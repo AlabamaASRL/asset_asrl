@@ -1,0 +1,6 @@
+numpy
+pybind11
+breathe
+sphinx
+sphinx-rtd-theme
+exhale

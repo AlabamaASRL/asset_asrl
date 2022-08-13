@@ -1,0 +1,7 @@
+\begindata
+   KERNELS_TO_LOAD = ( 'Spice/de414.bsp',
+		       'Spice/naif0012.tls',
+                       'Spice/gm_de431.tpc',
+		       'Spice/pck00010.tpc.txt',
+                       'Spice/wld19445.15','Spice/wld29769.15', 'Spice/54186922.bsp')
+\begintext

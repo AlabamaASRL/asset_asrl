@@ -1,0 +1,63 @@
+﻿{
+  "configurations": [
+    {
+      "name": "x64-Clang-Release",
+      "generator": "Ninja",
+      "configurationType": "RelWithDebInfo",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-j24 -v",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "windows-clang-x64",
+      "inheritEnvironments": [ "clang_cl_x64" ],
+      "variables": [
+        {
+          "name": "CMAKE_CXX_FLAGS_RELWITHDEBINFO",
+          "value": "/MD  /O2 /Ob2 /DNDEBUG /arch:AVX2 /fp:fast /GS- /Gw ",
+          "type": "STRING"
+        },
+        {
+          "name": "CMAKE_C_COMPILER",
+          "value": "C:/Program Files/LLVM/bin/clang-cl.exe",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "CMAKE_C_COMPILER_AR",
+          "value": "C:/Program Files/LLVM/bin/llvm-ar.exe",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "CMAKE_C_COMPILER_RANLIB",
+          "value": "C:/Program Files/LLVM/bin/llvm-ranlib.exe",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "CMAKE_CXX_COMPILER",
+          "value": "C:/Program Files/LLVM/bin/clang-cl.exe",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "CMAKE_CXX_COMPILER_AR",
+          "value": "C:/Program Files/LLVM/bin/llvm-ar.exe",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "CMAKE_CXX_COMPILER_RANLIB",
+          "value": "C:/Program Files/LLVM/bin/llvm-ranlib.exe",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "CMAKE_LINKER",
+          "value": "C:/Program Files/LLVM/bin/lld-link.exe",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "MKL_OMP_LIBRARY",
+          "value": "C:/Program Files/LLVM/lib/libiomp5md.lib",
+          "type": "FILEPATH"
+        }
+      ]
+    }
+  ]
+}

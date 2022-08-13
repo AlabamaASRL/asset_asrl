@@ -1,0 +1,9 @@
+.wy-table-responsive table td {
+white-space: normal;
+}
+
+.wy-table-responsive {
+    margin-bottom: 24px;
+    max-width: 100%;
+    overflow: visible;
+}
