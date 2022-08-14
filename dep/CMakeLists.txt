@@ -1,5 +1,0 @@
-add_subdirectory(pybind11)
-#add_subdirectory(boost)
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/boost/libs/math/include)
-#add_subdirectory(googletest/googletest)
-add_subdirectory(fmt)
