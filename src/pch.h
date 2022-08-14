@@ -8,8 +8,8 @@
 #include <Eigen/Sparse>
 #include <array>
 //#include <complex>
-#include <autodiff/forward.hpp>
-#include <autodiff/forward/eigen.hpp>
+#include <autodiff/forward/dual.hpp>
+#include <autodiff/forward/dual/eigen.hpp>
 #include <functional>
 #include <iostream>
 #include <stdexcept>

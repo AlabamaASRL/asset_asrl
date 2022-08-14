@@ -11,7 +11,7 @@ struct DenseFirstDerivatives<Derived, IR, OR, DenseDerivativeModes::AutodiffFwd>
   DENSE_FUNCTION_BASE_TYPES(Base);
 
   template <class Scalar>
-  using dual = autodiff::forward::Dual<Scalar, Scalar>;
+  using dual = autodiff::Dual<Scalar, Scalar>;
 
   template <class InType, class OutType, class JacType>
   inline void compute_jacobian_impl(ConstVectorBaseRef<InType> x,
@@ -22,7 +22,7 @@ struct DenseFirstDerivatives<Derived, IR, OR, DenseDerivativeModes::AutodiffFwd>
     MatrixBaseRef<JacType> jx = jx_.const_cast_derived();
 
     Input<dual<Scalar>> xdual;
-    if constexpr (autodiff::forward::isDual<Scalar>) {
+    if constexpr (autodiff::isDual<Scalar>) {
       for (int i = 0; i < this->IRows(); i++) {
         xdual[i].val = x[i];
         xdual[i].grad = Scalar(0.0);
@@ -63,7 +63,7 @@ struct DenseSecondDerivatives<Derived, IR, OR, JMode,
   DENSE_FUNCTION_BASE_TYPES(Base);
   using Base::adjointhessian;
   template <class Scalar>
-  using dual = autodiff::forward::Dual<Scalar, Scalar>;
+  using dual = autodiff::Dual<Scalar, Scalar>;
 
   template <class InType, class AdjHessType, class AdjVarType>
   inline void adjointhessian(ConstVectorBaseRef<InType> x,
