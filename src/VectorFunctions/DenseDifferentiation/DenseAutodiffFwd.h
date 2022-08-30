@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DenseDerivatives.h"
-
+/*
 namespace ASSET {
 
 template <class Derived, int IR, int OR>
@@ -12,7 +12,7 @@ struct DenseFirstDerivatives<Derived, IR, OR, DenseDerivativeModes::AutodiffFwd>
 
   template <class Scalar>
   using dual = autodiff::Dual<Scalar, Scalar>;
-
+  
   template <class InType, class OutType, class JacType>
   inline void compute_jacobian_impl(ConstVectorBaseRef<InType> x,
                                ConstVectorBaseRef<OutType> fx_,
@@ -110,3 +110,4 @@ struct DenseSecondDerivatives<Derived, IR, OR, JMode,
 };
 
 }  // namespace ASSET
+*/
