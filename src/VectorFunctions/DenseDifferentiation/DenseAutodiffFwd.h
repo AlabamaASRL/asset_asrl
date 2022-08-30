@@ -73,7 +73,7 @@ struct DenseSecondDerivatives<Derived, IR, OR, JMode,
     MatrixBaseRef<AdjHessType> adjhess = adjhess_.const_cast_derived();
 
     Input<dual<Scalar>> xdual;
-    if constexpr (autodiff::forward::isDual<Scalar>) {
+    if constexpr (autodiff::isDual<Scalar>) {
       for (int i = 0; i < this->IRows(); i++) {
         xdual[i].val = x[i];
         xdual[i].grad = Scalar(0.0);
