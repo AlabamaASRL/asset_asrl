@@ -34,11 +34,11 @@ n  = 100
 ts = np.linspace(0,1,n)
 vs = np.linspace(1,-1,n)
 
-IG = [[.01,v,t,-.0004] for t,v in zip(ts,vs)]
+IG = [[.01*t,v,t,-.0004] for t,v in zip(ts,vs)]
 
 ode = Model()
 
-phase = ode.phase("LGL5",IG,49)
+phase = ode.phase("LGL5",IG,32)
 #phase.setControlMode("BlockConstant")
 phase.addBoundaryValue("Front",range(0,3),[0,1,0])
 phase.addUpperVarBound("Path",0,1/10)

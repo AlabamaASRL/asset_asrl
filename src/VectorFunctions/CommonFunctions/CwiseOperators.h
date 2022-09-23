@@ -1,5 +1,25 @@
-#pragma once
+/*
+File Name: CwiseOperators.h
 
+File Description: Defines ASSET all Vector Functions which simply apply a common
+coefficient (Cwise) operation/functio to all elements of input vectors.
+
+////////////////////////////////////////////////////////////////////////////////
+
+Original File Developer : James B. Pezent - jbpezent - jbpezent@crimson.ua.edu
+
+Current File Maintainers:
+    1. James B. Pezent - jbpezent         - jbpezent@crimson.ua.edu
+    2. Full Name       - GitHub User Name - Current Email
+    3. ....
+
+
+Usage of this source code is governed by the license found
+in the LICENSE file in ASSET's top level directory.
+
+*/
+
+#pragma once
 #include "VectorFunction.h"
 
 namespace ASSET {
@@ -900,6 +920,15 @@ struct CwiseAbs : CwiseFunctionOperator<CwiseAbs<Func>, Func> {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// <summary>
+///  This template Bas class defines all operations that are common to CwiseOperators.
+///  Provides compute and derivative methods for derived classes so long as they implement
+///  cwise_compute,cwise_compute_jacobian, etc.
+/// </summary>
+/// <typeparam name="Derived"></typeparam>
+/// <typeparam name="Func"></typeparam>
+
 template <class Derived, class Func>
 struct CwiseFunctionOperator : VectorFunction<Derived, Func::IRC, Func::ORC> {
   using Base = VectorFunction<Derived, Func::IRC, Func::ORC>;

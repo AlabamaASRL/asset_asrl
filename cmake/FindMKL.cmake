@@ -117,6 +117,7 @@ find_library(MKL_INTERFACE_LIBRARY
                   $ENV{MKLROOT}/lib/intel64
                   $ENV{INTEL}/mkl/lib/intel64
                   $ENV{INTEL}/mkl/latest/lib/intel64
+                  $ENV{ONEAPI_ROOT}/mkl/latest/lib/intel64
                   $ENV{MKLROOT}/lib/intel64_win
                   $ENV{INTEL}/mkl/lib/intel64_win)
 
@@ -126,6 +127,7 @@ find_library(MKL_CORE_LIBRARY
                   $ENV{MKLROOT}/lib/intel64
                   $ENV{INTEL}/mkl/lib/intel64
                   $ENV{INTEL}/mkl/latest/lib/intel64
+                  $ENV{ONEAPI_ROOT}/mkl/latest/lib/intel64
                   $ENV{MKLROOT}/lib/intel64_win
                   $ENV{INTEL}/mkl/lib/intel64_win)
 
@@ -140,6 +142,7 @@ find_library(MKL_OMP_LIBRARY
                   $ENV{INTEL}/compiler/latest/lib/intel64
                   $ENV{INTEL}/compiler/latest/lib/intel64_win
                   $ENV{ONEAPI_ROOT}/compiler/latest/linux/compiler/lib/intel64_lin
+                  $ENV{ONEAPI_ROOT}/compiler/latest/windows/compiler/lib/intel64_win
                   $ENV{ONEAPI_ROOT}/compiler/2022.0.0/mac/compiler/lib
                   /opt/intel/oneapi/compiler/latest/mac/compiler/lib
                   $ENV{INTEL}/compiler/latest/linux/compiler/lib/intel64_lin)  # atrocious

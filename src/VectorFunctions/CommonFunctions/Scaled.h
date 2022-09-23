@@ -1,5 +1,26 @@
-#pragma once
+/*
+File Name: Scaled.h
 
+File Description: Defines ASSET all Vector Functionals that apply linear scalings to 
+the outputs of other functions.
+
+////////////////////////////////////////////////////////////////////////////////
+
+Original File Developer : James B. Pezent - jbpezent - jbpezent@crimson.ua.edu
+
+Current File Maintainers:
+    1. James B. Pezent - jbpezent         - jbpezent@crimson.ua.edu
+    2. Full Name       - GitHub User Name - Current Email
+    3. ....
+
+
+Usage of this source code is governed by the license found
+in the LICENSE file in ASSET's top level directory.
+
+*/
+
+
+#pragma once
 #include "VectorFunction.h"
 
 namespace ASSET {

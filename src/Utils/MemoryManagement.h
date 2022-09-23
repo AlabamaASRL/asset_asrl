@@ -1,3 +1,25 @@
+/*
+File Name: MemoryMangement.h
+
+File Description: Defines ASSET's memory manager for allocation of temporary matrices in 
+VectorFunction expressions
+
+////////////////////////////////////////////////////////////////////////////////
+
+Original File Developer : James B. Pezent - jbpezent - jbpezent@crimson.ua.edu
+
+Current File Maintainers:
+	1. James B. Pezent - jbpezent         - jbpezent@crimson.ua.edu
+	2. Full Name       - GitHub User Name - Current Email
+	3. ....
+
+
+Usage of this source code is governed by the license found
+in the LICENSE file in ASSET's top level directory.
+
+*/
+
+
 #pragma once
 #include "pch.h"
 #include <tuple>
@@ -7,7 +29,15 @@
 namespace ASSET {
 
 	namespace detail {
-
+		/// <summary>
+		/// Bump Stack Allocator for data type Scalar.
+		/// Attempts to fill allocations out of a single contigous Eigen vector.
+		/// Whenever allocation requests exceed size of this vector, blocks are allocated from a
+		/// new vector appended to a link list. Once all blocks are freed, resizes the main vector to the maximum
+		/// size seen since last time. That way if the allocation pattern repeats no data will be pushed to the 
+		/// linked list.
+		/// </summary>
+		/// <typeparam name="Scalar"></typeparam>
 		template<class Scalar>
 		struct TempStack {
 
@@ -24,11 +54,15 @@ namespace ASSET {
 			inline Scalar * getBlock(int blocksize) {
 				Scalar* dat;
 				if (OverFlowSize==0 && ((NextStart + blocksize) <= DataSize)) {
+					// If blocksize can be fit into Data, give ptr to next free location
+
 					this->Data.segment(NextStart, blocksize).setZero();
 					dat = this->Data.data() + NextStart;
 					NextStart += blocksize;
 				}
 				else {
+					// If blocksize too large to fit in Data, allocate new vector in OverflowData 
+
 					this->OverFlowData.emplace_back(VectorX<Scalar>());
 					this->OverFlowData.back().resize(blocksize);
 					OverFlowSize += blocksize;
@@ -52,12 +86,13 @@ namespace ASSET {
 			}
 
 		private:
-			VectorX<Scalar> Data;
-			std::list<VectorX<Scalar>> OverFlowData;
-			int NextStart;
-			int DataSize;
-			int OverFlowSize = 0;
-			int NextDataSize = 0;
+			
+			VectorX<Scalar> Data; // Persistent Data Stack
+			std::list<VectorX<Scalar>> OverFlowData; // Temporary Overlow Data stacks
+			int NextStart; // Next free index in Data where block can be allocated
+			int DataSize;  // Size of Data
+			int OverFlowSize = 0; // Size of all blocks that have been spilled to OverFlowData
+			int NextDataSize = 0; // What size to resize Data too whenever we return top of stack 
 
 		};
 
@@ -148,6 +183,10 @@ namespace ASSET {
 
 	}
 
+	/// <summary>
+	///  Template type for specifying the type and size of temporary matrix that must be created by the allocator.
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
 	template<class T>
 	struct TempSpec :detail::RCBase<T::RowsAtCompileTime, T::ColsAtCompileTime> {
 		using Base = detail::RCBase<T::RowsAtCompileTime, T::ColsAtCompileTime>;
@@ -172,6 +211,11 @@ namespace ASSET {
 		TempSpec(int rows, int cols) :Base(rows, cols) {}
 	};
 
+	/// <summary>
+	///  Template type for specifying a constant size array of TempSpecs that must be allocated.
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+
 	template<class T, int Size>
 	struct ArrayOfTempSpecs {
 		using Scalar = typename T::Scalar;
@@ -186,6 +230,10 @@ namespace ASSET {
 		ArrayOfTempSpecs(int rows, int cols) :tspec(rows, cols) {}
 	};
 
+	/// <summary>
+	///  Template type for specifying a heterogenous tuple of TempSpecs that must be allocated.
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
 	template<class ... T>
 	struct TupleOfTempSpecs {
 
@@ -322,7 +370,7 @@ namespace ASSET {
 				using type = typename std::remove_const_reference<decltype(tspec)>::type;
 
 				if constexpr (type::IsConstantSize) {
-					//Do nothing
+					//Do nothing, allocate as constant size Eigen matrix on Stack
 				}
 				else if constexpr (type::IsArray) {
 					blksize += CalcSpecSize(tspec.tspec) * tspec.size;
@@ -358,6 +406,8 @@ namespace ASSET {
 			auto make_temp = [&](const auto& tspec) {
 				using type = typename std::remove_const_reference<decltype(tspec)>::type;
 				if constexpr (type::IsConstantSize) {
+					//Do nothing, allocate as constant size Eigen matrix on Stack
+
 					return typename type::ExactTempType();
 				}
 				else if constexpr (type::IsArray) {

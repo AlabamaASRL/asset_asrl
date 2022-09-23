@@ -112,17 +112,11 @@ namespace ASSET {
         //////////////////////////////////////////////////////////////////////////////
 
         cm.def("__mul__", [](const colmattype& m1, const rowmattype& m2) {
-            //throw std::invalid_argument("ColumnMajor on RowMajor Matmul not implemented yet");
-            fmt::print("Sss");
             auto tmp = MatrixFunctionProduct<colmattype,rowmattype>(m1, m2);
-
-
             return GenericFunction<-1, -1>(tmp);
             });
 
         rm.def("__mul__", [](const rowmattype& m1, const rowmattype& m2) {
-            //throw std::invalid_argument("RowMajor on RowMajor Matmul not implemented yed");
-
             auto tmp = MatrixFunctionProduct<rowmattype, rowmattype>(m1, m2);
             return GenericFunction<-1, -1>(tmp);
             });
@@ -143,17 +137,14 @@ namespace ASSET {
 
 
         m.def("matmul", [](const Eigen::Matrix<double, 2, 2>& mat, const Gen& vec) {
-            
             return Gen(MatrixScaled<Gen, 2>(vec, mat));
             });
 
         m.def("matmul", [](const Eigen::Matrix<double, 3, 3>& mat, const Gen& vec) {
-            
             return Gen(MatrixScaled<Gen, 3>(vec, mat));
             });
 
         m.def("matmul", [](const Eigen::MatrixXd& mat, const Gen& vec) {
-           
             return Gen(MatrixScaled<Gen, -1>(vec, mat));
             });
 

@@ -165,7 +165,7 @@ def Plot(Traj1,Traj2):
 
 if __name__ == "__main__":
     ##########################################################################
-    tf  = 2000/Tstar
+    tf  = 1000/Tstar
 
     ht0  = 260000/Lstar
     htf  = 80000 /Lstar
@@ -186,7 +186,7 @@ if __name__ == "__main__":
     for t in ts:
         X = np.zeros((8))
         X[0] = ht0*(1-t/tf) + htf*t/tf
-        X[1] = thetaf*t/tf
+        X[1] = 0  #thetaf*t/tf
         X[2] = vt0*(1-t/tf) + vtf*t/tf
         X[3] = gammat0*(1-t/tf) + gammatf*t/tf
         X[4] = psit0
@@ -203,7 +203,7 @@ if __name__ == "__main__":
     
     
     
-    phase = ode.phase("LGL3",TrajIG,64)
+    phase = ode.phase("LGL3",TrajIG,41)
     
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
     phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
@@ -211,16 +211,22 @@ if __name__ == "__main__":
     phase.addLUVarBound("Path",7,np.deg2rad(-90.0),np.deg2rad(1.0) ,1.0)
     phase.addUpperDeltaTimeBound(tmax,1.0)
     phase.addBoundaryValue("Back" ,[0,2,3],[htf,vtf,gammatf])
-    phase.addDeltaVarObjective(1,-1.0)
+    phase.addDeltaVarObjective(1,-10.0)
     
     phase.optimizer.set_OptLSMode("L1")
-    #phase.optimizer.set_OptLSMode("AUGLANG")
+    phase.optimizer.set_OptLSMode("AUGLANG")
     phase.optimizer.MaxLSIters = 2
     phase.optimizer.MaxAccIters = 100
     phase.optimizer.PrintLevel = 1
+    phase.optimizer.incrH = 8
+    phase.optimizer.decrH = .3333
+
+    phase.optimizer.BoundFraction = .993
+
     #phase.optimizer.KKTtol = 1.0e-9
-    
+    phase.Threads = 5
     phase.optimize()
+    input("s")
     phase.refineTrajManual(256)
     phase.optimize()
 

@@ -1,3 +1,24 @@
+/*
+File Name: Scaled.h
+
+File Description: Defines ASSET all VectorFunction for computing the root of a Scalar function inside of
+an expression.
+
+////////////////////////////////////////////////////////////////////////////////
+
+Original File Developer : James B. Pezent - jbpezent - jbpezent@crimson.ua.edu
+
+Current File Maintainers:
+    1. James B. Pezent - jbpezent         - jbpezent@crimson.ua.edu
+    2. Full Name       - GitHub User Name - Current Email
+    3. ....
+
+
+Usage of this source code is governed by the license found
+in the LICENSE file in ASSET's top level directory.
+
+*/
+
 #pragma once
 #include "VectorFunction.h"
 
@@ -14,7 +35,17 @@ namespace ASSET {
         using Base::Base;
     };
 
-
+	/// <summary>
+	/// Defines a Vector Function for computing the root of Scalar Function FX, with dericative DFX.
+    /// By definition, the first input to FX is the Scalar parameter that we can adjust to find the root,
+    /// and should be set to your desired initial guess. The rest of the inputs to FX are parameters that
+    /// the output will be differentiated wrt to. You can also provide a second function scalar DFX that is the
+    /// derivative of the FX wrt to only the iteration variable. Otherwise it will be computed from the jacobian of
+    /// FX
+	/// </summary>
+	/// <typeparam name="Derived"></typeparam>
+	/// <typeparam name="FX"></typeparam>
+	/// <typeparam name="DFX"></typeparam>
 	template<class Derived, class FX, class DFX>
 	struct ScalarRootFinder_Impl:VectorFunction<Derived,FX::IRC,1> {
 
@@ -33,7 +64,7 @@ namespace ASSET {
 
             if constexpr (!std::is_same<DFX, std::false_type>::value) {
                 if (f.IRows() != df.IRows()) {
-                    throw std::invalid_argument("Root First Derivative functions must have same number of Input Rows");
+                    throw std::invalid_argument("Root and First Derivative functions must have same number of Input Rows");
                 }
             }
             this->setIORows(f.IRows(), 1);

@@ -7,7 +7,7 @@
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
-      "buildCommandArgs": "-j24 -v",
+      "buildCommandArgs": "-j6 -v",
       "ctestCommandArgs": "",
       "intelliSenseMode": "windows-clang-x64",
       "inheritEnvironments": [ "clang_cl_x64" ],
@@ -50,11 +50,6 @@
         {
           "name": "CMAKE_LINKER",
           "value": "C:/Program Files/LLVM/bin/lld-link.exe",
-          "type": "FILEPATH"
-        },
-        {
-          "name": "MKL_OMP_LIBRARY",
-          "value": "C:/Program Files/LLVM/lib/libiomp5md.lib",
           "type": "FILEPATH"
         }
       ]
