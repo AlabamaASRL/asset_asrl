@@ -860,15 +860,15 @@ void ASSET::ODEPhaseBase::transcribe_control_funcs() {
   if (this->TranscriptionMode == TranscriptionModes::LGL7) {
     if (this->UVars() > 0) {
       if (this->ControlMode == ControlModes::HighestOrderSpline) {
-        LGLControlSpline<4, -1, 2> lgl7spln2;
-        lgl7spln2.setUsize(this->UVars());
+        LGLControlSpline<4, -1, 2> lgl7spln2(this->UVars());
+        
         this->indexer.addEquality(lgl7spln2,
                                   PhaseRegionFlags::DefectPairWisePath, TUvarT,
                                   empty, empty, ThreadingFlags::ByApplication);
 
       } else if (this->ControlMode == ControlModes::FirstOrderSpline) {
-        LGLControlSpline<4, -1, 1> lgl7spln1;
-        lgl7spln1.setUsize(this->UVars());
+        LGLControlSpline<4, -1, 1> lgl7spln1(this->UVars());
+        
         this->indexer.addEquality(lgl7spln1,
                                   PhaseRegionFlags::DefectPairWisePath, TUvarT,
                                   empty, empty, ThreadingFlags::ByApplication);
@@ -878,8 +878,8 @@ void ASSET::ODEPhaseBase::transcribe_control_funcs() {
     if (this->UVars() > 0) {
       if (this->ControlMode == ControlModes::HighestOrderSpline ||
           this->ControlMode == ControlModes::FirstOrderSpline) {
-        LGLControlSpline<3, -1, 1> lgl5spln1;
-        lgl5spln1.setUsize(this->UVars());
+        LGLControlSpline<3, -1, 1> lgl5spln1(this->UVars());
+        
         this->indexer.addEquality(lgl5spln1,
                                   PhaseRegionFlags::DefectPairWisePath, TUvarT,
                                   empty, empty, ThreadingFlags::ByApplication);
@@ -966,20 +966,13 @@ void ASSET::ODEPhaseBase::transcribe_phase(int vo, int eqo, int iqo,
   this->indexer.begin_indexing(np, vo, eqo, iqo);
   this->check_functions(pnum);
 
-  if (this->ConstraintOrder == 1) {
-      this->transcribe_control_funcs();
-      this->transcribe_dynamics();
-      this->transcribe_axis_funcs();
-      this->transcribe_integrals();
-      this->transcribe_basic_funcs();
-  }
-  else {
-      this->transcribe_dynamics();
-      this->transcribe_axis_funcs();
-      this->transcribe_control_funcs();
-      this->transcribe_integrals();
-      this->transcribe_basic_funcs();
-  }
+  
+  this->transcribe_dynamics();
+  this->transcribe_axis_funcs();
+  this->transcribe_control_funcs();
+  this->transcribe_integrals();
+  this->transcribe_basic_funcs();
+  
 
   
 

@@ -144,7 +144,8 @@ phase1.addLowerDeltaTimeBound(0)
 phase2.addLowerDeltaTimeBound(0)
 phase3.addLowerDeltaTimeBound(0)
 
-
+ocp.Threads=8
+ocp.optimizer.PrintLevel=1
 ocp.optimize()
 
 

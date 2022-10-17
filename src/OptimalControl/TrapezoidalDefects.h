@@ -171,35 +171,19 @@ struct TrapezoidalDefects
 
 
         };
+        const int irows = this->ode.IRows();
+        const int orows = this->ode.ORows();
 
-        if constexpr (Base::JacobianIsDynamic) {
-            const int irows = this->ode.IRows();
-            auto DynImpl = [&](auto maxsize) {
-                using VecType = MaxVector<Scalar, maxsize.value>;
-                VecType X0(this->ode.IRows());
-                VecType FX0(this->ode.ORows());
-                VecType X1(this->ode.IRows());
-                VecType FX1(this->ode.ORows());
-                FX0.setZero();
-                FX1.setZero();
-                X0.setZero();
-                X1.setZero();
-                Impl(X0, X1, FX0, FX1);
+        using IType = ODEInput<Scalar>;
+        using OType = ODEOutput<Scalar>;
+      
 
-            };
-            LambdaJumpTable<5, 10, 16>::run(DynImpl, irows);
-        }
-        else {
-            ODEInput<Scalar> X0(this->ode.IRows());
-            ODEOutput<Scalar> FX0(this->ode.ORows());
-            ODEInput<Scalar> X1(this->ode.IRows());
-            ODEOutput<Scalar> FX1(this->ode.ORows());
-            FX0.setZero();
-            FX1.setZero();
-            X0.setZero();
-            X1.setZero();
-            Impl(X0, X1, FX0, FX1);
-        }
+        MemoryManager::allocate_run(irows,
+            Impl,
+            TempSpec<IType>(irows, 1),
+            TempSpec<IType>(irows, 1),
+            TempSpec<OType>(orows, 1),
+            TempSpec<OType>(orows, 1));
         fx *= Scalar(-1.0);
        
     }

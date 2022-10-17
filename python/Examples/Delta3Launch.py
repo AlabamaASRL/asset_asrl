@@ -265,7 +265,7 @@ if __name__ == "__main__":
     OEF  = [at,et,istart,Ot,Wt,M0]
     yf   = ast.Astro.classic_to_cartesian(OEF,mu)
     
-    ts   = np.linspace(0,tf_phase4,160)
+    ts   = np.linspace(0,tf_phase4,260)
     
     IG1 =[]
     IG2 =[]

@@ -119,6 +119,32 @@ namespace ASSET {
 
 
 
+ struct ConstantConditional {
+     template <class Scalar>
+     using Input = Eigen::Matrix<Scalar, -1, 1>;
+     template <class Scalar>
+     using ConstVectorBaseRef = const Eigen::MatrixBase<Scalar>&;
+
+     ConstantConditional(){}
+     ConstantConditional(int irows, bool value) :InputRows(irows), value(value) {}
+     ConstantConditional(bool value):value(value) {}
+     template <class InType>
+     inline bool compute(ConstVectorBaseRef<InType> x) const {
+         return this->value;
+     }
+
+     int IRows() const { return this->InputRows; }
+     std::string name()const { return this->name_; }
+
+ protected:
+     bool value;
+
+     int InputRows = 0;
+     std::string name_;
+ };
+
+
+
 template <class TestFunc, class TrueFunc, class FalseFunc>
 struct IfElseFunction
     : VectorFunction<IfElseFunction<TestFunc, TrueFunc, FalseFunc>,

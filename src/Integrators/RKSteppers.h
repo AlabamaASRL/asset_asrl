@@ -293,6 +293,83 @@ struct RKStepper_Impl_NEW {
                 .template segment<DODE::XV, SZ_PROD<DODE::XV, 2>::value>(2*xv,xv) *
                 BCoeff<2>().value);
         }
+        else if constexpr (RKOp == DOPRI5) {
+
+            //constexpr int XV       = DODE::XV;
+            constexpr int TAILSIZE = SZ_PROD<DODE::XV, (RKCoeffs<RKOp>::Stages - 1)>::value;
+            int xv = ode.XVars();
+            int tailsize = xv * (RKCoeffs<RKOp>::Stages - 1);
+            return make_sum(
+                kf * BCoeff<5>().value,
+                args.template head<DODE::XV>(xv),
+
+                args.template tail<TAILSIZE>(tailsize)
+                .template segment<DODE::XV, SZ_PROD<DODE::XV, 0>::value>(0, xv) *
+                BCoeff<0>().value,
+
+                //args.template tail<TAILSIZE>(tailsize)
+               // .template segment<DODE::XV, SZ_PROD<DODE::XV, 1>::value>(xv, xv) *
+               // BCoeff<1>().value,
+
+                args.template tail<TAILSIZE>(tailsize)
+                .template segment<DODE::XV, SZ_PROD<DODE::XV, 2>::value>(2 * xv, xv) *
+                BCoeff<2>().value,
+
+                args.template tail<TAILSIZE>(tailsize)
+                .template segment<DODE::XV, SZ_PROD<DODE::XV, 3>::value>(3 * xv, xv)*
+                BCoeff<3>().value,
+
+                args.template tail<TAILSIZE>(tailsize)
+                .template segment<DODE::XV, SZ_PROD<DODE::XV, 4>::value>(4 * xv, xv)*
+                BCoeff<4>().value);
+        }
+        else if constexpr (RKOp == DOPRI87) {
+
+            //constexpr int XV       = DODE::XV;
+            constexpr int TAILSIZE = SZ_PROD<DODE::XV, (RKCoeffs<RKOp>::Stages - 1)>::value;
+            int xv = ode.XVars();
+            int tailsize = xv * (RKCoeffs<RKOp>::Stages - 1);
+            return make_sum(
+                kf * BCoeff<12>().value,
+                args.template head<DODE::XV>(xv),
+
+                args.template tail<TAILSIZE>(tailsize)
+                .template segment<DODE::XV, SZ_PROD<DODE::XV, 0>::value>(0, xv) *
+                BCoeff<0>().value,
+
+                //args.template tail<TAILSIZE>(tailsize)
+               // .template segment<DODE::XV, SZ_PROD<DODE::XV, 1>::value>(xv, xv) *
+               // BCoeff<1>().value,
+
+                args.template tail<TAILSIZE>(tailsize)
+                .template segment<DODE::XV, SZ_PROD<DODE::XV, 5>::value>(5 * xv, xv) *
+                BCoeff<5>().value,
+
+                args.template tail<TAILSIZE>(tailsize)
+                .template segment<DODE::XV, SZ_PROD<DODE::XV, 6>::value>(6 * xv, xv) *
+                BCoeff<6>().value,
+
+                args.template tail<TAILSIZE>(tailsize)
+                .template segment<DODE::XV, SZ_PROD<DODE::XV, 7>::value>(7 * xv, xv) *
+                BCoeff<7>().value,
+
+                args.template tail<TAILSIZE>(tailsize)
+                .template segment<DODE::XV, SZ_PROD<DODE::XV, 8>::value>(8 * xv, xv)*
+                BCoeff<8>().value,
+
+                args.template tail<TAILSIZE>(tailsize)
+                .template segment<DODE::XV, SZ_PROD<DODE::XV, 9>::value>(9 * xv, xv)*
+                BCoeff<9>().value,
+
+                args.template tail<TAILSIZE>(tailsize)
+                .template segment<DODE::XV, SZ_PROD<DODE::XV, 10>::value>(10 * xv, xv)*
+                BCoeff<10>().value,
+
+                args.template tail<TAILSIZE>(tailsize)
+                .template segment<DODE::XV, SZ_PROD<DODE::XV, 11>::value>(11 * xv, xv)*
+                BCoeff<11>().value);
+        }
+
         else if constexpr (Elem == RKCoeffs<RKOp>::Stages - 1) {
             if constexpr (RKCoeffs<RKOp>::BCoeffs[Elem] == 0.0)
                 return args.template head<DODE::XV>();

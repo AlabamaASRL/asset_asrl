@@ -36,7 +36,7 @@ namespace ASSET {
     };
 
 	/// <summary>
-	/// Defines a Vector Function for computing the root of Scalar Function FX, with dericative DFX.
+	/// Defines a Vector Function for computing the root of Scalar Function FX, with derivative DFX.
     /// By definition, the first input to FX is the Scalar parameter that we can adjust to find the root,
     /// and should be set to your desired initial guess. The rest of the inputs to FX are parameters that
     /// the output will be differentiated wrt to. You can also provide a second function scalar DFX that is the

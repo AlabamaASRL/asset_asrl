@@ -406,10 +406,10 @@ def Form2():
     integ = ode.integrator(.01)
     integ.Adaptive = True
     
-    Traj = integ.integrate_dense(X0,250/Tstar,1000)
+    Traj = integ.integrate_dense(X0,200/Tstar,1000)
     
-    phase = ode.phase('LGL3',Traj,128)
-    phase.setControlMode('BlockConstant')
+    phase = ode.phase('LGL3',Traj,256)
+    #phase.setControlMode('BlockConstant')
     phase.addBoundaryValue("Front",range(0,14),X0[0:14])
     phase.addLUVarBounds('Path',[14,15,16],-MaxThrust,MaxThrust,.1)
     phase.addLUVarBounds('Path',[17,18,19],-MaxTorque,MaxTorque,1)
@@ -417,9 +417,10 @@ def Form2():
     phase.addEqualCon('Last',RendCon2(Udvec,TargetTab),range(0,14))
     phase.addDeltaTimeObjective(1.0)
     #phase.optimizer.set_OptLSMode("L1")
-    phase.optimizer.MaxLSIters = 1
-    phase.optimizer.BoundFraction = .99
-    phase.optimizer.EContol = 1.0e-9
+    phase.optimizer.MaxLSIters = 2
+    phase.optimizer.BoundFraction = .995
+    #phase.optimizer.EContol = 1.0e-9
+    phase.optimizer.deltaH = 1.0e-5
     phase.optimizer.PrintLevel = 1
     phase.optimize()
     

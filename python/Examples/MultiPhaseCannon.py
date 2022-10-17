@@ -167,12 +167,12 @@ if __name__ == "__main__":
                                       lambda x:x[2]<0)
     
     ##########################################################################
-    nsegs = 32
+    nsegs = 128
     
-    aphase = ode.phase("LGL5",AscentIG,nsegs)
+    aphase = ode.phase("Trapezoidal",AscentIG,nsegs)
     aphase.addLowerVarBound("ODEParams",0,0.0,1)
     aphase.addLowerVarBound("Front",1,0.0,1.0)
-    aphase.addBoundaryValue("Front",[2,3],[h0,r0])
+    aphase.addBoundaryValue("Front",[2,3,4],[h0,r0,0])
     
     aphase.addInequalCon("Front",EFunc()*.01,[0],[0],[])
     aphase.addBoundaryValue("Back",[1],[0.0])
@@ -186,8 +186,8 @@ if __name__ == "__main__":
     ocp.addPhase(dphase)
     
     ocp.addForwardLinkEqualCon(aphase,dphase,[0,1,2,3,4])
-    ocp.addDirectLinkEqualCon(aphase,"ODEParams",[0],
-                              dphase,"ODEParams",[0])
+    ocp.addDirectLinkEqualCon(0,"ODEParams",[0],
+                              1,"ODEParams",[0])
     
     ocp.optimizer.set_OptLSMode("L1")
     ocp.optimizer.PrintLevel = 0

@@ -7,7 +7,6 @@
 #include <signal.h>
 
 
-
 using namespace ASSET;
 using namespace rubber_types;
 
