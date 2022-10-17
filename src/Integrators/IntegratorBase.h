@@ -537,6 +537,10 @@ struct IntegratorBase : VectorFunction<Derived, Stepper::IRC, Stepper::ORC> {
 
   std::tuple<ODEState<double>, Jacobian<double>> integrate_stm(
       const ODEState<double>& x0, double tf, const VectorX<double>& cpv) const {
+
+    if (x0.size() != this->ode.IRows()) {
+        throw std::invalid_argument("Incorrect ode state size");
+    }
     Input<double> stepper_input(this->IRows());
     stepper_input.head(this->ode.IRows()) = x0;
     stepper_input[this->IRows() - 1] = tf;
@@ -565,6 +569,10 @@ struct IntegratorBase : VectorFunction<Derived, Stepper::IRC, Stepper::ORC> {
       const ODEState<double>& x0, double tf, const VectorX<double>& cpv,
       int thrs) {
       this->setPoolThreads(thrs);
+
+      if (x0.size() != this->ode.IRows()) {
+          throw std::invalid_argument("Incorrect ode state size");
+      }
 
     VectorX<double> ts =
         VectorX<double>::LinSpaced(thrs + 1, x0[this->ode.TVar()], tf);
