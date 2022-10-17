@@ -125,7 +125,7 @@ class test_MultiPhaseCannon(unittest.TestCase):
         aphase = ode.phase(tmode,AscentIG, nsegs)
         aphase.addLowerVarBound("ODEParams",0,0.0,1)
         aphase.addLowerVarBound("Front",1,0.0,1.0)
-        aphase.addBoundaryValue("Front",[2,3],[h0,r0])
+        aphase.addBoundaryValue("Front",[2,3,4],[h0,r0,0])
         
         aphase.addInequalCon("Front",EFunc()*.01,[0],[0],[])
         aphase.addBoundaryValue("Back",[1],[0.0])

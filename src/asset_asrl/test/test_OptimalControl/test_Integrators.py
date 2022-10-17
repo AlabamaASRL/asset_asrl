@@ -3,6 +3,7 @@ import asset as ast
 import unittest
 
 import matplotlib.pyplot as plt
+import time
 
 vf = ast.VectorFunctions
 oc = ast.OptimalControl
@@ -314,6 +315,44 @@ class test_Integrators(unittest.TestCase):
         
 
 if __name__ == "__main__":
+    
+    
+    rho = 28.0
+    sigma = 10.0
+    beta = 8.0 / 3.0
+    
+    abstol = 1.0e-13
+    defstepsize = .001
+    minstepsize = .0000001
+    errtol = 1.0e-6
+    n = 2000
+    
+    tf = 20
+    X0 = np.array([1,1,1,0])
+    ode = LorenzODE(sigma, rho, beta)
+    
+    integ = ode.integrator(defstepsize)
+    integ.setAbsTol(abstol)
+    integ.MinStepSize = minstepsize
+    integ.MaxStepChange=3
+    integ.Adaptive=True
+    
+    tm0 = time.perf_counter()
+    Traj =integ.integrate_dense(X0,tf,n)
+    print(len(Traj))
+    tmf = time.perf_counter()
+    print((tmf-tm0)*1000)
+
+    
+    Traj = np.array(Traj)
+    fig = plt.figure()
+    ax = plt.subplot(projection="3d")
+    ax.plot(Traj[:, 0], Traj[:, 1], Traj[:, 2])
+    plt.show()
+    
+
+    
+    input("S")
     #test_Integrators().test_TwoBodySTM()
     unittest.main(exit=False)
 

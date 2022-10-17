@@ -174,7 +174,7 @@ if __name__ == "__main__":
     
     
     
-    phase = ode.phase("LGL5",IG,64)
+    phase = ode.phase("LGL3",IG,64)
     phase.addBoundaryValue("Front",range(0,5),[0,0,0,0,0])
     phase.addBoundaryValue("Back",range(0,5),[d,np.pi,0,0,tf])
     phase.addLUVarBound("Path",5,-umax,umax,1.0)

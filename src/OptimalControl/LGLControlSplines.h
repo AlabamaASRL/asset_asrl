@@ -72,6 +72,12 @@ struct LGLControlSpline
   static const int tUNum = (2 * CSC - 1);
   static const int UeqNum = Order;
 
+  LGLControlSpline(){}
+
+  LGLControlSpline(int usize) {
+      this->setUsize(usize);
+  }
+
   template <class InType, class OutType>
   inline void compute_impl(const Eigen::MatrixBase<InType>& x,
                            Eigen::MatrixBase<OutType> const& fx_) const {

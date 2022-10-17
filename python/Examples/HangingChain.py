@@ -81,7 +81,7 @@ cols = sns.color_palette("plasma",len(Ls))
 
 JArgs = [(a,b,n,L) for L in Ls]
 
-Res = solvs.Jet.map(Job,JArgs,13)
+Res = solvs.Jet.map(Job,JArgs,16)
 
 for i,res in enumerate(Res):
     

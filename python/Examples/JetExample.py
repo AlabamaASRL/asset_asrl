@@ -458,7 +458,7 @@ if __name__ == "__main__":
     Ivec = np.array([1, 3.13, 3.92])  # Inertia of a 6U cubesat
     
     for i in range(0,1):
-        CalcManeuvers(Ivec, 120.0, n=3000, nsegs=250, ccount=8)
+        CalcManeuvers(Ivec, 120.0, n=3000, nsegs=250, ccount=12)
     	
     
     	

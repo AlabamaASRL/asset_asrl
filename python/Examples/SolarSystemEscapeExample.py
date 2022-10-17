@@ -10,38 +10,10 @@ Tmodes = oc.TranscriptionModes
 Cmodes = oc.ControlModes
 PhaseRegs = oc.PhaseRegionFlags
 
-Tmax =8
-V=4
-def Cost(N,T,Tmax):
-    N_t = N//T
-    Nmt = N_t%V
-    NN=N%T
-    NN_t = NN//T
-    NNmt = NN_t%V
-    return ((T/min(T,Tmax))**1.01)*(N_t//V + Nmt + NN//V + NN%V ) 
-    
-Ts = range(1,19)
-Ns = range(20,1000)
-
-Bests=[]
-Peaks=[]
-Costs=[]
-for N in Ns:
-    costs = [Cost(N,T,Tmax) for T in Ts]
-    Bests.append(Ts[costs.index(min(costs))])
-    Costs.append((N/(4*Tmax))/min(costs))
-    #Peaks.append(N/(4*Tmax))
-plt.plot(Ns,Bests)
-plt.show()
-
-plt.plot(Ns,Costs)
-#plt.plot(Ns,Peaks)
-
-plt.show()
 
 '''
 Companion to "PhaseExample.py" but instead of transfering to another orbit, 
-we maximize c3 for a solar system escape, intial state is in parabolic orbit
+we maximize c3 for a solar system escape, intial state is in a parabolic orbit
 '''
 
 def SolarSail_Acc(r, n, scale):
@@ -89,10 +61,10 @@ integ = ode.integrator(0.01,ProgradeFunc(),range(0,6))
 TOF = 12.0*np.pi
 IG = integ.integrate_dense(IState,TOF,500)
 
-phase = ode.phase(Tmodes.LGL3,IG,1024)
-phase.setControlMode(oc.ControlModes.BlockConstant)
-phase.addBoundaryValue(PhaseRegs.Front, range(0,7), IState[0:7])
-phase.addLUNormBound(PhaseRegs.Path,[7,8,9],.7,1.3)
+phase = ode.phase("LGL3",IG,1024)
+phase.setControlMode("BlockConstant")
+phase.addBoundaryValue("Front", range(0,7), IState[0:7])
+phase.addLUNormBound("Path",[7,8,9],.7,1.3)
 
 def CosAlpha():
     args = Args(6)
@@ -102,7 +74,7 @@ def CosAlpha():
 
 MaxAlpha = 80.0
 CosMaxAlpha =np.cos(np.deg2rad(MaxAlpha))
-phase.addLowerFuncBound(PhaseRegs.Path,CosAlpha(),[0,1,2,7,8,9],CosMaxAlpha,1.0)
+phase.addLowerFuncBound("Path",CosAlpha(),[0,1,2,7,8,9],CosMaxAlpha,1.0)
 
 def C3():
     args = Args(6)
@@ -110,11 +82,9 @@ def C3():
     v = args.tail3()
     return v.dot(v) - 2*mu/r.norm()
 
-phase.addStateObjective(PhaseRegs.Back,-1.0*C3(),range(0,6))
-phase.addBoundaryValue(PhaseRegs.Back, [6], [TOF])
-phase.optimizer.OptLSMode = ast.Solvers.LineSearchModes.L1
-phase.optimizer.MaxLSIters = 1
-#phase.optimizer.QPOrderingMode = ast.Solvers.QPOrderingModes.MINDEG
+phase.addStateObjective("Back",-1.0*C3(),range(0,6))
+phase.addBoundaryValue("Back", [6], [TOF])
+phase.optimizer.set_OptLSMode("L1")
 
 ast.SoftwareInfo()
 phase.optimize()
@@ -153,6 +123,10 @@ for T in TrajConv:
     X[3:6]=T[7:10]
     alphas.append(np.rad2deg(np.arccos(f(X))))
 plt.plot(TT[6],alphas)
+plt.xlabel("t")
+plt.ylabel(r"$\alpha$")
+plt.grid(True)
+
 plt.show()
 ################################################
 

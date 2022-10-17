@@ -108,13 +108,13 @@ def FullAxis(Ivec,Tmax,nvec,theta, IG,Nsegs=200):
     ode = QuatModel(Ivec)
     TrajIG = np.copy(IG)
     for T in TrajIG:
-        T[8:11]*=.999
+        T[8:11]*=.4
         
     phase= ode.phase(Tmodes.LGL3,TrajIG,Nsegs)
     #phase.setControlMode(oc.ControlModes.BlockConstant)
     phase.addBoundaryValue(PhaseRegs.Front,range(0,8),[0,0,0,1,0,0,0,0])
     phase.addBoundaryValue(PhaseRegs.Back,range(4,7),[0,0,0])
-    phase.addLUVarBounds(PhaseRegs.Path,[8,9,10],-Tmax,Tmax,1)
+    phase.addLUVarBounds(PhaseRegs.Path,[8,9,10],-Tmax,Tmax,.1)
     
     
     def axang():
@@ -132,8 +132,8 @@ def FullAxis(Ivec,Tmax,nvec,theta, IG,Nsegs=200):
     phase.Threads=8
     
     phase.optimizer.PrintLevel=1
-    phase.optimizer.BoundFraction=.995
-    phase.optimizer.deltaH=1.0e-6
+    phase.optimizer.BoundFraction=.999
+    phase.optimizer.deltaH=1.0e-5
     phase.optimizer.KKTtol=1.0e-6
     phase.optimizer.MaxAccIters=200
 
@@ -168,7 +168,7 @@ def CalcManeuver(Ivec,nvec,thetadeg,Tmax=1):
     
     
     
-    OPT = FullAxis(Ivec,Tmax,nvec,theta,TrajIG,100)
+    OPT = FullAxis(Ivec,Tmax,nvec,theta,EAM,200)
     
     AnimSlew(EAM[1:-1],Anim=False,Ivec=Ivec)
     AnimSlew(OPT[1:-1],Anim=False,Ivec=Ivec)
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     Ivec = np.array([1,2.0,2.6])    ## Inertia of a 6U cubesat
     Ivec = np.array([5621,4547,2364])/2364
 
-    CalcManeuver(Ivec,[1,-.0001,-.0],150.0)
+    CalcManeuver(Ivec,[1,.07,.07],150.0)
 
     
 
