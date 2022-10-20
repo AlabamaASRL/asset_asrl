@@ -90,8 +90,8 @@ struct Segment_Impl : VectorFunction<Derived, IR, OR>, SegStartHolder<ST> {
 
     this->set_input_domain(irows, {dmn});
 
-    if (start + orows > this->IRows()) {
-        throw std::invalid_argument("Segment Index Out of Bounds");
+    if (start + orows > this->IRows()|| start<0) {
+        throw std::invalid_argument("Segment/Element Index Out of Bounds");
     }
 
   }
