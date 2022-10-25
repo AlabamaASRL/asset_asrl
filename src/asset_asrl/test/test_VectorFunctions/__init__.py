@@ -46,7 +46,7 @@ class test_VectorFunctions(unittest.TestCase):
         hessian_error  = hx-hx2
         max_hessian_error = (abs(hessian_error)).max()
         
-        if(Verbose or max_selfadjointgrad_error>1.0e-14):
+        if(Verbose or max_selfadjointgrad_error>1.0e-12):
             print("Self adjoint_gradient Error:")
             print(selfadjointgrad_error)
          
@@ -54,7 +54,7 @@ class test_VectorFunctions(unittest.TestCase):
             print("Hessian Error:")
             print(hessian_error)
             
-        self.assertLess(max_selfadjointgrad_error,1.0e-14,"Adjoint gradients do not match")
+        self.assertLess(max_selfadjointgrad_error,1.0e-12,"Adjoint gradients do not match")
         
         with self.subTest("Jacobian"):
             if(Verbose or max_jacobian_error>maxjerror):
@@ -80,9 +80,77 @@ class test_VectorFunctions(unittest.TestCase):
             with self.subTest(n=n):
                 self.function_test_impl(Fun, X, L,Verbose=False)
 
-    def test_dotproduct(self):
-        s=3
+    
+
+    ######################################################
+    
+    def MatrixOps_impl(self, Ltype,lrows,lcols,Rtype,rrows,rcols):
         
+        M1val = np.random.rand(lrows,lcols)
+        M2val = np.random.rand(rrows,rcols)
+        
+        M1shift = np.random.rand(lrows,lcols)
+        M2shift = np.random.rand(rrows,rcols)
+        
+        M1scale = np.random.uniform(0,1)
+        M2scale = np.random.uniform(0,1)
+
+        
+        X = Args(lrows*lcols+rrows*rcols)
+        
+        M1 = Ltype(X.head(lrows*lcols),lrows,lcols)
+        M2 = Rtype(X.tail(rrows*rcols),rrows,rcols)
+        
+        MProd = (M1*M1scale + M1shift)*(M2*M2scale +M2shift)
+        
+        MProdval_truth = np.dot(M1val*M1scale+M1shift,M2val*M2scale +M2shift).flatten("F")
+        
+        Xin = np.zeros((lrows*lcols+rrows*rcols))
+        
+        if(Ltype==vf.ColMatrix):
+            Xin[0:lrows*lcols] = M1val.flatten("F")
+        else:
+            Xin[0:lrows*lcols] = M1val.flatten("C")
+            
+        if(Rtype==vf.ColMatrix):
+            Xin[lrows*lcols:len(Xin)] = M2val.flatten("F")
+        else:
+            Xin[lrows*lcols:len(Xin)] = M2val.flatten("C")
+        
+        
+        MProdval = MProd.vf()(Xin)
+        
+        ProdErr = MProdval-MProdval_truth
+        
+        with self.subTest("Output"):
+            self.assertLess(abs(ProdErr).max(), 1.0e-12)
+        
+        Fun = MProd.vf()
+        
+        L = range(2,Fun.ORows()+2)
+        
+        with self.subTest("Derivatives"):
+            self.function_test_impl(Fun, Xin, L,Verbose=False,maxjerror=1.0e-5,maxherror=1.0e-5)
+    
+    def test_MatrixOperations(self):
+        
+        for m1rows in range(1,10):
+            for m1cols_m2rows in range(1,10):
+                for m2cols in range(1,10):
+                    with self.subTest(f" Col * Row {m1rows}, ({m1cols_m2rows},{m2cols})"):
+                        self.MatrixOps_impl(vf.ColMatrix, m1rows, m1cols_m2rows, vf.RowMatrix, m1cols_m2rows, m2cols)
+                    with self.subTest(f" Col * Col {m1rows}, ({m1cols_m2rows},{m2cols})"):
+                        self.MatrixOps_impl(vf.ColMatrix, m1rows, m1cols_m2rows, vf.ColMatrix, m1cols_m2rows, m2cols)
+                    with self.subTest(f" Row * Col {m1rows}, ({m1cols_m2rows},{m2cols})"):
+                        self.MatrixOps_impl(vf.RowMatrix, m1rows, m1cols_m2rows, vf.ColMatrix, m1cols_m2rows, m2cols)
+                    with self.subTest(f" Row * Row {m1rows}, ({m1cols_m2rows},{m2cols})"):
+                        self.MatrixOps_impl(vf.RowMatrix, m1rows, m1cols_m2rows, vf.RowMatrix, m1cols_m2rows, m2cols)
+
+
+                    
+        
+    ##########################################################
+    
         
 
 

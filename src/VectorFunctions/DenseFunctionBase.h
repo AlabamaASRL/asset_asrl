@@ -1681,6 +1681,9 @@ struct DenseFunctionBase : Computable<Derived, IR, OR>, DomainHolder<IR> {
       using SEG4 = Segment<-1, 4, -1>;
       using ELEM = Segment<-1, 1, -1>;
 
+      // Prevents numpy from overriding __radd__ and __rmul__
+      obj.attr("__array_ufunc__") = py::none();
+
 
       obj.def(
           "__add__",
@@ -2052,16 +2055,29 @@ struct DenseFunctionBase : Computable<Derived, IR, OR>, DomainHolder<IR> {
           "__getitem__", [](const Derived& a, int elem) { return ElemRetType(a.coeff(elem)); },
           py::is_operator());
       obj.def(
-          "__getitem__", [](const Derived& a, py::slice slice) {
+          "__getitem__", [](const Derived& a, const py::slice & slice) {
               size_t start, stop, step, slicelength;
-              if (!slice.compute(a.ORows(), &start, &stop, &step, &slicelength))
+              if (!slice.compute(a.ORows(), &start, &stop, &step, &slicelength)) {
                   throw py::error_already_set();
+
+              }
 
               if (step != 1) {
                   throw std::invalid_argument("Non continous slices not supported");
               }
+              if (start>= a.ORows()) {
+                  throw std::invalid_argument("Segment index out of bounds.");
+              }
+              if (start > stop) {
+                  throw std::invalid_argument("Backward indexing not supported.");
+              }
+              if (slicelength <= 0) {
+                  throw std::invalid_argument("Slice length must be greater than 0.");
+              }
+
               int start_ = start;
               int size_ = stop - start;
+
               return SegRetType(a.segment(start_, size_));
           },
           py::is_operator());
