@@ -31,6 +31,28 @@ class CartPole(oc.ode_x_u.ode):
         ode = vf.stack([q1d,q2d,q1dd,q2dd])
         super().__init__(ode,4,1)
         
+class CartPole2(oc.ode_x_u.ode):
+    
+    def __init__(self,l,m1,m2,g):
+        
+        args = oc.ODEArguments(4,1)
+        
+        x,theta,xdot,thetadot = args.XVec().tolist()
+        F = args.UVar(0)
+        
+        rhs = vf.stack([-g*vf.sin(theta),F+m2*l*vf.sin(theta)*thetadot**2])
+        
+        Mvec_rm = vf.stack(vf.cos(theta),l,
+                            m1+m2,m2*l*vf.cos(theta))
+        
+        M = vf.RowMatrix(Mvec_rm,2,2)
+        
+        xddot_thetaddot = M.inverse()*rhs
+        
+
+        ode = vf.stack([xdot,thetadot,xddot_thetaddot])
+        super().__init__(ode,4,1)
+        
 ###############################################################################
 
 def Plot(Traj):
@@ -170,11 +192,11 @@ if __name__ == "__main__":
     
     ts = np.linspace(0,tf,100)
     IG = [[d*t/tf,np.pi*t/tf,0,0,t,.00] for t in ts]
-    ode = CartPole(l,m1,m2,g)
+    ode = CartPole2(l,m1,m2,g)
     
     
     
-    phase = ode.phase("LGL3",IG,64)
+    phase = ode.phase("LGL5",IG,64)
     phase.addBoundaryValue("Front",range(0,5),[0,0,0,0,0])
     phase.addBoundaryValue("Back",range(0,5),[d,np.pi,0,0,tf])
     phase.addLUVarBound("Path",5,-umax,umax,1.0)
