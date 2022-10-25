@@ -20,13 +20,13 @@ ode = oc.ode_x.ode(ode,6)
 
 
 atol = 1.0e-12
-dstep = .1
+dstep = .01
 
 X0 = np.zeros((7))
 X0[0]=1
 X0[2]=.01
-X0[4]=1.12
-tf = 30.0
+X0[4]=1.335
+tf = 60.0
 
 XT = np.zeros((7))
 XT[0:6]=X0[0:6]

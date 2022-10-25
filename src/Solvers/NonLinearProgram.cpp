@@ -276,10 +276,10 @@ void ASSET::NonLinearProgram::analyzeSparsity(Eigen::SparseMatrix<double, Eigen:
     /*
     Calculates Sparsity Pattern of NLP. PSIOPT requires that only the upper triangular part of a CSR
     matrix be filled. getMATSpace calculates the non-zeros of the lower triangular part. Therefore
-    in this routine we transose the the row-column indices when making the triplet vector that
-    Eigen uses to calcualte the compressed sparsity pattern of the upper triangular CSR matrix. Once this
+    in this routine we transpose the the row-column indices when making the triplet vector that
+    Eigen uses to calculate the compressed sparsity pattern of the upper triangular CSR matrix. Once this
     routine clculates the sparsity pattern of the KKT matrix it back calculates where every element specified
-    by KKTcoeffRows[i],KKTcoeffCols[i], should be summned into the KKT matrix. This info is stored in 
+    by KKTcoeffRows[i],KKTcoeffCols[i], should be summed into the KKT matrix. This info is stored in 
     KKTLocations, and is passed back to all functions so that they know where to scatter their outputs.
     
     */

@@ -8,6 +8,7 @@ ConvergenceFlags = _asset.Solvers.ConvergenceFlags
 Jet = _asset.Solvers.Jet
 JetJobModes = _asset.Solvers.JetJobModes
 LineSearchModes = _asset.Solvers.LineSearchModes
+OptimizationProblem = _asset.Solvers.OptimizationProblem
 OptimizationProblemBase = _asset.Solvers.OptimizationProblemBase
 PDStepStrategies = _asset.Solvers.PDStepStrategies
 PSIOPT = _asset.Solvers.PSIOPT

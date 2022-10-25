@@ -265,7 +265,7 @@ if __name__ == "__main__":
     OEF  = [at,et,istart,Ot,Wt,M0]
     yf   = ast.Astro.classic_to_cartesian(OEF,mu)
     
-    ts   = np.linspace(0,tf_phase4,260)
+    ts   = np.linspace(0,tf_phase4,200)
     
     IG1 =[]
     IG2 =[]
@@ -348,10 +348,12 @@ if __name__ == "__main__":
     
     ocp.addForwardLinkEqualCon(phase1,phase4,[0,1,2,3,4,5,7,8,9,10])
     ocp.optimizer.set_OptLSMode("L1")
-    ocp.optimizer.MaxLSIters = 3
+    ocp.optimizer.MaxLSIters = 2
 
     #ocp.optimizer.KKTtol = 1.0e-9
     ocp.optimizer.PrintLevel=1
+    #ocp.optimizer.CNRMode=True
+
 
     ocp.Threads=8
     ocp.optimizer.QPThreads=8

@@ -126,7 +126,7 @@ IG = [[x0 + (xf-x0)*t/tf,
        t,
        np.sin(t/tf)] for t in np.linspace(0,tf,100)]
 
-phase = ode.phase(Tmodes.LGL3,IG,64)
+phase = ode.phase(Tmodes.LGL3,IG,128)
 phase.addBoundaryValue("First",[0,1,2],[x0,v0,0])
 phase.addBoundaryValue("Last",[0],[xf])
 phase.addLowerVarBound(PhaseRegs.Back,1,0.0,1.0)
