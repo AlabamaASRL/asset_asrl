@@ -509,6 +509,77 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	std::tuple<ODEState<double>, Jacobian<double>> integrate_stm(const ODEState<double>& x0, double tf) const {
 		return this->integrate_stm(x0, tf, this->defaultstop);
 	}
+
+	std::tuple<ODEState<double>, Jacobian<double>,Hessian<double>> 
+		integrate_stm_hessian(const ODEState<double>& x0, double tf, const ODEState<double>& lf) const {
+
+		ODEState<double> xf(this->ode.IRows());
+		xf.setZero();
+
+
+
+		Jacobian<double> jx(this->IRows(), this->ORows());
+		jx.setZero();
+
+		Eigen::Matrix<double, Base::IRC, Base::IRC> jxall(this->IRows(), this->IRows());
+		jxall.setIdentity();
+
+		Eigen::Matrix<double, Base::IRC, Base::IRC> hxall(this->IRows(), this->IRows());
+		hxall.setZero();
+
+		Input<double> stepper_input(this->IRows());
+		Input<double> stepper_grad(this->IRows());
+
+		ODEState<double> stepper_output(this->ode.IRows());
+		Jacobian<double> stepper_jacobian(this->ORows(), this->IRows());
+		Hessian<double> stepper_hessian(this->ORows(), this->IRows());
+
+		ODEState<double> stepper_adjvars = lf;
+
+		Hessian<double> jtwist(this->IRows(), this->IRows());
+		jtwist.setZero();
+		jtwist(this->IRows() - 1, this->IRows() - 1) = 1.0;
+
+
+
+		auto xs = integrate_impl(x0, tf, xf, this->defaultstop, true);
+
+		int numsteps = xs.size()-1;
+
+
+		for (int i = 0; i < numsteps; i++) {
+			stepper_input.head(this->ode.IRows()) = xs[numsteps - i - 1];
+			stepper_input[this->ode.IRows()] = xs[numsteps - i][this->ode.TVar()];
+
+			stepper_output.setZero();
+			stepper_jacobian.setZero();
+			stepper_grad.setZero();
+			stepper_hessian.setZero();
+
+			this->stepper.compute_jacobian_adjointgradient_adjointhessian(
+				stepper_input, stepper_output, stepper_jacobian, stepper_grad, stepper_hessian, stepper_adjvars);
+			jxall.template topRows<Base::ORC>(this->ORows()) = stepper_jacobian * jxall;
+
+
+			jtwist.topRows(this->ORows()) = stepper_jacobian;
+			jxall = jxall * jtwist;
+
+			if (i == 0) {
+				jxall.rightCols(1) = stepper_jacobian.rightCols(1);
+			}
+			hxall = jtwist.transpose() * hxall * jtwist;
+			hxall += stepper_hessian;
+			stepper_adjvars = stepper_grad.head(this->ORows());
+
+		}
+
+		jx = jxall.template topRows<Base::ORC>(this->ORows());
+
+		return std::tuple{ xf,jx,hxall };
+	}
+
+
+
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	template <class InType, class OutType>
@@ -556,7 +627,10 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 			(std::tuple<ODEState<double>, Jacobian<double>>(Integrator::*)(
 				const ODEState<double>&, double) const) &
 			Integrator::integrate_stm);
-
+		obj.def("integrate_stm_hessian",
+			(std::tuple<ODEState<double>, Jacobian<double>,Hessian<double>>(Integrator::*)(
+				const ODEState<double>&, double, const ODEState<double>&) const) &
+			Integrator::integrate_stm_hessian);
 
 		obj.def_readwrite("DefStepSize", &Integrator::DefStepSize);
 		obj.def_readwrite("MaxStepSize", &Integrator::MaxStepSize);

@@ -9,6 +9,7 @@ New readers should begin at the beginning, since it's important to understand th
     :maxdepth: 2
 
     Installation
+    VectorFunctionGuide
     VectorFunctions_tutorial
     Integrator
     PSIOPT

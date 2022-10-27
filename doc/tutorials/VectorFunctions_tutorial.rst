@@ -168,6 +168,7 @@ The last thing we need to do to fully construct our equations of motion is to st
 To combine our desired outputs (velocity and acceleraton), we use the :code:`vf.Stack([vec1, vec2])`, which will take :code:`vec1` and place it on top of :code:`vec2`, in this case creating an output :code:`VectorFunction` of length 6, 3 from the velocity and 3 from the acceleration.
 
 
+
 Now we have the full :code:`VectorFunction` for our two-body solar sail problem! The last thing we have to do, before you should head over to the :ref:`Python: Phase Tutorial`, is to map this :code:`VectorFunction` to an ASSET ODE type and assign it an integrator.
 
 .. code-block:: python

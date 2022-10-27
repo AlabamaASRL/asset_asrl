@@ -165,16 +165,14 @@ def Plot(Traj1,Traj2):
 
 if __name__ == "__main__":
     ##########################################################################
-    tf  = 1000/Tstar
+    tf  = 2000/Tstar
 
     ht0  = 260000/Lstar
     htf  = 80000 /Lstar
     vt0  = 25600/Vstar
     vtf  = 2500 /Vstar
 
-    thetaf =  (vt0*tf + 0.5*(vtf-vt0)*tf)/Re
-
-    print(thetaf)
+    
     gammat0 = np.deg2rad(-1.0)
     gammatf = np.deg2rad(-5.0)
     psit0   = np.deg2rad(90.0)
@@ -186,7 +184,7 @@ if __name__ == "__main__":
     for t in ts:
         X = np.zeros((8))
         X[0] = ht0*(1-t/tf) + htf*t/tf
-        X[1] = 0  #thetaf*t/tf
+        X[1] = 0
         X[2] = vt0*(1-t/tf) + vtf*t/tf
         X[3] = gammat0*(1-t/tf) + gammatf*t/tf
         X[4] = psit0
@@ -203,7 +201,7 @@ if __name__ == "__main__":
     
     
     
-    phase = ode.phase("LGL3",TrajIG,41)
+    phase = ode.phase("LGL3",TrajIG,80)
     
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
     phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
@@ -224,9 +222,10 @@ if __name__ == "__main__":
     phase.optimizer.BoundFraction = .993
 
     #phase.optimizer.KKTtol = 1.0e-9
-    phase.Threads = 5
+    phase.Threads = 10
     phase.optimize()
-    input("s")
+   
+    
     phase.refineTrajManual(256)
     phase.optimize()
 
