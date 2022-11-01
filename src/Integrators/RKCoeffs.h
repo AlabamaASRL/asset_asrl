@@ -45,63 +45,14 @@ struct RKCoeffs<RKOptions::RK4Classic> {
   static constexpr STDarray<double, 4> CCoeffs = {0, 0, 0, 0};
 };
 
-template <>
-struct RKCoeffs<RKOptions::Ralston3> {
-  static const int Stages = 3;
-  static const bool isDiag = true;
-  static const bool EmbeddedCorrector = false;
 
-  template <class T, int SZ>
-  using STDarray = std::array<T, SZ>;
 
-  static constexpr STDarray<STDarray<double, 2>, 2> ACoeffs = {
-      STDarray<double, 2>{0.5, 0.0}, STDarray<double, 2>{0.0, 0.75}};
-
-  static constexpr STDarray<double, 2> Times = {0.5, 0.75};
-  static constexpr STDarray<double, 3> BCoeffs = {2.0 / 9.0, 1.0 / 3.0,
-                                                  4.0 / 9.0};
-  static constexpr STDarray<double, 3> CCoeffs = {0, 0, 0};
-};
-template <>
-struct RKCoeffs<RKOptions::Ralston2> {
-  static const int Stages = 2;
-  static const bool isDiag = true;
-  static const bool EmbeddedCorrector = false;
-
-  template <class T, int SZ>
-  using STDarray = std::array<T, SZ>;
-
-  static constexpr STDarray<STDarray<double, 1>, 1> ACoeffs = {
-      STDarray<double, 1>{2.0 / 3.0}};
-
-  static constexpr STDarray<double, 1> Times = {2.0 / 3.0};
-  static constexpr STDarray<double, 2> BCoeffs = {.25, .75};
-  static constexpr STDarray<double, 2> CCoeffs = {0, 0};
-};
-template <>
-struct RKCoeffs<RKOptions::RK438> {
-  static const int Stages = 4;
-  static const bool isDiag = false;
-  static const bool EmbeddedCorrector = false;
-
-  template <class T, int SZ>
-  using STDarray = std::array<T, SZ>;
-
-  static constexpr STDarray<STDarray<double, 3>, 3> ACoeffs = {
-      STDarray<double, 3>{1.0 / 3.0, 0.0, 0.0},
-      STDarray<double, 3>{-1.0 / 3.0, 1.0, 0.0},
-      STDarray<double, 3>{1.00, -1.0, 1.0}};
-
-  static constexpr STDarray<double, 3> Times = {1.0 / 3.0, 2.0 / 3.0, 1.0};
-  static constexpr STDarray<double, 4> BCoeffs = {1.0 / 8.0, 3.0 / 8.0,
-                                                  3.0 / 8.0, 1.0 / 8.0};
-  static constexpr STDarray<double, 4> CCoeffs = {0, 0, 0, 0};
-};
 template <>
 struct RKCoeffs<RKOptions::DOPRI54> {
   static const int Stages = 7;
   static const bool isDiag = false;
   static const bool EmbeddedCorrector = true;
+  static const bool FSAL = true;
 
   template <class T, int SZ>
   using STDarray = std::array<T, SZ>;
@@ -125,6 +76,15 @@ struct RKCoeffs<RKOptions::DOPRI54> {
   static constexpr STDarray<double, 7> CCoeffs = {
       5179.0 / 57600.0,  0.0,          7571.0 / 16695.0, 393 / 640.0,
       -92097 / 339200.0, 187 / 2100.0, 1.0 / 40.0};
+
+  static constexpr STDarray<double, 7> MidCoeffs = { 0.2002686376600479,
+0.0000000000000000,
+0.7836643588368518,
+- 0.0596492035318963,
+0.1178653667448159,
+- 0.0899577761820872,
+0.0478086164722679 };
+
 };
 
 template <>
@@ -160,7 +120,7 @@ struct RKCoeffs<RKOptions::DOPRI87> {
   static const int Stages = 13;
   static const bool isDiag = false;
   static const bool EmbeddedCorrector = true;
-
+  static const bool FSAL = false;
   template <class T, int SZ>
   using STDarray = std::array<T, SZ>;
 
@@ -245,6 +205,22 @@ struct RKCoeffs<RKOptions::DOPRI87> {
                                                    53011238.0 / 667516719.0,
                                                    2.0 / 45.0,
                                                    0};
+
+
+  static constexpr STDarray<double, 14> MidCoeffs = { 0.0820626072147879,
+0.0000000000000000,
+0.0000000000000000,
+0.0000000000000000,
+0.0000000000000000,
+0.1020112560398276,
+0.4777861354824404,
+0.6193740287992207,
+- 0.4344650943510704,
+0.1566681135866386,
+- 0.0037228739431160,
+0.0141456884053577,
+0.0138169474640115,
+- 0.0276768086980947 };
 };
 
 }  // namespace ASSET

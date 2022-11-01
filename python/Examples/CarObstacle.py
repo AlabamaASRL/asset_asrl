@@ -96,7 +96,7 @@ for t in np.linspace(0,tfIG,100):
 ode  = ODE(la,lb)
 
 
-phase = ode.phase("Trapezoidal",TrajIG,1024)
+phase = ode.phase("Trapezoidal",TrajIG,100)
 phase.setControlMode("BlockConstant")
 phase.addBoundaryValue("Front",[0,1,2,3,4],[x0,y0,psi0,v0,0])
 

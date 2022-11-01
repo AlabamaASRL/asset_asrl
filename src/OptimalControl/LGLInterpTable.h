@@ -381,6 +381,26 @@ struct LGLInterpTable {
       this->XdotData.col(i) = temp;
     }
   }
+  template<class V1,class V2>
+  void loadExactData(const std::vector<V1>& xtudat, const std::vector<V2>& xdotdat) {
+      this->XtUData.resize(this->XtUVars, xtudat.size());
+      this->XtUData.setZero();
+      this->XdotData.resize(this->XVars, xtudat.size());
+      this->XdotData.setZero();
+      this->T0 = xtudat[0][axis];
+      this->TF = xtudat.back()[axis];
+
+      this->TotalT = xtudat.back()[axis] - xtudat[0][axis];
+      this->NumStates = xtudat.size();
+      this->NumBlocks = (this->NumStates - 1) / (this->BlockSize - 1);
+      this->EvenData = false;
+      this->LastBlockAccessed = 0;
+      for (int i = 0; i < this->NumStates; i++) {
+          this->XtUData.col(i) = xtudat[i];
+          this->XdotData.col(i) = xdotdat[i];
+      }
+  }
+
 
   std::vector<Eigen::VectorXd> NDequidist(Eigen::VectorXd spacing, int dnum,
                                           double low, double high) {  // 0 to 1;
@@ -498,6 +518,7 @@ struct LGLInterpTable {
     int sd = 0;
     do {
       sd = this->CheckIthBlock(tglobal, element);
+
       element += sd;
       if (element < 0) {
         element = 0;
@@ -522,6 +543,7 @@ struct LGLInterpTable {
     int element = 0;
     Scalar tnd = 0;
     this->FindBlock(tglobal, tnd, element);
+
     return InterpIthBlock(tnd, fx, element);
   }
   template <class Scalar, class OutType>
@@ -908,13 +930,28 @@ struct LGLInterpTable {
                                          this->BlockSize)(axis, 0);
     Scalar tf = this->XtUData.middleCols(
         (this->BlockSize - 1) * i, this->BlockSize)(axis, this->BlockSize - 1);
+
+    
     int sd = 0;
-    if (t0 <= tglob && tf >= tglob)
-      sd = 0;
-    else if (tglob > tf)
-      sd = 1;
-    else if (tglob < t0)
-      sd = -1;
+
+    if (tf > t0) {
+        if (t0 <= tglob && tf >= tglob)
+            sd = 0;
+        else if (tglob > tf)
+            sd = 1;
+        else if (tglob < t0)
+            sd = -1;
+    }
+    else {
+        if (t0 >= tglob && tf <= tglob)
+            sd = 0;
+        else if (tglob < tf)
+            sd = 1;
+        else if (tglob > t0)
+            sd = -1;
+    }
+
+    
     return sd;
   }
 

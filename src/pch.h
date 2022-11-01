@@ -17,6 +17,7 @@
 #include <type_traits>
 #include <typeinfo>
 #include <vector>
+#include <algorithm>
 
 #include "TypeDefs/EigenTypes.h"
 #include "Utils/LambdaJumpTable.h"

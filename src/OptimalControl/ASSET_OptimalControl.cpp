@@ -4,6 +4,12 @@
 
 namespace ASSET {
 
+
+    
+
+
+
+
 void OptimalControlBuild(FunctionRegistry& reg, py::module& m) {
   auto & oc = reg.getOptimalControlModule();
   RKFlagsBuild(oc);
@@ -28,6 +34,9 @@ void OptimalControlBuild(FunctionRegistry& reg, py::module& m) {
 
 
   Integrator< GenericODE<GenericFunction<-1, -1>, -1, 0, 0>>::Build(oc, "TestIntegratorX");
+  Integrator< GenericODE<GenericFunction<-1, -1>, -1, -1, 0>>::Build(oc, "TestIntegratorXU");
+
+
 
 
   GenericODESBuildPart1(reg, oc);
