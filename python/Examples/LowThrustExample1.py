@@ -117,13 +117,17 @@ integ = ode.integrator(.01, Args(3).normalized() * .8, [3, 4, 5])
 TrajIG = integ.integrate_dense(XIG, 6.4 * np.pi, 100)
 
 phase = ode.phase('LGL3', TrajIG, 256)
-#phase.setControlMode("BlockConstant")
+phase.integrator = ode.integrator(.5)
+phase.setControlMode("BlockConstant")
 phase.addBoundaryValue(PhaseRegs.Front, range(0, 7), X0)
 phase.addLowerSquaredNormBound("Path",[7,8,9], 0.000001, 1.0)
 phase.addUpperNormBound("Path",[7,8,9],  1, 1.0)
 
 
 phase.addBoundaryValue(PhaseRegs.Back, range(0, 6), Xf[0:6])
+phase.Threads=16
+phase.test_threads(8,1,100)
+
 phase.optimizer.PrintLevel = 0
 phase.optimizer.BoundFraction = .995
 phase.optimizer.set_OptLSMode("L1")

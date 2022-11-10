@@ -10,16 +10,21 @@ New readers should begin at the beginning, since it's important to understand th
 
     Installation
     VectorFunctionGuide
-    VectorFunctions_tutorial
-    Integrator
+    ODEGuide
+    IntegratorGuide
+    PhaseGuide
+    OptimalControlProblem
     PSIOPT
     Phase
+    VectorFunctions_tutorial
+    Integrator
     halo
     zermelo
     zermelolink
     MultiTarg
     ReentryExample
     Delta3
+    CartPole
 
     
 

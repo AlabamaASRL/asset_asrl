@@ -103,7 +103,7 @@ You may use whatever method you wish, but we personally prefer the :code:`.tolis
 	x0,x1,x2,x3,x4,x5 = X.tolist()
 
 In addition to scalar Elements, one may also address contiguous sub-vectors in a set of arguments
-using the :code:`.head()`,:code:`.tail()`, and :code:`.segment()` methods of :code:`Arguments`, or standard python (contiguous) list indexing.
+using the :code:`.head()`, :code:`.tail()`, and :code:`.segment()` methods of :code:`Arguments`, or standard python (contiguous) list indexing.
 For example, if we want to treat the first three arguments of the Arguments below as a single vector R, we can
 use the :code:`.head(n)` method. The :code:`.head(n)` method returns a sub-vector of size :code:`n` starting at the first element. This syntax mirrors the
 Eigen C++ library, which we find to be quite nice, but you may also use standard python list indexing to accomplish the same
@@ -300,41 +300,41 @@ and can be called as shown below. A complete list of functions is given in the t
    * - Function
      - Description
    * - :code:`vf.sin(f)`
-     - Returns the sine of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the sine of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.cos(f)`
-     - Returns the cosine of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the cosine of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.tan(f)`
-     - Returns the tangent of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the tangent of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.arcsin(f)`
-     - Returns the inverse sine of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the inverse sine of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.arccos(f)`
-     - Returns the inverse cosine of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the inverse cosine of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.arctan(f)`
-     - Returns the inverse tangent of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the inverse tangent of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.sinh(f)`
-     - Returns the hyperbolic sine of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the hyperbolic sine of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.cosh(f)`
-     - Returns the hyperbolic cosine of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the hyperbolic cosine of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.tanh(f)`
-     - Returns the hyperbolic tangent of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the hyperbolic tangent of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.arcsinh(f)`
-     - Returns the inverse  hyperbolic sine of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the inverse  hyperbolic sine of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.arccosh(f)`
-     - Returns the inverse  hyperbolic cosine of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the inverse  hyperbolic cosine of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.arctanh(f)`
-     - Returns the inverse  hyperbolic tangent of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the inverse  hyperbolic tangent of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.log(f)`
-     - Returns the natural logarithm of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the natural logarithm of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.exp(f)`
-     - Returns the exponential function of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the exponential function of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.sqrt(f)`
-     - Returns the square root of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the square root of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.sign(f)`
-     - Returns the sign(+1.0,-1.0) of an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the sign(+1.0,-1.0) of an input :code:`Element` or :code:`ScalarFunction`
    * - :code:`vf.abs(f)`
-     - Returns the absolute value an input :code:`Element` or :code:`ScalarFuntion`
+     - Returns the absolute value an input :code:`Element` or :code:`ScalarFunction`
 
-Vector Norms and Transformations
+Vector Norms and Normalizations
 ################################
 
 For Vector Valued functions we also provide member functions that will compute various
@@ -368,6 +368,48 @@ and a complete list of such functions is given in the table below.
 	Grav2 = - R/r3         # Same as above but slower
 
 
+
+
+.. list-table:: List of Vector Norms and Normalizations
+   :widths: 25 25 50
+   :header-rows: 1
+
+   * - Function
+     - Math Form
+     - Description
+   * - :code:`F.norm()`
+     - :math:`|\vec{F}|`
+     - Returns the euclidean norm of :code:`VectorFunction` or :code:`Segment` :code:`F`  
+   * - :code:`F.squared_norm()`
+     - :math:`|\vec{F}|^2`
+     - Returns the square of the euclidean norm of :code:`VectorFunction` or :code:`Segment` :code:`F`  
+   * - :code:`F.cubed_norm()`
+     - :math:`|\vec{F}|^3`
+     - Returns the cube of the euclidean norm of :code:`VectorFunction` or :code:`Segment` :code:`F`  
+   * - :code:`F.inverse_norm()`
+     - :math:`1/|\vec{F}|`
+     - Returns the inverse of the euclidean norm of :code:`VectorFunction` or :code:`Segment` :code:`F`  
+   * - :code:`F.inverse_squared_norm()`
+     - :math:`1/|\vec{F}|^2`
+     - Returns the inverse square of the euclidean norm of :code:`VectorFunction` or :code:`Segment` :code:`F`  
+   * - :code:`F.inverse_cubed_norm()`
+     - :math:`1/|\vec{F}|^3`
+     - Returns the inverse cube of the euclidean norm of :code:`VectorFunction` or :code:`Segment` :code:`F`  
+   * - :code:`F.normalized()`
+     - :math:`\frac{\vec{F}}{|\vec{F}|}`
+     - Returns the normalized output of :code:`VectorFunction` or :code:`Segment` :code:`F`
+   * - :code:`F.normalized_power2()`
+     - :math:`\frac{\vec{F}}{|\vec{F}|^2}`
+     - Returns the output of :code:`VectorFunction` or :code:`Segment` :code:`F` divided by its euclidean norm squared.
+   * - :code:`F.normalized_power3()`
+     - :math:`\frac{\vec{F}}{|\vec{F}|^3}`
+     - Returns the output of :code:`VectorFunction` or :code:`Segment` :code:`F` divided by its euclidean norm cubed.
+   * - :code:`F.normalized_power4()`
+     - :math:`\frac{\vec{F}}{|\vec{F}|^4}`
+     - Returns the output of :code:`VectorFunction` or :code:`Segment` :code:`F` divided by its euclidean norm to the fourth power.
+   * - :code:`F.normalized_power5()`
+     - :math:`\frac{\vec{F}}{|\vec{F}|^5}`
+     - Returns the output of :code:`VectorFunction` or :code:`Segment` :code:`F` divided by its euclidean norm to the fifth power.
 
 Vector Products
 ###############
@@ -407,8 +449,8 @@ while the real part is the 4th element(ie: q =[qv,q4])
 
 	#RcrossC4 = vf.cross(R,C4)  # throws an error
 
-	KqpN = vf.quatProduct(K,N) # hamiltonian quaternion product
-	Krn  = vf.quatRotate(K,V)  ## Rotates 3x1 vecor V using quaternion K
+	KqpN = vf.quatProduct(K,N) # Hamiltonian quaternion product
+	Krn  = vf.quatRotate(K,V)  ## Rotates 3x1 vector V using quaternion K
 
 
 
@@ -650,7 +692,7 @@ of position and velocity, so let us first write a function that does just that.
 		Nhat = R.cross(V).normalized()
 		That = Nhat.cross(R).normalized()
 
-		return vf.stack(Rhat,Nhat,That)
+		return vf.stack(Rhat,That,Nhat)
 
 
 We can then write another function that takes position and velocity as well as the vector

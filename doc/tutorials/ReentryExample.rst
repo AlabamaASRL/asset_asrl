@@ -3,8 +3,8 @@ Example 4: Space Shuttle Reentry
 
 
 As a next example, we will solve a classic real world problem outlined by Betts in [ref]. This problem involves maximizing the glide range
-of the Space Shuttle during reentry. The dynamics are written in spherical cooridanates and incorporate gravity and an emprical model for the lift and
-drag characteristics of the shuttle. The controls are the angle of attack and bank angle of the vehicle and the objective is to maximize the final lattitde
+of the Space Shuttle during reentry. The dynamics are written in spherical coordinates and incorporate gravity and an empirical model for the lift and
+drag characteristics of the shuttle. The controls are the angle of attack and bank angle of the vehicle and the objective is to maximize the final latitude
 subject to the initial and terminal conditions given in eqY.
 
 
@@ -39,7 +39,7 @@ subject to the initial and terminal conditions given in eqY.
 
 
 
-Using this, model, to maximimize the glide range, it is sufficient to maximize  :math:`\theta(t_f)`, which we will do by minimizing :math:`-\theta(t_f)`. 
+Using this, model, to maximize the glide range, it is sufficient to maximize  :math:`\theta(t_f)`, which we will do by minimizing :math:`-\theta(t_f)`. 
 Similar to Betts, we examine the solution to this problem both with and without a path constraint on wing leading edge heating rate, :math:`q`. 
 
 .. math::
@@ -65,7 +65,7 @@ The initial and terminal values of the state variables for this problem are give
 As we have mentioned previously, solving problems in standard units (Miles,Km, fps etc.) is typically very ill conditioned and degrades the performance
 of an otherwise well posed problem. Therefore, as the first step to solving this problem, we will non-dimensionalize all variables and equations to be of order unity.
 This is done by defining characteristic length,mass, and time units from which we can define other derived units through dimensional analysis. In this example we
-select Lstar to be 100,000 feet and tstar to be 60 seconds. Mstar is then set to be the mass of the shuttle. After constructing our dervied units, we can simply divide our physical 
+select Lstar to be 100,000 feet and tstar to be 60 seconds. Mstar is then set to be the mass of the shuttle. After constructing our derived units, we can simply divide our physical 
 constants by the appropriate unit to get their non-dimensional value. 
 
 
@@ -105,7 +105,7 @@ constants by the appropriate unit to get their non-dimensional value.
     c3 = -.10117e-5
 
 
-Having Non-dimenionalized our constants, we can now write the EOM's as an ode_x_u object as we have done in previous examples. For this model, there are
+Having Non-dimensionalized our constants, we can now write the EOM's as an ode_x_u object as we have done in previous examples. For this model, there are
 five state variables  :math:`(h,\theta,v,\gamma,\psi)` and two control variables :math:`(\alpha,\beta)`.
 
 
@@ -174,9 +174,9 @@ Additionally, we can express our heating rate constraint as an asset vector func
 
 Next we must define a suitable initial guess for the optimization. Bett's problem definition places an upper limit of 2500sec 
 on this problem, so we will assume an initial guess of slightly less than this value (tf=1800 sec). We are given initial and terminal values of the altitude,velocity,
-and gamma, so it is natural to construct to the initial guess for these state variables linear functions over the interval (0,tf).For theta we only have an inital conditon,
-so we assume that it's final value is proportial to the integral of the velocity devided by the radius of the Earth and then interpolate linearly. 
-Psi is also only given an initial value and we have no good physical iniutition for how it will evolve so our initial guess assumes that it is constant. For both controls, we just
+and gamma, so it is natural to construct to the initial guess for these state variables linear functions over the interval (0,tf).For theta we only have an initial condition,
+so we assume that it's final value is proportional to the integral of the velocity divided by the radius of the Earth and then interpolate linearly. 
+Psi is also only given an initial value and we have no good physical intuition for how it will evolve so our initial guess assumes that it is constant. For both controls, we just
 assume that they are 0.
 
 .. code-block:: python
@@ -213,10 +213,10 @@ assume that they are 0.
 
 With preliminaries completed we can now solve the problem. We first construct our ode and phase object, and use
 a 64 LGL3 segments to discretize the problem. We then enforce our known initial conditions as a boundary value constraint at  PhaseReg.Front. Next, we
-apply the given bounds on our states and controls as path constraints and also place the specified upper bound on the final time. Last, we enforce the terminal condtions
-on altitude velocity and blank at the back of the trajectory, and then specify that the objective is to minimze deltatheta*-1. This is equivalent to maximizing deltatheta.
-Given our rather poor initialguess for this problem, PSIOPT is invoked in solve_optimize mode, so that it first finds a feasible solution 
-satisfting all constraitns before minimizing the objective. Furthmore, we enable the line-search during the optimize phase as an extra safe-gaurd.
+apply the given bounds on our states and controls as path constraints and also place the specified upper bound on the final time. Last, we enforce the terminal conditions
+on altitude velocity and blank at the back of the trajectory, and then specify that the objective is to minimize deltatheta*-1. This is equivalent to maximizing deltatheta.
+Given our rather poor initial guess for this problem, PSIOPT is invoked in solve_optimize mode, so that it first finds a feasible solution 
+satisfying all constraints before minimizing the objective. Furthermore, we enable the line-search during the optimize phase as an extra safe-guard.
 
 .. code-block:: python
 
@@ -251,8 +251,8 @@ satisfting all constraitns before minimizing the objective. Furthmore, we enable
     Plot(Traj1,Traj2)
 
 For this problem, PSIOPT is able to find a feasible solution in 13 iterations of the solve algorithm, and then an optimum solution after another 66 iterations
-in the optimize algoirithm. We then refine the trajectory to a higher number of segments and reoptimize the solution, which converges in only 4 iterations. 
-The total run-time (i9-12900k) is 70ms. The final objective value for delta theta is 34.141 degrees, which is exaclty that given by betts in [ref]. Next we add the path constraint on leading edge heating rate
+in the optimize algorithm. We then refine the trajectory to a higher number of segments and re-optimize the solution, which converges in only 4 iterations. 
+The total run-time (i9-12900k) is 70ms. The final objective value for delta theta is 34.141 degrees, which is exactly that given by Betts in [ref]. Next we add the path constraint on leading edge heating rate
 to the phase and optimize the new problem using the previous solution as the initial guess. Owing to the excellent initial guess, the heat rate limited problem converges in
 another 16 iterations. The additional of the constraint reduces the maximum glide range of the shuttle to 30.631 radians.
 A plot of the converged state and control histories for both problem formulations can be seen below.

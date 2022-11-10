@@ -1,3 +1,7 @@
+#pragma once
+#include "OptimalControl/LGLInterpTable.h"
+#include "OptimalControl/LGLInterpFunctions.h"
+
 #include "VectorFunctionTypeErasure/GenericFunction.h"
 #include "VectorFunctionTypeErasure/GenericConditional.h"
 
@@ -429,7 +433,6 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	bool usecontroller = false;
 	ControllerType controller;
 	StepperWrapperType stepper;
-	EventPack emptyeventpack;
 	RKOptions RKMethod = RKOptions::DOPRI54;
 	std::shared_ptr<ctpl::ThreadPool> pool;
 
@@ -444,8 +447,10 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	
 	Integrator(const DODE & dode, std::string meth,double defstep):Integrator() {
 		Eigen::VectorXi empty;
+		
 		this->setMethod(meth,dode,defstep,false,ControllerType(),empty);
 		this->setAbsTol(1.0e-12); // Must Be called after setMethod!!!
+		this->setRelTol(0); // Must Be called after setMethod!!!
 	}
 	Integrator(const DODE& dode, double defstep) :Integrator(dode,"DOPRI87",defstep) {
 
@@ -454,10 +459,21 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 		:Integrator() {
 		this->setMethod(meth, dode, defstep, true, ucon, varlocs);
 		this->setAbsTol(1.0e-12); // Must Be called after setMethod!!!
+		this->setRelTol(0); // Must Be called after setMethod!!!
 	}
 	Integrator(const DODE& dode, double defstep, const ControllerType& ucon,const Eigen::VectorXi& varlocs) 
 		:Integrator(dode, "DOPRI87", defstep, ucon, varlocs) {
 
+	}
+	Integrator(const DODE& dode, double defstep, const Eigen::VectorXd& v)
+		:Integrator() {
+
+		Eigen::VectorXi tloc(1);
+		tloc[0] = dode.TVar();
+		GenericFunction<-1, -1> ucon = Constant<-1, -1>(1, v);
+		this->setMethod("DOPRI87", dode, defstep, true, ucon, tloc);
+		this->setAbsTol(1.0e-12); // Must Be called after setMethod!!!
+		this->setRelTol(0); // Must Be called after setMethod!!!
 	}
 	Integrator(const DODE& dode, std::string meth, double defstep, std::shared_ptr<LGLInterpTable> tab,const Eigen::VectorXi& ulocs)
 		:Integrator() {
@@ -467,6 +483,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 		ControllerType ucon = InterpFunction<-1>(tab, ulocs);
 		this->setMethod(meth, dode, defstep, true, ucon, varlocs);
 		this->setAbsTol(1.0e-12); // Must Be called after setMethod!!!
+		this->setRelTol(0); // Must Be called after setMethod!!!
 
 	}
 	Integrator(const DODE& dode, double defstep, std::shared_ptr<LGLInterpTable> tab,const Eigen::VectorXi& ulocs)
@@ -494,6 +511,9 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 		else {
 			throw std::invalid_argument("Invalid integration method '{0:}'.");
 		}
+
+		
+
 	}
 
 
@@ -512,11 +532,13 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 		constexpr int DUV = (DODE::UV == 1) ? -1 : DODE::UV;
 		if constexpr (DODE::UV == 0) {
 			this->stepper =  StepperWrapperType(Stepper);
-
+			this->controller = Arguments<-1>(ode.UVars());
 		}
 		else {
 			if (!this->usecontroller) {
 				this->stepper = StepperWrapperType(Stepper);
+				this->controller = Arguments<-1>(ode.UVars());
+
 			}
 			else {
 
@@ -537,7 +559,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 					auto ODEargs = StackedOutputs{ odeargs.template head<DODE::XtV>(ode.XtVars()),controllerfunc };
 					auto ODEexpr = NestedFunction<DODE, decltype(ODEargs)>(ode, ODEargs);
 					auto GenOde = GenericODE<GenericFunction<-1, -1>, DODE::XV, DODE::UV, DODE::PV>(ODEexpr, ode.XVars(), ode.UVars(), ode.PVars());
-					auto StepperU =StepperType<decltype(GenOde), RKOp>(GenOde);
+					auto StepperU = ODEargs.eval(StepperType<decltype(GenOde), RKOp>(GenOde));
 					this->stepper = StepperWrapperType(StepperU);
 				}
 				else {
@@ -545,7 +567,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 					auto ODEargs = StackedOutputs{ odeargs.template head<DODE::XtV>(ode.XtVars()),controllerfunc,odeargs.template tail<-1>(ode.PVars()) };
 					auto ODEexpr   = NestedFunction<DODE, decltype(ODEargs)>(ode, ODEargs);
 					auto GenOde    = GenericODE<GenericFunction<-1, -1>, DODE::XV, DODE::UV, DODE::PV>(ODEexpr, ode.XVars(), ode.UVars(), ode.PVars());
-					auto StepperUP = StepperType<decltype(GenOde), RKOp>(GenOde);
+					auto StepperUP = ODEargs.eval(StepperType<decltype(GenOde), RKOp>(GenOde));
 					this->stepper =  StepperWrapperType(StepperUP);
 
 				}
@@ -564,18 +586,43 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	double MinStepSize = 0.1;
 	double DefStepSize = 0.1;
 	double MaxStepSize = 0.1;
-	double MaxStepChange = 2.0;
+	double MaxStepChange = 3.0;
 	bool Adaptive = true;
 	bool FastAdaptiveSTM = true;
 	double EventTol = 1.0e-6;
 	int MaxEventIters = 10;
 
 
-	Vector<double, DODE::XV> AbsTols;
-	Vector<double, DODE::XV> RelTols;
+	ODEDeriv<double> AbsTols;
+	ODEDeriv<double> RelTols;
 
 	void setAbsTol(double tol) {
 		this->AbsTols.setConstant(this->ode.XVars(), abs(tol));
+	}
+	void setRelTol(double tol) {
+		this->RelTols.setConstant(this->ode.XVars(), abs(tol));
+	}
+
+	void setAbsTols(ODEDeriv<double> tol) {
+		if (tol.size() != this->ode.XVars()) {
+			throw std::invalid_argument("Incorrectly sized tolerance vector.");
+		}
+		this->AbsTols=tol;
+	}
+	void setRelTols(ODEDeriv<double> tol) {
+		if (tol.size() != this->ode.XVars()) {
+			throw std::invalid_argument("Incorrectly sized tolerance vector.");
+		}
+		this->RelTols=tol;
+	}
+
+	ODEDeriv<double> getAbsTols() const {
+		
+		return this->AbsTols;
+	}
+	ODEDeriv<double> getRelTols() const {
+		
+		return this->RelTols;
 	}
 
 	void setStepSizes(double defstep, double minstep, double maxstep) {
@@ -773,6 +820,11 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 		for (int j = 0; j < events.size();j++) {
 			prev_event_vals[j].setZero();
 			next_event_vals[j].setZero();
+
+			if (std::get<0>(events[j]).IRows()!=this->ode.IRows()) {
+				throw std::invalid_argument("Input size of event function must equal input size of ode.");
+			}
+
 			std::get<0>(events[j]).compute(xi, prev_event_vals[j]);
 		}
 
@@ -952,7 +1004,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 						fx.setZero();
 						jx.setZero();
 						func.compute_jacobian(x, fx, jx);
-						if (abs(fx[0]) < EventTol) {
+						if (abs(fx[0]) < abs(EventTol)) {
 							break;
 						}
 						x[0] = x[0] - fx[0] / jx[0];
@@ -1242,6 +1294,10 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	auto integrate_parallel_impl(
 		const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd & tfs, int thrs, Args && ... args) {
 
+		if (x0s.size() != tfs.size()) {
+			throw std::invalid_argument("List of initial states and final times must be the same size");
+		}
+
 		using SingleRetType = decltype(Integrator::integrate(x0s[0], tfs[0], args...));
 		using RetType = std::vector<SingleRetType>;
 
@@ -1381,9 +1437,29 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	}
 
 
+	std::vector<ODEState<double>> integrate_dense(
+		const ODEState<double>& x0, double tf, int NumStates,
+		std::function<bool(ConstEigenRef<Eigen::VectorXd>)> exitfun) const {
+		VectorX<double> ts =
+			VectorX<double>::LinSpaced(NumStates, x0[this->ode.TVar()], tf);
+
+		std::vector<ODEState<double>> xout;
+		xout.reserve(NumStates);
+		xout.push_back(x0);
+		for (int i = 1; i < NumStates; i++) {
+			xout.push_back(this->integrate(xout[i - 1], ts[i]));
+			if (exitfun(xout.back())) break;
+		}
+		return xout;
+	}
+
 	template<class ... Args>
 	auto integrate_dense_parallel_impl(
 		const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, int thrs,   Args &&... args) {
+
+		if (x0s.size() != tfs.size()) {
+			throw std::invalid_argument("List of initial states and final times must be the same size");
+		}
 
 		using SingleRetType = decltype(Integrator::integrate_dense(x0s[0], tfs[0], args...));
 		using RetType = std::vector<SingleRetType>;
@@ -1415,13 +1491,20 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	}
 	auto integrate_dense_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, 
 		const std::vector<EventPack>& events, int thrs) {
-		return this->integrate_dense_parallel_impl(x0s, tfs, thrs, events ,true);
+		return this->integrate_dense_parallel_impl(x0s, tfs, thrs, events ,false);
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	template<class ... Args>
 	auto integrate_dense_parallel_impl_n(
 		const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, const std::vector<int>& ns, int thrs, Args &&... args) {
+
+		if (x0s.size() != tfs.size()) {
+			throw std::invalid_argument("List of initial states and final times must be the same size");
+		}
+		if (x0s.size() != ns.size()) {
+			throw std::invalid_argument("List of initial states and state numbers must be the same size");
+		}
 
 		using SingleRetType = decltype(Integrator::integrate_dense(x0s[0],tfs[0],ns[0], args...));
 		using RetType = std::vector<SingleRetType>;
@@ -1473,6 +1556,10 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	template<class ... Args>
 	auto integrate_stm_parallel_impl(
 		const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, int thrs, Args && ... args) {
+
+		if (x0s.size() != tfs.size()) {
+			throw std::invalid_argument("List of initial states and final times must be the same size");
+		}
 
 		using SingleRetType = decltype(Integrator::integrate_stm(x0s[0], tfs[0], args...));
 		using RetType = std::vector<SingleRetType>;
@@ -1589,6 +1676,9 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 		ODEState<Scalar> lf = adjvars;
 		Scalar tf = x[this->ode.IRows()];
 
+		
+
+
 		auto Xs = this->integrate_dense(x0, tf);
 		fx = Xs.back();
 
@@ -1604,7 +1694,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	template<class PyDODE>
-	void BuildConstructors(PyDODE& obj) {
+	static void BuildConstructors(PyDODE& obj) {
 
 		obj.def("integrator", [](const DODE& od, double ds) {
 			return Integrator<DODE>(od, ds);
@@ -1626,6 +1716,9 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 				const Eigen::VectorXi& v) {
 					return Integrator<DODE>(od, ds, u, v);
 				});
+			obj.def("integrator", [](const DODE& od, double ds, const Eigen::VectorXd& v) {
+					return Integrator<DODE>(od, ds, v);
+				});
 			obj.def("integrator", [](const DODE& od,  double ds, std::shared_ptr<LGLInterpTable> u,
 				const Eigen::VectorXi& v) {
 					return Integrator<DODE>(od, ds, u, v);
@@ -1644,6 +1737,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 		if constexpr (DODE::UV != 0) {
 			obj.def(py::init<const DODE&, std::string, double, const ControllerType&, const Eigen::VectorXi&>());
 			obj.def(py::init<const DODE&, double, const ControllerType&, const Eigen::VectorXi&>());
+			obj.def(py::init<const DODE&, double,const Eigen::VectorXd&>());
 
 			obj.def(py::init<const DODE&, std::string, double, std::shared_ptr<LGLInterpTable>, const Eigen::VectorXi&>());
 			obj.def(py::init<const DODE&, double, std::shared_ptr<LGLInterpTable>, const Eigen::VectorXi&>());
@@ -1664,11 +1758,11 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 
 		obj.def("integrate_parallel",
 			py::overload_cast<const std::vector<ODEState<double>>&, const Eigen::VectorXd&, int>(&Integrator::integrate_parallel),
-			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads"));
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads"), py::call_guard<py::gil_scoped_release>());
 
 		obj.def("integrate_parallel",
 			py::overload_cast<const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<EventPack>&,int>(&Integrator::integrate_parallel),
-			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"), py::arg("threads"));
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"), py::arg("threads"), py::call_guard<py::gil_scoped_release>());
 
 		////////////////////////////////////////////////////////////////////////////
 
@@ -1680,6 +1774,9 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 			py::overload_cast<const ODEState<double>&, double,int>(&Integrator::integrate_dense, py::const_),
 			py::arg("Xt0UP"), py::arg("tf"), py::arg("n"));
 
+		obj.def("integrate_dense",
+			py::overload_cast<const ODEState<double>&, double, int, std::function<bool(ConstEigenRef<Eigen::VectorXd>)>>(&Integrator::integrate_dense, py::const_),
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("n"),py::arg("StopFunc"));
 
 		obj.def("integrate_dense",
 			py::overload_cast<const ODEState<double>&, double, const std::vector<EventPack>&, const bool&>(&Integrator::integrate_dense, py::const_),
@@ -1693,21 +1790,25 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 
 		obj.def("integrate_dense_parallel",
 			py::overload_cast<const std::vector<ODEState<double>>& , const Eigen::VectorXd& , int>(&Integrator::integrate_dense_parallel),
-			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads"));
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads")
+			, py::call_guard<py::gil_scoped_release>());
 
 		obj.def("integrate_dense_parallel",
 			py::overload_cast<const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<EventPack>&, int>(&Integrator::integrate_dense_parallel),
-			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"), py::arg("threads"));
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"), py::arg("threads")
+			, py::call_guard<py::gil_scoped_release>());
 
 		obj.def("integrate_dense_parallel",
 			py::overload_cast<const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<int> &, 
 			int>(&Integrator::integrate_dense_parallel),
-			py::arg("Xt0UP"), py::arg("tf"), py::arg("ns"), py::arg("threads"));
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("ns"), py::arg("threads")
+			, py::call_guard<py::gil_scoped_release>());
 
 		obj.def("integrate_dense_parallel",
 			py::overload_cast<const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<int>&,
 			const std::vector<EventPack>&, int>(&Integrator::integrate_dense_parallel),
-			py::arg("Xt0UP"), py::arg("tf"), py::arg("ns"), py::arg("Events"), py::arg("threads"));
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("ns"), py::arg("Events")
+			, py::arg("threads"), py::call_guard<py::gil_scoped_release>());
 
 		/////////////////////////////////////////////////////
 
@@ -1722,16 +1823,19 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 
 		obj.def("integrate_stm_parallel",
 			py::overload_cast<const ODEState<double>&, double, int>(&Integrator::integrate_stm_parallel),
-			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads"));
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads")
+			, py::call_guard<py::gil_scoped_release>());
 
 
 		obj.def("integrate_stm_parallel",
 			py::overload_cast<const std::vector<ODEState<double>>&, const Eigen::VectorXd&, int>(&Integrator::integrate_stm_parallel),
-			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads"));
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads")
+			, py::call_guard<py::gil_scoped_release>());
 
 		obj.def("integrate_stm_parallel",
 			py::overload_cast<const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<EventPack>&, int>(&Integrator::integrate_stm_parallel),
-			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"), py::arg("threads"));
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events")
+			, py::arg("threads"), py::call_guard<py::gil_scoped_release>());
 
 
 		/////////////////////////////////////////////////////
@@ -1739,19 +1843,29 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 
 		Base::DenseBaseBuild(obj);
 
-		obj.def("getstepper", &Integrator::getstepper);
 
 		obj.def_readwrite("EnableVectorization", &Integrator::EnableVectorization);
+		
+
 
 
 		obj.def_readwrite("DefStepSize", &Integrator::DefStepSize);
 		obj.def_readwrite("MaxStepSize", &Integrator::MaxStepSize);
 		obj.def_readwrite("MinStepSize", &Integrator::MinStepSize);
 		obj.def_readwrite("MaxStepChange", &Integrator::MaxStepChange);
-		
+		obj.def_readwrite("FastAdaptiveSTM", &Integrator::FastAdaptiveSTM);
+
 		obj.def_readwrite("Adaptive", &Integrator::Adaptive);
 		obj.def_readwrite("AbsTols", &Integrator::AbsTols);
+
 		obj.def("setAbsTol", &Integrator::setAbsTol);
+		obj.def("setAbsTols", &Integrator::setAbsTols);
+		obj.def("getAbsTols", &Integrator::getAbsTols);
+
+		obj.def("setRelTol", &Integrator::setRelTol);
+		obj.def("setRelTols", &Integrator::setRelTols);
+		obj.def("getRelTols", &Integrator::getRelTols);
+
 		obj.def("setStepSizes", &Integrator::setStepSizes);
 		obj.def_readwrite("EventTol", &Integrator::EventTol);
 		obj.def_readwrite("MaxEventIters", &Integrator::MaxEventIters);

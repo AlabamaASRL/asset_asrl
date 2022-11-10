@@ -39,10 +39,18 @@ namespace ASSET {
                         const std::vector<Eigen::VectorXd>& Traj, int numdef) {
                     return std::make_shared<KeplerPhase>(od, Tmode, Traj, numdef);
                 });
-            obj.def("integrator", [](const Kepler& od, double ds) {
-                return RKIntegrator<Kepler>(od, ds);
+
+            obj.def("phase", [](const Kepler& od, std::string Tmode) {
+                return std::make_shared<KeplerPhase>(od, Tmode);
                 });
-           
+            obj.def("phase", [](const Kepler& od, std::string Tmode,
+                const std::vector<Eigen::VectorXd>& Traj, int numdef) {
+                    return std::make_shared<KeplerPhase>(od, Tmode, Traj, numdef);
+                });
+
+            Integrator<Kepler>::BuildConstructors(obj);
+
+            
 
         }
 
@@ -83,9 +91,7 @@ namespace ASSET {
         static void Build(py::module& m) {
             auto phase = py::class_<KeplerPhase, std::shared_ptr<KeplerPhase>,
                 ODEPhaseBase>(m, "phase");
-            phase.def(py::init<Kepler, TranscriptionModes>());
-            phase.def(py::init<Kepler, TranscriptionModes,
-                const std::vector<Eigen::VectorXd>&, int>());
+            BuildImpl(phase);
             phase.def_readwrite("integrator", &KeplerPhase::integrator);
             phase.def_readwrite("UseKeplerPropagator", &KeplerPhase::UseKeplerPropagator);
 
@@ -98,7 +104,7 @@ namespace ASSET {
     static void BuildKeplerMod(FunctionRegistry& reg, py::module& m) {
         auto odemod = m.def_submodule("Kepler");
         reg.template Build_Register<Kepler>(odemod, "ode");
-        reg.template Build_Register<RKIntegrator<Kepler>>(odemod, "integrator");
+        reg.template Build_Register<Integrator<Kepler>>(odemod, "integrator");
         reg.Build_Register<KeplerPropagator>(odemod, "KeplerPropagator");
         KeplerPhase::Build(odemod);
     }

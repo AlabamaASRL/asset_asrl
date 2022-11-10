@@ -160,16 +160,16 @@ class test_Integrators(unittest.TestCase):
         t0 = .1
         tf = 10
         
-        abstol = 1.0e-14
+        abstol = 1.0e-13
         
-        defstepsize = .001
+        defstepsize = .01
         minstepsize = .0000000001
         
         errtol = 1.0e-11
         
         ode = CauchyEulerODE(a,b)
         
-        integ = ode.integrator(defstepsize)
+        integ = ode.integrator("DOPRI54",defstepsize)
         integ.setAbsTol(abstol)
         integ.MinStepSize = minstepsize
         integ.Adaptive=True
@@ -211,8 +211,8 @@ class test_Integrators(unittest.TestCase):
         QErrtol =1.0e-10
         WErrtol =1.0e-6
         
-        Ivec = np.array([1,2,3])
-        W0   = np.array([3,9,3])
+        Ivec = np.array([1.,2.,3.])
+        W0   = np.array([3.,9.,3.])
         
         X0 = np.zeros((11))
         X0[3]=1
@@ -221,12 +221,12 @@ class test_Integrators(unittest.TestCase):
         ode = QuatModel(Ivec)
         integ = ode.integrator(.01,ode.DetumbleLaw(),range(4,7))
         integ.Adaptive = True
-        integ.setAbsTol(1.0e-13)
+        integ.setAbsTol(1.0e-14)
         tf = np.linalg.norm(W0*Ivec)
         
         n  = 1000
         
-        Traj = integ.integrate_dense(X0,tf,n)
+        Traj = integ.integrate_dense(X0,tf)
         
         QF = np.array([-0.893804752502,0.125508984388,0.070813040593,0.424671723248])
         
@@ -313,47 +313,12 @@ class test_Integrators(unittest.TestCase):
         
         
         
+from mpl_toolkits.mplot3d import Axes3D
 
 if __name__ == "__main__":
     
     
-    rho = 28.0
-    sigma = 10.0
-    beta = 8.0 / 3.0
     
-    abstol = 1.0e-13
-    defstepsize = .001
-    minstepsize = .0000001
-    errtol = 1.0e-6
-    n = 2000
-    
-    tf = 20
-    X0 = np.array([1,1,1,0])
-    ode = LorenzODE(sigma, rho, beta)
-    
-    integ = ode.integrator(defstepsize)
-    integ.setAbsTol(abstol)
-    integ.MinStepSize = minstepsize
-    integ.MaxStepChange=3
-    integ.Adaptive=True
-    
-    tm0 = time.perf_counter()
-    Traj =integ.integrate_dense(X0,tf,n)
-    print(len(Traj))
-    tmf = time.perf_counter()
-    print((tmf-tm0)*1000)
-
-    
-    Traj = np.array(Traj)
-    fig = plt.figure()
-    ax = plt.subplot(projection="3d")
-    ax.plot(Traj[:, 0], Traj[:, 1], Traj[:, 2])
-    plt.show()
-    
-
-    
-    input("S")
-    #test_Integrators().test_TwoBodySTM()
     unittest.main(exit=False)
 
 

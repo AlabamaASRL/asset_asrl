@@ -296,7 +296,8 @@ add_subdirectory(src)
 # add_subdirectory(impl)
 
 # Documentation
-add_subdirectory(doc)
+# READ: pip install sphinx,breathe,furo before trying to build docs
+#add_subdirectory(doc)
 
 # Formatting
 include(cmake/clang-format.cmake)

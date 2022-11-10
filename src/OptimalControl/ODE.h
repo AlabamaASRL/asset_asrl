@@ -49,15 +49,8 @@ struct ODE_Expression
     obj.def("phase", [](const Derived& od, TranscriptionModes Tmode) {
       return std::make_shared<ODEPhase<Derived>>(od, Tmode);
     });
-    obj.def("integrator", [](const Derived& od, double ds) {
-      return RKIntegrator<Derived>(od, ds);
-    });
-    if constexpr (ExprImpl::UV != 0) {
-        obj.def("integrator", [](const Derived& od, double ds, const GenericFunction<-1, -1>& u,
-            const Eigen::VectorXi& v) {
-                return RKIntegrator<Derived>(od, ds, u, v);
-            });
-    }
+    Integrator<Derived>::BuildConstructors(obj);
+
    
   }
 };
@@ -74,15 +67,15 @@ struct ODEBase : BaseType, ODESize<_XV, _UV, _PV> {
   using Base::Base;
   static const bool IsGenericODE = false;
 
-  RKIntegrator<Derived> integrator(double dstep) const {
-    return RKIntegrator<Derived>(this->derived(), dstep);
+  Integrator<Derived> integrator(double dstep) const {
+    return Integrator<Derived>(this->derived(), dstep);
   }
 
   static void BuildODEModule(const char* name, py::module& mod,
                              FunctionRegistry& reg) {
     auto odemod = mod.def_submodule(name);
     reg.template Build_Register<Derived>(odemod, "ode");
-    reg.template Build_Register<RKIntegrator<Derived>>(odemod, "integrator");
+    reg.template Build_Register<Integrator<Derived>>(odemod, "integrator");
     ODEPhase<Derived>::Build(odemod);
   }
 
@@ -134,7 +127,6 @@ struct GenericODE
     obj.def(py::init<BaseType, int, int>());
     obj.def(py::init<BaseType, int>());
     obj.def(py::init<BaseType>());
-    reg.template Build_Register<RKIntegrator<Derived>>(odemod, "integrator");
     ODEPhase<Derived>::Build(odemod);
     obj.def("phase", [](const Derived& od, TranscriptionModes Tmode) {
       return std::make_shared<ODEPhase<Derived>>(od, Tmode);
@@ -152,29 +144,17 @@ struct GenericODE
             return std::make_shared<ODEPhase<Derived>>(od, Tmode, Traj, numdef);
         });
 
-    obj.def("integrator", [](const Derived& od, double ds) {
-      return RKIntegrator<Derived>(od, ds);
-    });
+    
 
     py::implicitly_convertible<Derived, GenericFunction<-1, -1>>();
     reg.vfuncx.def(py::init([](const Derived & ode) {
         return std::make_unique<GenericFunction<-1, -1>>(ode.func);
         }));
 
-    if constexpr (_UV != 0) {
-        obj.def("integrator", [](const Derived& od, double ds, const GenericFunction<-1, -1>& u,
-            const Eigen::VectorXi& v) {
-                return RKIntegrator<Derived>(od, ds, u, v);
-            });
-        obj.def("integrator", [](const Derived& od, double ds, std::shared_ptr<LGLInterpTable> u,
-            const Eigen::VectorXi& v) {
-                return RKIntegrator<Derived>(od, ds, u, v);
-            });
-        obj.def("integrator", [](const Derived& od, double ds, const Eigen::VectorXd& uv) {
-                return RKIntegrator<Derived>(od, ds, uv);
-            });
+    reg.template Build_Register<Integrator<Derived>>(odemod, "integrator");
 
-    }
+    Integrator<Derived>::BuildConstructors(obj);
+    
 
     obj.def("vf", [](const Derived& od) { return od.func; });
   }

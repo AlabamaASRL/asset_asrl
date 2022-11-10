@@ -111,6 +111,8 @@ if __name__ == "__main__":
     ode = LTModel(amax)
     integ = ode.integrator(.01)
     
+    
+    
     RF = 4.0
     VF = np.sqrt(1/RF)
     

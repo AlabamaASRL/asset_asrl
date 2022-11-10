@@ -1,5 +1,5 @@
 import numpy as np
-import asset as ast
+import asset_asrl as ast
 import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib.animation as animation
@@ -40,7 +40,8 @@ class CartPole2(oc.ode_x_u.ode):
         x,theta,xdot,thetadot = args.XVec().tolist()
         F = args.UVar(0)
         
-        rhs = vf.stack([-g*vf.sin(theta),F+m2*l*vf.sin(theta)*thetadot**2])
+        rhs = vf.stack([-g*vf.sin(theta),
+                        F+m2*l*vf.sin(theta)*thetadot**2])
         
         Mvec_rm = vf.stack(vf.cos(theta),l,
                             m1+m2,m2*l*vf.cos(theta))
@@ -177,7 +178,7 @@ def Animate(Traj):
         
 if __name__ == "__main__":
 
-    ast.SoftwareInfo()        
+    #ast.SoftwareInfo()        
             
     m1 = 1
     m2 =.3
@@ -196,16 +197,16 @@ if __name__ == "__main__":
     
     
     
-    phase = ode.phase("LGL3",IG,100)
+    phase = ode.phase("LGL5",IG,32)
+    
+    integ = ode.integrator(.1)
     phase.addBoundaryValue("Front",range(0,5),[0,0,0,0,0])
     phase.addBoundaryValue("Back",range(0,5),[d,np.pi,0,0,tf])
     phase.addLUVarBound("Path",5,-umax,umax,1.0)
     phase.addLUVarBound("Path",0,-dmax,dmax,1.0)
     phase.addIntegralObjective(Args(1)[0]**2,[5])
-    phase.Threads=1
-    phase.optimizer.QPThreads=1
-    
-    #phase.optimizer.QPThreads = 8
+    phase.Threads=4
+    phase.optimizer.QPThreads=8
     phase.optimizer.PrintLevel= 0
     phase.optimize()
     

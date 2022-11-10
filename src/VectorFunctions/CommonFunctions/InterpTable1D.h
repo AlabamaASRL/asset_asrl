@@ -82,12 +82,19 @@ namespace ASSET {
 				
 					if (i == 0) {
 						double tstep1 = ts[i + 1] - ts[i];
-						dvs_dts.col(i) = (vs.col(i + 1) - vs.col(i)) / tstep1;
+
+						if (this->teven) {
+							dvs_dts.col(i) = (-.5*vs.col(i + 2)+2.0*vs.col(i + 1) - 1.5*vs.col(i)) / tstep1;
+
+						}
+						else {
+							dvs_dts.col(i) = (vs.col(i + 1) - vs.col(i)) / tstep1;
+						}
 					}
 					else if (i == tsize - 1) {
 						double tstep1 = ts[i] - ts[i - 1];
 						if (this->teven) {
-							dvs_dts.col(i) = (1.5 * vs.col(i) - 2 * vs.col(i - 1) + .5 * vs.col(i - 2)) / tstep1;
+							dvs_dts.col(i) = (1.5 * vs.col(i) - 2.0 * vs.col(i - 1) + .5 * vs.col(i - 2)) / tstep1;
 						}
 						else {
 							dvs_dts.col(i) = (vs.col(i) -  vs.col(i - 1) ) / tstep1;
@@ -331,6 +338,22 @@ namespace ASSET {
 		obj.def(py::init<const Eigen::VectorXd& , const MatType& , bool >());
 
 		obj.def("interp", py::overload_cast<double>(&InterpTable1D::interp, py::const_));
+
+		obj.def("__call__", py::overload_cast<double>(&InterpTable1D::interp, py::const_),py::is_operator());
+
+		obj.def("__call__", [](const InterpTable1D& self, const GenericFunction<-1, 1> & t) {
+			py::object pyfun;
+				if (self.vlen == 1) {
+					auto f = GenericFunction<-1, 1>(InterpFunction1D<1>(std::make_shared<InterpTable1D>(self)));
+					pyfun = py::cast(f);
+				} 
+				else {
+					auto f = GenericFunction<-1, -1>(InterpFunction1D<1>(std::make_shared<InterpTable1D>(self)));
+					pyfun = py::cast(f);
+				}
+				return pyfun;
+			});
+
 
 		obj.def("interp_deriv1", &InterpTable1D::interp_deriv1);
 		obj.def("interp_deriv2", &InterpTable1D::interp_deriv2);

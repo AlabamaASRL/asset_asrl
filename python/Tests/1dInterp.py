@@ -12,7 +12,7 @@ def F(t):
     return np.array([t**2,np.cos(t)])
 
 
-ts = np.linspace(0.0,5.0,20)
+ts = np.linspace(0.0,5.0,80)
 ts2 = np.linspace(0,5,520)
 
 #ts = np.array([0, .2,.3, .5,.6,.8,.9,1])
