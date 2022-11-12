@@ -1,5 +1,5 @@
-Example 5: Cart Pole Swing Up
-=============================
+Cart Pole Swing Up
+==================
 
 
 .. math::

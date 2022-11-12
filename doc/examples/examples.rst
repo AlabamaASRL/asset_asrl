@@ -1,4 +1,4 @@
-Tutorials
+Examples
 =========
 
 The examples below are meant to introduce ASSET in two contexts: strictly as a python package, and as an open-source library that you may extend.
@@ -8,23 +8,6 @@ New readers should begin at the beginning, since it's important to understand th
 .. toctree::
     :maxdepth: 2
 
-    Installation
-    VectorFunctionGuide
-    ODEGuide
-    IntegratorGuide
-    PhaseGuide
-    OptimalControlProblem
-    PSIOPT
-    Phase
-    VectorFunctions_tutorial
-    Integrator
-    halo
-    zermelo
-    zermelolink
-    MultiTarg
-    
-
-    
-
-..
-    cpp_newmodel
+    Delta3
+    ReentryExample
+    CartPole

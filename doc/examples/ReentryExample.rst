@@ -1,5 +1,5 @@
-Example 4: Space Shuttle Reentry
-========================================
+Space Shuttle Reentry
+=====================
 
 
 As a next example, we will solve a classic real world problem outlined by Betts in [ref]. This problem involves maximizing the glide range

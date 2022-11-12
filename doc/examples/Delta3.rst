@@ -1,5 +1,5 @@
-Example 5: Delta 3 Multi-phase GTO Transfer
-===========================================
+Delta 3 Multi-phase GTO Transfer
+================================
 
 .. figure:: _static/Delta_III.svg
     :width: 70%

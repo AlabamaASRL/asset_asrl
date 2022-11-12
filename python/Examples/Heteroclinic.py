@@ -53,15 +53,15 @@ def GetManifold(OrbitIn,h,T,Stable=True):
     
     integ =ode.integrator("DOPRI87",.001)
     
-    integ.setAbsTol(1.0e-14)
+    integ.setAbsTol(1.0e-13)
     Period = OrbitIn[-1][6]
 
     integ.vf()
     
-    Orbit = integ.integrate_dense(OrbitIn[0],Period,1000)
+    Orbit = integ.integrate_dense(OrbitIn[0],Period,400)
     
     times = [O[6]+Period for O in Orbit]
-    Results = integ.integrate_stm_parallel(Orbit,times,6)
+    Results = integ.integrate_stm_parallel(Orbit,times,16)
     
 
     EigIGs = []
@@ -120,9 +120,19 @@ def GetManifold(OrbitIn,h,T,Stable=True):
     events = [(CrossMoon(),0,1),
               (Cull(),0,1)]
     print("S")
+    import time
     
-    Results = integ.integrate_dense_parallel(EigIGs,ts,events,6)
-   
+    t00=time.perf_counter()
+    Results = integ.integrate_dense_parallel(EigIGs,ts,events,16)
+    tff=time.perf_counter()
+    
+    print(tff-t00)
+    
+    t00=time.perf_counter()
+    Results8 = integ.integrate_parallel(EigIGs,ts,events,16)
+    tff=time.perf_counter()
+    print(tff-t00)
+    
     Manifolds=[]
     for Result in Results:
         Traj,eventlocs = Result
@@ -158,12 +168,23 @@ def GetBest(Orbs1,Orbs2):
     
     return Orbs1[distij[0][1]],Orbs2[distij[0][2]]
             
+import sys    
+
+def Func(Traj):
+    
+    tab = oc.LGLInterpTable(6,Traj,10000)
+    
+    func = oc.InterpFunction(tab,range(0,6))
+    
+    #del(tab)
+    
+    return func
     
     
-    
-   
+import gc   
 
 if __name__ == "__main__":
+    print(gc.get_stats())
 
     ode = CR3BP(c.MuEarth,c.MuMoon,c.LD)
     
@@ -175,7 +196,20 @@ if __name__ == "__main__":
     MansL1 = GetManifold(CL1,1e-5,9.0)
     MansL2 = GetManifold(CL2,1e-5,12.0,False)
     
+    func = Func(CL1)
+    
+
+    import time
+    t00=time.perf_counter()
     O1,O2 = GetBest(MansL1,MansL2)
+    tff=time.perf_counter()
+    
+    print(tff-t00)
+    print(gc.get_stats())
+
+    print(gc.collect())
+    print(gc.get_stats())
+    print(func.compute([CL1[20][6]]))
 
     
     plot = CRPlot(ode,'Earth','Moon','green','grey')

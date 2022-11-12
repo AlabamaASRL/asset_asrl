@@ -16,6 +16,7 @@ A high-performance interior-point optimizer (PSIOPT) is included with the librar
     :caption: Contents:
 
     tutorials/tutorials.rst
+    examples/examples.rst
     python/python.rst
 
 

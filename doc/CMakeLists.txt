@@ -30,6 +30,7 @@ find_package(Sphinx)
 
 
 
+
 if(NOT DEFINED SPHINX_THEME)
     set(SPHINX_THEME default)
 endif()
@@ -60,13 +61,22 @@ configure_file(
 
 
 
+
+
+
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/tutorials/_static/"
 DESTINATION  "${SPHINX_BUILD}/tutorials/_static/")
 
 
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/examples/_static/"
+DESTINATION  "${SPHINX_BUILD}/examples/_static/")
 
 
+message(STATUS ${BINARY_BUILD_DIR})
 
+message(STATUS ${PROJECT_SOURCE_DIR})
+
+message(STATUS ${PROJECT_NAME})
 
 # Run Sphinx
 add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
@@ -84,6 +94,7 @@ add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
 
 add_custom_target(sphinx ALL DEPENDS ${SPHINX_INDEX_FILE})
 # add_dependencies(sphinx doxygen)
+
 
 
 #add_custom_command(OUTPUT ${SPHINX_PDF_FILE}
