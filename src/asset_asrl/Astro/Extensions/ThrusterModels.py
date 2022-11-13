@@ -200,7 +200,7 @@ class SolarSail():
 
         Returns
         -------
-        acc : float
+        acc : ASSET VectorFunction
             Non-dimensional ideal sail acceleration
 
         """
@@ -223,7 +223,7 @@ class SolarSail():
 
         Returns
         -------
-        acc1 : float
+        acc1 : ASSET VectorFunction
             Non-dimensional non-ideal sail acceleration
 
         """
