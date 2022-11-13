@@ -6,32 +6,100 @@ namespace ASSET {
 
 	struct InterpTable1D {
 
+		enum InterpType {
+			cubic_interp,
+			linear_interp
+		};
+
+
 		using MatType = Eigen::Matrix<double, -1, -1>;
 
 		Eigen::VectorXd ts;
 		MatType vs;
 		MatType dvs_dts;
 
-		bool cubic = false;
+		InterpType interp_kind = cubic_interp;
 		bool teven = true;
+		int axis = 0;
 		int tsize;
 		double ttotal;
 		int vlen;
 
 		InterpTable1D(){}
-		InterpTable1D(const Eigen::VectorXd& Ts, const MatType& Vs, bool cubic) {
-			set_data(Ts, Vs, cubic);
-		}
-		InterpTable1D(const Eigen::VectorXd& Ts, const Eigen::VectorXd& Vs, bool cubic) {
-			MatType Vstmp = Vs.transpose();
-			set_data(Ts, Vstmp, cubic);
-		}
 
-		void set_data(const Eigen::VectorXd& Ts, const MatType& Vs, bool cubic) {
+
+		InterpTable1D(const Eigen::VectorXd& Ts, const MatType& Vs, int axis, std::string kind) {
+			set_data(Ts, Vs, axis,kind);
+		}
+		InterpTable1D(const Eigen::VectorXd& Ts, const Eigen::VectorXd& Vs, int axis, std::string kind) {
+			MatType Vstmp = Vs.transpose();
+			set_data(Ts, Vstmp, 1, kind);
+		}
+		InterpTable1D(const std::vector<Eigen::VectorXd>& Vts, int tvar, std::string kind) {
+
+			if (Vts.size() == 0) {
+				throw std::invalid_argument("Input is empty");
+			}
+			if (Vts[0].size() < 2) {
+				throw std::invalid_argument("Invalid sized value-time data.");
+			}
+
+			if (tvar<0) {
+				tvar = Vts[0].size() + tvar;
+			}
+			if (tvar > Vts[0].size() - 1 || tvar < 0) {
+				throw std::invalid_argument("Invalid time variable index");
+			}
+
+			Eigen::VectorXd Ts(Vts.size());
+			
+			Eigen::MatrixXd Vs(Vts[0].size()-1,Vts.size());
+
+			for (int i = 0; i < Vts.size(); i++) {
+				int isize = Vts[i].size();
+				if (isize != Vts[0].size()) {
+					throw std::invalid_argument("All value-time vectors must have same size");
+				}
+				int shift = 0;
+				for (int j = 0; j < isize; j++) {
+					if (j == tvar) {
+						Ts[i] = Vts[i][j];
+						shift = 1;
+					}
+					else {
+						Vs.col(i)[j-shift] = Vts[i][j];
+					}
+				}
+			}
+			set_data(Ts, Vs, 1, kind);
+
+		}
+		void set_data(const Eigen::VectorXd& Ts, const MatType& Vs,int axis, std::string kind) {
 
 			this->ts = Ts;
-			this->vs = Vs;
-			this->cubic = cubic;
+
+			if (axis == 1) {
+				this->axis = 1;
+				this->vs = Vs;
+			}
+			else if (axis==0) {
+				this->axis = 0;
+				this->vs = Vs.transpose();
+			}
+			else {
+				throw std::invalid_argument("Interpolation axis must be 0 or 1");
+			}
+
+			if (kind == "cubic" || kind == "Cubic") {
+				this->interp_kind = cubic_interp;
+			}
+			else if (kind == "linear" || kind == "Linear") {
+				this->interp_kind = linear_interp;
+			}
+			else {
+				throw std::invalid_argument("Unrecognized interpolation type");
+			}
+
 
 			tsize = ts.size();
 			vlen  = vs.rows();
@@ -41,7 +109,7 @@ namespace ASSET {
 				throw std::invalid_argument("t coordinates must be larger than 2");
 			}
 			if (tsize != vs.cols()) {
-				throw std::invalid_argument("t coordinates must match rows in V matrix");
+				throw std::invalid_argument("Length of t coordinates must match length of interpolation axis");
 			}
 			for (int i = 0; i < ts.size() - 1; i++) {
 				if (ts[i + 1] < ts[i]) {
@@ -59,7 +127,7 @@ namespace ASSET {
 			}
 
 
-			if (cubic) calc_derivs();
+			if (this->interp_kind == cubic_interp) calc_derivs();
 
 		}
 
@@ -82,12 +150,19 @@ namespace ASSET {
 				
 					if (i == 0) {
 						double tstep1 = ts[i + 1] - ts[i];
-						dvs_dts.col(i) = (vs.col(i + 1) - vs.col(i)) / tstep1;
+
+						if (this->teven) {
+							dvs_dts.col(i) = (-.5*vs.col(i + 2)+2.0*vs.col(i + 1) - 1.5*vs.col(i)) / tstep1;
+
+						}
+						else {
+							dvs_dts.col(i) = (vs.col(i + 1) - vs.col(i)) / tstep1;
+						}
 					}
 					else if (i == tsize - 1) {
 						double tstep1 = ts[i] - ts[i - 1];
 						if (this->teven) {
-							dvs_dts.col(i) = (1.5 * vs.col(i) - 2 * vs.col(i - 1) + .5 * vs.col(i - 2)) / tstep1;
+							dvs_dts.col(i) = (1.5 * vs.col(i) - 2.0 * vs.col(i - 1) + .5 * vs.col(i - 2)) / tstep1;
 						}
 						else {
 							dvs_dts.col(i) = (vs.col(i) -  vs.col(i - 1) ) / tstep1;
@@ -147,7 +222,7 @@ namespace ASSET {
 			double tstep = ts[telem + 1] - ts[telem];
 			double tnd   = (t - ts[telem]) / tstep;
 
-			if (cubic) {
+			if (this->interp_kind==cubic_interp) {
 
 				double tnd2 = tnd * tnd;
 				double tnd3 = tnd2 * tnd;
@@ -206,6 +281,28 @@ namespace ASSET {
 			v.resize(vlen);
 			interp_impl(t, 0, v, v, v);
 			return v;
+
+		}
+
+		Eigen::MatrixXd interp(const Eigen::VectorXd & ts) const {
+
+			Eigen::MatrixXd vs; 
+			vs.resize(vlen, ts.size());
+			Eigen::VectorXd v;
+			v.resize(vlen);
+
+			for (int i = 0; i < ts.size(); i++) {
+				interp_impl(ts[i], 0, v, v, v);
+				vs.col(i) = v;
+				v.setZero();
+			}
+			
+			if (axis == 1) {
+				return vs;
+			}
+			else {
+				return vs.transpose();
+			}
 
 		}
 
@@ -326,11 +423,33 @@ namespace ASSET {
 		using MatType = InterpTable1D::MatType;
 		auto obj = py::class_<InterpTable1D, std::shared_ptr<InterpTable1D>>(m, "InterpTable1D");
 
-		obj.def(py::init<const Eigen::VectorXd&, const Eigen::VectorXd&, bool >());
+		obj.def(py::init<const Eigen::VectorXd&, const Eigen::VectorXd&, int,std::string >(),
+			py::arg("ts"), py::arg("Vs"), py::arg("axis") = 0, py::arg("kind") = std::string("cubic"));
 
-		obj.def(py::init<const Eigen::VectorXd& , const MatType& , bool >());
+		obj.def(py::init<const Eigen::VectorXd& , const MatType& , int, std::string >(),
+			py::arg("ts"),py::arg("Vs"),py::arg("axis")=0,py::arg("kind")=std::string("cubic"));
+
+		obj.def(py::init<const std::vector<Eigen::VectorXd>&, int, std::string >(),
+			py::arg("Vts"),py::arg("tvar")=-1, py::arg("kind") = std::string("cubic"));
 
 		obj.def("interp", py::overload_cast<double>(&InterpTable1D::interp, py::const_));
+
+		obj.def("__call__", py::overload_cast<double>(&InterpTable1D::interp, py::const_),py::is_operator());
+		obj.def("__call__", py::overload_cast<const Eigen::VectorXd&>(&InterpTable1D::interp, py::const_), py::is_operator());
+
+		obj.def("__call__", [](const InterpTable1D& self, const GenericFunction<-1, 1> & t) {
+			py::object pyfun;
+				if (self.vlen == 1) {
+					auto f = GenericFunction<-1, 1>(InterpFunction1D<1>(std::make_shared<InterpTable1D>(self)).eval(t));
+					pyfun = py::cast(f);
+				} 
+				else {
+					auto f = GenericFunction<-1, -1>(InterpFunction1D<-1>(std::make_shared<InterpTable1D>(self)).eval(t));
+					pyfun = py::cast(f);
+				}
+				return pyfun;
+			});
+
 
 		obj.def("interp_deriv1", &InterpTable1D::interp_deriv1);
 		obj.def("interp_deriv2", &InterpTable1D::interp_deriv2);

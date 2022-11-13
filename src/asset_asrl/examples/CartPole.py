@@ -10,28 +10,9 @@ Tmodes = oc.TranscriptionModes
 PhaseRegs = oc.PhaseRegionFlags
 Args = vf.Arguments
 
+
+        
 class CartPole(oc.ode_x_u.ode):
-    
-    def __init__(self,l,m1,m2,g):
-        
-        args = oc.ODEArguments(4,1)
-        
-        q1  = args.XVar(0)
-        q2  = args.XVar(1)
-        q1d = args.XVar(2)
-        q2d = args.XVar(3)
-        
-        q1,q2,q1d,q2d = args.XVec().tolist()
-        
-        u = args.UVar(0)
-        
-        q1dd = (l*m2*vf.sin(q2)*(q2d**2) + u + m2*g*vf.cos(q2)*vf.sin(q2))/( m1 + m2*((1-vf.cos(q2)**2)))
-        q2dd = -1*(l*m2*vf.cos(q2)*vf.sin(q2)*(q2d**2) +u*vf.cos(q2) +(m1*g+m2*g)*vf.sin(q2))/( l*m1 + l*m2*((1-vf.cos(q2)**2)))
-        
-        ode = vf.stack([q1d,q2d,q1dd,q2dd])
-        super().__init__(ode,4,1)
-        
-class CartPole2(oc.ode_x_u.ode):
     
     def __init__(self,l,m1,m2,g):
         
@@ -56,7 +37,7 @@ class CartPole2(oc.ode_x_u.ode):
         
 ###############################################################################
 
-def Plot(Traj):
+def Plot(Traj,l):
     
     T = np.array(Traj).T
     
@@ -109,7 +90,7 @@ def Plot(Traj):
     fig.set_tight_layout(True)
     plt.show()
 
-def Animate(Traj):
+def Animate(Traj,l):
     T = np.array(Traj).T
     
     
@@ -173,12 +154,10 @@ def Animate(Traj):
 
     plt.show()
     
-    
 ##############################################################################        
-        
-if __name__ == "__main__":
 
-    #ast.SoftwareInfo()        
+def main():
+    
             
     m1 = 1
     m2 =.3
@@ -193,19 +172,17 @@ if __name__ == "__main__":
     
     ts = np.linspace(0,tf,100)
     IG = [[d*t/tf,np.pi*t/tf,0,0,t,.00] for t in ts]
-    ode = CartPole2(l,m1,m2,g)
+    ode = CartPole(l,m1,m2,g)
     
     
+    phase = ode.phase("LGL3",IG,64)
     
-    phase = ode.phase("LGL5",IG,32)
-    
-    integ = ode.integrator(.1)
     phase.addBoundaryValue("Front",range(0,5),[0,0,0,0,0])
     phase.addBoundaryValue("Back",range(0,5),[d,np.pi,0,0,tf])
     phase.addLUVarBound("Path",5,-umax,umax,1.0)
     phase.addLUVarBound("Path",0,-dmax,dmax,1.0)
     phase.addIntegralObjective(Args(1)[0]**2,[5])
-    phase.Threads=4
+    phase.Threads=8
     phase.optimizer.QPThreads=8
     phase.optimizer.PrintLevel= 0
     phase.optimize()
@@ -220,9 +197,12 @@ if __name__ == "__main__":
     
     Traj = phase.returnTraj()
    
-    Plot(Traj)
-    Animate(Traj)
+    Plot(Traj,l)
+    Animate(Traj,l)
+    
+        
+if __name__ == "__main__":
 
-    ###########################################################################
+    main()
 
 

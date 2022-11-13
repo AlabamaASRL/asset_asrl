@@ -4,6 +4,7 @@ import asset as ast
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
+from mpl_toolkits.mplot3d import Axes3D
 
 def Ierr(tab,f,xs,ys):
     errs = []

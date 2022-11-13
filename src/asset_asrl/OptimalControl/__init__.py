@@ -40,7 +40,7 @@ ode_x_u_p = _asset.OptimalControl.ode_x_u_p
 ###############################################################################
 ## Expose Pure Python Extensions to OptimalControl
 
-from .Extensions.ODEBase import ODEBase
+from .ODEBaseClass import ODEBase
 
 
 

@@ -81,7 +81,7 @@ def Ulaw():
     m = Args(1)[0]
     return vf.ifelse(m>mf,1,0)
     
-def StopFunc(x): return (x[3]>0 and x[1]<0)
+def StopFunc(x): return (x[1]<0)
     
 
 

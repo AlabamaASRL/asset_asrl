@@ -1,6 +1,6 @@
 
 import numpy as np
-import asset as ast
+import asset_asrl as ast
 
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -9,20 +9,21 @@ from matplotlib.ticker import LinearLocator
 from scipy import interpolate
 
 def F(t):
-    return np.array([t**2,np.cos(t)])
+    return np.array([t**2,t**2.1])
 
 
-ts = np.linspace(0.0,5.0,20)
-ts2 = np.linspace(0,5,520)
-
+ts = np.linspace(0.0,5.0,120)
+ts2 = np.linspace(0,5,1200)
+print(F(ts))
 #ts = np.array([0, .2,.3, .5,.6,.8,.9,1])
 
 FS = interpolate.interp1d(ts, F(ts),kind='quadratic',axis=1)
-FA = ast.VectorFunctions.InterpTable1D(ts,F(ts),True)
+FA = ast.VectorFunctions.InterpTable1D(ts,F(ts),axis=1,kind='cubic')
 
 Fe  = F(ts2)
+
 FSi  = FS(ts2)
-FAi = np.array([FA.interp(t) for t in ts2]).T
+FAi =FA(ts2)
 
 
 

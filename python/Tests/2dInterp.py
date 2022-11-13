@@ -4,11 +4,12 @@ import asset as ast
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
+from mpl_toolkits.mplot3d import Axes3D
 
 vf = ast.VectorFunctions
 
-nx = 25
-ny = 29
+nx = 32
+ny = 42
 
 lim = np.pi
 
@@ -30,7 +31,7 @@ X, Y = np.meshgrid(xs, ys)
 
 Z    = f(X,Y)
 
-tab = ast.VectorFunctions.TwoDimInterpTable(xs,ys,Z,True)
+tab = ast.VectorFunctions.InterpTable2D(xs,ys,Z,True)
 
 X, Y = np.meshgrid(xs2, ys2)
 
@@ -42,8 +43,8 @@ fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 surf = ax.plot_surface(X, Y, Z, cmap=cm.viridis,
                        linewidth=0, antialiased=False)
 
-tab   = ast.VectorFunctions.TwoDimInterpTable(xs2,ys2,Z,True)
-tab2  = ast.VectorFunctions.TwoDimInterpTable(xs2,ys2,Z,False)
+tab   = ast.VectorFunctions.InterpTable2D(xs2,ys2,Z,True)
+tab2  = ast.VectorFunctions.InterpTable2D(xs2,ys2,Z,False)
 
 
 vals = np.linspace(0,1,11)

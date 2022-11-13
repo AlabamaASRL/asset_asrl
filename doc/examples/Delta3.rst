@@ -1,5 +1,5 @@
-Example 5: Delta 3 Multi-phase GTO Transfer
-===========================================
+Delta 3 Multi-phase GTO Transfer
+================================
 
 .. figure:: _static/Delta_III.svg
     :width: 70%
@@ -11,14 +11,14 @@ Example 5: Delta 3 Multi-phase GTO Transfer
 
 
 As an example of a real-world multi-phase problem, we will optimize the launch and 
-geostationary transfer orbit insertion of a Delta 3 rockets oultlined by Betts in []. The Delta 3 was nominally a
+geostationary transfer orbit insertion of a Delta 3 rockets outlined by Betts in []. The Delta 3 was nominally a
 2 stage rocket consisting of a first stage RS-27A and 9 solid rocket boosters topped with an RL-10 upper stage. The rocket had an interesting staging
-strategy with the first stage liquid engine and only 6 of the 9 SRBs igniting at take off. Follwwing burtnout of these 6 solid rocket 
+strategy with the first stage liquid engine and only 6 of the 9 SRBs igniting at take off. Following burnout of these 6 solid rocket 
 boosters 75 seconds after launch, the inert mass is ejected and the remaining the  3 boosters are ignited. After another 75 seconds (t+150s) these 3 SRBs
 too are ejected and the first stage continues to burn until t+261.
-At this point the RL-10 upper stage and payload seperate from the first stage and contrinue to orbit, burning for up to an additional 700 seconds. 
+At this point the RL-10 upper stage and payload separate from the first stage and continue to orbit, burning for up to an additional 700 seconds. 
 
-Betts problem in [] invlolves maximizing the mass delivered to a prespecified geostatiionary orbit for a launch from cape Canaveral. 
+Betts problem in [] involves maximizing the mass delivered to a pre-specified geostationary orbit for a launch from cape Canaveral. 
 This problem can be broken down into 4 phases: 
 
     1. 6 SRBs + First Stage   (  0.0  <= t <=  75.2s)
@@ -26,8 +26,8 @@ This problem can be broken down into 4 phases:
     3. First Stage            (150.4s <= t <= 261.0s)
     4. Second Stage.          (261.0s <= t <= 961.0s)
 
-The dynamics on each of the four phases are expressed in cartesion coordinates 
-and are all the same save for differing values for the combined thrust and mass flowrate of the currently burning engine configurations.
+The dynamics on each of the four phases are expressed in Cartesian coordinates 
+and are all the same save for differing values for the combined thrust and mass flow-rate of the currently burning engine configurations.
 The thrust (:math:`T_i`) , and mass flow rate (:math:`\dot{m}_i`), and inert masses for stages can be found in [] and in our example script.
 
 .. math::
@@ -48,7 +48,7 @@ The thrust (:math:`T_i`) , and mass flow rate (:math:`\dot{m}_i`), and inert mas
 
     h  &= |\vec{r}| - R_e
 
-Initial conditions applied to the first phase enforce that the rocket depart from the Cape's lattitude 
+Initial conditions applied to the first phase enforce that the rocket depart from the Cape's latitude 
 with zero velocity relative to the surface of the Earth.
 
 .. math::
@@ -58,7 +58,7 @@ with zero velocity relative to the surface of the Earth.
     \vec{v}(0) &= -\vec{r}\times\vec{\omega}_e
 
 Terminal conditions applied to the final phase enforce that the rocket 
-insert into a geostattionary transfer orbit with the following classical orbital elements.
+insert into a geostationary transfer orbit with the following classical orbital elements.
 
 .. math::
 
@@ -74,7 +74,7 @@ insert into a geostattionary transfer orbit with the following classical orbital
 
 
 
-Modelling this problem in asset starts with defining the dynamics for each phase. Since the structure of the dynamics is the same for
+Modeling this problem in asset starts with defining the dynamics for each phase. Since the structure of the dynamics is the same for
 all 4 phases, we can model them with a single ASSET ode given below.
 
 
@@ -107,12 +107,13 @@ all 4 phases, we can model them with a single ASSET ode given below.
             super().__init__(ode,7,3)
 
 
-As you might have noticed, our model is written in cartesian coordiantes, but our terminal boundary conditons on the final phase are given 
-as a set of classical orbital elements. This neccectates writing a custom constraint (below), which will convert from cartesian coordantes to 
-orbital elements so that we can target the given orbit. Those familiar with this conversion will know that it requires quadrant checks on the righat asecension
-and argumnent of periapse, and thus requires a run-time conditional statement. Such simple conditional statements can be readily handled in ASSET's VectorFunction type system,
-using the :code:`vf.ifelse` function as seen below. The first argumnent of the function is condtional statement containing at least one asset Vector Function. At run time, if this statement,
-evaluates to True, output of the function will be given by the second argument, and if it evaluates to False , the output will be the final argument.
+As you might have noticed, our model is written in Cartesian coordinates, but our terminal boundary conditions on the final phase are given 
+as a set of classical orbital elements. This necessitates writing a custom constraint (below), which will convert from Cartesian coordinates to 
+orbital elements so that we can target the given orbit. Those familiar with this conversion will know that it requires quadrant checks on the RAAN
+and argument of periapse, and thus requires a run-time conditional statement. Such simple conditional statements can be readily handled in ASSET's VectorFunction type system,
+using the :code:`vf.ifelse` function as seen below. The first argument of the function is conditional statement containing at least one asset Vector Function. 
+At run time, if this statement, evaluates to True, output of the function will be given by the second argument, 
+and if it evaluates to False , the output will be the final argument.
 
 .. code-block:: python
 
@@ -144,10 +145,10 @@ evaluates to True, output of the function will be given by the second argument, 
 
 With our dynamics and custom boundary constraint defined we can now begin the task of setting up and solving the problem.
 
-Our first step here will be to find a suitable inital guess for all four phases of the rockets flight as shown below. To do this, we adopt a similar
-strategy to Betts of selecting a suitable state along the target orbit, and linearly interpolating from our known inital conditions. We roughly select this terminal state
+Our first step here will be to find a suitable initial guess for all four phases of the rockets flight as shown below. To do this, we adopt a similar
+strategy to Betts of selecting a state along the target orbit, and linearly interpolating from our known initial conditions. We roughly select this terminal state
 such that the linearly interpolated initial guess departs the cape in an easterly direction does not pass under the surface of the Earth. 
-This inital guess is evenly partioned in time to construct the position and velcity along each phase. 
+This initial guess is evenly partitioned in time to construct the position and velocity along each phase. 
 Because the dynamics do not allow throttling of the engine, we can also supply the exact mass history for each phase. 
 The thrust directions are arbitrarily set to the unit x direction.
 
@@ -212,15 +213,15 @@ The thrust directions are arbitrarily set to the unit x direction.
 
 
 Now we can define (below), the odes and phases for each of the 4 rocket stages and combine them into a single optimal control problem. 
-On the first phase we apply our known inital state, time, and mass as a boundary value. The length of the phase is then enforced by fixing the
+On the first phase we apply our known initial state, time, and mass as a boundary value. The length of the phase is then enforced by fixing the
 final time of the last state to be equal to the burnout time of the first 6 SRB's. 
-The inital position velocity and time of phases 2,3 will be dictated by later continuity constarinatrs, 
-so along these phases we only need to explcitly enforce the known inital mass and burnout times given in thge problem statement. 
+The initial position velocity and time of phases 2,3 will be dictated by later continuity constraints, 
+so along these phases we only need to explicitly enforce the known initial mass and burnout times given in the problem statement. 
 In phase4, since the final, burnout time of the final stage not known, we simply place an upper bound to be the time at which all propellant would have been expended.
-Additonally, it is to this phase that we apply out terminal constraint on the target orbit, and our objective to maximize final mass. 
+Additionally, it is to this phase that we apply out terminal constraint on the target orbit, and our objective to maximize final mass. 
 
 Finally, we combine these 4 phases into a single optimal control problem and add a link constraint that enforces position,velocity 
-and time continity between sequential phases. 
+and time continuity between sequential phases. 
 We then directly optimize the problem with the Line search enabled and return the solution for plotting.
 
 
@@ -283,9 +284,9 @@ We then directly optimize the problem with the Line search enabled and return th
     
     Plot(Phase1Traj,Phase2Traj,Phase3Traj,Phase4Traj)
 
-On an intel i9 12900k ,using 150 LGL3 segments across all 4 phases, this problem solves in 38 iterations of PSIOPT's optimization algorithm taking aproximately 60 milliseconds.
-The altitude, velocity and mass of the rocket as function of time are plotted below along with a groundtrack of the trajectory. 
-Final Mass Delivred to the GTO is 7529.749kg, which is effectively the same as that given by Betts (7529.712 kg).
+On an intel i9 12900k ,using 150 LGL3 segments across all 4 phases, this problem solves in 38 iterations of PSIOPT's optimization algorithm taking approximately 60 milliseconds.
+The altitude, velocity and mass of the rocket as function of time are plotted below along with a ground-track of the trajectory. 
+Final Mass Delivered to the GTO is 7529.749kg, which is effectively the same as that given by Betts (7529.712 kg).
 
 .. image:: _static/Delta3.svg
     :width: 100%

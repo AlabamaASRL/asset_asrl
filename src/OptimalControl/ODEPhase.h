@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Blocked_ODE_Wrapper.h"
-#include "Integrators/RKIntegrator.h"
+//#include "Integrators/RKIntegrator.h"
+#include "Integrators/Integrator.h"
+
 #include "LGLDefects.h"
 #include "ODEPhaseBase.h"
 #include "ShootingDefects.h"
@@ -25,7 +27,7 @@ struct ODEPhase : ODEPhaseBase {
   using StateObjective = StateFunction<ScalarFunctionalX>;
 
   DODE ode;
-  RKIntegrator<DODE> integrator;
+  Integrator<DODE> integrator;
   bool EnableHessianSparsity = false;
 
   template<class ODET,int CS>
@@ -35,7 +37,7 @@ struct ODEPhase : ODEPhaseBase {
   ODEPhase(const DODE& ode, TranscriptionModes Tmode)
       : ODEPhaseBase(ode.XVars(), ode.UVars(), ode.PVars()) {
     this->ode = ode;
-    this->integrator = RKIntegrator<DODE>(ode, .01);
+    this->integrator = Integrator<DODE>(ode, .01);
     this->setTranscriptionMode(Tmode);
   }
   ODEPhase(const DODE& ode, TranscriptionModes Tmode,
@@ -206,7 +208,7 @@ struct ODEPhase : ODEPhaseBase {
   }
 
   virtual ASSET::ConstraintInterface make_shooter() {
-      auto Integ = RKIntegrator<DODE>{ this->ode, this->integrator.DefStepSize };
+      auto Integ = Integrator<DODE>{ this->ode, this->integrator.DefStepSize };
       Integ.Adaptive = this->integrator.Adaptive;
       Integ.FastAdaptiveSTM = this->integrator.FastAdaptiveSTM;
       Integ.AbsTols = this->integrator.AbsTols;
@@ -221,16 +223,21 @@ struct ODEPhase : ODEPhaseBase {
   }
 
 
+  template<class PyClass>
+  static void BuildImpl(PyClass& phase) {
+      phase.def(py::init<DODE, TranscriptionModes>());
+      phase.def(py::init<DODE, TranscriptionModes,
+          const std::vector<Eigen::VectorXd>&, int>());
+      phase.def(py::init<DODE, std::string>());
+      phase.def(py::init<DODE, std::string,
+          const std::vector<Eigen::VectorXd>&, int>());
+  }
+
   static void Build(py::module& m) {
     auto phase = py::class_<ODEPhase<DODE>, std::shared_ptr<ODEPhase<DODE>>,
                             ODEPhaseBase>(m, "phase");
-    phase.def(py::init<DODE, TranscriptionModes>());
-    phase.def(py::init<DODE, TranscriptionModes,
-                       const std::vector<Eigen::VectorXd>&, int>());
-    phase.def(py::init<DODE, std::string>());
-    phase.def(py::init<DODE, std::string,
-        const std::vector<Eigen::VectorXd>&, int>());
-
+   
+    BuildImpl(phase);
     phase.def_readwrite("integrator", &ODEPhase<DODE>::integrator);
     phase.def_readwrite("EnableHessianSparsity",  &ODEPhase<DODE>::EnableHessianSparsity);
   }

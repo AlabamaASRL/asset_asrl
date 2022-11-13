@@ -6,6 +6,8 @@ import asset_asrl.Astro
 import asset_asrl.Solvers
 import inspect
 
+SoftwareInfo = _asset.SoftwareInfo
+
 if __name__ == "__main__":
     _asset.SoftwareInfo()
     mlist = inspect.getmembers(_asset)

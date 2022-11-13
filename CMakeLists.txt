@@ -88,6 +88,7 @@ if(NOT WIN32)
 endif()
 
 
+
 if(LINK_TIME_OPT)
   if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     if(WIN32)
@@ -295,6 +296,7 @@ add_subdirectory(src)
 # add_subdirectory(impl)
 
 # Documentation
+# READ: pip install sphinx,breathe,furo before trying to build docs
 add_subdirectory(doc)
 
 # Formatting

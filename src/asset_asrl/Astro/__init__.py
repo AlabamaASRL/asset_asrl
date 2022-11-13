@@ -19,7 +19,7 @@ propagate_classic = _asset.Astro.propagate_classic
 propagate_modified = _asset.Astro.propagate_modified
 
 
-
+from .AstroFrames import CR3BPFrame
 
 if __name__ == "__main__":
     mlist = inspect.getmembers(_asset.Astro)

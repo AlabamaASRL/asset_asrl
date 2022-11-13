@@ -1,5 +1,5 @@
 import numpy as np
-import asset as ast
+import asset_asrl as ast
 import matplotlib.pyplot as plt
 
 vf        = ast.VectorFunctions
@@ -8,12 +8,7 @@ Args      = vf.Arguments
 Tmodes    = oc.TranscriptionModes
 PhaseRegs = oc.PhaseRegionFlags
 Cmodes    = oc.ControlModes
-ast.PyMain()
 
-'''
-Space Shuttle Reentry
-https://openmdao.github.io/dymos/examples/reentry/reentry.html
-'''
 
 ################### Non Dimensionalize ##################################
 g0 = 32.2 
@@ -53,7 +48,7 @@ c3 = -.10117e-5
 Qlimit = 70.0
 
 ##############################################################################
-class ShuttleReentry(oc.ode_x_u.ode):
+class ShuttleReentry(oc.ODEBase):
     def __init__(self):
         ############################################################
         args  = oc.ODEArguments(5,2)
@@ -112,6 +107,8 @@ def QFunc():
     
     return qa*qr
  
+    
+ 
 #############################################################################
 
 def Plot(Traj1,Traj2):
@@ -161,9 +158,8 @@ def Plot(Traj1,Traj2):
     plt.show()
     
 
-
-
-if __name__ == "__main__":
+def main():
+    
     ##########################################################################
     tf  = 2000/Tstar
 
@@ -199,33 +195,20 @@ if __name__ == "__main__":
 
     ode = ShuttleReentry()
     
-    
-    
-    phase = ode.phase("LGL3",TrajIG,80)
-    
+    phase = ode.phase("LGL3",TrajIG,64)
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
     phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
     phase.addLUVarBound("Path",6,np.deg2rad(-90.0),np.deg2rad(90.0),1.0)
     phase.addLUVarBound("Path",7,np.deg2rad(-90.0),np.deg2rad(1.0) ,1.0)
     phase.addUpperDeltaTimeBound(tmax,1.0)
     phase.addBoundaryValue("Back" ,[0,2,3],[htf,vtf,gammatf])
-    phase.addDeltaVarObjective(1,-10.0)
+    phase.addDeltaVarObjective(1,-1.0)
     
-    phase.optimizer.set_OptLSMode("L1")
     phase.optimizer.set_OptLSMode("AUGLANG")
     phase.optimizer.MaxLSIters = 2
-    phase.optimizer.MaxAccIters = 100
-    phase.optimizer.PrintLevel = 1
-    phase.optimizer.incrH = 8
-    phase.optimizer.decrH = .3333
-
-    phase.optimizer.BoundFraction = .993
-
-    #phase.optimizer.KKTtol = 1.0e-9
-    phase.Threads = 10
+    phase.optimizer.PrintLevel = 0
     phase.optimize()
    
-    
     phase.refineTrajManual(256)
     phase.optimize()
 
@@ -234,26 +217,14 @@ if __name__ == "__main__":
     phase.addUpperFuncBound("Path",QFunc(),[0,2,6],Qlimit,1/Qlimit)
     phase.optimize()
     
-    integ = ode.integrator(.01,oc.LGLInterpTable(ode.vf(),5,2,Tmodes.LGL3,Traj1,1000),[6,7])
-    integ.Adaptive=True
-    
-    
     Traj2 = phase.returnTraj()
     
-  
-    print(Traj1[-1][5]*Tstar,Traj1[-1][1]*180/np.pi)
-    print(Traj2[-1][5]*Tstar,Traj2[-1][1]*180/np.pi)
-   
-
     Plot(Traj1,Traj2)
-
-
-    
     
 
-
- 
-
-
+if __name__ == "__main__":
+    
+    main()
+    
 
 

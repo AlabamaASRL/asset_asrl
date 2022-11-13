@@ -61,20 +61,24 @@ enum IntegralModes {
 
 static PhaseRegionFlags strto_PhaseRegionFlag(const std::string& str) {
 
-    if (str.compare("Front") == 0 || str.compare("First")==0) 
+    if (str.compare("Front") == 0 || str.compare("First") == 0)
         return PhaseRegionFlags::Front;
     else if (str.compare("Back") == 0 || str.compare("Last") == 0)
         return PhaseRegionFlags::Back;
-    else if (str.compare("Path") == 0)          
+    else if (str.compare("Path") == 0)
         return PhaseRegionFlags::Path;
-    else if (str.compare("ODEParams") == 0)     
+    else if (str.compare("ODEParams") == 0)
         return PhaseRegionFlags::ODEParams;
-    else if (str.compare("StaticParams") == 0)  
+    else if (str.compare("StaticParams") == 0)
         return PhaseRegionFlags::StaticParams;
     else if (str.compare("FrontandBack") == 0 || str.compare("FirstandLast") == 0)
         return PhaseRegionFlags::FrontandBack;
     else if (str.compare("BackandFront") == 0 || str.compare("LastandFirst") == 0)
         return PhaseRegionFlags::BackandFront;
+    else if (str == "InnerPath")
+        return PhaseRegionFlags::InnerPath;
+    else if (str == "PairWisePath")
+        return PhaseRegionFlags::PairWisePath;
     else {
         auto msg = fmt::format("Unrecognized PhaseRegionFlag: {0}\n", str);
         throw std::invalid_argument(msg);
