@@ -2,8 +2,9 @@ import asset as _asset
 import inspect
 
 class ODEBase:
+ 
     def __init__(self,odefunc,Xvars,Uvars = None,Pvars = None):
-        
+
         mlist = inspect.getmembers(_asset.OptimalControl)
         
         

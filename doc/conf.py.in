@@ -14,6 +14,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath("@PROJECT_SOURCE_DIR@/python"))
+sys.path.insert(0, os.path.abspath("@PROJECT_SOURCE_DIR@/src/"))
 
 
 # -- Project information -----------------------------------------------------
@@ -24,7 +25,7 @@ author = "UA ASRL"
 
 # The full version, including alpha/beta/rc tags
 release = "@PROJECT_VERSION@"
-
+#autoclass_content = 'both'
 
 # -- General configuration ---------------------------------------------------
 
@@ -40,6 +41,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
     "sphinx.ext.autosectionlabel",
+    "sphinx.ext.doctest",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
