@@ -56,11 +56,11 @@ control problem.
 	print( X.adjointhessian(xvals,lvals) ) #prints zero matrix of size 6
 
 
-As you can see, Arguments itself does not do any thing very interesting, but what it does do is
+As you can see, :code:`Arguments` itself does not do any thing very interesting, but what it does do is
 serve as a starting point for defining functions of elements and sub-vectors. For example, we may
 make a new object referencing one of its elements by using the bracket operator. This will return an object of
 another fundamental type, :code:`Element`, which is itself a function that takes all input arguments and returns the specified 
-element as a scalar output. Attempting to address an element out of bounds of the Arguments will immediately throw an
+element as a scalar output. Attempting to address an element out of bounds of the :code:`Arguments` will immediately throw an
 error at the offending operation.
 
 .. code-block:: python
@@ -83,7 +83,7 @@ distinct scalar elements that will be combined to construct a more complicated e
 In this case, we can bypass the many lines necessary to index them individually, by using
 the :code:`.tolist()` method of Arguments. This method will return all the individual elements concatenated
 in order inside of a single python list, which we can then unpack into individual named elements in a single line.
-You may use whatever method you wish, but we personally prefer the :code:`.tolist` method in this case.
+You may use whatever method you wish, but we personally prefer the :code:`.tolist()` method in this case.
 
 .. code-block:: python
 	
@@ -268,8 +268,8 @@ Scalar Math Operations
 
 Next we will move on to describe the standard mathematical functions that can be applied to scalar
 valued functions. These encompass most of the standard functions that can be found in python or C math libraries,
-such as sin, cos, tan etc. All of these functions are stored inside the VectorFunctions module(which we have imported as vf),
-and can be called as shown below. A complete list of functions is given in the table below (ADD IN THE TABLE).
+such as sin, cos, tan etc. All of these functions are stored inside the VectorFunctions module (which we have imported as :code:`vf`),
+and can be called as shown below. A complete list of functions is given in the table below.
 
 .. code-block:: python
 	
@@ -467,7 +467,7 @@ of other functions, and have not addressed how the outputs of functions may be c
 into a larger single function. This can be accomplished using the VERY IMPORTANT :code:`vf.stack()` method.
 In general stack takes a list of asset function types and produces another function whose output is the concatenation 
 of all the outputs. There are two signatures for stack, The first one (:code:`vf.stack([f1,f2,...])`) takes a python list
-containing only explicit asset function types (ie:Element,ScalarFunction,VectorFunction,Segment etc..).
+containing only explicit asset function types (ie: :code:`Element`, :code:`ScalarFunction` , :code:`VectorFunction`, :code:`Segment` etc..).
 This version does not allow one to mix in floats or numpy vectors. The second signature (:code:`vf.stack(f1,f2,...)`) does the 
 same thing as the first but does not enclose the objects to be stacked inside of list. Additionally,
 for this second signature, you may mix in arbitrary floats and numpy vectors that will be included in the output.
@@ -700,7 +700,7 @@ to be transformed. We then instantiate our previously defined function that
 computes basis vectors and then "call" it with the position and velocity arguments
 defined inside our new function. Calling the already instantiated function, can be accomplished
 using the providing a correctly sized function to the :code:`()` call operator the same way we do for
-real number arguments. In this case, providing the contiguous segment of size 6 RV, is the most efficient
+real number arguments. In this case, providing the contiguous segment of size 6 :code:`RV`, is the most efficient
 way to the define the expression. However, if this were not the case, we could also the other
 call signatures shown. We can provide two separate functions, in this case :code:`R` and :code:`V`
 either as individual arguments or grouped together in a python list. These will be implicitly
@@ -800,7 +800,12 @@ sections.
 	X = Args(1000) # Legal but Bad
 
 
-	
+Tabular Data and Interpolation
+##############################
+
+
+Binding Raw Python Functions
+############################
 
 
 	

@@ -41,10 +41,6 @@ set(BUILD_ASSET_ALL TRUE)         ### Build Full ASSET PYTHON Lib
 set(BUILD_ASSET_PROFILE FALSE)    ### Build Only minimal set for profiling
 set(BUILD_ASSET_WHEEL FALSE)      ### Copy binaries and build wheel for distribution
 set(ASSET_STATIC_ANALYSIS TRUE)  
-
-
-#set(Python_ROOT_DIR "C:\\ProgramData\\Anaconda3\\envs\\pyv37")
-#set(PYVERSION_EXACT, 3.7 EXACT)
 set(PYVERSION_EXACT, )
 
 #set(MKL_USE_TBB TRUE) #trash
@@ -65,14 +61,11 @@ list(APPEND RELEASE_FLAGS "-O2")
 list(APPEND RELEASE_FLAGS "-march=native")
 
 if(ASSET_STATIC_ANALYSIS)
-
     list(APPEND RELEASE_FLAGS "-Wunused-variable")
     list(APPEND RELEASE_FLAGS "-Wunused-value")
     list(APPEND RELEASE_FLAGS "-Wunused-function")
     list(APPEND RELEASE_FLAGS "-Wdivision-by-zero")
     list(APPEND RELEASE_FLAGS "-Warray-bounds")
-
-
 endif()
 
 #list(APPEND RELEASE_FLAGS "-Wall")
@@ -111,7 +104,6 @@ endif()
 
 
 
-#list(APPEND RELEASE_FLAGS "-ftime-trace")
 
 
 set(MAX_INLINE_DEPTH 225)

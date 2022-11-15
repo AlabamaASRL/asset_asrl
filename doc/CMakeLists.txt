@@ -30,7 +30,6 @@ find_package(Sphinx)
 
 
 
-
 if(NOT DEFINED SPHINX_THEME)
     set(SPHINX_THEME default)
 endif()
@@ -54,14 +53,6 @@ configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in"
     "${BINARY_BUILD_DIR}/conf.py"
     @ONLY)
-
-
-
-
-
-
-
-
 
 
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/tutorials/_static/"

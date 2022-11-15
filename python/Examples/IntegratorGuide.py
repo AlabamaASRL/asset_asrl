@@ -135,7 +135,7 @@ r  = 1.0
 v  = 1.1
 t0 = 0.0
 tf = 10.0
-N  = 1000
+N  = 100
 
 X0t0 = np.zeros((7))
 X0t0[0]=r
@@ -148,6 +148,29 @@ Xftf = TBInteg.integrate(X0t0,tf)
 
 TrajExact  = TBInteg.integrate_dense(X0t0,tf)
 TrajInterpN = TBInteg.integrate_dense(X0t0,tf,N)
+
+
+fig,axs = plt.subplots(1,2)
+
+TT = np.array(TrajExact).T
+axs[0].plot(TT[0],TT[1],label='TrajExact',marker='o')
+
+TT = np.array(TrajInterpN).T
+axs[1].plot(TT[0],TT[1],label='TrajInterpN',marker='o')
+
+for ax in axs:
+
+    ax.scatter(X0t0[0],X0t0[1],color='g',zorder=10,label='X0t0')
+    ax.scatter(Xftf[0],Xftf[1],color='r',zorder=10,label='Xftf')
+    ax.axis("Equal")
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.grid(True)
+axs[0].legend()
+axs[1].legend()
+
+
+plt.show()
 
 '''
 
@@ -230,18 +253,31 @@ ApoApse  = AllApseEventLocs[0]
 PeriApse = AllApseEventLocs[1]
 
 
+Traj, EventLocs  = TBInteg.integrate_dense(X0t0,tf,Events)
+
+
+fig,axs = plt.subplots(1,2)
 
 TT = np.array(Traj).T
-plt.plot(TT[0],TT[1])
+EventVals = [ApseFunc()(T)[0] for T in Traj]
+axs[1].plot(TT[6],EventVals,marker='o',label='Traj')
+axs[1].grid(True)
+axs[1].set_ylabel(r"$\vec{R}\cdot\vec{V}$")
+axs[1].set_xlabel(r"$t$")
 
-plt.scatter(ApoApse[0],ApoApse[1],color='r',zorder=10,label='Apoapse')
-plt.scatter(PeriApse[0],PeriApse[1],color='b',zorder=10,label='Periapse')
-plt.axis("Equal")
-plt.xlabel("X")
-plt.ylabel("Y")
-plt.legend()
+axs[1].scatter(ApoApse[6],0,color='r',zorder=10,label='Apoapse',marker='*',s=100)
+axs[1].scatter(PeriApse[6],0,color='b',zorder=10,label='Periapse',marker='*',s=100)
 
-plt.grid(True)
+
+axs[0].plot(TT[0],TT[1],marker='o',label='Traj')
+
+axs[0].scatter(ApoApse[0],ApoApse[1],color='r',zorder=10,label='Apoapse',marker='*',s=100)
+axs[0].scatter(PeriApse[0],PeriApse[1],color='b',zorder=10,label='Periapse',marker='*',s=100)
+axs[0].axis("Equal")
+axs[0].set_xlabel("X")
+axs[0].set_ylabel("Y")
+axs[0].legend()
+axs[0].grid(True)
 plt.show()
 
 ##############  Derivatives  ##############
@@ -401,10 +437,10 @@ TrajULaw   = integULaw.integrate_dense(X0t0U0,tf)
 
 ####################
 TT = np.array(TrajNoULaw).T
-plt.plot(TT[0],TT[1],label='Constant 0 Throttle')
+plt.plot(TT[0],TT[1],label='TrajNoULaw',marker='o')
 
 TT = np.array(TrajULaw).T
-plt.plot(TT[0],TT[1],label='80% Prograde Throttle')
+plt.plot(TT[0],TT[1],label='TrajULaw',marker='o')
 
 plt.xlabel("X")
 plt.ylabel("Y")

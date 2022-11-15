@@ -58,7 +58,7 @@ def GetManifold(OrbitIn,h,T,Stable=True):
 
     integ.vf()
     
-    Orbit = integ.integrate_dense(OrbitIn[0],Period,400)
+    Orbit = integ.integrate_dense(OrbitIn[0],Period,1200)
     
     times = [O[6]+Period for O in Orbit]
     Results = integ.integrate_stm_parallel(Orbit,times,16)
@@ -184,8 +184,7 @@ def Func(Traj):
 import gc   
 
 if __name__ == "__main__":
-    print(gc.get_stats())
-
+    
     ode = CR3BP(c.MuEarth,c.MuMoon,c.LD)
     
     IGL1 = ode.GenL1Lissajous(.03,0,180,0,1,100)
@@ -205,12 +204,7 @@ if __name__ == "__main__":
     tff=time.perf_counter()
     
     print(tff-t00)
-    print(gc.get_stats())
-
-    print(gc.collect())
-    print(gc.get_stats())
-    print(func.compute([CL1[20][6]]))
-
+    
     
     plot = CRPlot(ode,'Earth','Moon','green','grey')
     
