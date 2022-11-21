@@ -122,6 +122,7 @@ class Container {
   }
 
   std::shared_ptr<const Concept> get_container() const { return self_; }
+  
   void reset_container(std::shared_ptr<const Concept> s) { this->self_ = s; }
 
  private:

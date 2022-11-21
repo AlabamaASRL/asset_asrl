@@ -626,6 +626,8 @@ void ASSET::NonLinearProgram::evalAUG(
   fill.get();
 }
 
+
+
 void ASSET::NonLinearProgram::NLPTest(const Eigen::VectorXd& x, int n,
                                       std::shared_ptr<NonLinearProgram> nlp1,
                                       std::shared_ptr<NonLinearProgram> nlp2) {
@@ -681,7 +683,7 @@ void ASSET::NonLinearProgram::NLPTest(const Eigen::VectorXd& x, int n,
   Utils::Timer t4;
 
   cout << nlp1->KKTLocations.minCoeff() << endl;
-  nlp2->KKTClashes.setConstant(-1);
+  //nlp2->KKTClashes.setConstant(-1);
 
   for (int i = 0; i < n; i++) {
     std::fill_n(KKTmat1.valuePtr(), KKTmat1.nonZeros(), 0.0);
@@ -695,7 +697,7 @@ void ASSET::NonLinearProgram::NLPTest(const Eigen::VectorXd& x, int n,
     nlp2->evalKKT(1.0, X, LE, LI, v2, PGX2, AGX2, FXE2, FXI2, KKTmat2);
     t2.stop();
 
-    if (i == 0) {
+    if (i%10 == 0) {
       double maxval = 0;
       double maxrow = 0;
       double maxcol = 0;
@@ -722,14 +724,14 @@ void ASSET::NonLinearProgram::NLPTest(const Eigen::VectorXd& x, int n,
       int agx_err_idx = 0;
       double AGXIrr = (AGX1 - AGX2).cwiseAbs().maxCoeff(&agx_err_idx);
 
-      if (i == 0) {
+    
         std::cout << "KKTmat Diff:" << maxval << " row: " << maxrow
                   << "  col:" << maxcol << endl;
         std::cout << "FXE Diff:" << FXErr << " row: " << e_err_idx << endl;
         std::cout << "FXI Diff:" << FXIrr << " row: " << i_err_idx << endl;
         std::cout << "PGX Diff:" << GXIrr << " row: " << gx_err_idx << endl;
         std::cout << "AGX Diff:" << AGXIrr << " row: " << agx_err_idx << endl;
-      }
+      
     }
 
     t3.start();

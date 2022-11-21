@@ -115,13 +115,24 @@ namespace ASSET {
             this->cachedata();
         }
         GenericFunction(const GenericFunction<IR, OR>& obj) {
-            this->func.reset_container(obj.func.get_container());
-            this->cachedata();
+            if (obj.func.get_container()) {
+                this->func.reset_container(obj.func.get_container());
+                this->cachedata();
+            }
+            else {
+                throw std::invalid_argument("Attempting to copy null function");
+            }
+            
         }
         template <int IR1, int OR1>
         GenericFunction(const GenericFunction<IR1, OR1>& obj) {
-            obj.func.deep_copy_into(this->func);
-            cachedata();
+            if (obj.func.get_container()) {
+                obj.func.deep_copy_into(this->func);
+                cachedata();
+            }
+            else {
+                throw std::invalid_argument("Attempting to copy null function");
+            }
         }
         void cachedata() {
             this->setIORows(this->func.IRows(), this->func.ORows());

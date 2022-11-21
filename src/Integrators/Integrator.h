@@ -7,7 +7,7 @@
 
 #include "RKSteppers.h"
 #include "pch.h"
-
+#include <sstream>
 
 namespace ASSET {
 
@@ -206,6 +206,8 @@ namespace ASSET {
 
 
 					xtup = x.template segment<DODE::IRC>(0, this->ode.IRows());
+					
+
 					Scalar t0 = xtup[this->ode.TVar()];
 					Scalar tf = x[this->ode.IRows()];
 					Scalar h = tf - t0;
@@ -238,7 +240,7 @@ namespace ASSET {
 							Scalar(RKData::BCoeffs[i]) * Kvals[i];
 						KXmults[i] = adjvars * Scalar(RKData::BCoeffs[i]) * h;
 					}
-
+					
 					fx = xtup; // Next State
 
 					for (int i = Stgsm1 - 1; i >= 0; i--) {
@@ -258,7 +260,7 @@ namespace ASSET {
 					this->ode.compute_jacobian_adjointgradient_adjointhessian(Xs[0],
 						Kvals[0], Kjacs[0], Kgrads[0], Khesses[0], KXmults[0].head(this->ode.ORows()));
 
-
+					
 
 					adjhess.topLeftCorner(this->ode.IRows(), this->ode.IRows()) += Khesses[0];
 
@@ -340,11 +342,12 @@ namespace ASSET {
 
 					jx = Xijac;
 					adjgrad = jx.transpose() * adjvars;
+					
 
 			};
 
 			using KXjacType = Eigen::Matrix<Scalar, DODE::XV, Base::IRC>;
-
+			
 			MemoryManager::allocate_run(this->ode.IRows(), Impl,
 				ArrayOfTempSpecs<ODEDeriv<Scalar>, Stages>(this->ode.ORows(), 1),
 				TempSpec<ODEState<Scalar>>(this->ode.IRows(), 1),
@@ -435,6 +438,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	StepperWrapperType stepper;
 	RKOptions RKMethod = RKOptions::DOPRI54;
 	std::shared_ptr<ctpl::ThreadPool> pool;
+	
 
 	void setPoolThreads(int thrs) {
 		if (this->pool->size() < thrs) {
@@ -838,7 +842,11 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 				if (storederivs) derivs.reserve(numsteps * 2 + 2);
 			}
 			else {
+				
 				states.reserve(numsteps + 2);
+				
+				
+				
 				if (storederivs) derivs.reserve(numsteps + 2);
 
 			}
@@ -949,6 +957,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 				}
 			}
 
+			
 
 			xi = xnext;
 			xdoti = xdotnext;
@@ -1103,7 +1112,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 
 	Jacobian<double> calculate_jacobian(const std::vector<ODEState<double>> & Xs) const {
 
-		Jacobian<double> jx(this->IRows(), this->ORows());
+		Jacobian<double> jx(this->ORows(), this->IRows());
 		jx.setZero();
 		Hessian<double> jxall(this->IRows(), this->IRows());
 		jxall.setIdentity();
@@ -1173,16 +1182,17 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 		return jx;
 	}
 
-	auto calculate_jacobian_hessian(const std::vector<ODEState<double>>& Xs,const ODEState<double>& lf) const {
+	std::tuple < Jacobian<double>, Hessian < double> > calculate_jacobian_hessian(const std::vector<ODEState<double>>& Xs, const ODEState<double>& lf) const {
 		ODEState<double> xf(this->ode.IRows());
 		xf.setZero();
 
 
 
-		Jacobian<double> jx(this->IRows(), this->ORows());
+		Jacobian<double> jx(this->ORows(), this->IRows());
 		jx.setZero();
 
 		Jacobian<double> jxall(this->ORows(), this->IRows());
+		jxall.setZero();
 		jxall.leftCols(this->ORows()).setIdentity();
 
 		Hessian<double> hxall(this->IRows(), this->IRows());
@@ -1219,6 +1229,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 				stepper_input, stepper_output, stepper_jacobian, stepper_grad, stepper_hessian, stepper_adjvars);
 
 
+			
 			jtwist.topRows(this->ORows()) = stepper_jacobian;
 			jxall = jxall * jtwist;
 			if (i == 0) {
@@ -1232,8 +1243,10 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 		}
 
 		jx = jxall.template topRows<Base::ORC>(this->ORows());
+		
+		
 
-		return std::tuple{jx,hxall};
+		return std::tuple < Jacobian<double>, Hessian < double> >{jx,hxall};
 
 
 	}
@@ -1677,20 +1690,22 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 		Scalar tf = x[this->ode.IRows()];
 
 		
-
+		
 
 		auto Xs = this->integrate_dense(x0, tf);
 		fx = Xs.back();
 
-		auto [jxtmp, hxtmp] = this->calculate_jacobian_hessian(Xs, lf);
 
-		jx = jxtmp;
-		adjhess = hxtmp;
+		std::tuple<Jacobian<double>,Hessian<double>> res= this->calculate_jacobian_hessian(Xs, lf);
+
+		
+		jx = std::get<0>(res);
+		adjhess = std::get<1>(res);
 		adjgrad = jx.transpose() * adjvars;
 
 	}
-
-
+	
+	
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	template<class PyDODE>

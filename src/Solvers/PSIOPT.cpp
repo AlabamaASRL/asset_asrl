@@ -516,6 +516,8 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
 
     this->evalNLP(algmode, ObjScale, XSL, PrimObj, PGX, RHS,
                   this->KKTSol.getMatrix());
+    
+    
 
     if (this->InequalCons > 0) {
       this->apply_reset_slacks(this->getSlacks(XSL), this->getIqCons(RHS));
@@ -594,6 +596,11 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
     }
 
     DXSL = -this->KKTSol.solve(RHS);
+
+    if (Diagnostic) {
+       
+    }
+
     if (this->InequalCons > 0)
       this->max_primal_dual_step(XSL, DXSL, this->BoundFraction, alphap,
                                  alphad);
@@ -1246,6 +1253,7 @@ void ASSET::PSIOPT::Build(py::module& m) {
   //////////////////////////////////////////////////////////////////////////////////////////////////
   obj.def_readwrite("QPPrint", &PSIOPT::QPPrint);
   
+  obj.def_readwrite("Diagnostic", &PSIOPT::Diagnostic);
 
 
   obj.def_readwrite("storespmat", &PSIOPT::storespmat, PSIOPT_storespmat);

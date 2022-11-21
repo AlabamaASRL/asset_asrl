@@ -1358,8 +1358,12 @@ struct DenseFunctionBase : Computable<Derived, IR, OR>, DomainHolder<IR> {
         jx.setZero();
         hx.setZero();
 
+
+
         this->derived().compute_jacobian_adjointgradient_adjointhessian(
             x, fx, jx, agx, hx, l);
+
+        
 
         this->derived().KKTFillAll(V, jx, hx, KKTmat, KKTLocations, KKTClashes,
                                    KKTLocks, data);

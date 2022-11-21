@@ -444,6 +444,8 @@ struct NonLinearProgram {
                EigenRef<VectorXd> FXE, EigenRef<VectorXd> FXI,
                Eigen::SparseMatrix<double, Eigen::RowMajor>& KKTmat);
 
+
+
   static void NLPTest(const Eigen::VectorXd& x, int n,
                       std::shared_ptr<NonLinearProgram> nlp1,
                       std::shared_ptr<NonLinearProgram> nlp2);

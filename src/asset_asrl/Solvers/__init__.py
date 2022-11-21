@@ -1,4 +1,4 @@
-from asset.VectorFunctions import *
+from asset.Solvers import *
 import asset as _asset
 import inspect
 

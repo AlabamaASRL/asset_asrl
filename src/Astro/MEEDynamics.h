@@ -53,7 +53,9 @@ namespace ASSET {
 				auto pdot = 2. * (p / w) * ut;
 				//auto fdot = ur * sinL + ((w + 1) * cosL + f) * (ut / w) - (h * sinL - k * cosL) * (g * un / w);
 
-				auto fdot = sum(ur * sinL , ((w + 1) * cosL + f) * (ut / w), -1*(h * sinL - k * cosL) * (g * un / w));
+				//auto fdot = sum(ur * sinL , ((w + 1) * cosL + f) * (ut / w), -1*(h * sinL - k * cosL) * (g * un / w));
+
+				auto fdot = (ur * sinL + ((w + 1) * cosL + f) * (ut / w) - (h * sinL - k * cosL) * (g * un / w));
 
 
 				auto gdot = -1 * ur * cosL + ((w + 1) * sinL + g) * (ut / w) + (h * sinL - k * cosL) * (g * un / w);

@@ -24,6 +24,9 @@ void SoftwareInfo() {
     int vsize = ASSET::DefaultSuperScalar::SizeAtCompileTime;
 
 
+    
+
+
     std::string assetversion = std::string(ASSET_VERSIONSTRING);
     std::string osversion = std::string(ASSET_OS) + " " + std::string(ASSET_OSVERSION);
 
@@ -99,6 +102,9 @@ int main() {
     using std::cin;
     using std::cout;
     using std::endl;
+
+    
+
     ASSET::enable_color_console();
 
     signal(SIGINT, signal_callback);

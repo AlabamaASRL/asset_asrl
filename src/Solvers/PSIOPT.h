@@ -115,6 +115,7 @@ struct PSIOPT {
   bool QPPrint = false;
   bool QPanalyzed = false;
   bool ForceQPanalysis = false;
+  bool Diagnostic = false;
   int QPParSolve = 0;
   
 
