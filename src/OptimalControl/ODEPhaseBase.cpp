@@ -1102,6 +1102,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
           ODEPhaseBase_returnTrajRange);
   obj.def("returnTrajRangeND", &ODEPhaseBase::returnTrajRangeND,
           ODEPhaseBase_returnTrajRangeND);
+  obj.def("returnTrajTable", &ODEPhaseBase::returnTrajTable);
 
   obj.def("returnCostateTraj", &ODEPhaseBase::returnCostateTraj,
           ODEPhaseBase_returnCostateTraj);

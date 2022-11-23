@@ -760,11 +760,20 @@ struct LGLInterpTable {
     xtuN[axis] = t0 + h * t;
 
     if (this->UVars > 0) {
-      Scalar usc0 = 1.0 - t;
-      Scalar usc1 = t;
-      xtuN.tail(this->UVars) =
-          xtublk.col(0).tail(this->UVars).template cast<Scalar>() * usc0 +
-          xtublk.col(1).tail(this->UVars).template cast<Scalar>() * usc1;
+
+        if (this->BlockedControls) {
+            xtuN.tail(this->UVars) =
+                xtublk.col(0).tail(this->UVars).template cast<Scalar>();
+        }
+        else {
+            Scalar usc0 = 1.0 - t;
+            Scalar usc1 = t;
+            xtuN.tail(this->UVars) =
+                xtublk.col(0).tail(this->UVars).template cast<Scalar>() * usc0 +
+                xtublk.col(1).tail(this->UVars).template cast<Scalar>() * usc1;
+
+        }
+      
     }
   }
 

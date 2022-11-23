@@ -674,6 +674,11 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
     this->Table.loadRegularData(this->DefsPerBin.sum(), this->ActiveTraj);
     return this->Table.NDequidist(num, tl, th);
   }
+  LGLInterpTable returnTrajTable()  {
+      this->Table.loadRegularData(this->DefsPerBin.sum(), this->ActiveTraj);
+      return this->Table;
+  }
+
   Eigen::VectorXd returnStaticParams() const {
     return this->ActiveStaticParams;
   }
