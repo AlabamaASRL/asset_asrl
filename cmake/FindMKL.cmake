@@ -94,7 +94,8 @@ else()  # if Windows
 endif() # End OS Conditional
 
 find_path(MKL_INCLUDE_DIR NAMES mkl.h
-                          HINTS $ENV{MKLROOT}/include /opt/intel/mkl/include
+                          HINTS $ENV{MKLROOT}/include /opt/intel/mkl/include   $ENV{ONEAPI_ROOT}/mkl/latest/include
+
                           PATH_SUFFIXES mkl)
 
 message(STATUS ${OMP_LIB})
@@ -178,6 +179,7 @@ else()
         $ENV{MKLROOT}/lib/intel64
         $ENV{INTEL}/mkl/lib/intel64
         $ENV{MKLROOT}/lib/intel64_win
+        $ENV{ONEAPI_ROOT}/mkl/latest/lib/intel64
         $ENV{INTEL}/mkl/lib/intel64_win)
 endif()
 
