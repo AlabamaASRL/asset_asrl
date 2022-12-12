@@ -562,6 +562,9 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
   int addIntegralObjective(ScalarFunctionalX fun, VectorXi vars) {
     return this->addIntegralObjective(StateObjective(fun, Path, vars));
   }
+  int addIntegralObjective(ScalarFunctionalX fun, VectorXi XtUvars, VectorXi OPvars, VectorXi SPvars) {
+      return this->addIntegralObjective(StateObjective(fun, Path, XtUvars,OPvars,SPvars));
+  }
   ///////////////////////////////////////////////////
   int addIntegralParamFunction(StateObjective con, int pv) {
     this->resetTranscription();
@@ -583,7 +586,11 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
                                           accum_parm);
   }
 
-
+  int addIntegralParamFunction(ScalarFunctionalX fun, VectorXi XtUvars, VectorXi OPvars, VectorXi SPvars,
+      int accum_parm) {
+      return this->addIntegralParamFunction(StateObjective(fun, Path, XtUvars,OPvars,SPvars),
+          accum_parm);
+  }
    
 
   /////////////////////////////////////////////////
@@ -686,7 +693,7 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
   std::vector<Eigen::VectorXd> returnEqualConLmults(int index) const {
     if (!this->MultipliersLoaded) {
       throw std::invalid_argument(
-          "No multiplers to return, a solve or optimize call must be made "
+          "No multipliers to return, a solve or optimize call must be made "
           "before returning constraint multipliers ");
     }
     int Gindex = this->userEqualities[index].GlobalIndex;
@@ -695,7 +702,7 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
   std::vector<Eigen::VectorXd> returnInequalConLmults(int index) const {
     if (!this->MultipliersLoaded) {
       throw std::invalid_argument(
-          "No multiplers to return, a solve or optimize call must be made "
+          "No multipliers to return, a solve or optimize call must be made "
           "before returning constraint multipliers ");
     }
     int Gindex = this->userInequalities[index].GlobalIndex;
@@ -768,7 +775,7 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
       if (lbscale <= 0.0) {
           fmt::print(fmt::fg(fmt::color::red),
               "Transcription Error!!!\n"
-              "Lower-bound scale ({0:.3e}) must be a strictly positve number.\n",
+              "Lower-bound scale ({0:.3e}) must be a strictly positive number.\n",
               lbscale);
           throw std::invalid_argument("");
       }
@@ -777,7 +784,7 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
       if (ubscale <= 0.0) {
           fmt::print(fmt::fg(fmt::color::red),
               "Transcription Error!!!\n"
-              "Upper-bound scale ({0:.3e}) must be a strictly positve number.\n",
+              "Upper-bound scale ({0:.3e}) must be a strictly positive number.\n",
               ubscale);
           throw std::invalid_argument("");
       }
@@ -817,7 +824,7 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
       this->indexer = PhaseIndexer();
       this->optimizer->release();
       this->Threads = std::max(1, int(std::thread::hardware_concurrency()));
-      this->optimizer->QPThreads = get_core_count();
+      this->optimizer->QPThreads = std::min(ASSET_DEFAULT_QP_THREADS, get_core_count());;
       this->optimizer->PrintLevel = 0;
       this->nlp = std::shared_ptr<NonLinearProgram>();
       this->resetTranscription();
@@ -865,7 +872,15 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
           this->optimizer->LastIqLmults);
       return this->optimizer->ConvergeFlag;
   }
-
+  PSIOPT::ConvergenceFlags optimize_solve() {
+      if (this->doTranscription) this->transcribe();
+      VectorXd Input = this->makeSolverInput();
+      VectorXd Output = this->optimizer->optimize_solve(Input);
+      this->collectSolverOutput(Output);
+      this->collectSolverMultipliers(this->optimizer->LastEqLmults,
+          this->optimizer->LastIqLmults);
+      return this->optimizer->ConvergeFlag;
+  }
 
   static void Build(py::module& m);
 };

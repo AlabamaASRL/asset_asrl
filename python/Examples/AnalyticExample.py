@@ -37,7 +37,7 @@ tf = 1.0
 u0 = .01
 
 nsegs = 128
-method = Tmodes.LGL5
+method = Tmodes.Trapezoidal
 
 TrajIG = [[x0,t,u0] for t in np.linspace(t0,tf,100)]
 

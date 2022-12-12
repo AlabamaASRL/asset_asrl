@@ -1563,6 +1563,10 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
           py::overload_cast<ScalarFunctionalX, VectorXi>(
               &ODEPhaseBase::addIntegralObjective),
           ODEPhaseBase_addIntegralObjective2);
+  obj.def("addIntegralObjective",
+      py::overload_cast<ScalarFunctionalX, VectorXi,VectorXi,VectorXi>(
+          &ODEPhaseBase::addIntegralObjective),
+      ODEPhaseBase_addIntegralObjective2);
   ///////////////////////////////////////////////////////////////////////////////
   obj.def("addIntegralParamFunction",
           py::overload_cast<StateObjective, int>(
@@ -1572,7 +1576,10 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
           py::overload_cast<ScalarFunctionalX, VectorXi, int>(
               &ODEPhaseBase::addIntegralParamFunction),
           ODEPhaseBase_addIntegralParamFunction2);
-
+  obj.def("addIntegralParamFunction",
+      py::overload_cast<ScalarFunctionalX, VectorXi,VectorXi,VectorXi, int>(
+          &ODEPhaseBase::addIntegralParamFunction),
+      ODEPhaseBase_addIntegralParamFunction2);
   
   obj.def_readwrite("ConstraintOrder", &ODEPhaseBase::ConstraintOrder);
 

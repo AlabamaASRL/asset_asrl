@@ -114,6 +114,8 @@ int main() {
     return 0;
 }
 
+
+
 PYBIND11_MODULE(asset, m) {
 
   ASSET::enable_color_console();//This only does something on windows

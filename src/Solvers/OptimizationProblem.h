@@ -147,7 +147,7 @@ namespace ASSET {
 		void jet_release() {
 			this->optimizer->release();
 			this->Threads = std::max(1, int(std::thread::hardware_concurrency()));
-			this->optimizer->QPThreads = 1;
+			this->optimizer->QPThreads = std::min(ASSET_DEFAULT_QP_THREADS, get_core_count());;
 			this->optimizer->PrintLevel = 0;
 			this->nlp = std::shared_ptr<NonLinearProgram>();
 			this->resetTranscription();
@@ -180,6 +180,14 @@ namespace ASSET {
 		PSIOPT::ConvergenceFlags solve_optimize_solve() {
 			if (this->doTranscription) this->transcribe();
 			this->ActiveVariables = this->optimizer->solve_optimize_solve(this->ActiveVariables);
+			this->ActiveEqLmults = this->optimizer->LastEqLmults;
+			this->ActiveIqLmults = this->optimizer->LastIqLmults;
+			return this->optimizer->ConvergeFlag;
+		}
+
+		PSIOPT::ConvergenceFlags optimize_solve() {
+			if (this->doTranscription) this->transcribe();
+			this->ActiveVariables = this->optimizer->optimize_solve(this->ActiveVariables);
 			this->ActiveEqLmults = this->optimizer->LastEqLmults;
 			this->ActiveIqLmults = this->optimizer->LastIqLmults;
 			return this->optimizer->ConvergeFlag;

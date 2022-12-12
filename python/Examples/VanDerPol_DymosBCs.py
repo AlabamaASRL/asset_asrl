@@ -38,12 +38,12 @@ integ = ode.integrator(.001)
 
 TrajIG = integ.integrate_dense([1,1,0,0],tf,100)
 
-phase = ode.phase(Tmodes.LGL3,TrajIG,49)
-phase.addBoundaryValue(PhaseRegs.Front,range(0,3),[1,1,0])
+phase = ode.phase(Tmodes.LGL5,TrajIG,64)
+phase.addBoundaryValue(PhaseRegs.Front,range(0,3),[0,1,0])
 phase.addLUVarBound(PhaseRegs.Path,3,-0.75,1.0,1.0)
 phase.addIntegralObjective(Args(3).squared_norm(),[0,1,3])
 phase.addBoundaryValue(PhaseRegs.Back,[0,1,2],[0.0,0.0,tf])
-phase.optimizer.PrintLevel=1
+phase.optimizer.PrintLevel=0
 phase.optimizer.set_tols(1.0e-8,1.0e-8,1.0e-8)
 
 

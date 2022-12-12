@@ -109,7 +109,7 @@ ocp.addLinkParamInequalCon(.001/frame.vstar - Args(3).norm(),[range(0,3),range(3
 
 ocp.optimizer.set_OptLSMode("AUGLANG")
 
-ocp.optimizer.MaxLSIters = 4
+ocp.optimizer.MaxLSIters = 2
 ocp.optimizer.MaxAccIters = 100
 ocp.optimizer.deltaH = 1.0e-6
 ocp.optimizer.BoundFraction = .995

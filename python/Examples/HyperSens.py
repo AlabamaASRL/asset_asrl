@@ -33,12 +33,12 @@ class HyperSens(oc.ode_x_u.ode):
 
 xt0 =1.5
 xtf =1.0
-tf  =20.0
+tf  =40.0
 
 TrajIG =[[xt0*(1-t/tf) + xtf*(t/tf),0,t,.01] for t in np.linspace(0,tf,100)]
 ode= HyperSens()
 
-phase = ode.phase(Tmodes.LGL3,TrajIG,128)
+phase = ode.phase(Tmodes.LGL3,TrajIG,1024)
 phase.addBoundaryValue(PhaseRegs.Front,range(0,3),[xt0,0,0])
 phase.addBoundaryValue(PhaseRegs.Back ,[0,2],[xtf,tf])
 phase.addDeltaVarObjective(1,1.0)

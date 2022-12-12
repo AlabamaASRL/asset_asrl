@@ -17,6 +17,7 @@ namespace ASSET {
 			Optimize,
 			SolveOptimize,
 			SolveOptimizeSolve,
+			OptimizeSolve
 		};
 
 		int Threads = ASSET_DEFAULT_FUNC_THREADS;
@@ -33,7 +34,21 @@ namespace ASSET {
 		virtual PSIOPT::ConvergenceFlags optimize() = 0;
 		virtual PSIOPT::ConvergenceFlags solve_optimize() = 0;
 		virtual PSIOPT::ConvergenceFlags solve_optimize_solve() = 0;
+		virtual PSIOPT::ConvergenceFlags optimize_solve() = 0;
 
+		virtual void setThreads(int functhreads, int qpthreads) {
+			if (functhreads < 1 || qpthreads < 1) {
+				throw std::invalid_argument("Number of threads must be positive");
+			}
+			this->Threads = functhreads;
+			this->optimizer->QPThreads = qpthreads;
+		}
+		virtual void setThreads(int functhreads) {
+			if (functhreads < 1 ) {
+				throw std::invalid_argument("Number of threads must be positive");
+			}
+			this->Threads = functhreads;
+		}
 
 		virtual void jet_initialize() = 0;
 		virtual void jet_release() = 0;
@@ -57,10 +72,11 @@ namespace ASSET {
 				break;
 			}
 			case JetJobModes::SolveOptimizeSolve: {
-				flag = this->solve_optimize();
-				if (flag != PSIOPT::ConvergenceFlags::CONVERGED) {
-					flag = this->solve();
-				}
+				flag = this->solve_optimize_solve();
+				break;
+			}
+			case JetJobModes::OptimizeSolve: {
+				flag = this->optimize_solve();
 				break;
 			}
 			case NotSet: {
@@ -87,6 +103,8 @@ namespace ASSET {
 				return JetJobModes::SolveOptimize;
 			else if (str == "solve_optimize_solve" || str == "SolveOptimizeSolve" || str == "Solve_Optimize_Solve")
 				return JetJobModes::SolveOptimizeSolve;
+			else if (str == "optimize_solve" || str == "OptimizeSolve" || str == "Optimize_Solve")
+				return JetJobModes::OptimizeSolve;
 			else if (str == "DoNothing"||str=="do_nothing"||str=="Do_Nothing")
 				return JetJobModes::DoNothing;
 			else {

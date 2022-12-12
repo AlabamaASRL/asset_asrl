@@ -139,8 +139,8 @@ if __name__ == "__main__":
     
     phase.optimizer.PrintLevel = 0
     phase.optimizer.MaxAccIters = 200
-    phase.optimizer.BoundFraction = .993
-    phase.optimizer.deltaH = 1.0e-8
+    phase.optimizer.BoundFraction = .99
+    phase.optimizer.deltaH = 1.0e-6
     phase.optimizer.QPThreads = 8
     phase.Threads=8
     

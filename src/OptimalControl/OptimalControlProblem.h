@@ -920,7 +920,7 @@ struct OptimalControlProblem:OptimizationProblemBase {
   void jet_release() {
       this->optimizer->release();
       this->Threads = std::max(1, int(std::thread::hardware_concurrency()));
-      this->optimizer->QPThreads = get_core_count();
+      this->optimizer->QPThreads = std::min(ASSET_DEFAULT_QP_THREADS, get_core_count());;
       this->optimizer->PrintLevel = 0;
       this->nlp = std::shared_ptr<NonLinearProgram>();
       for (auto& phase : this->phases) phase->jet_release();
@@ -932,6 +932,7 @@ struct OptimalControlProblem:OptimizationProblemBase {
   PSIOPT::ConvergenceFlags optimize();
   PSIOPT::ConvergenceFlags solve_optimize();
   PSIOPT::ConvergenceFlags solve_optimize_solve();
+  PSIOPT::ConvergenceFlags optimize_solve();
 
   void print_stats(bool showfuns);
 

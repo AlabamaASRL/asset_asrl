@@ -73,9 +73,8 @@ b = 3
 L = 4
 n = 200
 
-print(np.sqrt(5))
 
-Ls = np.linspace(2.25,8,100)
+Ls = np.linspace(2.25,8,1000)
 cols = sns.color_palette("plasma",len(Ls))
 
 

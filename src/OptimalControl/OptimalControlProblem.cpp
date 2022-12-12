@@ -1,4 +1,5 @@
 #include "OptimalControlProblem.h"
+#include "OptimalControlProblem.h"
 
 #include "PyDocString/OptimalControl/OptimalControlProblem_doc.h"
 
@@ -232,6 +233,19 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::solve_optimize_sol
     this->collectSolverMultipliers(this->optimizer->LastEqLmults,
         this->optimizer->LastIqLmults);
     return this->optimizer->ConvergeFlag;
+}
+
+ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::optimize_solve()
+{
+    this->checkTranscriptions();
+    if (this->doTranscription) this->transcribe();
+    VectorXd Input = this->makeSolverInput();
+    VectorXd Output = this->optimizer->optimize_solve(Input);
+    this->collectSolverOutput(Output);
+    this->collectSolverMultipliers(this->optimizer->LastEqLmults,
+        this->optimizer->LastIqLmults);
+    return this->optimizer->ConvergeFlag;
+    return PSIOPT::ConvergenceFlags();
 }
 
 void ASSET::OptimalControlProblem::print_stats(bool showfuns) {

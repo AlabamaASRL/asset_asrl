@@ -261,7 +261,7 @@ if __name__ == "__main__":
     ## an intital terminal state that is along the orbit, downrange from KSC in
     ## the correct direction and doesnt pass through earth when LERPed from KSC
     M0   =-.05
-    M0   =-.00
+    #M0   =-.00
     OEF  = [at,et,istart,Ot,Wt,M0]
     yf   = ast.Astro.classic_to_cartesian(OEF,mu)
     
@@ -280,24 +280,24 @@ if __name__ == "__main__":
         
         if(t<tf_phase1):
             m= m0_phase1 + (mf_phase1-m0_phase1)*(t/tf_phase1)
-            X[0:6]=y0
+            #X[0:6]=y0
             X[6]=m
             X[8:11]= vf.normalize([0,1,0])
             IG1.append(X)
         elif(t<tf_phase2):
             m= m0_phase2 + (mf_phase2-m0_phase2)*(( t-tf_phase1) / (tf_phase2 - tf_phase1))
-            X[0:6]=y0
+            #X[0:6]=y0
             X[6]=m
             X[8:11]= vf.normalize([0,1,0])
             IG2.append(X)
         elif(t<tf_phase3):
             m= m0_phase3 + (mf_phase3-m0_phase3)*(( t-tf_phase2) / (tf_phase3 - tf_phase2))
-            X[0:6]=yf
+            #X[0:6]=yf
             X[6]=m
             X[8:11]= vf.normalize([0,1,0])
             IG3.append(X)
         elif(t<tf_phase4):
-            X[0:6]=yf
+            #X[0:6]=yf
             m= m0_phase4 + (mf_phase4-m0_phase4)*(( t-tf_phase3) / (tf_phase4 - tf_phase3))
             X[6]=m
             X[8:11]= vf.normalize([0,1,0])
@@ -340,6 +340,7 @@ if __name__ == "__main__":
     phase3.addLowerNormBound("Path",[0,1,2],Re*.999999)
     phase4.addLowerNormBound("Path",[0,1,2],Re*.999999)
     
+    
     ocp = oc.OptimalControlProblem()
     ocp.addPhase(phase1)
     ocp.addPhase(phase2)
@@ -348,7 +349,14 @@ if __name__ == "__main__":
     
     ocp.addForwardLinkEqualCon(phase1,phase4,[0,1,2,3,4,5,7,8,9,10])
     ocp.optimizer.set_OptLSMode("L1")
+    ocp.optimizer.set_alphaRed(2.0)
+    
     ocp.optimizer.MaxLSIters = 2
+    
+    phase1.setControlMode("BlockConstant")
+    phase2.setControlMode("BlockConstant")
+    phase3.setControlMode("BlockConstant")
+    phase4.setControlMode("BlockConstant")
 
     #ocp.optimizer.KKTtol = 1.0e-9
     ocp.optimizer.PrintLevel=1
@@ -359,7 +367,7 @@ if __name__ == "__main__":
     ocp.optimizer.QPThreads=8
 
     #ocp.optimizer.SoeMode = ast.Solvers.AlgorithmModes.OPTNO
-    ocp.solve_optimize()
+    ocp.optimize_solve()
     
     
     
@@ -368,7 +376,21 @@ if __name__ == "__main__":
     Phase3Traj = phase3.returnTraj()
     Phase4Traj = phase4.returnTraj()
     
+    Traj = Phase1Traj + Phase2Traj +Phase3Traj +Phase4Traj
+    MEEs =[list(ast.Astro.cartesian_to_modified(T[0:6], mu))+[T[7]] for T in Traj]
+    print(mu)
     
+    
+    TT = np.array(MEEs).T
+    plt.plot(TT[6],TT[0])
+    
+    plt.plot(TT[6],TT[1])
+    plt.plot(TT[6],TT[2])
+    plt.plot(TT[6],TT[3])
+    plt.plot(TT[6],TT[4])
+    
+    plt.plot(TT[6],TT[5])
+    plt.show()
     
     print("Final Mass = ",Phase4Traj[-1][6]*Mstar,' kg')
 

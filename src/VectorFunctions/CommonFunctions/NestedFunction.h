@@ -44,6 +44,7 @@ struct NestedFunction_Impl
   static const bool IsVectorizable =
       OuterFunc::IsVectorizable && InnerFunc::IsVectorizable;
 
+
   NestedFunction_Impl() {}
   NestedFunction_Impl(OuterFunc ofunc, InnerFunc ifunc)
       : outer_func(std::move(ofunc)), inner_func(std::move(ifunc)) {

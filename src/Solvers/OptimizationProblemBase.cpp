@@ -4,7 +4,14 @@ void ASSET::OptimizationProblemBase::Build(py::module & m) {
 	auto obj = py::class_<OptimizationProblemBase, std::shared_ptr<OptimizationProblemBase>>(m, "OptimizationProblemBase");
 	obj.def_readwrite("JetJobMode", &OptimizationProblemBase::JetJobMode);
 	obj.def_readwrite("Threads", &OptimizationProblemBase::Threads);
-	obj.def_readwrite("optimizer", &OptimizationProblemBase::optimizer);
+	obj.def_readonly("optimizer", &OptimizationProblemBase::optimizer);
+
+
+	obj.def("setThreads",
+		py::overload_cast<int, int>(&OptimizationProblemBase::setThreads));
+
+	obj.def("setThreads",
+		py::overload_cast<int>(&OptimizationProblemBase::setThreads));
 
 
 	obj.def("setJetJobMode",
@@ -21,6 +28,8 @@ void ASSET::OptimizationProblemBase::Build(py::module & m) {
 		py::call_guard<py::gil_scoped_release>());
 	obj.def("solve_optimize_solve", &OptimizationProblemBase::solve_optimize_solve,
 		py::call_guard<py::gil_scoped_release>());
+	obj.def("optimize_solve", &OptimizationProblemBase::optimize_solve,
+		py::call_guard<py::gil_scoped_release>());
 
 	/// <summary>
 	/// Probably need to move these enums somewhere else
@@ -32,6 +41,7 @@ void ASSET::OptimizationProblemBase::Build(py::module & m) {
 		.value("Solve", JetJobModes::Solve)
 		.value("Optimize", JetJobModes::Optimize)
 		.value("SolveOptimize", JetJobModes::SolveOptimize)
-		.value("SolveOptimizeSolve", JetJobModes::SolveOptimizeSolve);
+		.value("SolveOptimizeSolve", JetJobModes::SolveOptimizeSolve)
+		.value("OptimizeSolve", JetJobModes::OptimizeSolve);
 
 }

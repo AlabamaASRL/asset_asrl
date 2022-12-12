@@ -164,8 +164,7 @@ F1 = KeplerPropagator(mu)
 ode = ast.Astro.Kepler.ode(mu)
 integ = ode.integrator(.001)
 integ.setAbsTol(1.0e-14)
-integ.FastAdaptiveSTM = False
-integ.Adaptive=True
+
 
 
 F2 = ast.Astro.Kepler.KeplerPropagator(mu).vf()
@@ -180,37 +179,26 @@ X2 = [1,0,.1,0,v0,.0,0,tf]
 J1 = F3.jacobian(X)
 J2 = integ.jacobian(X2)
 
-print(J1[0:6,0:6]-J2[0:6,0:6])
-print("s")
-print(J1[0:6,0:6])
 
 
+print(F2.adjointhessian(X,range(1,7))-F3.adjointhessian(X,range(1,7)))
 
-
-
-
-print(F3.compute(X)-F2.compute(X))
-print(F3.compute(X))
-
-print(np.sign(1))
-
-#print(F1.adjointhessian(X,range(1,7))-F3.adjointhessian(X,range(1,7)))
-
-k =1000000
-F1.SpeedTest(X,k)
+k =100000
+#F1.SpeedTest(X,k)
 F2.SpeedTest(X,k)
 F3.SpeedTest(X,k)
 
 
 
-F2.rpt(X,100000)
-F3.rpt(X,100000)
+#F2.rpt(X,1000)
+#F3.rpt(X,1000)
 
 
 #F1.rpt(X,100000)
-#F3.rpt(X,100000)
-#F2.vf().rpt(X,100000)
 
+F2.vf().rpt(X,100000)
+
+F3.rpt(X,100000)
 
 
     

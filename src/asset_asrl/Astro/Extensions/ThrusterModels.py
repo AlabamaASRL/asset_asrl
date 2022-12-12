@@ -20,7 +20,7 @@ class LowThrustAcc():
             Non-dimensional acceleration value.
             Set false if using LTacc.
         LTacc : float
-            Dimensional acceleration value. 
+            Dimensional acceleration value m/s^2. 
             Set false if using NonDim_LTacc
         """
         if(LTacc==False) and (NonDim_LTacc == False):
@@ -77,10 +77,10 @@ class CSIThruster():
             Initial mass
         """
         self.LTacc = F/M
-        self.Mdot  = F/(Isp*9.81)
+        self.Mdot  = F/(Isp*9.8065)
         self.M0 = M
 
-    def ThrustExpr(self,u,astar):
+    def ThrustExpr(self,u,m,astar):
         """
         Acceleration expression for thruster. 
 
@@ -97,7 +97,7 @@ class CSIThruster():
         Acceleration magnitude : float
             Non-dimensional acceleration
         """
-        return u*(self.LTacc/astar)
+        return u*(self.LTacc/astar)/m
     def MdotExpr(self,u,tstar):
         """
         Mass consumption expression 
@@ -115,7 +115,7 @@ class CSIThruster():
         Mass Consumption rate : float
             Non-dimensional mass consumption
         """
-        return u.norm()*(self.Mdot*(tstar/self.M0))
+        return u.norm()*(-self.Mdot*(tstar/self.M0))
 
 class SolarSail():
     """

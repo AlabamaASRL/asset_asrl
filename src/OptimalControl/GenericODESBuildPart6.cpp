@@ -9,6 +9,7 @@ namespace ASSET {
 
 		GODE<6, 0, 0>::BuildGenODEModule("ode_6", m, reg);
 
+		GODE<4, 0, 0>::BuildGenODEModule("ode_4", m, reg);
 
 	}
 

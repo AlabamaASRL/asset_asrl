@@ -11,6 +11,12 @@
 
 namespace ASSET {
 
+	template <class BaseType, int _XV, int _UV, int _PV>
+	struct GenericODE;
+	template<int OR>
+	struct InterpFunction;
+
+
 	template <class DODE, RKOptions RKOp>
 	struct RKStepperF
 		: VectorFunction<RKStepperF<DODE, RKOp>, SZ_SUM<DODE::IRC, 1>::value, DODE::IRC> {
@@ -994,7 +1000,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 		Eigen::VectorXi vars;
 		vars.setLinSpaced(this->ode.IRows(), 0, this->ode.IRows() - 1);
 
-		InterpFunction<DODE::IRC> tabfunc(tab, vars);
+		InterpFunction<-1> tabfunc(tab, vars);
 
 		Vector1<double> x;
 		Vector1<double> fx;

@@ -58,7 +58,7 @@ def GetManifold(OrbitIn,h,T,Stable=True):
 
     integ.vf()
     
-    Orbit = integ.integrate_dense(OrbitIn[0],Period,1200)
+    Orbit = integ.integrate_dense(OrbitIn[0],Period,1000)
     
     times = [O[6]+Period for O in Orbit]
     Results = integ.integrate_stm_parallel(Orbit,times,16)
@@ -74,8 +74,7 @@ def GetManifold(OrbitIn,h,T,Stable=True):
         
         vals,vecs = np.linalg.eig(Jac[0:6,0:6])
         
-        iv = 0
-        if(not Stable):iv = 1
+        
         
         Vec = np.real(vecs[0])
         

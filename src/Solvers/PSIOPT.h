@@ -124,14 +124,23 @@ struct PSIOPT {
   int MaxLSIters = 2;
   int MaxAccIters = 50;
 
-  void set_MaxIters(int maxiters) {
-      MaxIters = maxiters;
+  void set_MaxIters(int MaxIters) {
+      if (MaxIters < 1) {
+          throw std::invalid_argument("MaxIters must be greater than 0.");
+      }
+      this->MaxIters = MaxIters;
   }
-  void set_MaxAccIters(int maxiters) {
-      MaxAccIters = maxiters;
+  void set_MaxAccIters(int MaxAccIters) {
+      if (MaxAccIters < 1) {
+          throw std::invalid_argument("MaxAccIters must be greater than 0.");
+      }
+      this->MaxAccIters = MaxAccIters;
   }
-  void set_MaxLSIters(int maxiters) {
-      MaxAccIters = maxiters;
+  void set_MaxLSIters(int MaxLSIters) {
+      if (MaxLSIters < 0) {
+          throw std::invalid_argument("MaxLSIters must be positive.");
+      }
+      this->MaxLSIters = MaxLSIters;
   }
   void set_AllMaxIters(int m1,int m2) {
       set_MaxIters(m1);
@@ -186,48 +195,87 @@ struct PSIOPT {
 
   /////////////////////////////////////////////////////////////////////////
   double KKTtol = 1.0e-6;
-  double Bartol = 1.0e-6;
   double EContol = 1.0e-6;
   double IContol = 1.0e-6;
-  void set_tols(double kktol, double etol, double itol, double bartol) {
-       KKTtol  = kktol;
-       Bartol  = bartol;
-       EContol = etol;
-       IContol = itol;
+  double Bartol = 1.0e-6;
+
+  void set_KKTtol(double KKTtol) {
+      this->KKTtol = std::abs(KKTtol);
+  }
+  void set_Bartol(double Bartol) {
+      this->Bartol = std::abs(Bartol);
+  }
+  void set_EContol(double EContol) {
+      this->EContol = std::abs(EContol);
+  }
+  void set_IContol(double IContol) {
+      this->IContol = std::abs(IContol);
+  }
+  void set_tols(double KKTtol, double EContol, double IContol, double Bartol) {
+      this->set_KKTtol(KKTtol);
+      this->set_EContol(EContol);
+      this->set_IContol(IContol);
+      this->set_Bartol(Bartol);
   }
 
   double AccKKTtol = 1.0e-2;
-  double AccBartol = 1.0e-3;
   double AccEContol = 1.0e-3;
   double AccIContol = 1.0e-3;
-  void set_Acctols(double kktol, double etol, double itol, double bartol) {
-      AccKKTtol = kktol;
-      AccBartol = bartol;
-      AccEContol = etol;
-      AccIContol = itol;
+  double AccBartol = 1.0e-3;
+
+  void set_AccKKTtol(double AccKKTtol) {
+      this->AccKKTtol = std::abs(AccKKTtol);
+  }
+  void set_AccBartol(double AccBartol) {
+      this->AccBartol = std::abs(AccBartol);
+  }
+  void set_AccEContol(double AccEContol) {
+      this->AccEContol = std::abs(AccEContol);
+  }
+  void set_AccIContol(double AccIContol) {
+      this->AccIContol = std::abs(AccIContol);
+  }
+  void set_Acctols(double AccKKTtol, double AccEContol, double AccIContol, double AccBartol) {
+      this->set_AccKKTtol(AccKKTtol);
+      this->set_AccEContol(AccEContol);
+      this->set_AccIContol(AccIContol);
+      this->set_AccBartol(AccBartol);
   }
 
   double UnAccKKTtol = 10;
-  double UnAccBartol = 2;
   double UnAccEContol = 2;
   double UnAccIContol = 2;
+  double UnAccBartol = 2;
+
   void set_UnAcctols(double kktol, double etol, double itol, double bartol) {
-      UnAccKKTtol = kktol;
-      UnAccBartol = bartol;
-      UnAccEContol = etol;
-      UnAccIContol = itol;
+      this->UnAccKKTtol = kktol;
+      this->UnAccBartol = bartol;
+      this->UnAccEContol = etol;
+      this->UnAccIContol = itol;
   }
 
   double DivKKTtol = 1.0e15;
-  double DivBartol = 1.0e15;
   double DivEContol = 1.0e15;
   double DivIContol = 1.0e15;
+  double DivBartol = 1.0e15;
 
-  void set_Divtols(double kktol, double etol, double itol, double bartol) {
-      DivKKTtol = kktol;
-      DivBartol = bartol;
-      DivEContol = etol;
-      DivIContol = itol;
+  void set_DivKKTtol(double DivKKTtol) {
+      this->DivKKTtol = std::abs(DivKKTtol);
+  }
+  void set_DivBartol(double DivBartol) {
+      this->DivBartol = std::abs(DivBartol);
+  }
+  void set_DivEContol(double DivEContol) {
+      this->DivEContol = std::abs(DivEContol);
+  }
+  void set_DivIContol(double DivIContol) {
+      this->DivIContol = std::abs(DivIContol);
+  }
+  void set_Divtols(double DivKKTtol, double DivEContol, double DivIContol, double DivBartol) {
+      this->set_DivKKTtol(DivKKTtol);
+      this->set_DivEContol(DivEContol);
+      this->set_DivIContol(DivIContol);
+      this->set_DivBartol(DivBartol);
   }
 
   
@@ -239,17 +287,69 @@ struct PSIOPT {
   
 
   double BoundFraction = 0.98;
+  void set_BoundFraction(double BoundFraction) {
+      if (BoundFraction >= 1.0 || BoundFraction <= 0.0) {
+          throw std::invalid_argument("BoundFraction must be between 0 and 1.");
+      }
+      this->BoundFraction = BoundFraction;
+  }
+
   double BoundPush = 1.0e-3;
+  void set_BoundPush(double BoundPush) {
+      if ( BoundPush <= 0.0) {
+          throw std::invalid_argument("BoundPush must be greater than 0.");
+      }
+      this->BoundPush = BoundPush;
+  }
+
   double NegSlackReset = 1.0e-12;
 
   double SOEboundRelax = 1.0e-8;
   double minLSstep = .01;
   double alphaRed = 2.0;
 
+  void set_alphaRed(double ared) {
+      if (ared <= 1.0) {
+          throw std::invalid_argument("alphaRed must be greater than 1.0");
+      }
+      this->alphaRed = ared;
+  }
 
+  /////////////////////////////////////////////////////////////////////////
   double deltaH = 1.0e-5;
   double incrH = 8.00;
   double decrH = 0.333333;
+
+  void set_deltaH(double deltaH) {
+      if (deltaH <= 0.0) {
+          throw std::invalid_argument("deltaH must be greater than 0.");
+      }
+      this->deltaH = deltaH;
+  }
+  void set_incrH(double incrH) {
+      if (incrH<=1.0) {
+          throw std::invalid_argument("incrH must  greater than 1.0.");
+      }
+      this->incrH = incrH;
+  }
+  void set_decrH(double decrH) {
+      if (decrH >= 1.0||decrH<=0) {
+          throw std::invalid_argument("decrH must be between 0 and 1.");
+      }
+      this->decrH = decrH;
+  }
+  void set_HpertParams(double deltaH, double incrH, double decrH) {
+      this->set_deltaH(deltaH);
+      this->set_incrH(incrH);
+      this->set_decrH(decrH);
+  }
+  /////////////////////////////////////////////////////////////////////////
+  ConvergenceFlags ConvergeFlag = ConvergenceFlags::NOTCONVERGED;
+  ConvergenceFlags get_ConvergenceFlag()const {
+      return this->ConvergeFlag;
+  }
+
+
   double initMu = 0.001;
   double MaxMu = 100.0;
   double MinMu = 1.0e-12;
@@ -259,7 +359,6 @@ struct PSIOPT {
   PDStepStrategies PDStepStrategy = PrimSlackEq_Iq;
   bool storespmat = false;
   Eigen::SparseMatrix<double, Eigen::RowMajor> spmat;
-  ConvergenceFlags ConvergeFlag = ConvergenceFlags::NOTCONVERGED;
   double LastObjVal = 0.0;
   bool FastFactorAlg = true;
 
@@ -601,6 +700,8 @@ struct PSIOPT {
   Eigen::VectorXd solve_optimize(const Eigen::VectorXd& x);
 
   Eigen::VectorXd solve_optimize_solve(const Eigen::VectorXd& x);
+
+  Eigen::VectorXd optimize_solve(const Eigen::VectorXd& x);
 
 
   Eigen::VectorXd solve(const Eigen::VectorXd& x);

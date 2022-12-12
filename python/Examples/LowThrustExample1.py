@@ -1,5 +1,5 @@
 import numpy as np
-import asset as ast
+import asset_asrl as ast
 import matplotlib.pyplot as plt
 
 vf = ast.VectorFunctions
@@ -28,7 +28,7 @@ def ThrottlePlot2(Traj, name, col, ax=plt):
     ax.plot(TT[6], (TT[7] ** 2 + TT[8] ** 2 + TT[9] ** 2) ** .5, label=name + " |mag|", color=col)
 
 
-class LTModel(oc.ode_x_u.ode):
+class LTModel(oc.ODEBase):
     def __init__(self, mu, ltacc):
         Xvars = 6
         Uvars = 3
@@ -229,7 +229,7 @@ plt.xlabel("t (ND)")
 plt.grid(True)
 plt.show()
 ###########################################
-'''
+
 IdTraj = []
 
 for i in range(0, len(MassOptimal)):
@@ -269,4 +269,3 @@ plt.plot(TT[12], -TT[10] / N, color='blue', label='-Py(t)')
 plt.xlabel("t (ND)")
 plt.grid(True)
 plt.show()
-'''

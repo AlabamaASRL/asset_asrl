@@ -5,8 +5,8 @@ from   asset_asrl.Astro.Extensions.TwoBodyFrame import TwoBodyFrame
 from   asset_asrl.Astro.Extensions.NBodyFrame   import NBodyFrame
 from   asset_asrl.Astro.Extensions.CR3BPFrame   import CR3BPFrame
 from   asset_asrl.Astro.Extensions.EPPRFrame    import EPPRFrame
+from   asset_asrl.Astro.Extensions.MEETwoBodyFrame   import MEETwoBodyFrame
 from   asset_asrl.Astro.Extensions.ThrusterModels   import SolarSail,LowThrustAcc,CSIThruster
-
 from   asset_asrl.OptimalControl import ODEBase
 
 
@@ -99,6 +99,22 @@ class TwoBody_LT(ODEBase,TwoBodyFrame):
                                     otherEOMs=[])
         ODEBase.__init__(self,odeeq,6,3) 
         ###################################
+
+class MEETwoBody_LT(ODEBase,MEETwoBodyFrame):
+    def __init__(self,P1mu,lstar,thruster=LowThrustAcc()):
+        self.thruster=thruster
+        MEETwoBodyFrame.__init__(self,P1mu,lstar,HasControl=True,HasMass=False)
+        ###################################
+        args = oc.ODEArguments(6,3)
+        X = args.head(6)
+        u = args.tail3()
+        otherAccs = [self.thruster.ThrustExpr(u,self.astar)]
+
+        odeeq = self.MEETwoBodyFrame(X,
+                                    otherAccs=otherAccs,
+                                    otherEOMs=[])
+        ODEBase.__init__(self,odeeq,6,3) 
+        ###################################
         
 class NBody_LT(ODEBase,TwoBodyFrame):
     def __init__(self,Frame,thruster=LowThrustAcc(), ActiveAltBodies = 'All', Enable_J2=False):
@@ -160,6 +176,27 @@ class EPPR_LT(ODEBase,CR3BPFrame):
                                      ActiveAltBodies = ActiveAltBodies, 
                                      Enable_J2=Enable_J2)
         ODEBase.__init__(self,odeeq,6,3)   
+        ###################################
+
+###############################################################################
+###############################################################################
+class MEETwoBody_CSI(ODEBase,MEETwoBodyFrame):
+    def __init__(self,P1mu,lstar,CSIthrust):
+        self.thruster=CSIthrust
+        MEETwoBodyFrame.__init__(self,P1mu,lstar,HasControl=True,HasMass=True)
+        ###################################
+        args = oc.ODEArguments(7,3)
+        X = args.head(6)
+        m = args[6]
+        
+        u = args.tail3()
+        otherAccs = [self.thruster.ThrustExpr(u,m,self.astar)]
+        otherEOMs = [self.thruster.MdotExpr(u,self.tstar)]
+
+        odeeq = self.MEETwoBodyEOMs(X,
+                                    otherAccs=otherAccs,
+                                    otherEOMs=otherEOMs)
+        ODEBase.__init__(self,odeeq,7,3) 
         ###################################
         
 ###############################################################################        

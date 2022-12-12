@@ -1049,14 +1049,74 @@ Eigen::VectorXd ASSET::PSIOPT::solve_optimize_solve(const Eigen::VectorXd& x)
     }
     XSLans = this->alg_impl(OPT, this->OptBarMode, this->OptLSMode,
         this->ObjScale, this->initMu, XSL);
-
+    if (this->PrintLevel < 2) {
+        print_Finished("Optimization Algorithm ");
+    }
     if (this->ConvergeFlag == ConvergenceFlags::CONVERGED) {
-        if (this->PrintLevel < 2) {
-            print_Finished("Optimization Algorithm ");
-        }
+        
     }
     else {
         Xt = this->getPrimals(XSLans);
+        XSL = this->init_impl(Xt, this->initMu, false);
+
+        if (this->PrintLevel < 2) {
+            print_Beginning("Solve Algorithm ");
+        }
+        XSLans = this->alg_impl(this->SoeMode, this->SoeBarMode, this->SoeLSMode,
+            this->ObjScale, this->initMu, XSL);
+
+        if (this->PrintLevel < 2) {
+            print_Finished("Solve Algorithm ");
+        }
+    }
+    t.stop();
+    double tottime = double(t.count<std::chrono::microseconds>()) / 1000.0;
+    this->LastTotalTime = tottime / 1000.0;
+    this->LastMiscTime = this->LastTotalTime - this->LastPreTime - this->LastKKTTime - this->LastFuncTime;
+
+    if (this->PrintLevel < 2) {
+        fmt::print(" PSIOPT Total Time : "); fmt::print(fmt::fg(fmt::color::cyan), "{0:.3f} ms\n", tottime);
+        print_Finished("PSIOPT ");
+        print_Header();
+    }
+
+    if (this->EqualCons > 0) this->LastEqLmults = this->getEqLmults(XSLans);
+    if (this->InequalCons > 0) this->LastIqLmults = this->getIqLmults(XSLans);
+    return this->getPrimals(XSLans);
+}
+
+Eigen::VectorXd ASSET::PSIOPT::optimize_solve(const Eigen::VectorXd& x)
+{
+    this->zero_timing_stats();
+    if (this->PrintLevel == 0) print_stats();
+    if (this->PrintLevel < 2) {
+        print_Header();
+        print_Beginning("PSIOPT ");
+    }
+    Utils::Timer t;
+    t.start();
+
+    bool docompute = analyze_KKT_Matrix();
+
+    Eigen::VectorXd XSL = this->init_impl(x, this->initMu, docompute);
+    Eigen::VectorXd XSLans(this->KKTdim);
+    
+    if (this->PrintLevel < 2) {
+        print_Beginning("Optimization Algorithm ");
+    }
+
+    XSLans = this->alg_impl(OPT, this->OptBarMode, this->OptLSMode,
+        this->ObjScale, this->initMu, XSL);
+
+    if (this->PrintLevel < 2) {
+        print_Finished("Optimization Algorithm ");
+    }
+
+    if (this->ConvergeFlag == ConvergenceFlags::CONVERGED) {
+        
+    }
+    else {
+        Eigen::VectorXd Xt = this->getPrimals(XSLans);
         XSL = this->init_impl(Xt, this->initMu, false);
 
         if (this->PrintLevel < 2) {
@@ -1136,8 +1196,19 @@ void ASSET::PSIOPT::Build(py::module& m) {
   obj.def("setQPParams", &PSIOPT::setQPParams);
 
   obj.def_readwrite("MaxIters", &PSIOPT::MaxIters, PSIOPT_MaxIters);
+  obj.def_readwrite("MaxAccIters", &PSIOPT::MaxAccIters, PSIOPT_MaxAccIters);
   obj.def_readwrite("MaxLSIters", &PSIOPT::MaxLSIters, PSIOPT_MaxLSIters);
+
+  obj.def("set_MaxIters", &PSIOPT::set_MaxIters);
+  obj.def("set_MaxAccIters", &PSIOPT::set_MaxAccIters);
+  obj.def("set_MaxLSIters", &PSIOPT::set_MaxLSIters);
+
+
+
   obj.def_readwrite("alphaRed", &PSIOPT::alphaRed, PSIOPT_alphaRed);
+  obj.def("set_alphaRed", &PSIOPT::set_alphaRed);
+
+
   obj.def_readwrite("WideConsole", &PSIOPT::WideConsole);
 
 
@@ -1146,23 +1217,30 @@ void ASSET::PSIOPT::Build(py::module& m) {
 
 
   obj.def_readwrite("LastTotalTime", &PSIOPT::LastTotalTime, PSIOPT_LastUserTime);
-  obj.def_readwrite("LastPreTime", &PSIOPT::LastPreTime, PSIOPT_LastUserTime);
-  obj.def_readwrite("LastFuncTime", &PSIOPT::LastFuncTime, PSIOPT_LastUserTime);
-  obj.def_readwrite("LastKKTTime", &PSIOPT::LastKKTTime, PSIOPT_LastQPTime);
-  obj.def_readwrite("LastMiscTime", &PSIOPT::LastMiscTime, PSIOPT_LastQPTime);
-  obj.def_readwrite("LastIterNum", &PSIOPT::LastIterNum, PSIOPT_LastIterNum);
-  obj.def_readwrite("LastObjVal", &PSIOPT::LastObjVal);
+  obj.def_readwrite("LastPreTime",   &PSIOPT::LastPreTime, PSIOPT_LastUserTime);
+  obj.def_readwrite("LastFuncTime",  &PSIOPT::LastFuncTime, PSIOPT_LastUserTime);
+  obj.def_readwrite("LastKKTTime",   &PSIOPT::LastKKTTime, PSIOPT_LastQPTime);
+  obj.def_readwrite("LastMiscTime",  &PSIOPT::LastMiscTime, PSIOPT_LastQPTime);
+  obj.def_readwrite("LastIterNum",   &PSIOPT::LastIterNum, PSIOPT_LastIterNum);
+  obj.def_readwrite("LastObjVal",    &PSIOPT::LastObjVal);
 
 
-  obj.def_readwrite("MaxAccIters", &PSIOPT::MaxAccIters, PSIOPT_MaxAccIters);
   obj.def_readwrite("ObjScale", &PSIOPT::ObjScale, PSIOPT_ObjScale);
   obj.def_readwrite("PrintLevel", &PSIOPT::PrintLevel, PSIOPT_PrintLevel);
   obj.def_readwrite("ConvergeFlag", &PSIOPT::ConvergeFlag);
+
+  obj.def("get_ConvergenceFlag", &PSIOPT::get_ConvergenceFlag);
+
 
   obj.def_readwrite("KKTtol",  &PSIOPT::KKTtol, PSIOPT_KKTtol);
   obj.def_readwrite("Bartol",  &PSIOPT::Bartol, PSIOPT_Bartol);
   obj.def_readwrite("EContol", &PSIOPT::EContol, PSIOPT_EContol);
   obj.def_readwrite("IContol", &PSIOPT::IContol, PSIOPT_IContol);
+
+  obj.def("set_KKTtol", &PSIOPT::set_KKTtol);
+  obj.def("set_Bartol", &PSIOPT::set_Bartol);
+  obj.def("set_EContol", &PSIOPT::set_EContol);
+  obj.def("set_IContol", &PSIOPT::set_IContol);
 
   obj.def("set_tols", &PSIOPT::set_tols,
       py::arg("KKTtol")  = 1.0e-6,
@@ -1177,11 +1255,17 @@ void ASSET::PSIOPT::Build(py::module& m) {
   obj.def_readwrite("AccEContol", &PSIOPT::AccEContol, PSIOPT_AccEContol);
   obj.def_readwrite("AccIContol", &PSIOPT::AccIContol, PSIOPT_AccIContol);
 
+  obj.def("set_AccKKTtol", &PSIOPT::set_AccKKTtol);
+  obj.def("set_AccBartol", &PSIOPT::set_AccBartol);
+  obj.def("set_AccEContol", &PSIOPT::set_AccEContol);
+  obj.def("set_AccIContol", &PSIOPT::set_AccIContol);
+
+
   obj.def("set_Acctols", &PSIOPT::set_Acctols,
-      py::arg("AccKKTtol") = 1.0e-2,
+      py::arg("AccKKTtol") =  1.0e-2,
       py::arg("AccEContol") = 1.0e-3,
       py::arg("AccIContol") = 1.0e-3,
-      py::arg("AccBartol") = 1.0e-3);
+      py::arg("AccBartol")  = 1.0e-3);
 
 
   obj.def_readwrite("DivKKTtol", &PSIOPT::DivKKTtol, PSIOPT_DivKKTtol);
@@ -1189,14 +1273,36 @@ void ASSET::PSIOPT::Build(py::module& m) {
   obj.def_readwrite("DivEContol", &PSIOPT::DivEContol, PSIOPT_DivEContol);
   obj.def_readwrite("DivIContol", &PSIOPT::DivIContol, PSIOPT_DivIContol);
 
+  obj.def("set_DivKKTtol", &PSIOPT::set_DivKKTtol);
+  obj.def("set_DivBartol", &PSIOPT::set_DivBartol);
+  obj.def("set_DivEContol", &PSIOPT::set_DivEContol);
+  obj.def("set_DivIContol", &PSIOPT::set_DivIContol);
+
+
+
   obj.def_readwrite("NegSlackReset", &PSIOPT::NegSlackReset,
                     PSIOPT_NegSlackReset);
+
   obj.def_readwrite("BoundFraction", &PSIOPT::BoundFraction,
                     PSIOPT_BoundFraction);
+  obj.def("set_BoundFraction", &PSIOPT::set_BoundFraction);
+
   obj.def_readwrite("BoundPush", &PSIOPT::BoundPush, PSIOPT_BoundPush);
+
+  /////////////////////////////////////////////////////////////
+
   obj.def_readwrite("deltaH", &PSIOPT::deltaH, PSIOPT_deltaH);
   obj.def_readwrite("incrH", &PSIOPT::incrH, PSIOPT_incrH);
   obj.def_readwrite("decrH", &PSIOPT::decrH, PSIOPT_decrH);
+
+  obj.def("set_deltaH", &PSIOPT::set_deltaH);
+  obj.def("set_incrH", &PSIOPT::set_incrH);
+  obj.def("set_decrH", &PSIOPT::set_decrH);
+
+  obj.def("set_HpertParams", &PSIOPT::set_HpertParams,py::arg("deltaH"),py::arg("incrH"), py::arg("decrH"));
+
+
+  /////////////////////////////////////////////////////////////
   obj.def_readwrite("initMu", &PSIOPT::initMu, PSIOPT_initMu);
   obj.def_readwrite("MinMu", &PSIOPT::MinMu, PSIOPT_MinMu);
   obj.def_readwrite("MaxMu", &PSIOPT::MaxMu, PSIOPT_MaxMu);
