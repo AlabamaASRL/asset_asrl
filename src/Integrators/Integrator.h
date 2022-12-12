@@ -17,395 +17,7 @@ namespace ASSET {
 	struct InterpFunction;
 
 
-	template <class DODE, RKOptions RKOp>
-	struct RKStepperF
-		: VectorFunction<RKStepperF<DODE, RKOp>, SZ_SUM<DODE::IRC, 1>::value, DODE::IRC> {
-		using Base = VectorFunction<RKStepperF<DODE, RKOp>, SZ_SUM<DODE::IRC, 1>::value,
-			DODE::IRC>;
-		DENSE_FUNCTION_BASE_TYPES(Base);
-
-		template <class Scalar>
-		using ODEDeriv = typename DODE::template Output<Scalar>;
-		template <class Scalar>
-		using ODEState = typename DODE::template Input<Scalar>;
-		template <class Scalar>
-		using ODEJacobian = typename DODE::template Jacobian<Scalar>;
-		template <class Scalar>
-		using ODEHessian = typename DODE::template Hessian<Scalar>;
-
-		static const bool IsVectorizable = true;
-
-		using RKData = RKCoeffs<RKOp>;
-		static const int Stages = RKData::Stages;
-		static const int Stgsm1 = RKData::Stages - 1;
-		static const bool isDiag = RKData::isDiag;
-
-		DODE ode;
-
-
-		RKStepperF() {}
-		RKStepperF(DODE ode) : ode(ode) {
-			this->setIORows(this->ode.IRows() + 1, this->ode.IRows());
-		}
-
-		template <class InType, class OutType>
-		inline void compute_impl(const Eigen::MatrixBase<InType>& x,
-			Eigen::MatrixBase<OutType> const& fx_) const {
-			typedef typename InType::Scalar Scalar;
-			Eigen::MatrixBase<OutType>& fx = fx_.const_cast_derived();
-
-			auto Impl = [&](auto& Kvals, auto& xtup) {
-
-				xtup = x.template segment<DODE::IRC>(0, this->ode.IRows());
-				Scalar t0 = xtup[this->ode.TVar()];
-				Scalar tf = x[this->ode.IRows()];
-				Scalar h = tf - t0;
-
-
-				this->ode.compute(xtup, Kvals[0]);
-				Kvals[0] *= h;
-
-
-				for (int i = 0; i < Stgsm1; i++) {
-					Scalar ti = t0 + RKData::Times[i] * h;
-					xtup = x.template segment<DODE::IRC>(0, this->ode.IRows());
-					xtup[this->ode.TVar()] = ti;
-					const int ip1 = i + 1;
-					const int js = isDiag ? i : 0;
-					for (int j = js; j < ip1; j++) {
-						xtup.template segment<DODE::XV>(0, this->ode.XVars()) +=
-							Scalar(RKData::ACoeffs[i][j]) * Kvals[j];
-					}
-
-					this->ode.compute(xtup, Kvals[ip1]);
-
-					Kvals[ip1] *= h;
-				}
-				xtup = x.template segment<DODE::IRC>(0, this->ode.IRows());
-				xtup[this->ode.TVar()] = tf;
-				for (int i = 0; i < Stages; i++) {
-					xtup.template segment<DODE::XV>(0, this->ode.XVars()) +=
-						Scalar(RKData::BCoeffs[i]) * Kvals[i];
-				}
-				fx = xtup; // Next State
-			};
-
-			MemoryManager::allocate_run(this->ode.IRows(), Impl,
-				ArrayOfTempSpecs<ODEDeriv<Scalar>, Stages>(this->ode.ORows(), 1),
-				TempSpec<ODEState<Scalar>>(this->ode.IRows(), 1));
-
-
-		}
-
-		template <class InType, class OutType, class JacType>
-		inline void compute_jacobian_impl(
-			const Eigen::MatrixBase<InType>& x, Eigen::MatrixBase<OutType> const& fx_,
-			Eigen::MatrixBase<JacType> const& jx_) const {
-			typedef typename InType::Scalar Scalar;
-			Eigen::MatrixBase<JacType>& jx = jx_.const_cast_derived();
-			Eigen::MatrixBase<OutType>& fx = fx_.const_cast_derived();
-
-			auto Impl = [&](auto& Kvals, auto& xtup, auto& Kjac, auto& Xijac, auto& KXjacs) {
-
-				xtup = x.template segment<DODE::IRC>(0, this->ode.IRows());
-				Scalar t0 = xtup[this->ode.TVar()];
-				Scalar tf = x[this->ode.IRows()];
-				Scalar h = tf - t0;
-
-				Xijac.setIdentity();
-				Xijac(this->ode.TVar(), this->IRows() - 1) = 0;
-
-				this->ode.compute_jacobian(xtup, Kvals[0], Kjac);
-
-				Kjac *= h;
-				KXjacs[0].noalias() = Kjac * Xijac;
-				KXjacs[0].col(this->ode.TVar())
-					.template segment<DODE::XV>(0, this->ode.XVars()) -= Kvals[0];
-				KXjacs[0].col(this->IRows() - 1)
-					.template segment<DODE::XV>(0, this->ode.XVars()) += Kvals[0];
-
-				Kvals[0] *= h;
-
-				for (int i = 0; i < Stgsm1; i++) {
-					Scalar ti = t0 + RKData::Times[i] * h;
-					xtup = x.template segment<DODE::IRC>(0, this->ode.IRows());
-					Xijac.setIdentity();
-
-
-					xtup[this->ode.TVar()] = ti;
-
-					Xijac(this->ode.TVar(), this->ode.TVar()) = Scalar(1.0) - Scalar(RKData::Times[i]);
-					Xijac(this->ode.TVar(), this->IRows() - 1) = Scalar(RKData::Times[i]);
-
-					const int ip1 = i + 1;
-					const int js = isDiag ? i : 0;
-					for (int j = js; j < ip1; j++) {
-						xtup.template segment<DODE::XV>(0, this->ode.XVars()) +=
-							Scalar(RKData::ACoeffs[i][j]) * Kvals[j];
-						Xijac.template topRows<DODE::XV>(this->ode.XVars()) +=
-							Scalar(RKData::ACoeffs[i][j]) * KXjacs[j];
-					}
-					Kjac.setZero();
-
-					this->ode.compute_jacobian(xtup, Kvals[ip1], Kjac);
-
-					KXjacs[ip1].noalias() = h * Kjac * Xijac;
-					KXjacs[ip1]
-						.col(this->ode.TVar())
-						.template head<DODE::XV>(this->ode.XVars()) -= Kvals[ip1];
-					KXjacs[ip1]
-						.col(this->IRows() - 1)
-						.template head<DODE::XV>(this->ode.XVars()) += Kvals[ip1];
-
-					Kvals[ip1] *= h;
-
-
-
-				}
-				xtup = x.template segment<DODE::IRC>(0, this->ode.IRows());
-				xtup[this->ode.TVar()] = tf;
-
-				Xijac.setIdentity();
-
-				Xijac(this->ode.TVar(), this->ode.TVar()) = Scalar(0);
-				Xijac(this->ode.TVar(), (this->IRows() - 1)) = Scalar(1);
-
-
-				for (int i = 0; i < Stages; i++) {
-					xtup.template segment<DODE::XV>(0, this->ode.XVars()) +=
-						Scalar(RKData::BCoeffs[i]) * Kvals[i];
-					Xijac.template topRows<DODE::XV>(this->ode.XVars()) +=
-						Scalar(RKData::BCoeffs[i]) * KXjacs[i];
-				}
-				fx = xtup; // Next State
-				jx = Xijac;
-			};
-
-			using KXjacType = Eigen::Matrix<Scalar, DODE::XV, Base::IRC>;
-
-			MemoryManager::allocate_run(this->ode.IRows(), Impl,
-				ArrayOfTempSpecs<ODEDeriv<Scalar>, Stages>(this->ode.ORows(), 1),
-				TempSpec<ODEState<Scalar>>(this->ode.IRows(), 1),
-				TempSpec<ODEJacobian<Scalar>>(this->ode.ORows(), this->ode.IRows()),
-				TempSpec<Jacobian<Scalar>>(this->ORows(), this->IRows()),
-				ArrayOfTempSpecs<KXjacType, Stages>(this->ode.ORows(), this->IRows())
-			);
-		}
-
-
-		template <class InType, class OutType, class JacType, class AdjGradType,
-			class AdjHessType, class AdjVarType>
-			inline void compute_jacobian_adjointgradient_adjointhessian_impl(
-				ConstVectorBaseRef<InType> x, ConstVectorBaseRef<OutType> fx_,
-				ConstMatrixBaseRef<JacType> jx_, ConstVectorBaseRef<AdjGradType> adjgrad_,
-				ConstMatrixBaseRef<AdjHessType> adjhess_,
-				ConstVectorBaseRef<AdjVarType> adjvars) const {
-			typedef typename InType::Scalar Scalar;
-			VectorBaseRef<OutType> fx = fx_.const_cast_derived();
-			MatrixBaseRef<JacType> jx = jx_.const_cast_derived();
-			VectorBaseRef<AdjGradType> adjgrad = adjgrad_.const_cast_derived();
-			MatrixBaseRef<AdjHessType> adjhess = adjhess_.const_cast_derived();
-
-
-			auto Impl = [&](auto& Kvals, auto& xtup, auto& Kjacs, auto& Xijac, auto& KXjacs,
-				auto& Xs, auto& Kgrads, auto& Khesses, auto& KXmults, auto& HTpar) {
-
-
-					xtup = x.template segment<DODE::IRC>(0, this->ode.IRows());
-					
-
-					Scalar t0 = xtup[this->ode.TVar()];
-					Scalar tf = x[this->ode.IRows()];
-					Scalar h = tf - t0;
-
-					Xs[0] = xtup;
-					this->ode.compute(xtup, Kvals[0]);
-					Kvals[0] *= h;
-
-
-					for (int i = 0; i < Stgsm1; i++) {
-						Scalar ti = t0 + RKData::Times[i] * h;
-						xtup = x.template segment<DODE::IRC>(0, this->ode.IRows());
-						xtup[this->ode.TVar()] = ti;
-						const int ip1 = i + 1;
-						const int js = isDiag ? i : 0;
-						for (int j = js; j < ip1; j++) {
-							xtup.template segment<DODE::XV>(0, this->ode.XVars()) +=
-								Scalar(RKData::ACoeffs[i][j]) * Kvals[j];
-						}
-						Xs[ip1] = xtup;
-						this->ode.compute(xtup, Kvals[ip1]);
-						Kvals[ip1] *= h;
-					}
-
-
-					xtup = x.template segment<DODE::IRC>(0, this->ode.IRows());
-					xtup[this->ode.TVar()] = tf;
-					for (int i = 0; i < Stages; i++) {
-						xtup.template segment<DODE::XV>(0, this->ode.XVars()) +=
-							Scalar(RKData::BCoeffs[i]) * Kvals[i];
-						KXmults[i] = adjvars * Scalar(RKData::BCoeffs[i]) * h;
-					}
-					
-					fx = xtup; // Next State
-
-					for (int i = Stgsm1 - 1; i >= 0; i--) {
-
-						const int ip1 = i + 1;
-						const int js = isDiag ? i : 0;
-						Kvals[ip1].setZero();
-						this->ode.compute_jacobian_adjointgradient_adjointhessian(Xs[ip1],
-							Kvals[ip1], Kjacs[ip1], Kgrads[ip1], Khesses[ip1], KXmults[ip1].head(this->ode.ORows()));
-
-						for (int j = js; j < ip1; j++) {
-							KXmults[j] += Kgrads[ip1] * Scalar(RKData::ACoeffs[i][j]) * h;
-						}
-					}
-
-					Kvals[0].setZero();
-					this->ode.compute_jacobian_adjointgradient_adjointhessian(Xs[0],
-						Kvals[0], Kjacs[0], Kgrads[0], Khesses[0], KXmults[0].head(this->ode.ORows()));
-
-					
-
-					adjhess.topLeftCorner(this->ode.IRows(), this->ode.IRows()) += Khesses[0];
-
-					Xijac.setIdentity();
-					Xijac(this->ode.TVar(), this->IRows() - 1) = Scalar(0.0);
-
-
-					Kjacs[0] *= h;
-					KXjacs[0].noalias() = Kjacs[0] * Xijac;
-					KXjacs[0].col(this->ode.TVar())
-						.template segment<DODE::XV>(0, this->ode.XVars()) -= Kvals[0];
-					KXjacs[0].col(this->IRows() - 1)
-						.template segment<DODE::XV>(0, this->ode.XVars()) += Kvals[0];
-
-					Kvals[0] *= h;
-
-					HTpar = (Xijac.transpose() * Kgrads[0]) * (1.0 / h);
-
-
-					//
-
-					for (int i = 0; i < Stgsm1; i++) {
-						Scalar ti = t0 + RKData::Times[i] * h;
-						Xijac.setIdentity();
-
-
-
-						Xijac(this->ode.TVar(), this->ode.TVar()) = Scalar(1.0) - Scalar(RKData::Times[i]);
-						Xijac(this->ode.TVar(), this->IRows() - 1) = Scalar(RKData::Times[i]);
-
-						const int ip1 = i + 1;
-						const int js = isDiag ? i : 0;
-						for (int j = js; j < ip1; j++) {
-
-							Xijac.template topRows<DODE::XV>(this->ode.XVars()) +=
-								Scalar(RKData::ACoeffs[i][j]) * KXjacs[j];
-						}
-
-						KXjacs[ip1].noalias() = h * Kjacs[ip1] * Xijac;
-						KXjacs[ip1]
-							.col(this->ode.TVar())
-							.template head<DODE::XV>(this->ode.XVars()) -= Kvals[ip1];
-						KXjacs[ip1]
-							.col(this->IRows() - 1)
-							.template head<DODE::XV>(this->ode.XVars()) += Kvals[ip1];
-
-						Kvals[ip1] *= h;
-
-
-						adjhess += Xijac.transpose() * Khesses[ip1] * Xijac;
-
-						HTpar += (Xijac.transpose() * Kgrads[ip1]) * (1.0 / h);
-
-
-
-
-					}
-					xtup = x.template segment<DODE::IRC>(0, this->ode.IRows());
-					xtup[this->ode.TVar()] = tf;
-
-					Xijac.setIdentity();
-
-					Xijac(this->ode.TVar(), this->ode.TVar()) = Scalar(0.0);
-					Xijac(this->ode.TVar(), (this->IRows() - 1)) = Scalar(1.0);
-
-
-					for (int i = 0; i < Stages; i++) {
-
-						Xijac.template topRows<DODE::XV>(this->ode.XVars()) +=
-							Scalar(RKData::BCoeffs[i]) * KXjacs[i];
-					}
-
-					adjhess.col(this->ode.TVar()) -= HTpar;
-					adjhess.col(this->IRows() - 1) += HTpar;
-
-					adjhess.row(this->ode.TVar()) -= HTpar.transpose();
-					adjhess.row(this->IRows() - 1) += HTpar.transpose();
-
-
-					jx = Xijac;
-					adjgrad = jx.transpose() * adjvars;
-					
-
-			};
-
-			using KXjacType = Eigen::Matrix<Scalar, DODE::XV, Base::IRC>;
-			
-			MemoryManager::allocate_run(this->ode.IRows(), Impl,
-				ArrayOfTempSpecs<ODEDeriv<Scalar>, Stages>(this->ode.ORows(), 1),
-				TempSpec<ODEState<Scalar>>(this->ode.IRows(), 1),
-				ArrayOfTempSpecs <ODEJacobian<Scalar>, Stages>(this->ode.ORows(), this->ode.IRows()),
-				TempSpec<Jacobian<Scalar>>(this->ORows(), this->IRows()),
-				ArrayOfTempSpecs<KXjacType, Stages>(this->ode.ORows(), this->IRows()),
-				ArrayOfTempSpecs<ODEState<Scalar>, Stages>(this->ode.IRows(), 1),
-				ArrayOfTempSpecs<ODEState<Scalar>, Stages>(this->ode.IRows(), 1),
-				ArrayOfTempSpecs<ODEHessian<Scalar>, Stages>(this->ode.IRows(), this->ode.IRows()),
-				ArrayOfTempSpecs<ODEState<Scalar>, Stages>(this->ode.IRows(), 1),
-				TempSpec<Input<Scalar>>(this->IRows(), 1)
-			);
-
-
-		}
-
-
-
-		/// These Methods are being nulled because it is not
-	    /// possible for them to be called
-
-		void constraints(ConstEigenRef<Eigen::VectorXd> X,
-			EigenRef<Eigen::VectorXd> FX,
-			const SolverIndexingData& data) const {};
-		void constraints_adjointgradient(ConstEigenRef<Eigen::VectorXd> X,
-			ConstEigenRef<Eigen::VectorXd> L,
-			EigenRef<Eigen::VectorXd> FX,
-			EigenRef<Eigen::VectorXd> AGX,
-			const SolverIndexingData& data) const {};
-		void constraints_jacobian(
-			ConstEigenRef<Eigen::VectorXd> X, Eigen::Ref<Eigen::VectorXd> FX,
-			Eigen::SparseMatrix<double, Eigen::RowMajor>& KKTmat,
-			Eigen::Ref<Eigen::VectorXi> KKTLocations,
-			Eigen::Ref<Eigen::VectorXi> KKTClashes, std::vector<std::mutex>& KKTLocks,
-			const SolverIndexingData& data) const {}
-		void constraints_jacobian_adjointgradient(
-			ConstEigenRef<Eigen::VectorXd> X, ConstEigenRef<Eigen::VectorXd> L,
-			Eigen::Ref<Eigen::VectorXd> FX, Eigen::Ref<Eigen::VectorXd> AGX,
-			Eigen::SparseMatrix<double, Eigen::RowMajor>& KKTmat,
-			EigenRef<Eigen::VectorXi> KKTLocations,
-			EigenRef<Eigen::VectorXi> KKTClashes, std::vector<std::mutex>& KKTLocks,
-			const SolverIndexingData& data) const {}
-		void constraints_jacobian_adjointgradient_adjointhessian(
-			ConstEigenRef<Eigen::VectorXd> X, ConstEigenRef<Eigen::VectorXd> L,
-			EigenRef<Eigen::VectorXd> FX, EigenRef<Eigen::VectorXd> AGX,
-			Eigen::SparseMatrix<double, Eigen::RowMajor>& KKTmat,
-			EigenRef<Eigen::VectorXi> KKTLocations,
-			EigenRef<Eigen::VectorXi> KKTClashes, std::vector<std::mutex>& KKTLocks,
-			const SolverIndexingData& data) const {}
-
-	};
-
+	
 
 
 template<class DODE>
@@ -421,7 +33,10 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	using ODEDeriv = typename DODE::template Output<Scalar>;
 
 
-	using EventPack = std::tuple<GenericFunction<-1, 1>, int, int>;
+	using EventPack     = std::tuple<GenericFunction<-1, 1>, int, int>;
+	using EventLocsType = std::vector<std::vector<ODEState<double>>>;
+
+
 
 	/// <summary>
 	/// The type for the differentiable stepper function.
@@ -429,7 +44,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	/// </summary>
 	/// <typeparam name="PseudoODE"></typeparam>
 	template<class PseudoODE, RKOptions RKOp>
-	using StepperType = RKStepperF< PseudoODE, RKOp>;
+	using StepperType = RKStepper< PseudoODE, RKOp>;
 
 	/// <summary>
 	/// Wraps stepper types with RKoptions types
@@ -1764,30 +1379,72 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 			obj.def(py::init<const DODE&, double, std::shared_ptr<LGLInterpTable>, const Eigen::VectorXi&>());
 		}
 
-		
+		using IntegRet = ODEState<double>;
+		using DenseRet = std::vector<ODEState<double>>;
+		using STMRet = std::tuple< IntegRet, Jacobian<double> >;
 
+		using IntegEventRet = std::tuple< IntegRet, EventLocsType > ;
+		using DenseEventRet = std::tuple< DenseRet, EventLocsType >;
+		using STMEventRet   = std::tuple< IntegRet, Jacobian<double>, EventLocsType >;
 
 
 		obj.def("integrate",
-			py::overload_cast<const ODEState<double>&, double>(&Integrator::integrate, py::const_),
+			(IntegRet(Integrator::*)(const ODEState<double>&,double) const) &Integrator::integrate,
 			py::arg("Xt0UP"), py::arg("tf"));
 
 		obj.def("integrate",
-			py::overload_cast<const ODEState<double>&, double, const std::vector<EventPack>&>(&Integrator::integrate, py::const_),
+			(IntegEventRet(Integrator::*)(const ODEState<double>&, double, const std::vector<EventPack>&) const) & Integrator::integrate,
 			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"));
 
+		//obj.def("integrate",
+		//	py::overload_cast<const ODEState<double>&, double, const std::vector<EventPack>&>(&Integrator::integrate, py::const_),
+		//	py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"));
 
+
+		obj.def("integrate_parallel",
+			(std::vector<IntegRet>(Integrator::*)
+				(const std::vector<ODEState<double>>&, const Eigen::VectorXd&, int) )& Integrator::integrate_parallel,
+			py::arg("Xt0UPs"), py::arg("tfs"), py::arg("threads"), py::call_guard<py::gil_scoped_release>());
+
+		obj.def("integrate_parallel",
+			(std::vector<IntegEventRet>(Integrator::*)
+				(const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<EventPack>&,int) )& Integrator::integrate_parallel,
+				py::arg("Xt0UPs"), py::arg("tfs"), py::arg("Events"), py::arg("threads"), py::call_guard<py::gil_scoped_release>());
+
+		/*
 		obj.def("integrate_parallel",
 			py::overload_cast<const std::vector<ODEState<double>>&, const Eigen::VectorXd&, int>(&Integrator::integrate_parallel),
 			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads"), py::call_guard<py::gil_scoped_release>());
 
 		obj.def("integrate_parallel",
 			py::overload_cast<const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<EventPack>&,int>(&Integrator::integrate_parallel),
-			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"), py::arg("threads"), py::call_guard<py::gil_scoped_release>());
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"), py::arg("threads"), py::call_guard<py::gil_scoped_release>());*/
 
 		////////////////////////////////////////////////////////////////////////////
 
+
 		obj.def("integrate_dense",
+			(DenseRet(Integrator::*)(const ODEState<double>&, double) const) & Integrator::integrate_dense,
+			py::arg("Xt0UP"), py::arg("tf"));
+
+		obj.def("integrate_dense",
+			(DenseRet(Integrator::*)(const ODEState<double>&, double,int) const) & Integrator::integrate_dense,
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("n"));
+
+		obj.def("integrate_dense",
+			(DenseRet(Integrator::*)(const ODEState<double>&, double,int, std::function<bool(ConstEigenRef<Eigen::VectorXd>)>) const) & Integrator::integrate_dense,
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("n"), py::arg("StopFunc"));
+
+		obj.def("integrate_dense",
+			(DenseEventRet(Integrator::*)(const ODEState<double>&, double, const std::vector<EventPack>&, const bool& ) const) & Integrator::integrate_dense,
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"), py::arg("alloutput") = false);
+
+		obj.def("integrate_dense",
+			(DenseEventRet(Integrator::*)(const ODEState<double>&, double, int, const std::vector<EventPack>&) const) & Integrator::integrate_dense,
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("nstates"), py::arg("Events"));
+
+
+		/*obj.def("integrate_dense",
 			py::overload_cast<const ODEState<double>& , double >(&Integrator::integrate_dense,py::const_),
 			py::arg("Xt0UP"), py::arg("tf"));
 
@@ -1805,11 +1462,38 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 
 		obj.def("integrate_dense",
 			py::overload_cast<const ODEState<double>&, double,int, const std::vector<EventPack>&>(&Integrator::integrate_dense, py::const_),
-			py::arg("Xt0UP"),py::arg("tf"),py::arg("nstates"),py::arg("Events"));
+			py::arg("Xt0UP"),py::arg("tf"),py::arg("nstates"),py::arg("Events"));*/
 
 		////////////////////////////////////////////////////////////////////////////
 
 		obj.def("integrate_dense_parallel",
+			(std::vector<DenseRet>(Integrator::*)
+				(const std::vector<ODEState<double>>&, const Eigen::VectorXd&, int))&Integrator::integrate_dense_parallel,
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads")
+			, py::call_guard<py::gil_scoped_release>());
+
+		obj.def("integrate_dense_parallel",
+			(std::vector<DenseEventRet>(Integrator::*)
+				(const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<EventPack>&, int))& Integrator::integrate_dense_parallel,
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"), py::arg("threads")
+			, py::call_guard<py::gil_scoped_release>());
+
+		obj.def("integrate_dense_parallel",
+			(std::vector<DenseRet>(Integrator::*)
+				(const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<int>&,
+			int))& Integrator::integrate_dense_parallel,
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("ns"), py::arg("threads")
+			, py::call_guard<py::gil_scoped_release>());
+
+		obj.def("integrate_dense_parallel",
+			(std::vector<DenseEventRet>(Integrator::*)
+				(const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<int>&,
+			const std::vector<EventPack>&, int))& Integrator::integrate_dense_parallel,
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("ns"), py::arg("Events")
+			, py::arg("threads"), py::call_guard<py::gil_scoped_release>());
+
+
+		/*obj.def("integrate_dense_parallel",
 			py::overload_cast<const std::vector<ODEState<double>>& , const Eigen::VectorXd& , int>(&Integrator::integrate_dense_parallel),
 			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads")
 			, py::call_guard<py::gil_scoped_release>());
@@ -1829,34 +1513,48 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 			py::overload_cast<const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<int>&,
 			const std::vector<EventPack>&, int>(&Integrator::integrate_dense_parallel),
 			py::arg("Xt0UP"), py::arg("tf"), py::arg("ns"), py::arg("Events")
-			, py::arg("threads"), py::call_guard<py::gil_scoped_release>());
+			, py::arg("threads"), py::call_guard<py::gil_scoped_release>());*/
 
 		/////////////////////////////////////////////////////
 
 		obj.def("integrate_stm",
+			(STMRet(Integrator::*)(const ODEState<double>&, double) const)&Integrator::integrate_stm,
+			py::arg("Xt0UP"), py::arg("tf"));
+		obj.def("integrate_stm",
+			(STMEventRet(Integrator::*)(const ODEState<double>&, double, const std::vector<EventPack>&) const)& Integrator::integrate_stm,
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"));
+		obj.def("integrate_stm_parallel",
+			(STMRet(Integrator::*)(const ODEState<double>&, double, int))&Integrator::integrate_stm_parallel,
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads")
+			, py::call_guard<py::gil_scoped_release>());
+		obj.def("integrate_stm_parallel",
+			(std::vector<STMRet>(Integrator::*)(const std::vector<ODEState<double>>&, const Eigen::VectorXd&, int))& Integrator::integrate_stm_parallel,
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads")
+			, py::call_guard<py::gil_scoped_release>());
+		obj.def("integrate_stm_parallel",
+			(std::vector<STMEventRet>(Integrator::*)(const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<EventPack>&, int))& Integrator::integrate_stm_parallel,
+			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events")
+			, py::arg("threads"), py::call_guard<py::gil_scoped_release>());
+
+
+		/*obj.def("integrate_stm",
 			py::overload_cast<const ODEState<double>&, double>(&Integrator::integrate_stm, py::const_),
 			py::arg("Xt0UP"), py::arg("tf"));
-
-		
 		obj.def("integrate_stm",
 			py::overload_cast<const ODEState<double>&, double, const std::vector<EventPack>&>(&Integrator::integrate_stm, py::const_),
 			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"));
-
 		obj.def("integrate_stm_parallel",
 			py::overload_cast<const ODEState<double>&, double, int>(&Integrator::integrate_stm_parallel),
 			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads")
 			, py::call_guard<py::gil_scoped_release>());
-
-
 		obj.def("integrate_stm_parallel",
 			py::overload_cast<const std::vector<ODEState<double>>&, const Eigen::VectorXd&, int>(&Integrator::integrate_stm_parallel),
 			py::arg("Xt0UP"), py::arg("tf"), py::arg("threads")
 			, py::call_guard<py::gil_scoped_release>());
-
 		obj.def("integrate_stm_parallel",
 			py::overload_cast<const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<EventPack>&, int>(&Integrator::integrate_stm_parallel),
 			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events")
-			, py::arg("threads"), py::call_guard<py::gil_scoped_release>());
+			, py::arg("threads"), py::call_guard<py::gil_scoped_release>());*/
 
 
 		/////////////////////////////////////////////////////
