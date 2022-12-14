@@ -19,8 +19,6 @@ New readers should begin at the beginning, since it's important to understand th
     VectorFunctions_tutorial
     Integrator
     halo
-    zermelo
-    zermelolink
     
 
     
