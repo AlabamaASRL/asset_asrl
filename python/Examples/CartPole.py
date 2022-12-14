@@ -177,7 +177,7 @@ if __name__ == "__main__":
     
     
     
-    phase = ode.phase("LGL7",IG,64)
+    phase = ode.phase("LGL5",IG,64)
     
     integ = ode.integrator(.1)
     phase.addBoundaryValue("Front",range(0,5),[0,0,0,0,0])

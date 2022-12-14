@@ -28,7 +28,7 @@ some or all of its outputs.
 
 We can construct the object by simply specifying the number of arguments, in this
 case 6. This instance :code:`X` is now a first class function thats takes any vector of size 6
-and returns that vector. Since it is a vectorfunction we can compute is output value using the
+and returns that vector. Since it is a vector function we can compute is output value using the
 :code:`()` operator,first derivative using the :code:`.jacobian` method and second derivative using the :code:`.adjointhessian` method.
 To do this we provide either a numpy vector or python list of real valued inputs, and additionally for the second derivative
 a vector of list of lagrange multipliers with same dimensions as the output of the function. One important note, ASSET does not compute
@@ -788,7 +788,7 @@ The vector-function type system has been designed to have good performance for e
 the value and derivatives of dense vector functions with a small number of arguments (<50).
 It will work for larger expressions, but performance will begin to degrade considerably. This may seem
 strange since it ostensibly designed to be used to define constraints and objective inside of large
-sparse non-linear programs. However, in out experience these problems are almost never composed
+sparse non-linear programs. However, in our experience these problems are almost never composed
 of single monolithic functions, and can generally be decomposed into smaller dense functions that only
 take a partial subsets of the problem variables. In that case we can define our functions in terms of
 only the arguments they take, and then under the hood, asset will ensure that the inputs and outputs are gathered and

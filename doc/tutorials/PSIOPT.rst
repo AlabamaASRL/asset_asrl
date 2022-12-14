@@ -1,3 +1,4 @@
+======
 PSIOPT
 ======
 
@@ -69,10 +70,12 @@ To solve the resulting linear-system, the software leverages the state of the ar
 
 
 PSIOPT Usage
-------------
-Each interface for defining optimization problems in ASSET (ex: OptimalControlProblem,ode.phase ) has as its own instance of PSIOPT attached as a member variable of the class.
-Formulation and solution of the optimization problem is always handled through the respective interface, but users use the reference to PSIOPT to modify settings and hyper-parameters
-of the algorithm. A list of common, settings/hyper-parameters and their default and suggested values are listed in the table below. In all cases these can be set by using .set_XXX(value) method
+============
+Each interface for defining optimization problems in ASSET (ex: :code:`OptimalControlProblem`, :code:`ode.phase` ) 
+has as its own instance of PSIOPT attached as a member variable of the class.
+Formulation and solution of the optimization problem is always handled through the respective interface, 
+but users can use this to modify PSIOPT's settings . A list of common, settings
+and their default and suggested values are listed in the table below. In all cases these can be set by using .set_XXX(value) method
 where XXX is replaced by the name of the setting
 
 
@@ -104,26 +107,40 @@ where XXX is replaced by the name of the setting
    * - Parameter
      - Description/Tips
      - (type) Default Value
-     - Valid/[Suggested] Range
+     - (Valid)/[Suggested] Range
    * - MaxIters
      - Maximum number of iterations the solve or optimization routines will run before returning with NO SOLUTION FOUND.
      - (int) 500 
-     - >0
+     - (>0) [100,1000]
    * - MaxAccIters
      - Maximum number of consecutive acceptable iterations the solve or optimization routines will run before returning with ACCEPTABLE SOLUTION FOUND. 
        An acceptable iterate is defined as having EconsInf,IConsInf,KKTinf, and all being less than their specified acceptable value (Acc###tol). To disable
        acceptable solutions set this to be greater than or equal to MaxIters.
      - (int) 50 
-     - >0
+     - (>0) [50,300]
+   * - ###tol
+       (### = KKT,ECon,ICon,Bar)
+     - Convergence tolerances for the KKT/optimality, equality, inequality, and barrier infeasibilities.
+     - (double) 1.0e-6 
+     - (>0.0) [1.0e-6,1.0e-12]
+   * - Acc###tol
+       (### = KKT,ECon,ICon,Bar)
+     - Acceptable convergence tolerances for the KKT/optimality, equality, inequality, and barrier infeasibilities.
+     - (double) 1.0e-3 
+     - (>0.0) [1.0e-3,1.0e-5]
+   * - Div###tol
+       (### = KKT,ECon,ICon,Bar)
+     - Diverging tolerances for the KKT/optimality, equality, inequality, and barrier infeasibilities. Algorithm will terminate with SOLUTION DIVERGING if value exceeds this number. 
+     - (double) 1.0e15
+     - (>0.0) [1.0e10,1.0e15]
    * - MaxLSIters
      - Maximum number iterations a line search algorithm will take before accepting the step and continuing to next full iteration. 
      - (int) 2 
-     - >0 
-       [1,4]
+     - (>=0) [1,4]
    * - alphaRed
      - Amount by which a line search algorithm divides the current step size when it fails to reduce the merit function. 
      - (double) 2.0 
-     - >1.0 [1.5,3.0]
+     - (>1.0) [1.5,3.0]
    * - OptLSMode
      - Line Search algorithm to be used by the optimization algorithm. It is disabled by default, but we suggest enabling the
        L1 penalty function line search or Augmented Lagrangian line search for sensitive problems with poor initial guesses.
@@ -134,13 +151,13 @@ where XXX is replaced by the name of the setting
      - ('string') 'NOLS'
      - ['AUGLANG','L1','NOLS']
    * - OptBarMode
-     - Adaptive Barrier parameter method to be used by the optimization algorithm. Set to the LOQO centrality heuristic by default. The other option, 'PROBE', 
+     - Adaptive barrier parameter method to be used by the optimization algorithm. Set to the LOQO centrality heuristic by default. The other option, 'PROBE', 
        is the Mehrotra probing heuristic. It can converge in fewer iterations than 'LOQO' in certain circumstances but requires an extra linear solve of the KKT matrix.
        Thus it is typically slower than the LOQO algorithm.
      - (string) 'LOQO'
      - ['LOQO','PROBE']
    * - SoeBarMode
-     - Adaptive Barrier parameter method to be used by the solve algorithm. Set to the 'LOQO' centrality heuristic by default. The other option, 'PROBE', 
+     - Adaptive barrier parameter method to be used by the solve algorithm. Set to the 'LOQO' centrality heuristic by default. The other option, 'PROBE', 
        is the Mehrotra probing heuristic. It can converge in fewer iterations than 'LOQO' in certain circumstances but requires an extra linear solve of the KKT matrix.
        Thus it is typically slower than the 'LOQO' algorithm.
      - (string) 'LOQO'
@@ -148,39 +165,39 @@ where XXX is replaced by the name of the setting
    * - deltaH
      - Size of the first and smallest perturbation, :math:`\delta`, that will be added to the diagonal of the KKT matrix to correct for indefiniteness.
      - (double) 1.0e-5 
-     - >0.0 [1.e-8,1.e-4]
+     - (>0.0) [1.e-8,1.e-4]
    * - incrH
      - Factor by which a the Hessian perturbation, :math:`\delta`, will be increased when the previous value failed to correct the KKT matrix's inertia.
      - (double) 8.0 
-     - >1.0, [4.0,10.0]
+     - (1.0) [4.0,10.0]
    * - decrH
      - Factor by which a the Hessian perturbation, :math:`\delta`, will be decreased each iteration.
      - (double) .33 
-     - <1.0 [.1,.5]
+     - (<1.0) [.1,.5]
    * - BoundFraction
      - Fraction of the full step to the boundary that the slack variables or inequality constraint multipliers will take. Must be less
        than 1.0 to prevent slacks and multipliers from becoming negative. Values close to one will lead to faster convergence when near the
        solution but can harm robustness when the initial guess is poor. 
      - (double) .98 
-     - <1.0 [.95,.999]
+     - (<1.0) [.95,.999]
    * - QPOrderingMode
-     - Fill-in reducing applied to the KKT matrix by MKL-Pardiso. The default, "METIS", is the METIS nested dissection algorithm
+     - Fill-in reducing applied to the KKT matrix by MKL-Pardiso. The default, 'METIS', is the METIS nested dissection algorithm
        and generally results in the best scaling of matrix factorization with the number of threads. The alternative, "MINDEG", the minimum degree algorithm, generally
-       results in faster single threaded factorizations, but does not scale well with thread count. Use "AMD" when using Jet and "METIS" otherwise.
+       results in faster single threaded factorizations, but does not scale well with thread count. Use "MINDEG" when using Jet and "METIS" otherwise.
      - (string) "METIS" 
-     - <["METIS","MINDEG"] 
+     - ["METIS","MINDEG"] 
    * - PrintLevel
      - Verbosity of the console output. 0 is full output, and higher values will produce less output. Set to 3 or higher for no output. 
      - (int) 0 
-     - >= 0
+     - [>= 0]
 
     
-After defining a problem, and potentially modifying the optimizer settings, an optimization problem interface is used to invoke one of or a sequence of PSIOPT's algorithms. The optimize algorithm
-will seek to minimize the objective function and also satisfy the equality and inequality constraints. The solve algorithm ignores the objective and
+After defining a problem, and potentially modifying the optimizer settings, an optimization problem interface is used to invoke one of or a sequence of PSIOPT's algorithms as
+shown below. The optimize algorithm will seek to minimize the objective function and also satisfy the equality and inequality constraints. The solve algorithm ignores the objective and
 attempts only to find a solution to the equality and inequality constraints. If you are trying only to solve a system of equations and do not have an objective
 function, you should almost always use the solve algorithm rather than invoking optimize. You may also invoke the solve and optimize algorithms in sequence
 as shown below. For example, it can often be more robust to call solve first when optimizing so that the optimize algorithm will start from a feasible point. 
-Additionally,it often happens that the optimize algorithm will be able to minimize the objective function considerably from its initial value,
+Additionally, it often happens that the optimize algorithm will be able to minimize the objective function considerably from its initial value,
 but have difficulty exactly satisfying the optimality and constraint tolerances simultaneously.
 In these cases, it is practical to feed this non-converged solution to the solve algorithm in the hopes of finding a nearby solution that satisfies the constraints. 
 For the combined call sequences, the function returns the convergence flag of the last algorithm invoked. If you need the convergence flag for each specific algorithm, they should be called
@@ -229,7 +246,7 @@ use the flags in your code, it is recommended to compare flags their enumerator 
      - 0
    * - ACCEPTABLE
      - The algorithm has terminated because it observed MaxAccIters number of consecutive iterates that all satisfy user specified AccEContol,AccIContol, AccBartol, and AccKKTtol (if optimizing).
-       This prevents algorithm from iterating until MaxIters is reached, if full-tolerances cannot be exactly satisfied, and no progress is being made.
+       This prevents the algorithm from iterating until MaxIters is reached, if full tolerances cannot be exactly satisfied, and no progress is being made.
      - 1
    * - NOTCONVERGED
      - The algorithm has run form MaxIters number of iterates with out finding a solution satisfying user specified EContol,IContol, Bartol, and KKTtol (if optimizing).
@@ -241,8 +258,8 @@ use the flags in your code, it is recommended to compare flags their enumerator 
 
 
 PSIOPT Output
--------------
-When invoking one of PSIOPT's algorithms with PrintLevel = 0, to solver will produce the console output scroll shown in the figure below. The current objective
+=============
+When invoking one of PSIOPT's algorithms with a PrintLevel of 0, the solver will produce the console output scroll shown in the figure below. The current objective
 and constraint/optimality errors as well as other relevant algorithm parameters are displayed at each iterate. The meaning of each column is given in the table below.
 The constraint and optimality feasibilities are color coded according to their value. The color scheme progresses from dark red to orange, to yellow, to green as the
 value of the feasibility approaches user specified tolerances. When the value is yellow the current value satisfies the corresponding Acc###tol and likewise when it is green it satisfies ###tol.
@@ -286,22 +303,22 @@ You can suppress some or all of the output by setting PrintLevel to a value grea
    * - PPS
      - Number of perturbed pivots seen during factorization of the KKT matrix.
    * - HFI
-     - Number of hessian factorization and regularization iterations needed to correct the inertia of the KKT matrix.
+     - Number of Hessian factorization and regularization iterations needed to correct the inertia of the KKT matrix.
    * - HPert
-     - Final value of the hessian perturbation that resulted in a successful matrix factorization.
+     - Final value of the Hessian perturbation that resulted in a successful matrix factorization.
 
 
 
 
 Jet
----
+===
 
 In addition to calling PSIOPT to solve or optimize a single problem at a time, we provide the capability to optimize multiple different problems in parallel using
 the Jet tool. This can allow you to more efficiently tackle throughput oriented workloads from within a single python process in just a few lines of code,
 without having to resort to multiprocessing libraries. There are two ways to do this. In the first method, demonstrated below, we construct a python list 
-of fully configured phases or optimalcontrol problems (or both) as we normally would, but rather than running solve or optimize on each individually, we specify the algorithm we would like to call using
-.setJetJobMode(""). These options correspond to the .solve/.optimize methods we have already covered. Having set the Job mode, we add the objects a list and then pass the list to the Jet.map() function along with 
-the number of threads we want to use, and a bool specifying whether we want to print the console scroll. After solving all the problems, the function returns the list phases/optimalcontrol problems. We can then access
+of fully configured phases or optimal control problems (or both) as we normally would, but rather than running solve or optimize on each individually, we specify the algorithm we would like Jet to invoke
+using :code:`.setJetJobMode("")`. These options correspond to the methods we have already covered. Having set the Job mode, we add the objects a list and then pass the list to the :code:`Jet.map()` function along with 
+the number of threads we want to use, and a bool specifying whether we want to print the console scroll. After solving all the problems, the function returns the list phases/optimal control problems. We can then access
 each element object to get the solved trajectories as we normally would.
 
 .. code-block:: python
@@ -324,13 +341,13 @@ each element object to get the solved trajectories as we normally would.
         ocp.setJetJobMode("Optimize")
        
         #Or
-        #ocp.setJetJobMode("Solve")
+        #ocp.setJetJobMode("solve")
         #Or
-        #ocp.setJetJobMode("OptimizeSolve")
+        #ocp.setJetJobMode("optimize_solve")
         #Or
-        #ocp.setJetJobMode("SolveOptimize")
+        #ocp.setJetJobMode("solve_optimize")
         #Or
-        #ocp.setJetJobMode("SolveOptimizeSolve")
+        #ocp.setJetJobMode("solve_optimize_solve")
         #Or
         #ocp.setJetJobMode("DoNothing")
 
@@ -347,10 +364,10 @@ each element object to get the solved trajectories as we normally would.
     ocps[0].Phase(0).returnTraj()
         
 
-Alternatively, we can use another method shown below where we leverage a generator function. Here rather than directly creating each phase/ocp we create
-a function that returns the phase/ocp. We can then pass this function, along with a python list of tuples of the arguments we want to pass to out ProblemGenerator
-function. Internally, Jet will then expand each element of the ProblemArguments list into ProblemGenerator function to create all of the phases/ocps on the fly. 
-These will then be solved according the JetJobMode and returned as a list. This form is particularly efficient whenever construction of each problem requires independent 
+Alternatively, we can use another method shown below where we leverage a generator function. Here rather than directly creating each phase/optimal control problem directly we create
+a function that returns them. We can then pass this function, along with a python list of tuples of the arguments we want to pass to out ProblemGenerator
+function. Internally, Jet will then expand each element of the :code:`ProblemArgs` list into :code:`ProblemGenerator` function to create all of the phases/optimal control problems on the fly. 
+These will then be solved according the job mode and returned as a list as before. This form is particularly efficient whenever construction of each problem requires independent 
 and expensive preprocessing that cannot be parallelized.
 
 
@@ -398,7 +415,7 @@ and expensive preprocessing that cannot be parallelized.
     ocps[0].Phase(0).returnTraj()
 
 
-For both methods, if console printing is enabled, Jet will dynamically print out its progress, and alert of the convergeance rate of each problem and the estimated remaining run-time.
+For both methods, if console printing is enabled, Jet will dynamically print out its progress, and alert of the convergence rate of each problem and the estimated remaining run-time.
 
 .. image:: _static/JetGif4.GIF
     :width: 100%

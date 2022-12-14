@@ -14,6 +14,8 @@
 
 namespace ASSET {
 
+struct OptimalControlProblem;
+
 struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
   using VectorXi = Eigen::VectorXi;
   using MatrixXi = Eigen::MatrixXi;
@@ -30,16 +32,16 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
   template <int V>
   using int_const = std::integral_constant<int, V>;
 
+  friend OptimalControlProblem;
+
   int calc_threads();
 
-  PhaseIndexer indexer;
-  
+protected:
 
+  PhaseIndexer indexer;
   bool doTranscription = true;
   bool EnableVectorization = true;
-  void enable_vectorization(bool b) { this->EnableVectorization = b; }
-  void resetTranscription() { this->doTranscription = true; };
-
+  
   int numDefects = 0;
   int numStatParams = 0;
   VectorXd DefBinSpacing;
@@ -73,7 +75,12 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
   int TranSpacingFuncIndices = 0;
   int ConstraintOrder = 0;
 
+public:
   /////////////////////////////////////////////////////////////////////////////
+
+  void enable_vectorization(bool b) { this->EnableVectorization = b; }
+  void resetTranscription() { this->doTranscription = true; };
+
 
   ODEPhaseBase() {}
   ODEPhaseBase(int Xv, int Uv, int Pv) {
@@ -711,6 +718,7 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
   std::vector<Eigen::VectorXd> returnCostateTraj() const;
 
   /////////////////////////////////////////////////
+protected:
 
   virtual void transcribe_dynamics() = 0;
   virtual void transcribe_axis_funcs();
@@ -795,7 +803,6 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
   void transcribe_phase(int vo, int eqo, int iqo,
                         std::shared_ptr<NonLinearProgram> np, int pnum);
 
-  void transcribe(bool showstats, bool showfuns);
 
   Eigen::VectorXd makeSolverInput() const {
     return this->indexer.makeSolverInput(this->ActiveTraj,
@@ -810,6 +817,10 @@ struct ODEPhaseBase : ODESize<-1, -1, -1>, OptimizationProblemBase {
     this->ActiveEqLmults = EM;
     this->ActiveIqLmults = IM;
   }
+
+public:
+  void transcribe(bool showstats, bool showfuns);
+
   void transcribe() { this->transcribe(false, false); }
 
   void test_threads(int i, int j, int n);

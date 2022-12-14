@@ -160,4 +160,9 @@ struct GenericODE
   }
 };
 
+
+template <int XV, int UV, int PV>
+using PythonGenericODE = GenericODE<GenericFunction<-1, -1>, XV, UV, PV>;
+
+
 }  // namespace ASSET

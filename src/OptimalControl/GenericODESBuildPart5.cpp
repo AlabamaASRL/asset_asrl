@@ -7,7 +7,7 @@ namespace ASSET {
 
 	void GenericODESBuildPart5(FunctionRegistry& reg, py::module& m) {
 
-		GODE<2, 1, 0>::BuildGenODEModule("ode_2_1", m, reg);
+		PythonGenericODE<2, 1, 0>::BuildGenODEModule("ode_2_1", m, reg);
 
 
 	}

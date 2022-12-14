@@ -1581,7 +1581,6 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
           &ODEPhaseBase::addIntegralParamFunction),
       ODEPhaseBase_addIntegralParamFunction2);
   
-  obj.def_readwrite("ConstraintOrder", &ODEPhaseBase::ConstraintOrder);
 
 
   

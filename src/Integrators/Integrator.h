@@ -53,6 +53,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	using ControllerType        = GenericFunction<-1, -1>;
 	using StopFuncType             = GenericConditional<-1>;
 
+protected:
 	DODE ode;
 	bool usecontroller = false;
 	ControllerType controller;
@@ -66,6 +67,8 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 			this->pool->resize(thrs);
 		}
 	}
+public:
+
 	Integrator() {
 		this->pool = std::make_shared<ctpl::ThreadPool>();
 	}
@@ -271,6 +274,8 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////
+
+protected:
 
 	template<class State>
 	void update_control(State& xtup) const {
@@ -875,7 +880,7 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	
 
 
-
+public:
 	////////////////////////////////////////////////////////////////////////////////////
 
 	auto integrate(const ODEState<double>& x0, double tf) const {

@@ -45,6 +45,7 @@ ocp.addPhase(phase5)
 ocp.setLinkParams(np.ones((15)))
 
 
+
 ###############################################################################
 '''
 The individual phases in an ocp, MUST Be unique objects. The software will detect

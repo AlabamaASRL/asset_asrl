@@ -20,15 +20,15 @@ class ODE(oc.ODEBase):
         vydot = y**2 -y -x**2
         
         ode = vf.stack(Xt.segment2(2),vxdot,vydot)
-        ode = oc.TestODE()
+        
         super().__init__(ode,4)
         
         
         
 ode = ODE()
 
-integ = ode.integrator(1)
-integ.setAbsTol(1.0e-15)
+integ = ode.integrator("DP87",1)
+integ.setAbsTol(1.0e-14)
         
 IState = np.zeros((5))
 IState[0]=0
@@ -42,12 +42,11 @@ def Event():
 
 
 t00 = time.perf_counter()
-Traj = integ.integrate_dense(IState,2000)
+Traj = integ.integrate_dense_parallel([IState]*100,[2000]*100,[100]*100,12)
 tff = time.perf_counter()
 print((tff-t00)*1000*(44/27))
 
-Tmp = [list(T[0:3]) +[T[4]] for T in Traj]
-
+Traj = Traj[0]
 
 
 

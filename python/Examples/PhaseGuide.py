@@ -24,7 +24,7 @@ In this section, we will explain the usage of ASSETs phase object. Blah Blah
 As introduction, we will walk through using phase to optimize a low-thrust
 transfer between two-circular orbits using our TwoBodyLTODE model. In particular,
 we will attempt to compute a transfer from a fixed circular orbit at radius 1,
-to a circular orbit at r = 2.
+to a circular orbit at r = 2. 
 '''
 
 class TwoBodyLTODE(oc.ODEBase):
@@ -33,7 +33,7 @@ class TwoBodyLTODE(oc.ODEBase):
         
         XVars = 6
         UVars = 3
-        
+        PVars = 1
         
         XtU = oc.ODEArguments(XVars,UVars)
         
@@ -162,6 +162,7 @@ Alternatively, For all methods, we can also specify that rather than having smoo
 constant control history with 1 uniquye control per segment. This can be specified by setting the control mode to BlockConstant.
 In our experience this control parameterization can be very robust and typically results in KKT matrices that are faster to factor.
 The caveat is that special care must be taken when reintegrating converged solutions with an explicit integrator. This will be covered in a later section. 
+
 '''
 
 # Options: FirstOrderSpline,HighestOrderSpline,BlockConstant,NoSpline
@@ -182,8 +183,73 @@ they are trying to accomplish is not possible with the simplified interface.
 In asset, there are 5 different general types of constraints/objectivs that
 can be applied to a phase. EqualityConstraints, InequalityContraints, StateObjectives,
 IntegralObjectives, and Integral Parameter relations. Equality constraints of functions
-of the phase variables of the form f([X_i,t_i,U_i])=0
+of the phase variables of the form f([X_i,t_i,U_i])=0 and Inequality constraitns have
+the for f([X_i,t_i,U_i])<0.
 '''
+
+
+'''
+Generalized eqaulity and inerquality constraints as well as state objectives
+ may be added to a phase using the .addEqualCon,addInequalCon, and addStateObjective methods which
+all operate in essentially the same way. As an example, add an equality
+constraint specifying that our initial position, velocity and time should be constrined to the
+fixed initial state we specified above. First we spenify the phase region, specifies from which time-varying
+state to which the constraint will be applied followed by the equality constraint itself (an ASSET VEctor function).
+Next which of the indices of time-varying state varibles at the phaseregion, as well as any ODEParams and phase Static Parameters
+we wish to forward to the function. In this case we only want to positon velocity as time. WE dont, wish to fiox the inital control
+so we dont have to include those in XtUVars, additionally, this constraint does not involve any ODE paramters or static parameters
+so we can just leave those inputs empty or not even provide them.
+'''
+
+PhaseRegion = "First" # Or "Front"
+InitCon = Args(7) - X0t0U0[0:7]
+XtUVars = [0,1,2,3,4,5,6]
+OPVars = []
+SPVars = []
+
+phase.addEqualCon(PhaseRegion,InitCon,XtUVars,[],[])
+# Same as above, leave off OPVars, and SPVars since we dont have any
+# phase.addEqualCon(PhaseRegion,InitCon,XtUVars)
+'''
+However, we can avoid writing out an actual asset function for simple boundary value constraints like this, by using
+the .addBoundaryValue method. It takes just the phase region, variable indices, and boundary value vector and
+adds a constraint functionally identical to the one above.
+'''
+phase.addBoundaryValue("First",XtUVars,X0t0U0[0:7])
+
+'''
+If we wanted to add a constraint, specifying.
+'''
+
+
+'''
+Similarly, if we wanted to apply an ineqaulity constraint specifying that the norm 
+of the throttle vector should be bounded between 0 and 1, we could do that as shown below.
+By setting the phase region to path, this constraint will be applied to every time-varying state
+in the phase.
+'''
+
+PhaseRegion = "Path" 
+UBoundCon = vf.stack(-Args(3).norm(),Args(3).norm()-1.0)
+XtUVars = [7,8,9]
+OPVars = []
+SPVars = []
+
+phase.addInequalCon(PhaseRegion,UBoundCon,XtUVars,[],[])
+# Same as above, leave off OPVars, and SPVars since we dont have any
+# phase.addInequalCon(PhaseRegion,UBoundCon,XtUVars)
+
+'''
+
+'''
+
+
+'''
+Additionaly, we could specify that our objective is to minimize final time using
+.addStateObjective as shown below. Note that in this, case because we specified
+that 
+'''
+
 
 #############################################################
 # Equality constraints

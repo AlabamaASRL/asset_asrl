@@ -26,13 +26,13 @@ struct ODEPhase : ODEPhaseBase {
   using StateConstraint = StateFunction<VectorFunctionalX>;
   using StateObjective = StateFunction<ScalarFunctionalX>;
 
+  template<class ODET, int CS>
+  using LGLType = LGLDefects<ODET, CS>;
+
+
   DODE ode;
   Integrator<DODE> integrator;
   bool EnableHessianSparsity = false;
-
-  template<class ODET,int CS>
-  using LGLType = LGLDefects<ODET, CS>;
-
 
   ODEPhase(const DODE& ode, TranscriptionModes Tmode)
       : ODEPhaseBase(ode.XVars(), ode.UVars(), ode.PVars()) {
