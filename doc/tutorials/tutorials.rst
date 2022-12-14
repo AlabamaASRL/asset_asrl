@@ -21,7 +21,6 @@ New readers should begin at the beginning, since it's important to understand th
     halo
     zermelo
     zermelolink
-    MultiTarg
     
 
     

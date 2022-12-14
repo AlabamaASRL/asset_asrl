@@ -8,11 +8,9 @@ For now, the standard problem procedure is the same, where we need to import eve
 .. code-block:: python
 
     import numpy as np
-    import asset as ast
+    import asset_asrl as ast
+    import matplotlib.pyplot as plt
     import time
-    import copy
-    from plotly.subplots import make_subplots
-    import plotly.graph_objects as go
 
 
     ################################################################################
@@ -33,23 +31,26 @@ examples, where we will use the ASSET VectorFunctions to construct our system of
 
     ################################################################################
     ## System Dynamics
-    def ODE(mu, ltacc=False):
-        irows = 7
-        if ltacc != False:
-            irows += 3
+    class TwoBody(oc.ode_x_u.ode):
+        def __init__(self, P1mu, ltacc=False):
+            Xvars = 6
+            Uvars = 0
+            if ltacc != False:
+                Uvars = 3
+    
+            args = oc.ODEArguments(Xvars, Uvars)
+            r = args.head3()
+            v = args.segment_3(3)
+            g = r.normalized_power3() * (-P1mu)
+            if ltacc != False:
+                thrust = args.tail_3() * ltacc
+                acc = g + thrust
+            else:
+                acc = g
+            ode = vf.stack([v, acc])
+            super().__init__(ode, Xvars, Uvars)
 
-        args = vf.Arguments(irows)
-        r = args.head_3()
-        v = args.segment_3(3)
-        g = r.normalized_power3() * (-mu)
-        if ltacc != False:
-            thrust = args.tail_3() * ltacc
-            acc = g + thrust
-        else:
-            acc = g
-        return vf.Stack([v, acc])
-
-Here the dynamics are simply a function of the 6 state variables (position and velocity), and the 7th argument is time. The :code:`ltacc` flag
+Here the dynamics are simply a function of the 6 state variables (position and velocity). The :code:`ltacc` flag
 determines if we are incorporating the low thrust acceleration into the function or not. We make this choice so that if we wish to propagate the spacecraft
 without low thrust and purely gravity as the only acceleration. If :code:`ltacc` is given a value, we will include a low thrust acceleration into the model, as well as the
 normal vector of the low thrust, where we add 3 to the input rows of the state. This will let us control the direction of the thrust for the optimization call.
@@ -73,8 +74,8 @@ Assuming that these are planar circular orbits, we can generate them with:
 
 
         def MakeCircTraj(r, thetadeg, tf, n):
-            ode = oc.ode_6.ode(ODE(1))
-            integ = oc.ode_6.integrator(ode, 0.01)
+            ode = TwoBody(1)
+            integ = ode.integrator(.01)
             IGC = MakeCircIG(r, thetadeg)
             Temp = integ.integrate_dense(IGC, tf, n)
             Traj = []
@@ -106,7 +107,7 @@ For now we will show the function that handles all this in three sections, with 
         ocp = oc.OptimalControlProblem()
 
         ## create ODE governing all spacecraft
-        ode = oc.ode_6_3.ode(ODE(1, LTacc), 6, 3)
+        ode = TwoBody(1, LTacc)
 
         for i, T in enumerate(Trajs):
 
@@ -114,7 +115,6 @@ For now we will show the function that handles all this in three sections, with 
             phase = ode.phase(Tmodes.LGL5)
             ## Set Initial Guess
             phase.setTraj(T, NSegs)
-            phase.EnableVectorization = True
 
             ##Use block constant control
             phase.setControlMode(Cmodes.BlockConstant)
@@ -182,13 +182,13 @@ reach some initial final free state.
 
         ocp.addLinkParamEqualCon(Args(6).head3().dot(Args(6).tail3()), range(0, 6))
 
-        ocp.optimizer.OptLSMode = ast.LineSearchModes.L1
         ocp.optimizer.QPThreads = 8  # Equal to number of physical cores
-        ocp.optimizer.deltaH = 5.0e-8
-        ocp.optimizer.KKTtol = 1.0e-9
-        ocp.optimizer.BoundFraction = 0.997
+        ocp.optimizer.set_OptLSMode("L1")
+        ocp.optimizer.set_deltaH(5.0e-8)
+        ocp.optimizer.set_KKTtol(1.0e-9)
+        ocp.optimizer.set_BoundFraction(0.997)
         ocp.optimizer.PrintLevel = 1
-        ocp.optimizer.MaxLSIters = 1
+        ocp.optimizer.set_MaxLSIters(1)
 
         Data = []
 
@@ -238,7 +238,7 @@ The very last section of the code neccessary for the multi-spacecraft optimizati
             Flag = ocp.optimize()
             tf = time.perf_counter()
             print((tf - t0) * 1000.0)
-            if Flag == ast.ConvergenceFlags.NOTCONVERGED:
+            if Flag == ast.Solvers.ConvergenceFlags.NOTCONVERGED:
                 ocp.solve_optimize()
 
             Data.append(
@@ -259,10 +259,9 @@ Below is the code we use to plot, but the user can use whatever they are most co
     ################################################################################
     ## Plotting Utilities
     def colorScale(x, left=[48, 59, 194], right=[208, 35, 70]):
-        return [int(round((x * right[i]) + ((1 - x) * left[i]))) for i in range(3)]
+        return [int(round((x * right[i]) + ((1 - x) * left[i])))/(256) for i in range(3)]
 
-
-    def plotPhaseAndThrottle(tList, name):
+    def plotPhaseAndThrottle(tList):
         # Take N planar trajectories and calculate angles between them
         angs = [[] for _ in tList]
         for i in range(len(tList[0])):
@@ -273,40 +272,28 @@ Below is the code we use to plot, but the user can use whatever they are most co
                 else:
                     unitJ = tList[j][i][0:3] / np.linalg.norm(tList[j][i][0:3])
                     angs[j].append(np.arccos(np.dot(base, unitJ)))
-
-        fig = make_subplots(rows=2, cols=1)
+        fig, axes = plt.subplots(2, 1, figsize = (12, 8))
         for i, t in enumerate(tList):
             clr = colorScale(i / len(tList))
-            fig.add_trace(
-                go.Scatter(
-                    x=[X[6] for X in t],
-                    y=[A for A in angs[i]],
-                    mode="lines",
-                    name="Craft {} Phase".format(i),
-                    line=dict(color="rgb({},{},{})".format(clr[0], clr[1], clr[2])),
-                ),
-                row=1,
-                col=1,
-            )
-            fig.add_trace(
-                go.Scatter(
-                    x=[X[6] for X in t],
-                    y=[X[7] ** 2 + X[8] ** 2 + X[9] ** 2 for X in t],
-                    mode="lines",
-                    name="Craft {} Control".format(i),
-                    line=dict(color="rgb({},{},{})".format(clr[0], clr[1], clr[2])),
-                ),
-                row=2,
-                col=1,
-            )
-
-        fig.update_xaxes(title_text="Time", row=1, col=1)
-        fig.update_yaxes(title_text="Phase Angle", row=1, col=1)
-        fig.update_xaxes(title_text="Time", row=2, col=1)
-        fig.update_yaxes(title_text="Control Magnitude", row=2, col=1)
-
-        fig.show()
-        fig.write_html("./{}.html".format(name))
+            x1=[X[6] for X in t]
+            y1=[A for A in angs[i]]
+            axes[0].plot(x1, y1, color = [(clr[0]), (clr[1]), (clr[2])],
+                         label = "S/C "+str(i))
+        
+            x2=[X[6] for X in t]
+            y2=[X[7] ** 2 + X[8] ** 2 + X[9] ** 2 for X in t]
+            axes[1].plot(x2, y2, color = [(clr[0]), (clr[1]), (clr[2])])
+        axes[0].grid(True)
+        axes[0].set_ylabel("Phase Angle (rad)")
+    
+        axes[1].grid(True)
+        axes[1].set_xlabel("Time (ND)")
+        axes[1].set_ylabel("Control Magnitude")
+        plt.tight_layout()
+        axes[0].legend()
+        plt.savefig("Plots/MultiSpacecraftOptimization/multispacecraftoptimization.pdf",
+                    dpi = 500)
+        plt.show()
 
 
 Bringing everything together into the main function of the problem, we create out initial guesses, determine our final point, and call the :code:`MultiSpaceCraft` function.
@@ -332,7 +319,6 @@ We decide that we want 10 spacecraft and we will space them all out along the sa
 
         accs = np.linspace(0.015, 0.005, 2)
 
-        timeTrace = []
         for i, a in enumerate(accs):
             Times = []
             Data = MultSpaceCraft(TrajsIG, AllIGs, SetPointIG, a)
@@ -340,15 +326,8 @@ We decide that we want 10 spacecraft and we will space them all out along the sa
                 SetPoint = D[1]
                 Times.append(SetPoint[6] / (2.0 * np.pi))
 
-            timeTrace.append(go.Scatter(x=Times, y=Thetas, mode="lines"))
-
-        fig1 = go.Figure(data=timeTrace)
-        fig1.update_xaxes(title_text="Time (ND)")
-        fig1.update_yaxes(title_text="Theta (deg)")
-        # fig1.show()
-
         plotTrajs = Data[-1][0]
-        plotPhaseAndThrottle(plotTrajs, "Rendezvous")
+        plotPhaseAndThrottle(plotTrajs)
 
 
     ################################################################################
@@ -362,9 +341,9 @@ loop, where we make sure that every initial state is corresponding to a circular
 so we create a list of various non-dimensional accelerations in :code:`accs`. Now all we do is iterate over the list of accelerations and call our :code:`MultiSpaceCraft` function with all of the required inputs.
 What we get is an optimization problem that simultaneously solves for the optimal control of all spacecraft to converge on the final point.
 
-.. raw:: html
-
-    <iframe src="_static/Rendezvous.html" height=500em width=100%></iframe>
+.. figure:: _static/multispacecraftoptimization.svg
+    :width: 90%
+    :align: center
 
 The top plot shows the spacecraft converging to the final point, indicated by the phase angles between the spacecraft decreasing towards 0. The bottom plot shows the complex control histories of 10 spacecraft
 manuevering in tandem to satisfy a given objective. Any further analysis is outside of the scope of this tutorial and is left to the reader.
@@ -374,13 +353,9 @@ Full Code:
 .. code-block:: python
 
     import numpy as np
-    import asset as ast
+    import asset_asrl as ast
     import matplotlib.pyplot as plt
-    import seaborn as sns
     import time
-    import copy
-    from plotly.subplots import make_subplots
-    import plotly.graph_objects as go
 
 
     ################################################################################
@@ -393,26 +368,27 @@ Full Code:
     Cmodes = oc.ControlModes
     PhaseRegs = oc.PhaseRegionFlags
 
-    colpal = sns.color_palette
-
 
     ################################################################################
     ## System Dynamics
-    def ODE(mu, ltacc=False):
-        irows = 7
-        if ltacc != False:
-            irows += 3
-
-        args = vf.Arguments(irows)
-        r = args.head_3()
-        v = args.segment_3(3)
-        g = r.normalized_power3() * (-mu)
-        if ltacc != False:
-            thrust = args.tail_3() * ltacc
-            acc = g + thrust
-        else:
-            acc = g
-        return vf.Stack([v, acc])
+    class TwoBody(oc.ode_x_u.ode):
+        def __init__(self, P1mu, ltacc=False):
+            Xvars = 6
+            Uvars = 0
+            if ltacc != False:
+                Uvars = 3
+    
+            args = oc.ODEArguments(Xvars, Uvars)
+            r = args.head3()
+            v = args.segment_3(3)
+            g = r.normalized_power3() * (-P1mu)
+            if ltacc != False:
+                thrust = args.tail_3() * ltacc
+                acc = g + thrust
+            else:
+                acc = g
+            ode = vf.stack([v, acc])
+            super().__init__(ode, Xvars, Uvars)
 
 
     ################################################################################
@@ -429,8 +405,8 @@ Full Code:
 
 
     def MakeCircTraj(r, thetadeg, tf, n):
-        ode = oc.ode_6.ode(ODE(1))
-        integ = oc.ode_6.integrator(ode, 0.01)
+        ode = TwoBody(1)
+        integ = ode.integrator(.01)
         IGC = MakeCircIG(r, thetadeg)
         Temp = integ.integrate_dense(IGC, tf, n)
         Traj = []
@@ -450,7 +426,7 @@ Full Code:
         ocp = oc.OptimalControlProblem()
 
         ## create ODE governing all spacecraft
-        ode = oc.ode_6_3.ode(ODE(1, LTacc), 6, 3)
+        ode = TwoBody(1, LTacc)
 
         for i, T in enumerate(Trajs):
 
@@ -458,7 +434,6 @@ Full Code:
             phase = ode.phase(Tmodes.LGL5)
             ## Set Initial Guess
             phase.setTraj(T, NSegs)
-            phase.EnableVectorization = True
 
             ##Use block constant control
             phase.setControlMode(Cmodes.BlockConstant)
@@ -497,7 +472,7 @@ Full Code:
         LinkFun = Args(14).head(7) - Args(14).tail(7)
 
         ## Specifying for each call to collect the x variables indexed
-        ## by xlinkvars (position velocity time) at PhaseReg.Back (last state),
+        ## by xlinkvars (position velocity time) at PhaseRegs.Back (last state),
         ## these will be the first 7 arguments to each call of LinkFun
         linkregs = [PhaseRegs.Back]
         phasestolink = [[i] for i in range(0, len(Trajs))]
@@ -514,13 +489,13 @@ Full Code:
 
         ocp.addLinkParamEqualCon(Args(6).head3().dot(Args(6).tail3()), range(0, 6))
 
-        ocp.optimizer.OptLSMode = ast.LineSearchModes.L1
         ocp.optimizer.QPThreads = 8  # Equal to number of physical cores
-        ocp.optimizer.deltaH = 5.0e-8
-        ocp.optimizer.KKTtol = 1.0e-9
-        ocp.optimizer.BoundFraction = 0.997
+        ocp.optimizer.set_OptLSMode("L1")
+        ocp.optimizer.set_deltaH(5.0e-8)
+        ocp.optimizer.set_KKTtol(1.0e-9)
+        ocp.optimizer.set_BoundFraction(0.997)
         ocp.optimizer.PrintLevel = 1
-        ocp.optimizer.MaxLSIters = 1
+        ocp.optimizer.set_MaxLSIters(1)
 
         Data = []
 
@@ -552,7 +527,7 @@ Full Code:
             Flag = ocp.optimize()
             tf = time.perf_counter()
             print((tf - t0) * 1000.0)
-            if Flag == ast.ConvergenceFlags.NOTCONVERGED:
+            if Flag == ast.Solvers.ConvergenceFlags.NOTCONVERGED:
                 ocp.solve_optimize()
 
             Data.append(
@@ -564,10 +539,10 @@ Full Code:
     ################################################################################
     ## Plotting Utilities
     def colorScale(x, left=[48, 59, 194], right=[208, 35, 70]):
-        return [int(round((x * right[i]) + ((1 - x) * left[i]))) for i in range(3)]
+        return [int(round((x * right[i]) + ((1 - x) * left[i])))/(256) for i in range(3)]
 
 
-    def plotPhaseAndThrottle(tList, name):
+    def plotPhaseAndThrottle(tList):
         # Take N planar trajectories and calculate angles between them
         angs = [[] for _ in tList]
         for i in range(len(tList[0])):
@@ -578,41 +553,28 @@ Full Code:
                 else:
                     unitJ = tList[j][i][0:3] / np.linalg.norm(tList[j][i][0:3])
                     angs[j].append(np.arccos(np.dot(base, unitJ)))
-
-        fig = make_subplots(rows=2, cols=1)
+        fig, axes = plt.subplots(2, 1, figsize = (12, 8))
         for i, t in enumerate(tList):
             clr = colorScale(i / len(tList))
-            fig.add_trace(
-                go.Scatter(
-                    x=[X[6] for X in t],
-                    y=[A for A in angs[i]],
-                    mode="lines",
-                    name="Craft {} Phase".format(i),
-                    line=dict(color="rgb({},{},{})".format(clr[0], clr[1], clr[2])),
-                ),
-                row=1,
-                col=1,
-            )
-            fig.add_trace(
-                go.Scatter(
-                    x=[X[6] for X in t],
-                    y=[X[7] ** 2 + X[8] ** 2 + X[9] ** 2 for X in t],
-                    mode="lines",
-                    name="Craft {} Control".format(i),
-                    line=dict(color="rgb({},{},{})".format(clr[0], clr[1], clr[2])),
-                ),
-                row=2,
-                col=1,
-            )
-
-        fig.update_xaxes(title_text="Time", row=1, col=1)
-        fig.update_yaxes(title_text="Phase Angle", row=1, col=1)
-        fig.update_xaxes(title_text="Time", row=2, col=1)
-        fig.update_yaxes(title_text="Control Magnitude", row=2, col=1)
-
-        fig.show()
-        fig.write_html("./{}.html".format(name))
-
+            x1=[X[6] for X in t]
+            y1=[A for A in angs[i]]
+            axes[0].plot(x1, y1, color = [(clr[0]), (clr[1]), (clr[2])],
+                         label = "S/C "+str(i))
+        
+            x2=[X[6] for X in t]
+            y2=[X[7] ** 2 + X[8] ** 2 + X[9] ** 2 for X in t]
+            axes[1].plot(x2, y2, color = [(clr[0]), (clr[1]), (clr[2])])
+        axes[0].grid(True)
+        axes[0].set_ylabel("Phase Angle (rad)")
+    
+        axes[1].grid(True)
+        axes[1].set_xlabel("Time (ND)")
+        axes[1].set_ylabel("Control Magnitude")
+        plt.tight_layout()
+        axes[0].legend()
+        plt.savefig("Plots/MultiSpacecraftOptimization/multispacecraftoptimization.pdf",
+                    dpi = 500)
+        plt.show()
 
     ################################################################################
     ## Main
@@ -632,7 +594,6 @@ Full Code:
 
         accs = np.linspace(0.015, 0.005, 2)
 
-        timeTrace = []
         for i, a in enumerate(accs):
             Times = []
             Data = MultSpaceCraft(TrajsIG, AllIGs, SetPointIG, a)
@@ -640,15 +601,8 @@ Full Code:
                 SetPoint = D[1]
                 Times.append(SetPoint[6] / (2.0 * np.pi))
 
-            timeTrace.append(go.Scatter(x=Times, y=Thetas, mode="lines"))
-
-        fig1 = go.Figure(data=timeTrace)
-        fig1.update_xaxes(title_text="Time (ND)")
-        fig1.update_yaxes(title_text="Theta (deg)")
-        # fig1.show()
-
         plotTrajs = Data[-1][0]
-        plotPhaseAndThrottle(plotTrajs, "Rendezvous")
+        plotPhaseAndThrottle(plotTrajs)
 
 
     ################################################################################
