@@ -342,7 +342,7 @@ so we create a list of various non-dimensional accelerations in :code:`accs`. No
 What we get is an optimization problem that simultaneously solves for the optimal control of all spacecraft to converge on the final point.
 
 .. figure:: _static/multispacecraftoptimization.svg
-    :width: 90%
+    :width: 100%
     :align: center
 
 The top plot shows the spacecraft converging to the final point, indicated by the phase angles between the spacecraft decreasing towards 0. The bottom plot shows the complex control histories of 10 spacecraft
