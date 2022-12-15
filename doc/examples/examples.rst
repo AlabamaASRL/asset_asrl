@@ -8,6 +8,11 @@ New readers should begin at the beginning, since it's important to understand th
 .. toctree::
     :maxdepth: 2
 
+    halo
+    zermelo
+    zermelolink
+    MultiTarg
     Delta3
     ReentryExample
     CartPole
+    
