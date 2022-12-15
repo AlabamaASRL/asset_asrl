@@ -24,7 +24,32 @@ class ODE(oc.ODEBase):
         super().__init__(ode,4)
         
         
-        
+ 
+R,V,U = Args(9).tolist([(0,3),(3,3),(6,3)])
+
+Rhat = R.normalized()
+Nhat = R.cross(V).normalized()
+That = Nhat.cross(Rhat).normalized() 
+
+Mat1 = vf.ColMatrix([Rhat,That,Nhat])
+    
+Mat2 = vf.RowMatrix([Rhat,That,Nhat])
+
+Mat3 = Mat1*Mat2
+ 
+print(type(Mat3*U))
+    
+ 
+    
+ 
+    
+ 
+    
+ 
+    
+ 
+    
+ 
 ode = ODE()
 
 integ = ode.integrator("DP87",1)

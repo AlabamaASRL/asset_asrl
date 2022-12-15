@@ -367,7 +367,7 @@ if __name__ == "__main__":
     ocp.optimizer.QPThreads=8
 
     #ocp.optimizer.SoeMode = ast.Solvers.AlgorithmModes.OPTNO
-    ocp.optimize_solve()
+    ocp.solve_optimize_solve()
     
     
     

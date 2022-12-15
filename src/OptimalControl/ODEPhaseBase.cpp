@@ -1093,9 +1093,16 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
 
   obj.def("subStaticParams", &ODEPhaseBase::subStaticParams,
           ODEPhaseBase_subStaticParams);
-  obj.def("subVariables", &ODEPhaseBase::subVariables,
+
+  obj.def("subVariables", py::overload_cast<PhaseRegionFlags , VectorXi , VectorXd >(& ODEPhaseBase::subVariables),
           ODEPhaseBase_subVariables);
-  obj.def("subVariable", &ODEPhaseBase::subVariable, ODEPhaseBase_subVariable);
+  obj.def("subVariable", py::overload_cast<PhaseRegionFlags, int, double>(&ODEPhaseBase::subVariable), 
+      ODEPhaseBase_subVariable);
+
+  obj.def("subVariables", py::overload_cast<std::string, VectorXi, VectorXd>(&ODEPhaseBase::subVariables),
+      ODEPhaseBase_subVariables);
+  obj.def("subVariable", py::overload_cast<std::string, int, double>(&ODEPhaseBase::subVariable),
+      ODEPhaseBase_subVariable);
 
   obj.def("returnTraj", &ODEPhaseBase::returnTraj, ODEPhaseBase_returnTraj);
   obj.def("returnTrajRange", &ODEPhaseBase::returnTrajRange,
