@@ -61,21 +61,21 @@ Now that we have our guess generator fixed to handle arbitrary size inputs we ne
 
             # 3. Enforce start and end point
             if i == 0:
-                phase.addBoundaryValue(phaseRegs.Front, [0, 1], A)
-                phase.addBoundaryValue(phaseRegs.Front, [2], [0.0])
-                phase.addBoundaryValue(phaseRegs.Back, [0, 1], B)
+                phase.addBoundaryValue("Front", [0, 1], A)
+                phase.addBoundaryValue("Front", [2], [0.0])
+                phase.addBoundaryValue("Back", [0, 1], B)
             else:
-                phase.addBoundaryValue(phaseRegs.Back, [0, 1], B)
+                phase.addBoundaryValue("Back", [0, 1], B)
 
-            phase.addLUVarBound(phaseRegs.Path, 3, -np.pi, np.pi, 1)
+            phase.addLUVarBound("Path", 3, -np.pi, np.pi, 1)
 
             # 4. Add objective function
             phase.addDeltaTimeObjective(1.0)
             phase.addLowerDeltaTimeBound(0)
 
             # 5. Optimize
-            phase.optimizer.EContol = tol
-            phase.optimizer.KKTtol = tol
+            phase.optimizer.set_EContol(tol)
+            phase.optimizer.set_KKTtol(tol)
 
             # 6. add each phase to the optimal control problem
             ocp.addPhase(phase)
@@ -118,15 +118,15 @@ We defined the initial points such that the boat manuevers back to the initial s
 
 As for plots, first we have the comparison of the different wind models and how they affect the movement of the boat. We will take the same approach as last time and leave the technical analysis to you.
 
-.. raw:: html
-
-    <iframe src="_static/CompareWindModelsLink.html" height=500em width=100%></iframe>
+.. figure:: _static/CompareWindModelsLink.svg
+    :width: 100%
+    :align: center
 
 The same as last time, we have also a plot to compare how different boat speeds affect the final trajectory in a multi-phase problem.
 
-.. raw:: html
-
-    <iframe src="_static/CompareBoatSpeedLink.html" height=500em width=100%></iframe>
+.. figure:: _static/CompareBoatSpeedLink.svg
+    :width: 100%
+    :align: center
 
 Full Code
 #########
@@ -135,11 +135,15 @@ Full Code
 
     import asset as ast
     import numpy as np
-    from plotly.subplots import make_subplots
-    import plotly.graph_objects as go
-    import plotly.figure_factory as ff
+    import asset_asrl as ast
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import matplotlib as mpl
 
-
+    #Change a few of the matplotlib label sizes for ease of reading plots
+    params = {'xtick.labelsize': 12, 'ytick.labelsize' : 12,
+              'axes.labelsize':15, 'legend.fontsize':11}
+    mpl.rcParams.update(params) 
     ################################################################################
     ## Setup
     oc = ast.OptimalControl
@@ -151,7 +155,7 @@ Full Code
 
     ################################################################################
     ## Constants
-    nSeg = 350
+    nSeg = 150
     tol = 1e-12
     nVecPlot = 20
     vecPlotScale = 0.1
@@ -161,10 +165,12 @@ Full Code
     ## System Dynamics
     class Zermelo(oc.ode_x_u.ode):
         def __init__(self, vMax, wFunc):
-            XV = 2
-            UV = 1
-
-            args = vf.Arguments(XV + 1 + UV)
+            Xvars = 2
+            Uvars = 1
+        
+            #we use vf.Arguments as opposed to 
+            #oc.ODEArguments because of the time dependent model
+            args = vf.Arguments(Xvars + 1 + Uvars)
             xyt = args.head_3()
             th = args[3]
 
@@ -175,7 +181,7 @@ Full Code
 
             ode = vf.Stack([xD, yD])
 
-            super().__init__(ode, XV, UV)
+            super().__init__(ode, Xvars, Uvars)
 
 
     ################################################################################
@@ -249,21 +255,21 @@ Full Code
 
             # 3. Enforce start and end point
             if i == 0:
-                phase.addBoundaryValue(phaseRegs.Front, [0, 1], A)
-                phase.addBoundaryValue(phaseRegs.Front, [2], [0.0])
-                phase.addBoundaryValue(phaseRegs.Back, [0, 1], B)
+                phase.addBoundaryValue("Front", [0, 1], A)
+                phase.addBoundaryValue("Front", [2], [0.0])
+                phase.addBoundaryValue("Back", [0, 1], B)
             else:
-                phase.addBoundaryValue(phaseRegs.Back, [0, 1], B)
+                phase.addBoundaryValue("Back", [0, 1], B)
 
-            phase.addLUVarBound(phaseRegs.Path, 3, -np.pi, np.pi, 1)
+            phase.addLUVarBound("Path", 3, -np.pi, np.pi, 1)
 
             # 4. Add objective function
             phase.addDeltaTimeObjective(1.0)
             phase.addLowerDeltaTimeBound(0)
 
             # 5. Optimize
-            phase.optimizer.EContol = tol
-            phase.optimizer.KKTtol = tol
+            phase.optimizer.set_EContol(tol)
+            phase.optimizer.set_KKTtol(tol)
 
             # 6. add each phase to the optimal control problem
             ocp.addPhase(phase)
@@ -284,46 +290,38 @@ Full Code
 
     ################################################################################
     ## 2D Plotting
-    def plot2DTrajList(tList, name):
-        fig = make_subplots(rows=1, cols=2)
+    def colorScale(x, left=[48, 59, 194], right=[208, 35, 70]):
+        return [int(round((x * right[i]) + ((1 - x) * left[i])))/(256) for i in range(3)]
+
+    def plot2DTrajList(tList):
+        fig, axes = plt.subplots(1, 2, figsize = (12, 8))
         for i, t in enumerate(tList):
-            fig.add_trace(
-                go.Scatter(
-                    x=[X[0] for X in t],
-                    y=[X[1] for X in t],
-                    mode="lines",
-                    name="Path {}".format(i),
-                ),
-                row=1,
-                col=1,
-            )
-            fig.add_trace(
-                go.Scatter(
-                    x=[X[2] for X in t],
-                    y=[X[3] for X in t],
-                    mode="lines",
-                    name="Control {}".format(i),
-                ),
-                row=1,
-                col=2,
-            )
-
-        fig.update_layout(scene_aspectmode="data")
-
-        fig.update_xaxes(title_text="X", row=1, col=1)
-        fig.update_yaxes(title_text="Y", row=1, col=1)
-        fig.update_xaxes(title_text="Time", row=1, col=2)
-        fig.update_yaxes(title_text="Theta", row=1, col=2)
-
-        fig.show()
-        fig.write_html("./{}.html".format(name))
+            clr = colorScale(i / len(tList))
+            axes[0].plot([X[0] for X in t], [X[1] for X in t],
+                         color = [(clr[0]), (clr[1]), (clr[2])],
+                         label = "Path "+str(i))
+        
+            axes[1].plot([X[2] for X in t], [X[3] for X in t],
+                         color = [(clr[0]), (clr[1]), (clr[2])])
+        axes[0].grid(True)
+        axes[0].set_xlabel("X")
+        axes[0].set_ylabel("Y")
+    
+        axes[1].grid(True)
+        axes[1].set_xlabel("Time")
+        axes[1].set_ylabel("$\\theta$ (rad)")
+        axes[0].legend()
+        plt.tight_layout()
+        plt.savefig("Plots/Zermelo/CompareWindModelsLink.svg",
+                    dpi = 500)
+        plt.show()
 
 
     # -------------------------------------
 
 
-    def plot2DTrajListVF(tList, name, wFunc_num):
-        fig = make_subplots(rows=1, cols=2)
+    def plot2DTrajListVF(tList, wFunc_num):
+        fig, axes = plt.subplots(1, 2, figsize = (12, 8))
 
         # Generate vector field for trajectory plot
         maxX = max([max([x[0] for x in t]) for t in tList])
@@ -340,47 +338,35 @@ Full Code
         vPlot = np.zeros_like(xPlot)
         for i in range(nVecPlot):
             for j in range(nVecPlot):
-                u_ij, v_ij = wFunc_num([xPlot[i, j], yPlot[i, j], 0])
+                u_ij, v_ij = wFunc_num([xPlot[i, j], yPlot[i, j]])
                 uPlot[i, j] = u_ij
                 vPlot[i, j] = v_ij
-
-        qv = ff.create_quiver(xPlot, yPlot, uPlot, vPlot)
-
-        for d in qv.data:
-            fig.add_trace(go.Scatter(x=d["x"], y=d["y"], name="Wind"), row=1, col=1)
+            
+        QV = axes[0].quiver(xPlot, yPlot, uPlot, vPlot, label = "Wind", color = "blue")
+    
 
         # Overlay trajectories and control
         for i, t in enumerate(tList):
-            fig.add_trace(
-                go.Scatter(
-                    x=[X[0] for X in t],
-                    y=[X[1] for X in t],
-                    mode="lines",
-                    name="Path {}".format(i),
-                ),
-                row=1,
-                col=1,
-            )
-            fig.add_trace(
-                go.Scatter(
-                    x=[X[2] for X in t],
-                    y=[X[3] for X in t],
-                    mode="lines",
-                    name="Control {}".format(i),
-                ),
-                row=1,
-                col=2,
-            )
-
-        fig.update_layout(scene_aspectmode="data")
-
-        fig.update_xaxes(title_text="X", row=1, col=1)
-        fig.update_yaxes(title_text="Y", row=1, col=1)
-        fig.update_xaxes(title_text="Time", row=1, col=2)
-        fig.update_yaxes(title_text="Theta", row=1, col=2)
-
-        fig.show()
-        fig.write_html("./{}.html".format(name))
+            clr = colorScale(i / len(tList))
+            axes[0].plot([X[0] for X in t], [X[1] for X in t],
+                         color = [(clr[0]), (clr[1]), (clr[2])],
+                         label = "Path "+str(i))
+        
+            axes[1].plot([X[2] for X in t], [X[3] for X in t],
+                         color = [(clr[0]), (clr[1]), (clr[2])])
+        
+        axes[0].grid(True)
+        axes[0].set_xlabel("X")
+        axes[0].set_ylabel("Y")
+    
+        axes[1].grid(True)
+        axes[1].set_xlabel("Time")
+        axes[1].set_ylabel("$\\theta$ (rad)")
+        axes[0].legend(ncol =2)
+        plt.tight_layout()
+        plt.savefig("Plots/Zermelo/CompareBoatSpeedLink.svg",
+                    dpi = 500)
+        plt.show()
 
 
     ################################################################################
@@ -412,7 +398,6 @@ Full Code
                 test3,
                 test4,
             ],
-            "CompareWindModelsLink",
         )
 
 
@@ -424,7 +409,7 @@ Full Code
         C = np.array([1, -2])
         D = A
 
-        vMRange = np.linspace(1.85, 6, num=25)
+        vMRange = np.linspace(1.85, 4., num=25)
         trajs = []
         for vM in vMRange:
             trajs.append(navigate([A, B, C, D], vM=vM, wF=variableDirWind))
@@ -433,7 +418,6 @@ Full Code
 
         plot2DTrajListVF(
             trajs,
-            "CompareBoatSpeedLink",
             lambda xyt: (vdwx.compute(xyt), vdwy.compute(xyt)),
         )
 

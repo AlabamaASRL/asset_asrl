@@ -11,15 +11,15 @@ Problem Setup
 -------------
 
 All python scripts begin by importing necessary external packages.
-Obviously, we will need ASSET, but we will also use numpy for arrays and plotly for graphing.
+Obviously, we will need ASSET, but we will also use numpy for arrays and matplotlib for graphing.
 
 .. code-block:: python
 
-    import asset as ast
+    import asset_asrl as ast
+    from asset_asrl.Astro.AstroModels import CR3BP
     import numpy as np
-    import plotly as py
-    import plotly.graph_objects as go
     import copy
+    import matplotlib.pyplot as plt
 
 Next, we will define shorthand abbreviations for some of ASSET's common functionality.
 :code:`OptimalControl` and :code:`VectorFunctions` are the two primary submodules, and it makes it easier on us if we don't have to type the full name every time.
@@ -39,7 +39,7 @@ If they are unfamiliar, you should go back to the introductory tutorials.
 
 Now we define some system parameters.
 These quantities are known ahead of time and will not change during the course of continuation or optimization.
-For our test problem, we are analyzing the Earth-Moon system, so the appropriate masses go here.
+For our test problem, we are analyzing the Earth-Moon system, so the appropriate masses and characteristic distance go here.
 Also, we define a delta-t for our integrator step.
 
 .. code-block:: python
@@ -48,6 +48,7 @@ Also, we define a delta-t for our integrator step.
     # Constants
     mE = 5.9724e24  # Earth mass
     mM = 0.07346e24  # Moon mass
+    lstar = 385000 #characteristic distance (km)
 
     dt = 3.1415 / 10000
 
@@ -63,10 +64,10 @@ The :code:`dt` here is the maximum allowable time step whenever the integrator i
     ################################################################################
     # System Dynamics
     mu = mM / (mE + mM)
-    ode = ast.CR3BP.ode(mu)
+    ode = CR3BP(mE, mM, lstar)
 
     # Create integrator (= propagator)
-    odeItg = ast.CR3BP.integrator(ode, dt)
+    odeItg = ode.integrator(dt)
 
 
 
@@ -97,7 +98,7 @@ Here is the python implementation, with discussion below:
 
     ################################################################################
     # Solve for periodic orbit using initial guess ig
-    def solvePeriodic(ig, tf, fixInit=[0, 1, 2]):
+    def solvePeriodic(ig, tf, ode, odeItg, fixInit=[0, 1, 2]):
         # 1: Integrate initial guess
         steps = 1000
         trajGuess = odeItg.integrate_dense(ig, tf, steps)
@@ -182,19 +183,20 @@ With the arguments established, the code is presented with discussion below:
     def contin(ig, tf, cIdx, dx, lim, fixInit=[0, 1, 2]):
         trajList = []
         # Calculate the first orbit
-        trajList.append(solvePeriodic(ig, tf, fixInit))
+        trajList.append(solvePeriodic(ig, tf, ode, odeItg, fixInit))
         sign = np.sign(trajList[-1][0][cIdx] - lim)
         signLast = sign
         while sign == signLast:
             # Our guess for this step is the result of the last step
-            g = trajList[-1][0]
-            t = trajList[-1][-1][6]
+            g = np.copy(trajList[-1][0])
+            t = np.copy(trajList[-1][-1][6])
+            print(g)
 
             # Increment the cIdx'th term
             g[cIdx] += dx
-
+ 
             # Pass to solvePeriodic
-            sol = solvePeriodic(g, t, fixInit)
+            sol = solvePeriodic(g, t, ode, odeItg, fixInit)
 
             # Save result
             trajList.append(copy.deepcopy(sol))
@@ -202,7 +204,6 @@ With the arguments established, the code is presented with discussion below:
             # Check limit condition
             signLast = sign
             sign = np.sign(trajList[-1][0][cIdx] - lim)
-
         return trajList
 
 As you can see, continuation can be as simple as wrapping a :code:`solvePeriodic` call in a while loop that terminates at the given :code:`lim`.
@@ -220,28 +221,37 @@ First, here's a quick plotting function to graph the list of trajectories we exp
 
 .. code-block:: python
 
-    ################################################################################
-    # Use plotly to plot a list of trajectories
-    def plotTrajList(tList, name):
+    def plotTrajList(tList, proj = False):
         data = []
-        layout = go.Layout(showlegend=True)
-        for t in tList:
-            data.append(
-                go.Scatter3d(
-                    x=[X[0] for X in t],
-                    y=[X[1] for X in t],
-                    z=[X[2] for X in t],
-                    mode="lines",
-                )
-            )
+        if proj == False:
+            fig, axes = plt.subplots(figsize = (8, 8))
+            for t in tList:
+                axes.plot([x[0] for x in t], [x[1] for x in t], color = "red")
+            axes.grid(True)
+            plt.tight_layout()
+            axes.set_xlabel("X")
+            axes.set_ylabel("Y")
+            plt.tight_layout()
+            plt.savefig("Plots/OrbitContinuation/Lyapunov.svg",
+                    dpi = 500)
+            plt.show()
+        elif proj == True:
+            fig2=plt.figure(figsize=(8,8))
+            axes = fig2.add_subplot(projection='3d')
+        
+            for t in tList[::5]:
+                axes.plot3D([x[0] for x in t], [x[1] for x in t], [x[2] for x in t],
+                            color = "blue")
+            axes.set_xlabel("X")
+            axes.set_ylabel("Y")
+            axes.set_zlabel("Z")
+        
+            plt.tight_layout()
+            plt.savefig("Plots/OrbitContinuation/Halo.svg",
+                    dpi = 500)
+            plt.show()
 
-        fig = go.Figure(data=data, layout=layout)
-        fig.update_layout(scene_aspectmode="data")
-
-        fig.show()
-        fig.write_html("./{}.html".format(name))
-
-We'll skip discussing this function in detail since Plotly has it's own documentation.
+We'll skip discussing this function in detail since matplotlib has it's own documentation.
 
 Now, on to what we promised from the start, L1 Lyapunovs:
 
@@ -263,7 +273,7 @@ Now, on to what we promised from the start, L1 Lyapunovs:
         t2 = [[x[0], -x[1], x[2]] for x in t]
         tlp.append(tt + t2)
 
-    plotTrajList(tlp, "L1Lyapunov")
+    plotTrajList(tlp)
 
 We pull an initial guess from any reputable source (e.g. Grebow_), and hot-start the continuation with a preliminary solve.
 In this case, we are reducing the inital :math:`x` with each step, as indicated by :code:`cIdx=0` and :code:`dx=-0.001`.
@@ -273,9 +283,9 @@ A smarter continuation scheme would be necessary to converge the extreme orbits.
 Also, we do a bit of trickery with the plotting.
 Since it's more stable to solve for half-orbits, we duplicate the trajectory over the x-z plane so that we see the full orbit.
 
-.. raw:: html
-
-    <iframe src="_static/L1Lyapunov.html" height=500em width=100%></iframe>
+.. figure:: _static/Lyapunov.svg
+    :width: 100%
+    :align: center
 
 .. _Grebow: https://engineering.purdue.edu/people/kathleen.howell.1/Publications/Masters/2006_Grebow.pdf
 
@@ -302,8 +312,177 @@ Again, we truncate early.
         t2 = [[x[0], -x[1], x[2]] for x in t]
         tlp.append(tt + t2)
 
-    plotTrajList(tlp, "NorthL1Halo")
+    plotTrajList(tlp)
 
-.. raw:: html
+.. figure:: _static/Halo.svg
+    :width: 100%
+    :align: center
 
-    <iframe src="_static/NorthL1Halo.html" height=500em width=100%></iframe>
+Full Code
+#########
+
+.. code-block:: python
+
+    import asset_asrl as ast
+    from asset_asrl.Astro.AstroModels import CR3BP
+    import numpy as np
+    import copy
+    import matplotlib.pyplot as plt
+
+
+    ################################################################################
+    # Setup
+    oc = ast.OptimalControl
+    vf = ast.VectorFunctions
+
+    phaseRegs = oc.PhaseRegionFlags
+    tModes = oc.TranscriptionModes
+
+    ################################################################################
+    # Constants
+    mE = 5.9724e24  # Earth mass (kg)
+    mM = 0.07346e24  # Moon mass (kg)
+    lstar = 385000 #characteristic distance (km)
+
+    dt = 3.1415 / 10000
+
+    ################################################################################
+    # System Dynamics
+    mu = mM / (mE + mM)
+    ode = CR3BP(mE, mM, lstar)
+
+    # Create integrator (= propagator)
+    odeItg = ode.integrator(dt)
+
+
+    ################################################################################
+    # Solve for periodic orbit using initial guess ig
+    def solvePeriodic(ig, tf, ode, odeItg, fixInit=[0, 1, 2] ):
+        # 1: Integrate initial guess
+        steps = 1000
+        trajGuess = odeItg.integrate_dense(ig, tf, steps)
+
+        # 2: Create optimal control phase and assign guess
+        odePhase = ode.phase("LGL3")  # LGL-3 collocation
+        odePhase.Threads = 8  # Equal to number of physical cores
+
+        nSeg = 150  # number of segments
+        odePhase.setTraj(trajGuess, nSeg)
+        for idx in fixInit:
+            odePhase.addBoundaryValue("Front", [idx], [ig[idx]])
+        odePhase.addBoundaryValue(
+            "Front", [3, 6], [0.0, 0.0]  # Initial vx, t = 0
+        )
+        odePhase.addBoundaryValue(
+            "Back", [1, 3, 5], [0.0, 0.0, 0.0]  # Final y, vx, vz = 0
+        )
+
+        # 4: Solve
+        tol = 1e-12
+        odePhase.optimizer.set_EContol(tol)  # Equality constraint tolerance
+        odePhase.solve()
+
+        # 5: Get solution and return
+        trajSol = odePhase.returnTraj()
+    
+
+        return trajSol
+
+    ################################################################################
+    # Perform basic continuation of ig along x[cIdx] with step dx up to lim
+    def contin(ig, tf, cIdx, dx, lim, fixInit=[0, 1, 2]):
+        trajList = []
+        # Calculate the first orbit
+        trajList.append(solvePeriodic(ig, tf, ode, odeItg, fixInit))
+        sign = np.sign(trajList[-1][0][cIdx] - lim)
+        signLast = sign
+        while sign == signLast:
+            # Our guess for this step is the result of the last step
+            g = np.copy(trajList[-1][0])
+            t = np.copy(trajList[-1][-1][6])
+            print(g)
+
+            # Increment the cIdx'th term
+            g[cIdx] += dx
+ 
+            # Pass to solvePeriodic
+            sol = solvePeriodic(g, t, ode, odeItg, fixInit)
+
+            # Save result
+            trajList.append(copy.deepcopy(sol))
+
+            # Check limit condition
+            signLast = sign
+            sign = np.sign(trajList[-1][0][cIdx] - lim)
+        return trajList
+
+
+
+    ################################################################################
+    # Use plotly to plot a list of trajectories
+    def plotTrajList(tList, name, proj = False):
+        data = []
+        if proj == False:
+            fig, axes = plt.subplots(figsize = (8, 8))
+            for t in tList:
+                axes.plot([x[0] for x in t], [x[1] for x in t], color = "red")
+            axes.grid(True)
+            plt.tight_layout()
+            axes.set_xlabel("X")
+            axes.set_ylabel("Y")
+            plt.tight_layout()
+            plt.savefig("Plots/OrbitContinuation/Lyapunov.svg",
+                    dpi = 500)
+            plt.show()
+        elif proj == True:
+            fig2=plt.figure(figsize=(8,8))
+            axes = fig2.add_subplot(projection='3d')
+        
+            for t in tList[::5]:
+                axes.plot3D([x[0] for x in t], [x[1] for x in t], [x[2] for x in t],
+                            color = "blue")
+            axes.set_xlabel("X")
+            axes.set_ylabel("Y")
+            axes.set_zlabel("Z")
+        
+            plt.tight_layout()
+            plt.savefig("Plots/OrbitContinuation/Halo.svg",
+                    dpi = 500)
+            plt.show()
+    
+    ################################################################################
+    # Continuation - L1 Lyapunov
+    ig = np.zeros((7))
+    ig[0] = 0.8234  # Initial x
+    ig[4] = 0.1263  # Initial vy
+    tf = 1.3
+    tj = solvePeriodic(ig, tf, ode, odeItg)
+    tl = contin(tj[0], tj[-1][6], cIdx=0, dx=-0.001, lim=0.77)
+
+    tlp = []
+
+    for t in tl:
+        tt = copy.deepcopy(t)
+        t.reverse()
+        t2 = [[x[0], -x[1], x[2]] for x in t]
+        tlp.append(tt + t2)
+
+    plotTrajList(tlp)
+
+    ################################################################################
+    # Continuation - Northern L1 Halo
+    ig = np.zeros((7))
+    ig[0] = 0.8234
+    ig[4] = 0.1263
+    tf = 1.3715
+    tj = solvePeriodic(ig, tf, ode, odeItg, fixInit=[1, 2, 5])
+    tl = contin(tj[0], tj[-1][6], cIdx=2, dx=0.001, lim=0.214, fixInit=[1, 2, 5])
+
+    tlp = []
+    for t in tl:
+        tt = copy.deepcopy(t)
+        t.reverse()
+        t2 = [[x[0], -x[1], x[2]] for x in t]
+        tlp.append(tt + t2)
+
+    plotTrajList(tlp, proj = True)

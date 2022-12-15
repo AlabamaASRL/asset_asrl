@@ -20,11 +20,15 @@ We'll also go ahead and establish the standard shorthand conventions.
 
 .. code-block:: python
 
-    import asset as ast
+    import asset_asrl as ast
     import numpy as np
-    from plotly.subplots import make_subplots
-    import plotly.graph_objects as go
-    import plotly.figure_factory as ff
+    import matplotlib.pyplot as plt
+    import matplotlib as mpl
+
+    #Change a few of the matplotlib label sizes for ease of reading plots
+    params = {'xtick.labelsize': 12, 'ytick.labelsize' : 12,
+              'axes.labelsize':15, 'legend.fontsize':11}
+    mpl.rcParams.update(params) 
 
 
     ################################################################################
@@ -63,21 +67,23 @@ Look below.
     ## System Dynamics
     class Zermelo(oc.ode_x_u.ode):
         def __init__(self, vMax, wFunc):
-            XV = 2  # Number of state variables
-            UV = 1  # Number of control variables
-
-            args = vf.Arguments(XV + 1 + UV)  # State + Time + Control
+            Xvars = 2
+            Uvars = 1
+        
+            #we use vf.Arguments as opposed to 
+            #oc.ODEArguments because of the time dependent model
+            args = vf.Arguments(Xvars + 1 + Uvars)
             xyt = args.head_3()
             th = args[3]
 
-            wx, wy = wFunc(xyt)  # Get X and Y wind components
+            wx, wy = wFunc(xyt)
 
             xD = vMax * vf.cos(th) + wx
             yD = vMax * vf.sin(th) + wy
 
             ode = vf.Stack([xD, yD])
 
-            super().__init__(ode, XV, UV)
+            super().__init__(ode, Xvars, Uvars)
 
 The constructor argument :code:`wFunc` is any function that returns the :math:`x` and :math:`y` components of wind when it's passed the current location and time, :code:`xyt`.
 As long as :code:`wFunc` has the correct input and output signatures, and it operates on ASSET VectorFunctions, you can construct an instance of the :code:`Zermelo` ODE that captures those dynamics.
@@ -167,19 +173,18 @@ Based on those inputs, we need to:
         phase.setTraj(trajG, nSeg)
 
         # 3. Enforce start and end points
-        phase.addBoundaryValue(phaseRegs.Front, [0, 1], A)
-        phase.addBoundaryValue(phaseRegs.Front, [2], [0.0])
-        phase.addBoundaryValue(phaseRegs.Back, [0, 1], B)
+        phase.addBoundaryValue("Front", [0, 1], A)
+        phase.addBoundaryValue("Front", [2], [0.0])
+        phase.addBoundaryValue("Back", [0, 1], B)
 
-        phase.addLUVarBound(phaseRegs.Path, 3, -np.pi, np.pi, 1)
+        phase.addLUVarBound("Path", 3, -np.pi, np.pi, 1)
 
         # 4. Add objective function
         phase.addDeltaTimeObjective(1.0)
 
         # 5. Optimize
-        phase.optimizer.EContol = tol
-        phase.optimizer.KKTtol = tol
-        phase.EnableVectorization = True
+        phase.optimizer.set_EContol(tol)
+        phase.optimizer.set_KKTtol(tol)
         phase.solve_optimize()
 
         return phase.returnTraj()
@@ -230,15 +235,15 @@ I'm omitting the in-line definition of the plotting functions, but you can find 
         )
         test4 = navigate(A, B, vM=vM, wF=variableDirWind)
 
-        plot2DTrajList([test1, test2, test3, test4], "CompareWindModels")
+        plot2DTrajList([test1, test2, test3, test4])
 
 The starting and ending points are defined as 2-element numpy arrays, and boat speed :code:`vM` is arbitrarily set to 1.25.
 Then we simply call :code:`navigate` with various wind functions and see what happens.
 Since this isn't a technical paper, I'll save the analysis and just let you enjoy the plots.
 
-.. raw:: html
-
-    <iframe src="_static/CompareWindModels.html" height=500em width=100%></iframe>
+.. figure:: _static/CompareWindModels.svg
+    :width: 100%
+    :align: center
 
 
 We may also want to know for a given wind system, what happens if we change the boat speed.
@@ -260,16 +265,15 @@ We may also want to know for a given wind system, what happens if we change the 
 
         plot2DTrajListVF(
             trajs,
-            "CompareBoatSpeed",
             lambda xyt: (vdwx.compute(xyt), vdwy.compute(xyt)),
         )
 
 Note that in this code, there's a bit of a work-around to make the ASSET-syntax :code:`variableDirWind` behave like a numeric function.
 That's just so we can plot it as a vector field below:
 
-.. raw:: html
-
-    <iframe src="_static/CompareBoatSpeed.html" height=500em width=100%></iframe>
+.. figure:: _static/CompareBoatSpeed.svg
+    :width: 100%
+    :align: center
 
 
 Again, this is not the place for technical analysis of results.
@@ -285,11 +289,15 @@ How would the phase boundary conditions need to change?
 
 .. code-block:: python
 
-    import asset as ast
+    import asset_asrl as ast
     import numpy as np
-    from plotly.subplots import make_subplots
-    import plotly.graph_objects as go
-    import plotly.figure_factory as ff
+    import matplotlib.pyplot as plt
+    import matplotlib as mpl
+
+    #Change a few of the matplotlib label sizes for ease of reading plots
+    params = {'xtick.labelsize': 12, 'ytick.labelsize' : 12,
+              'axes.labelsize':15, 'legend.fontsize':11}
+    mpl.rcParams.update(params) 
 
 
     ################################################################################
@@ -313,10 +321,12 @@ How would the phase boundary conditions need to change?
     ## System Dynamics
     class Zermelo(oc.ode_x_u.ode):
         def __init__(self, vMax, wFunc):
-            XV = 2
-            UV = 1
-
-            args = vf.Arguments(XV + 1 + UV)
+            Xvars = 2
+            Uvars = 1
+        
+            #we use vf.Arguments as opposed to 
+            #oc.ODEArguments because of the time dependent model
+            args = vf.Arguments(Xvars + 1 + Uvars)
             xyt = args.head_3()
             th = args[3]
 
@@ -327,7 +337,7 @@ How would the phase boundary conditions need to change?
 
             ode = vf.Stack([xD, yD])
 
-            super().__init__(ode, XV, UV)
+            super().__init__(ode, Xvars, Uvars)
 
 
     ################################################################################
@@ -383,19 +393,18 @@ How would the phase boundary conditions need to change?
         phase.setTraj(trajG, nSeg)
 
         # 3. Enforce start and end points
-        phase.addBoundaryValue(phaseRegs.Front, [0, 1], A)
-        phase.addBoundaryValue(phaseRegs.Front, [2], [0.0])
-        phase.addBoundaryValue(phaseRegs.Back, [0, 1], B)
+        phase.addBoundaryValue("Front", [0, 1], A)
+        phase.addBoundaryValue("Front", [2], [0.0])
+        phase.addBoundaryValue("Back", [0, 1], B)
 
-        phase.addLUVarBound(phaseRegs.Path, 3, -np.pi, np.pi, 1)
+        phase.addLUVarBound("Path", 3, -np.pi, np.pi, 1)
 
         # 4. Add objective function
         phase.addDeltaTimeObjective(1.0)
 
         # 5. Optimize
-        phase.optimizer.EContol = tol
-        phase.optimizer.KKTtol = tol
-        phase.EnableVectorization = True
+        phase.optimizer.set_EContol(tol)
+        phase.optimizer.set_KKTtol(tol)
         phase.solve_optimize()
 
         return phase.returnTraj()
@@ -403,46 +412,40 @@ How would the phase boundary conditions need to change?
 
     ################################################################################
     ## 2D Plotting
-    def plot2DTrajList(tList, name):
-        fig = make_subplots(rows=1, cols=2)
+    def colorScale(x, left=[48, 59, 194], right=[208, 35, 70]):
+        return [int(round((x * right[i]) + ((1 - x) * left[i])))/(256) for i in range(3)]
+
+    def plot2DTrajList(tList):
+    
+        fig, axes = plt.subplots(1, 2, figsize = (12, 8))
         for i, t in enumerate(tList):
-            fig.add_trace(
-                go.Scatter(
-                    x=[X[0] for X in t],
-                    y=[X[1] for X in t],
-                    mode="lines",
-                    name="Path {}".format(i),
-                ),
-                row=1,
-                col=1,
-            )
-            fig.add_trace(
-                go.Scatter(
-                    x=[X[2] for X in t],
-                    y=[X[3] for X in t],
-                    mode="lines",
-                    name="Control {}".format(i),
-                ),
-                row=1,
-                col=2,
-            )
-
-        fig.update_layout(scene_aspectmode="data")
-
-        fig.update_xaxes(title_text="X", row=1, col=1)
-        fig.update_yaxes(title_text="Y", row=1, col=1)
-        fig.update_xaxes(title_text="Time", row=1, col=2)
-        fig.update_yaxes(title_text="Theta", row=1, col=2)
-
-        fig.show()
-        fig.write_html("./{}.html".format(name))
-
+            clr = colorScale(i / len(tList))
+            axes[0].plot([X[0] for X in t], [X[1] for X in t],
+                         color = [(clr[0]), (clr[1]), (clr[2])],
+                         label = "Path "+str(i))
+        
+            axes[1].plot([X[2] for X in t], [X[3] for X in t],
+                         color = [(clr[0]), (clr[1]), (clr[2])])
+        axes[0].grid(True)
+        axes[0].set_xlabel("X")
+        axes[0].set_ylabel("Y")
+    
+        axes[1].grid(True)
+        axes[1].set_xlabel("Time")
+        axes[1].set_ylabel("$\\theta$ (rad)")
+        axes[0].legend()
+        plt.tight_layout()
+        plt.savefig("Plots/Zermelo/CompareWindModels.svg",
+                    dpi = 500)
+        plt.show()
 
     # -------------------------------------
 
 
-    def plot2DTrajListVF(tList, name, wFunc_num):
-        fig = make_subplots(rows=1, cols=2)
+    def plot2DTrajListVF(tList, wFunc_num):
+        #fig = make_subplots(rows=1, cols=2)
+    
+        fig, axes = plt.subplots(1, 2, figsize = (12, 8))
 
         # Generate vector field for trajectory plot
         maxX = max([max([x[0] for x in t]) for t in tList])
@@ -459,47 +462,35 @@ How would the phase boundary conditions need to change?
         vPlot = np.zeros_like(xPlot)
         for i in range(nVecPlot):
             for j in range(nVecPlot):
-                u_ij, v_ij = wFunc_num([xPlot[i, j], yPlot[i, j], 0])
+                u_ij, v_ij = wFunc_num([xPlot[i, j], yPlot[i, j]])
                 uPlot[i, j] = u_ij
                 vPlot[i, j] = v_ij
-
-        qv = ff.create_quiver(xPlot, yPlot, uPlot, vPlot)
-
-        for d in qv.data:
-            fig.add_trace(go.Scatter(x=d["x"], y=d["y"], name="Wind"), row=1, col=1)
+            
+        QV = axes[0].quiver(xPlot, yPlot, uPlot, vPlot, label = "Wind", color = "blue")
+    
 
         # Overlay trajectories and control
         for i, t in enumerate(tList):
-            fig.add_trace(
-                go.Scatter(
-                    x=[X[0] for X in t],
-                    y=[X[1] for X in t],
-                    mode="lines",
-                    name="Path {}".format(i),
-                ),
-                row=1,
-                col=1,
-            )
-            fig.add_trace(
-                go.Scatter(
-                    x=[X[2] for X in t],
-                    y=[X[3] for X in t],
-                    mode="lines",
-                    name="Control {}".format(i),
-                ),
-                row=1,
-                col=2,
-            )
-
-        fig.update_layout(scene_aspectmode="data")
-
-        fig.update_xaxes(title_text="X", row=1, col=1)
-        fig.update_yaxes(title_text="Y", row=1, col=1)
-        fig.update_xaxes(title_text="Time", row=1, col=2)
-        fig.update_yaxes(title_text="Theta", row=1, col=2)
-
-        fig.show()
-        fig.write_html("./{}.html".format(name))
+            clr = colorScale(i / len(tList))
+            axes[0].plot([X[0] for X in t], [X[1] for X in t],
+                         color = [(clr[0]), (clr[1]), (clr[2])],
+                         label = "Path "+str(i))
+        
+            axes[1].plot([X[2] for X in t], [X[3] for X in t],
+                         color = [(clr[0]), (clr[1]), (clr[2])])
+        
+        axes[0].grid(True)
+        axes[0].set_xlabel("X")
+        axes[0].set_ylabel("Y")
+    
+        axes[1].grid(True)
+        axes[1].set_xlabel("Time")
+        axes[1].set_ylabel("$\\theta$ (rad)")
+        axes[0].legend(ncol =2)
+        plt.tight_layout()
+        plt.savefig("Plots/Zermelo/CompareBoatSpeed.svg",
+                    dpi = 500)
+        plt.show()
 
 
     ################################################################################
@@ -524,7 +515,7 @@ How would the phase boundary conditions need to change?
         )
         test4 = navigate(A, B, vM=vM, wF=variableDirWind)
 
-        plot2DTrajList([test1, test2, test3, test4], "CompareWindModels")
+        plot2DTrajList([test1, test2, test3, test4])
 
 
     ################################################################################
@@ -542,7 +533,6 @@ How would the phase boundary conditions need to change?
 
         plot2DTrajListVF(
             trajs,
-            "CompareBoatSpeed",
             lambda xyt: (vdwx.compute(xyt), vdwy.compute(xyt)),
         )
 
