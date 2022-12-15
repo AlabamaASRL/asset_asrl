@@ -677,6 +677,13 @@ public:
     this->subVariables(reg, indices, vals);
   }
 
+  void subVariables(std::string reg, VectorXi indices, VectorXd vals) {
+      this->subVariables(strto_PhaseRegionFlag(reg), indices, vals);
+  }
+  void subVariable(std::string reg, int var, double val) {
+      this->subVariable(strto_PhaseRegionFlag(reg), var, val);
+  }
+
   std::vector<Eigen::VectorXd> returnTraj() const { return this->ActiveTraj; }
 
   std::vector<Eigen::VectorXd> returnTrajRange(int num, double tl, double th) {

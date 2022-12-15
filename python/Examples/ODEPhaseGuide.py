@@ -179,3 +179,311 @@ SPVars = [0,1]
 Values  = [1.0,4.0]
 phase.addBoundaryValue("StaticParams",SPVars,Values)
 
+
+phase.addDeltaVarEqualCon(0,1.0)
+# These do the same as the following
+DeltaEqualCon= Args(2)[1]-Args(2)[0] -1.0
+phase.addEqualCon("FirstandLast",DeltaEqualCon,[0])
+
+## These do the same thing, constraining the elapsed time over the phase to be = 1.0
+phase.addDeltaVarEqualCon(6,1.0)
+phase.addDeltaTimeEqualCon(1.0) #Time is special and has its on named method
+
+# Both are equivalent to the following
+DeltaEqualCon= Args(2)[1]-Args(2)[0] -1.0
+phase.addEqualCon("FirstandLast",DeltaEqualCon,[6])
+
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+PhaseRegion = "First"
+
+def AnInequalCon():
+    XtU_OP_SP = Args(13)
+    return -1.0*XtU_OP_SP
+
+XtUVars = range(0,10)  # indices of state, time, and control variables at the PhaseRegion we want to forward to our function
+OPVars  = range(0,1)   # indcices of the ODE Parameters (indexed from 0) we want to forward to our function
+SPVars  = range(0,2)   # indcices of the phase Static Parameters (indexed from 0) we want to forward to our function
+
+phase.addInequalCon(PhaseRegion,AnInequalCon(),XtUVars,OPVars,SPVars)
+
+# Same rules as covered for addEqualCon
+phase.addInequalCon("Path", Args(4).sum(),[0,1,2],[],[1])
+phase.addInequalCon("Back",  Args(3).squared_norm()-1,[3,4,5])
+phase.addInequalCon("StaticParams",1-Args(2).norm(),[0,1])
+
+###############################################################################
+
+# Add lower bound to the 7th state,time,control variable
+PhaseRegion = "Back"
+VarIndex    = 7
+LowerBound  = 0.0
+Scale       = 1.0  # strictly positive scale factor
+
+phase.addLowerVarBound(PhaseRegion,VarIndex,LowerBound,Scale)
+# If no scale factor is supplied it is assumed to be = 1.0
+phase.addLowerVarBound(PhaseRegion,VarIndex,LowerBound)
+
+
+# Add upper bound to the 7th state,time,control variable
+PhaseRegion = "Back"
+VarIndex    = 7
+UpperBound  = 1.0
+Scale       = 1.0  # strictly positive scale factor
+
+phase.addUpperVarBound(PhaseRegion,VarIndex,UpperBound,Scale)
+# If no scale factor is supplied it is assumed to be = 1.0
+phase.addUpperVarBound(PhaseRegion,VarIndex,UpperBound)
+
+
+## Add Both Lower and Upper Bounds at same time
+PhaseRegion = "Back"
+VarIndex    = 7
+LowerBound  = 0.0
+UpperBound  = 1.0
+Scale       = 1.0  # strictly positive scale factor for both bounds
+
+phase.addLUVarBound(PhaseRegion,VarIndex,LowerBound,UpperBound,Scale)
+# If no scale factor is supplied it is assumed to be = 1.0
+phase.addLUVarBound(PhaseRegion,VarIndex,LowerBound,UpperBound)
+
+# Also works for the parameter variables
+phase.addLUVarBound("StaticParams",0,-1.0,1.0)
+
+# Violations are now of order one
+Scale = 10000.0
+phase.addUpperVarBound("ODEParams",0,1.0/10000.0, Scale)
+
+##############################################################################
+
+
+## Upper bound on the norm of the controls
+PhaseRegion ="Path"
+ScalarFunc = Args(3).norm()
+XTUVars = [7,8,9]
+UpperBound = 1.0
+Scale = 1.0
+
+phase.addUpperFuncBound(PhaseRegion,ScalarFunc,XTUVars,UpperBound,Scale)
+# If no scale factor is supplied it is assumed to be = 1.0
+phase.addUpperFuncBound(PhaseRegion,ScalarFunc,XTUVars,UpperBound)
+
+
+## Lower bound on the norm of the controls
+PhaseRegion ="Path"
+ScalarFunc = Args(3).norm()
+XTUVars = [7,8,9]
+LowerBound = 0.0
+Scale = 1.0
+
+phase.addLowerFuncBound(PhaseRegion,ScalarFunc,XTUVars,LowerBound,Scale)
+# If no scale factor is supplied it is assumed to be = 1.0
+phase.addLowerFuncBound(PhaseRegion,ScalarFunc,XTUVars,LowerBound)
+
+
+## Both at the same time
+PhaseRegion ="Path"
+ScalarFunc = Args(3).norm()
+XTUVars = [7,8,9]
+LowerBound = 0.0
+UpperBound = 1.0
+
+Scale = 1.0
+
+phase.addLUFuncBound(PhaseRegion,ScalarFunc,XTUVars,LowerBound,UpperBound,Scale)
+# If no scale factor is supplied it is assumed to be = 1.0
+phase.addLUFuncBound(PhaseRegion,ScalarFunc,XTUVars,LowerBound,UpperBound)
+
+##############################################################################
+
+
+## Upper bound on the norm of the controls
+PhaseRegion ="Path"
+XTUVars = [7,8,9]
+UpperBound = 1.0
+Scale = 1.0
+
+phase.addUpperNormBound(PhaseRegion,XTUVars,UpperBound,Scale)
+# If no scale factor is supplied it is assumed to be = 1.0
+phase.addUpperNormBound(PhaseRegion,XTUVars,UpperBound)
+
+
+## Lower bound on the norm of the controls
+PhaseRegion ="Path"
+XTUVars = [7,8,9]
+LowerBound = 0.0
+Scale = 1.0
+
+phase.addLowerNormBound(PhaseRegion,XTUVars,LowerBound,Scale)
+# If no scale factor is supplied it is assumed to be = 1.0
+phase.addLowerNormBound(PhaseRegion,XTUVars,LowerBound)
+
+
+## Both at the same time
+PhaseRegion ="Path"
+XTUVars = [7,8,9]
+LowerBound = 0.0
+UpperBound = 1.0
+
+Scale = 1.0
+
+phase.addLUSquaredNormBound(PhaseRegion,XTUVars,LowerBound,UpperBound,Scale)
+# If no scale factor is supplied it is assumed to be = 1.0
+phase.addLUSquaredNormBound(PhaseRegion,XTUVars,LowerBound,UpperBound)
+
+###########################################################################
+
+VarIdx     = 0
+LowerBound = 0.0
+Scale      = 1.0
+phase.addLowerDeltaVarBound(VarIdx,LowerBound,Scale)
+# If no scale factor is supplied it is assumed to be = 1.0
+phase.addLowerDeltaVarBound(6,LowerBound)
+
+
+
+
+VarIdx     = 0
+UpperBound = 1.0
+Scale      = 1.0
+
+phase.addUpperDeltaVarBound(VarIdx,LowerBound,Scale)
+# If no scale factor is supplied it is assumed to be = 1.0
+phase.addUpperDeltaVarBound(VarIdx,LowerBound)
+
+
+
+# Time is special, we can use addLower/UpperDeltaTimeBound instead
+LowerBound = .5
+UpperBound = 1.5
+Scale      = 1.0
+
+phase.addLowerDeltaTimeBound(LowerBound,Scale)
+phase.addUpperDeltaTimeBound(UpperBound)
+
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+def AStateObjective():
+    XtU_OP_SP = Args(13)
+    return XtU_OP_SP.norm()  ## An Asset Scalar Function
+
+PhaseRegion = "Back"
+XtUVars = range(0,10)  # indices of state, time, and control variables at the PhaseRegion we want to forward to our function
+OPVars  = range(0,1)   # indcices of the ODE Parameters (indexed from 0) we want to forward to our function
+SPVars  = range(0,2)   # indcices of the phase Static Parameters (indexed from 0) we want to forward to our function
+
+phase.addStateObjective(PhaseRegion,AStateObjective(),XtUVars,OPVars,SPVars)
+
+##########################################################################
+
+
+
+
+# Minimize the final value of XtUVar 5 
+PhaseRegion = "Last"
+VarIdx = 5
+Scale = 1.0
+phase.addValueObjective(PhaseRegion,VarIdx,Scale)
+
+
+# Maximize the initial value of XtUVar 0 
+PhaseRegion = "First"
+VarIdx = 0
+Scale = -1.0  ## Negative scale factors to maximize!!!
+phase.addValueObjective(PhaseRegion,VarIdx,Scale)
+
+
+# Minimize the Static Param 0 
+PhaseRegion = "StaticParams"
+VarIdx = 0
+Scale = 1.0
+phase.addValueObjective(PhaseRegion,VarIdx,Scale)
+
+
+##############################################################################
+
+# Minimize change in XtUVar 2 across the phase ie: x2_f - x2_0
+VarIdx = 2
+Scale  = 1.0
+phase.addDeltaVarObjective(VarIdx,Scale)
+
+
+# Maximize change in XtUVar 4 across the phase ie: x4_f - x4_0
+VarIdx = 4
+Scale  = -100.0  # Negative scale factor to maximize
+phase.addDeltaVarObjective(VarIdx,Scale)
+
+# Minimize the duration of the phase : tf-t0
+VarIdx = 6  # Index of time
+Scale  = 1.0
+phase.addDeltaVarObjective(VarIdx,Scale)
+## Time is special and has its own named method that does the same as above
+phase.addDeltaTimeObjective(Scale)
+
+##############################################################################
+
+
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+
+def AnIntegrand():
+    XtU_OP_SP = Args(13)
+    return XtU_OP_SP.norm()  ## An Asset Scalar Function
+
+XtUVars = range(0,10)  # indices of state, time, and control variables at the PhaseRegion we want to forward to our function
+OPVars  = range(0,1)   # indcices of the ODE Parameters (indexed from 0) we want to forward to our function
+SPVars  = range(0,2)   # indcices of the phase Static Parameters (indexed from 0) we want to forward to our function
+
+
+# Signature if variables of all types are needed by integrand
+phase.addIntegralObjective(AnIntegrand(),XtUVars,OPVars,SPVars)
+
+# Signature if only state,time, and control variables needed by integrand
+phase.addIntegralObjective(Args(3).norm(),[7,8,9])
+
+# All integrands are minimized, so to maximize, multiply by negative number
+phase.addIntegralObjective(-10.0*Args(3).norm(),[7,8,9])
+
+
+
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+
+def AnIntegrand():
+    XtU_OP_SP = Args(12)
+    return XtU_OP_SP.norm()  ## An Asset Scalar Function
+
+XtUVars = range(0,10)  # indices of state, time, and control variables at the PhaseRegion we want to forward to our function
+OPVars  = range(0,1)   # indcices of the ODE Parameters (indexed from 0) we want to forward to our function
+SPVars  = range(0,1)   # indcices of the phase Static Parameters (indexed from 0), MINUS THE ONE WE ARE ASSIGING THE INTEGRAL TOO
+IntSPVar = 1 # Assign the value of the intgral to the second static parameter
+
+# Signature if variables of all types are needed by integrand
+phase.addIntegralParamFunction(AnIntegrand(),XtUVars,OPVars,SPVars,IntSPVar)
+
+# Signature if only state,time, and control variables needed by integrand
+phase.addIntegralParamFunction(Args(3).norm(),[7,8,9],IntSPVar)
+
+## Now we can apply constraints to the integral by constraining the static param
+# Ex: constrain the integral to be equal to 100.0
+phase.addBoundaryValue("StaticParams",[1],[100.0])
+
+
+phase.returnStaticParams()
+
