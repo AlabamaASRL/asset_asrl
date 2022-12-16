@@ -1,5 +1,5 @@
 import numpy as np
-import asset as ast
+import asset_asrl as ast
 
 
 vf        = ast.VectorFunctions
@@ -9,7 +9,7 @@ PhaseRegs = oc.PhaseRegionFlags
 Args      = vf.Arguments
 
 
-class DummyODE(oc.ode_x_u_p.ode):
+class DummyODE(oc.ODEBase):
     def __init__(self,xv,uv,pv):
         args = oc.ODEArguments(xv,uv,pv)
         super().__init__(args.XVec(),xv,uv,pv)

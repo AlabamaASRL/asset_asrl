@@ -60,7 +60,7 @@ ODEArguments
 To simplify the process of defining Vector functions adhering to the state space
 formalism, we provide the :code:`ODEArguments` class inside of the :code:`OptimalControl` module.
 This class is a thin wrapper around the :code:`Arguments` class that allows you to index relevant
-sub-vectors and elements of an ODE's inputs in a clearer way than using Arguments. To construct 
+sub-vectors and elements of an ODE's inputs in a clearer way than using :code:`Arguments`. To construct 
 :code:`ODEArguments` we pass the number of state variables,control variables, and ODE parameters (if
 any). The total input size will be the sum of :code:`XVars`,:code:`PVars`, and :code:`UVars` plus 1 for time. We can the
 address the relevant sub-vectors of our input using the :code:`X/U/PVec()` methods. These methods are return regular

@@ -487,3 +487,28 @@ phase.addBoundaryValue("StaticParams",[1],[100.0])
 
 phase.returnStaticParams()
 
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+########################################################################
+
+def URateBound(LBoundVec,UBoundVec):
+        tUtU = Args(8)
+        ti,Ui = tUtU.head(4).tolist([(0,1),(1,3)])
+        tip1,Uip1 = tUtU.tail(4).tolist([(0,1),(1,3)])
+    
+        h = tip1-ti
+        Urate = (Uip1-Ui)/(h)
+    
+        UpperBound = Urate - UBoundVec
+        LowerBound = LBoundVec - Urate
+    
+        return vf.stack(UpperBound,LowerBound)
+
+phase.addInequalCon("PairWisePath",URateBound(-np.ones(3),np.ones(3)),[6,7,8,9])
+    
+    
+    
+
+
