@@ -1590,7 +1590,10 @@ public:
 		obj.def("setRelTols", &Integrator::setRelTols);
 		obj.def("getRelTols", &Integrator::getRelTols);
 
-		obj.def("setStepSizes", &Integrator::setStepSizes);
+		obj.def("setStepSizes", &Integrator::setStepSizes,
+			py::arg("DefStepSize"),py::arg("MinStepSize"),py::arg("MaxStepSize"));
+
+
 		obj.def_readwrite("EventTol", &Integrator::EventTol);
 		obj.def_readwrite("MaxEventIters", &Integrator::MaxEventIters);
 
