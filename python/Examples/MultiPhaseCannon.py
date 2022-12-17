@@ -189,6 +189,18 @@ if __name__ == "__main__":
     ocp.addDirectLinkEqualCon(0,"ODEParams",[0],
                               1,"ODEParams",[0])
     
+    
+    Func1 = Args(10).head(5)-Args(10).tail(5)
+    Func2 = Args(2).head(1)-Args(2).tail(1)
+    '''
+    ocp.addLinkEqualCon(Func1,aphase,"Back" ,range(0,5),
+                              dphase,"Front",range(0,5))
+    
+    ocp.addLinkEqualCon(Func2,aphase,"ODEParams" ,[0],
+                              dphase,"ODEParams",[0])
+    '''
+    
+    print("S")
     ocp.optimizer.set_OptLSMode("L1")
     ocp.optimizer.PrintLevel = 0
     #ocp.optimizer.CNRMode = True

@@ -226,11 +226,11 @@ def ContCon():
     return f
 
 phase_regs     = ["Back","Front"]
-phases_to_link = [[4,5]]
+phases_to_link = [[4 , 5]]
 xtuvars        = [[6],[6]]
 opvars         = [[0],[0]]
 spvars         = [[0],[0]]
-lpvars =[]
+lpvars =         []
 
 ocp.addLinkEqualCon(ContCon(),phase_regs,phases_to_link,xtuvars,opvars,spvars,lpvars)
 
