@@ -1,0 +1,2620 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#" /><link rel="search" title="Search" href="search.html" />
+
+    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/><title>Index - ASSET 0.0.1 documentation</title>
+<link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: red;
+  --color-brand-content: #CC3333;
+  --color-admonition-background: orange;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">ASSET 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">ASSET 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="tutorials/tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/ODEGuide.html">ODE Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/IntegratorGuide.html">Integrator Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/PSIOPT.html">PSIOPT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/Phase.html">Phase Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/Integrator.html">Integrators</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="examples/examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/halo.html">Example 1: Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/zermelo.html">Example 2a: Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ReentryExample.html">Space Shuttle Reentry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/CartPole.html">Cart Pole Swing Up</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="python/asset.html">ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python/optimalcontrol.html">Optimal Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python/vectorfunctions.html">Vector Functions</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          
+<section class="genindex-section">
+  <h1 id="index">Index</h1>
+  <div class="genindex-jumpbox"><a href="#_"><strong>_</strong></a> | <a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#J"><strong>J</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#O"><strong>O</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#Q"><strong>Q</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#U"><strong>U</strong></a> | <a href="#V"><strong>V</strong></a> | <a href="#X"><strong>X</strong></a></div>
+</section>
+<section id="_" class="genindex-section">
+  <h2>_</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__abs__">__abs__() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__abs__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.__add__">__add__() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ColMatrix.__add__">(asset.VectorFunctions.ColMatrix method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__add__">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.RowMatrix.__add__">(asset.VectorFunctions.RowMatrix method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__add__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.__add__">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.__add__">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.__add__">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.__add__">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Conditional.__and__">__and__() (asset.VectorFunctions.Conditional method)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.__array_ufunc__">__array_ufunc__ (asset.VectorFunctions.Arguments attribute)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ColMatrix.__array_ufunc__">(asset.VectorFunctions.ColMatrix attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__array_ufunc__">(asset.VectorFunctions.Element attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.RowMatrix.__array_ufunc__">(asset.VectorFunctions.RowMatrix attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__array_ufunc__">(asset.VectorFunctions.ScalarFunction attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.__array_ufunc__">(asset.VectorFunctions.Segment attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.__array_ufunc__">(asset.VectorFunctions.Segment2 attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.__array_ufunc__">(asset.VectorFunctions.Segment3 attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.__array_ufunc__">(asset.VectorFunctions.VectorFunction attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction.__call__">__call__() (asset.OptimalControl.InterpFunction method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.__call__">(asset.OptimalControl.InterpFunction_1 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3.__call__">(asset.OptimalControl.InterpFunction_3 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6.__call__">(asset.OptimalControl.InterpFunction_6 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.__call__">(asset.OptimalControl.ODEArguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.__call__">(asset.VectorFunctions.Arguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.__call__">(asset.VectorFunctions.ConstantScalar method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector.__call__">(asset.VectorFunctions.ConstantVector method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__call__">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable1D.__call__">(asset.VectorFunctions.InterpTable1D method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.__call__">(asset.VectorFunctions.PyScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction.__call__">(asset.VectorFunctions.PyVectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__call__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.__call__">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.__call__">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.__call__">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.__call__">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__delattr__">__delattr__() (in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__dir__">__dir__() (in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.__eq__">__eq__() (asset.OptimalControl.ControlModes method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.__eq__">(asset.OptimalControl.IntegralModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.__eq__">(asset.OptimalControl.LinkFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.__eq__">(asset.OptimalControl.PhaseRegionFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.__eq__">(asset.OptimalControl.RKOptions method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.__eq__">(asset.OptimalControl.TranscriptionModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__eq__">(in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__format__">__format__() (in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__ge__">__ge__() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__ge__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__ge__">(in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__getattribute__">__getattribute__() (in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.__getitem__">__getitem__() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__getitem__">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__getitem__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.__getitem__">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.__getitem__">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.__getitem__">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.__getitem__">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.__getstate__">__getstate__() (asset.OptimalControl.ControlModes method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.__getstate__">(asset.OptimalControl.IntegralModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.__getstate__">(asset.OptimalControl.LinkFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.__getstate__">(asset.OptimalControl.PhaseRegionFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.__getstate__">(asset.OptimalControl.RKOptions method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.__getstate__">(asset.OptimalControl.TranscriptionModes method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__gt__">__gt__() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__gt__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__gt__">(in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.__hash__">__hash__() (asset.OptimalControl.ControlModes method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.__hash__">(asset.OptimalControl.IntegralModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.__hash__">(asset.OptimalControl.LinkFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.__hash__">(asset.OptimalControl.PhaseRegionFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.__hash__">(asset.OptimalControl.RKOptions method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.__hash__">(asset.OptimalControl.TranscriptionModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__hash__">(in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.__index__">__index__() (asset.OptimalControl.ControlModes method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.__index__">(asset.OptimalControl.IntegralModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.__index__">(asset.OptimalControl.LinkFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.__index__">(asset.OptimalControl.PhaseRegionFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.__index__">(asset.OptimalControl.RKOptions method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.__index__">(asset.OptimalControl.TranscriptionModes method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.__init__">__init__() (asset.OptimalControl.ControlModes method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.FiniteDiffTable.__init__">(asset.OptimalControl.FiniteDiffTable method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.__init__">(asset.OptimalControl.IntegralModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction.__init__">(asset.OptimalControl.InterpFunction method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.__init__">(asset.OptimalControl.InterpFunction_1 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3.__init__">(asset.OptimalControl.InterpFunction_3 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6.__init__">(asset.OptimalControl.InterpFunction_6 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.__init__">(asset.OptimalControl.LGLInterpTable method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkConstraint.__init__">(asset.OptimalControl.LinkConstraint method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.__init__">(asset.OptimalControl.LinkFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkObjective.__init__">(asset.OptimalControl.LinkObjective method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.__init__">(asset.OptimalControl.ODEArguments method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.__init__">(asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.__init__">(asset.OptimalControl.PhaseInterface method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.__init__">(asset.OptimalControl.PhaseRegionFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.__init__">(asset.OptimalControl.RKOptions method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.StateConstraint.__init__">(asset.OptimalControl.StateConstraint method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.StateObjective.__init__">(asset.OptimalControl.StateObjective method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.__init__">(asset.OptimalControl.TranscriptionModes method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.__init__">(asset.VectorFunctions.Arguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ColMatrix.__init__">(asset.VectorFunctions.ColMatrix method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Comparative.__init__">(asset.VectorFunctions.Comparative method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Conditional.__init__">(asset.VectorFunctions.Conditional method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.__init__">(asset.VectorFunctions.ConstantScalar method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector.__init__">(asset.VectorFunctions.ConstantVector method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__init__">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable1D.__init__">(asset.VectorFunctions.InterpTable1D method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable2D.__init__">(asset.VectorFunctions.InterpTable2D method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.__init__">(asset.VectorFunctions.PyScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction.__init__">(asset.VectorFunctions.PyVectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.RowMatrix.__init__">(asset.VectorFunctions.RowMatrix method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__init__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.__init__">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.__init__">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.__init__">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.__init__">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__init_subclass__">__init_subclass__() (in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.__int__">__int__() (asset.OptimalControl.ControlModes method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.__int__">(asset.OptimalControl.IntegralModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.__int__">(asset.OptimalControl.LinkFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.__int__">(asset.OptimalControl.PhaseRegionFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.__int__">(asset.OptimalControl.RKOptions method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.__int__">(asset.OptimalControl.TranscriptionModes method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__le__">__le__() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__le__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__le__">(in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__lt__">__lt__() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__lt__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__lt__">(in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.__members__">__members__ (asset.OptimalControl.ControlModes attribute)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.__members__">(asset.OptimalControl.IntegralModes attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.__members__">(asset.OptimalControl.LinkFlags attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.__members__">(asset.OptimalControl.PhaseRegionFlags attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.__members__">(asset.OptimalControl.RKOptions attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.__members__">(asset.OptimalControl.TranscriptionModes attribute)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.__module__">__module__ (asset.OptimalControl.ControlModes attribute)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.FiniteDiffTable.__module__">(asset.OptimalControl.FiniteDiffTable attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.__module__">(asset.OptimalControl.IntegralModes attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction.__module__">(asset.OptimalControl.InterpFunction attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.__module__">(asset.OptimalControl.InterpFunction_1 attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3.__module__">(asset.OptimalControl.InterpFunction_3 attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6.__module__">(asset.OptimalControl.InterpFunction_6 attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.__module__">(asset.OptimalControl.LGLInterpTable attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkConstraint.__module__">(asset.OptimalControl.LinkConstraint attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.__module__">(asset.OptimalControl.LinkFlags attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkObjective.__module__">(asset.OptimalControl.LinkObjective attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.__module__">(asset.OptimalControl.ODEArguments attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.__module__">(asset.OptimalControl.OptimalControlProblem attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.__module__">(asset.OptimalControl.PhaseInterface attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.__module__">(asset.OptimalControl.PhaseRegionFlags attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.__module__">(asset.OptimalControl.RKOptions attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.StateConstraint.__module__">(asset.OptimalControl.StateConstraint attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.StateObjective.__module__">(asset.OptimalControl.StateObjective attribute)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.__module__">(asset.OptimalControl.TranscriptionModes attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.__module__">(asset.VectorFunctions.Arguments attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ColMatrix.__module__">(asset.VectorFunctions.ColMatrix attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Comparative.__module__">(asset.VectorFunctions.Comparative attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Conditional.__module__">(asset.VectorFunctions.Conditional attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.__module__">(asset.VectorFunctions.ConstantScalar attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector.__module__">(asset.VectorFunctions.ConstantVector attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__module__">(asset.VectorFunctions.Element attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable1D.__module__">(asset.VectorFunctions.InterpTable1D attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable2D.__module__">(asset.VectorFunctions.InterpTable2D attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.__module__">(asset.VectorFunctions.PyScalarFunction attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction.__module__">(asset.VectorFunctions.PyVectorFunction attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.RowMatrix.__module__">(asset.VectorFunctions.RowMatrix attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__module__">(asset.VectorFunctions.ScalarFunction attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.__module__">(asset.VectorFunctions.Segment attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.__module__">(asset.VectorFunctions.Segment2 attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.__module__">(asset.VectorFunctions.Segment3 attribute)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.__module__">(asset.VectorFunctions.VectorFunction attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.__mul__">__mul__() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ColMatrix.__mul__">(asset.VectorFunctions.ColMatrix method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__mul__">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.RowMatrix.__mul__">(asset.VectorFunctions.RowMatrix method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__mul__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.__mul__">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.__mul__">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.__mul__">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.__mul__">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.__ne__">__ne__() (asset.OptimalControl.ControlModes method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.__ne__">(asset.OptimalControl.IntegralModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.__ne__">(asset.OptimalControl.LinkFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.__ne__">(asset.OptimalControl.PhaseRegionFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.__ne__">(asset.OptimalControl.RKOptions method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.__ne__">(asset.OptimalControl.TranscriptionModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__ne__">(in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.__neg__">__neg__() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__neg__">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__neg__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.__neg__">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.__neg__">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.__neg__">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.__neg__">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__new__">__new__() (in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Conditional.__or__">__or__() (asset.VectorFunctions.Conditional method)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__pow__">__pow__() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__pow__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.__radd__">__radd__() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ColMatrix.__radd__">(asset.VectorFunctions.ColMatrix method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__radd__">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.RowMatrix.__radd__">(asset.VectorFunctions.RowMatrix method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__radd__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.__radd__">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.__radd__">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.__radd__">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.__radd__">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__reduce__">__reduce__() (in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__reduce_ex__">__reduce_ex__() (in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.__repr__">__repr__() (asset.OptimalControl.ControlModes method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.__repr__">(asset.OptimalControl.IntegralModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.__repr__">(asset.OptimalControl.LinkFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.__repr__">(asset.OptimalControl.PhaseRegionFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.__repr__">(asset.OptimalControl.RKOptions method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.__repr__">(asset.OptimalControl.TranscriptionModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__repr__">(in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__rgt__">__rgt__() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__rgt__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__rlt__">__rlt__() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__rlt__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.__rmul__">__rmul__() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ColMatrix.__rmul__">(asset.VectorFunctions.ColMatrix method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__rmul__">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.RowMatrix.__rmul__">(asset.VectorFunctions.RowMatrix method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__rmul__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.__rmul__">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.__rmul__">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.__rmul__">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.__rmul__">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.__rsub__">__rsub__() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__rsub__">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__rsub__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.__rsub__">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.__rsub__">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.__rsub__">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.__rsub__">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__rtruediv__">__rtruediv__() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__rtruediv__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__setattr__">__setattr__() (in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.__setstate__">__setstate__() (asset.OptimalControl.ControlModes method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.__setstate__">(asset.OptimalControl.IntegralModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.__setstate__">(asset.OptimalControl.LinkFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.__setstate__">(asset.OptimalControl.PhaseRegionFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.__setstate__">(asset.OptimalControl.RKOptions method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.__setstate__">(asset.OptimalControl.TranscriptionModes method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__sizeof__">__sizeof__() (in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.__str__">__str__() (asset.OptimalControl.ControlModes method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.__str__">(asset.OptimalControl.IntegralModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.__str__">(asset.OptimalControl.LinkFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.__str__">(asset.OptimalControl.PhaseRegionFlags method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.__str__">(asset.OptimalControl.RKOptions method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.__str__">(asset.OptimalControl.TranscriptionModes method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__str__">(in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.__sub__">__sub__() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__sub__">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__sub__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.__sub__">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.__sub__">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.__sub__">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.__sub__">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__subclasshook__">__subclasshook__() (in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.__truediv__">__truediv__() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.__truediv__">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.__truediv__">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.__truediv__">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.__truediv__">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.__truediv__">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.__truediv__">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__weakref__">__weakref__ (in module asset_asrl.OptimalControl.ODEBase)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="A" class="genindex-section">
+  <h2>A</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.abs">abs() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addBoundaryValue">addBoundaryValue() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addBoundaryValues">addBoundaryValues() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addDeltaTimeEqualCon">addDeltaTimeEqualCon() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addDeltaTimeObjective">addDeltaTimeObjective() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addDeltaVarEqualCon">addDeltaVarEqualCon() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addDeltaVarObjective">addDeltaVarObjective() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.addDirectLinkEqualCon">addDirectLinkEqualCon() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addEqualCon">addEqualCon() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.addForwardLinkEqualCon">addForwardLinkEqualCon() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addInequalCon">addInequalCon() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addIntegralObjective">addIntegralObjective() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addIntegralParamFunction">addIntegralParamFunction() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.addLinkEqualCon">addLinkEqualCon() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.addLinkInequalCon">addLinkInequalCon() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.addLinkObjective">addLinkObjective() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.addLinkParamEqualCon">addLinkParamEqualCon() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.addLinkParamInequalCon">addLinkParamInequalCon() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.addLinkParamObjective">addLinkParamObjective() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addLowerDeltaTimeBound">addLowerDeltaTimeBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addLowerDeltaVarBound">addLowerDeltaVarBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addLowerFuncBound">addLowerFuncBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addLowerNormBound">addLowerNormBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addLowerSquaredNormBound">addLowerSquaredNormBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addLowerVarBound">addLowerVarBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addLUFuncBound">addLUFuncBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addLUNormBound">addLUNormBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addLUSquaredNormBound">addLUSquaredNormBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addLUVarBound">addLUVarBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addLUVarBounds">addLUVarBounds() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addPeriodicityCon">addPeriodicityCon() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.addPhase">addPhase() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addStateObjective">addStateObjective() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addUpperDeltaTimeBound">addUpperDeltaTimeBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addUpperDeltaVarBound">addUpperDeltaVarBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addUpperFuncBound">addUpperFuncBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addUpperNormBound">addUpperNormBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addUpperSquaredNormBound">addUpperSquaredNormBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addUpperVarBound">addUpperVarBound() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addValueLock">addValueLock() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.addValueObjective">addValueObjective() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction.adjointgradient">adjointgradient() (asset.OptimalControl.InterpFunction method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.adjointgradient">(asset.OptimalControl.InterpFunction_1 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3.adjointgradient">(asset.OptimalControl.InterpFunction_3 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6.adjointgradient">(asset.OptimalControl.InterpFunction_6 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.adjointgradient">(asset.OptimalControl.ODEArguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.adjointgradient">(asset.VectorFunctions.Arguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.adjointgradient">(asset.VectorFunctions.ConstantScalar method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector.adjointgradient">(asset.VectorFunctions.ConstantVector method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.adjointgradient">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.adjointgradient">(asset.VectorFunctions.PyScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction.adjointgradient">(asset.VectorFunctions.PyVectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.adjointgradient">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.adjointgradient">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.adjointgradient">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.adjointgradient">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.adjointgradient">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction.adjointhessian">adjointhessian() (asset.OptimalControl.InterpFunction method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.adjointhessian">(asset.OptimalControl.InterpFunction_1 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3.adjointhessian">(asset.OptimalControl.InterpFunction_3 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6.adjointhessian">(asset.OptimalControl.InterpFunction_6 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.adjointhessian">(asset.OptimalControl.ODEArguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.adjointhessian">(asset.VectorFunctions.Arguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.adjointhessian">(asset.VectorFunctions.ConstantScalar method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector.adjointhessian">(asset.VectorFunctions.ConstantVector method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.adjointhessian">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.adjointhessian">(asset.VectorFunctions.PyScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction.adjointhessian">(asset.VectorFunctions.PyVectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.adjointhessian">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.adjointhessian">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.adjointhessian">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.adjointhessian">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.adjointhessian">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.FiniteDiffTable.all_derivs">all_derivs() (asset.OptimalControl.FiniteDiffTable method)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.apply">apply() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.apply">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.apply">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.apply">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.apply">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.apply">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.apply">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.arccos">arccos() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.arccos">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.arccos">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.arccosh">arccosh() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.arccosh">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.arccosh">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.arcsin">arcsin() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.arcsin">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.arcsin">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.arcsinh">arcsinh() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.arcsinh">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.arcsinh">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.arctan">arctan() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.arctan">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.arctan">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.arctan2">arctan2() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.arctanh">arctanh() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.arctanh">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.arctanh">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments">Arguments (class in asset.VectorFunctions)</a>
+</li>
+        <li>
+    asset
+
+        <ul>
+          <li><a href="python/asset.html#module-asset">module</a>
+</li>
+        </ul></li>
+        <li>
+    asset.OptimalControl
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#module-asset.OptimalControl">module</a>
+</li>
+        </ul></li>
+        <li>
+    asset.VectorFunctions
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#module-asset.VectorFunctions">module</a>
+</li>
+        </ul></li>
+        <li>
+    asset_asrl.OptimalControl.ODEBase
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#module-asset_asrl.OptimalControl.ODEBase">module</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="B" class="genindex-section">
+  <h2>B</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.Back">Back (asset.OptimalControl.PhaseRegionFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.BackandFront">BackandFront (asset.OptimalControl.PhaseRegionFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.BackToBack">BackToBack (asset.OptimalControl.LinkFlags attribute)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.BackToFront">BackToFront (asset.OptimalControl.LinkFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.BackTwoToTwoFront">BackTwoToTwoFront (asset.OptimalControl.LinkFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.BaseIntegral">BaseIntegral (asset.OptimalControl.IntegralModes attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.BlockConstant">BlockConstant (asset.OptimalControl.ControlModes attribute)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="C" class="genindex-section">
+  <h2>C</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.CentralShooting">CentralShooting (asset.OptimalControl.TranscriptionModes attribute)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.coeff">coeff() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.coeff">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.coeff">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.coeff">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.coeff">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.coeff">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.coeff">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ColMatrix">ColMatrix (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Comparative">Comparative (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction.compute">compute() (asset.OptimalControl.InterpFunction method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.compute">(asset.OptimalControl.InterpFunction_1 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3.compute">(asset.OptimalControl.InterpFunction_3 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6.compute">(asset.OptimalControl.InterpFunction_6 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.compute">(asset.OptimalControl.ODEArguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.compute">(asset.VectorFunctions.Arguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Comparative.compute">(asset.VectorFunctions.Comparative method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Conditional.compute">(asset.VectorFunctions.Conditional method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.compute">(asset.VectorFunctions.ConstantScalar method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector.compute">(asset.VectorFunctions.ConstantVector method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.compute">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.compute">(asset.VectorFunctions.PyScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction.compute">(asset.VectorFunctions.PyVectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.compute">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.compute">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.compute">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.compute">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.compute">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction.computeall">computeall() (asset.OptimalControl.InterpFunction method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.computeall">(asset.OptimalControl.InterpFunction_1 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3.computeall">(asset.OptimalControl.InterpFunction_3 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6.computeall">(asset.OptimalControl.InterpFunction_6 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.computeall">(asset.OptimalControl.ODEArguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.computeall">(asset.VectorFunctions.Arguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.computeall">(asset.VectorFunctions.ConstantScalar method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector.computeall">(asset.VectorFunctions.ConstantVector method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.computeall">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.computeall">(asset.VectorFunctions.PyScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction.computeall">(asset.VectorFunctions.PyVectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.computeall">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.computeall">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.computeall">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.computeall">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.computeall">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Conditional">Conditional (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.Constant">Constant() (asset.VectorFunctions.Arguments method)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar">ConstantScalar (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector">ConstantVector (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes">ControlModes (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.cos">cos() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.cos">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.cos">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.cosh">cosh() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.cosh">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.cosh">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.cross">cross() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.cross">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.cross">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.cross">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.cross">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.cubed_norm">cubed_norm() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.cubed_norm">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.cubed_norm">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.cubed_norm">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.cubed_norm">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.cubed_norm">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.cwiseProduct">cwiseProduct() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.cwiseProduct">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.cwiseProduct">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.cwiseProduct">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.cwiseProduct">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.cwiseProduct">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.cwiseProduct">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.cwiseProduct">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.cwiseQuotient">cwiseQuotient() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.cwiseQuotient">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.cwiseQuotient">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.cwiseQuotient">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.cwiseQuotient">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.cwiseQuotient">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.cwiseQuotient">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.cwiseQuotient">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="D" class="genindex-section">
+  <h2>D</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.FiniteDiffTable.deriv">deriv() (asset.OptimalControl.FiniteDiffTable method)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.divtest">divtest() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.DOPRI54">DOPRI54 (asset.OptimalControl.RKOptions attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.DOPRI87">DOPRI87 (asset.OptimalControl.RKOptions attribute)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.dot">dot() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.dot">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.dot">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.dot">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.dot">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.dot">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.dot">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.dot">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.doublecross">doublecross() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.DynamicStackTest">DynamicStackTest() (in module asset.VectorFunctions)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="E" class="genindex-section">
+  <h2>E</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element">Element (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.enable_vectorization">enable_vectorization() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.ErrorIntegral">ErrorIntegral() (asset.OptimalControl.LGLInterpTable method)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.eval">eval() (asset.VectorFunctions.ScalarFunction method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.eval">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.exp">exp() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.exp">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.exp">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="F" class="genindex-section">
+  <h2>F</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable2D.find_elem">find_elem() (asset.VectorFunctions.InterpTable2D method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.FiniteDiffTable">FiniteDiffTable (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.FirstOrderSpline">FirstOrderSpline (asset.OptimalControl.ControlModes attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.Front">Front (asset.OptimalControl.PhaseRegionFlags attribute)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.FrontandBack">FrontandBack (asset.OptimalControl.PhaseRegionFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.FrontToBack">FrontToBack (asset.OptimalControl.LinkFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.FrontToFront">FrontToFront (asset.OptimalControl.LinkFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.FrontTwoToTwoBack">FrontTwoToTwoBack (asset.OptimalControl.LinkFlags attribute)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="G" class="genindex-section">
+  <h2>G</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.getPhaseNum">getPhaseNum() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.getTablePtr">getTablePtr() (asset.OptimalControl.LGLInterpTable method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="H" class="genindex-section">
+  <h2>H</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.head">head() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.head">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.head">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.head">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.head">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.head">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.head">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.head2">head2() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.head2">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.head2">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.head2">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.head3">head3() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.head3">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.head3">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.head_2">head_2() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.head_2">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.head_2">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.head_2">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.head_3">head_3() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.head_3">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.head_3">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.HighestOrderSpline">HighestOrderSpline (asset.OptimalControl.ControlModes attribute)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="I" class="genindex-section">
+  <h2>I</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Conditional.ifelse">ifelse() (asset.VectorFunctions.Conditional method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ifelse">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.InnerPath">InnerPath (asset.OptimalControl.PhaseRegionFlags attribute)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.input_domain">input_domain() (asset.VectorFunctions.ScalarFunction method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.input_domain">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes">IntegralModes (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable1D.interp">interp() (asset.VectorFunctions.InterpTable1D method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable2D.interp">(asset.VectorFunctions.InterpTable2D method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable1D.interp_deriv1">interp_deriv1() (asset.VectorFunctions.InterpTable1D method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable2D.interp_deriv1">(asset.VectorFunctions.InterpTable2D method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable1D.interp_deriv2">interp_deriv2() (asset.VectorFunctions.InterpTable1D method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable2D.interp_deriv2">(asset.VectorFunctions.InterpTable2D method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction">InterpFunction (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1">InterpFunction_1 (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3">InterpFunction_3 (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6">InterpFunction_6 (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.InterpNonDim">InterpNonDim() (asset.OptimalControl.LGLInterpTable method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.Interpolate">Interpolate() (asset.OptimalControl.LGLInterpTable method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.InterpolateDeriv">InterpolateDeriv() (asset.OptimalControl.LGLInterpTable method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.InterpRange">InterpRange() (asset.OptimalControl.LGLInterpTable method)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable1D">InterpTable1D (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable2D">InterpTable2D (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.InterpWholeRange">InterpWholeRange() (asset.OptimalControl.LGLInterpTable method)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ColMatrix.inverse">inverse() (asset.VectorFunctions.ColMatrix method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.RowMatrix.inverse">(asset.VectorFunctions.RowMatrix method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.inverse_cubed_norm">inverse_cubed_norm() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.inverse_cubed_norm">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.inverse_cubed_norm">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.inverse_cubed_norm">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.inverse_cubed_norm">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.inverse_cubed_norm">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.inverse_four_norm">inverse_four_norm() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.inverse_four_norm">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.inverse_four_norm">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.inverse_four_norm">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.inverse_four_norm">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.inverse_four_norm">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.inverse_norm">inverse_norm() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.inverse_norm">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.inverse_norm">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.inverse_norm">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.inverse_norm">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.inverse_norm">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.inverse_squared_norm">inverse_squared_norm() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.inverse_squared_norm">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.inverse_squared_norm">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.inverse_squared_norm">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.inverse_squared_norm">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.inverse_squared_norm">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction.IRows">IRows() (asset.OptimalControl.InterpFunction method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.IRows">(asset.OptimalControl.InterpFunction_1 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3.IRows">(asset.OptimalControl.InterpFunction_3 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6.IRows">(asset.OptimalControl.InterpFunction_6 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.IRows">(asset.OptimalControl.ODEArguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.IRows">(asset.VectorFunctions.Arguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.IRows">(asset.VectorFunctions.ConstantScalar method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector.IRows">(asset.VectorFunctions.ConstantVector method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.IRows">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.IRows">(asset.VectorFunctions.PyScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction.IRows">(asset.VectorFunctions.PyVectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.IRows">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.IRows">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.IRows">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.IRows">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.IRows">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.is_linear">is_linear() (asset.VectorFunctions.ScalarFunction method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.is_linear">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="J" class="genindex-section">
+  <h2>J</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction.jacobian">jacobian() (asset.OptimalControl.InterpFunction method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.jacobian">(asset.OptimalControl.InterpFunction_1 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3.jacobian">(asset.OptimalControl.InterpFunction_3 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6.jacobian">(asset.OptimalControl.InterpFunction_6 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.jacobian">(asset.OptimalControl.ODEArguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.jacobian">(asset.VectorFunctions.Arguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.jacobian">(asset.VectorFunctions.ConstantScalar method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector.jacobian">(asset.VectorFunctions.ConstantVector method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.jacobian">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.jacobian">(asset.VectorFunctions.PyScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction.jacobian">(asset.VectorFunctions.PyVectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.jacobian">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.jacobian">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.jacobian">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.jacobian">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.jacobian">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="L" class="genindex-section">
+  <h2>L</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.LGL3">LGL3 (asset.OptimalControl.TranscriptionModes attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.LGL5">LGL5 (asset.OptimalControl.TranscriptionModes attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.LGL7">LGL7 (asset.OptimalControl.TranscriptionModes attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable">LGLInterpTable (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkConstraint">LinkConstraint (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags">LinkFlags (class in asset.OptimalControl)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkObjective">LinkObjective (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.LinkParams">LinkParams (asset.OptimalControl.LinkFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.loadEvenData">loadEvenData() (asset.OptimalControl.LGLInterpTable method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.loadUnevenData">loadUnevenData() (asset.OptimalControl.LGLInterpTable method)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.log">log() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.log">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.log">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="M" class="genindex-section">
+  <h2>M</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.makePeriodic">makePeriodic() (asset.OptimalControl.LGLInterpTable method)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.matmul">matmul() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Comparative.max">max() (asset.VectorFunctions.Comparative method)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Comparative.min">min() (asset.VectorFunctions.Comparative method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li>
+    module
+
+        <ul>
+          <li><a href="python/asset.html#module-asset">asset</a>
+</li>
+          <li><a href="python/optimalcontrol.html#module-asset.OptimalControl">asset.OptimalControl</a>
+</li>
+          <li><a href="python/vectorfunctions.html#module-asset.VectorFunctions">asset.VectorFunctions</a>
+</li>
+          <li><a href="python/optimalcontrol.html#module-asset_asrl.OptimalControl.ODEBase">asset_asrl.OptimalControl.ODEBase</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="N" class="genindex-section">
+  <h2>N</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.name">name (asset.OptimalControl.ControlModes property)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.name">(asset.OptimalControl.IntegralModes property)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.name">(asset.OptimalControl.LinkFlags property)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.name">(asset.OptimalControl.PhaseRegionFlags property)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.name">(asset.OptimalControl.RKOptions property)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.name">(asset.OptimalControl.TranscriptionModes property)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction.name">name() (asset.OptimalControl.InterpFunction method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.name">(asset.OptimalControl.InterpFunction_1 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3.name">(asset.OptimalControl.InterpFunction_3 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6.name">(asset.OptimalControl.InterpFunction_6 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.name">(asset.OptimalControl.ODEArguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.name">(asset.VectorFunctions.Arguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.name">(asset.VectorFunctions.ConstantScalar method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector.name">(asset.VectorFunctions.ConstantVector method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.name">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.name">(asset.VectorFunctions.PyScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction.name">(asset.VectorFunctions.PyVectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.name">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.name">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.name">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.name">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.name">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.NodalPath">NodalPath (asset.OptimalControl.PhaseRegionFlags attribute)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.norm">norm() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.norm">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.norm">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.norm">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.norm">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.norm">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.normalize">normalize() (in module asset.VectorFunctions)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.normalized">normalized() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.normalized">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.normalized">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.normalized">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.normalized">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.normalized">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.normalized_power2">normalized_power2() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.normalized_power2">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.normalized_power2">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.normalized_power2">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.normalized_power2">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.normalized_power2">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.normalized_power3">normalized_power3() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.normalized_power3">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.normalized_power3">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.normalized_power3">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.normalized_power3">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.normalized_power3">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.normalized_power4">normalized_power4() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.normalized_power4">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.normalized_power4">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.normalized_power4">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.normalized_power4">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.normalized_power4">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.normalized_power5">normalized_power5() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.normalized_power5">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.normalized_power5">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.normalized_power5">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.normalized_power5">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.normalized_power5">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.NoSpline">NoSpline (asset.OptimalControl.ControlModes attribute)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="O" class="genindex-section">
+  <h2>O</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments">ODEArguments (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.ODEParams">ODEParams (asset.OptimalControl.PhaseRegionFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem">OptimalControlProblem (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction.ORows">ORows() (asset.OptimalControl.InterpFunction method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.ORows">(asset.OptimalControl.InterpFunction_1 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3.ORows">(asset.OptimalControl.InterpFunction_3 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6.ORows">(asset.OptimalControl.InterpFunction_6 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.ORows">(asset.OptimalControl.ODEArguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.ORows">(asset.VectorFunctions.Arguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.ORows">(asset.VectorFunctions.ConstantScalar method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector.ORows">(asset.VectorFunctions.ConstantVector method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.ORows">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.ORows">(asset.VectorFunctions.PyScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction.ORows">(asset.VectorFunctions.PyVectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.ORows">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.ORows">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.ORows">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.ORows">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.ORows">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="P" class="genindex-section">
+  <h2>P</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.padded">padded() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.padded">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.padded">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.padded">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.padded">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.padded">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.padded">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.padded_lower">padded_lower() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.padded_lower">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.padded_lower">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.padded_lower">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.padded_lower">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.padded_lower">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.padded_lower">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.padded_upper">padded_upper() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.padded_upper">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.padded_upper">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.padded_upper">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.padded_upper">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.padded_upper">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.padded_upper">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.PairWisePath">PairWisePath (asset.OptimalControl.PhaseRegionFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.Params">Params (asset.OptimalControl.PhaseRegionFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.ParamsToParams">ParamsToParams (asset.OptimalControl.LinkFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.Path">Path (asset.OptimalControl.PhaseRegionFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.PathToPath">PathToPath (asset.OptimalControl.LinkFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.Phase">Phase() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface">PhaseInterface (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags">PhaseRegionFlags (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.Phases">Phases (asset.OptimalControl.OptimalControlProblem property)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.pow">pow() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.pow">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.pow">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.PVar">PVar() (asset.OptimalControl.ODEArguments method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.PVec">PVec() (asset.OptimalControl.ODEArguments method)</a>
+</li>
+        <li><a href="python/asset.html#asset.PyMain">PyMain() (in module asset)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction">PyScalarFunction (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction">PyVectorFunction (class in asset.VectorFunctions)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="Q" class="genindex-section">
+  <h2>Q</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.quatProduct">quatProduct() (in module asset.VectorFunctions)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.quatRotate">quatRotate() (in module asset.VectorFunctions)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="R" class="genindex-section">
+  <h2>R</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.refineTrajEqual">refineTrajEqual() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.refineTrajManual">refineTrajManual() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.removeEqualCon">removeEqualCon() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.removeInequalCon">removeInequalCon() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.removeIntegralObjective">removeIntegralObjective() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.removeIntegralParamFunction">removeIntegralParamFunction() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.removeLinkEqualCon">removeLinkEqualCon() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.removeLinkInequalCon">removeLinkInequalCon() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.removeLinkObjective">removeLinkObjective() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.removePhase">removePhase() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.removeStateObjective">removeStateObjective() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.returnCostateTraj">returnCostateTraj() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.returnEqualConLmults">returnEqualConLmults() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.returnInequalConLmults">returnInequalConLmults() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.returnLinkParams">returnLinkParams() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.returnStaticParams">returnStaticParams() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.returnTraj">returnTraj() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.returnTrajRange">returnTrajRange() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.returnTrajRangeND">returnTrajRangeND() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.returnTrajTable">returnTrajTable() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.RK4">RK4 (asset.OptimalControl.RKOptions attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions">RKOptions (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.RowMatrix">RowMatrix (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction.rpt">rpt() (asset.OptimalControl.InterpFunction method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.rpt">(asset.OptimalControl.InterpFunction_1 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3.rpt">(asset.OptimalControl.InterpFunction_3 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6.rpt">(asset.OptimalControl.InterpFunction_6 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.rpt">(asset.OptimalControl.ODEArguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.rpt">(asset.VectorFunctions.Arguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.rpt">(asset.VectorFunctions.ConstantScalar method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector.rpt">(asset.VectorFunctions.ConstantVector method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.rpt">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.rpt">(asset.VectorFunctions.PyScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction.rpt">(asset.VectorFunctions.PyVectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.rpt">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.rpt">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.rpt">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.rpt">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.rpt">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="S" class="genindex-section">
+  <h2>S</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarDynamicStackTest">ScalarDynamicStackTest() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction">ScalarFunction (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarRootFinder">ScalarRootFinder() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment">Segment (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.segment">segment() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.segment">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.segment">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.segment">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.segment">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.segment">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.segment">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2">Segment2 (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.segment2">segment2() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.segment2">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.segment2">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.segment2">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3">Segment3 (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.segment3">segment3() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.segment3">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.segment3">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.segment_2">segment_2() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.segment_2">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.segment_2">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.segment_2">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.segment_3">segment_3() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.segment_3">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.segment_3">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.setControlMode">setControlMode() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.setIntegralMode">setIntegralMode() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.setLinkParams">setLinkParams() (asset.OptimalControl.OptimalControlProblem method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.setStaticParams">setStaticParams() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.setTraj">setTraj() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.sf">sf() (asset.OptimalControl.InterpFunction_1 method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.sf">(asset.VectorFunctions.ConstantScalar method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.sf">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable1D.sf">(asset.VectorFunctions.InterpTable1D method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable2D.sf">(asset.VectorFunctions.InterpTable2D method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.sf">(asset.VectorFunctions.PyScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.sf">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.sign">sign() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.sign">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.sign">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.sin">sin() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.sin">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.sin">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.sinh">sinh() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.sinh">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.sinh">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/asset.html#asset.SoftwareInfo">SoftwareInfo() (in module asset)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.SpeedTest">SpeedTest() (asset.VectorFunctions.ScalarFunction method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.SpeedTest">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.sqrt">sqrt() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.sqrt">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.sqrt">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.squared">squared() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.squared">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.squared">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.squared_norm">squared_norm() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.squared_norm">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.squared_norm">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.squared_norm">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.squared_norm">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.squared_norm">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Stack">Stack() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.stack">stack() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.stack_scalar">stack_scalar() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.StackScalar">StackScalar() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.StateConstraint">StateConstraint (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.StateObjective">StateObjective (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.StaticParams">StaticParams (asset.OptimalControl.PhaseRegionFlags attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.strto_PhaseRegionFlag">strto_PhaseRegionFlag() (in module asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.subStaticParams">subStaticParams() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.subVariable">subVariable() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.subVariables">subVariables() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.sum">sum() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.sum">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.sum">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.sum">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.sum">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Sum">Sum() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.sum">sum() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.SumElems">SumElems() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.SumScalar">SumScalar() (in module asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.SuperTest">SuperTest() (asset.VectorFunctions.ScalarFunction method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.SuperTest">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.switchTranscriptionMode">switchTranscriptionMode() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="T" class="genindex-section">
+  <h2>T</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.T0">T0 (asset.OptimalControl.LGLInterpTable property)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.tail">tail() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.tail">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.tail">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.tail">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.tail">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.tail">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.tail">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.tail2">tail2() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.tail2">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.tail2">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.tail2">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.tail3">tail3() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.tail3">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.tail3">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.tail_2">tail_2() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.tail_2">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.tail_2">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.tail_2">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.tail_3">tail_3() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.tail_3">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.tail_3">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.tan">tan() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.tan">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.tan">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.tanh">tanh() (asset.VectorFunctions.Element method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.tanh">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.tanh">(in module asset.VectorFunctions)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.test_threads">test_threads() (asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.LGLInterpTable.TF">TF (asset.OptimalControl.LGLInterpTable property)</a>
+</li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.tolist">tolist() (asset.VectorFunctions.Arguments method)</a>
+
+        <ul>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.tolist">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.tolist">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.tolist">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.tolist">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.OptimalControlProblem.transcribe">transcribe() (asset.OptimalControl.OptimalControlProblem method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseInterface.transcribe">(asset.OptimalControl.PhaseInterface method)</a>
+</li>
+        </ul></li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes">TranscriptionModes (class in asset.OptimalControl)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.Trapezoidal">Trapezoidal (asset.OptimalControl.TranscriptionModes attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.TrapIntegral">TrapIntegral (asset.OptimalControl.IntegralModes attribute)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.TVar">TVar() (asset.OptimalControl.ODEArguments method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="U" class="genindex-section">
+  <h2>U</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.UVar">UVar() (asset.OptimalControl.ODEArguments method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.UVec">UVec() (asset.OptimalControl.ODEArguments method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="V" class="genindex-section">
+  <h2>V</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ControlModes.value">value (asset.OptimalControl.ControlModes property)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.IntegralModes.value">(asset.OptimalControl.IntegralModes property)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.LinkFlags.value">(asset.OptimalControl.LinkFlags property)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags.value">(asset.OptimalControl.PhaseRegionFlags property)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.RKOptions.value">(asset.OptimalControl.RKOptions property)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.TranscriptionModes.value">(asset.OptimalControl.TranscriptionModes property)</a>
+</li>
+        </ul></li>
+        <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction">VectorFunction (class in asset.VectorFunctions)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction.vf">vf() (asset.OptimalControl.InterpFunction method)</a>
+
+        <ul>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_1.vf">(asset.OptimalControl.InterpFunction_1 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_3.vf">(asset.OptimalControl.InterpFunction_3 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.InterpFunction_6.vf">(asset.OptimalControl.InterpFunction_6 method)</a>
+</li>
+          <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.vf">(asset.OptimalControl.ODEArguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Arguments.vf">(asset.VectorFunctions.Arguments method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ColMatrix.vf">(asset.VectorFunctions.ColMatrix method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantScalar.vf">(asset.VectorFunctions.ConstantScalar method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ConstantVector.vf">(asset.VectorFunctions.ConstantVector method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Element.vf">(asset.VectorFunctions.Element method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable1D.vf">(asset.VectorFunctions.InterpTable1D method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.InterpTable2D.vf">(asset.VectorFunctions.InterpTable2D method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyScalarFunction.vf">(asset.VectorFunctions.PyScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.PyVectorFunction.vf">(asset.VectorFunctions.PyVectorFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.RowMatrix.vf">(asset.VectorFunctions.RowMatrix method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.ScalarFunction.vf">(asset.VectorFunctions.ScalarFunction method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment.vf">(asset.VectorFunctions.Segment method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment2.vf">(asset.VectorFunctions.Segment2 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.Segment3.vf">(asset.VectorFunctions.Segment3 method)</a>
+</li>
+          <li><a href="python/vectorfunctions.html#asset.VectorFunctions.VectorFunction.vf">(asset.VectorFunctions.VectorFunction method)</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="X" class="genindex-section">
+  <h2>X</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.XtVec">XtVec() (asset.OptimalControl.ODEArguments method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.XVar">XVar() (asset.OptimalControl.ODEArguments method)</a>
+</li>
+        <li><a href="python/optimalcontrol.html#asset.OptimalControl.ODEArguments.XVec">XVec() (asset.OptimalControl.ODEArguments method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021, UA ASRL
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    </body>
+</html>

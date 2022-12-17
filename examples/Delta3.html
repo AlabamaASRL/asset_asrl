@@ -1,0 +1,554 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Space Shuttle Reentry" href="ReentryExample.html" /><link rel="prev" title="Example 3: Multi-Spacecraft Optimization" href="MultiTarg.html" />
+
+    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
+        <title>Delta 3 Multi-phase GTO Transfer - ASSET 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: red;
+  --color-brand-content: #CC3333;
+  --color-admonition-background: orange;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">ASSET 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">ASSET 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/ODEGuide.html">ODE Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/IntegratorGuide.html">Integrator Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/PSIOPT.html">PSIOPT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Phase.html">Phase Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Integrator.html">Integrators</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="examples.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="halo.html">Example 1: Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Example 2a: Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Delta 3 Multi-phase GTO Transfer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CartPole.html">Cart Pole Swing Up</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="delta-3-multi-phase-gto-transfer">
+<h1>Delta 3 Multi-phase GTO Transfer<a class="headerlink" href="#delta-3-multi-phase-gto-transfer" title="Permalink to this headline">#</a></h1>
+<figure class="align-right" id="id1">
+<a class="reference internal image-reference" href="../_images/Delta_III.svg"><img alt="../_images/Delta_III.svg" src="../_images/Delta_III.svg" width="70%" /></a>
+<figcaption>
+<p><span class="caption-text">Delta 3 Rocket.</span><a class="headerlink" href="#id1" title="Permalink to this image">#</a></p>
+<div class="legend">
+<p>Courtesy W. D. Graham.</p>
+</div>
+</figcaption>
+</figure>
+<p>As an example of a real-world multi-phase problem, we will optimize the launch and
+geostationary transfer orbit insertion of a Delta 3 rockets outlined by Betts in []. The Delta 3 was nominally a
+2 stage rocket consisting of a first stage RS-27A and 9 solid rocket boosters topped with an RL-10 upper stage. The rocket had an interesting staging
+strategy with the first stage liquid engine and only 6 of the 9 SRBs igniting at take off. Following burnout of these 6 solid rocket
+boosters 75 seconds after launch, the inert mass is ejected and the remaining the  3 boosters are ignited. After another 75 seconds (t+150s) these 3 SRBs
+too are ejected and the first stage continues to burn until t+261.
+At this point the RL-10 upper stage and payload separate from the first stage and continue to orbit, burning for up to an additional 700 seconds.</p>
+<p>Betts problem in [] involves maximizing the mass delivered to a pre-specified geostationary orbit for a launch from cape Canaveral.
+This problem can be broken down into 4 phases:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>6 SRBs + First Stage   (  0.0  &lt;= t &lt;=  75.2s)</p></li>
+<li><p>3 SRBs + First Stage   ( 75.2s &lt;= t &lt;= 150.4s)</p></li>
+<li><p>First Stage            (150.4s &lt;= t &lt;= 261.0s)</p></li>
+<li><p>Second Stage.          (261.0s &lt;= t &lt;= 961.0s)</p></li>
+</ol>
+</div></blockquote>
+<p>The dynamics on each of the four phases are expressed in Cartesian coordinates
+and are all the same save for differing values for the combined thrust and mass flow-rate of the currently burning engine configurations.
+The thrust (<span class="math notranslate nohighlight">\(T_i\)</span>) , and mass flow rate (<span class="math notranslate nohighlight">\(\dot{m}_i\)</span>), and inert masses for stages can be found in [] and in our example script.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\dot{\vec{r}} &amp;= \vec{v}\\\dot{\vec{v}} &amp;= -\frac{\mu}{r^3}\vec{r} +  \frac{T_i\hat{u} + \vec{D}}{m}\\\dot{m}       &amp;= -\dot{m}_i\end{aligned}\end{align} \]</div>
+</div>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\vec{D} &amp;= \frac{1}{2}C_D S \rho |\vec{v}_r|\vec{v_r}\\\vec{v}_r &amp;= \vec{v} + \vec{r}\times\vec{\omega}_e\\\rho  &amp;= \rho_0 e^{-h/h_0}\\h  &amp;= |\vec{r}| - R_e\end{aligned}\end{align} \]</div>
+</div>
+<p>Initial conditions applied to the first phase enforce that the rocket depart from the Cape’s latitude
+with zero velocity relative to the surface of the Earth.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\vec{r}(0) &amp;= [\cos(28.5^\circ),0,0\sin(28.5^\circ)]^T\\\vec{v}(0) &amp;= -\vec{r}\times\vec{\omega}_e\end{aligned}\end{align} \]</div>
+</div>
+<p>Terminal conditions applied to the final phase enforce that the rocket
+insert into a geostationary transfer orbit with the following classical orbital elements.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}a(t_f) &amp;= 24361140 \;km\\e(t_f) &amp;= .7308\\i(t_f) &amp;= 28.5^\circ\\\omega(t_f) &amp;= 130.5 ^\circ\\\Omega(t_f) &amp;= 269.8 ^\circ\end{aligned}\end{align} \]</div>
+</div>
+<p>Modeling this problem in asset starts with defining the dynamics for each phase. Since the structure of the dynamics is the same for
+all 4 phases, we can model them with a single ASSET ode given below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Delta3</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ode_x_u</span><span class="o">.</span><span class="n">ode</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">mdot</span><span class="p">):</span>
+        <span class="c1">############################################################</span>
+        <span class="n">args</span>  <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">segment3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">XVar</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+        <span class="n">u</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">tail3</span><span class="p">()</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span>
+
+
+        <span class="n">h</span>       <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span> <span class="o">-</span> <span class="n">Re</span>
+        <span class="n">rho</span>     <span class="o">=</span> <span class="n">RhoAir</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">h</span> <span class="o">/</span> <span class="n">h_scale</span><span class="p">)</span>
+        <span class="n">vr</span>      <span class="o">=</span> <span class="n">v</span> <span class="o">+</span> <span class="n">r</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">We</span><span class="p">]))</span>
+
+        <span class="n">D</span>       <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">CD</span><span class="o">*</span><span class="n">S</span><span class="p">)</span><span class="o">*</span><span class="n">rho</span><span class="o">*</span><span class="p">(</span><span class="n">vr</span><span class="o">*</span><span class="n">vr</span><span class="o">.</span><span class="n">norm</span><span class="p">())</span>
+
+        <span class="n">rdot</span>    <span class="o">=</span>  <span class="n">v</span>
+        <span class="n">vdot</span>    <span class="o">=</span>  <span class="p">(</span><span class="o">-</span><span class="n">mu</span><span class="p">)</span><span class="o">*</span><span class="n">r</span><span class="o">.</span><span class="n">normalized_power3</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">u</span> <span class="o">+</span> <span class="n">D</span><span class="p">)</span><span class="o">/</span><span class="n">m</span>
+
+
+        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">rdot</span><span class="p">,</span><span class="n">vdot</span><span class="p">,</span><span class="o">-</span><span class="n">mdot</span><span class="p">)</span>
+        <span class="c1">##############################################################</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>As you might have noticed, our model is written in Cartesian coordinates, but our terminal boundary conditions on the final phase are given
+as a set of classical orbital elements. This necessitates writing a custom constraint (below), which will convert from Cartesian coordinates to
+orbital elements so that we can target the given orbit. Those familiar with this conversion will know that it requires quadrant checks on the RAAN
+and argument of periapse, and thus requires a run-time conditional statement. Such simple conditional statements can be readily handled in ASSET’s VectorFunction type system,
+using the <code class="code docutils literal notranslate"><span class="pre">vf.ifelse</span></code> function as seen below. The first argument of the function is conditional statement containing at least one asset Vector Function.
+At run time, if this statement, evaluates to True, output of the function will be given by the second argument,
+and if it evaluates to False , the output will be the final argument.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">TargetOrbit</span><span class="p">(</span><span class="n">at</span><span class="p">,</span><span class="n">et</span><span class="p">,</span><span class="n">it</span><span class="p">,</span> <span class="n">Ot</span><span class="p">,</span><span class="n">Wt</span><span class="p">):</span>
+    <span class="n">rvec</span><span class="p">,</span><span class="n">vvec</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
+
+    <span class="n">hvec</span> <span class="o">=</span> <span class="n">rvec</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">vvec</span><span class="p">)</span>
+    <span class="n">nvec</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">cross</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">hvec</span><span class="p">)</span>
+
+    <span class="n">r</span>    <span class="o">=</span> <span class="n">rvec</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
+    <span class="n">v</span>    <span class="o">=</span> <span class="n">vvec</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
+
+    <span class="n">eps</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">mu</span><span class="o">/</span><span class="n">r</span>
+
+    <span class="n">a</span> <span class="o">=</span>  <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">mu</span><span class="o">/</span><span class="n">eps</span>
+
+    <span class="n">evec</span> <span class="o">=</span> <span class="n">vvec</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">hvec</span><span class="p">)</span><span class="o">/</span><span class="n">mu</span> <span class="o">-</span> <span class="n">rvec</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">hvec</span><span class="o">.</span><span class="n">normalized</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">Omega</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">nvec</span><span class="o">.</span><span class="n">normalized</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">Omega</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">ifelse</span><span class="p">(</span><span class="n">nvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">,</span><span class="n">Omega</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span><span class="n">Omega</span><span class="p">)</span>
+
+    <span class="n">W</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">nvec</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">evec</span><span class="o">.</span><span class="n">normalized</span><span class="p">()))</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">ifelse</span><span class="p">(</span><span class="n">evec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">,</span><span class="n">W</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">W</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">a</span><span class="o">-</span><span class="n">at</span><span class="p">,</span><span class="n">evec</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">-</span><span class="n">et</span><span class="p">,</span><span class="n">i</span><span class="o">-</span><span class="n">it</span><span class="p">,</span><span class="n">Omega</span><span class="o">-</span><span class="n">Ot</span><span class="p">,</span><span class="n">W</span><span class="o">-</span><span class="n">Wt</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>With our dynamics and custom boundary constraint defined we can now begin the task of setting up and solving the problem.</p>
+<p>Our first step here will be to find a suitable initial guess for all four phases of the rockets flight as shown below. To do this, we adopt a similar
+strategy to Betts of selecting a state along the target orbit, and linearly interpolating from our known initial conditions. We roughly select this terminal state
+such that the linearly interpolated initial guess departs the cape in an easterly direction does not pass under the surface of the Earth.
+This initial guess is evenly partitioned in time to construct the position and velocity along each phase.
+Because the dynamics do not allow throttling of the engine, we can also supply the exact mass history for each phase.
+The thrust directions are arbitrarily set to the unit x direction.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">at</span> <span class="o">=</span> <span class="mi">24361140</span> <span class="o">/</span><span class="n">Lstar</span>
+<span class="n">et</span> <span class="o">=</span> <span class="mf">.7308</span>
+<span class="n">Ot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">269.8</span><span class="p">)</span>
+<span class="n">Wt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">130.5</span><span class="p">)</span>
+<span class="n">istart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">28.5</span><span class="p">)</span>
+
+
+<span class="n">y0</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">y0</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">istart</span><span class="p">),</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">istart</span><span class="p">)])</span><span class="o">*</span><span class="n">Re</span>
+<span class="n">y0</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">y0</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">We</span><span class="p">]))</span>
+<span class="c1">## Prevent Earth Relative velocity from being exactly 0, would NaN derivative of drag equation in dynamics</span>
+<span class="n">y0</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>  <span class="o">+=</span> <span class="mf">0.0001</span><span class="o">/</span><span class="n">Vstar</span>
+
+
+<span class="c1">## M0 is the only magic number in the script, just trying to find</span>
+<span class="c1">## an intital terminal state that is along the orbit, downrange from KSC in</span>
+<span class="c1">## the correct direction and doesnt pass through earth when LERPed from KSC</span>
+<span class="n">M0</span>   <span class="o">=-</span><span class="mf">.05</span>
+<span class="n">OEF</span>  <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="p">,</span><span class="n">et</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">Ot</span><span class="p">,</span><span class="n">Wt</span><span class="p">,</span><span class="n">M0</span><span class="p">]</span>
+<span class="n">yf</span>   <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Astro</span><span class="o">.</span><span class="n">classic_to_cartesian</span><span class="p">(</span><span class="n">OEF</span><span class="p">,</span><span class="n">mu</span><span class="p">)</span>
+
+<span class="n">ts</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">tf_phase4</span><span class="p">,</span><span class="mi">150</span><span class="p">)</span>
+
+<span class="n">IG1</span> <span class="o">=</span><span class="p">[]</span>
+<span class="n">IG2</span> <span class="o">=</span><span class="p">[]</span>
+<span class="n">IG3</span> <span class="o">=</span><span class="p">[]</span>
+<span class="n">IG4</span> <span class="o">=</span><span class="p">[]</span>
+
+
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">:</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">11</span><span class="p">))</span>
+    <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span> <span class="n">y0</span> <span class="o">+</span> <span class="p">(</span><span class="n">yf</span><span class="o">-</span><span class="n">y0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="n">ts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">X</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>  <span class="o">=</span> <span class="n">t</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">tf_phase1</span><span class="p">):</span>
+        <span class="n">m</span><span class="o">=</span> <span class="n">m0_phase1</span> <span class="o">+</span> <span class="p">(</span><span class="n">mf_phase1</span><span class="o">-</span><span class="n">m0_phase1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="n">tf_phase1</span><span class="p">)</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="n">m</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span><span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">normalize</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">IG1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="k">elif</span><span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">tf_phase2</span><span class="p">):</span>
+        <span class="n">m</span><span class="o">=</span> <span class="n">m0_phase2</span> <span class="o">+</span> <span class="p">(</span><span class="n">mf_phase2</span><span class="o">-</span><span class="n">m0_phase2</span><span class="p">)</span><span class="o">*</span><span class="p">((</span> <span class="n">t</span><span class="o">-</span><span class="n">tf_phase1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tf_phase2</span> <span class="o">-</span> <span class="n">tf_phase1</span><span class="p">))</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="n">m</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span><span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">normalize</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">IG2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="k">elif</span><span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">tf_phase3</span><span class="p">):</span>
+        <span class="n">m</span><span class="o">=</span> <span class="n">m0_phase3</span> <span class="o">+</span> <span class="p">(</span><span class="n">mf_phase3</span><span class="o">-</span><span class="n">m0_phase3</span><span class="p">)</span><span class="o">*</span><span class="p">((</span> <span class="n">t</span><span class="o">-</span><span class="n">tf_phase2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tf_phase3</span> <span class="o">-</span> <span class="n">tf_phase2</span><span class="p">))</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="n">m</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span><span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">normalize</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">IG3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="k">elif</span><span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">tf_phase4</span><span class="p">):</span>
+        <span class="n">m</span><span class="o">=</span> <span class="n">m0_phase4</span> <span class="o">+</span> <span class="p">(</span><span class="n">mf_phase4</span><span class="o">-</span><span class="n">m0_phase4</span><span class="p">)</span><span class="o">*</span><span class="p">((</span> <span class="n">t</span><span class="o">-</span><span class="n">tf_phase3</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tf_phase4</span> <span class="o">-</span> <span class="n">tf_phase3</span><span class="p">))</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="n">m</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span><span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">normalize</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">IG4</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we can define (below), the odes and phases for each of the 4 rocket stages and combine them into a single optimal control problem.
+On the first phase we apply our known initial state, time, and mass as a boundary value. The length of the phase is then enforced by fixing the
+final time of the last state to be equal to the burnout time of the first 6 SRB’s.
+The initial position velocity and time of phases 2,3 will be dictated by later continuity constraints,
+so along these phases we only need to explicitly enforce the known initial mass and burnout times given in the problem statement.
+In phase4, since the final, burnout time of the final stage not known, we simply place an upper bound to be the time at which all propellant would have been expended.
+Additionally, it is to this phase that we apply out terminal constraint on the target orbit, and our objective to maximize final mass.</p>
+<p>Finally, we combine these 4 phases into a single optimal control problem and add a link constraint that enforces position,velocity
+and time continuity between sequential phases.
+We then directly optimize the problem with the Line search enabled and return the solution for plotting.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ode1</span> <span class="o">=</span> <span class="n">Delta3</span><span class="p">(</span><span class="n">T_phase1</span><span class="p">,</span><span class="n">mdot_phase1</span><span class="p">)</span>
+<span class="n">ode2</span> <span class="o">=</span> <span class="n">Delta3</span><span class="p">(</span><span class="n">T_phase2</span><span class="p">,</span><span class="n">mdot_phase2</span><span class="p">)</span>
+<span class="n">ode3</span> <span class="o">=</span> <span class="n">Delta3</span><span class="p">(</span><span class="n">T_phase3</span><span class="p">,</span><span class="n">mdot_phase3</span><span class="p">)</span>
+<span class="n">ode4</span> <span class="o">=</span> <span class="n">Delta3</span><span class="p">(</span><span class="n">T_phase4</span><span class="p">,</span><span class="n">mdot_phase4</span><span class="p">)</span>
+
+<span class="n">tmode</span> <span class="o">=</span> <span class="s2">&quot;LGL3&quot;</span>
+
+<span class="n">phase1</span> <span class="o">=</span> <span class="n">ode1</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tmode</span><span class="p">,</span><span class="n">IG1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">IG1</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">phase1</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mf">.5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
+
+<span class="n">phase1</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">8</span><span class="p">),</span><span class="n">IG1</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">8</span><span class="p">])</span>
+<span class="n">phase1</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,[</span><span class="mi">7</span><span class="p">],[</span><span class="n">tf_phase1</span><span class="p">])</span>
+
+<span class="n">phase2</span> <span class="o">=</span> <span class="n">ode2</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tmode</span><span class="p">,</span><span class="n">IG2</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">IG2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">phase2</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mf">.5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">phase2</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,[</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="n">m0_phase2</span><span class="p">])</span>
+<span class="n">phase2</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">,[</span><span class="n">tf_phase2</span><span class="p">])</span>
+
+<span class="n">phase3</span> <span class="o">=</span> <span class="n">ode3</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tmode</span><span class="p">,</span><span class="n">IG3</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">IG3</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">phase3</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mf">.5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">phase3</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,[</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="n">m0_phase3</span><span class="p">])</span>
+<span class="n">phase3</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">,[</span><span class="n">tf_phase3</span><span class="p">])</span>
+
+<span class="n">phase4</span> <span class="o">=</span> <span class="n">ode4</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tmode</span><span class="p">,</span><span class="n">IG4</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">IG4</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">phase4</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mf">.5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">phase4</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,[</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="n">m0_phase4</span><span class="p">])</span>
+<span class="n">phase4</span><span class="o">.</span><span class="n">addValueObjective</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">phase4</span><span class="o">.</span><span class="n">addUpperVarBound</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="n">tf_phase4</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">phase4</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span><span class="n">TargetOrbit</span><span class="p">(</span><span class="n">at</span><span class="p">,</span><span class="n">et</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">Ot</span><span class="p">,</span><span class="n">Wt</span><span class="p">),</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+
+
+<span class="n">phase1</span><span class="o">.</span><span class="n">addLowerNormBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">Re</span><span class="o">*</span><span class="mf">.999999</span><span class="p">)</span>
+<span class="n">phase2</span><span class="o">.</span><span class="n">addLowerNormBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">Re</span><span class="o">*</span><span class="mf">.999999</span><span class="p">)</span>
+<span class="n">phase3</span><span class="o">.</span><span class="n">addLowerNormBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">Re</span><span class="o">*</span><span class="mf">.999999</span><span class="p">)</span>
+<span class="n">phase4</span><span class="o">.</span><span class="n">addLowerNormBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">Re</span><span class="o">*</span><span class="mf">.999999</span><span class="p">)</span>
+
+
+<span class="n">ocp</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">OptimalControlProblem</span><span class="p">()</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase1</span><span class="p">)</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase2</span><span class="p">)</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase3</span><span class="p">)</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase4</span><span class="p">)</span>
+
+<span class="n">ocp</span><span class="o">.</span><span class="n">addForwardLinkEqualCon</span><span class="p">(</span><span class="n">phase1</span><span class="p">,</span><span class="n">phase4</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">])</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+
+
+<span class="n">Phase1Traj</span> <span class="o">=</span> <span class="n">phase1</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>  <span class="c1"># or ocp.Phase(i).returnTraj()</span>
+<span class="n">Phase2Traj</span> <span class="o">=</span> <span class="n">phase2</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+<span class="n">Phase3Traj</span> <span class="o">=</span> <span class="n">phase3</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+<span class="n">Phase4Traj</span> <span class="o">=</span> <span class="n">phase4</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+
+
+<span class="n">Plot</span><span class="p">(</span><span class="n">Phase1Traj</span><span class="p">,</span><span class="n">Phase2Traj</span><span class="p">,</span><span class="n">Phase3Traj</span><span class="p">,</span><span class="n">Phase4Traj</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>On an intel i9 12900k ,using 150 LGL3 segments across all 4 phases, this problem solves in 38 iterations of PSIOPT’s optimization algorithm taking approximately 60 milliseconds.
+The altitude, velocity and mass of the rocket as function of time are plotted below along with a ground-track of the trajectory.
+Final Mass Delivered to the GTO is 7529.749kg, which is effectively the same as that given by Betts (7529.712 kg).</p>
+<a class="reference internal image-reference" href="../_images/Delta3.svg"><img alt="../_images/Delta3.svg" src="../_images/Delta3.svg" width="100%" /></a>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">#</a></h2>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="ReentryExample.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Space Shuttle Reentry</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="MultiTarg.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Example 3: Multi-Spacecraft Optimization</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021, UA ASRL
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Delta 3 Multi-phase GTO Transfer</a><ul>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>

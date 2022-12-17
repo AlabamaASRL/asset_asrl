@@ -1,0 +1,885 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Delta 3 Multi-phase GTO Transfer" href="Delta3.html" /><link rel="prev" title="Example 2b: Multi-Phase Zermelo’s Problem" href="zermelolink.html" />
+
+    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
+        <title>Example 3: Multi-Spacecraft Optimization - ASSET 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: red;
+  --color-brand-content: #CC3333;
+  --color-admonition-background: orange;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">ASSET 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">ASSET 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/ODEGuide.html">ODE Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/IntegratorGuide.html">Integrator Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/PSIOPT.html">PSIOPT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Phase.html">Phase Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Integrator.html">Integrators</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="examples.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="halo.html">Example 1: Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Example 2a: Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Example 3: Multi-Spacecraft Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CartPole.html">Cart Pole Swing Up</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="example-3-multi-spacecraft-optimization">
+<h1>Example 3: Multi-Spacecraft Optimization<a class="headerlink" href="#example-3-multi-spacecraft-optimization" title="Permalink to this headline">#</a></h1>
+<p>Performing a multi-spacecraft optimization with ASSET is virtually identically to the single spacecraft case, except for one new constraint that we will focus on later.
+For now, the standard problem procedure is the same, where we need to import everything from ASSET with our standard conventions, as well as some plotting tools for the output.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">## Setup</span>
+<span class="n">vf</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
+<span class="n">oc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
+
+<span class="n">Args</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
+<span class="n">Tmodes</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">TranscriptionModes</span>
+<span class="n">Cmodes</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ControlModes</span>
+<span class="n">PhaseRegs</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">PhaseRegionFlags</span>
+</pre></div>
+</div>
+<p>Now that we have all of the tools imported from ASSET, as always we need to identify our dynamics for the problem. Here, for this simple case,
+we have assumed two-body gravity dynamics, plus each spacecraft will be equipped with a low thrust propulsion system. Writing the dynamics is the same as in previous
+examples, where we will use the ASSET VectorFunctions to construct our system of ODEs.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">################################################################################</span>
+<span class="c1">## System Dynamics</span>
+<span class="k">class</span> <span class="nc">TwoBody</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ode_x_u</span><span class="o">.</span><span class="n">ode</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">P1mu</span><span class="p">,</span> <span class="n">ltacc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">Xvars</span> <span class="o">=</span> <span class="mi">6</span>
+        <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">ltacc</span> <span class="o">!=</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">3</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">Xvars</span><span class="p">,</span> <span class="n">Uvars</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">segment_3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">normalized_power3</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">P1mu</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ltacc</span> <span class="o">!=</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">thrust</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">tail_3</span><span class="p">()</span> <span class="o">*</span> <span class="n">ltacc</span>
+            <span class="n">acc</span> <span class="o">=</span> <span class="n">g</span> <span class="o">+</span> <span class="n">thrust</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">acc</span> <span class="o">=</span> <span class="n">g</span>
+        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">v</span><span class="p">,</span> <span class="n">acc</span><span class="p">])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span> <span class="n">Xvars</span><span class="p">,</span> <span class="n">Uvars</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here the dynamics are simply a function of the 6 state variables (position and velocity). The <code class="code docutils literal notranslate"><span class="pre">ltacc</span></code> flag
+determines if we are incorporating the low thrust acceleration into the function or not. We make this choice so that if we wish to propagate the spacecraft
+without low thrust and purely gravity as the only acceleration. If <code class="code docutils literal notranslate"><span class="pre">ltacc</span></code> is given a value, we will include a low thrust acceleration into the model, as well as the
+normal vector of the low thrust, where we add 3 to the input rows of the state. This will let us control the direction of the thrust for the optimization call.</p>
+<p>As is standard procedure for optimization calls, we have to generate initial guesses for our problem. A very easy case to use is that of an initially circular orbit for our spacecraft.
+Assuming that these are planar circular orbits, we can generate them with:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">################################################################################</span>
+<span class="c1">## Initial Guess Generators</span>
+    <span class="k">def</span> <span class="nf">MakeCircIG</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">thetadeg</span><span class="p">):</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">thetadeg</span><span class="p">)</span>
+        <span class="n">IGC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">7</span><span class="p">))</span>
+        <span class="n">IGC</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span>
+        <span class="n">IGC</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span>
+        <span class="n">IGC</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">v</span>
+        <span class="n">IGC</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">v</span>
+        <span class="k">return</span> <span class="n">IGC</span>
+
+
+    <span class="k">def</span> <span class="nf">MakeCircTraj</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">thetadeg</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="n">ode</span> <span class="o">=</span> <span class="n">TwoBody</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">integ</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="mf">.01</span><span class="p">)</span>
+        <span class="n">IGC</span> <span class="o">=</span> <span class="n">MakeCircIG</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">thetadeg</span><span class="p">)</span>
+        <span class="n">Temp</span> <span class="o">=</span> <span class="n">integ</span><span class="o">.</span><span class="n">integrate_dense</span><span class="p">(</span><span class="n">IGC</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">Traj</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">Temp</span><span class="p">:</span>
+            <span class="n">TT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">))</span>
+            <span class="n">TT</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span>
+            <span class="n">TT</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">))</span> <span class="o">*</span> <span class="mf">0.01</span>
+            <span class="n">Traj</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TT</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Traj</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">MakeCircIG</span></code> is responsible for returning the position and velocity of the spacecraft for a specified radius of <code class="code docutils literal notranslate"><span class="pre">r</span></code>, as well as a given
+true anomaly <code class="code docutils literal notranslate"><span class="pre">thetadeg</span></code>. This is also the case for <code class="code docutils literal notranslate"><span class="pre">MakeCircTraj</span></code>, which will call <code class="code docutils literal notranslate"><span class="pre">MakeCircIG</span></code> when it is determining the initial states
+of the spacecraft. To simplify our design flow, <code class="code docutils literal notranslate"><span class="pre">MakeCircTraj</span></code> initializes the ode for each spacecraft, through the ASSET optimal control interface
+and integrates the trajectory out for the given time <code class="code docutils literal notranslate"><span class="pre">tf</span></code> (<code class="code docutils literal notranslate"><span class="pre">n</span></code> determines the number of points to use for the output trajectory).
+<code class="code docutils literal notranslate"><span class="pre">MakeCircTraj</span></code> returns the integrated trajectory for the time tf, and will have a number of states equal to n.</p>
+<p>Now, we have our dynamics, as well as a method to produce initial guesses for the multi-spacecraft optimization problem. The next step to do
+is to define a function to wrap our optimization calls in. This is similar to what we have done in the previous Zermelo problem example, except now we will have
+an extra Link Constraint that will enforce that each final states of the spacecraft must be equal to a desired free state that we will add.
+For now we will show the function that handles all this in three sections, with the final full function definition at the end of the example.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">################################################################################</span>
+<span class="c1">## Solver Function</span>
+<span class="k">def</span> <span class="nf">MultSpaceCraft</span><span class="p">(</span><span class="n">Trajs</span><span class="p">,</span> <span class="n">IStates</span><span class="p">,</span> <span class="n">SetPointIG</span><span class="p">,</span> <span class="n">LTacc</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">NSegs</span><span class="o">=</span><span class="mi">75</span><span class="p">):</span>
+
+    <span class="c1">##Section 1: Create Optimal Control Problem</span>
+    <span class="n">ocp</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">OptimalControlProblem</span><span class="p">()</span>
+
+    <span class="c1">## create ODE governing all spacecraft</span>
+    <span class="n">ode</span> <span class="o">=</span> <span class="n">TwoBody</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">LTacc</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Trajs</span><span class="p">):</span>
+
+        <span class="c1">## Create a phase for Each Spacecraft</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">Tmodes</span><span class="o">.</span><span class="n">LGL5</span><span class="p">)</span>
+        <span class="c1">## Set Initial Guess</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">setTraj</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">NSegs</span><span class="p">)</span>
+
+        <span class="c1">##Use block constant control</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="n">Cmodes</span><span class="o">.</span><span class="n">BlockConstant</span><span class="p">)</span>
+
+        <span class="c1">##Specify that initial state and time are locked at</span>
+        <span class="c1">##whatever value is passed to optimizer</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">addValueLock</span><span class="p">(</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Front</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+
+        <span class="c1">## Bound Norm of Control Vector over the whole phase</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Add TOF objective</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaTimeObjective</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="c1">## add phase to the OCP</span>
+        <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
+
+    <span class="c1">####################################################</span>
+</pre></div>
+</div>
+<p>The first section of <code class="code docutils literal notranslate"><span class="pre">MultiSpaceCraft</span></code> is very similar to the previous definitions for ASSET optimization routines.
+It takes as arguments the list of initial circular orbits, <code class="code docutils literal notranslate"><span class="pre">Trajs</span></code>.
+The next input <code class="code docutils literal notranslate"><span class="pre">IStates</span></code> is the list of initial states for each of the spacecraft. Each spacecraft will also need to be given a specific state
+to target for the final end stand, <code class="code docutils literal notranslate"><span class="pre">SetPointIG</span></code>. Lastly, the low thrust acceleration is assigned a non-dimensional value <code class="code docutils literal notranslate"><span class="pre">LTacc</span></code> of .01 and the number of segments for each trajectory <code class="code docutils literal notranslate"><span class="pre">Nsegs</span></code>
+is given a value of 75. the rest of this code is the same as we have seen in previous examples to establish the base of the optimization routine.</p>
+<p>The next section of code continues the above function. Here we need to define the link constraint that will enforce that each spacecraft
+reach some initial final free state.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">####################################################</span>
+    <span class="c1">#Section 2:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adding a Link constraint to enforce that the terminal state and time</span>
+<span class="sd">    of each phase must be equal to a free state added as LinkParameters of the ocp</span>
+
+<span class="sd">    ie: for each phase(i) Xt_i(tf) - Xt_link = 0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># First we add an initial guess for the linkParams, which we be a free</span>
+    <span class="c1"># terminal position,velocity and time that all phases must hit</span>
+    <span class="c1"># The ocp now has 7 link params indexed 0-&gt;6</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">setLinkParams</span><span class="p">(</span><span class="n">SetPointIG</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
+
+    <span class="c1"># Now we need to define the function and varibales needed to express</span>
+    <span class="c1"># the constraint</span>
+
+    <span class="c1">## The constraint function enforces the equality of two length 7 vectors</span>
+    <span class="n">LinkFun</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="o">-</span> <span class="n">Args</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+
+    <span class="c1">## Specifying for each call to collect the x variables indexed</span>
+    <span class="c1">## by xlinkvars (position velocity time) at PhaseReg.Back (last state),</span>
+    <span class="c1">## these will be the first 7 arguments to each call of LinkFun</span>
+    <span class="n">linkregs</span> <span class="o">=</span> <span class="p">[</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Back</span><span class="p">]</span>
+    <span class="n">phasestolink</span> <span class="o">=</span> <span class="p">[[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Trajs</span><span class="p">))]</span>
+    <span class="n">xlinkvars</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">)]</span>
+
+    <span class="c1">## Specifies that for each call, collect the the ocp link vars representing</span>
+    <span class="c1">## the free state and forward them to LinkFun, these will be the final 7</span>
+    <span class="c1">## arguments for each call</span>
+    <span class="n">linkparmavars</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Trajs</span><span class="p">))]</span>
+
+    <span class="c1">## combine function and indexing info into LinkConstraint Object and</span>
+    <span class="c1">## add it to the phase</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">LinkFun</span><span class="p">,</span> <span class="n">linkregs</span><span class="p">,</span> <span class="n">phasestolink</span><span class="p">,</span> <span class="n">xlinkvars</span><span class="p">,</span> <span class="n">linkparmavars</span><span class="p">)</span>
+
+    <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkParamEqualCon</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">tail3</span><span class="p">()),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">QPThreads</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># Equal to number of physical cores</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_deltaH</span><span class="p">(</span><span class="mf">5.0e-8</span><span class="p">)</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_KKTtol</span><span class="p">(</span><span class="mf">1.0e-9</span><span class="p">)</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_BoundFraction</span><span class="p">(</span><span class="mf">0.997</span><span class="p">)</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">PrintLevel</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_MaxLSIters</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">Data</span> <span class="o">=</span> <span class="p">[]</span>
+</pre></div>
+</div>
+<p>First we must choose which part of each state we desire to enforce this constraint for. Clearly, we wish each spacecraft to arrive at some
+final position, velocity, and time, so we set the link parameters to be the point we passed in <code class="code docutils literal notranslate"><span class="pre">SetPointIG</span></code>. It is length 7, and following our convention
+the first 3 are position, the next 3 are velocity, and 7th variable is the desired final time. We assign the link parameter to the optimal control interface with <code class="code docutils literal notranslate"><span class="pre">ocp.setLinkParams(SetPointIG[0:7])</span></code>.
+Now we will construct a VectorFunction representing the constraint. To construct this function we define a variable <code class="code docutils literal notranslate"><span class="pre">LinkFun</span></code>, wich is simply subtracting the last 7 variables
+from our <code class="code docutils literal notranslate"><span class="pre">Args</span></code> (our desired final point), and the first 7 (our initial spacecraft state).</p>
+<p>With this done, we need a way to collect all the variables as each step to tie the phases together. We know we want the last states linked together, so we assign <code class="code docutils literal notranslate"><span class="pre">linkregs</span></code> to be the PhaseRegionFlag <code class="code docutils literal notranslate"><span class="pre">PhaseRegs.Back</span></code>.
+Now we set all the phases that need to be linked together (all of them), with <code class="code docutils literal notranslate"><span class="pre">phasestolink</span></code> and tell <code class="code docutils literal notranslate"><span class="pre">xlinkvars</span></code> that we want the first 7 variables of each. The last step before we add the constraint to the problem,
+is to create an argument that specifies we want the first 7 variables of <strong>each</strong> trajectory from <code class="code docutils literal notranslate"><span class="pre">Trajs</span></code>.</p>
+<p>All of this comes together in <code class="code docutils literal notranslate"><span class="pre">ocp.addLinkEqualCon(LinkFun,</span> <span class="pre">linkregs,</span> <span class="pre">phasestolink,</span> <span class="pre">xlinkvars,</span> <span class="pre">linkparmavars)</span></code>, creating the link constraint for the optimization problem.
+The last bit of this section is setting the linesearch mode (<code class="code docutils literal notranslate"><span class="pre">ocp.optimizer.OptLSMode</span></code>), as well as tolerances on the optimization problem.</p>
+<p>The very last section of the code neccessary for the multi-spacecraft optimization problem is to actually run the optimizer! We will need to do this for every initial state we pass into the problem, with each state representing a spacecraft in the constellation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">##################################################################</span>
+    <span class="c1">#Section 3:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Now we are going to run an optimization continuation scheme to compute</span>
+<span class="sd">    the constellation trajectory for each list of initial states of the spacecraft</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">Ist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">IStates</span><span class="p">):</span>
+
+        <span class="c1">## For each set Initial condtions subsitute the fixed intial conditions</span>
+        <span class="c1">## to each phase, Because we locked them, they will be fixed at these values</span>
+        <span class="c1">## this avoids having to retranscribe to the problem for every optimize</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">phase</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">):</span>
+            <span class="n">phase</span><span class="o">.</span><span class="n">subVariables</span><span class="p">(</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Front</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">Ist</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
+
+        <span class="c1"># force a retranscription peridically to keep problem well conditioned</span>
+        <span class="c1"># This is not strictly necessary</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">j</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">ocp</span><span class="o">.</span><span class="n">transcribe</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Solve before optimizing for the intial run</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ocp</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+        <span class="n">Flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+        <span class="n">tf</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">((</span><span class="n">tf</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1000.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Flag</span> <span class="o">==</span> <span class="n">ast</span><span class="o">.</span><span class="n">Solvers</span><span class="o">.</span><span class="n">ConvergenceFlags</span><span class="o">.</span><span class="n">NOTCONVERGED</span><span class="p">:</span>
+            <span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
+
+        <span class="n">Data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">[[</span><span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span> <span class="k">for</span> <span class="n">phase</span> <span class="ow">in</span> <span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">],</span> <span class="n">ocp</span><span class="o">.</span><span class="n">returnLinkParams</span><span class="p">()]</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">Data</span>
+</pre></div>
+</div>
+<p>The first <code class="code docutils literal notranslate"><span class="pre">for</span></code> loop in this section assigns the values of our desired initial conditions into the <code class="code docutils literal notranslate"><span class="pre">ocp.Phases</span></code> interface.
+The actual optimization code that executes the solution is likely the simplest bit of code in this problem (as we know constructing a problem statement in a logical manner can be the hardest part of optimization).
+We run a <code class="code docutils literal notranslate"><span class="pre">ocp.solve</span></code> on each initial state to make our initial guess better by satisfying the constraints before we even begin optimizing. We are also curious about the total time to solve each problem, so we set
+a few timers with the <code class="code docutils literal notranslate"><span class="pre">Python::time</span></code> library. We run the optimize call between the timers so we know how much time is taken up by the optimizer. Lastly, we check if at the end of the optimization
+if the <code class="code docutils literal notranslate"><span class="pre">ast.ConvergenceFlags</span></code> is satisfied, and if not we run <code class="code docutils literal notranslate"><span class="pre">ocp.solve_optimize()</span></code> to solve and optimize the problem again. Then we save the data in a format that will make it easier to plot.</p>
+<p>Below is the code we use to plot, but the user can use whatever they are most comfortable with for their own purposes.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">################################################################################</span>
+<span class="c1">## Plotting Utilities</span>
+<span class="k">def</span> <span class="nf">colorScale</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">194</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="p">[</span><span class="mi">208</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">70</span><span class="p">]):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">x</span> <span class="o">*</span> <span class="n">right</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">left</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span><span class="o">/</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+
+<span class="k">def</span> <span class="nf">plotPhaseAndThrottle</span><span class="p">(</span><span class="n">tList</span><span class="p">):</span>
+    <span class="c1"># Take N planar trajectories and calculate angles between them</span>
+    <span class="n">angs</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tList</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tList</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">tList</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tList</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tList</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">angs</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">unitJ</span> <span class="o">=</span> <span class="n">tList</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tList</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+                <span class="n">angs</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">unitJ</span><span class="p">)))</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tList</span><span class="p">):</span>
+        <span class="n">clr</span> <span class="o">=</span> <span class="n">colorScale</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">tList</span><span class="p">))</span>
+        <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">]</span>
+        <span class="n">y1</span><span class="o">=</span><span class="p">[</span><span class="n">A</span> <span class="k">for</span> <span class="n">A</span> <span class="ow">in</span> <span class="n">angs</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span>
+                     <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;S/C &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+        <span class="n">x2</span><span class="o">=</span><span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">]</span>
+        <span class="n">y2</span><span class="o">=</span><span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">X</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">X</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">]</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])])</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Phase Angle (rad)&quot;</span><span class="p">)</span>
+
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time (ND)&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Control Magnitude&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;Plots/MultiSpacecraftOptimization/multispacecraftoptimization.pdf&quot;</span><span class="p">,</span>
+                <span class="n">dpi</span> <span class="o">=</span> <span class="mi">500</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Bringing everything together into the main function of the problem, we create out initial guesses, determine our final point, and call the <code class="code docutils literal notranslate"><span class="pre">MultiSpaceCraft</span></code> function.
+We decide that we want 10 spacecraft and we will space them all out along the same orbit in 20 degree increments, up to 180 degrees. These will be our initial states for the optimization problem.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">################################################################################</span>
+<span class="c1">## Main</span>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="n">Thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="n">TrajsIG</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">MakeCircTraj</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">theta</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Thetas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">SetPointIG</span> <span class="o">=</span> <span class="n">TrajsIG</span><span class="p">[</span><span class="nb">int</span><span class="p">((</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span>
+    <span class="n">AllIGs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">Theta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Thetas</span><span class="p">):</span>
+        <span class="n">IStates</span> <span class="o">=</span> <span class="p">[</span><span class="n">MakeCircIG</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span> <span class="k">for</span> <span class="n">theta</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Theta</span><span class="p">,</span> <span class="n">n</span><span class="p">)]</span>
+        <span class="n">AllIGs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">IStates</span><span class="p">)</span>
+
+    <span class="n">accs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.015</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">accs</span><span class="p">):</span>
+        <span class="n">Times</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Data</span> <span class="o">=</span> <span class="n">MultSpaceCraft</span><span class="p">(</span><span class="n">TrajsIG</span><span class="p">,</span> <span class="n">AllIGs</span><span class="p">,</span> <span class="n">SetPointIG</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">D</span> <span class="ow">in</span> <span class="n">Data</span><span class="p">:</span>
+            <span class="n">SetPoint</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">Times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetPoint</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+
+    <span class="n">plotTrajs</span> <span class="o">=</span> <span class="n">Data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">plotPhaseAndThrottle</span><span class="p">(</span><span class="n">plotTrajs</span><span class="p">)</span>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">## Run</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Our initial guess for the final point to target is taken to be the middle spacecrafts last state at the end of its initial trajectory in <code class="code docutils literal notranslate"><span class="pre">SetPointIG</span></code>. All of our initial states are generated in the next <code class="code docutils literal notranslate"><span class="pre">for</span></code>
+loop, where we make sure that every initial state is corresponding to a circular orbit. We are interested in how the low thrust acceleration of the vehicle affects the ability for our spacecraft to rendezvous to the desired final state,
+so we create a list of various non-dimensional accelerations in <code class="code docutils literal notranslate"><span class="pre">accs</span></code>. Now all we do is iterate over the list of accelerations and call our <code class="code docutils literal notranslate"><span class="pre">MultiSpaceCraft</span></code> function with all of the required inputs.
+What we get is an optimization problem that simultaneously solves for the optimal control of all spacecraft to converge on the final point.</p>
+<figure class="align-center">
+<a class="reference internal image-reference" href="../_images/multispacecraftoptimization.svg"><img alt="../_images/multispacecraftoptimization.svg" src="../_images/multispacecraftoptimization.svg" width="100%" /></a>
+</figure>
+<p>The top plot shows the spacecraft converging to the final point, indicated by the phase angles between the spacecraft decreasing towards 0. The bottom plot shows the complex control histories of 10 spacecraft
+manuevering in tandem to satisfy a given objective. Any further analysis is outside of the scope of this tutorial and is left to the reader.</p>
+<section id="full-code">
+<h2>Full Code:<a class="headerlink" href="#full-code" title="Permalink to this headline">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">## Setup</span>
+<span class="n">vf</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
+<span class="n">oc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
+
+<span class="n">Args</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
+<span class="n">Tmodes</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">TranscriptionModes</span>
+<span class="n">Cmodes</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ControlModes</span>
+<span class="n">PhaseRegs</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">PhaseRegionFlags</span>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">## System Dynamics</span>
+<span class="k">class</span> <span class="nc">TwoBody</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ode_x_u</span><span class="o">.</span><span class="n">ode</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">P1mu</span><span class="p">,</span> <span class="n">ltacc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">Xvars</span> <span class="o">=</span> <span class="mi">6</span>
+        <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">ltacc</span> <span class="o">!=</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">3</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">Xvars</span><span class="p">,</span> <span class="n">Uvars</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">segment_3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">normalized_power3</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">P1mu</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ltacc</span> <span class="o">!=</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">thrust</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">tail_3</span><span class="p">()</span> <span class="o">*</span> <span class="n">ltacc</span>
+            <span class="n">acc</span> <span class="o">=</span> <span class="n">g</span> <span class="o">+</span> <span class="n">thrust</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">acc</span> <span class="o">=</span> <span class="n">g</span>
+        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">v</span><span class="p">,</span> <span class="n">acc</span><span class="p">])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span> <span class="n">Xvars</span><span class="p">,</span> <span class="n">Uvars</span><span class="p">)</span>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">## Initial Guess Generators</span>
+<span class="k">def</span> <span class="nf">MakeCircIG</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">thetadeg</span><span class="p">):</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">thetadeg</span><span class="p">)</span>
+    <span class="n">IGC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">7</span><span class="p">))</span>
+    <span class="n">IGC</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span>
+    <span class="n">IGC</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span>
+    <span class="n">IGC</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">v</span>
+    <span class="n">IGC</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">v</span>
+    <span class="k">return</span> <span class="n">IGC</span>
+
+
+<span class="k">def</span> <span class="nf">MakeCircTraj</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">thetadeg</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="n">ode</span> <span class="o">=</span> <span class="n">TwoBody</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">integ</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="mf">.01</span><span class="p">)</span>
+    <span class="n">IGC</span> <span class="o">=</span> <span class="n">MakeCircIG</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">thetadeg</span><span class="p">)</span>
+    <span class="n">Temp</span> <span class="o">=</span> <span class="n">integ</span><span class="o">.</span><span class="n">integrate_dense</span><span class="p">(</span><span class="n">IGC</span><span class="p">,</span> <span class="n">tf</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">Traj</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">Temp</span><span class="p">:</span>
+        <span class="n">TT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">))</span>
+        <span class="n">TT</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="n">TT</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">))</span> <span class="o">*</span> <span class="mf">0.01</span>
+        <span class="n">Traj</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TT</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Traj</span>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">## Solver Function</span>
+<span class="k">def</span> <span class="nf">MultSpaceCraft</span><span class="p">(</span><span class="n">Trajs</span><span class="p">,</span> <span class="n">IStates</span><span class="p">,</span> <span class="n">SetPointIG</span><span class="p">,</span> <span class="n">LTacc</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">NSegs</span><span class="o">=</span><span class="mi">75</span><span class="p">):</span>
+
+    <span class="c1">##Section 1: Create Optimal Control Problem</span>
+    <span class="n">ocp</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">OptimalControlProblem</span><span class="p">()</span>
+
+    <span class="c1">## create ODE governing all spacecraft</span>
+    <span class="n">ode</span> <span class="o">=</span> <span class="n">TwoBody</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">LTacc</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Trajs</span><span class="p">):</span>
+
+        <span class="c1">## Create a phase for Each Spacecraft</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">Tmodes</span><span class="o">.</span><span class="n">LGL5</span><span class="p">)</span>
+        <span class="c1">## Set Initial Guess</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">setTraj</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">NSegs</span><span class="p">)</span>
+
+        <span class="c1">##Use block constant control</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="n">Cmodes</span><span class="o">.</span><span class="n">BlockConstant</span><span class="p">)</span>
+
+        <span class="c1">##Specify that initial state and time are locked at</span>
+        <span class="c1">##whatever value is passed to optimizer</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">addValueLock</span><span class="p">(</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Front</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+
+        <span class="c1">## Bound Norm of Control Vector over the whole phase</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Add TOF objective</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaTimeObjective</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="c1">## add phase to the OCP</span>
+        <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
+
+    <span class="c1">####################################################</span>
+    <span class="c1">#Section 2:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adding a Link constraint to enforce that the terminal state and time</span>
+<span class="sd">    of each phase must be equal to a free state added as LinkParameters of the ocp</span>
+
+<span class="sd">    ie: for each phase(i) Xt_i(tf) - Xt_link = 0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># First we add an initial guess for the linkParams, which we be a free</span>
+    <span class="c1"># terminal position,velocity and time that all phases must hit</span>
+    <span class="c1"># The ocp now has 7 link params indexed 0-&gt;6</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">setLinkParams</span><span class="p">(</span><span class="n">SetPointIG</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
+
+    <span class="c1"># Now we need to define the function and varibales needed to express</span>
+    <span class="c1"># the constraint</span>
+
+    <span class="c1">## The constraint function enforces the equality of two length 7 vectors</span>
+    <span class="n">LinkFun</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="o">-</span> <span class="n">Args</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+
+    <span class="c1">## Specifying for each call to collect the x variables indexed</span>
+    <span class="c1">## by xlinkvars (position velocity time) at PhaseRegs.Back (last state),</span>
+    <span class="c1">## these will be the first 7 arguments to each call of LinkFun</span>
+    <span class="n">linkregs</span> <span class="o">=</span> <span class="p">[</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Back</span><span class="p">]</span>
+    <span class="n">phasestolink</span> <span class="o">=</span> <span class="p">[[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Trajs</span><span class="p">))]</span>
+    <span class="n">xlinkvars</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">)]</span>
+
+    <span class="c1">## Specifies that for each call, collect the the ocp link vars representing</span>
+    <span class="c1">## the free state and forward them to LinkFun, these will be the final 7</span>
+    <span class="c1">## arguments for each call</span>
+    <span class="n">linkparmavars</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Trajs</span><span class="p">))]</span>
+
+    <span class="c1">## combine function and indexing info into LinkConstraint Object and</span>
+    <span class="c1">## add it to the phase</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">LinkFun</span><span class="p">,</span> <span class="n">linkregs</span><span class="p">,</span> <span class="n">phasestolink</span><span class="p">,</span> <span class="n">xlinkvars</span><span class="p">,</span> <span class="n">linkparmavars</span><span class="p">)</span>
+
+    <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkParamEqualCon</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">tail3</span><span class="p">()),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">QPThreads</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># Equal to number of physical cores</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_deltaH</span><span class="p">(</span><span class="mf">5.0e-8</span><span class="p">)</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_KKTtol</span><span class="p">(</span><span class="mf">1.0e-9</span><span class="p">)</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_BoundFraction</span><span class="p">(</span><span class="mf">0.997</span><span class="p">)</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">PrintLevel</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_MaxLSIters</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">Data</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1">##################################################################</span>
+    <span class="c1">#Section 3:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Now we are going to run an optimization continuation scheme to compute</span>
+<span class="sd">    the constellation trajectory for each list of initial states of the spacecraft</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">Ist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">IStates</span><span class="p">):</span>
+
+        <span class="c1">## For each set Initial condtions subsitute the fixed intial conditions</span>
+        <span class="c1">## to each phase, Because we locked them, they will be fixed at these values</span>
+        <span class="c1">## this avoids having to retranscribe to the problem for every optimize</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">phase</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">):</span>
+            <span class="n">phase</span><span class="o">.</span><span class="n">subVariables</span><span class="p">(</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Front</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">Ist</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
+
+        <span class="c1"># force a retranscription peridically to keep problem well conditioned</span>
+        <span class="c1"># This is not strictly necessary</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">j</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">ocp</span><span class="o">.</span><span class="n">transcribe</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Solve before optimizing for the intial run</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ocp</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+        <span class="n">Flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+        <span class="n">tf</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">((</span><span class="n">tf</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1000.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">Flag</span> <span class="o">==</span> <span class="n">ast</span><span class="o">.</span><span class="n">Solvers</span><span class="o">.</span><span class="n">ConvergenceFlags</span><span class="o">.</span><span class="n">NOTCONVERGED</span><span class="p">:</span>
+            <span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
+
+        <span class="n">Data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">[[</span><span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span> <span class="k">for</span> <span class="n">phase</span> <span class="ow">in</span> <span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">],</span> <span class="n">ocp</span><span class="o">.</span><span class="n">returnLinkParams</span><span class="p">()]</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">Data</span>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">## Plotting Utilities</span>
+<span class="k">def</span> <span class="nf">colorScale</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">194</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="p">[</span><span class="mi">208</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">70</span><span class="p">]):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">x</span> <span class="o">*</span> <span class="n">right</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">left</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span><span class="o">/</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+
+
+<span class="k">def</span> <span class="nf">plotPhaseAndThrottle</span><span class="p">(</span><span class="n">tList</span><span class="p">):</span>
+    <span class="c1"># Take N planar trajectories and calculate angles between them</span>
+    <span class="n">angs</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">tList</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tList</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">tList</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tList</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tList</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">angs</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">unitJ</span> <span class="o">=</span> <span class="n">tList</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tList</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+                <span class="n">angs</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">unitJ</span><span class="p">)))</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tList</span><span class="p">):</span>
+        <span class="n">clr</span> <span class="o">=</span> <span class="n">colorScale</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">tList</span><span class="p">))</span>
+        <span class="n">x1</span><span class="o">=</span><span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">]</span>
+        <span class="n">y1</span><span class="o">=</span><span class="p">[</span><span class="n">A</span> <span class="k">for</span> <span class="n">A</span> <span class="ow">in</span> <span class="n">angs</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span>
+                     <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;S/C &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+        <span class="n">x2</span><span class="o">=</span><span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">]</span>
+        <span class="n">y2</span><span class="o">=</span><span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">X</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">X</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">]</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])])</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Phase Angle (rad)&quot;</span><span class="p">)</span>
+
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time (ND)&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Control Magnitude&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;Plots/MultiSpacecraftOptimization/multispacecraftoptimization.pdf&quot;</span><span class="p">,</span>
+                <span class="n">dpi</span> <span class="o">=</span> <span class="mi">500</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1">################################################################################</span>
+<span class="c1">## Main</span>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="n">Thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="n">TrajsIG</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">MakeCircTraj</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">theta</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Thetas</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">SetPointIG</span> <span class="o">=</span> <span class="n">TrajsIG</span><span class="p">[</span><span class="nb">int</span><span class="p">((</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)][</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span>
+    <span class="n">AllIGs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">Theta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Thetas</span><span class="p">):</span>
+        <span class="n">IStates</span> <span class="o">=</span> <span class="p">[</span><span class="n">MakeCircIG</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span> <span class="k">for</span> <span class="n">theta</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Theta</span><span class="p">,</span> <span class="n">n</span><span class="p">)]</span>
+        <span class="n">AllIGs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">IStates</span><span class="p">)</span>
+
+    <span class="n">accs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.015</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">accs</span><span class="p">):</span>
+        <span class="n">Times</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Data</span> <span class="o">=</span> <span class="n">MultSpaceCraft</span><span class="p">(</span><span class="n">TrajsIG</span><span class="p">,</span> <span class="n">AllIGs</span><span class="p">,</span> <span class="n">SetPointIG</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">D</span> <span class="ow">in</span> <span class="n">Data</span><span class="p">:</span>
+            <span class="n">SetPoint</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">Times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SetPoint</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+
+    <span class="n">plotTrajs</span> <span class="o">=</span> <span class="n">Data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">plotPhaseAndThrottle</span><span class="p">(</span><span class="n">plotTrajs</span><span class="p">)</span>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">## Run</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="Delta3.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Delta 3 Multi-phase GTO Transfer</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="zermelolink.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Example 2b: Multi-Phase Zermelo’s Problem</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021, UA ASRL
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Example 3: Multi-Spacecraft Optimization</a><ul>
+<li><a class="reference internal" href="#full-code">Full Code:</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
+    </body>
+</html>

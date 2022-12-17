@@ -1,0 +1,461 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Integrator Tutorial" href="IntegratorGuide.html" /><link rel="prev" title="Vector Function Tutorial" href="VectorFunctionGuide.html" />
+
+    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
+        <title>ODE Tutorial - ASSET 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: red;
+  --color-brand-content: #CC3333;
+  --color-admonition-background: orange;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">ASSET 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">ASSET 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VectorFunctionGuide.html">Vector Function Tutorial</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">ODE Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IntegratorGuide.html">Integrator Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PSIOPT.html">PSIOPT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Phase.html">Phase Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Integrator.html">Integrators</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../examples/examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Example 1: Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Example 2a: Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/ReentryExample.html">Space Shuttle Reentry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/CartPole.html">Cart Pole Swing Up</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="ode-tutorial">
+<h1>ODE Tutorial<a class="headerlink" href="#ode-tutorial" title="Permalink to this headline">#</a></h1>
+<p>One of ASSET’s primary goals is facilitating optimal control and integration of dynamical systems governed by ordinary differential equations (ODEs).
+In ASSET, an ODE is simply a vector function adhering to the state-space formalism shown below.
+That is, it is a vector function that takes as arguments the state of the system, <span class="math notranslate nohighlight">\(\vec{X}\)</span>, the current time,
+<span class="math notranslate nohighlight">\(t\)</span>, time varying controls, <span class="math notranslate nohighlight">\(\vec{U}\)</span>, some static ODE parameters <span class="math notranslate nohighlight">\(\vec{P}\)</span>, and returns the time derivative of the state variables.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{equation}
+\dot{\vec{X}} = \vec{F}([\vec{X},t,\vec{U},\vec{P}])
+\end{equation}\]</div>
+</div>
+<p>Some ODEs do not require the <span class="math notranslate nohighlight">\(\vec{U}\)</span> or <span class="math notranslate nohighlight">\(\vec{P}\)</span> inputs (e.g. ballistic gravity model), and thus it is not necessary to provide them in those cases.
+However, because we use a common interface between autonomous and non-autonomous ODEs, it is always necessary to provide
+an explicit time variable even if it is unused in the dynamics.</p>
+<p>ODE’s can be written using any of the techniques described in the VectorFunctions
+section, provided that they obey the state space formalism for their inputs and outputs.
+For example a simple two body gravitational model with low thrust could be written as shown
+below. This model would have 6 state variables representing the position and velocity vectors
+relative to the central body, and three control variables representing the thrust direction and engine throttle.
+We implicitly assume that we will later place an upper bound of 1 on the norm of the control so that the acceleration
+never exceeds the maximum we specify here. Adhering to the convention above, the position and velocity state variables will be
+the first 6 input arguments, followed by the time, and then the thrust direction/throttle. As outputs we return
+the time derivatives of position and velocity in the same order we assumed in the input arguments.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">vf</span>        <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
+<span class="n">oc</span>        <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
+<span class="n">Args</span>      <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
+
+<span class="k">def</span> <span class="nf">TwoBodyLTFunc</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span><span class="n">MaxLTAcc</span><span class="p">):</span>
+
+    <span class="n">XtU</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="c1"># [ [R,V] , t, [U]]</span>
+
+    <span class="n">R</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">U</span>  <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">7</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
+
+    <span class="n">G</span> <span class="o">=</span> <span class="o">-</span><span class="n">mu</span><span class="o">*</span><span class="n">R</span><span class="o">.</span><span class="n">normalized_power3</span><span class="p">()</span>
+
+    <span class="n">Acc</span> <span class="o">=</span> <span class="n">G</span> <span class="o">+</span> <span class="n">U</span><span class="o">*</span><span class="n">MaxLTAcc</span>
+
+    <span class="n">Rdot</span> <span class="o">=</span> <span class="n">V</span>
+    <span class="n">Vdot</span> <span class="o">=</span> <span class="n">Acc</span>
+
+    <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">Rdot</span><span class="p">,</span><span class="n">Vdot</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">ode</span>
+</pre></div>
+</div>
+<section id="odearguments">
+<h2>ODEArguments<a class="headerlink" href="#odearguments" title="Permalink to this headline">#</a></h2>
+<p>To simplify the process of defining Vector functions adhering to the state space
+formalism, we provide the <code class="code docutils literal notranslate"><span class="pre">ODEArguments</span></code> class inside of the <code class="code docutils literal notranslate"><span class="pre">OptimalControl</span></code> module.
+This class is a thin wrapper around the <code class="code docutils literal notranslate"><span class="pre">Arguments</span></code> class that allows you to index relevant
+sub-vectors and elements of an ODE’s inputs in a clearer way than using <code class="code docutils literal notranslate"><span class="pre">Arguments</span></code>. To construct
+<code class="code docutils literal notranslate"><span class="pre">ODEArguments</span></code> we pass the number of state variables,control variables, and ODE parameters (if
+any). The total input size will be the sum of <code class="code docutils literal notranslate"><span class="pre">XVars</span></code>,:code:<cite>PVars</cite>, and <code class="code docutils literal notranslate"><span class="pre">UVars</span></code> plus 1 for time. We can the
+address the relevant sub-vectors of our input using the <code class="code docutils literal notranslate"><span class="pre">X/U/PVec()</span></code> methods. These methods are return regular
+segment types so we can then apply all operations we would to those objects. Similarly, we can also address
+specific elements of each of these sub-vectors using the <code class="code docutils literal notranslate"><span class="pre">X/U/PVar(i)</span></code> methods.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">TwoBodyLTFunc</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span><span class="n">MaxLTAcc</span><span class="p">):</span>
+
+    <span class="n">XVars</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">UVars</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">PVars</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">XtU</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">XVars</span><span class="p">,</span><span class="n">UVars</span><span class="p">,</span><span class="n">PVars</span><span class="p">)</span> <span class="c1"># [ [R,V] , t, [U],[]]</span>
+
+    <span class="c1"># no need to specify PVars if there aren&#39;t any, same would go for UVars</span>
+    <span class="c1"># if there were no control variables</span>
+    <span class="n">XtU</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">XVars</span><span class="p">,</span><span class="n">UVars</span><span class="p">)</span>
+
+    <span class="c1"># Index state,control or parameter vectors</span>
+    <span class="n">XVec</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">XVec</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span>
+
+    <span class="n">UVec</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">segment</span><span class="p">(</span><span class="n">XVars</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">UVars</span><span class="p">)</span>
+    <span class="n">UVec</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVec</span><span class="p">()</span>
+
+    <span class="n">r0</span><span class="p">,</span><span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">v0</span><span class="p">,</span><span class="n">v1</span><span class="p">,</span><span class="n">v2</span> <span class="o">=</span> <span class="n">XVec</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">u0</span><span class="p">,</span><span class="n">u1</span><span class="p">,</span><span class="n">u2</span> <span class="o">=</span> <span class="n">UVec</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="c1"># If we had ode parameters</span>
+    <span class="c1">#PVec = XtU.segment(XVars+1+UVars,PVars)</span>
+    <span class="c1">#PVec = XtU.PVec()</span>
+
+    <span class="n">R</span><span class="p">,</span><span class="n">V</span>  <span class="o">=</span> <span class="n">XVec</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">UVec</span>
+
+    <span class="c1">### Index specific elements</span>
+    <span class="n">t</span>  <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">TVar</span><span class="p">()</span>   <span class="c1"># same as XtU[XVars]</span>
+
+    <span class="n">v1</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">v1</span> <span class="o">=</span> <span class="n">XVec</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">v1</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVar</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c1"># XtU.UVar(i) is same as XtU[i]</span>
+
+    <span class="n">u0</span> <span class="o">=</span> <span class="n">UVec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">u0</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVar</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># XtU.UVar(i) is same as XtU[XVars+i]</span>
+
+    <span class="c1">######################################</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="o">-</span><span class="n">mu</span><span class="o">*</span><span class="n">R</span><span class="o">.</span><span class="n">normalized_power3</span><span class="p">()</span>
+    <span class="n">Acc</span> <span class="o">=</span> <span class="n">G</span> <span class="o">+</span> <span class="n">U</span><span class="o">*</span><span class="n">MaxLTAcc</span>
+
+    <span class="n">Rdot</span> <span class="o">=</span> <span class="n">V</span>
+    <span class="n">Vdot</span> <span class="o">=</span> <span class="n">Acc</span>
+
+    <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">Rdot</span><span class="p">,</span><span class="n">Vdot</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">ode</span>
+</pre></div>
+</div>
+</section>
+<section id="defining-ode-classes">
+<h2>Defining ODE Classes<a class="headerlink" href="#defining-ode-classes" title="Permalink to this headline">#</a></h2>
+<p>If you were to inspect the type of the result of the function above, it would
+be VectorFunction, and at this point ASSET has no idea that it is an ODE.
+For ASSET to recognize our function as an ODE and allow us to use it directly with
+all of associated utilities, we need to define it using the class
+based style describing in VectorFunctionGuide, but inherit from the class <code class="code docutils literal notranslate"><span class="pre">oc.ODEBase</span></code>
+rather <code class="code docutils literal notranslate"><span class="pre">VectorFunction</span></code>. Therefore, the correct way to write the TwoBodyLT ODE shown below.
+When initializing our base class we simply supply, the asset vector function specifying
+the ode as well as the number of states, controls, and parameters.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TwoBodyLTODE</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mu</span><span class="p">,</span><span class="n">MaxLTAcc</span><span class="p">):</span>
+
+        <span class="n">XVars</span> <span class="o">=</span> <span class="mi">6</span>
+        <span class="n">UVars</span> <span class="o">=</span> <span class="mi">3</span>
+
+
+        <span class="n">XtU</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">XVars</span><span class="p">,</span><span class="n">UVars</span><span class="p">)</span>
+
+        <span class="n">R</span><span class="p">,</span><span class="n">V</span>  <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVec</span><span class="p">()</span>
+
+
+        <span class="n">G</span> <span class="o">=</span> <span class="o">-</span><span class="n">mu</span><span class="o">*</span><span class="n">R</span><span class="o">.</span><span class="n">normalized_power3</span><span class="p">()</span>
+        <span class="n">Acc</span> <span class="o">=</span> <span class="n">G</span> <span class="o">+</span> <span class="n">U</span><span class="o">*</span><span class="n">MaxLTAcc</span>
+
+        <span class="n">Rdot</span> <span class="o">=</span> <span class="n">V</span>
+        <span class="n">Vdot</span> <span class="o">=</span> <span class="n">Acc</span>
+
+        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">Rdot</span><span class="p">,</span><span class="n">Vdot</span><span class="p">])</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="n">XVars</span><span class="p">,</span><span class="n">UVars</span><span class="p">)</span>
+
+
+
+
+<span class="n">ode</span> <span class="o">=</span> <span class="n">TwoBodyLTODE</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mf">.01</span><span class="p">)</span>
+
+<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">)</span>
+<span class="n">integ</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="s2">&quot;DOPRI87&quot;</span><span class="p">,</span><span class="mf">.1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This object is now a full fledged ODE, from which we can dispatch phase and integrator
+objects. We will discuss usage of these in the next sections.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="IntegratorGuide.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Integrator Tutorial</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="VectorFunctionGuide.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Vector Function Tutorial</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021, UA ASRL
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">ODE Tutorial</a><ul>
+<li><a class="reference internal" href="#odearguments">ODEArguments</a></li>
+<li><a class="reference internal" href="#defining-ode-classes">Defining ODE Classes</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>
