@@ -94,7 +94,7 @@ def Run2():
     plt.plot(TT[7],TT[8])
     plt.plot(TT[7],TT[9])
     plt.plot(TT[7],TT[10])
-    plt.plot(TT[7],(TT[8]**2+TT[9]**2+TT[10]**2)**.5)
+    #plt.plot(TT[7],(TT[8]**2+TT[9]**2+TT[10]**2)**.5)
 
     plt.show()
     

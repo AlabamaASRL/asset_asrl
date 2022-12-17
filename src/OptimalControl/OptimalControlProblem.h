@@ -25,6 +25,10 @@ struct OptimalControlProblem:OptimizationProblemBase {
   using StateIntegral = StateFunction<ScalarFunctionalX>;
   using PhasePtr = std::shared_ptr<ODEPhaseBase>;
 
+  using PhaseIndexPack = std::tuple<int,std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi>;
+  using PhaseIndexPackPtr = std::tuple<PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi>;
+
+
   std::vector<PhasePtr> phases;
   std::vector<std::string> phase_names;
 
@@ -153,6 +157,115 @@ struct OptimalControlProblem:OptimizationProblemBase {
     return this->phases[ith];
   }
 
+  /////////////////////////////////////////////////
+
+  template<class FuncType,class PackType, class OutType>
+  OutType makeLinkFunc(FuncType f,std::vector<PackType> packs, VectorXi lv) {
+
+      int npacks = packs.size();
+      std::vector<Eigen::VectorXi> PTL;
+      VectorXi phasenums(npacks);
+      Eigen::Matrix<PhaseRegionFlags, -1, 1> RegFlags(npacks);
+      std::vector<Eigen::VectorXi> xtvs(npacks);
+      std::vector<Eigen::VectorXi> opvs(npacks);
+      std::vector<Eigen::VectorXi> spvs(npacks);
+
+      for (int i = 0; i < npacks; i++) {
+          if constexpr (std::is_same<PackType, PhaseIndexPack>::value) {
+              phasenums[i] = std::get<0>(packs[i]);
+          }
+          else {
+              phasenums[i] = this->getPhaseNum(std::get<0>(packs[i]));
+          }
+          
+          RegFlags[i] = strto_PhaseRegionFlag(std::get<1>(packs[i]));
+          xtvs[i] = std::get<2>(packs[i]);
+          opvs[i] = std::get<3>(packs[i]);
+          spvs[i] = std::get<4>(packs[i]);
+      }
+
+      PTL.push_back(phasenums);
+      std::vector<Eigen::VectorXi> lvs;
+      lvs.push_back(lv);
+      return OutType(f, RegFlags, PTL, xtvs, opvs, spvs, lvs);
+  }
+  template<class FuncType, class PhaseType, class OutType>
+  OutType makeLinkFunc(FuncType f, 
+      PhaseType phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      PhaseType phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1,
+      VectorXi lv) {
+
+      auto pack0 = std::tuple{ phase0,reg0,xtv0,opv0,spv0 };
+      auto pack1 = std::tuple{ phase1,reg1,xtv1,opv1,spv1 };
+      auto packs = std::vector{ pack0,pack1 };
+      return this->makeLinkFunc<FuncType,decltype(pack0),OutType>(f, packs, lv);
+  }
+
+  template<class FuncType, class PhaseType, class OutType>
+  OutType makeLinkFunc(FuncType f,
+      PhaseType phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      PhaseType phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1) {
+
+      auto pack0 = std::tuple{ phase0,reg0,xtv0,opv0,spv0 };
+      auto pack1 = std::tuple{ phase1,reg1,xtv1,opv1,spv1 };
+      auto packs = std::vector{ pack0,pack1 };
+      Eigen::VectorXi lv;
+      lv.resize(0);
+      return this->makeLinkFunc<FuncType, decltype(pack0), OutType>(f, packs, lv);
+  }
+
+  template<class FuncType, class PhaseType, class OutType>
+  OutType makeLinkFunc(FuncType f,
+      PhaseType phase0, std::string reg0, Eigen::VectorXi v0,
+      PhaseType phase1, std::string reg1, Eigen::VectorXi v1,
+      Eigen::VectorXi lv) {
+
+      Eigen::VectorXi xtv0, opv0, spv0, xtv1, opv1, spv1;
+
+      strto_PhaseRegionFlag(reg0);
+      strto_PhaseRegionFlag(reg1);
+
+      if (reg0 == "ODEParams")  opv0 = v0;
+      else if (reg0 == "StaticParams")  spv0 = v0;
+      else  xtv0 = v0;
+
+      if (reg1 == "ODEParams")  opv1 = v1;
+      else if (reg1 == "StaticParams")  spv1 = v1;
+      else  xtv1 = v1;
+
+
+      auto pack0 = std::tuple{ phase0,reg0,xtv0,opv0,spv0 };
+      auto pack1 = std::tuple{ phase1,reg1,xtv1,opv1,spv1 };
+      auto packs = std::vector{ pack0,pack1 };
+      return this->makeLinkFunc<FuncType, decltype(pack0), OutType>(f, packs, lv);
+  }
+  template<class FuncType, class PhaseType, class OutType>
+  OutType makeLinkFunc(FuncType f,
+      PhaseType phase0, std::string reg0, Eigen::VectorXi v0,
+      PhaseType phase1, std::string reg1, Eigen::VectorXi v1) {
+
+      Eigen::VectorXi xtv0, opv0, spv0, xtv1, opv1, spv1;
+
+      strto_PhaseRegionFlag(reg0);
+      strto_PhaseRegionFlag(reg1);
+
+      if (reg0 == "ODEParams")  opv0 = v0;
+      else if (reg0 == "StaticParams")  spv0 = v0;
+      else  xtv0 = v0;
+
+      if (reg1 == "ODEParams")  opv1 = v1;
+      else if (reg1 == "StaticParams")  spv1 = v1;
+      else  xtv1 = v1;
+
+
+      auto pack0 = std::tuple{ phase0,reg0,xtv0,opv0,spv0 };
+      auto pack1 = std::tuple{ phase1,reg1,xtv1,opv1,spv1 };
+      auto packs = std::vector{ pack0,pack1 };
+      Eigen::VectorXi lv;
+      lv.resize(0);
+      return this->makeLinkFunc<FuncType, decltype(pack0), OutType>(f, packs, lv);
+
+  }
 
   ////////////////////////////////////////////////
   int addLinkEqualCon(LinkConstraint lc) {
@@ -164,7 +277,105 @@ struct OptimalControlProblem:OptimizationProblemBase {
 
     return index;
   }
-        ////////////////////////////////////////////
+  ////////////////////////////////////////////
+
+
+  /////////////// THE NEW EQUALCON INTERFACE//////////////////////////////
+
+  int addLinkEqualCon(VectorFunctionalX lc, std::vector<PhaseIndexPack> packs, VectorXi lv) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, PhaseIndexPack, LinkConstraint>(lc, packs, lv);
+      return this->addLinkEqualCon(Func);
+  }
+  int addLinkEqualCon(VectorFunctionalX lc, std::vector<PhaseIndexPackPtr> packs, VectorXi lv) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, PhaseIndexPackPtr, LinkConstraint>(lc, packs, lv);
+      return this->addLinkEqualCon(Func);
+  }
+
+  
+  int addLinkEqualCon(VectorFunctionalX lc, 
+      int phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      int phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1,
+      VectorXi lv) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, int, LinkConstraint>(lc, 
+               phase0,  reg0,  xtv0,  opv0,  spv0,
+               phase1,  reg1,  xtv1,  opv1,  spv1,
+               lv);
+      return this->addLinkEqualCon(Func);
+  }
+  int addLinkEqualCon(VectorFunctionalX lc,
+      PhasePtr phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      PhasePtr phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1,
+      VectorXi lv) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, PhasePtr, LinkConstraint>(lc,
+          phase0, reg0, xtv0, opv0, spv0,
+          phase1, reg1, xtv1, opv1, spv1,
+          lv);
+      return this->addLinkEqualCon(Func);
+  }
+
+
+  int addLinkEqualCon(VectorFunctionalX lc,
+      int phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      int phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, int, LinkConstraint>(lc,
+          phase0, reg0, xtv0, opv0, spv0,
+          phase1, reg1, xtv1, opv1, spv1);
+      return this->addLinkEqualCon(Func);
+  }
+  int addLinkEqualCon(VectorFunctionalX lc,
+      PhasePtr phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      PhasePtr phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, PhasePtr, LinkConstraint>(lc,
+          phase0, reg0, xtv0, opv0, spv0,
+          phase1, reg1, xtv1, opv1, spv1);
+      return this->addLinkEqualCon(Func);
+  }
+
+
+
+  int addLinkEqualCon(VectorFunctionalX lc,
+      int phase0, std::string reg0, Eigen::VectorXi xtv0,
+      int phase1, std::string reg1, Eigen::VectorXi xtv1,  Eigen::VectorXi lv) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, int, LinkConstraint>(lc,
+          phase0, reg0, xtv0,
+          phase1, reg1, xtv1,lv);
+      return this->addLinkEqualCon(Func);
+  }
+  int addLinkEqualCon(VectorFunctionalX lc,
+      PhasePtr phase0, std::string reg0, Eigen::VectorXi xtv0,
+      PhasePtr phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi lv) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, PhasePtr, LinkConstraint>(lc,
+          phase0, reg0, xtv0,
+          phase1, reg1, xtv1,lv);
+      return this->addLinkEqualCon(Func);
+  }
+
+
+  int addLinkEqualCon(VectorFunctionalX lc,
+      int phase0, std::string reg0, Eigen::VectorXi xtv0, 
+      int phase1, std::string reg1, Eigen::VectorXi xtv1) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, int, LinkConstraint>(lc,
+          phase0, reg0, xtv0, 
+          phase1, reg1, xtv1 );
+      return this->addLinkEqualCon(Func);
+  }
+  int addLinkEqualCon(VectorFunctionalX lc,
+      PhasePtr phase0, std::string reg0, Eigen::VectorXi xtv0,
+      PhasePtr phase1, std::string reg1, Eigen::VectorXi xtv1) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, PhasePtr, LinkConstraint>(lc,
+          phase0, reg0, xtv0,
+          phase1, reg1, xtv1);
+      return this->addLinkEqualCon(Func);
+  }
+
+
+
+
+
+
+
+
+
 
   int addLinkEqualCon(VectorFunctionalX lc, 
       RegVec regs,
@@ -295,7 +506,12 @@ struct OptimalControlProblem:OptimizationProblemBase {
       return this->addLinkEqualCon(lc, regs, ptl_from_phases(ptl), xtuvs);
   }
 
-    ////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////
+
+  
+
+
+  /////////////////////////////////////////////////////////////
 
   int addLinkParamEqualCon(VectorFunctionalX lc, std::vector<VectorXi> lpvs) {
     std::vector<Eigen::VectorXi> empty;
@@ -359,7 +575,8 @@ struct OptimalControlProblem:OptimizationProblemBase {
 
  
 
-  int addDirectLinkEqualCon(VectorFunctionalX lc, int iphase, PhaseRegionFlags f1, VectorXi v1,
+  int addDirectLinkEqualCon(VectorFunctionalX lc, 
+      int iphase, PhaseRegionFlags f1, VectorXi v1,
       int fphase, PhaseRegionFlags f2, VectorXi v2) {
       if (iphase < 0) iphase = (this->phases.size() + iphase);
       if (fphase < 0) fphase = (this->phases.size() + fphase);
@@ -445,6 +662,98 @@ struct OptimalControlProblem:OptimizationProblemBase {
 
 
   ////////////////////////////////////////////
+
+  /////////////// THE NEW INEQUALCON INTERFACE//////////////////////////////
+
+  int addLinkInequalCon(VectorFunctionalX lc, std::vector<PhaseIndexPack> packs, VectorXi lv) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, PhaseIndexPack, LinkConstraint>(lc, packs, lv);
+      return this->addLinkInequalCon(Func);
+  }
+  int addLinkInequalCon(VectorFunctionalX lc, std::vector<PhaseIndexPackPtr> packs, VectorXi lv) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, PhaseIndexPackPtr, LinkConstraint>(lc, packs, lv);
+      return this->addLinkInequalCon(Func);
+  }
+
+
+  int addLinkInequalCon(VectorFunctionalX lc,
+      int phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      int phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1,
+      VectorXi lv) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, int, LinkConstraint>(lc,
+          phase0, reg0, xtv0, opv0, spv0,
+          phase1, reg1, xtv1, opv1, spv1,
+          lv);
+      return this->addLinkInequalCon(Func);
+  }
+  int addLinkInequalCon(VectorFunctionalX lc,
+      PhasePtr phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      PhasePtr phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1,
+      VectorXi lv) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, PhasePtr, LinkConstraint>(lc,
+          phase0, reg0, xtv0, opv0, spv0,
+          phase1, reg1, xtv1, opv1, spv1,
+          lv);
+      return this->addLinkInequalCon(Func);
+  }
+
+
+  int addLinkInequalCon(VectorFunctionalX lc,
+      int phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      int phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, int, LinkConstraint>(lc,
+          phase0, reg0, xtv0, opv0, spv0,
+          phase1, reg1, xtv1, opv1, spv1);
+      return this->addLinkInequalCon(Func);
+  }
+  int addLinkInequalCon(VectorFunctionalX lc,
+      PhasePtr phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      PhasePtr phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, PhasePtr, LinkConstraint>(lc,
+          phase0, reg0, xtv0, opv0, spv0,
+          phase1, reg1, xtv1, opv1, spv1);
+      return this->addLinkInequalCon(Func);
+  }
+
+
+
+  int addLinkInequalCon(VectorFunctionalX lc,
+      int phase0, std::string reg0, Eigen::VectorXi xtv0,
+      int phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi lv) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, int, LinkConstraint>(lc,
+          phase0, reg0, xtv0,
+          phase1, reg1, xtv1, lv);
+      return this->addLinkInequalCon(Func);
+  }
+  int addLinkInequalCon(VectorFunctionalX lc,
+      PhasePtr phase0, std::string reg0, Eigen::VectorXi xtv0,
+      PhasePtr phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi lv) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, PhasePtr, LinkConstraint>(lc,
+          phase0, reg0, xtv0,
+          phase1, reg1, xtv1, lv);
+      return this->addLinkInequalCon(Func);
+  }
+
+
+  int addLinkInequalCon(VectorFunctionalX lc,
+      int phase0, std::string reg0, Eigen::VectorXi xtv0,
+      int phase1, std::string reg1, Eigen::VectorXi xtv1) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, int, LinkConstraint>(lc,
+          phase0, reg0, xtv0,
+          phase1, reg1, xtv1);
+      return this->addLinkInequalCon(Func);
+  }
+  int addLinkInequalCon(VectorFunctionalX lc,
+      PhasePtr phase0, std::string reg0, Eigen::VectorXi xtv0,
+      PhasePtr phase1, std::string reg1, Eigen::VectorXi xtv1) {
+      auto Func = this->makeLinkFunc< VectorFunctionalX, PhasePtr, LinkConstraint>(lc,
+          phase0, reg0, xtv0,
+          phase1, reg1, xtv1);
+      return this->addLinkInequalCon(Func);
+  }
+
+  
+  //////////////////////////
+  
 
   int addLinkInequalCon(VectorFunctionalX lc,
       RegVec regs,
@@ -599,6 +908,103 @@ struct OptimalControlProblem:OptimizationProblemBase {
     check_function_size(this->LinkObjectives.back(), "Link Objective");
     return index;
   }
+  /////////////// THE NEW INEQUALCON INTERFACE//////////////////////////////
+
+  int addLinkObjective(ScalarFunctionalX lc, std::vector<PhaseIndexPack> packs, VectorXi lv) {
+      auto Func = this->makeLinkFunc< ScalarFunctionalX, PhaseIndexPack, LinkObjective>(lc, packs, lv);
+      return this->addLinkObjective(Func);
+  }
+  int addLinkObjective(ScalarFunctionalX lc, std::vector<PhaseIndexPackPtr> packs, VectorXi lv) {
+      auto Func = this->makeLinkFunc< ScalarFunctionalX, PhaseIndexPackPtr, LinkObjective>(lc, packs, lv);
+      return this->addLinkObjective(Func);
+  }
+
+
+  int addLinkObjective(ScalarFunctionalX lc,
+      int phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      int phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1,
+      VectorXi lv) {
+      auto Func = this->makeLinkFunc< ScalarFunctionalX, int, LinkObjective>(lc,
+          phase0, reg0, xtv0, opv0, spv0,
+          phase1, reg1, xtv1, opv1, spv1,
+          lv);
+      return this->addLinkObjective(Func);
+  }
+  int addLinkObjective(ScalarFunctionalX lc,
+      PhasePtr phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      PhasePtr phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1,
+      VectorXi lv) {
+      auto Func = this->makeLinkFunc< ScalarFunctionalX, PhasePtr, LinkObjective>(lc,
+          phase0, reg0, xtv0, opv0, spv0,
+          phase1, reg1, xtv1, opv1, spv1,
+          lv);
+      return this->addLinkObjective(Func);
+  }
+
+
+  int addLinkObjective(ScalarFunctionalX lc,
+      int phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      int phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1) {
+      auto Func = this->makeLinkFunc< ScalarFunctionalX, int, LinkObjective>(lc,
+          phase0, reg0, xtv0, opv0, spv0,
+          phase1, reg1, xtv1, opv1, spv1);
+      return this->addLinkObjective(Func);
+  }
+  int addLinkObjective(ScalarFunctionalX lc,
+      PhasePtr phase0, std::string reg0, Eigen::VectorXi xtv0, Eigen::VectorXi opv0, Eigen::VectorXi spv0,
+      PhasePtr phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi opv1, Eigen::VectorXi spv1) {
+      auto Func = this->makeLinkFunc< ScalarFunctionalX, PhasePtr, LinkObjective>(lc,
+          phase0, reg0, xtv0, opv0, spv0,
+          phase1, reg1, xtv1, opv1, spv1);
+      return this->addLinkObjective(Func);
+  }
+
+
+
+  int addLinkObjective(ScalarFunctionalX lc,
+      int phase0, std::string reg0, Eigen::VectorXi xtv0,
+      int phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi lv) {
+      auto Func = this->makeLinkFunc< ScalarFunctionalX, int, LinkObjective>(lc,
+          phase0, reg0, xtv0,
+          phase1, reg1, xtv1, lv);
+      return this->addLinkObjective(Func);
+  }
+  int addLinkObjective(ScalarFunctionalX lc,
+      PhasePtr phase0, std::string reg0, Eigen::VectorXi xtv0,
+      PhasePtr phase1, std::string reg1, Eigen::VectorXi xtv1, Eigen::VectorXi lv) {
+      auto Func = this->makeLinkFunc< ScalarFunctionalX, PhasePtr, LinkObjective>(lc,
+          phase0, reg0, xtv0,
+          phase1, reg1, xtv1, lv);
+      return this->addLinkObjective(Func);
+  }
+
+
+  int addLinkObjective(ScalarFunctionalX lc,
+      int phase0, std::string reg0, Eigen::VectorXi xtv0,
+      int phase1, std::string reg1, Eigen::VectorXi xtv1) {
+      auto Func = this->makeLinkFunc< ScalarFunctionalX, int, LinkObjective>(lc,
+          phase0, reg0, xtv0,
+          phase1, reg1, xtv1);
+      return this->addLinkObjective(Func);
+  }
+  int addLinkObjective(ScalarFunctionalX lc,
+      PhasePtr phase0, std::string reg0, Eigen::VectorXi xtv0,
+      PhasePtr phase1, std::string reg1, Eigen::VectorXi xtv1) {
+      auto Func = this->makeLinkFunc< ScalarFunctionalX, PhasePtr, LinkObjective>(lc,
+          phase0, reg0, xtv0,
+          phase1, reg1, xtv1);
+      return this->addLinkObjective(Func);
+  }
+
+
+  //////////////////////////
+
+
+
+
+
+
+
 
   int addLinkObjective(ScalarFunctionalX lc,
       RegVec regs,
@@ -787,8 +1193,7 @@ struct OptimalControlProblem:OptimizationProblemBase {
 
                       fmt::print(fmt::fg(fmt::color::red),
                           "Transcription Error!!!\n"
-                          "Same phase detected more than once in optimal control problem. \n",
-                          "If this was intentional make an explicit copy of the phase using the .copy method.\n");
+                          "Same phase detected more than once in optimal control problem. \n");
                       throw std::invalid_argument("");
                   }
               }

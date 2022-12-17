@@ -356,6 +356,10 @@ struct PSIOPT {
 
   bool CNRMode = false;
   int PrintLevel = 0;
+  void set_PrintLevel(int plevel) {
+      this->PrintLevel = plevel;
+  }
+
   PDStepStrategies PDStepStrategy = PrimSlackEq_Iq;
   bool storespmat = false;
   Eigen::SparseMatrix<double, Eigen::RowMajor> spmat;

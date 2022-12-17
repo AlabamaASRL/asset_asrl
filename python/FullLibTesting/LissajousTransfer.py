@@ -62,9 +62,9 @@ phase0 = ode.phase("LGL3",ImapP0[1:-1],128)
 phase0.addBoundaryValue("Front",range(0,6),ImapP0[0][0:6])
 phase0.addBoundaryValue("Front",[6],[ImapP0[0][6]])
 
-phase1 = ode.phase("LGL3",ImapP1[1:-1],128)
-phase2 = ode.phase("LGL3",ImapP2[1:-1],128)
-phase3 = ode.phase("LGL3",ImapP3[1:-1],128)
+phase1 = ode.phase("LGL3",ImapP1[1:-2],128)
+phase2 = ode.phase("LGL3",ImapP2[1:-2],128)
+phase3 = ode.phase("LGL3",ImapP3[1:-2],128)
 
 
 phase3.addBoundaryValue("Back",range(0,3),LissF[0:3])
@@ -97,15 +97,32 @@ def DVCon():
     return (V1 + DV - V2)
 
 
-ocp.setLinkParams(1*np.ones((9))/frame.vstar)
+#ocp.setLinkParams(1*np.ones((9))/frame.vstar)
+
+'''
 ocp.addLinkEqualCon(DVCon(),"BackToFront",
                 [[0,1],[1,2],[2,3]],
                 [[3,4,5],[3,4,5]],
                 [],[],
                 [range(0,3),range(3,6),range(6,9)])
+'''
 
-ocp.addLinkParamObjective(Args(3).norm()*30,[range(0,3),range(3,6),range(6,9)])
-ocp.addLinkParamInequalCon(.001/frame.vstar - Args(3).norm(),[range(0,3),range(3,6),range(6,9)])
+for i in range(0,3):
+    p0 = ocp.Phase(i)
+    p1 = ocp.Phase(i+1)
+    
+    Lvars = range(3*i,3*i+3)
+    print(Lvars)
+    ocp.addLinkInequalCon(.001/frame.vstar -DVObj(),
+                        i  ,"Last", range(3,6),
+                        i+1,"First",range(3,6))
+    
+    ocp.addLinkObjective(DVObj(),
+                        i  ,"Last", range(3,6),
+                        i+1,"First",range(3,6))
+
+#ocp.addLinkParamObjective(Args(3).norm()*30,[range(0,3),range(3,6),range(6,9)])
+#ocp.addLinkParamInequalCon(.001/frame.vstar - Args(3).norm(),[range(0,3),range(3,6),range(6,9)])
 
 ocp.optimizer.set_OptLSMode("AUGLANG")
 

@@ -921,5 +921,212 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
   obj.def_readwrite("Phases", &OptimalControlProblem::phases,
                     OptimalControlProblem_Phases);
 
- 
+
+
+  ///////////////////////////////////////////////////////////////
+  /////////////// New Link Interface/////////////////////////////
+
+  /// 
+  /// EqualCons
+  
+  obj.def("addLinkEqualCon",
+      py::overload_cast<VectorFunctionalX , std::vector<PhaseIndexPack> , VectorXi>(
+          &OptimalControlProblem::addLinkEqualCon));
+
+  obj.def("addLinkEqualCon",
+      py::overload_cast<VectorFunctionalX, std::vector<PhaseIndexPackPtr>, VectorXi>(
+          &OptimalControlProblem::addLinkEqualCon));
+
+
+  obj.def("addLinkEqualCon",
+      py::overload_cast<VectorFunctionalX, std::vector<PhaseIndexPack>, VectorXi>(
+          &OptimalControlProblem::addLinkEqualCon));
+
+  obj.def("addLinkEqualCon",
+      py::overload_cast<VectorFunctionalX,
+      int , std::string , Eigen::VectorXi , Eigen::VectorXi , Eigen::VectorXi ,
+      int , std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      VectorXi>(&OptimalControlProblem::addLinkEqualCon));
+
+  obj.def("addLinkEqualCon",
+      py::overload_cast<VectorFunctionalX,
+      PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      VectorXi>(&OptimalControlProblem::addLinkEqualCon));
+
+  obj.def("addLinkEqualCon",
+      py::overload_cast<VectorFunctionalX,
+      int, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      int, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkEqualCon));
+
+  obj.def("addLinkEqualCon",
+      py::overload_cast<VectorFunctionalX,
+      PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkEqualCon));
+
+  obj.def("addLinkEqualCon",
+      py::overload_cast<VectorFunctionalX,
+      int, std::string, Eigen::VectorXi,
+      int, std::string, Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkEqualCon));
+
+  obj.def("addLinkEqualCon",
+      py::overload_cast<VectorFunctionalX,
+      PhasePtr, std::string, Eigen::VectorXi,
+      PhasePtr, std::string, Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkEqualCon));
+
+  obj.def("addLinkEqualCon",
+      py::overload_cast<VectorFunctionalX,
+      int, std::string, Eigen::VectorXi,
+      int, std::string, Eigen::VectorXi, 
+      Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkEqualCon));
+
+  obj.def("addLinkEqualCon",
+      py::overload_cast<VectorFunctionalX,
+      PhasePtr, std::string, Eigen::VectorXi,
+      PhasePtr, std::string, Eigen::VectorXi, 
+      Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkEqualCon));
+
+
+
+  /// 
+  /// InequalCons
+
+  obj.def("addLinkInequalCon",
+      py::overload_cast<VectorFunctionalX, std::vector<PhaseIndexPack>, VectorXi>(
+          &OptimalControlProblem::addLinkInequalCon));
+
+  obj.def("addLinkInequalCon",
+      py::overload_cast<VectorFunctionalX, std::vector<PhaseIndexPackPtr>, VectorXi>(
+          &OptimalControlProblem::addLinkInequalCon));
+
+  obj.def("addLinkInequalCon",
+      py::overload_cast<VectorFunctionalX, std::vector<PhaseIndexPack>, VectorXi>(
+          &OptimalControlProblem::addLinkInequalCon));
+
+  obj.def("addLinkInequalCon",
+      py::overload_cast<VectorFunctionalX,
+      int, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      int, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      VectorXi>(&OptimalControlProblem::addLinkInequalCon));
+
+  obj.def("addLinkInequalCon",
+      py::overload_cast<VectorFunctionalX,
+      PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      VectorXi>(&OptimalControlProblem::addLinkInequalCon));
+
+  obj.def("addLinkInequalCon",
+      py::overload_cast<VectorFunctionalX,
+      int, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      int, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkInequalCon));
+
+  obj.def("addLinkInequalCon",
+      py::overload_cast<VectorFunctionalX,
+      PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkInequalCon));
+
+  obj.def("addLinkInequalCon",
+      py::overload_cast<VectorFunctionalX,
+      int, std::string, Eigen::VectorXi,
+      int, std::string, Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkInequalCon));
+
+  obj.def("addLinkInequalCon",
+      py::overload_cast<VectorFunctionalX,
+      PhasePtr, std::string, Eigen::VectorXi,
+      PhasePtr, std::string, Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkInequalCon));
+
+  obj.def("addLinkInequalCon",
+      py::overload_cast<VectorFunctionalX,
+      int, std::string, Eigen::VectorXi,
+      int, std::string, Eigen::VectorXi,
+      Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkInequalCon));
+
+  obj.def("addLinkInequalCon",
+      py::overload_cast<VectorFunctionalX,
+      PhasePtr, std::string, Eigen::VectorXi,
+      PhasePtr, std::string, Eigen::VectorXi,
+      Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkInequalCon));
+
+
+  /// 
+  /// Objectives
+
+  obj.def("addLinkObjective",
+      py::overload_cast<ScalarFunctionalX, std::vector<PhaseIndexPack>, VectorXi>(
+          &OptimalControlProblem::addLinkObjective));
+
+  obj.def("addLinkObjective",
+      py::overload_cast<ScalarFunctionalX, std::vector<PhaseIndexPackPtr>, VectorXi>(
+          &OptimalControlProblem::addLinkObjective));
+
+  obj.def("addLinkObjective",
+      py::overload_cast<ScalarFunctionalX, std::vector<PhaseIndexPack>, VectorXi>(
+          &OptimalControlProblem::addLinkObjective));
+
+  obj.def("addLinkObjective",
+      py::overload_cast<ScalarFunctionalX,
+      int, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      int, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      VectorXi>(&OptimalControlProblem::addLinkObjective));
+
+  obj.def("addLinkObjective",
+      py::overload_cast<ScalarFunctionalX,
+      PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      VectorXi>(&OptimalControlProblem::addLinkObjective));
+
+  obj.def("addLinkObjective",
+      py::overload_cast<ScalarFunctionalX,
+      int, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      int, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkObjective));
+
+  obj.def("addLinkObjective",
+      py::overload_cast<ScalarFunctionalX,
+      PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi,
+      PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkObjective));
+
+  obj.def("addLinkObjective",
+      py::overload_cast<ScalarFunctionalX,
+      int, std::string, Eigen::VectorXi,
+      int, std::string, Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkObjective));
+
+  obj.def("addLinkObjective",
+      py::overload_cast<ScalarFunctionalX,
+      PhasePtr, std::string, Eigen::VectorXi,
+      PhasePtr, std::string, Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkObjective));
+
+  obj.def("addLinkObjective",
+      py::overload_cast<ScalarFunctionalX,
+      int, std::string, Eigen::VectorXi,
+      int, std::string, Eigen::VectorXi,
+      Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkObjective));
+
+  obj.def("addLinkObjective",
+      py::overload_cast<ScalarFunctionalX,
+      PhasePtr, std::string, Eigen::VectorXi,
+      PhasePtr, std::string, Eigen::VectorXi,
+      Eigen::VectorXi
+      >(&OptimalControlProblem::addLinkObjective));
+
+
+
+
+
 }

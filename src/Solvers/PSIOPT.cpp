@@ -1227,6 +1227,9 @@ void ASSET::PSIOPT::Build(py::module& m) {
 
   obj.def_readwrite("ObjScale", &PSIOPT::ObjScale, PSIOPT_ObjScale);
   obj.def_readwrite("PrintLevel", &PSIOPT::PrintLevel, PSIOPT_PrintLevel);
+  obj.def("set_PrintLevel", &PSIOPT::set_PrintLevel);
+
+
   obj.def_readwrite("ConvergeFlag", &PSIOPT::ConvergeFlag);
 
   obj.def("get_ConvergenceFlag", &PSIOPT::get_ConvergenceFlag);

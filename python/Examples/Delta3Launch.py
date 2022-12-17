@@ -312,23 +312,23 @@ if __name__ == "__main__":
     
     tmode = "LGL3"
     
-    phase1 = ode1.phase(tmode,IG1,len(IG1)-1)
+    phase1 = ode1.phase(tmode,IG1,50)
     phase1.addLUNormBound("Path",[8,9,10],.5,1.5)
     
     phase1.addBoundaryValue("Front",range(0,8),IG1[0][0:8])
     phase1.addBoundaryValue("Back",[7],[tf_phase1])
     
-    phase2 = ode2.phase(tmode,IG2,len(IG2)-1)
+    phase2 = ode2.phase(tmode,IG2,50)
     phase2.addLUNormBound("Path",[8,9,10],.5,1.5)
     phase2.addBoundaryValue("Front",[6], [m0_phase2])
     phase2.addBoundaryValue("Back", [7] ,[tf_phase2])
     
-    phase3 = ode3.phase(tmode,IG3,len(IG3)-1)
+    phase3 = ode3.phase(tmode,IG3,50)
     phase3.addLUNormBound("Path",[8,9,10],.5,1.5)
     phase3.addBoundaryValue("Front",[6], [m0_phase3])
     phase3.addBoundaryValue("Back", [7] ,[tf_phase3])
     
-    phase4 = ode4.phase(tmode,IG4,len(IG4)-1)
+    phase4 = ode4.phase(tmode,IG4,50)
     phase4.addLUNormBound("Path",[8,9,10],.5,1.5)
     phase4.addBoundaryValue("Front",[6], [m0_phase4])
     phase4.addValueObjective("Back",6,-1.0)
@@ -359,7 +359,7 @@ if __name__ == "__main__":
     phase4.setControlMode("BlockConstant")
 
     #ocp.optimizer.KKTtol = 1.0e-9
-    ocp.optimizer.PrintLevel=1
+    ocp.optimizer.set_PrintLevel(1)
     #ocp.optimizer.CNRMode=True
 
 
@@ -367,7 +367,7 @@ if __name__ == "__main__":
     ocp.optimizer.QPThreads=8
 
     #ocp.optimizer.SoeMode = ast.Solvers.AlgorithmModes.OPTNO
-    ocp.solve_optimize_solve()
+    ocp.optimize_solve()
     
     
     

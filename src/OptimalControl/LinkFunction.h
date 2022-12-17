@@ -5,6 +5,9 @@
 
 namespace ASSET {
 
+
+ 
+
 template <class FuncType>
 struct LinkFunction {
   FuncType Func;

@@ -212,8 +212,9 @@ if __name__ == "__main__":
     ocp.addForwardLinkEqualCon(phase1, phase2, [0, 1, 2, 6])
 
     
-    ocp.addLinkEqualCon(VinfMatchCon(MarsTab),
-                        "BackToFront", [[phase1, phase2]], [3, 4, 5, 6])
+    #ocp.addLinkEqualCon(VinfMatchCon(MarsTab),"BackToFront", [[phase1, phase2]], [3, 4, 5, 6])
+
+    ocp.addLinkEqualCon(VinfMatchCon(MarsTab),phase1,'Back',range(3,7),phase2,'Front',range(3,7))
 
 
     FB = FlybyAngleBound(MarsTab, mu_Val_Mars, r_Mars_Psyche)
@@ -227,9 +228,10 @@ if __name__ == "__main__":
     lpvs  = [[]]
 
     #ocp.addLinkInequalCon(FB,reg, ptl, indxs)
-    ocp.addLinkInequalCon(FB,reg, ptl, xtvs,[],[],[])
+    #ocp.addLinkInequalCon(FB,reg, ptl, xtvs,[],[],[])
 
-    
+    ocp.addLinkInequalCon(FB,phase1,'Back',[3, 4, 5, 6],phase2,'Front',[3, 4, 5, 6])
+
 
     ocp.optimizer.OptLSMode = ast.Solvers.LineSearchModes.L1
     ocp.optimizer.MaxLSIters = 1
