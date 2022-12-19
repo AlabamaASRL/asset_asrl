@@ -1,4 +1,4 @@
-Example 1: Orbit Family Continuation
+Orbit Family Continuation
 ====================================
 
 A use case familiar to all astrodynamicists is the generation of orbit families via continuation from an initial orbit.

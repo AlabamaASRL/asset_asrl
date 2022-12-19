@@ -1,10 +1,10 @@
-Example 2a: Zermelo's Problem
+Zermelo's Problem
 ============================
 
 Ernst Zermelo's question of optimal navigation is a classic in the field of optimal control.
 In this tutorial, we will demonstrate how ASSET can be used to construct a modular solution approach that allows the user to easily manipulate the conditions of the problem.
 These type of parameter estimation tasks were a core motivation during intial development, and although it requires some intermediate programming techniques, the return on investment is extremely compelling.
-This tutorial will move a bit faster than the :ref:`Example 1: Orbit Family Continuation` example, and focuses more on how to use ASSET rather than how ASSET works.
+This tutorial will move a bit faster than the :ref:`Orbit Family Continuation` example, and focuses more on how to use ASSET rather than how ASSET works.
 We'll also be finding trajectories that optimize an objective instead of just satisfying constraints.
 
 As a quick overview, here's the problem that interested Zermelo:
@@ -15,7 +15,7 @@ Problem Setup
 -------------
 
 You're probably familiar with the standard set of import packages.
-Numpy and ASSET are required, and plotly is just my preferred graphing library.
+Numpy and ASSET are required, and matplotlib is just my preferred graphing library.
 We'll also go ahead and establish the standard shorthand conventions.
 
 .. code-block:: python
