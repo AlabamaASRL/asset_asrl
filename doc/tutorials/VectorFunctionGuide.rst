@@ -9,7 +9,7 @@ Vector Function Tutorial
 One of the goals of ASSET is to provide the ability to users to construct functions
 dynamically within Python that are able to be used by ASSET. By doing this we can simplify a user's work-flow,
 where the benefits of high speed C++ code can be combined with the ease of use Python provides. 
-In this section we will give an depth overview of ASSET's vector function type. At a high-level,
+In this section we will give an depth overview of ASSET's VectorFunction type. At a high-level,
 this is simple functional (in the programming sense) domain specific language for defining 
 mathematical Vector Functions that take a fixed number of inputs
 and produce a fixed number outputs, with both inputs and outputs assumed to be column vectors.
@@ -17,9 +17,9 @@ and produce a fixed number outputs, with both inputs and outputs assumed to be c
 
 Arguments
 #########
-To start let us import ASSET and the vector functions module which contains all types
+To start let us import ASSET and the VectorFunctions module which contains all types
 and functions defining the language. From this module we will then import the Arguments type
-and give it a shorthand name. The :code:`Arguments` type is the base expression in the vector function system
+and give it a shorthand name. The :code:`Arguments` type is the base expression in the VectorFunction system
 and represents a function that simply takes some number of input arguments and returns them as outputs.
 It always serves as the starting point for defining a more complicated functional expressions involving
 some or all of its outputs.
@@ -31,7 +31,7 @@ some or all of its outputs.
 
 We can construct the object by simply specifying the number of arguments, in this
 case 6. This instance :code:`X` is now a first class function thats takes any vector of size 6
-and returns that vector. Since it is a vector function we can compute its output value using the
+and returns that vector. Since it is a VectorFunction we can compute its output value using the
 :code:`()` operator, first derivative using the :code:`.jacobian` method and second derivative using the :code:`.adjointhessian` method.
 To do this we provide either a numpy vector or python list of real valued inputs, and additionally for the second derivative
 a vector list of lagrange multipliers with same dimensions as the output of the function. One important note, ASSET does not compute
@@ -39,8 +39,8 @@ the full 3D tensor second derivative of vector valued functions, instead it comp
 dotted with a vector lagrange multipliers, resulting in 2D symmetric matrix with rows and columns equal to the number of inputs.
 We refer to this as the adjointhessian, and in the case of a function with a single output is equivalent to the normal hessian.
 Since :code:`X` here is a simple linear function, the first derivative is simply the identity matrix and the adjointhessian is zero. This is
-a rather trivial example, but the same methods can applied to any ASSET vector function that we can construct. We should also note that while
-these methods are available for all vector functions, for most applications and examples you won't ever actually need to explicitly
+a rather trivial example, but the same methods can applied to any ASSET VectorFunction that we can construct. We should also note that while
+these methods are available for all VectorFunctions, for most applications and examples you won't ever actually need to explicitly
 call the function or its derivatives at real arguments as that will be handled for you by some other interface such as an integrator or optimal
 control problem.
 
@@ -257,7 +257,7 @@ not multiply two VectorFunctions together using the * operator as is possible wi
 This is an explicit choice because in our opinion, for the types of expressions written using ASSET, 
 allowing element-wise vector multiplication creates more problems in terms of incorrect problem formulation than it solves.
 However, these operations can be accomplished using methods we describe later. Note,
-this does not apply to scalar functions such as :code:`Element` or :code:`ScalarFunction`, which may be multiplied together with
+this does not apply to ScalarFunctions such as :code:`Element` or :code:`ScalarFunction`, which may be multiplied together with
 no issue, and may also scale in VectorFunction.
 
 .. code-block:: python
@@ -422,7 +422,7 @@ we also provide member functions and free functions for performing various commo
 The most commonly used are the dot, cross, quaternion, and coefficient-wise products,
 A few examples of how these can be used are shown below. All functions appearing in these expressions must
 have the correct output size, otherwise an error will be immediately thrown. You may also
-mix and match constant numpy arrays and vector functions as needed to define your function. It should be noted
+mix and match constant numpy arrays and VectorFunctions as needed to define your function. It should be noted
 that our quaternion products assume that the vector part of the quaternion is the first three components of the output 
 while the real part is the 4th element(ie: q =[qv,q4])
 
@@ -502,9 +502,9 @@ Matrix Operations
 #################
 
 While ASSET is and always will be a language for defining functions with vector valued
-inputs and outputs, we do have limited but growing support for interpreting vector functions
+inputs and outputs, we do have limited but growing support for interpreting VectorFunctions
 as matrices inside of expressions. This is supported through the :code:`vf.ColMatrix` and :code:`vf.RowMatrix` types.
-These are types constructed from some vector function and interprets the outputs as nxm matrix.
+These are types constructed from some VectorFunction and interprets the outputs as nxm matrix.
 A :code:`ColMatrix` will interpret the coefficients of output as a column major matrix, whereas :code:`RowMatrix` interprets
 them as a row major matrix. Once constructed you may multiply matrices by any other appropriately sized
 Row/ColMatrix functions in any order, or multiply them on the right by appropriately sized VectorFunctions. The result
@@ -547,10 +547,10 @@ general rule of thumb, it is a bad idea for such functions to contain conditiona
 as this could potentially result in non-smooth derivatives. In these cases we always recommend considering
 whether what you were trying to accomplish with the conditional statement can be reformulated in another way.
 However if this is not possible, or you are writing a function that will not see the inside of an optimizer,
-we do offer support for simple conditional statements and boolean operations with vector function expressions.
+we do offer support for simple conditional statements and boolean operations with VectorFunction expressions.
 To be precise, we support constructing boolean statements involving the outputs of scalar valued functions, and then
 using those as conditional statements to control the output of another expression. Conditional statements are constructed by
-applying the comparison operators (>,<,<=,>=) to the outputs of scalar functions. This can be used to dispatch one of
+applying the comparison operators (>,<,<=,>=) to the outputs of ScalarFunctions. This can be used to dispatch one of
 two functions using the :code:`vf.ifelse()` function as shown below. Note that the output sizes of both the true and false functions
 MUST be the same. Conditional statements may also be combined together using the bitwise or and operators (|,&).
 
@@ -620,7 +620,7 @@ combine expressions derived from two arguments objects of the same size.
 Suggested Style and Organization
 ################################
 At this point we have covered most all of the operations one can and can't perform with ASSET
-vector functions, with the important exception of function composition
+VectorFunctions, with the important exception of function composition
 (which we will cover in the next section). As you might have noticed, in all of
 our scratch pad examples, we simply created a single set of arguments and operated on them
 in the same scope. Everyone of these functions is a fully formed ASSET type and can be immediately passed
@@ -630,7 +630,7 @@ encapsulate the construction of ASSET vector-functions is up to you, but we sugg
 
 Method one involves simply writing a standard python function that takes as arguments
 any meta data or constants, needed to define the function, then writing and returning your ASSET
-vector function. A trivial example of this is shown below, and you can find many others throughout our
+VectorFunction. A trivial example of this is shown below, and you can find many others throughout our
 problem specific examples contained in other sections.
 
 .. code-block:: python
@@ -788,7 +788,7 @@ as above while only ever evaluating :code:`expensive` once.
 
 Tabular Data and Interpolation
 ##############################
-We also have support for interpreting tabular data as a vector function using differentiable interpolation table objects.
+We also have support for interpreting tabular data as a VectorFunction using differentiable interpolation table objects.
 
 1-D Interpolation
 -----------------
@@ -802,7 +802,7 @@ Note on Size of VectorFunctions
 ###############################
 
 The vector-function type system has been designed to have good performance for evaluating
-the value and derivatives of dense vector functions with a small number of arguments (<50).
+the value and derivatives of dense VectorFunctions with a small number of arguments (<50).
 It will work for larger expressions, but performance will begin to degrade considerably. This may seem
 strange since it ostensibly designed to be used to define constraints and objective inside of large
 sparse non-linear programs. However, in our experience these problems are almost never composed
@@ -823,7 +823,7 @@ sections.
 Binding Raw Python Functions (DON'T DO THIS)
 #############################################
 You also have the option should you need to, to bind raw python functions
-as ASSET vector functions and scalar functions. This can be accomplished using the  :code:`vf.PyVectorFunction`
+as ASSET VectorFunctions and ScalarFunctions. This can be accomplished using the  :code:`vf.PyVectorFunction`
 and  :code:`vf.PyScalarFunction` types as shown below. The function must have a signature accepting as the first argument a 1 dimensional numpy array of input arguments
 (named :code:`X` in this case) and returning a numpy array. Additional parameters on which the implementation depends (these are not mathematical input variables) may be included as additional
 arguments.
@@ -857,7 +857,7 @@ using the user specified jacobian and hessian step sizes.
 
 You should be warned that extensive use of these objects inside of the optimizer or ODE will result in VERY slow and non-parrallelizable code with inexact derivatives. 
 If you find yourself in situation where you don't think you can write an expression without using :code:`vf.PyVectorFunction` or :code:`vf.PyScalarFunction`, 
-please submit an issue on GitHub. We will happily give suggestions on how you might be able to accomplish your task with the standard vector functions. 
+please submit an issue on GitHub. We will happily give suggestions on how you might be able to accomplish your task with the standard VectorFunctions. 
 Or if its truly not possible, we will consider adding the missing expression to the core library in a future release.
 
 
