@@ -21,6 +21,10 @@ With the given inputs to the frames (:math:`\mu` and :math:`l^*`, which is the g
 (such as :math:`v^*`, the characteristic non-dimensional velocity) are stored in each model. Failure to be conistent with unit scaling for accelerations (such as a low thrust acceleration)
 **will** result in incorrect models. It is highly recommended to use the constants defined in Astro.Constants as a result.
 
+.. note::
+	While all of these models accept dimensional values pertaining to the masses and distances of the system, **they are all non-dimensionalized inside of the models.**
+	Thus it is necessary that all inputs to the models (ODE variables, controls, etc.) are appropriately non-dimensionalized **by the user** before proceeding.
+
 .. warning::
 	
 	When using any model that contains Spice data, be sure that the start and stop Julian days for the Spice data range includes the time range you wish to model for.
@@ -115,7 +119,7 @@ CR3BP Low-Thrust
 
 Ephemeris Models
 ----------------
-Below are examples of ephemeris models implemented in the Astro library. You will need to have a working install of spiceypy, as well as Spice ephemery kernels, along with all necessary items to use spiceypy.
+Below are examples of ephemeris models implemented in the Astro library. You will need to have a working install of spiceypy, as well as Spice ephemeris kernels, along with all necessary items to use spiceypy.
 Your Spice Kernel will need to have information regarding all bodies you wish to add.
 
 .. warning:::
