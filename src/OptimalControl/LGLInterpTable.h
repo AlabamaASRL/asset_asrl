@@ -4,6 +4,7 @@
 #include "LGLCoeffs.h"
 #include "OptimalControlFlags.h"
 #include "VectorFunctions/ASSET_VectorFunctions.h"
+#include <atomic>
 #include "pch.h"
 
 namespace ASSET {
@@ -36,6 +37,9 @@ struct LGLInterpTable {
   bool Periodic = false;
   bool EvenData = false;
 
+  bool WarnOutOfBounds = true;
+  bool ThrowOutOfBounds = false;
+
   Eigen::VectorXd Tspacing;
   Eigen::MatrixXd Xweights;
   Eigen::MatrixXd DXweights;
@@ -60,6 +64,22 @@ struct LGLInterpTable {
     this->HasOde = true;
     this->setMethod(m);
     this->loadUnevenData(dnum, xtudat);
+  }
+
+  LGLInterpTable(VectorFunctionalX od, int xv, int uv,int pv, std::string m,
+      const std::vector<Eigen::VectorXd>& xtudat, int dnum) {
+      this->XVars = xv;
+      this->UVars = uv + pv;
+      this->axis = xv;
+      this->XtUVars = xv + uv + 1 +pv;
+      this->ode = od;
+      this->HasOde = true;
+      this->setMethod(strto_TranscriptionMode(m));
+      this->loadUnevenData(dnum, xtudat);
+  }
+  LGLInterpTable(VectorFunctionalX od, int xv, int uv, std::string m,
+      const std::vector<Eigen::VectorXd>& xtudat, int dnum):LGLInterpTable(od,xv,uv,0,m,xtudat,dnum) {
+      
   }
 
   LGLInterpTable(int xv, int uv, TranscriptionModes m,
@@ -969,6 +989,12 @@ struct LGLInterpTable {
         m, "LGLInterpTable");
     obj.def(py::init<VectorFunctionalX, int, int, TranscriptionModes,
                      const std::vector<Eigen::VectorXd>&, int>());
+
+    obj.def(py::init<VectorFunctionalX, int, int, std::string,
+        const std::vector<Eigen::VectorXd>&, int>());
+
+    obj.def(py::init<VectorFunctionalX, int, int,int, std::string,
+        const std::vector<Eigen::VectorXd>&, int>());
 
     obj.def(py::init<int, const std::vector<Eigen::VectorXd>&, int>());
 

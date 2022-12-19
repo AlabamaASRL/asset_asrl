@@ -118,6 +118,30 @@ public:
 		:Integrator(dode,"DOPRI87", defstep, tab, ulocs) {
 	}
 
+	Integrator(const DODE& dode, std::string meth, double defstep, std::shared_ptr<LGLInterpTable> tab)
+		:Integrator() {
+
+		// Bug waiting to happen when LGL interp table is re-factored
+		if (dode.IRows() != tab->XtUVars||dode.XVars()!=tab->XVars) {
+			throw std::invalid_argument("Table data does not match expected dimension of ODE."
+				" Please provide the indices variables in the table you want to interpret as controls.\n");
+		}
+		Eigen::VectorXi ulocs;
+		ulocs.setLinSpaced(dode.UVars(), dode.TVar() + 1, dode.TVar() + dode.UVars());
+
+		std::cout << ulocs.transpose()<<std::endl;
+
+		Eigen::VectorXi varlocs(1);
+		varlocs[0] = dode.TVar();
+		ControllerType ucon = InterpFunction<-1>(tab, ulocs);
+		this->setMethod(meth, dode, defstep, true, ucon, varlocs);
+		this->setAbsTol(1.0e-12); // Must Be called after setMethod!!!
+		this->setRelTol(0); // Must Be called after setMethod!!!
+
+	}
+	Integrator(const DODE& dode, double defstep, std::shared_ptr<LGLInterpTable> tab)
+		:Integrator(dode, "DOPRI87", defstep, tab) {
+	}
 
 	void setMethod(std::string str, const DODE& dode, double defstep, bool usecontrol,
 		const GenericFunction<-1, -1>& ucon,
@@ -1387,6 +1411,9 @@ public:
 				const Eigen::VectorXi& v) {
 					return Integrator<DODE>(od,meth, ds, u, v);
 				});
+			obj.def("integrator", [](const DODE& od, std::string meth, double ds, std::shared_ptr<LGLInterpTable> u) {
+					return Integrator<DODE>(od, meth, ds, u);
+				});
 			obj.def("integrator", [](const DODE& od,  double ds, const ControllerType& u,
 				const Eigen::VectorXi& v) {
 					return Integrator<DODE>(od, ds, u, v);
@@ -1398,7 +1425,9 @@ public:
 				const Eigen::VectorXi& v) {
 					return Integrator<DODE>(od, ds, u, v);
 				});
-
+			obj.def("integrator", [](const DODE& od, double ds, std::shared_ptr<LGLInterpTable> u) {
+					return Integrator<DODE>(od, ds, u);
+				});
 		}
 	}
 
@@ -1416,6 +1445,10 @@ public:
 
 			obj.def(py::init<const DODE&, std::string, double, std::shared_ptr<LGLInterpTable>, const Eigen::VectorXi&>());
 			obj.def(py::init<const DODE&, double, std::shared_ptr<LGLInterpTable>, const Eigen::VectorXi&>());
+
+			obj.def(py::init<const DODE&, std::string, double, std::shared_ptr<LGLInterpTable>>());
+			obj.def(py::init<const DODE&, double, std::shared_ptr<LGLInterpTable>>());
+
 		}
 
 		using IntegRet = ODEState<double>;
