@@ -261,7 +261,7 @@ if __name__ == "__main__":
     ## an intital terminal state that is along the orbit, downrange from KSC in
     ## the correct direction and doesnt pass through earth when LERPed from KSC
     M0   =-.05
-    #M0   =-.00
+    M0   =-.00
     OEF  = [at,et,istart,Ot,Wt,M0]
     yf   = ast.Astro.classic_to_cartesian(OEF,mu)
     
@@ -280,24 +280,24 @@ if __name__ == "__main__":
         
         if(t<tf_phase1):
             m= m0_phase1 + (mf_phase1-m0_phase1)*(t/tf_phase1)
-            #X[0:6]=y0
+            X[0:6]=y0
             X[6]=m
             X[8:11]= vf.normalize([0,1,0])
             IG1.append(X)
         elif(t<tf_phase2):
             m= m0_phase2 + (mf_phase2-m0_phase2)*(( t-tf_phase1) / (tf_phase2 - tf_phase1))
-            #X[0:6]=y0
+            X[0:6]=y0
             X[6]=m
             X[8:11]= vf.normalize([0,1,0])
             IG2.append(X)
         elif(t<tf_phase3):
             m= m0_phase3 + (mf_phase3-m0_phase3)*(( t-tf_phase2) / (tf_phase3 - tf_phase2))
-            #X[0:6]=yf
+            X[0:6]=yf
             X[6]=m
             X[8:11]= vf.normalize([0,1,0])
             IG3.append(X)
         elif(t<tf_phase4):
-            #X[0:6]=yf
+            X[0:6]=yf
             m= m0_phase4 + (mf_phase4-m0_phase4)*(( t-tf_phase3) / (tf_phase4 - tf_phase3))
             X[6]=m
             X[8:11]= vf.normalize([0,1,0])
@@ -312,24 +312,24 @@ if __name__ == "__main__":
     
     tmode = "LGL3"
     
-    phase1 = ode1.phase(tmode,IG1,50)
-    phase1.addLUNormBound("Path",[8,9,10],.5,1.5)
+    phase1 = ode1.phase(tmode,IG1,len(IG1)-1)
+    phase1.addLUNormBound("Path",[8,9,10],.1,1.5)
     
     phase1.addBoundaryValue("Front",range(0,8),IG1[0][0:8])
     phase1.addBoundaryValue("Back",[7],[tf_phase1])
     
-    phase2 = ode2.phase(tmode,IG2,50)
-    phase2.addLUNormBound("Path",[8,9,10],.5,1.5)
+    phase2 = ode2.phase(tmode,IG2,len(IG2)-1)
+    phase2.addLUNormBound("Path",[8,9,10],.1,1.5)
     phase2.addBoundaryValue("Front",[6], [m0_phase2])
     phase2.addBoundaryValue("Back", [7] ,[tf_phase2])
     
-    phase3 = ode3.phase(tmode,IG3,50)
-    phase3.addLUNormBound("Path",[8,9,10],.5,1.5)
+    phase3 = ode3.phase(tmode,IG3,len(IG3)-1)
+    phase3.addLUNormBound("Path",[8,9,10],.1,1.5)
     phase3.addBoundaryValue("Front",[6], [m0_phase3])
     phase3.addBoundaryValue("Back", [7] ,[tf_phase3])
     
-    phase4 = ode4.phase(tmode,IG4,50)
-    phase4.addLUNormBound("Path",[8,9,10],.5,1.5)
+    phase4 = ode4.phase(tmode,IG4,len(IG4)-1)
+    phase4.addLUNormBound("Path",[8,9,10],.1,1.5)
     phase4.addBoundaryValue("Front",[6], [m0_phase4])
     phase4.addValueObjective("Back",6,-1.0)
     phase4.addUpperVarBound("Back",7,tf_phase4,1.0)
@@ -340,7 +340,7 @@ if __name__ == "__main__":
     phase3.addLowerNormBound("Path",[0,1,2],Re*.999999)
     phase4.addLowerNormBound("Path",[0,1,2],Re*.999999)
     
-    
+    ast.Solvers.ConvergenceFlags
     ocp = oc.OptimalControlProblem()
     ocp.addPhase(phase1)
     ocp.addPhase(phase2)
@@ -349,9 +349,11 @@ if __name__ == "__main__":
     
     ocp.addForwardLinkEqualCon(phase1,phase4,[0,1,2,3,4,5,7,8,9,10])
     ocp.optimizer.set_OptLSMode("L1")
+    ocp.optimizer.set_SoeLSMode("L1")
+
     ocp.optimizer.set_alphaRed(2.0)
-    
-    ocp.optimizer.MaxLSIters = 2
+    ocp.optimizer.set_MaxAccIters(100)
+    ocp.optimizer.MaxLSIters = 4
     
     phase1.setControlMode("BlockConstant")
     phase2.setControlMode("BlockConstant")
@@ -359,7 +361,7 @@ if __name__ == "__main__":
     phase4.setControlMode("BlockConstant")
 
     #ocp.optimizer.KKTtol = 1.0e-9
-    ocp.optimizer.set_PrintLevel(1)
+    ocp.optimizer.set_PrintLevel(0)
     #ocp.optimizer.CNRMode=True
 
 
@@ -368,7 +370,7 @@ if __name__ == "__main__":
 
     #ocp.optimizer.SoeMode = ast.Solvers.AlgorithmModes.OPTNO
     ocp.optimize_solve()
-    
+    ocp.optimize()
     
     
     Phase1Traj = phase1.returnTraj()  # or ocp.Phase(i).returnTraj()
@@ -381,15 +383,15 @@ if __name__ == "__main__":
     print(mu)
     
     
-    TT = np.array(MEEs).T
-    plt.plot(TT[6],TT[0])
+    TT = np.array(Traj).T
+    plt.plot(TT[7],TT[0])
     
-    plt.plot(TT[6],TT[1])
-    plt.plot(TT[6],TT[2])
-    plt.plot(TT[6],TT[3])
-    plt.plot(TT[6],TT[4])
+    plt.plot(TT[7],TT[1])
+    plt.plot(TT[7],TT[2])
+    plt.plot(TT[7],TT[3])
+    plt.plot(TT[7],TT[4])
     
-    plt.plot(TT[6],TT[5])
+    plt.plot(TT[7],TT[5])
     plt.show()
     
     print("Final Mass = ",Phase4Traj[-1][6]*Mstar,' kg')

@@ -313,22 +313,56 @@ protected:
 				Kvals[0] *= h;
 			}
 
-			for (int i = 0; i < Stgsm1; i++) {
-				double ti = t0 + RKData::Times[i] * h;
-				xtup = x;
-				xtup[this->ode.TVar()] = ti;
-				const int ip1 = i + 1;
-				const int js = isDiag ? i : 0;
-				for (int j = js; j < ip1; j++) {
-					xtup.template segment<DODE::XV>(0, this->ode.XVars()) +=
-						RKData::ACoeffs[i][j] * Kvals[j];
+			if constexpr (true) {
+				for (int i = 0; i < Stgsm1; i++) {
+					double ti = t0 + RKData::Times[i] * h;
+					xtup = x;
+					xtup[this->ode.TVar()] = ti;
+					const int ip1 = i + 1;
+					const int js = isDiag ? i : 0;
+					for (int j = js; j < ip1; j++) {
+						xtup.template segment<DODE::XV>(0, this->ode.XVars()) +=
+							RKData::ACoeffs[i][j] * Kvals[j];
+					}
+
+					this->update_control(xtup);
+					this->ode.compute(xtup, Kvals[ip1]);
+
+					Kvals[ip1] *= h;
 				}
-
-				this->update_control(xtup);
-				this->ode.compute(xtup, Kvals[ip1]);
-
-				Kvals[ip1] *= h;
 			}
+			else {
+				const int tvar = this->ode.TVar();
+
+				ASSET::constexpr_for_loop(
+					std::integral_constant<int, 0>(),
+					std::integral_constant<int, Stgsm1>(), [&](auto i) {
+						double ti = t0 + RKData::Times[i.value] * h;
+						xtup = x;
+						xtup[tvar] = ti;
+						constexpr int ip1 = i.value + 1;
+						const int js = isDiag ? i.value : 0;
+
+						ASSET::constexpr_for_loop(
+							std::integral_constant<int, 0>(),
+							std::integral_constant<int, ip1>(), [&](auto j) {
+								if constexpr (RKData::ACoeffs[i.value][j.value] != 0.0) {
+									xtup.template segment<DODE::XV>(0, tvar) +=
+										RKData::ACoeffs[i.value][j.value] * Kvals[j.value];
+								}
+								
+							});
+
+						this->update_control(xtup);
+						this->ode.compute(xtup, Kvals[ip1]);
+
+						Kvals[ip1] *= h;
+					});
+
+
+			}
+
+
 			xtup = x;
 			xtup[this->ode.TVar()] = tf;
 			for (int i = 0; i < Stages; i++) {

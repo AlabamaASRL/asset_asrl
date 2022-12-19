@@ -1,3 +1,5 @@
+.. _psiopt-guide:
+
 ======
 PSIOPT
 ======
@@ -75,8 +77,8 @@ Each interface for defining optimization problems in ASSET (ex: :code:`OptimalCo
 has as its own instance of PSIOPT attached as a member variable of the class.
 Formulation and solution of the optimization problem is always handled through the respective interface, 
 but users can use this to modify PSIOPT's settings . A list of common, settings
-and their default and suggested values are listed in the table below. In all cases these can be set by using .set_XXX(value) method
-where XXX is replaced by the name of the setting
+and their default and suggested values are listed in the table below. In all cases these can be set by using :code:`.set_XXX(value)` method
+where :code:`XXX` is replaced by the name of the setting
 
 
 .. code-block:: python
@@ -99,7 +101,7 @@ where XXX is replaced by the name of the setting
 
 
 
-.. list-table:: PSIOPT OPTIONS 
+.. list-table:: PSIOPT SETTINGS 
    :width: 100%
    :widths: 20 60 20 20
    :header-rows: 1
@@ -181,7 +183,7 @@ where XXX is replaced by the name of the setting
      - (double) .98 
      - (<1.0) [.95,.999]
    * - QPOrderingMode
-     - Fill-in reducing applied to the KKT matrix by MKL-Pardiso. The default, 'METIS', is the METIS nested dissection algorithm
+     - Fill-in reducing ordering applied to the KKT matrix by MKL-Pardiso. The default, 'METIS', is the METIS nested dissection algorithm
        and generally results in the best scaling of matrix factorization with the number of threads. The alternative, "MINDEG", the minimum degree algorithm, generally
        results in faster single threaded factorizations, but does not scale well with thread count. Use "MINDEG" when using Jet and "METIS" otherwise.
      - (string) "METIS" 
@@ -193,11 +195,12 @@ where XXX is replaced by the name of the setting
 
     
 After defining a problem, and potentially modifying the optimizer settings, an optimization problem interface is used to invoke one of or a sequence of PSIOPT's algorithms as
-shown below. The optimize algorithm will seek to minimize the objective function and also satisfy the equality and inequality constraints. The solve algorithm ignores the objective and
+shown below. The :code:`optimize` algorithm will seek to minimize the objective function and also satisfy the equality and inequality constraints. The :code:`solve` algorithm ignores the objective and
 attempts only to find a solution to the equality and inequality constraints. If you are trying only to solve a system of equations and do not have an objective
-function, you should almost always use the solve algorithm rather than invoking optimize. You may also invoke the solve and optimize algorithms in sequence
-as shown below. For example, it can often be more robust to call solve first when optimizing so that the optimize algorithm will start from a feasible point. 
-Additionally, it often happens that the optimize algorithm will be able to minimize the objective function considerably from its initial value,
+function, you should almost always use the :code:`solve` algorithm rather than invoking :code:`optimize`. 
+You may also invoke the :code:`solve` and :code:`optimize` algorithms in sequence
+using :code:`solve_optimize` as shown below. For example, it can often be more robust to call :code:`solve` first when optimizing so that the optimize algorithm will start from a feasible point. 
+Additionally, it often happens that the :code:`optimize` algorithm will be able to minimize the objective function considerably from its initial value,
 but have difficulty exactly satisfying the optimality and constraint tolerances simultaneously.
 In these cases, it is practical to feed this non-converged solution to the solve algorithm in the hopes of finding a nearby solution that satisfies the constraints. 
 For the combined call sequences, the function returns the convergence flag of the last algorithm invoked. If you need the convergence flag for each specific algorithm, they should be called
@@ -208,14 +211,14 @@ separately.
     flag = ocp.solve()    # ocp transcribes problem and calls psiopt's solve algorithm
     flag = ocp.optimize() # ocp transcribes problem and calls psiopt's optimize algorithm
 
-    flag = ocp.solve_optimize()       # Calls solve then optimize, functionally equivalent to the two lines above
+    flag = ocp.solve_optimize()       # Calls solve then optimize, functionally equivalent to calling the two lines above
 
     flag = ocp.solve_optimize_solve() # Calls solve then optimize, then calls solve IF optimize fails to converge
 
     flag = ocp.optimize_solve()       # Calls optimize, then calls solve IF optimize fails to converge
 
 
-The returned convergence flags are enumerator types defined in ast.Solvers.ConvergenceFlags, their meanings and integer values are given in the table below. Should you need to
+The returned convergence flags are enumerator types defined in :code:`ast.Solvers.ConvergenceFlags`, their meanings and integer values are given in the table below. Should you need to
 use the flags in your code, it is recommended to compare flags their enumerator rather than integer values as shown below, in case that we add more flags in the future.
 
 .. code-block:: python
@@ -314,10 +317,10 @@ Jet
 ===
 
 In addition to calling PSIOPT to solve or optimize a single problem at a time, we provide the capability to optimize multiple different problems in parallel using
-the Jet tool. This can allow you to more efficiently tackle throughput oriented workloads from within a single python process in just a few lines of code,
+the :code:`Jet` tool. This can allow you to more efficiently tackle throughput oriented workloads from within a single python process in just a few lines of code,
 without having to resort to multiprocessing libraries. There are two ways to do this. In the first method, demonstrated below, we construct a python list 
 of fully configured phases or optimal control problems (or both) as we normally would, but rather than running solve or optimize on each individually, we specify the algorithm we would like Jet to invoke
-using :code:`.setJetJobMode("")`. These options correspond to the methods we have already covered. Having set the Job mode, we add the objects a list and then pass the list to the :code:`Jet.map()` function along with 
+using :code:`.setJetJobMode("")`. These options correspond to the methods we have already covered. Having set the job mode, we add the objects a list and then pass the list to the :code:`Jet.map()` function along with 
 the number of threads we want to use, and a bool specifying whether we want to print the console scroll. After solving all the problems, the function returns the list phases/optimal control problems. We can then access
 each element object to get the solved trajectories as we normally would.
 
@@ -365,7 +368,7 @@ each element object to get the solved trajectories as we normally would.
         
 
 Alternatively, we can use another method shown below where we leverage a generator function. Here rather than directly creating each phase/optimal control problem directly we create
-a function that returns them. We can then pass this function, along with a python list of tuples of the arguments we want to pass to out ProblemGenerator
+a function that returns them. We can then pass this function, along with a python list of tuples of the arguments we want to pass to our :code:`ProblemGenerator`
 function. Internally, Jet will then expand each element of the :code:`ProblemArgs` list into :code:`ProblemGenerator` function to create all of the phases/optimal control problems on the fly. 
 These will then be solved according the job mode and returned as a list as before. This form is particularly efficient whenever construction of each problem requires independent 
 and expensive preprocessing that cannot be parallelized.

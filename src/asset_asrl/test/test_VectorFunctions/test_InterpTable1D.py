@@ -45,14 +45,13 @@ class test_InterpTable1D(unittest.TestCase):
         TabVt2 = vf.InterpTable1D(Vts2,tvar=n,kind=kind)
         
         
-        RetAx0 = TabAx0(tscheck).T
+        RetAx0 = TabAx0(tscheck)
         RetAx1 = TabAx1(tscheck)
         RetVt0 = TabVt0(tscheck)
         RetVt2 = TabVt2(tscheck)
         
-        print(RetAx0-RetAx1.T)
-        print(RetAx1)
-
+        
+        
         ErrAx1Ax0 = abs(RetAx1-RetAx0).max()
         ErrVt0Ax0 = abs(RetVt0-RetAx0).max()
         ErrVt2Ax0 = abs(RetVt2-RetAx0).max()
@@ -85,6 +84,9 @@ class test_InterpTable1D(unittest.TestCase):
                 
                 Vali,dVali,d2Vali = Tab.interp_deriv2(t)
                 
+                #print(d2Vali,d2Val,t)
+
+                
                 Valerr = abs(Val-Vali).max()
                 dValerr = abs(dVal-dVali).max()
                 d2Valerr = abs(d2Val-d2Vali).max()
@@ -115,16 +117,17 @@ class test_InterpTable1D(unittest.TestCase):
         def d2Func(t):return np.array([-np.cos(t),-np.sin(t)])
         
         
-        tstab = np.linspace(0,2*np.pi,200)
-        tscheck = np.linspace(0,2*np.pi,37)
+        tstab = list(np.linspace(0,2*np.pi,500))
         
-        #self.Interp_test(2,Func,dFunc,d2Func,tstab,tscheck)
+        tscheck = np.linspace(0.01,2*np.pi,37)
+        
+        self.Interp_test(2,Func,dFunc,d2Func,tstab,tscheck)
         
         def  Func(t) :return np.array([ np.cos(t)])
         def dFunc(t) :return np.array([-np.sin(t)])
         def d2Func(t):return np.array([-np.cos(t)])
 
-        #self.Interp_test(1,Func,dFunc,d2Func,tstab,tscheck)
+        self.Interp_test(1,Func,dFunc,d2Func,tstab,tscheck)
 
         
         

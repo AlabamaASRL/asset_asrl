@@ -1,5 +1,5 @@
 import numpy as np
-import asset as ast
+import asset_asrl as ast
 import matplotlib.pyplot as plt
 
 #### PIP INSTALL Basemap if you dont have it
@@ -29,9 +29,9 @@ Mustar  =  (Lstar**3)/(Tstar**2)
 Fstar   =  Astar*Mstar
 #############################################################################
 
-mu      = 3.986012e14     /Mustar
-Re      = 6378145      /Lstar
-We      = 7.29211585e-5          *Tstar
+mu      = 3.986012e14      /Mustar
+Re      = 6378145          /Lstar
+We      = 7.29211585e-5    *Tstar
 
 RhoAir  = 1.225        /Rhostar
 h_scale = 7200         /Lstar
@@ -100,7 +100,7 @@ mf_phase4 = m0_phase4 - PM2
 
 
 #############################################################################
-class Delta3(oc.ode_x_u.ode):
+class RocketODE(oc.ODEBase):
     def __init__(self,T,mdot):
         ####################################################
         args  = oc.ODEArguments(7,3)
@@ -125,25 +125,39 @@ class Delta3(oc.ode_x_u.ode):
 def TargetOrbit(at,et,it, Ot,Wt):
     rvec,vvec = Args(6).tolist([(0,3),(3,3)])
     
-    hvec = rvec.cross(vvec)
-    nvec = vf.cross([0,0,1],hvec)
-    
     r    = rvec.norm()
     v    = vvec.norm()
     
+    #Angular momentum vector
+    hvec = rvec.cross(vvec)
+    
+    #Node vector
+    nvec = vf.cross([0,0,1],hvec)
+    
+    # Energy
     eps = 0.5*(v**2) - mu/r
     
+    # Semi-major axis
     a =  -0.5*mu/eps
     
     evec = vvec.cross(hvec)/mu - rvec.normalized()
+    #Eccentrcity
+    e = evec.norm()
     
+    #inclination
     i = vf.arccos(hvec.normalized()[2]) 
     
-    Omega = vf.arccos(nvec.normalized()[0])
-    Omega = vf.ifelse(nvec[1]>0,Omega,2*np.pi -Omega)
+    #RAAN
+    O = vf.arccos(nvec.normalized()[0])
+    # Quadrant Check
+    O = vf.ifelse(nvec[1]>0,O,2*np.pi -O)
+    
+    # Argument of periapse
     W = vf.arccos(nvec.normalized().dot(evec.normalized()))
+    #QuadrantCheck
     W = vf.ifelse(evec[2]>0,W,2*np.pi-W)
-    return vf.stack([a-at,evec.norm()-et,i-it,Omega-Ot,W-Wt])
+    
+    return vf.stack([a,e,i,O,W]) - np.array([at,et,it,Ot,Wt])
     
 ###############################################################################
 
@@ -253,7 +267,7 @@ if __name__ == "__main__":
     y0      = np.zeros((6))
     y0[0:3] = np.array([np.cos(istart),0,np.sin(istart)])*Re
     y0[3:6] =-np.cross(y0[0:3],np.array([0,0,We]))
-    y0[3]  += 0.0001/Vstar
+    y0[3]  += 0.00001/Vstar  # cant be exactly zero,our drag equation's derivative would NAN !!!
     print(y0[3:6]*Vstar)
     
     
@@ -265,7 +279,7 @@ if __name__ == "__main__":
     OEF  = [at,et,istart,Ot,Wt,M0]
     yf   = ast.Astro.classic_to_cartesian(OEF,mu)
     
-    ts   = np.linspace(0,tf_phase4,200)
+    ts   = np.linspace(0,tf_phase4,1000)
     
     IG1 =[]
     IG2 =[]
@@ -305,40 +319,60 @@ if __name__ == "__main__":
         
     
     
-    ode1 = Delta3(T_phase1,mdot_phase1)
-    ode2 = Delta3(T_phase2,mdot_phase2)
-    ode3 = Delta3(T_phase3,mdot_phase3)
-    ode4 = Delta3(T_phase4,mdot_phase4)
+    ode1 = RocketODE(T_phase1,mdot_phase1)
+    ode2 = RocketODE(T_phase2,mdot_phase2)
+    ode3 = RocketODE(T_phase3,mdot_phase3)
+    ode4 = RocketODE(T_phase4,mdot_phase4)
     
     tmode = "LGL3"
+    cmode = "HighestOrderSpline"
     
-    phase1 = ode1.phase(tmode,IG1,len(IG1)-1)
+    nsegs1 = 32
+    nsegs2 = 32
+    nsegs3 = 32
+    nsegs4 = 32
+    
+    #########################################
+    phase1 = ode1.phase(tmode,IG1,nsegs1)
+    phase1.setControlMode(cmode)
     phase1.addLUNormBound("Path",[8,9,10],.5,1.5)
-    
     phase1.addBoundaryValue("Front",range(0,8),IG1[0][0:8])
+    
+    #Dont want our bound to interfere with initial condition which starts at Re
+    #so i relax the Earth radius constraint slightly
+    phase1.addLowerNormBound("Path",[0,1,2],Re*.999999)
     phase1.addBoundaryValue("Back",[7],[tf_phase1])
     
-    phase2 = ode2.phase(tmode,IG2,len(IG2)-1)
+    #########################################
+    phase2 = ode2.phase(tmode,IG2,nsegs2)
+    phase2.setControlMode(cmode)
+    
+    phase2.addLowerNormBound("Path",[0,1,2],Re)
     phase2.addLUNormBound("Path",[8,9,10],.5,1.5)
     phase2.addBoundaryValue("Front",[6], [m0_phase2])
     phase2.addBoundaryValue("Back", [7] ,[tf_phase2])
     
-    phase3 = ode3.phase(tmode,IG3,len(IG3)-1)
+    #########################################
+    phase3 = ode3.phase(tmode,IG3,nsegs3)
+    phase3.setControlMode(cmode)
+    
+    phase3.addLowerNormBound("Path",[0,1,2],Re)
     phase3.addLUNormBound("Path",[8,9,10],.5,1.5)
     phase3.addBoundaryValue("Front",[6], [m0_phase3])
     phase3.addBoundaryValue("Back", [7] ,[tf_phase3])
     
-    phase4 = ode4.phase(tmode,IG4,len(IG4)-1)
+    #########################################
+    phase4 = ode4.phase(tmode,IG4,nsegs4)
+    phase4.setControlMode(cmode)
+
+    phase4.addLowerNormBound("Path",[0,1,2],Re)
     phase4.addLUNormBound("Path",[8,9,10],.5,1.5)
     phase4.addBoundaryValue("Front",[6], [m0_phase4])
     phase4.addValueObjective("Back",6,-1.0)
     phase4.addUpperVarBound("Back",7,tf_phase4,1.0)
     phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),range(0,6))
+    #########################################
     
-    phase1.addLowerNormBound("Path",[0,1,2],Re*.999999)
-    phase2.addLowerNormBound("Path",[0,1,2],Re*.999999)
-    phase3.addLowerNormBound("Path",[0,1,2],Re*.999999)
-    phase4.addLowerNormBound("Path",[0,1,2],Re*.999999)
     
     
     ocp = oc.OptimalControlProblem()
@@ -347,28 +381,17 @@ if __name__ == "__main__":
     ocp.addPhase(phase3)
     ocp.addPhase(phase4)
     
-    ocp.addForwardLinkEqualCon(phase1,phase4,[0,1,2,3,4,5,7,8,9,10])
+    ## All phases contniuous in everything but mass (var 6)
+    ocp.addForwardLinkEqualCon(phase1,phase4,[0,1,2,3,4,5, 7,8,9,10])
+    
+    
     ocp.optimizer.set_OptLSMode("L1")
-    ocp.optimizer.set_alphaRed(2.0)
-    
-    ocp.optimizer.MaxLSIters = 2
-    
-    phase1.setControlMode("BlockConstant")
-    phase2.setControlMode("BlockConstant")
-    phase3.setControlMode("BlockConstant")
-    phase4.setControlMode("BlockConstant")
+    ocp.optimizer.set_SoeLSMode("L1")
+    ocp.optimizer.set_MaxLSIters(2)
+    ocp.optimizer.set_PrintLevel(1)
 
-    #ocp.optimizer.KKTtol = 1.0e-9
-    ocp.optimizer.PrintLevel=1
-    #ocp.optimizer.CNRMode=True
-
-
-    ocp.Threads=8
-    ocp.optimizer.QPThreads=8
-
-    #ocp.optimizer.SoeMode = ast.Solvers.AlgorithmModes.OPTNO
-    ocp.optimize_solve()
-    
+    ocp.solve_optimize()
+    #########################################
     
     
     Phase1Traj = phase1.returnTraj()  # or ocp.Phase(i).returnTraj()
@@ -376,21 +399,6 @@ if __name__ == "__main__":
     Phase3Traj = phase3.returnTraj()
     Phase4Traj = phase4.returnTraj()
     
-    Traj = Phase1Traj + Phase2Traj +Phase3Traj +Phase4Traj
-    MEEs =[list(ast.Astro.cartesian_to_modified(T[0:6], mu))+[T[7]] for T in Traj]
-    print(mu)
-    
-    
-    TT = np.array(MEEs).T
-    plt.plot(TT[6],TT[0])
-    
-    plt.plot(TT[6],TT[1])
-    plt.plot(TT[6],TT[2])
-    plt.plot(TT[6],TT[3])
-    plt.plot(TT[6],TT[4])
-    
-    plt.plot(TT[6],TT[5])
-    plt.show()
     
     print("Final Mass = ",Phase4Traj[-1][6]*Mstar,' kg')
 

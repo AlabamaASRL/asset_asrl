@@ -94,8 +94,8 @@ ocp.setLinkParams(np.ones((15)))
 ###############################################################################
 
 def ALinkEqualCon():
-    V0,V1,Lvar = Args(27).tolist([(0,13),(13,13),(26,1)])
-    return (V0-V1)*Lvar
+    VPS0,VPS1,Lvar = Args(27).tolist([(0,13),(13,13),(26,1)])
+    return (VPS0-VPS1)*Lvar
 
 
 XtUvars0 = range(0,11)
@@ -130,22 +130,177 @@ ocp.addLinkEqualCon(ALinkEqualCon(),
 ###############################################################################
 
 def ALinkEqualCon():
-    V0,V1 = Args(26).tolist([(0,13),(13,13)])
-    return (V0-V1)
+    VS0,VP1 = Args(8).tolist([(0,4),(4,4)])
+    return VS0.dot(VP1)
 
 
-XtUvars0 = range(0,11)
-OPvars0 = [0]
-SPvars0 = [0]
+XtUvars0 = [3,4,5]
+SPvars0  = [0]
 
-XtUvars1 = range(0,11)
+XtUvars1 = [3,1,2]
 OPvars1 = [0]
-SPvars1 = [0]
 
-
-## Use index in the of the phase in the ocp to specify each phase
+## Enforce that the dot procuct of the specified variables from each phase region =0
 ocp.addLinkEqualCon(ALinkEqualCon(),
-                    0,'Last', XtUvars0,OPvars0,SPvars0,
-                    1,'First',XtUvars1,OPvars1,SPvars1)
+                    0,'Last', XtUvars0,[],SPvars0,
+                    1,'First',XtUvars1,OPvars1,[])
 
 
+###############################################################################
+
+SomeFunc = Args(6).head(3).cross(Args(6).tail(3))
+## Only need XtUVars from phases 2 and 3 at the specified regions
+ocp.addLinkEqualCon(SomeFunc,
+                    phase2,'Last', range(0,3),
+                    phase3,'First',range(0,3))
+
+
+SomeOtherFunc = Args(2).sum()-1
+# Only needs ODEparams from phases 0 and 1
+ocp.addLinkEqualCon(SomeOtherFunc,
+                    0,'ODEParams', [0],
+                    1,'ODEParams', [0])
+
+##############################################################################
+
+
+def TriplePhaseLink():
+    X0,X1,X2 = Args(9).tolist([(0,3),(3,3),(6,3)])
+    
+    return vf.sum(X0,X1,X2)
+
+
+XtUvars = range(3,6)
+SPvars = []  # none needed, leave empty but still pass it in
+OPvars = []  # none needed, leave empty but still pass it in
+LPvars = []  # none needed, leave empty but still pass it in
+
+# List of tuples of the variables and regions needed from each phase
+ocp.addLinkEqualCon(TriplePhaseLink(),
+                    [(3,'First', XtUvars,OPvars,OPvars),
+                     (4,'First', XtUvars,OPvars,OPvars),
+                     (5,'First', XtUvars,OPvars,OPvars)],
+                    LPvars)
+##################################################################
+
+
+# Enforce that the norm of first 3 link params is 1
+LPvec = [0,1,2]
+ocp.addLinkParamEqualCon(Args(3).norm()-1.0,LPvec)
+
+# Apply same constraint to multiple groups of 3 link params
+LPvecs = [[0,1,2] ,[3,4,5],[6,7,8]]
+ocp.addLinkParamEqualCon(Args(3).norm()-1.0,LPvecs)
+
+
+################################################################
+
+# Enforce that variables XtUvars [3,4,5] in the last state of phase0
+# are equal to the same variables in the first state of phase1
+ocp.addDirectLinkEqualCon(0,'Last',range(3,6),
+                          1,'First',range(3,6))
+
+
+
+# Enforce continuity between the last time in phase1 (time is index 7)
+# And the first time in phase2 (time is index 6!!)
+ocp.addDirectLinkEqualCon(1,'Last',[7],
+                          2,'First',[6])
+
+
+# Enforce that the ODE varaibels in phase 0 ans phase 1 are equal
+ocp.addDirectLinkEqualCon(0,'ODEParams',[0],
+                          1,'ODEParams',[0])
+
+############################################################################
+
+# Enforce forward time continuity in XtUvars [0,1,2] across all phases
+for i in range(0,5):
+    ocp.addDirectLinkEqualCon(i,'Last',range(0,3),
+                              i+1,'First',range(0,3))
+
+### OR
+
+ocp.addForwardLinkEqualCon(0,5,range(3,6))
+
+#
+ocp.addForwardLinkEqualCon(phase0,phase5,range(3,6))
+############################################################################
+############################################################################
+
+def ALinkInequalCon():
+    VS0,VP1 = Args(8).tolist([(0,4),(4,4)])
+    return VS0.dot(VP1)
+
+
+XtUvars0 = [3,4,5]
+SPvars0  = [0]
+
+XtUvars1 = [3,1,2]
+OPvars1 = [0]
+
+## Enforce that the dot procuct of the specified variables from each phase region <0
+ocp.addLinkInequalCon(ALinkInequalCon(),
+                    0,'Last', XtUvars0,[],SPvars0,
+                    1,'First',XtUvars1,OPvars1,[])
+
+
+
+def TriplePhaseInequality():
+    X0,X1,X2 = Args(9).tolist([(0,3),(3,3),(6,3)])
+    
+    return vf.sum(X0,X1,X2)
+
+
+XtUvars = range(3,6)
+SPvars = []  # none needed, leave empty but still pass it in
+OPvars = []  # none needed, leave empty but still pass it in
+LPvars = []  # none needed, leave empty but still pass it in
+
+# List of tuples of the variables and regions needed from each phase
+ocp.addLinkInequalCon(TriplePhaseInequality(),
+                    [(3,'First', XtUvars,OPvars,OPvars),
+                     (4,'First', XtUvars,OPvars,OPvars),
+                     (5,'First', XtUvars,OPvars,OPvars)],
+                    LPvars)
+
+
+
+######################################################################
+
+# Enforce that the norm of first 3 link params is < 1
+LPvec = [0,1,2]
+ocp.addLinkParamInequalCon(Args(3).norm()-1.0,LPvec)
+
+# Apply same constraint to multiple groups of 3 link params
+LPvecs = [[0,1,2] ,[3,4,5],[6,7,8]]
+ocp.addLinkParamInequalCon(Args(3).norm()-1.0,LPvecs)
+
+
+LinkParams = ocp.returnLinkParams()
+
+##############################################################################
+##############################################################################
+
+def ALinkObjective():
+    VS0,VP1 = Args(8).tolist([(0,4),(4,4)])
+    return VS0.dot(VP1)  # is a scalar function
+
+
+XtUvars0 = [3,4,5]
+SPvars0  = [0]
+
+XtUvars1 = [3,1,2]
+OPvars1 = [0]
+
+
+ocp.addLinkObjective(ALinkObjective(),
+                    0,'Last', XtUvars0,[],SPvars0,
+                    1,'First',XtUvars1,OPvars1,[])
+
+
+
+# Minimize the sum of the norms of these groups of 3 link params
+
+LPvecs = [[0,1,2] ,[3,4,5],[6,7,8]]
+ocp.addLinkParamObjective(Args(3).norm(),LPvecs)

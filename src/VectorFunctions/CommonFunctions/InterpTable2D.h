@@ -6,6 +6,11 @@ namespace ASSET {
 
 	struct InterpTable2D {
 
+		enum class InterpType {
+			cubic_interp,
+			linear_interp
+		};
+
 		Eigen::VectorXd xs;
 		Eigen::VectorXd ys;
 
@@ -16,8 +21,10 @@ namespace ASSET {
 		MatType dzys;
 		MatType dzys_dxs;
 
+		bool WarnOutOfBounds = true;
+		bool ThrowOutOfBounds = false;
 
-		bool cubic = false;
+		InterpType interp_kind = InterpType::cubic_interp;
 		bool xeven = true;
 		bool yeven = true;
 		int xsize;
@@ -29,15 +36,25 @@ namespace ASSET {
 		InterpTable2D(){}
 
 		InterpTable2D(const Eigen::VectorXd & Xs, const Eigen::VectorXd& Ys,
-			const MatType & Zs,bool cubic):xs(Xs),ys(Ys),zs(Zs) {
-			set_data(Xs, Ys, Zs, cubic);
+			const MatType & Zs,std::string kind) {
+			set_data(Xs, Ys, Zs,  kind);
 		}
 
 
 		void set_data(const Eigen::VectorXd& Xs, const Eigen::VectorXd& Ys,
-			const MatType& Zs, bool cubic) {
+			const MatType& Zs, std::string kind) {
 
-			this->cubic = cubic;
+			
+			if (kind == "cubic" || kind == "Cubic") {
+				this->interp_kind = InterpType::cubic_interp;
+			}
+			else if (kind == "linear" || kind == "Linear") {
+				this->interp_kind = InterpType::linear_interp;
+			}
+			else {
+				throw std::invalid_argument("Unrecognized interpolation type");
+			}
+
 			this->xs = Xs;
 			this->ys = Ys;
 			this->zs = Zs;
@@ -91,7 +108,7 @@ namespace ASSET {
 				this->yeven = false;
 			}
 
-			if (cubic)calc_derivs();
+			if (this->interp_kind == InterpType::cubic_interp)calc_derivs();
 
 		}
 
@@ -281,6 +298,28 @@ namespace ASSET {
 			Eigen::Vector2<double>& dzxy, 
 			Eigen::Matrix2<double>& d2zxy) const {
 
+			if (WarnOutOfBounds || ThrowOutOfBounds) {
+				double xeps = std::numeric_limits<double>::epsilon() * xtotal;
+				if (x<(xs[0] - xeps) || x>(xs[xs.size() - 1] + xeps)) {
+					fmt::print("{0}\n", x);
+					fmt::print(fmt::fg(fmt::color::red),
+						"WARNING: x coordinate falls outside of InterpTable2D range. Data is being extrapolated!!\n");
+					if (ThrowOutOfBounds) {
+						throw std::invalid_argument("");
+					}
+				}
+				double yeps = std::numeric_limits<double>::epsilon() * ytotal;
+				if (y<(ys[0] - yeps) || y>(ys[ys.size() - 1]) + yeps) {
+					fmt::print(fmt::fg(fmt::color::red),
+						"WARNING: y coordinate falls outside of InterpTable2D range. Data is being extrapolated!!\n");
+					if (ThrowOutOfBounds) {
+						throw std::invalid_argument("");
+					}
+				}
+
+			}
+
+
 			auto [xelem, yelem] = get_xyelems(x, y);
 
 			double xstep = xs[xelem + 1] - xs[xelem];
@@ -289,7 +328,7 @@ namespace ASSET {
 			double xf = (x - xs[xelem]) / xstep;
 			double yf = (y - ys[yelem]) / ystep;
 
-			if (cubic) {
+			if (this->interp_kind == InterpType::cubic_interp) {
 
 				double yf2 = yf * yf;
 				double yf3 = yf2 * yf;
@@ -472,10 +511,14 @@ namespace ASSET {
 		using MatType = InterpTable2D::MatType;
 		auto obj = py::class_<InterpTable2D, std::shared_ptr<InterpTable2D>>(m, "InterpTable2D");
 
-		obj.def(py::init<const Eigen::VectorXd&, const Eigen::VectorXd&, const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>&, bool >());
+		obj.def(py::init<const Eigen::VectorXd&, const Eigen::VectorXd&, const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>&, std::string >());
 
 		obj.def("interp", py::overload_cast<double, double>(&InterpTable2D::interp, py::const_));
 		obj.def("interp", py::overload_cast<const MatType&, const MatType&>(&InterpTable2D::interp, py::const_));
+
+		obj.def_readwrite("WarnOutOfBounds", &InterpTable2D::WarnOutOfBounds);
+		obj.def_readwrite("ThrowOutOfBounds", &InterpTable2D::ThrowOutOfBounds);
+
 
 		obj.def("interp_deriv1", &InterpTable2D::interp_deriv1);
 		obj.def("interp_deriv2", &InterpTable2D::interp_deriv2);

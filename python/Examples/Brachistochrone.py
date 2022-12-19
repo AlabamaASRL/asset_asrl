@@ -72,7 +72,7 @@ for t in ts:
     X[4]=theta0
     Xs.append(X)
 
-phase = ode.phase("LGL3",Xs,64)
+phase = ode.phase("LGL3",Xs,32)
 phase.addBoundaryValue("Front",range(0,4),[x0,y0,v0,0])
 phase.addLUVarBound("Path",4,-0.1,2.00)
 

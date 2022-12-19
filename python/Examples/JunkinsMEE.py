@@ -57,7 +57,8 @@ def Run2():
         
     TrajIG = Traj
     
-    phase = ode.phase("LGL3",Traj,192)
+    phase = ode.phase("LGL5",Traj,128)
+    phase.integrator.setStepSizes(.3,.00001,10)
     phase.setControlMode("BlockConstant")
     phase.addBoundaryValue("Front",range(0,8),Istate[0:8])
     phase.addLUNormBound("Path",range(8,11),.0001,1,1)
@@ -71,21 +72,28 @@ def Run2():
     phase.optimizer.set_MaxAccIters(200)
     phase.optimizer.set_BoundFraction(.997)
     phase.optimizer.set_HpertParams(deltaH = 1.0e-7,incrH = 8.,decrH = .33)
-
+    #phase.enable_vectorization(False)
     phase.optimizer.PrintLevel = 0
-    #phase.optimizer.set_QPOrderingMode("MINDEG")
+    phase.optimizer.set_QPOrderingMode("MINDEG")
+    
+    #1,1 Default: 45i, 41.07,.93
+    #8,8 Default: 45i, 13.9, .31
+    #1,1 Default-LTO: 45i, 35.34,.786
+    #8,8 Default-LTO: 45i, 10.9, .242
+    
     
     phase.setThreads(8,8)
     phase.optimize()
    
     Traj = phase.returnTraj()
+    Tab  = phase.returnTrajTable()
     
     
     TT = np.array(Traj).T
     
     
     
-    plt.plot(TT[7],TT[0])
+    plt.plot(TT[7],TT[2])
     
 
     plt.show()
@@ -116,12 +124,7 @@ def Run2():
     
     
     
-    
-    print(tf)
-    
-    print(Tmag)
-    
-    print(mdot)
+  
     
     
 if __name__ == "__main__":

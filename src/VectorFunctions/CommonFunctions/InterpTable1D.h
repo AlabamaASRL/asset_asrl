@@ -6,7 +6,7 @@ namespace ASSET {
 
 	struct InterpTable1D {
 
-		enum InterpType {
+		enum class InterpType {
 			cubic_interp,
 			linear_interp
 		};
@@ -18,12 +18,14 @@ namespace ASSET {
 		MatType vs;
 		MatType dvs_dts;
 
-		InterpType interp_kind = cubic_interp;
+		InterpType interp_kind = InterpType::cubic_interp;
 		bool teven = true;
 		int axis = 0;
 		int tsize;
 		double ttotal;
 		int vlen;
+		bool WarnOutOfBounds = true;
+		bool ThrowOutOfBounds = false;
 
 		InterpTable1D(){}
 
@@ -91,10 +93,10 @@ namespace ASSET {
 			}
 
 			if (kind == "cubic" || kind == "Cubic") {
-				this->interp_kind = cubic_interp;
+				this->interp_kind = InterpType::cubic_interp;
 			}
 			else if (kind == "linear" || kind == "Linear") {
-				this->interp_kind = linear_interp;
+				this->interp_kind = InterpType::linear_interp;
 			}
 			else {
 				throw std::invalid_argument("Unrecognized interpolation type");
@@ -127,7 +129,7 @@ namespace ASSET {
 			}
 
 
-			if (this->interp_kind == cubic_interp) calc_derivs();
+			if (this->interp_kind == InterpType::cubic_interp) calc_derivs();
 
 		}
 
@@ -218,11 +220,22 @@ namespace ASSET {
 		template<class VType>
 		void interp_impl(double t, int deriv, VType& v, VType& dv_dt, VType& dv2_dt2) const {
 
+			if (WarnOutOfBounds|| ThrowOutOfBounds) {
+				double eps = std::numeric_limits<double>::epsilon() * ttotal;
+				if (t<(ts[0]-eps) || t>(ts[ts.size() - 1]+eps)) {
+					fmt::print(fmt::fg(fmt::color::red),
+						"WARNING: t falls outside of InterpTable1D time range. Data is being extrapolated!!\n");
+					if (ThrowOutOfBounds) {
+						throw std::invalid_argument("");
+					}
+				}
+			}
+
 			double telem = this->get_telem(t);
 			double tstep = ts[telem + 1] - ts[telem];
 			double tnd   = (t - ts[telem]) / tstep;
 
-			if (this->interp_kind==cubic_interp) {
+			if (this->interp_kind== InterpType::cubic_interp) {
 
 				double tnd2 = tnd * tnd;
 				double tnd3 = tnd2 * tnd;
@@ -297,13 +310,9 @@ namespace ASSET {
 				v.setZero();
 			}
 			
-			if (axis == 1) {
-				return vs;
-			}
-			else {
-				return vs.transpose();
-			}
 
+			return vs;
+			
 		}
 
 		std::tuple<Eigen::VectorXd, Eigen::VectorXd > interp_deriv1(double t) const {
@@ -433,6 +442,7 @@ namespace ASSET {
 			py::arg("Vts"),py::arg("tvar")=-1, py::arg("kind") = std::string("cubic"));
 
 		obj.def("interp", py::overload_cast<double>(&InterpTable1D::interp, py::const_));
+		obj.def("interp", py::overload_cast<const Eigen::VectorXd&>(&InterpTable1D::interp, py::const_));
 
 		obj.def("__call__", py::overload_cast<double>(&InterpTable1D::interp, py::const_),py::is_operator());
 		obj.def("__call__", py::overload_cast<const Eigen::VectorXd&>(&InterpTable1D::interp, py::const_), py::is_operator());
@@ -454,7 +464,9 @@ namespace ASSET {
 		obj.def("interp_deriv1", &InterpTable1D::interp_deriv1);
 		obj.def("interp_deriv2", &InterpTable1D::interp_deriv2);
 
-		
+		obj.def_readwrite("WarnOutOfBounds", &InterpTable1D::WarnOutOfBounds);
+		obj.def_readwrite("ThrowOutOfBounds", &InterpTable1D::ThrowOutOfBounds);
+
 
 		
 		obj.def("sf", [](const InterpTable1D& self) {

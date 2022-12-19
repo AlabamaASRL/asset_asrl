@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
     plt.show()
 
-    phase1 = ode.phase(TModes.LGL5, EarthMarsIG, 64)
+    phase1 = ode.phase(TModes.LGL3, EarthMarsIG, 128)
 
     phase1.addEqualCon(PhaseRegs.Front, PosCon(EarthTab), [0, 1, 2, 6])
     phase1.addEqualCon(PhaseRegs.Back, PosCon(MarsTab),  [0, 1, 2, 6])
@@ -192,12 +192,12 @@ if __name__ == "__main__":
 
     phase1.addUpperFuncBound(PhaseRegs.Front, VinfFunc(EarthTab).squared_norm(),
                              [3, 4, 5, 6], (2000.0/vstar)**2, 10.0)
-    phase1.addLUNormBound(PhaseRegs.Path, [7, 8, 9], .01/2, 1.0, 1.0)
+    phase1.addLUNormBound(PhaseRegs.Path, [7, 8, 9], .001, 1.0, 1.0)
 
-    phase2 = ode.phase(TModes.LGL5, MarsPsycheIG, 128)
+    phase2 = ode.phase(TModes.LGL3, MarsPsycheIG, 256)
 
     phase2.addEqualCon(PhaseRegs.Back, RendCon(PsycheTab),  range(0, 7))
-    phase2.addLUNormBound(PhaseRegs.Path, [7, 8, 9], .01/2, 1.0, 1.0)
+    phase2.addLUNormBound(PhaseRegs.Path, [7, 8, 9], .001, 1.0, 1.0)
     phase2.addUpperVarBound(PhaseRegs.Back, 6, te - 24.0*3600*745/tstar, 1.0)
 
     r_Mars_Psyche = (3389.5 + 500)*1000.0/lstar

@@ -1,9 +1,12 @@
+.. _integrator-guide:
+
 Integrator Tutorial
 ===================
 
 In this section, we will describe usage of asset's integrator object. To 
 start we will define an ODE which we want to integrate using what we have learned from the
-previous two sections. As concrete example we use a ballistic two body
+previous two sections on :ref:`vector functions <vectorfunction-guide>` and :ref:`ODEs <ode-guide>`. 
+As concrete example we use a ballistic two body
 model whose state variables are the position and velocity relative to a central
 with gravitational parameter is mu. This ODE may be defined as shown below. 
 For this example,we will be working in canonical units where mu=1.
@@ -111,18 +114,18 @@ Integration
 ###########
 
 Now that we have covered initializing integrators, lets examine how we actually
-use them. By far the most used methods are integrate and integrate_dense. Both methods,
+use them. By far the most used methods are :code:`.integrate` and :code:`integrate_dense`. Both methods,
 take as the first input a full-state vector containing the initial state, time, controls, and
 parameters as well as the final time that we wish to integrate these initial inputs to.
  
 The :code:`.integrate` method  integrates this initial full-state input vector to final time :code:`tf` and returns just the full-state at the final time.
-integrate_dense takes the same inputs but returns all intermediate full-states 
+:code:`integrate_dense` takes the same inputs but returns all intermediate full-states 
 calculated by the integrator as single python list. We also call provide integrate_dense 
 with an additional arguments specifying that we would like to return :code:`N` evenly spaced steps
 between :code:`t0` and :code:`tf` rather than the exact steps taken by the solver. These :code:`N` states and controls
 will be calculated from the exact steps taken by the integrator using a fifth order interpolation method. 
-For the DOPRI54 method, interpolated states have effectively
-the exact same error as the true steps taken by the integrator. However, for the DOPRI87 method, interpolated states
+For the :code:`"DOPRI54"` method, interpolated states have effectively
+the exact same error as the true steps taken by the integrator. However, for the :code:`"DOPRI87"` method, interpolated states
 will have the larger locals error owing the difference in order between the integration and interpolation. In practice
 the maximum local error at any point along the trajectory is typically 2 orders of magnitude larger than the integration tolerances. 
 
@@ -160,7 +163,7 @@ Event Detection
 ###############
 
 We can also pass a list of events to be detected during the integration. An single 
-event is defined as a tuple consisting of: An asset scalar function whose zeros
+event is defined as a tuple consisting of: An ASSET scalar function whose zeros
 determine the locations of the event, a direction indicating whether we want to track ascending, descending or all zeros, and a stop code
 signifying whether integration should stop after encountering a zero. The scalar function should take the same arguments as the underlying ODE.
 The :code:`direction` flag should be set to :code:`0` to capture all zeros, :code:`-1` to capture only zeros where the function value is decreasing, or :code:`1` to capture
@@ -288,7 +291,7 @@ interface using the :code:`.integrate_stm` methods, which can be used as shown b
 Parrallel Integration
 #####################
 
-Finally, for all previously discussed .iintegrate methods, we have corresponding multi-threaded _parallel
+Finally, for all previously discussed .iintegrate methods, we have corresponding multi-threaded :code:`_parallel`
 version which will integrate lists of initial conditions and final times in parallel. In each case rather
 than passing a single initial state and final time we pass a lists of each. The outputs to the call will then be list
 of length :code:`n` containing the outputs of the regular non-parallel method for the ith input state and final time.
