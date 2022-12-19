@@ -696,8 +696,11 @@ public:
     return this->Table.NDequidist(num, tl, th);
   }
   LGLInterpTable returnTrajTable()  {
-      this->Table.loadRegularData(this->DefsPerBin.sum(), this->ActiveTraj);
-      return this->Table;
+      //this->Table.loadRegularData(this->DefsPerBin.sum(), this->ActiveTraj);
+
+      LGLInterpTable tabt = this->Table;
+      tabt.loadExactData(this->ActiveTraj);
+      return tabt;
   }
 
   Eigen::VectorXd returnStaticParams() const {
