@@ -71,7 +71,7 @@ We can also manually specify the initial spacing for segments. This is done by p
 for groups of evenly spaced segments. We then pass another list, :code:`SegsPerBin`, of length :code:`n-1` specifying
 an integer number of segments we want in each group. For example, we can replicate the behavior of the
 default method as shown below. Or alternatively, we could specify that we want to vary the density of 
-segments across the :code:`phase`. In most cases, the user'ss first option should be to just evenly space segments over
+segments across the :code:`phase`. In most cases, the user's first option should be to just evenly space segments over
 the phase. One can also create a :code:`phase`, set the transcription method, and initial guess in the same
 call as shown on the final line. 
 
