@@ -9,7 +9,7 @@ Vector Function Tutorial
 One of the goals of ASSET is to provide the ability to users to construct functions
 dynamically within Python that are able to be used by ASSET. By doing this we can simplify a user's work-flow,
 where the benefits of high speed C++ code can be combined with the ease of use Python provides. 
-In this section we will give an depth overview of ASSET's vector function type. At high-level,
+In this section we will give an depth overview of ASSET's vector function type. At a high-level,
 this is simple functional (in the programming sense) domain specific language for defining 
 mathematical Vector Functions that take a fixed number of inputs
 and produce a fixed number outputs, with both inputs and outputs assumed to be column vectors.
@@ -17,7 +17,7 @@ and produce a fixed number outputs, with both inputs and outputs assumed to be c
 
 Arguments
 #########
-To start let is import asset and the vector functions module which contains all types
+To start let us import ASSET and the vector functions module which contains all types
 and functions defining the language. From this module we will then import the Arguments type
 and give it a shorthand name. The :code:`Arguments` type is the base expression in the vector function system
 and represents a function that simply takes some number of input arguments and returns them as outputs.
@@ -31,16 +31,16 @@ some or all of its outputs.
 
 We can construct the object by simply specifying the number of arguments, in this
 case 6. This instance :code:`X` is now a first class function thats takes any vector of size 6
-and returns that vector. Since it is a vector function we can compute is output value using the
-:code:`()` operator,first derivative using the :code:`.jacobian` method and second derivative using the :code:`.adjointhessian` method.
+and returns that vector. Since it is a vector function we can compute its output value using the
+:code:`()` operator, first derivative using the :code:`.jacobian` method and second derivative using the :code:`.adjointhessian` method.
 To do this we provide either a numpy vector or python list of real valued inputs, and additionally for the second derivative
-a vector of list of lagrange multipliers with same dimensions as the output of the function. One important note, ASSET does not compute
+a vector list of lagrange multipliers with same dimensions as the output of the function. One important note, ASSET does not compute
 the full 3D tensor second derivative of vector valued functions, instead it computes the second derivative
 dotted with a vector lagrange multipliers, resulting in 2D symmetric matrix with rows and columns equal to the number of inputs.
 We refer to this as the adjointhessian, and in the case of a function with a single output is equivalent to the normal hessian.
 Since :code:`X` here is a simple linear function, the first derivative is simply the identity matrix and the adjointhessian is zero. This is
-a rather trivial example, but the same methods can applied to any asset vector function that we can construct. We should also note that while
-these methods are available for all vector functions, for most applications and examples you wont ever actually need to explicitly
+a rather trivial example, but the same methods can applied to any ASSET vector function that we can construct. We should also note that while
+these methods are available for all vector functions, for most applications and examples you won't ever actually need to explicitly
 call the function or its derivatives at real arguments as that will be handled for you by some other interface such as an integrator or optimal
 control problem.
 
@@ -107,11 +107,11 @@ You may use whatever method you wish, but we personally prefer the :code:`.tolis
 
 In addition to scalar Elements, one may also address contiguous sub-vectors in a set of arguments
 using the :code:`.head()`, :code:`.tail()`, and :code:`.segment()` methods of :code:`Arguments`, or standard python (contiguous) list indexing.
-For example, if we want to treat the first three arguments of the Arguments below as a single vector R, we can
+For example, if we want to treat the first three arguments of the Arguments below as a single vector :code:`R`, we can
 use the :code:`.head(n)` method. The :code:`.head(n)` method returns a sub-vector of size :code:`n` starting at the first element. This syntax mirrors the
 Eigen C++ library, which we find to be quite nice, but you may also use standard python list indexing to accomplish the same
-goal. Similarly, if we want to address the last three arguments as a single vector V , we can use the :code:`.tail(n)` method which returns
-the last :code:`n` elements of some arguments. Finally we can address vectors of length n starting at index :code:`i` 
+goal. Similarly, if we want to address the last three arguments as a single vector :code:`V` , we can use the :code:`.tail(n)` method which returns
+the last :code:`n` elements of some arguments. Finally we can address vectors of length :math:`n` starting at index :code:`i` 
 using the :code:`.segment(i,n)` method. The return type of all of these methods is the fundamental :code:`Segment` type, which is a function that returns
 as its output the specified sub-vector of the arguments.
 
@@ -211,13 +211,13 @@ Standard Math Operations
 
 Having covered most everything related to constructing arguments, and their elements
 and sub-vectors, we can move on the to combining them together into meaningful mathematical functions.
-We should note that the result of any mathematical non indexing operation will have
+We should note that the result of any mathematical non-indexing operation will have
 the generic type :code:`VectorFunction` (more than one output) or :code:`ScalarFunction` (one output),
 which themselves may be operated on and combined with the three
 fundamental types using the same rules. In general, types will be converted automatically, and
 users should not concern themselves with the types of resulting expressions 
 and should only make sure that their expressions are mathematically consistent. 
-We may add subtract multiply, and divide functions by other functions and numerical constants using 
+We may add, subtract, multiply, and divide functions by other functions and numerical constants using 
 the standard rules of vector math. For example, 
 we may add or subtract two functions of the same output size to together, add or subtract vectors
 of constants or constant scalars, multiply functions by constant scalars, multiply functions by Scalar functions, etc.
@@ -254,9 +254,9 @@ of constants or constant scalars, multiply functions by constant scalars, multip
 As this is a vector math language, certain operations involving vectors are not 
 allowed via standard multiply and divide operator overloads. For example one may
 not multiply two VectorFunctions together using the * operator as is possible with two arrays in numpy. 
-This is an explicit choice because in our opinion, for the types of expressions written using asset, 
-allowing element-wise vector multiplication creates more problems in terms incorrect problem formulation than it solves.
-However, these operations can be accomplished using methods we describe later.Note,
+This is an explicit choice because in our opinion, for the types of expressions written using ASSET, 
+allowing element-wise vector multiplication creates more problems in terms of incorrect problem formulation than it solves.
+However, these operations can be accomplished using methods we describe later. Note,
 this does not apply to scalar functions such as :code:`Element` or :code:`ScalarFunction`, which may be multiplied together with
 no issue, and may also scale in VectorFunction.
 
@@ -340,7 +340,7 @@ and can be called as shown below. A complete list of functions is given in the t
 Vector Norms and Normalizations
 ################################
 
-For Vector Valued functions we also provide member functions that will compute various
+For Vector valued functions we also provide member functions that will compute various
 useful norms and transformations on vectors. While most of these could be computed using the math operations
 we have already covered, users should always use one of these methods if applicable, as the resulting expressions
 will be much faster when evaluated. A few examples are illustrated here,
@@ -467,10 +467,10 @@ Stacking Outputs
 
 Up to this point, we have looked at partitioning and operating on the outputs
 of other functions, and have not addressed how the outputs of functions may be combined together
-into a larger single function. This can be accomplished using the VERY IMPORTANT :code:`vf.stack()` method.
-In general stack takes a list of asset function types and produces another function whose output is the concatenation 
+into a larger single function. This can be accomplished using the **VERY IMPORTANT** :code:`vf.stack()` method.
+In general stack takes a list of ASSET function types and produces another function whose output is the concatenation 
 of all the outputs. There are two signatures for stack, The first one (:code:`vf.stack([f1,f2,...])`) takes a python list
-containing only explicit asset function types (ie: :code:`Element`, :code:`ScalarFunction` , :code:`VectorFunction`, :code:`Segment` etc..).
+containing only explicit ASSET function types (ie: :code:`Element`, :code:`ScalarFunction` , :code:`VectorFunction`, :code:`Segment` etc..).
 This version does not allow one to mix in floats or numpy vectors. The second signature (:code:`vf.stack(f1,f2,...)`) does the 
 same thing as the first but does not enclose the objects to be stacked inside of list. Additionally,
 for this second signature, you may mix in arbitrary floats and numpy vectors that will be included in the output.
@@ -541,14 +541,14 @@ together if they have the same Row/Col type, though we will support this in the 
 Conditional Statement/Operations
 ################################	
 
-Asset's intended use case is for defining constraint,objectives, and dynamical
+Asset's intended use case is for defining constraints, objectives, and dynamical
 models that will eventually be put to use inside of a second derivative optimizer. As a
 general rule of thumb, it is a bad idea for such functions to contain conditional statements,
-as this could potentially result non-smooth derivatives. In these cases we always recommend considering
+as this could potentially result in non-smooth derivatives. In these cases we always recommend considering
 whether what you were trying to accomplish with the conditional statement can be reformulated in another way.
 However if this is not possible, or you are writing a function that will not see the inside of an optimizer,
 we do offer support for simple conditional statements and boolean operations with vector function expressions.
-To be precise,we support constructing boolean statements involving the outputs of scalar valued functions, and then
+To be precise, we support constructing boolean statements involving the outputs of scalar valued functions, and then
 using those as conditional statements to control the output of another expression. Conditional statements are constructed by
 applying the comparison operators (>,<,<=,>=) to the outputs of scalar functions. This can be used to dispatch one of
 two functions using the :code:`vf.ifelse()` function as shown below. Note that the output sizes of both the true and false functions
@@ -619,17 +619,17 @@ combine expressions derived from two arguments objects of the same size.
 
 Suggested Style and Organization
 ################################
-At this point we have covered most all of the operations one can and cant perform with asset
+At this point we have covered most all of the operations one can and can't perform with ASSET
 vector functions, with the important exception of function composition
 (which we will cover in the next section). As you might have noticed, in all of
 our scratch pad examples, we simply created a single set of arguments and operated on them
-in the same scope. Everyone of these functions is a fully formed asset type and can be immediately passed
+in the same scope. Everyone of these functions is a fully formed ASSET type and can be immediately passed
 off to other parts of the library to be used as constraints/ODEs/controllers etc. However, obviously it is not a recipe
 for longterm success to simply write expressions inline wherever they are needed. How you package or
-encapsulate the construction of asset vector-functions is up to you, but we suggest one of the following two methods.
+encapsulate the construction of ASSET vector-functions is up to you, but we suggest one of the following two methods.
 
 Method one involves simply writing a standard python function that takes as arguments
-any meta data or constants, needed to define the function, then writing and returning your asset
+any meta data or constants, needed to define the function, then writing and returning your ASSET
 vector function. A trivial example of this is shown below, and you can find many others throughout our
 problem specific examples contained in other sections.
 
@@ -703,7 +703,7 @@ We can then write another function that takes position and velocity as well as t
 to be transformed. We then instantiate our previously defined function that
 computes basis vectors and then "call" it with the position and velocity arguments
 defined inside our new function. Calling the already instantiated function, can be accomplished
-using the providing a correctly sized function to the :code:`()` call operator the same way we do for
+passing the provided, correctly sized function, to the :code:`()` call operator the same way we do for
 real number arguments. In this case, providing the contiguous segment of size 6 :code:`RV`, is the most efficient
 way to the define the expression. However, if this were not the case, we could also the other
 call signatures shown. We can provide two separate functions, in this case :code:`R` and :code:`V`
@@ -747,7 +747,7 @@ stacked using the same rules governing :code:`vf.stack` and then forwarded to th
 Repeated Sub Expressions
 ########################
 
-Being a functional programming language, it is important to note that an asset
+Being a functional programming language, it is important to note that an ASSET
 expression is evaluated every where it appears in a statement. There is no notion
 of assigning it to a temporary variable and then reusing it later without recalculating it.
 For example,in the following code, just because we bind the complicated expression to
@@ -808,7 +808,7 @@ strange since it ostensibly designed to be used to define constraints and object
 sparse non-linear programs. However, in our experience these problems are almost never composed
 of single monolithic functions, and can generally be decomposed into smaller dense functions that only
 take a partial subsets of the problem variables. In that case we can define our functions in terms of
-only the arguments they take, and then under the hood, asset will ensure that the inputs and outputs are gathered and
+only the arguments they take, and then under the hood, ASSET will ensure that the inputs and outputs are gathered and
 scattered to the correct locations inside the larger problem. The specifics of how this works will be handled in later
 sections.
 
@@ -820,14 +820,14 @@ sections.
 
 
 
-Binding Raw Python Functions (DONT READ THIS)
+Binding Raw Python Functions (DON'T DO THIS)
 #############################################
 You also have the option should you need to, to bind raw python functions
 as ASSET vector functions and scalar functions. This can be accomplished using the  :code:`vf.PyVectorFunction`
 and  :code:`vf.PyScalarFunction` types as shown below. The function must have a signature accepting as the first argument a 1 dimensional numpy array of input arguments
-(named :code:`X` in this case) and returning a numpy array. Additional parameters on which the implementation depends (these are not mathematical input variables) may included as additional
+(named :code:`X` in this case) and returning a numpy array. Additional parameters on which the implementation depends (these are not mathematical input variables) may be included as additional
 arguments.
-You must also explicit state the input and output(if not scalar) sizes of the function. The function jacobian and hessian will be computed with finite differences
+You must also explicit state the input and output (if not scalar) sizes of the function. The function jacobian and hessian will be computed with finite differences
 using the user specified jacobian and hessian step sizes.
 
 
@@ -855,7 +855,7 @@ using the user specified jacobian and hessian step sizes.
 	
 
 
-You should be warned that extensive use these objects inside of the optimizer or ODE will result in VERY slow and non-parralizable code with inexact derivatives. 
+You should be warned that extensive use of these objects inside of the optimizer or ODE will result in VERY slow and non-parrallelizable code with inexact derivatives. 
 If you find yourself in situation where you don't think you can write an expression without using :code:`vf.PyVectorFunction` or :code:`vf.PyScalarFunction`, 
 please submit an issue on GitHub. We will happily give suggestions on how you might be able to accomplish your task with the standard vector functions. 
 Or if its truly not possible, we will consider adding the missing expression to the core library in a future release.

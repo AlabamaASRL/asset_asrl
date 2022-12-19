@@ -132,7 +132,7 @@ For ASSET to recognize our function as an ODE and allow us to use it directly wi
 all of associated utilities, we need to define it using the class
 based style describing in :ref:`the vector functions tutorial <vfstyle-guide>`, but inherit from the class :code:`oc.ODEBase`
 rather than :code:`VectorFunction`. Therefore, the correct way to write the :code:`TwoBodyLT` ODE shown below.
-When initializing our base class we simply supply, the asset vector function specifying
+When initializing our base class we simply supply the asset vector function specifying
 the ode as well as the number of states, controls, and parameters.
 
 .. code-block:: python

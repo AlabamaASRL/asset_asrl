@@ -8,11 +8,11 @@ Windows Installation
 
 In order to build ASSET on Windows the following dependencies are required:
 
-* Visual Studio 2017 or greater `(Link to Visual Studio Community 2022) <https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&channel=Release&version=VS2022&source=VSLandingPage&cid=2030&passive=false>`_ 
-* `LLVM Compiler Toolkit <https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.0/LLVM-15.0.0-win64.exe>`_
+* Visual Studio 2017 or greater `(Link to Visual Studio Community 2022) <https://visualstudio.microsoft.com/downloads/>`_ 
+* `LLVM Compiler Toolkit <https://github.com/llvm/llvm-project/releases/tag/llvmorg-15.0.0>`_
 * `Intel oneAPI MKL <https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=window&distributions=offline>`_
 * A Python installation with Numpy, however we recommend using Anaconda.
-	* `Anaconda <https://repo.anaconda.com/archive/Anaconda3-2022.10-Windows-x86_64.exe>`_
+	* `Anaconda <https://www.anaconda.com/products/distribution>`_
 
 
 Step-By-Step Guide
@@ -23,7 +23,7 @@ Step-By-Step Guide
   
 	  Follow the VS installation prompts until you are prompted to select any additional packages to install with VS. 
 	  Here we will want to select **Desktop development with C++**, however we are going to make one change to the defaults for the C++ install and **un-check** the option for "C++ Clang tools for Windows" (shown below).
-	  Also ensure that the "**C++ CMake Tools for Windows*" is checked.
+	  Also ensure that the "**C++ CMake Tools for Windows**" is checked.
 	  After doing this continue and finish the installation.
 
 		.. image:: _static/VSoptions.PNG
@@ -34,7 +34,7 @@ Step-By-Step Guide
   
 	  Navigate to the LLVM github releases page and select your desired version and download the LLVM win64 installer (LLVM-15.0.0-win64.exe for example).
 	  Proceed with the LLVM install, however ensure that the install option "**Do not add LLVM to the system PATH**" is checked.
-	  After finishing the LLVM installation we can proceed with installing the Intel MKL.
+	  After finishing the LLVM installation we can proceed with installing Intel MKL.
 
 		.. image:: _static/LLVMnopath.PNG
 
@@ -58,11 +58,11 @@ Step-By-Step Guide
 	  .. warning::
 		If you are using an Alder Lake Intel CPU it may be beneficial to add the system variable "MKL_ENABLE_INSTRUCTIONS" with value "AVX" as well. 
 
-#. We also need to add our Python distribution to the PATH. 
+#. We also need to add a few variables to our Path 
 
 	  ..  note:: 
   
-	  If you are using an Anaconda distribution the following directories should be added to your system PATH
+	  Add the following directories should be added to your system PATH
 
 		.. image:: _static/anacondapath.PNG
 
@@ -92,13 +92,7 @@ Step-By-Step Guide
 
 	  .. note::
 
-	  To import ASSET into your Python workflow simply import asset.
-
-	  .. code-block:: python
-		
-		import asset as ast
-
-	  To access ASSET's built-in Astrodynamics tools import asset_asrl
+	  To import ASSET simply use the following in your Python IDE
 
 	  .. code-block:: python
 
@@ -191,13 +185,7 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 	  .. note::
 
-	  To import ASSET into your Python workflow simply import asset.
-
-	  .. code-block:: python
-		
-		import asset as ast
-
-	  To access ASSET's built-in Astrodynamics tools import asset_asrl
+	  To import ASSET simply use the following in your Python IDE
 
 	  .. code-block:: python
 
