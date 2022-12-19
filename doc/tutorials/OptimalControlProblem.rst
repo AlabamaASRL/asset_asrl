@@ -97,7 +97,7 @@ same object. Be careful not to apply duplicate constraints to the same phase.
     # Equivalent to above,make sure you dont accidentally do both.
     # phase0.addBoundaryValue("Front",range(0,6),np.zeros((6)))
 
-Additionally, you make access the list of phases already added to an ocp using the :code:`.Phases` field
+Additionally, you make access the list of phases already added to an :code:`ocp` using the :code:`.Phases` field
 of the object. This can allow you to iterate over all phases to apply similar constraints/objectives
 to some or all of the phases as shown below.
 
@@ -108,7 +108,7 @@ to some or all of the phases as shown below.
 
 
 As a general rule of thumb, any constraint or objective that can be applied to the individual phases to represent your goal, should be, 
-and not using the :code:`OptimalControlProblem` API that we are about to cover in the next section. For example, if our intent was to minimize
+and not with the :code:`OptimalControlProblem` API that we are about to cover in the next section. For example, if our intent was to minimize
 the total time elapsed time of all of our phases, applying :code:`addDeltaTimeObjective` to every phase should be preferred to an equivalent formulation using 
 Link Objectives.
 
@@ -157,10 +157,10 @@ extra link parameters.
 
 Link Equality Constraints
 -------------------------
-A link equality constraint of the form :math:`\vec{h}(\vec{x}) = \vec{0}` can be added to the phase using one the 
+A link equality constraint of the form :math:`\vec{h}(\vec{x}) = \vec{0}` can be added to the phase using the 
 :code:`.addLinkEqualCon` method. The most general way to link two phases with an equality constraint is shown below. This contrived example is
 enforcing continuity between the last time-varying state variables and in :code:`phase0` and the first-time varying state variables and parameters in :code:`phase1`.
-To illustrate the expected order of arguments we also multiply the result by the 0th link parameter. Our constraint function should be formulated to expect
+To illustrate the expected order of arguments we also multiply the result by the 0:sup:`th` link parameter. Our constraint function should be formulated to expect
 all arguments specified for :code:`phase0` ( :code:`V0`), followed by all specified for :code:`phase1` ( :code:`V0`), followed by the link parameter ( :code:`Lvar`).
 
 .. code-block:: python
@@ -302,7 +302,7 @@ between certain variables in each phase. This can be accomplished using the :cod
                               1,'ODEParams',[0])
 
 Another common case is when we have a list of phases all sequentially ordered in time and want to enforce forward time continuity in some common
-set of state,time, or control variables.
+set of state, time, or control variables.
 This could be accomplished using :code:`addDirectLinkEqualCon` in a loop to link the :code:`'Last'` and :code:`'First'` states of
 each adjacent phase as shown below. Or, alternatively, you can use the convenient :code:`addForwardLinkEqualCon` to accomplish the same thing.
 
@@ -394,9 +394,9 @@ Additionally, similar to before, if you need to write an inequality constraint o
     
 Link Objectives
 ---------------
-You can also add objectives of the form f(x) using the :code:`addLinkObjective` method. Once again the calling signature 
+You can also add objectives of the form :math:`f(x)` using the :code:`addLinkObjective` method. Once again the calling signature 
 for all methods is identical to :code:`addLinkEqualCon`. Likewise, objectives involving only the link parameters can be added with
-:code:`addLinkParamObjective`. Otherwise, the only difference is that the objective must be an ASSET scalar function.
+:code:`addLinkParamObjective`. Otherwise, the only difference is that the objective must be an ASSET ScalarFunction.
 As was the case with phase, if multiple link objectives are added to an :code:`ocp`, they along with any objectives defined in each
 phase are implicitly summed by the optimizer.
 

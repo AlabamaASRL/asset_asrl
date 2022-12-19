@@ -66,7 +66,7 @@ will update :math:`\delta` every iteration to keep this perturbation as small as
    H = \nabla_{_{xx}}f + \nabla_{_{xx}}h\cdot\nu + \nabla_{_{xx}}g\cdot\lambda + \delta I
 
 
-The first and second derivatives of the objectives and constraints appearing in :ref:`Eq.(3)<eq:3>` are calculated analytically by ASSET's vector function type system.
+The first and second derivatives of the objectives and constraints appearing in :ref:`Eq.(3)<eq:3>` are calculated analytically by ASSET's VectorFunction type system.
 Since computation of first and second derivatives is a computationally expensive task, the solver automatically detects independent functions and evaluate them in parallel on multi-core CPUs. 
 To solve the resulting linear-system, the software leverages the state of the art sparse-symmetric-indefinite solver MKL PARDISO.
 
@@ -262,14 +262,14 @@ use the flags in your code, it is recommended to compare flags their enumerator 
 
 PSIOPT Output
 =============
-When invoking one of PSIOPT's algorithms with a PrintLevel of 0, the solver will produce the console output scroll shown in the figure below. The current objective
+When invoking one of PSIOPT's algorithms with a :code:`PrintLevel` of 0, the solver will produce the console output scroll shown in the figure below. The current objective
 and constraint/optimality errors as well as other relevant algorithm parameters are displayed at each iterate. The meaning of each column is given in the table below.
 The constraint and optimality feasibilities are color coded according to their value. The color scheme progresses from dark red to orange, to yellow, to green as the
 value of the feasibility approaches user specified tolerances. When the value is yellow the current value satisfies the corresponding Acc###tol and likewise when it is green it satisfies ###tol.
 Additionally, the right hash mark of 'Prim Obj','Barr Obj','KKT Inf','ECons Inf', and 'ICons Inf' are color coded to show whether the current value is an decrease (green) or increase (red) from the previous iterate. 
 The full console is 119 characters wide, which will fit in a standard console on Windows. However, most Linux terminals are not wide enough by default, so you should widen you terminal if you want to be able to
 make sense of the output. While the console is (in its author's opinion) quite nice to look at, it has non-negligible cost to print, so you should probably suppress output if throughput and performance are of concern. 
-You can suppress some or all of the output by setting PrintLevel to a value greater than 1. 
+You can suppress some or all of the output by setting :code:`PrintLevel` to a value greater than 1. 
 
 .. image:: _static/PSIOPTOUT.PNG
     :width: 100%
@@ -367,7 +367,7 @@ each element object to get the solved trajectories as we normally would.
     ocps[0].Phase(0).returnTraj()
         
 
-Alternatively, we can use another method shown below where we leverage a generator function. Here rather than directly creating each phase/optimal control problem directly we create
+Alternatively, we can use another method shown below where we leverage a generator function. Rather than directly creating each phase/optimal control problem directly we create
 a function that returns them. We can then pass this function, along with a python list of tuples of the arguments we want to pass to our :code:`ProblemGenerator`
 function. Internally, Jet will then expand each element of the :code:`ProblemArgs` list into :code:`ProblemGenerator` function to create all of the phases/optimal control problems on the fly. 
 These will then be solved according the job mode and returned as a list as before. This form is particularly efficient whenever construction of each problem requires independent 

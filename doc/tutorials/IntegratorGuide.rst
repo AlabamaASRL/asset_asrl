@@ -3,13 +3,13 @@
 Integrator Tutorial
 ===================
 
-In this section, we will describe usage of asset's integrator object. To 
+In this section, we will describe usage of ASSET's integrator object. To 
 start we will define an ODE which we want to integrate using what we have learned from the
 previous two sections on :ref:`vector functions <vectorfunction-guide>` and :ref:`ODEs <ode-guide>`. 
 As concrete example we use a ballistic two body
 model whose state variables are the position and velocity relative to a central
-with gravitational parameter is mu. This ODE may be defined as shown below. 
-For this example,we will be working in canonical units where mu=1.
+with gravitational parameter is :math:`\mu`. This ODE may be defined as shown below. 
+For this example,we will be working in canonical units where :math:`\mu = 1`.
 
 
 .. code-block:: python
@@ -47,10 +47,10 @@ Initialization
 
 To start, we can create an integrator for our ODE by using the :code:`.integrator` method of the ODE.
 At initialization we can specify the integration scheme as a string as well as the
-default step size to be used. At the moment we provide the support adaptive Dormand Prince
+default step size to be used. At the moment we provide the adaptive Dormand Prince
 integration schemes of order 8(7) and 5(4). These are specified by the strings :code:`"DOPRI87"` or
 :code:`"DOPRI54"`. If no method is specified, the integration we will default to :code:`"DOPRI87"`. The second
-argument, :code:`DefStepSize` is first trial step size in the adaptive integration algorithm, which will then
+argument, :code:`DefStepSize` is the first trial step size in the adaptive integration algorithm, which will then
 adjust the step size up or down to meet specified error tolerances. By default, we set the
 integrator's minimum and maximum allowable step sizes to be 10000 times smaller and larger than
 the default step size. However, you can override this by manually setting all step sizes using the
@@ -80,10 +80,10 @@ the default step size. However, you can override this by manually setting all st
     TBInteg.setStepSizes(DefStepSize,MinStepSize,MaxStepSize)
 
 Both integration schemes use the standard absolute and relative tolerance
-metrics to asses the accuracy of steps and update the step size adaptively.
+metrics to assess the accuracy of steps and update the step size adaptively.
 By default we set the absolute tolerance on all state variables equal to 1.0e-12
 and the relative tolerance to 0.0. This usually works well for well scaled dynamics 
-equations such as our two-body model with mu = 1. However, you can set them manually
+equations such as our two-body model with :math:`\mu = 1`. However, you can set them manually
 yourself using the :code:`.setAbs/RelTol` methods as shown below.
 
 
@@ -120,7 +120,7 @@ parameters as well as the final time that we wish to integrate these initial inp
  
 The :code:`.integrate` method  integrates this initial full-state input vector to final time :code:`tf` and returns just the full-state at the final time.
 :code:`integrate_dense` takes the same inputs but returns all intermediate full-states 
-calculated by the integrator as single python list. We also call provide integrate_dense 
+calculated by the integrator as single python list. We also call :code:`.integrate_dense` 
 with an additional arguments specifying that we would like to return :code:`N` evenly spaced steps
 between :code:`t0` and :code:`tf` rather than the exact steps taken by the solver. These :code:`N` states and controls
 will be calculated from the exact steps taken by the integrator using a fifth order interpolation method. 
@@ -162,10 +162,10 @@ the maximum local error at any point along the trajectory is typically 2 orders 
 Event Detection
 ###############
 
-We can also pass a list of events to be detected during the integration. An single 
-event is defined as a tuple consisting of: An ASSET scalar function whose zeros
+We can also pass a list of events to be detected during the integration. A single 
+event is defined as a tuple consisting of: An ASSET ScalarFunction whose zeros
 determine the locations of the event, a direction indicating whether we want to track ascending, descending or all zeros, and a stop code
-signifying whether integration should stop after encountering a zero. The scalar function should take the same arguments as the underlying ODE.
+signifying whether integration should stop after encountering a zero. The ScalarFunction should take the same arguments as the underlying ODE.
 The :code:`direction` flag should be set to :code:`0` to capture all zeros, :code:`-1` to capture only zeros where the function value is decreasing, or :code:`1` to capture
 zeros where it is increasing. The :code:`stopcode` should be set to :code:`0` or :code:`False` if you do not want an event to stop integration. To stop after 1 occurrence,
 :code:`stopcode` can be set to :code:`1` or :code:`True`. The :code:`stopcode` can also be set to any positive integer, in which case it specifies that the number of zeros to be encountered
@@ -240,8 +240,8 @@ and maximum Newton iterations may be specified by modifying the :code:`EventTol`
 Derivatives
 ###########
 
-In asset integrators themselves are vector functions, and have analytic first and second
-derivatives. The input arguments for the integrator when used as a vector function consists of
+In ASSET integrators themselves are VectorFunctions, and have analytic first and second
+derivatives. The input arguments for the integrator when used as a VectorFunction consists of
 the full-state to be integrated and the final time :code:`tf,` and the output is the full-state at time :code:`tf`.
 For example, calling compute as shown below is equivalent to the normal integrate call. This also means
 that we can calculate the jacobian and adjointhessian as well.
@@ -275,7 +275,7 @@ that we can calculate the jacobian and adjointhessian as well.
 
 
 We should note that the jacobian of an integrator is the same as the state transition matrix (STM).
-Since calculation of an ODE's state transition matrix (STM), is critical to the assessing
+Since calculation of an ODE's state transition matrix (STM), is critical to assessing
 the stability of periodic orbits and many other applications, we also provide methods to calculate the STM through the integrator
 interface using the :code:`.integrate_stm` methods, which can be used as shown below.
 
@@ -291,7 +291,7 @@ interface using the :code:`.integrate_stm` methods, which can be used as shown b
 Parrallel Integration
 #####################
 
-Finally, for all previously discussed .iintegrate methods, we have corresponding multi-threaded :code:`_parallel`
+Finally, for all previously discussed :code:`.integrate methods`, we have corresponding multi-threaded :code:`_parallel`
 version which will integrate lists of initial conditions and final times in parallel. In each case rather
 than passing a single initial state and final time we pass a lists of each. The outputs to the call will then be list
 of length :code:`n` containing the outputs of the regular non-parallel method for the ith input state and final time.
@@ -330,8 +330,8 @@ Local Control Laws
 
 In the previous examples we only examined how to integrate ODEs with no control,
 or constant controls, but often time we need to compute controls as a function
-of the local state or time. We can do this in asset by initializing our integrator with
-a control law. As an example,lets reuse our :code:`TwoBodyLTODE` ode from the ODEGuide section.
+of the local state or time. We can do this in ASSET by initializing our integrator with
+a control law. As an example, lets reuse our :code:`TwoBodyLTODE` ode from the :ref:`ode-guide` section.
 
 .. code-block:: python
 
@@ -357,7 +357,7 @@ a control law. As an example,lets reuse our :code:`TwoBodyLTODE` ode from the OD
         
 We will add a control to the integrator specifying that throttle should be 80%
 of the maximum and aligned with the spacecraft's instantaneous velocity vector. We do this by first writing
-an ASSET vector function , that is assumed to take only the velocity as arguments and outputs
+an ASSET VectorFunction , that is assumed to take only the velocity as arguments and outputs
 the desired control vector. We can then pass this to integrator constructor along with a list
 specifying the indices full-state variables we want to forward to out control law. In this case it
 is :code:`[3,4,5]` which are the velocity variables as we have defined in our ODE.

@@ -8,7 +8,7 @@ In this module we will describe some typical examples for basic integration use,
 Basic Use
 #########
 
-If you haven't covered the :ref:`Python: Vector Functions` tutorial, we would reccomend you do so now before proceeding.
+If you haven't covered the :ref:`Python: Vector Functions` tutorial, we would recommend you do so now before proceeding.
 Every ASSET :code:`Integrator` object requires an :code:`ODE` instance to be constructed. 
 We will start with the same Two-Body Solar Sail ODE that we used in :ref:`Python: Vector Functions`.
 
