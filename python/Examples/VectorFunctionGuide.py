@@ -739,8 +739,9 @@ Tab = vf.InterpTable1D(ListData,tvar=2,kind=kind)
 
 
 Tab.WarnOutOfBounds=True
-#print(Tab(-.00001))  # prints a warning
+print(Tab(-.00001))  # prints a warning
 Tab.ThrowOutOfBounds=True
+#print(Tab(-.00001))  #throws exception
 
 
 
