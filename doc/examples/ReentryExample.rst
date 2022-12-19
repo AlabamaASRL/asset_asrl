@@ -2,7 +2,11 @@ Space Shuttle Reentry
 =====================
 
 
-As a next example, we will solve a classic real world problem outlined by Betts in [ref]. This problem involves maximizing the glide range
+As a next example, we will solve a classic real world problem outlined by Betts in [1].
+
+*[1] *Betts, J.T. "Practical methods for Optimal Control and Estimation Using Nonlinear Programming", Cambridge University Press, 2009*
+
+This problem involves maximizing the glide range
 of the Space Shuttle during reentry. The dynamics are written in spherical coordinates and incorporate gravity and an empirical model for the lift and
 drag characteristics of the shuttle. The controls are the angle of attack and bank angle of the vehicle and the objective is to maximize the final latitude
 subject to the initial and terminal conditions given in eqY.
@@ -39,7 +43,7 @@ subject to the initial and terminal conditions given in eqY.
 
 
 
-Using this, model, to maximize the glide range, it is sufficient to maximize  :math:`\theta(t_f)`, which we will do by minimizing :math:`-\theta(t_f)`. 
+Using this, model, to maximize the glide range, it is sufficient to maximize :math:`\theta(t_f)`, which we will do by minimizing :math:`-\theta(t_f)`. 
 Similar to Betts, we examine the solution to this problem both with and without a path constraint on wing leading edge heating rate, :math:`q`. 
 
 .. math::
@@ -62,10 +66,10 @@ The initial and terminal values of the state variables for this problem are give
 
     
 
-As we have mentioned previously, solving problems in standard units (Miles,Km, fps etc.) is typically very ill conditioned and degrades the performance
+As we have mentioned previously, solving problems in standard units (Miles, Km, fps etc.) is typically very ill conditioned and degrades the performance
 of an otherwise well posed problem. Therefore, as the first step to solving this problem, we will non-dimensionalize all variables and equations to be of order unity.
-This is done by defining characteristic length,mass, and time units from which we can define other derived units through dimensional analysis. In this example we
-select Lstar to be 100,000 feet and tstar to be 60 seconds. Mstar is then set to be the mass of the shuttle. After constructing our derived units, we can simply divide our physical 
+This is done by defining characteristic length, mass, and time units from which we can define other derived units through dimensional analysis. In this example we
+select :code:`Lstar` to be 100,000 feet and :code:`tstar` to be 60 seconds. :code:`Mstar` is then set to be the mass of the shuttle. After constructing our derived units, we can simply divide our physical 
 constants by the appropriate unit to get their non-dimensional value. 
 
 
@@ -105,8 +109,8 @@ constants by the appropriate unit to get their non-dimensional value.
     c3 = -.10117e-5
 
 
-Having Non-dimensionalized our constants, we can now write the EOM's as an ode_x_u object as we have done in previous examples. For this model, there are
-five state variables  :math:`(h,\theta,v,\gamma,\psi)` and two control variables :math:`(\alpha,\beta)`.
+Having non-dimensionalized our constants, we can now write the EOM's as an :code:`ode_x_u` object as we have done in previous examples. For this model, there are
+five state variables :math:`(h,\theta,v,\gamma,\psi)` and two control variables :math:`(\alpha,\beta)`.
 
 
 .. code-block:: python
@@ -156,7 +160,7 @@ five state variables  :math:`(h,\theta,v,\gamma,\psi)` and two control variables
             ##############################################################
             super().__init__(ode,5,2)
 
-Additionally, we can express our heating rate constraint as an asset vector function for later use in the solution process.
+Additionally, we can express our heating rate constraint as an ASSET VectorFunction for later use in the solution process.
 
 .. code-block:: python
 
@@ -172,11 +176,11 @@ Additionally, we can express our heating rate constraint as an asset vector func
         return qa*qr
 
 
-Next we must define a suitable initial guess for the optimization. Bett's problem definition places an upper limit of 2500sec 
-on this problem, so we will assume an initial guess of slightly less than this value (tf=1800 sec). We are given initial and terminal values of the altitude,velocity,
-and gamma, so it is natural to construct to the initial guess for these state variables linear functions over the interval (0,tf).For theta we only have an initial condition,
+Next we must define a suitable initial guess for the optimization. Bett's problem definition places an upper limit of 2500 sec 
+on this problem, so we will assume an initial guess of slightly less than this value (code:`tf=1800` sec). We are given initial and terminal values of the altitude, velocity, 
+and gamma, so it is natural to construct to the initial guess for these state variables linear functions over the interval (0, tf).For :math:`\theta` we only have an initial condition, 
 so we assume that it's final value is proportional to the integral of the velocity divided by the radius of the Earth and then interpolate linearly. 
-Psi is also only given an initial value and we have no good physical intuition for how it will evolve so our initial guess assumes that it is constant. For both controls, we just
+:math:`\psi` is also only given an initial value and we have no good physical intuition for how it will evolve so our initial guess assumes that it is constant. For both controls, we just
 assume that they are 0.
 
 .. code-block:: python
@@ -211,11 +215,11 @@ assume that they are 0.
 
 
 
-With preliminaries completed we can now solve the problem. We first construct our ode and phase object, and use
-a 64 LGL3 segments to discretize the problem. We then enforce our known initial conditions as a boundary value constraint at  PhaseReg.Front. Next, we
+With preliminaries completed we can now solve the problem. We first construct our :code:`ode` and :code:`phase` object, and use
+64 LGL3 segments to discretize the problem. We then enforce our known initial conditions as a boundary value constraint at :code:`PhaseReg.Front`. Next, we
 apply the given bounds on our states and controls as path constraints and also place the specified upper bound on the final time. Last, we enforce the terminal conditions
-on altitude velocity and blank at the back of the trajectory, and then specify that the objective is to minimize deltatheta*-1. This is equivalent to maximizing deltatheta.
-Given our rather poor initial guess for this problem, PSIOPT is invoked in solve_optimize mode, so that it first finds a feasible solution 
+on altitude velocity and blank at the back of the trajectory, and then specify that the objective is to minimize :math:`\Delta \theta*-1`. This is equivalent to maximizing :math:`\Delta theta`.
+Given our rather poor initial guess for this problem, PSIOPT is invoked in :code:`solve_optimize` mode, so that it first finds a feasible solution 
 satisfying all constraints before minimizing the objective. Furthermore, we enable the line-search during the optimize phase as an extra safe-guard.
 
 .. code-block:: python
@@ -252,7 +256,7 @@ satisfying all constraints before minimizing the objective. Furthermore, we enab
 
 For this problem, PSIOPT is able to find a feasible solution in 13 iterations of the solve algorithm, and then an optimum solution after another 66 iterations
 in the optimize algorithm. We then refine the trajectory to a higher number of segments and re-optimize the solution, which converges in only 4 iterations. 
-The total run-time (i9-12900k) is 70ms. The final objective value for delta theta is 34.141 degrees, which is exactly that given by Betts in [ref]. Next we add the path constraint on leading edge heating rate
+The total run-time (i9-12900k) is 70ms. The final objective value for :math:`\Delta \theta` is 34.141 degrees, which is exactly that given by Betts in [1]. Next we add the path constraint on leading edge heating rate
 to the phase and optimize the new problem using the previous solution as the initial guess. Owing to the excellent initial guess, the heat rate limited problem converges in
 another 16 iterations. The additional of the constraint reduces the maximum glide range of the shuttle to 30.631 radians.
 A plot of the converged state and control histories for both problem formulations can be seen below.

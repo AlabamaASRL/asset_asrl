@@ -1,7 +1,7 @@
-Example 2b: Multi-Phase Zermelo's Problem
-=========================================
+Multi-Phase Zermelo's Problem
+==============================
 
-If you haven't explored :ref:`Example 2a: Zermelo's Problem`, it is highly reccomended that you do so before going much further.
+If you haven't explored :ref:`Zermelo's Problem`, it is highly reccomended that you do so before going much further.
 It provides much needed background information about the problem, as well as the initial code that we will be modifying.
 
 The previous example showed Zermelo's problem as a single phase problem. We were only trying to get from point A to B, with some constraints and objectives along
@@ -13,7 +13,7 @@ Link Constraints:
 #################
 
 Link Constraints are the way that ASSET handles multi-phase problems. A link constraint enforces that state variables must be equal across phases. That is to say that the final state of phase 1 must be equal to the first state of phase 2.
-To do this to the previous problem, we only have to make a few additions to the code from :ref:`Example 2a: Zermelo's Problem`. The primary changes occur in the :code:`navigate` function.
+To do this to the previous problem, we only have to make a few additions to the code from :ref:`Zermelo's Problem`. The primary changes occur in the :code:`navigate` function.
 
 .. code-block:: python
 

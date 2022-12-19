@@ -1,4 +1,4 @@
-Example 3: Multi-Spacecraft Optimization
+Multi-Spacecraft Optimization
 ========================================
 
 
@@ -90,11 +90,11 @@ Assuming that these are planar circular orbits, we can generate them with:
 true anomaly :code:`thetadeg`. This is also the case for :code:`MakeCircTraj`, which will call :code:`MakeCircIG` when it is determining the initial states
 of the spacecraft. To simplify our design flow, :code:`MakeCircTraj` initializes the ode for each spacecraft, through the ASSET optimal control interface
 and integrates the trajectory out for the given time :code:`tf` (:code:`n` determines the number of points to use for the output trajectory).
-:code:`MakeCircTraj` returns the integrated trajectory for the time tf, and will have a number of states equal to n.
+:code:`MakeCircTraj` returns the integrated trajectory for the time :code:`tf`, and will have a number of states equal to :code:`n`.
 
 Now, we have our dynamics, as well as a method to produce initial guesses for the multi-spacecraft optimization problem. The next step to do
-is to define a function to wrap our optimization calls in. This is similar to what we have done in the previous Zermelo problem example, except now we will have
-an extra Link Constraint that will enforce that each final states of the spacecraft must be equal to a desired free state that we will add.
+is to define a function to wrap our optimization calls in. This is similar to what we have done in the previous example, :ref:`Zermelo's Problem`, except now we will have
+an extra LinkConstraint that will enforce that each final states of the spacecraft must be equal to a desired free state that we will add.
 For now we will show the function that handles all this in three sections, with the final full function definition at the end of the example.
 
 .. code-block:: python
@@ -336,7 +336,7 @@ We decide that we want 10 spacecraft and we will space them all out along the sa
         main()
 
 
-Our initial guess for the final point to target is taken to be the middle spacecrafts last state at the end of its initial trajectory in :code:`SetPointIG`. All of our initial states are generated in the next :code:`for`
+Our initial guess for the final point to target is taken to be the middle spacecraft's last state at the end of its initial trajectory in :code:`SetPointIG`. All of our initial states are generated in the next :code:`for`
 loop, where we make sure that every initial state is corresponding to a circular orbit. We are interested in how the low thrust acceleration of the vehicle affects the ability for our spacecraft to rendezvous to the desired final state,
 so we create a list of various non-dimensional accelerations in :code:`accs`. Now all we do is iterate over the list of accelerations and call our :code:`MultiSpaceCraft` function with all of the required inputs.
 What we get is an optimization problem that simultaneously solves for the optimal control of all spacecraft to converge on the final point.

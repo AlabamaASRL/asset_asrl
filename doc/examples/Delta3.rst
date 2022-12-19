@@ -11,14 +11,18 @@ Delta 3 Multi-phase GTO Transfer
 
 
 As an example of a real-world multi-phase problem, we will optimize the launch and 
-geostationary transfer orbit insertion of a Delta 3 rockets outlined by Betts in []. The Delta 3 was nominally a
+geostationary transfer orbit insertion of a Delta 3 rockets outlined by Betts in [1].
+
+*[1] *Betts, J.T. "Practical methods for Optimal Control and Estimation Using Nonlinear Programming", Cambridge University Press, 2009*
+
+The Delta 3 was nominally a
 2 stage rocket consisting of a first stage RS-27A and 9 solid rocket boosters topped with an RL-10 upper stage. The rocket had an interesting staging
 strategy with the first stage liquid engine and only 6 of the 9 SRBs igniting at take off. Following burnout of these 6 solid rocket 
 boosters 75 seconds after launch, the inert mass is ejected and the remaining the  3 boosters are ignited. After another 75 seconds (t+150s) these 3 SRBs
 too are ejected and the first stage continues to burn until t+261.
 At this point the RL-10 upper stage and payload separate from the first stage and continue to orbit, burning for up to an additional 700 seconds. 
 
-Betts problem in [] involves maximizing the mass delivered to a pre-specified geostationary orbit for a launch from cape Canaveral. 
+Betts problem in [1] involves maximizing the mass delivered to a pre-specified geostationary orbit for a launch from cape Canaveral. 
 This problem can be broken down into 4 phases: 
 
     1. 6 SRBs + First Stage   (  0.0  <= t <=  75.2s)
@@ -28,7 +32,7 @@ This problem can be broken down into 4 phases:
 
 The dynamics on each of the four phases are expressed in Cartesian coordinates 
 and are all the same save for differing values for the combined thrust and mass flow-rate of the currently burning engine configurations.
-The thrust (:math:`T_i`) , and mass flow rate (:math:`\dot{m}_i`), and inert masses for stages can be found in [] and in our example script.
+The thrust (:math:`T_i`) , and mass flow rate (:math:`\dot{m}_i`), and inert masses for stages can be found in [1] and in our example script.
 
 .. math::
 
@@ -74,7 +78,7 @@ insert into a geostationary transfer orbit with the following classical orbital 
 
 
 
-Modeling this problem in asset starts with defining the dynamics for each phase. Since the structure of the dynamics is the same for
+Modeling this problem in ASSET starts with defining the dynamics for each phase. Since the structure of the dynamics is the same for
 all 4 phases, we can model them with a single ASSET ode given below.
 
 
@@ -111,9 +115,9 @@ As you might have noticed, our model is written in Cartesian coordinates, but ou
 as a set of classical orbital elements. This necessitates writing a custom constraint (below), which will convert from Cartesian coordinates to 
 orbital elements so that we can target the given orbit. Those familiar with this conversion will know that it requires quadrant checks on the RAAN
 and argument of periapse, and thus requires a run-time conditional statement. Such simple conditional statements can be readily handled in ASSET's VectorFunction type system,
-using the :code:`vf.ifelse` function as seen below. The first argument of the function is conditional statement containing at least one asset Vector Function. 
+using the :code:`vf.ifelse` function as seen below. The first argument of the function is conditional statement containing at least one ASSET VectorFunction. 
 At run time, if this statement, evaluates to True, output of the function will be given by the second argument, 
-and if it evaluates to False , the output will be the final argument.
+and if it evaluates to :code:`False` , the output will be the final argument.
 
 .. code-block:: python
 
@@ -215,14 +219,14 @@ The thrust directions are arbitrarily set to the unit x direction.
 Now we can define (below), the odes and phases for each of the 4 rocket stages and combine them into a single optimal control problem. 
 On the first phase we apply our known initial state, time, and mass as a boundary value. The length of the phase is then enforced by fixing the
 final time of the last state to be equal to the burnout time of the first 6 SRB's. 
-The initial position velocity and time of phases 2,3 will be dictated by later continuity constraints, 
+The initial position velocity and time of phases 2 and 3 will be dictated by later continuity constraints, 
 so along these phases we only need to explicitly enforce the known initial mass and burnout times given in the problem statement. 
-In phase4, since the final, burnout time of the final stage not known, we simply place an upper bound to be the time at which all propellant would have been expended.
+In :code:`phase4`, since the final, burnout time of the final stage not known, we simply place an upper bound to be the time at which all propellant would have been expended.
 Additionally, it is to this phase that we apply out terminal constraint on the target orbit, and our objective to maximize final mass. 
 
-Finally, we combine these 4 phases into a single optimal control problem and add a link constraint that enforces position,velocity 
+Finally, we combine these 4 phases into a single optimal control problem and add a link constraint that enforces position, velocity 
 and time continuity between sequential phases. 
-We then directly optimize the problem with the Line search enabled and return the solution for plotting.
+We then directly optimize the problem with the line search enabled and return the solution for plotting.
 
 
 
@@ -284,7 +288,7 @@ We then directly optimize the problem with the Line search enabled and return th
     
     Plot(Phase1Traj,Phase2Traj,Phase3Traj,Phase4Traj)
 
-On an intel i9 12900k ,using 150 LGL3 segments across all 4 phases, this problem solves in 38 iterations of PSIOPT's optimization algorithm taking approximately 60 milliseconds.
+On an intel i9-12900k ,using 150 LGL3 segments across all 4 phases, this problem solves in 38 iterations of PSIOPT's optimization algorithm taking approximately 60 milliseconds.
 The altitude, velocity and mass of the rocket as function of time are plotted below along with a ground-track of the trajectory. 
 Final Mass Delivered to the GTO is 7529.749kg, which is effectively the same as that given by Betts (7529.712 kg).
 
