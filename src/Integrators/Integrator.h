@@ -129,7 +129,6 @@ public:
 		Eigen::VectorXi ulocs;
 		ulocs.setLinSpaced(dode.UVars(), dode.TVar() + 1, dode.TVar() + dode.UVars());
 
-		std::cout << ulocs.transpose()<<std::endl;
 
 		Eigen::VectorXi varlocs(1);
 		varlocs[0] = dode.TVar();

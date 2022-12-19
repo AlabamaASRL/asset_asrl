@@ -77,6 +77,13 @@ struct LGLInterpTable {
       this->setMethod(strto_TranscriptionMode(m));
       this->loadUnevenData(dnum, xtudat);
   }
+  LGLInterpTable(VectorFunctionalX od, int xv, int uv, int pv,
+      const std::vector<Eigen::VectorXd>& xtudat):LGLInterpTable(od,xv,uv,pv,"LGL3",xtudat,xtudat.size()-1) {
+  }
+  LGLInterpTable(VectorFunctionalX od, int xv, int uv,
+      const std::vector<Eigen::VectorXd>& xtudat) :LGLInterpTable(od, xv, uv, 0, "LGL3", xtudat, xtudat.size() - 1) {
+  }
+
   LGLInterpTable(VectorFunctionalX od, int xv, int uv, std::string m,
       const std::vector<Eigen::VectorXd>& xtudat, int dnum):LGLInterpTable(od,xv,uv,0,m,xtudat,dnum) {
       
@@ -995,6 +1002,9 @@ struct LGLInterpTable {
 
     obj.def(py::init<VectorFunctionalX, int, int,int, std::string,
         const std::vector<Eigen::VectorXd>&, int>());
+
+    obj.def(py::init<VectorFunctionalX, int, int, const std::vector<Eigen::VectorXd>&>());
+    obj.def(py::init<VectorFunctionalX, int, int, int,const std::vector<Eigen::VectorXd>&>());
 
     obj.def(py::init<int, const std::vector<Eigen::VectorXd>&, int>());
 
