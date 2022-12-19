@@ -1,5 +1,5 @@
 import numpy as np
-import asset as ast
+import asset_asrl as ast
 import matplotlib.pyplot as plt
 
 vf        = ast.VectorFunctions
@@ -14,7 +14,7 @@ Vanderpol Osscilator Optimization Problem Taken From
 https://openmdao.github.io/dymos/examples/vanderpol/vanderpol.html
 '''
 
-class VanderPol(oc.ode_x_u.ode):
+class VanderPol(oc.ODEBase):
     def __init__(self):
         ############################################################
         args  = oc.ODEArguments(2,1)
@@ -43,7 +43,6 @@ phase.integrator.setStepSizes(.25,.001,3)
 phase.setControlMode("BlockConstant")
 phase.addBoundaryValue(PhaseRegs.Front,range(0,3),[0,1,0])
 phase.addLUVarBound(PhaseRegs.Path,3,-0.75,1.0,1.0)
-phase.addLUVarBound(PhaseRegs.Path,0,-0.25,1.0,1.0)
 
 phase.addIntegralObjective(Args(3).squared_norm(),[0,1,3])
 phase.addBoundaryValue(PhaseRegs.Back,[0,1,2],[0.0,0.0,tf])

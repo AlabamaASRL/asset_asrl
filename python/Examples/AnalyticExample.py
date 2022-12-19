@@ -47,7 +47,7 @@ phase.setTraj(TrajIG,nsegs)
 phase.addBoundaryValue(PhaseRegs.Front,[0,1],[x0,t0])
 phase.addBoundaryValue(PhaseRegs.Back, [1],  [tf])
 phase.addIntegralObjective(Example1ODE.obj(),[0,2])
-phase.optimize()
+phase.solve()
 Traj = phase.returnTraj()
 CTraj= phase.returnCostateTraj()
 
@@ -68,9 +68,9 @@ lm = CT[0]
 plt.plot(lstar)
 plt.show()
 ##########################################
-plt.plot(t,abs(lm-lstar),label   ='Collocation')
+plt.plot(t,lm,label   ='Collocation')
 #plt.plot(t,lstar,label='Analytic')
-plt.yscale("log")
+#plt.yscale("log")
 plt.show()
 #################################
     

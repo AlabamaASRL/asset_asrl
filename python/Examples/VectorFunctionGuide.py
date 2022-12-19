@@ -709,17 +709,109 @@ X = Args(1000) # Bad
 
 print("########## Tables #################")
 
-############ Tables ##############################
+############ 1D Tables ##############################
+#####################################################
+import matplotlib.pyplot as plt
+import time
+
+tt = time.perf_counter()
 '''
-
+One dimensonal
 '''
+ts = np.linspace(0,2*np.pi,500)
 
-ts = np.linspace(0,2.0,100)
+ArrayData = np.array([ [np.sin(t),np.cos(t)] for t in ts])
 
-#Vals = 
+kind = 'cubic' # or linear 
+
+Tab = vf.InterpTable1D(ts,ArrayData,axis=0,kind=kind)
+
+#print(Tab(0)) #prints [0,1]
+
+# Or if data is transposed
+Tab = vf.InterpTable1D(ts,ArrayData.T,axis=1,kind=kind)
+#print(Tab(0)) #prints [0,1]
+
+# Or if data is a list of arrays with time included as one the elements
+ListData = [ [np.sin(t), np.cos(t), t] for t in ts]
+Tab = vf.InterpTable1D(ListData,tvar=2,kind=kind)
+
+
+
+Tab.WarnOutOfBounds=True
+#print(Tab(-.00001))  # prints a warning
+Tab.ThrowOutOfBounds=True
+
+
+
+ScalarData = [np.sin(t) for t in ts]
+
+STab =vf.InterpTable1D(ts,ScalarData,axis=0,kind=kind)
+
+
+TabFunc = Tab.vf() # Now it is a vector function with input size 1
+STabFunc = STab.sf()
+
+
+
+print(STabFunc.adjointhessian([0],[1]))
+
+
+ts2 = np.linspace(0,2*np.pi,1000)
+Vals = Tab(ts2)
+
+
+
+plt.plot(ts2,Vals[0],label='sin')
+plt.plot(ts2,Vals[1],label='cos')
+
+ff = time.perf_counter()
+print(ff-tt)
+
+plt.show()
+
+############ 2D Tables ##############################
+#####################################################
 
 
 
 
 
-print("########## Order Reduction #################")
+
+print("########## Binding Raw Python (DONT READ THIS) #################")
+
+
+# A vector function
+def VFunc(X,a,b):
+    return np.array([a*X[0]**2,X[1]*b])
+
+InputSize = 2
+OutputSize =2
+
+PyVfunc =vf.PyVectorFunction(InputSize,OutputSize,
+                             VFunc,
+                             Jstepsize=1.0e-6,Hstepsize=1.0e-4,
+                             args = (3,7)) ## a and b will be 2 
+
+print(PyVfunc([2,2]))  # prints [12,14]
+
+
+# A scalar function
+def SFunc(X,a,b,c):
+    return np.array([a*X[0]**2 + X[1]*b + c]) # output is 1x1 array
+
+InputSize = 2
+
+PySfunc =vf.PyScalarFunction(InputSize,
+                             SFunc,
+                             Jstepsize=1.0e-6,Hstepsize=1.0e-5,
+                             args = (1,2,3))  
+
+print(PySfunc([2,2])) #prints [11]
+
+print(PySfunc.adjointhessian([2,2],[1])) #prints [11]
+
+
+
+
+

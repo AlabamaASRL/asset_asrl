@@ -1,3 +1,6 @@
+.. _vectorfunction-guide:
+
+
 Vector Function Tutorial
 ========================
 
@@ -612,6 +615,7 @@ combine expressions derived from two arguments objects of the same size.
 	Fine = R3.dot(V2)
 
 
+.. _vfstyle-guide:
 
 Suggested Style and Organization
 ################################
@@ -671,8 +675,8 @@ the one above.
 
 
 
-Calling Existing Asset Functions inside other functions
-#######################################################
+Function Composition
+####################
 
 Now that we have a good understanding of the rules and style for defining
 single vector-functions, we can cover how to call them inside of other functions.
@@ -781,6 +785,19 @@ as above while only ever evaluating :code:`expensive` once.
 	answer = answer_tmp([R,expensive])
 
 
+
+Tabular Data and Interpolation
+##############################
+We also have support for interpreting tabular data as a vector function using differentiable interpolation table objects.
+
+1-D Interpolation
+-----------------
+
+2-D Interpolation
+-----------------
+
+
+
 Note on Size of VectorFunctions
 ###############################
 
@@ -800,12 +817,48 @@ sections.
 	X = Args(1000) # Legal but Bad
 
 
-Tabular Data and Interpolation
-##############################
 
 
-Binding Raw Python Functions
-############################
+
+Binding Raw Python Functions (DONT READ THIS)
+#############################################
+You also have the option should you need to, to bind raw python functions
+as ASSET vector functions and scalar functions. This can be accomplished using the  :code:`vf.PyVectorFunction`
+and  :code:`vf.PyScalarFunction` types as shown below. The function must have a signature accepting as the first argument a 1 dimensional numpy array of input arguments
+(named :code:`X` in this case) and returning a numpy array. Additional parameters on which the implementation depends (these are not mathematical input variables) may included as additional
+arguments.
+You must also explicit state the input and output(if not scalar) sizes of the function. The function jacobian and hessian will be computed with finite differences
+using the user specified jacobian and hessian step sizes.
+
+
+.. code-block:: python
+
+	# A vector function
+	def VFunc(X,a,b):
+		return np.array([a*X[0]**2,X[1]*b])
+
+	InputSize = 2
+	OutputSize =2
+
+	PyVfunc =vf.PyVectorFunction(InputSize,OutputSize,VFunc,Jstepsize=1.0e-6,Hstepsize=1.0e-4,args = (3,7)) ## a and b will be 2 
+
+	print(PyVfunc([2,2]))  # prints [12,14]
+
+
+	# A scalar function
+	def SFunc(X,a,b,c):
+		return np.array([a*X[0]**2 + X[1]*b + c]) # output is 1x1 array
+
+	InputSize = 2
+
+	PySfunc =vf.PyScalarFunction(InputSize,SFunc,Jstepsize=1.0e-6,Hstepsize=1.0e-5,args = (1,2,3))
+	
+
+
+You should be warned that extensive use these objects inside of the optimizer or ODE will result in VERY slow and non-parralizable code with inexact derivatives. 
+If you find yourself in situation where you don't think you can write an expression without using :code:`vf.PyVectorFunction` or :code:`vf.PyScalarFunction`, 
+please submit an issue on GitHub. We will happily give suggestions on how you might be able to accomplish your task with the standard vector functions. 
+Or if its truly not possible, we will consider adding the missing expression to the core library in a future release.
 
 
 	
