@@ -793,6 +793,79 @@ We also have support for interpreting tabular data as a VectorFunction using dif
 1-D Interpolation
 -----------------
 
+Interpolation of vector or scalar data with one input dimension may be accomplished using the vf.InterpTable1D. This
+class is designed be constructed and behave similarly to scipys interp1D class. To construct a table for interpolating
+vector data, we pass a list of sorted coordinates values along with an array whose rows or columns are the vectors of values at each
+each coordinate. You may also pass in the data as a list of numpy arrays or lists which includes the coordinate element. You have the
+option to choose between linear or cubic interpolation using the kind parameter in the constructor. Cubic interpolation is recommended to ensure
+that the function is twice differentiable.
+
+
+.. code-block:: python
+
+	ts = np.linspace(0,2*np.pi,1000)
+
+	VecDat = np.array([ [np.sin(t),np.cos(t)] for t in ts])
+
+	kind = 'cubic' # or 'linear' 
+
+	Tab = vf.InterpTable1D(ts,VecDat,axis=0,kind=kind)
+	print(Tab(np.pi/2.0)) #prints [1,.0]
+
+	# Or if data is transposed
+	Tab = vf.InterpTable1D(ts,VecDat.T,axis=1,kind=kind)
+	print(Tab(np.pi/2.0)) #prints [1,.0]
+
+	# Or if data is a list of arrays or lists with time included as one the elements
+	VecList = [ [np.sin(t), np.cos(t), t] for t in ts]
+
+	Tab = vf.InterpTable1D(VecList,tvar=2,kind=kind)
+	print(Tab(np.pi/2.0)) #prints [1,.0]
+
+
+To construct a table for interpolating scalar data, you may just pass in the list of coordinates along with
+1-D numpy array or python list of the values of the function at each point.
+
+.. code-block:: python
+	
+	ScalDat = [np.sin(t) for t in ts]
+	STab =vf.InterpTable1D(ts,ScalDat,kind=kind)
+	print(STab(np.pi/2.0)) # prints [1.0]
+
+The outputs of vf.InterpTable1D are only well defined within the domain of the supplied coordinates. By default attempts
+to interpolate outside of the domain will result in inaccurate extrapolation and will print a warning the screen. This
+Can be disabled using the .WarnOutOfBounds field of the object. Additionally, you may specify that you would like an exception
+to be thrown when this occurs.
+
+
+.. code-block:: python
+	
+	
+	Tab.WarnOutOfBounds=True   # By default
+	print(Tab(-.00001))        # prints [-1.0e-5,1] and a warning
+	Tab.ThrowOutOfBounds=True
+	#print(Tab(-.00001))       # throws an exception
+
+Once you have constructed a table object, it can be composed with other asset vector functions by providing a scalarfunction
+argument to the call operator.
+
+.. code-block:: python
+
+	x,V,t = Args(4).tolist([(0,1),(1,2),(3,1)])
+
+	f1 = STab(t) + x  # STab(t) is an asset scalar function
+	f2 = Tab(t) + V   # Tab(t) is an asset vector function
+
+
+	
+
+
+
+
+
+
+
+
 2-D Interpolation
 -----------------
 
