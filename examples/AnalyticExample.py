@@ -41,7 +41,7 @@ if __name__ == "__main__":
     tf = 1.0
     u0 = .00
     
-    nsegs = 64
+    nsegs = 100
     
     TrajIG = [[x0,t,u0] for t in np.linspace(t0,tf,100)]
     
