@@ -10,3 +10,4 @@ Documentation of Python Functionality
     asset
     optimalcontrol
     vectorfunctions
+    Astro

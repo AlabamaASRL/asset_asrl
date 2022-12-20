@@ -13,6 +13,7 @@ In order to build ASSET on Windows the following dependencies are required:
 * `Intel oneAPI MKL <https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=window&distributions=offline>`_
 * A Python installation with Numpy, however we recommend using Anaconda.
 	* `Anaconda <https://www.anaconda.com/products/distribution>`_
+* SpiceyPy, Sphinx, and Furo
 
 
 Step-By-Step Guide
@@ -46,6 +47,9 @@ Step-By-Step Guide
 	  If you are not using Anaconda you may skip the next step.
 
 #. Now download and install Anaconda.
+	  ..  note:: 
+
+      Use pip to install SpiceyPy, Sphinx, and Furo
 
 #. Next we will be adding the required system and PATH variables to build ASSET.
 
@@ -152,6 +156,7 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 	  .. note::
 
 	  Be sure to follow the Anaconda installation directions to make Anaconda your default Python installation.
+      Use pip to install SpiceyPy, Sphinx, and Furo.
 
 #. Next we will be setting the required system variables to build ASSET.
 

@@ -130,7 +130,6 @@ class NBody_LT(ODEBase,TwoBodyFrame):
         otherAccs = [self.thruster.ThrustExpr(u,self.astar)]
 
         odeeq = self.Frame.NBodyEOMs(r,v,t,
-                                     otherGaccs=[],
                                      otherAccs=otherAccs,
                                      otherEOMs=[],
                                      ActiveAltBodies = ActiveAltBodies, 
