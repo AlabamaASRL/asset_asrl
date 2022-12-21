@@ -1,8 +1,8 @@
 Python: Vector Functions
 ========================
 
-One of the goals of ASSET is to provide the ability to users to construct functions within Python that are able to be used by ASSET.
-By doing this we can simplify a user's workflow, where the benefits of high speed C++ code can be combined with the ease of use Python provides.
+One of the goals of ASSET is to provide users the ability to construct functions within Python that are able to be used by ASSET.
+By doing this, we can simplify a user's workflow, where the benefits of high speed C++ code can be combined with the ease of use Python provides.
 However, the construction of these functions in Python requires that the user stick to the conventions that have been established for the ASSET Python interface.
 This document will outline those conventions, as well as providing examples on what and what not to do when writing your Vector Functions in Python.
 
@@ -22,7 +22,7 @@ First things first, ASSET needs to be imported into the environment.
     Args = vf.Arguments
 
 
-The variable :code:`vf` exposes the Vector Functions of ASSET for use, while :code:`Args` will be neccessary for when we want to define the inputs to our Vector Function.
+The variable :code:`vf` exposes the Vector Functions of ASSET for use, while :code:`Args` will be necessary for when we want to define the inputs to our Vector Function.
 Now that we have ASSET and Vector Functions available we can start writing our Vector Function.
 
 .. code-block:: python
@@ -39,7 +39,7 @@ Now that we have ASSET and Vector Functions available we can start writing our V
 
 It is necessary for all functions in ASSET to know the size of the input to the Vector Function.
 In this example we have decided that our function will take a **fixed** sized input of 6 arguments when the function is to be evaluated.
-The first and last 3 arguments :code:`args` are seperated out into seperate vectors :code:`x` and :code:`y`.
+The first and last 3 arguments :code:`args` are separated out into separate vectors :code:`x` and :code:`y`.
 A real example of a similar type operation would be on a vector containing 3D position and velocity information, where the first 3 arguments may be position and the last 3 are velocity.
 
 We then define that the output of our function in Python is to return the :code:`x` vector multiplied by the first element of the :code:`y` vector and added with :code:`x`.

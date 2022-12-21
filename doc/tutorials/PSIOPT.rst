@@ -4,12 +4,11 @@
 PSIOPT
 ======
 
-An efficient method of solving sparse non-linear optimization problems is critical to the success of any trajectory optimization software. 
+Having an efficient method of solving sparse non-linear optimization problems is critical to the success of any trajectory optimization software. 
 While several excellent optimization software packages exist, they all require either commercial products (KNITRO, SNOPT) or are reliant
 on other commercial and restrictively licensed products for optimum performance (IPOPT).
 Therefore, in order to keep ASSET completely open source, the Parallel Sparse Interior-point Optimizer (PSIOPT) was developed and incorporated into the library.
 PSIOPT is built to solve non-linear programs (NLP) expressed in standard form as shown in :ref:`Eq.(1)<eq:1>`. 
-
 
 
 .. math::
@@ -76,8 +75,8 @@ PSIOPT Usage
 Each interface for defining optimization problems in ASSET (ex: :code:`OptimalControlProblem`, :code:`ode.phase` ) 
 has as its own instance of PSIOPT attached as a member variable of the class.
 Formulation and solution of the optimization problem is always handled through the respective interface, 
-but users can use this to modify PSIOPT's settings . A list of common, settings
-and their default and suggested values are listed in the table below. In all cases these can be set by using :code:`.set_XXX(value)` method
+but users can use this to modify PSIOPT's settings . A list of common settings
+and their default and suggested values are listed in the table below. In all cases these can be set by using the :code:`.set_XXX(value)` method
 where :code:`XXX` is replaced by the name of the setting
 
 
@@ -196,7 +195,7 @@ where :code:`XXX` is replaced by the name of the setting
     
 After defining a problem, and potentially modifying the optimizer settings, an optimization problem interface is used to invoke one of or a sequence of PSIOPT's algorithms as
 shown below. The :code:`optimize` algorithm will seek to minimize the objective function and also satisfy the equality and inequality constraints. The :code:`solve` algorithm ignores the objective and
-attempts only to find a solution to the equality and inequality constraints. If you are trying only to solve a system of equations and do not have an objective
+attempts only to find a solution to the equality and inequality constraints. If you are only trying to solve a system of equations and do not have an objective
 function, you should almost always use the :code:`solve` algorithm rather than invoking :code:`optimize`. 
 You may also invoke the :code:`solve` and :code:`optimize` algorithms in sequence
 using :code:`solve_optimize` as shown below. For example, it can often be more robust to call :code:`solve` first when optimizing so that the optimize algorithm will start from a feasible point. 
@@ -266,7 +265,7 @@ Threading
 By default, PSIOPT will set the number of threads used to parallelize function evaluations to be equal to the number of hardware threads
 on your machine up to a maximum of 16. So if your computer has 10 cores and 20 threads (ex: i9-10900k), only 16 threads will be used for function evaluations by default.
 Likewise by default, PSIOPT will set the number of threads used to factor KKT matrices to be equal to the number of physical cores on your machine up to a maximum of 8.
-So if your computer has 10 cores and 20 threads, only 8 threads will be used for matrix factorization by default. Based on experience, this an appropriate
+So, if your computer has 10 cores and 20 threads, only 8 threads will be used for matrix factorization by default. Based on experience, this an appropriate
 threading allocation to solve single problems as fast as possible on most desktop machines. In our experience KKT matrix factorization does not scale beyond
 8 threads on most problems. Furthermore, applying too many threads to function evaluations on small to medium sized problems can actually degrade performance.
 However, you can manually set the thread count by using the :code:`.setThreads` member function of a :code:`phase` or :code:`OptimalControlProblem`. If speed is of concern we recommend you play around with
@@ -401,7 +400,7 @@ attached to each problem.
     flag = ocps[0].optimizer.get_ConvergenceFlag()
         
 
-Alternatively, we can use another method shown below where we leverage a generator function. Rather than creating each phase/optimal control problem directly we create
+Alternatively, we can use another method shown below where we leverage a generator function. Rather than creating each phase/optimal control problem directly, we create
 a function that returns them. We can then pass this function, along with a python list of tuples of the arguments we want to pass to our :code:`ProblemGenerator`
 function. Internally, Jet will then expand each element of the :code:`ProblemArgs` list into :code:`ProblemGenerator` function to create all of the phases/optimal control problems on the fly. 
 These will then be solved according the job mode and returned as a list as before. This form is particularly efficient whenever construction of each problem requires independent 
@@ -460,7 +459,7 @@ For both methods, if console printing is enabled, Jet will dynamically print out
     :width: 100%
 
 
-We should make a few notes about the performance. First, best performance is usually seen by using of number of threads equal to or slightly greater than the number
+We should make a few notes about the performance. First, best performance is usually seen by using a number of threads equal to or slightly greater than the number
 of physical cores on your machine, anymore can lead to over-subscription of the CPU.
 Second, you should limit the maximum number of problems solved in a single Jet run to somewhere between 2000 and 10000. 
 Solving too many problems at a time with Jet puts serious strain on the process heap and performance can degrade considerably. The exact number when this occurs is dependent on

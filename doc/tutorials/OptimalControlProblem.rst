@@ -6,7 +6,7 @@ The previous section on :ref:`phases <phase-guide>` covers everything you need t
 single phase optimal control problems. In this section, we will cover how you can link these 
 phases together into a multi phase optimal control problem using the :code:`oc.OptimalControlProblem` type.
 
-As we walk through the :code:`OptimalControlPoblem` API, we will make the trivial ODEs shown below.
+As we walk through the :code:`OptimalControlPoblem` API, we will make use of the trivial ODEs shown below.
 
 .. code-block:: python
 
@@ -65,7 +65,7 @@ previous :ref:`section <phase-guide>`.
     #.
 
 We can then create an :code:`OptimalControlProblem` (here named :code:`ocp`), and add our phases using the :code:`addPhase` method.
-The individual phases in an :code:`OptimalControlProblem`, MUST Be unique objects. The software will detect
+The individual phases in an :code:`OptimalControlProblem` MUST Be unique objects. The software will detect
 if you attempt to add the same phase to an :code:`OptimalControlProblem` twice and throw an error. The commented
 out line below will throw an error because the specific :code:`phase5` object has already been added to
 the :code:`OptimalControlProblem`.
@@ -239,7 +239,7 @@ Furthermore, if your function only requires variables from a single group in eac
                         0,'ODEParams', [0],
                         1,'ODEParams', [0])
 
-Finally if you need to express a constraint in terms of more than 2 phases at a time, you can utilize the method shown below. Here we pass a list
+If you need to express a constraint in terms of more than 2 phases at a time, you can utilize the method shown below. Here we pass a list
 of tuples each containing all of the arguments needed to specify the variables from a phase region.
 
 .. code-block:: python
@@ -304,7 +304,7 @@ between certain variables in each phase. This can be accomplished using the :cod
 Another common case is when we have a list of phases all sequentially ordered in time and want to enforce forward time continuity in some common
 set of state, time, or control variables.
 This could be accomplished using :code:`addDirectLinkEqualCon` in a loop to link the :code:`'Last'` and :code:`'First'` states of
-each adjacent phase as shown below. Or, alternatively, you can use the convenient :code:`addForwardLinkEqualCon` to accomplish the same thing.
+each adjacent phase as shown below. Alternatively, you can use the convenient :code:`addForwardLinkEqualCon` to accomplish the same thing.
 
 .. code-block:: python
     
@@ -394,7 +394,7 @@ Additionally, similar to before, if you need to write an inequality constraint o
     
 Link Objectives
 ---------------
-You can also add objectives of the form :math:`f(x)` using the :code:`addLinkObjective` method. Once again the calling signature 
+You can also add objectives of the form :math:`f(x)` using the :code:`addLinkObjective` method. Once again, the calling signature 
 for all methods is identical to :code:`addLinkEqualCon`. Likewise, objectives involving only the link parameters can be added with
 :code:`addLinkParamObjective`. Otherwise, the only difference is that the objective must be an ASSET ScalarFunction.
 As was the case with phase, if multiple link objectives are added to an :code:`ocp`, they along with any objectives defined in each

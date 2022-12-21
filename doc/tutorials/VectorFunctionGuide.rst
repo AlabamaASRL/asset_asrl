@@ -6,7 +6,7 @@ Vector Function Tutorial
 
 
 
-One of the goals of ASSET is to provide the ability to users to construct functions
+One of the goals of ASSET is to provide users the ability to construct functions
 dynamically within Python that are able to be used by ASSET. By doing this we can simplify a user's work-flow,
 where the benefits of high speed C++ code can be combined with the ease of use Python provides. 
 In this section we will give an depth overview of ASSET's VectorFunction type. At a high-level,
@@ -17,8 +17,8 @@ and produce a fixed number outputs, with both inputs and outputs assumed to be c
 
 Arguments
 #########
-To start let us import ASSET and the VectorFunctions module which contains all types
-and functions defining the language. From this module we will then import the Arguments type
+Let us begin by importing ASSET and the VectorFunctions module which contains all types
+and functions defining the language. From this module, we will then import the Arguments type
 and give it a shorthand name. The :code:`Arguments` type is the base expression in the VectorFunction system
 and represents a function that simply takes some number of input arguments and returns them as outputs.
 It always serves as the starting point for defining a more complicated functional expressions involving
@@ -29,11 +29,10 @@ some or all of its outputs.
 	vf        = ast.VectorFunctions
 	Args      = vf.Arguments
 
-We can construct the object by simply specifying the number of arguments, in this
-case 6. This instance :code:`X` is now a first class function thats takes any vector of size 6
-and returns that vector. Since it is a VectorFunction we can compute its output value using the
-:code:`()` operator, first derivative using the :code:`.jacobian` method and second derivative using the :code:`.adjointhessian` method.
-To do this we provide either a numpy vector or python list of real valued inputs, and additionally for the second derivative
+We can construct the object by simply specifying the number of arguments, which in this case is 6. This instance :code:`X` is now a first class function thats takes any vector of size 6
+and returns that vector. Since it is a VectorFunction, we can compute its output value using the
+:code:`()` operator, first derivative using the :code:`.jacobian` method, and second derivative using the :code:`.adjointhessian` method.
+To do this, we provide either a numpy vector or python list of real valued inputs, and additionally for the second derivative,
 a vector list of lagrange multipliers with same dimensions as the output of the function. One important note, ASSET does not compute
 the full 3D tensor second derivative of vector valued functions, instead it computes the second derivative
 dotted with a vector lagrange multipliers, resulting in 2D symmetric matrix with rows and columns equal to the number of inputs.
@@ -111,7 +110,7 @@ For example, if we want to treat the first three arguments of the Arguments belo
 use the :code:`.head(n)` method. The :code:`.head(n)` method returns a sub-vector of size :code:`n` starting at the first element. This syntax mirrors the
 Eigen C++ library, which we find to be quite nice, but you may also use standard python list indexing to accomplish the same
 goal. Similarly, if we want to address the last three arguments as a single vector :code:`V` , we can use the :code:`.tail(n)` method which returns
-the last :code:`n` elements of some arguments. Finally we can address vectors of length :math:`n` starting at index :code:`i` 
+the last :code:`n` elements of some arguments. Finally, we can address vectors of length :math:`n` starting at index :code:`i` 
 using the :code:`.segment(i,n)` method. The return type of all of these methods is the fundamental :code:`Segment` type, which is a function that returns
 as its output the specified sub-vector of the arguments.
 
@@ -143,10 +142,10 @@ as its output the specified sub-vector of the arguments.
 	print(N(xvals))    # prints [2,3,4,5]
 
 
-Paralleling what we did before with elements we can also partition an input argument list
-list into segments and elements using the :code:`.tolist([(start,size), ..])` method. In this case we should
+Paralleling what we did before with elements, we can also partition an input argument list
+list into segments and elements using the :code:`.tolist([(start,size), ..])` method. In this case, we should
 pass a python list of tuples, where the first element of each tuple is the starting index of the sub-vector
-and the second is the size, sub-vectors of size one are returned as elements. Note that this method does not
+and the second is the size; sub-vectors of size one are returned as elements. Note that this method does not
 require you to partition all of the argument set, though this example does. Furthermore, it is not
 required that the sub-vectors specified be in any particular order, though we highly recommend you sort them 
 according to starting index.
@@ -180,7 +179,7 @@ Finally, all of the above indexing methods behave exactly the same when applied
 to segments rather than arguments, and we can address their individual components 
 as elements, and split them in smaller segments. For example, we may split :code:`R` into
 its scalar components using :code:`.tolist`, address a single component using brackets, or a subsegment
-using head,tail,segment etc..
+using head, tail, segment, etc..
 
 
 .. code-block:: python
@@ -252,7 +251,7 @@ of constants or constant scalars, multiply functions by constant scalars, multip
 	inv0 = 1.0/v0
 
 As this is a vector math language, certain operations involving vectors are not 
-allowed via standard multiply and divide operator overloads. For example one may
+allowed via standard multiply and divide operator overloads. For example, one may
 not multiply two VectorFunctions together using the * operator as is possible with two arrays in numpy. 
 This is an explicit choice because in our opinion, for the types of expressions written using ASSET, 
 allowing element-wise vector multiplication creates more problems in terms of incorrect problem formulation than it solves.
@@ -269,9 +268,9 @@ no issue, and may also scale in VectorFunction.
 Scalar Math Operations
 ######################
 
-Next we will move on to describe the standard mathematical functions that can be applied to scalar
+Next, we will move on to describe the standard mathematical functions that can be applied to scalar
 valued functions. These encompass most of the standard functions that can be found in python or C math libraries,
-such as sin, cos, tan etc. All of these functions are stored inside the VectorFunctions module (which we have imported as :code:`vf`),
+such as sin, cos, tan, etc. All of these functions are stored inside the VectorFunctions module (which we have imported as :code:`vf`),
 and can be called as shown below. A complete list of functions is given in the table below.
 
 .. code-block:: python
@@ -340,7 +339,7 @@ and can be called as shown below. A complete list of functions is given in the t
 Vector Norms and Normalizations
 ################################
 
-For Vector valued functions we also provide member functions that will compute various
+For Vector valued functions, we also provide member functions that will compute various
 useful norms and transformations on vectors. While most of these could be computed using the math operations
 we have already covered, users should always use one of these methods if applicable, as the resulting expressions
 will be much faster when evaluated. A few examples are illustrated here,
@@ -419,12 +418,12 @@ Vector Products
 
 In addition to the standard binary math operations supported via operator overloads,
 we also provide member functions and free functions for performing various common vector operations.
-The most commonly used are the dot, cross, quaternion, and coefficient-wise products,
+The most commonly used are the dot, cross, quaternion, and coefficient-wise products.
 A few examples of how these can be used are shown below. All functions appearing in these expressions must
 have the correct output size, otherwise an error will be immediately thrown. You may also
 mix and match constant numpy arrays and VectorFunctions as needed to define your function. It should be noted
 that our quaternion products assume that the vector part of the quaternion is the first three components of the output 
-while the real part is the 4th element(ie: q =[qv,q4])
+while the real part is the 4th element(ie: q =[qv,q4]).
 
 .. code-block:: python
 	
@@ -509,8 +508,8 @@ A :code:`ColMatrix` will interpret the coefficients of output as a column major 
 them as a row major matrix. Once constructed you may multiply matrices by any other appropriately sized
 Row/ColMatrix functions in any order, or multiply them on the right by appropriately sized VectorFunctions. The result
 of all matrix on matrix operations are assumed to be :code:`ColMatrix` type. The result of Matrix*vector operations is :code:`VectorFunction`.
-Furthermore, square matrices may be inverted resulting in a Matrix type with same row/col type. For now one, may only add matrices
-together if they have the same Row/Col type, though we will support this in the future.
+Furthermore, square matrices may be inverted resulting in a Matrix type with same row/col type. For now, one may only add matrices
+together if they have the same Row/Col type, though we will support adding different Row/Col types in the future.
 
 .. code-block:: python
 
@@ -541,12 +540,12 @@ together if they have the same Row/Col type, though we will support this in the 
 Conditional Statement/Operations
 ################################	
 
-Asset's intended use case is for defining constraints, objectives, and dynamical
+ASSET's intended use case is for defining constraints, objectives, and dynamical
 models that will eventually be put to use inside of a second derivative optimizer. As a
 general rule of thumb, it is a bad idea for such functions to contain conditional statements,
 as this could potentially result in non-smooth derivatives. In these cases we always recommend considering
 whether what you were trying to accomplish with the conditional statement can be reformulated in another way.
-However if this is not possible, or you are writing a function that will not see the inside of an optimizer,
+However, if this is not possible, or you are writing a function that will not see the inside of an optimizer,
 we do offer support for simple conditional statements and boolean operations with VectorFunction expressions.
 To be precise, we support constructing boolean statements involving the outputs of scalar valued functions, and then
 using those as conditional statements to control the output of another expression. Conditional statements are constructed by
@@ -587,14 +586,14 @@ MUST be the same. Conditional statements may also be combined together using the
 Some Notes on Input Arguments
 #############################
 
-Before, moving on any further, we need to make one very important note about how the vector
+Before moving on any further, we need to make one very important note about how the vector
 function type system works. In all of our previous examples, we have created and partitioned
 one set of arguments of a certain size, from which we constructed other functions. You might
-ask, what happens if we try to mix expressions formulated out of arguments of different sizes.
-This is strictly not allowed, as our entire type system predicated on the fact that expressions can
+ask, what happens if we try to mix expressions formulated out of arguments of different sizes?
+This is strictly not allowed, as our entire type system is predicated on the fact that expressions can
 only be combined if they have the same sized input arguments. For example, the following code will
 throw an error to alert you that you have made a mistake. However, we should also note as shown below,
-that there is nothing unique about any two sets of arguments of the same size. Thus you may (though it is pointless)
+that there is nothing unique about any two sets of arguments of the same size. Thus, you may (though it is pointless)
 combine expressions derived from two arguments objects of the same size.
 
 .. code-block:: python
@@ -623,7 +622,7 @@ At this point we have covered most all of the operations one can and can't perfo
 VectorFunctions, with the important exception of function composition
 (which we will cover in the next section). As you might have noticed, in all of
 our scratch pad examples, we simply created a single set of arguments and operated on them
-in the same scope. Everyone of these functions is a fully formed ASSET type and can be immediately passed
+in the same scope. Every one of these functions is a fully formed ASSET type and can be immediately passed
 off to other parts of the library to be used as constraints/ODEs/controllers etc. However, obviously it is not a recipe
 for longterm success to simply write expressions inline wherever they are needed. How you package or
 encapsulate the construction of ASSET vector-functions is up to you, but we suggest one of the following two methods.
@@ -702,8 +701,8 @@ of position and velocity, so let us first write a function that does just that.
 We can then write another function that takes position and velocity as well as the vector
 to be transformed. We then instantiate our previously defined function that
 computes basis vectors and then "call" it with the position and velocity arguments
-defined inside our new function. Calling the already instantiated function, can be accomplished
-passing the provided, correctly sized function, to the :code:`()` call operator the same way we do for
+defined inside our new function. Calling the already instantiated function can be accomplished
+by passing the provided, correctly sized function, to the :code:`()` call operator the same way we do for
 real number arguments. In this case, providing the contiguous segment of size 6 :code:`RV`, is the most efficient
 way to the define the expression. However, if this were not the case, we could also the other
 call signatures shown. We can provide two separate functions, in this case :code:`R` and :code:`V`
@@ -748,9 +747,9 @@ Repeated Sub Expressions
 ########################
 
 Being a functional programming language, it is important to note that an ASSET
-expression is evaluated every where it appears in a statement. There is no notion
+expression is evaluated everywhere it appears in a statement. There is no notion
 of assigning it to a temporary variable and then reusing it later without recalculating it.
-For example,in the following code, just because we bind the complicated expression to
+For example, in the following code, just because we bind the complicated expression to
 the name :code:`expensive`, the function :code:`answer` will still require actually
 evaluating :code:`expensive` three times.
 
@@ -764,7 +763,7 @@ evaluating :code:`expensive` three times.
 
 
 In the vast majority of cases you should not worry about the cost of reevaluating subexpressions,
-as the run time hit is marginal. There is however, one way to explicitly ensure to reduce the cost of expensive repeated
+as the run time hit is marginal. There is, however, one way to explicitly ensure to reduce the cost of expensive repeated
 sub expressions should you need to. You can do this by writing a second function where the subexpression appears
 linearly as additional arguments or segments and then using the call operator to compose this new function
 and the original arguments and subexpression together. For example, the following code will produce the same output
@@ -917,9 +916,9 @@ It will work for larger expressions, but performance will begin to degrade consi
 strange since it ostensibly designed to be used to define constraints and objective inside of large
 sparse non-linear programs. However, in our experience these problems are almost never composed
 of single monolithic functions, and can generally be decomposed into smaller dense functions that only
-take a partial subsets of the problem variables. In that case we can define our functions in terms of
+take a partial subsets of the problem variables. In that case, we can define our functions in terms of
 only the arguments they take, and then under the hood, ASSET will ensure that the inputs and outputs are gathered and
-scattered to the correct locations inside the larger problem. The specifics of how this works will be handled in later
+scattered to the correct locations inside the larger problem. The specifics of how this works will be discussed in later
 sections.
 
 .. code-block:: python
@@ -932,7 +931,7 @@ sections.
 
 Binding Raw Python Functions (DON'T DO THIS)
 #############################################
-You also have the option should you need to, to bind raw python functions
+You also have the option, should you need to, to bind raw python functions
 as ASSET VectorFunctions and ScalarFunctions. This can be accomplished using the  :code:`vf.PyVectorFunction`
 and  :code:`vf.PyScalarFunction` types as shown below. The function must have a signature accepting as the first argument a 1 dimensional numpy array of input arguments
 (named :code:`X` in this case) and returning a numpy array. Additional parameters on which the implementation depends (these are not mathematical input variables) may be included as additional
@@ -968,7 +967,7 @@ using the user specified jacobian and hessian step sizes.
 You should be warned that extensive use of these objects inside of the optimizer or an ODE will result in VERY slow and non-parrallelizable code with inexact derivatives. 
 If you find yourself in situation where you don't think you can write an expression without using :code:`vf.PyVectorFunction` or :code:`vf.PyScalarFunction`, 
 please submit an issue on GitHub. We will happily give suggestions on how you might be able to accomplish your task with the standard VectorFunctions. 
-Or if its truly not possible, we will consider adding the missing expression to the core library in a future release.
+If it's truly not possible, we will consider adding the missing expression to the core library in a future release.
 
 
 	
