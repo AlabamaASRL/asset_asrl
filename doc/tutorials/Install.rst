@@ -187,7 +187,7 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 		apt install ninja-build
 
-	  Select the type of build (1) you wish to perform (Release is correct if you going to be running code using ASSET), and kit to use (2) (gcc or clang).
+	  Select the type of build (1) you wish to perform (Release is correct if you are going to be running code using ASSET), and kit to use (2) (gcc or clang).
 
 	  .. image:: _static/vscodevariant.PNG
 
