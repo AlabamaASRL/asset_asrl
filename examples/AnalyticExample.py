@@ -41,11 +41,11 @@ if __name__ == "__main__":
     tf = 1.0
     u0 = .00
     
-    nsegs = 100
+    nsegs = 50
     
     TrajIG = [[x0,t,u0] for t in np.linspace(t0,tf,100)]
     
-    phase = ode.phase("LGL3",TrajIG,nsegs)
+    phase = ode.phase("LGL5",TrajIG,nsegs)
     phase.addBoundaryValue("Front",[0,1],[x0,t0])
     phase.addBoundaryValue("Back", [1],  [tf])
     phase.addIntegralObjective(AnalyticODE.obj(),[0,2])
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     
     Traj = phase.returnTraj()
     CTraj= phase.returnCostateTraj()
-    print(phase.optimizer.get_ConvergenceFlag())
+
     
     ###########################################
     T = np.array(Traj).T
@@ -62,19 +62,26 @@ if __name__ == "__main__":
     
     X = T[0]
     t = T[1]
-    U = T[2]
     
+    #Collocation control
+    U = T[2]
     ## Collocation Costates
-    lcoll = CT[0]
+    L = CT[0]
 
     ### Analytic costates
-    lstar = 2*np.cosh(1-t)*np.tanh(1-t)/np.cosh(1)
+    Lstar = 2*np.cosh(1-t)*np.tanh(1-t)/np.cosh(1)
+    ### Analytic control
+    Ustar = -(np.tanh(1-t)+.5)*np.cosh(1-t)/np.cosh(1)
         
-    plt.plot(t,lcoll,label   ='Collocation',marker='o')
-    plt.plot(t,lstar,label   ='Analytic')
+    plt.plot(t,L,label   =r'$L$' + '-Collocation',marker='o')
+    plt.plot(t,Lstar,label   =r'$L$' +'-Analytic')
+    
+    plt.plot(t,U,label   =r'$U$' + '-Collocation',marker='o')
+    plt.plot(t,Ustar,label   =r'$U$' +'-Analytic')
+    plt.legend()
     plt.grid(True)
     plt.xlabel(r"$t$")
-    plt.ylabel(r"$l$")
+    plt.ylabel(r"$L,U$")
     plt.show()
     #################################
     
