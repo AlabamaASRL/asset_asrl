@@ -36,7 +36,7 @@ def Run2():
     
     Istate = np.zeros((11))
     Istate[0:6]=X0
-    Istate[6]=1
+    Istate[6]=1     # Full mass is non-dimensionalized to one
     Istate[9]=.5
     
     
@@ -57,7 +57,7 @@ def Run2():
         
     TrajIG = Traj
     
-    phase = ode.phase("LGL5",Traj,128)
+    phase = ode.phase("LGL7",Traj,128)
     phase.integrator.setStepSizes(.3,.00001,10)
     phase.setControlMode("BlockConstant")
     phase.addBoundaryValue("Front",range(0,8),Istate[0:8])
@@ -68,10 +68,10 @@ def Run2():
     
     phase.optimizer.set_OptLSMode("AUGLANG")
     phase.optimizer.set_MaxLSIters(2)
-    phase.optimizer.set_MaxIters(300)
+    #phase.optimizer.set_MaxIters(300)
     phase.optimizer.set_MaxAccIters(200)
     phase.optimizer.set_BoundFraction(.997)
-    phase.optimizer.set_HpertParams(deltaH = 1.0e-7,incrH = 8.,decrH = .33)
+    #phase.optimizer.set_HpertParams(deltaH = 1.0e-7,incrH = 8.,decrH = .33)
     #phase.enable_vectorization(False)
     phase.optimizer.PrintLevel = 0
     phase.optimizer.set_QPOrderingMode("MINDEG")
@@ -84,12 +84,34 @@ def Run2():
     
     phase.setThreads(8,8)
     phase.optimize()
-   
-    Traj = phase.returnTraj()
+    phase.optimizer.set_EContol(1.0e-9)
+    phase.refineTrajManual(256)
+    phase.optimize()
+    
+    
+    ConvTraj = phase.returnTraj()
     Tab  = phase.returnTrajTable()
     
+    integ = ode.integrator(.1,Tab)
+    integ.setAbsTol(1.0e-13)
     
-    TT = np.array(Traj).T
+    ## Do this for non-blockconstant control or if you dont care about exact accuracy
+    ReintTraj1 = integ.integrate_dense(ConvTraj[0],ConvTraj[-1][7])
+    
+    ## This is to be preffered if control is blockconstant
+    ReintTraj2 = [ConvTraj[0]]    
+    for i in range(0,len(ConvTraj)-1):
+        Next = integ.integrate_dense(ReintTraj2[-1],ConvTraj[i+1][7])[1::]
+        ReintTraj2+=Next
+        
+    
+    
+    
+    print(ReintTraj1[-1]-ConvTraj[-1])
+    print(ReintTraj2[-1]-ConvTraj[-1])
+
+    
+    TT = np.array(ReintTraj1).T
     
     
     
@@ -106,14 +128,16 @@ def Run2():
 
     plt.show()
     
-    TrajCart   = ode.MEEToCartesian(Traj)
-    TrajCartIG = ode.MEEToCartesian(TrajIG)
+    TrajCart   = ode.MEEToCartesian(ConvTraj)
+    TrajCart2 = ode.MEEToCartesian(ReintTraj1)
+    TrajCart3 = ode.MEEToCartesian(ReintTraj2)
 
     
     plot = TBPlot(ode)
     
     plot.addTraj(TrajCart, "Conv",color='b')
-    plot.addTraj(TrajCartIG, "IG",color='r')
+    plot.addTraj(TrajCart2, "IG",color='r')
+    plot.addTraj(TrajCart3, "I3G",color='g')
 
     plot.Plot2d(bbox='Two')
             
