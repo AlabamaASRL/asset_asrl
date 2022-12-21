@@ -57,36 +57,26 @@ def Run2():
         
     TrajIG = Traj
     
-    phase = ode.phase("LGL7",Traj,128)
+    phase = ode.phase("LGL5",Traj,128)
     phase.integrator.setStepSizes(.3,.00001,10)
     phase.setControlMode("BlockConstant")
     phase.addBoundaryValue("Front",range(0,8),Istate[0:8])
-    phase.addLUNormBound("Path",range(8,11),.0001,1,1)
+    phase.addLUNormBound("Path",range(8,11),.00001,1,1)
     phase.addBoundaryValue("Back",[7],[tf])
     phase.addBoundaryValue("Back",range(0,6),XF[0:6])
     phase.addValueObjective("Back",6,-1.0)
     
     phase.optimizer.set_OptLSMode("AUGLANG")
     phase.optimizer.set_MaxLSIters(2)
-    #phase.optimizer.set_MaxIters(300)
     phase.optimizer.set_MaxAccIters(200)
     phase.optimizer.set_BoundFraction(.997)
-    #phase.optimizer.set_HpertParams(deltaH = 1.0e-7,incrH = 8.,decrH = .33)
-    #phase.enable_vectorization(False)
-    phase.optimizer.PrintLevel = 0
-    phase.optimizer.set_QPOrderingMode("MINDEG")
-    
-    #1,1 Default: 45i, 41.07,.93
-    #8,8 Default: 45i, 13.9, .31
-    #1,1 Default-LTO: 45i, 35.34,.786
-    #8,8 Default-LTO: 45i, 10.9, .242
-    
-    
-    phase.setThreads(8,8)
-    phase.optimize()
+    phase.optimizer.set_PrintLevel(1)
     phase.optimizer.set_EContol(1.0e-9)
-    phase.refineTrajManual(256)
+    
+    
     phase.optimize()
+    
+    
     
     
     ConvTraj = phase.returnTraj()
@@ -111,7 +101,7 @@ def Run2():
     print(ReintTraj2[-1]-ConvTraj[-1])
 
     
-    TT = np.array(ReintTraj1).T
+    TT = np.array(ReintTraj2).T
     
     
     

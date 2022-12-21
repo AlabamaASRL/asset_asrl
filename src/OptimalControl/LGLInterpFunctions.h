@@ -17,6 +17,11 @@ struct InterpFunction:VectorFunction<InterpFunction<OR>, 1, OR, Analytic, Analyt
   InterpFunction(std::shared_ptr<LGLInterpTable> tab, Eigen::VectorXi v) {
     this->table = tab;
     this->vars = v;
+
+    if (v.maxCoeff() + 1 > tab->XtUVars) {
+        throw std::invalid_argument("Interpolation table has incorrect dimensions");
+    }
+
     this->setIORows(1, this->vars.size());
     //this->setHessFDSteps(tab->DeltaT/10.0);
   }
@@ -139,8 +144,17 @@ struct InterpFunction:VectorFunction<InterpFunction<OR>, 1, OR, Analytic, Analyt
     else {
         obj.def(py::init<std::shared_ptr<LGLInterpTable>>());
     }
-   
+
     Base::DenseBaseBuild(obj);
+
+    obj.def("__call__", [](const InterpFunction<OR>& self, const GenericFunction<-1, 1>& t) {
+        return GenericFunction<-1, -1>(self.eval(t));
+        });
+    obj.def("__call__", [](const InterpFunction<OR>& self, const Segment<-1, 1, -1>& t) {
+        return GenericFunction<-1, -1>(self.eval(t));
+        });
+
+
   }
 };
 

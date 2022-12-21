@@ -739,7 +739,7 @@ the optimizer are handled through the phase itself as shown below. Both of these
 
 After finding a solution, we can retrieve the converged trajectory using the :code:`.returnTraj` method of the :code:`phase`. 
 Note the trajectory is returned as a python list where each element is a full-ode input (ie: :math:`[\vec{X}_i,t_i,\vec{U}_i,\vec{P}]`) at each point in time along the trajectory.
-You may also return the table in the form of an :code:`oc.LGLInterpTable` so that it can be sampled as a smooth function of time. See the section on :ref:`Tabular Data and Interpolation` for more details.
+You may also return the table in the form of an :code:`oc.LGLInterpTable` so that it can be sampled as a smooth function of time. See the section on :ref:`LGLInterpTable and InterpFunction` for more details.
 If you added static parameters to the :code:`phase`, these can be retrieved using :code:`.returnStaticParams`. Finally, you can also retrieve an estimate for the co-states
 of an optimal control problem AFTER it has been optimized. These could then be used as the initial guess to an indirect form of the same optimization problem.
 
@@ -753,6 +753,8 @@ of an optimal control problem AFTER it has been optimized. These could then be u
         XtUP[6]    # The time,t
         XtUP[7:10] # The control variables,U
         XtUP[10]   # The ODE parameter,P
+
+    Tab = phase.returnTrajTable()  ## As an LGL interp table
 
     StatParams = phase.returnStaticParams()
 
