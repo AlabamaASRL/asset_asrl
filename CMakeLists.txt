@@ -36,7 +36,7 @@ endif()
 
 
 set(LINK_TIME_OPT FALSE)          ### DO LTO - Recommended for full release
-set(CLANG_MAX_INLINE_DEPTH 500)
+set(CLANG_MAX_INLINE_DEPTH 225)
 set(BUILD_ASSET_WHEEL FALSE)      ### Copy binaries and build wheel for distribution
 
 
