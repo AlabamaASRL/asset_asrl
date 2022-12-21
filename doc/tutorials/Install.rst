@@ -49,8 +49,12 @@ Step-By-Step Guide
 #. Now download and install Anaconda.
 
 	  ..  note:: 
+	  
+	  Check that Anaconda is set to be placed on the PATH and set Anaconda to be your default Python.
 
-	  Use pip to install SpiceyPy, Sphinx, and Furo
+	  .. image:: _static/anacondainstall.PNG
+
+	  Use pip to install SpiceyPy, Sphinx, and Furo.
 
 #. Next we will be adding the required system and PATH variables to build ASSET.
 
@@ -68,7 +72,7 @@ Step-By-Step Guide
 
 	  ..  note:: 
   
-	  The following directories should be added to your system PATH
+	  The following directories should be added to your system PATH and set as your default Python install.
 
 		.. image:: _static/anacondapath.PNG
 
@@ -157,7 +161,10 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 	  .. note::
 
-	  Be sure to follow the Anaconda installation directions to make Anaconda your default Python installation.
+	  Check that Anaconda is set to be placed on the PATH and set Anaconda to be your default Python.
+
+	  .. image:: _static/anacondainstall.PNG
+
       Use pip to install SpiceyPy, Sphinx, and Furo.
 
 #. Next, we will set the required system variables to build ASSET.
@@ -180,7 +187,7 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 		apt install ninja-build
 
-	  Select the type of build (1) you wish to perform (Release is correct if you going to be running code using ASSET), and kit to use (2) (gcc or clang).
+	  Select the type of build (1) you wish to perform (Release is correct if you are going to be running code using ASSET), and kit to use (2) (gcc or clang).
 
 	  .. image:: _static/vscodevariant.PNG
 
