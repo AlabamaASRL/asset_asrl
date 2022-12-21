@@ -52,16 +52,17 @@ X0t0U0[4]=v
 X0t0U0[6]=t0        
 
 integULaw   = ode.integrator(.1,ULaw(0.8),[3,4,5])
-integULaw.setAbsTol(1.0e-14)
+
+T   = integULaw.integrate_dense(X0t0U0,tf)
+
 
 TrajULaw   = integULaw.integrate_dense(X0t0U0,tf,3000)
 Uts = [ list(T[7:10]) +[T[6]] for T in TrajULaw  ]
 
 
-
 Tab1 = oc.LGLInterpTable(ode.vf(),6,3,TrajULaw)
+Tab2 = oc.LGLInterpTable(3,Uts)
 
-Tab2 = oc.LGLInterpTable(3,Uts,2000-1)
 
 integTab1 = ode.integrator(.1,Tab1)
 integTab2 = ode.integrator(.1,Tab2,range(0,3))
@@ -83,7 +84,7 @@ print(Traj2[-1]-TrajULaw[-1])
 #TT = np.array(TrajNoULaw).T
 #plt.plot(TT[0],TT[1],label='TrajNoULaw',marker='o')
 
-TT = np.array(TrajULaw).T
+TT = np.array(T).T
 plt.plot(TT[0],TT[1],label='TrajULaw',marker='o')
 
 plt.xlabel("X")

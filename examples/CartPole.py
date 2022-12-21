@@ -175,7 +175,7 @@ if __name__ == "__main__":
     
     
     ode = CartPole(l,m1,m2,g)
-    phase = ode.phase("LGL5",IG,64)
+    phase = ode.phase("LGL3",IG,64)
     
     phase.addBoundaryValue("Front",range(0,5),[0,0,0,0,0])
     phase.addBoundaryValue("Back",range(0,5),[d,np.pi,0,0,tf])
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     
     phase.addIntegralObjective(Args(1)[0]**2,[5])
     
-    phase.setThreads(8,8)
+    #phase.setThreads(8,8)
     phase.optimizer.PrintLevel= 0
     phase.optimize()
     

@@ -773,18 +773,48 @@ Vals = Tab(ts2)
 
 plt.plot(ts2,Vals[0],label='sin')
 plt.plot(ts2,Vals[1],label='cos')
-
 plt.plot(ts2,np.cos(ts2),label='cos')
-
-
 plt.show()
 
 ############ 2D Tables ##############################
 #####################################################
 
+nx =500
+ny =800
+
+lim = 2*np.pi
+
+xs = np.linspace(-lim,lim,nx)
+ys = np.linspace(-lim,lim,ny)
+
+def f(x,y):
+    return np.sin(x)*np.cos(y) 
 
 
+X, Y = np.meshgrid(xs, ys)
+Z    = f(X,Y)             #Scalar data defined on 2-D meshgrid
 
+kind = 'cubic' # or 'linear'
+
+Tab2D = vf.InterpTable2D(xs,ys,Z,kind=kind)
+
+print(Tab2D(np.pi/2,0))  #prints 1.0
+
+
+#############################################
+Tab2D.WarnOutOfBounds=True   # By default
+print(Tab2D(-6.3,0))        # prints a warning
+Tab2D.ThrowOutOfBounds=True
+#print(Tab2D(-6.3,0))       # throws exception
+#############################################
+
+x,y,c= Args(3).tolist()
+
+TabSf = Tab2D(x,y)  # it is now an asset scalar function of x,y in this expression
+
+Func = TabSf + c   # Use it as a normal scalar function
+
+print(Func([np.pi/2,0,1.0]))  # prints [2.0]
 
 
 print("########## Binding Raw Python (DONT READ THIS) #################")

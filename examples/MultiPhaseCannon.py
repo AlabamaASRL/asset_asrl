@@ -194,9 +194,9 @@ if __name__ == "__main__":
     
     Fun = Args(2)[0]-Args(2)[1]
     
-    ocp.addLinkEqualCon(Fun,
-                        0,'ODEParams',[0],
-                        1,'ODEParams',[0])
+    #ocp.addLinkEqualCon(Fun,
+    #                    0,'ODEParams',[0],
+    #                    1,'ODEParams',[0])
     
     
     Fun = Args(12).head(6) - Args(12).tail(6)
@@ -207,7 +207,8 @@ if __name__ == "__main__":
     
     
     ocp.optimizer.set_OptLSMode("L1")
-    ocp.setThreads(8,8)
+    #ocp.setThreads(8,8)
+    #ocp.setThreads(FuncThreads = 20 ,KKTThreads=20)
     ocp.optimize()
     
     Ascent  = aphase.returnTraj()

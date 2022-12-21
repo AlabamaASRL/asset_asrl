@@ -428,7 +428,7 @@ int ASSET::PSIOPT::factor_impl(bool docompute, bool Zfac, double ipurt,
   };
   auto RankDef = [&]() {
     if ((this->KKTSol.neigs() + this->KKTSol.peigs() - this->KKTdim) != 0) {
-      std::cout << "RankDef" << std::endl;
+      std::cout << "Potential Rank Deficiency Detected!!!" << std::endl;
     }
   };
   auto Perturb = [&](double p) {

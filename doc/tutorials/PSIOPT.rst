@@ -236,6 +236,7 @@ use the flags in your code, it is recommended to compare flags their enumerator 
 
 
 
+
 .. list-table:: PSIOPT CONVERGENCE FLAGS
    :width: 100%
    :widths: 20 65 15
@@ -259,9 +260,34 @@ use the flags in your code, it is recommended to compare flags their enumerator 
        constraints or gradient
      - 3
 
+Threading
+---------
 
-PSIOPT Output
-=============
+By default, PSIOPT will set the number of threads used to parallelize function evaluations to be equal to the number of hardware threads
+on your machine up to a maximum of 16. So if your computer has 10 cores and 20 threads (ex: i9-10900k), only 16 threads will be used for function evaluations by default.
+Likewise by default, PSIOPT will set the number of threads used to factor KKT matrices to be equal to the number of physical cores on your machine up to a maximum of 8.
+So if your computer has 10 cores and 20 threads, only 8 threads will be used for matrix factorization by default. Based on experience, this an appropriate
+threading allocation to solve single problems as fast as possible on most desktop machines. In our experience KKT matrix factorization does not scale beyond
+8 threads on most problems. Furthermore, applying too many threads to function evaluations on small to medium sized problems can actually degrade performance.
+However, you can manually set the thread count by using the :code:`.setThreads` member function of a :code:`phase` or :code:`OptimalControlProblem`. If speed is of concern we recommend you play around with
+these parameters to find the best option. However, we should note that if you are trying to maximize throughput by running ASSET in multiple processes simultaneously on your desktop or on a server, 
+you should almost always set the optimizer to run-serially to prevent over-subscription of the CPU.
+
+.. code-block:: python
+
+    phase.setThreads(1,1)  # force to run serially on a single thread only
+    phase.solve_optimize()
+    
+
+    ocp.setThreads(FuncThreads = 20 ,KKTThreads=20) # Use more than default number of threads
+    ocp.Phase(0).setThreads(20,20)  #not necessary, will be overridden by the settings of the ocp
+    ocp.optimize()
+
+    
+
+
+Output
+------
 When invoking one of PSIOPT's algorithms with a :code:`PrintLevel` of 0, the solver will produce the console output scroll shown in the figure below. The current objective
 and constraint/optimality errors as well as other relevant algorithm parameters are displayed at each iterate. The meaning of each column is given in the table below.
 The constraint and optimality feasibilities are color coded according to their value. The color scheme progresses from dark red to orange, to yellow, to green as the
@@ -321,8 +347,11 @@ the :code:`Jet` tool. This can allow you to more efficiently tackle throughput o
 without having to resort to multiprocessing libraries. There are two ways to do this. In the first method, demonstrated below, we construct a python list 
 of fully configured phases or optimal control problems (or both) as we normally would, but rather than running solve or optimize on each individually, we specify the algorithm we would like Jet to invoke
 using :code:`.setJetJobMode("")`. These options correspond to the methods we have already covered. Having set the job mode, we add the objects a list and then pass the list to the :code:`Jet.map()` function along with 
-the number of threads we want to use, and a bool specifying whether we want to print the console scroll. After solving all the problems, the function returns the list phases/optimal control problems. We can then access
-each element object to get the solved trajectories as we normally would.
+the number of threads we want to use, and a bool specifying whether we want to print the console scroll. It is not necessary to set the number of threads for
+each phases or optimal control problem, Jet will take care of optimally allocating the number of threads for each problem.
+After solving all the problems, the function returns the list phases/optimal control problems. We can then access
+each element object to get the solved trajectories as we normally would. You can get the convergence flag of each problem by using the :code:`get_ConvergenceFlag()` method of the optimizer instance
+attached to each problem.
 
 .. code-block:: python
 
@@ -339,6 +368,8 @@ each element object to get the solved trajectories as we normally would.
         #Define a problem
         #.
         #.
+
+        ocp.setThreads(1,1)  # Not necessary, Jet will take care of this
 
         ### SET the JetJobMode !!! #####
         ocp.setJetJobMode("Optimize")
@@ -365,9 +396,12 @@ each element object to get the solved trajectories as we normally would.
 
     ### Access the solved phases/ocps
     ocps[0].Phase(0).returnTraj()
+
+    ## Get the convergence flag this way
+    flag = ocps[0].optimizer.get_ConvergenceFlag()
         
 
-Alternatively, we can use another method shown below where we leverage a generator function. Rather than directly creating each phase/optimal control problem directly we create
+Alternatively, we can use another method shown below where we leverage a generator function. Rather than creating each phase/optimal control problem directly we create
 a function that returns them. We can then pass this function, along with a python list of tuples of the arguments we want to pass to our :code:`ProblemGenerator`
 function. Internally, Jet will then expand each element of the :code:`ProblemArgs` list into :code:`ProblemGenerator` function to create all of the phases/optimal control problems on the fly. 
 These will then be solved according the job mode and returned as a list as before. This form is particularly efficient whenever construction of each problem requires independent 
@@ -399,6 +433,8 @@ and expensive preprocessing that cannot be parallelized.
         #. Some Non Trivial Preprocessing
         #.
         #.
+
+        ocp.setThreads(1,1)  # Not necessary, Jet will take care of this
 
         ### SET the JetJobMode !!! #####
         ocp.setJetJobMode("Optimize")
