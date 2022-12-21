@@ -54,6 +54,7 @@ if __name__ == "__main__":
     
     Traj = phase.returnTraj()
     CTraj= phase.returnCostateTraj()
+    print(phase.optimizer.get_ConvergenceFlag())
     
     ###########################################
     T = np.array(Traj).T

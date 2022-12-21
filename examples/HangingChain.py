@@ -71,7 +71,7 @@ def Job(a,b,n,L):
 a = 1
 b = 3
 L = 4
-n = 300
+n = 500
 
 
 Ls = np.linspace(2.25,8,100)
