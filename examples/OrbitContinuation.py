@@ -1,5 +1,6 @@
 import asset_asrl as ast
 from asset_asrl.Astro.AstroModels import CR3BP
+import asset_asrl.Astro.Constants as c
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
@@ -15,16 +16,18 @@ tModes = oc.TranscriptionModes
 
 ################################################################################
 # Constants
-mE = 5.9724e24  # Earth mass (kg)
-mM = 0.07346e24  # Moon mass (kg)
-lstar = 385000 #characteristic distance (km)
+muE = c.MuEarth  # Earth gravitational parameter
+muM = c.MuMoon # Moon gravitational parameter
+lstar = c.LD #Earth-Moon characteristic distance (m)
 
 dt = 3.1415 / 10000
 
 ################################################################################
 # System Dynamics
-mu = mM / (mE + mM)
-ode = CR3BP(mE, mM, lstar)
+
+ode = CR3BP(muE, muM, lstar)
+
+mu = ode.mu
 
 # Create integrator (= propagator)
 odeItg = ode.integrator(dt)

@@ -9,7 +9,7 @@ Windows Installation
 In order to build ASSET on Windows the following dependencies are required:
 
 * Visual Studio 2017 or greater `(Link to Visual Studio Community 2022) <https://visualstudio.microsoft.com/downloads/>`_ 
-* `LLVM Compiler Toolkit <https://github.com/llvm/llvm-project/releases/tag/llvmorg-15.0.0>`_
+* `LLVM Compiler Toolkit <https://github.com/llvm/llvm-project/releases/latest>`_
 * `Intel oneAPI MKL <https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=window&distributions=offline>`_
 * A Python installation with Numpy, however we recommend using Anaconda.
 	* `Anaconda <https://www.anaconda.com/products/distribution>`_
@@ -47,9 +47,10 @@ Step-By-Step Guide
 	  If you are not using Anaconda you may skip the next step.
 
 #. Now download and install Anaconda.
+
 	  ..  note:: 
 
-      Use pip to install SpiceyPy, Sphinx, and Furo
+	  Use pip to install SpiceyPy, Sphinx, and Furo
 
 #. Next we will be adding the required system and PATH variables to build ASSET.
 
@@ -60,6 +61,7 @@ Step-By-Step Guide
 		.. image:: _static/oneapiroot.PNG
 
 	  .. warning::
+
 		If you are using an Alder Lake Intel CPU it may be beneficial to add the system variable "MKL_ENABLE_INSTRUCTIONS" with value "AVX" as well. 
 
 #. We also need to add a few variables to our Path. 
@@ -111,7 +113,7 @@ The dependencies for Linux installations are similar to that of Windows; however
 * `Visual Studio Code <https://code.visualstudio.com/download>`_
 	* `C/C++ Extension <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools>`_ 
 	* `CMake Tools Extension <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools>`_
-* LLVM Compiler Toolkit (recommended)
+* `LLVM Compiler Toolkit (recommended) <https://github.com/llvm/llvm-project/releases/latest>`_
 	* GCC greater than 9 can also be used
 * `Intel oneAPI MKL <https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=linux&distributions=offline>`_
 * `Anaconda <https://www.anaconda.com/products/distribution#linux>`_
@@ -146,10 +148,10 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 	  ..  note:: 
 
-	  We recommend that you use the oneAPI gui installer through the Intel website; however, if it necessary to install via the bash terminal, those directions can be found `here <https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-using-package-managers/apt.html#apt>`_.
+		We recommend that you use the oneAPI gui installer through the Intel website; however, if it necessary to install via the bash terminal, those directions can be found `here <https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-using-package-managers/apt.html#apt>`_.
 
-	  Install with the recommended settings and then proceed to installing Anaconda, if desired.
-	  If you are not using Anaconda you may skip the next step.
+		Install with the recommended settings and then proceed to installing Anaconda, if desired.
+		If you are not using Anaconda you may skip the next step.
 
 #. Now, download and install Anaconda.
 
