@@ -460,6 +460,19 @@ namespace ASSET {
 				return pyfun;
 			});
 
+		obj.def("__call__", [](const InterpTable1D& self, const Segment<-1,1, -1>& t) {
+			py::object pyfun;
+			if (self.vlen == 1) {
+				auto f = GenericFunction<-1, 1>(InterpFunction1D<1>(std::make_shared<InterpTable1D>(self)).eval(t));
+				pyfun = py::cast(f);
+			}
+			else {
+				auto f = GenericFunction<-1, -1>(InterpFunction1D<-1>(std::make_shared<InterpTable1D>(self)).eval(t));
+				pyfun = py::cast(f);
+			}
+			return pyfun;
+			});
+
 
 		obj.def("interp_deriv1", &InterpTable1D::interp_deriv1);
 		obj.def("interp_deriv2", &InterpTable1D::interp_deriv2);

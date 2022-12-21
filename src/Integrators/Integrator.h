@@ -129,7 +129,6 @@ public:
 		Eigen::VectorXi ulocs;
 		ulocs.setLinSpaced(dode.UVars(), dode.TVar() + 1, dode.TVar() + dode.UVars());
 
-		std::cout << ulocs.transpose()<<std::endl;
 
 		Eigen::VectorXi varlocs(1);
 		varlocs[0] = dode.TVar();
@@ -502,6 +501,8 @@ protected:
 		this->ode.compute(xi, xdoti);
 		ODEDeriv<double> xdotnext = xdoti;
 
+
+
 		std::vector<Vector1<double>> prev_event_vals(events.size());
 		std::vector<Vector1<double>> next_event_vals(events.size());
 
@@ -540,6 +541,7 @@ protected:
 
 		ODEDeriv<double> Abserror;
 		ODEDeriv<double> Abserror_max;
+		ODEDeriv<double> Errvec;
 
 		bool HitMinimum = false;
 		int MinimumCount = 0;
@@ -579,12 +581,14 @@ protected:
 					(xnext.head(this->ode.XVars()) - xnext_est.head(this->ode.XVars()))
 					.cwiseAbs();
 
-				Abserror_max = Abserror.cwiseQuotient(this->AbsTols);
+				Errvec = this->AbsTols + xnext.head(this->ode.XVars()).cwiseAbs().cwiseProduct(this->RelTols);
+
+				Abserror_max = Abserror.cwiseQuotient(Errvec);
 				int worst = 0;
 				Abserror_max.maxCoeff(&worst);
 
 				double err = Abserror[worst];
-				double acc = this->AbsTols[worst];
+				double acc = Errvec[worst];
 				double hnext = h * pow((acc / err), 1.0 / this->ErrorOrder);
 
 				if (hnext / h > this->MaxStepChange)

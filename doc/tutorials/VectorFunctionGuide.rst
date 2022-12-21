@@ -792,8 +792,118 @@ We also have support for interpreting tabular data as a VectorFunction using dif
 1-D Interpolation
 -----------------
 
+Interpolation of vector or scalar data with one input dimension may be accomplished using :code:`vf.InterpTable1D`. This
+class is designed be constructed and behave similarly to scipy's :code:`interp1D` class. To construct a table for interpolating
+vector data, we pass a list of sorted coordinates values along with an array whose rows or columns are the vectors of values at each
+each coordinate. You may also pass in the data as a list of numpy arrays or lists which include the coordinate element. You have the
+option to choose between linear or cubic interpolation using the kind parameter in the constructor. Cubic interpolation is recommended to ensure
+that the function is twice differentiable.
+
+
+.. code-block:: python
+
+	ts = np.linspace(0,2*np.pi,1000)
+
+	VecDat = np.array([ [np.sin(t),np.cos(t)] for t in ts])
+
+	kind = 'cubic' # or 'linear' 
+
+	Tab = vf.InterpTable1D(ts,VecDat,axis=0,kind=kind)
+	print(Tab(np.pi/2.0)) #prints [1,.0]
+
+	# Or if data is transposed
+	Tab = vf.InterpTable1D(ts,VecDat.T,axis=1,kind=kind)
+	print(Tab(np.pi/2.0)) #prints [1,.0]
+
+	# Or if data is a list of arrays or lists with time included as one the elements
+	VecList = [ [np.sin(t), np.cos(t), t] for t in ts]
+
+	Tab = vf.InterpTable1D(VecList,tvar=2,kind=kind)
+	print(Tab(np.pi/2.0)) #prints [1,.0]
+
+
+To construct a table for interpolating scalar data, you may just pass in the list of coordinates along with
+1-D numpy array or python list of the values of the function at each point.
+
+.. code-block:: python
+	
+	ScalDat = [np.sin(t) for t in ts]
+	STab =vf.InterpTable1D(ts,ScalDat,kind=kind)
+	print(STab(np.pi/2.0)) # prints [1.0]
+
+The outputs of :code:`vf.InterpTable1D` are only well defined within the domain of the supplied coordinates. By default attempts
+to interpolate outside of the domain will result in inaccurate extrapolation and print a warning the screen. This
+can be disabled using the :code:`.WarnOutOfBounds` field of the object. Additionally, you may specify that you would like an exception
+to be thrown when this occurs by setting :code:`.ThrowOutOfBounds` to :code:`True`.
+
+
+.. code-block:: python
+	
+	
+	Tab.WarnOutOfBounds=True   # By default
+	print(Tab(-.00001))        # prints [-1.0e-5,1] and a warning
+	Tab.ThrowOutOfBounds=True
+	#print(Tab(-.00001))       # throws an exception
+
+Once you have constructed a table object, it can be composed with other ASSET VectorFunctions or ScalarFunctions
+by providing a ScalarFunction argument to the call operator.
+
+.. code-block:: python
+
+	x,V,t = Args(4).tolist([(0,1),(1,2),(3,1)])
+
+	f1 = STab(t) + x  # STab(t) is an asset scalar function
+	f2 = Tab(t) + V   # Tab(t) is an asset vector function
+
+
+
 2-D Interpolation
 -----------------
+Similarly, you can also interpret scalar data defined on a 2-D regular grid of coordinates as an ASSET ScalarFunction using the
+:code:`vf.InterpTable2D` class. The class my be constructed by supplying the grid coordinates as either python lists or numpy
+arrays along with the function values formatted like a numpy meshgrid.
+
+.. code-block:: python
+
+	nx =500
+	ny =800
+	lim = 2*np.pi
+
+	xs = np.linspace(-lim,lim,nx)
+	ys = np.linspace(-lim,lim,ny)
+
+	def f(x,y):return np.sin(x)*np.cos(y) 
+	X, Y = np.meshgrid(xs, ys)
+	Z    = f(X,Y)             #Scalar data defined on 2-D meshgrid
+
+	kind = 'cubic' # or 'linear'
+
+	Tab2D = vf.InterpTable2D(xs,ys,Z,kind=kind)
+
+	print(Tab2D(np.pi/2,0))  #prints 1.0
+
+
+	Tab2D.WarnOutOfBounds=True   # By default
+	print(Tab2D(-6.3,0))        # prints a warning
+	Tab2D.ThrowOutOfBounds=True
+	#print(Tab2D(-6.3,0))       # throws exception
+
+Once constructed, :code:`vf.InterpTable2D` can be converted into an ASSET ScalarFunction by supplying
+the x and y coordinates as ASSET ScalarFunctions to the table's call operator.
+
+
+.. code-block:: python
+
+	x,y,c= Args(3).tolist()
+
+	TabSf = Tab2D(x,y)  # it is now an asset scalar function of x,y in this expression
+
+	Func = TabSf + c   # Use it as a normal scalar function
+
+	print(Func([np.pi/2,0,1.0]))  # prints [2.0]
+
+	
+
 
 
 
@@ -854,7 +964,7 @@ using the user specified jacobian and hessian step sizes.
 	
 
 
-You should be warned that extensive use of these objects inside of the optimizer or ODE will result in VERY slow and non-parrallelizable code with inexact derivatives. 
+You should be warned that extensive use of these objects inside of the optimizer or an ODE will result in VERY slow and non-parrallelizable code with inexact derivatives. 
 If you find yourself in situation where you don't think you can write an expression without using :code:`vf.PyVectorFunction` or :code:`vf.PyScalarFunction`, 
 please submit an issue on GitHub. We will happily give suggestions on how you might be able to accomplish your task with the standard VectorFunctions. 
 If it's truly not possible, we will consider adding the missing expression to the core library in a future release.

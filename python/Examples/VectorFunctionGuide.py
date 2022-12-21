@@ -718,43 +718,52 @@ tt = time.perf_counter()
 '''
 One dimensonal
 '''
-ts = np.linspace(0,2*np.pi,500)
+ts = np.linspace(0,2*np.pi,90)
 
-ArrayData = np.array([ [np.sin(t),np.cos(t)] for t in ts])
+VecDat = np.array([ [np.sin(t),np.cos(t)] for t in ts])
 
-kind = 'cubic' # or linear 
+kind = 'cubic' # or 'linear' 
 
-Tab = vf.InterpTable1D(ts,ArrayData,axis=0,kind=kind)
-
-#print(Tab(0)) #prints [0,1]
+Tab = vf.InterpTable1D(ts,VecDat,axis=0,kind=kind)
+print(Tab(np.pi/2.0)) #prints [1,.0]
 
 # Or if data is transposed
-Tab = vf.InterpTable1D(ts,ArrayData.T,axis=1,kind=kind)
-#print(Tab(0)) #prints [0,1]
+Tab = vf.InterpTable1D(ts,VecDat.T,axis=1,kind=kind)
+print(Tab(np.pi/2.0)) #prints [1,.0]
 
-# Or if data is a list of arrays with time included as one the elements
-ListData = [ [np.sin(t), np.cos(t), t] for t in ts]
-Tab = vf.InterpTable1D(ListData,tvar=2,kind=kind)
+# Or if data is a list of arrays or lists with time included as one the elements
+VecList = [ [np.sin(t), np.cos(t), t] for t in ts]
+
+Tab = vf.InterpTable1D(VecList,tvar=2,kind=kind)
+print(Tab(np.pi/2.0)) #prints [1,.0]
+
+###########################################
+ScalDat = [np.sin(t) for t in ts]
+STab =vf.InterpTable1D(ts,ScalDat,kind=kind)
+print(STab(np.pi/2.0)) # prints [1.0]
 
 
-
-Tab.WarnOutOfBounds=True
-#print(Tab(-.00001))  # prints a warning
+#############################################
+Tab.WarnOutOfBounds=True   # By default
+print(Tab(-.00001))        # prints a warning
 Tab.ThrowOutOfBounds=True
+#print(Tab(-.00001))       # throws exception
 
 
+x,V,t = Args(4).tolist([(0,1),(1,2),(3,1)])
 
-ScalarData = [np.sin(t) for t in ts]
+f1 = STab(t) + x # STab(t) is an asset scalar function
+f2 = Tab(t) + V  # Tab(t) is an asset vector function
 
-STab =vf.InterpTable1D(ts,ScalarData,axis=0,kind=kind)
+print(f1([1,1,1,np.pi/2])) #prints
+
 
 
 TabFunc = Tab.vf() # Now it is a vector function with input size 1
-STabFunc = STab.sf()
+STabFunc = STab.sf() # Now a scalar function with input size 1
 
 
 
-print(STabFunc.adjointhessian([0],[1]))
 
 
 ts2 = np.linspace(0,2*np.pi,1000)
@@ -764,18 +773,48 @@ Vals = Tab(ts2)
 
 plt.plot(ts2,Vals[0],label='sin')
 plt.plot(ts2,Vals[1],label='cos')
-
-ff = time.perf_counter()
-print(ff-tt)
-
+plt.plot(ts2,np.cos(ts2),label='cos')
 plt.show()
 
 ############ 2D Tables ##############################
 #####################################################
 
+nx =500
+ny =800
+
+lim = 2*np.pi
+
+xs = np.linspace(-lim,lim,nx)
+ys = np.linspace(-lim,lim,ny)
+
+def f(x,y):
+    return np.sin(x)*np.cos(y) 
 
 
+X, Y = np.meshgrid(xs, ys)
+Z    = f(X,Y)             #Scalar data defined on 2-D meshgrid
 
+kind = 'cubic' # or 'linear'
+
+Tab2D = vf.InterpTable2D(xs,ys,Z,kind=kind)
+
+print(Tab2D(np.pi/2,0))  #prints 1.0
+
+
+#############################################
+Tab2D.WarnOutOfBounds=True   # By default
+print(Tab2D(-6.3,0))        # prints a warning
+Tab2D.ThrowOutOfBounds=True
+#print(Tab2D(-6.3,0))       # throws exception
+#############################################
+
+x,y,c= Args(3).tolist()
+
+TabSf = Tab2D(x,y)  # it is now an asset scalar function of x,y in this expression
+
+Func = TabSf + c   # Use it as a normal scalar function
+
+print(Func([np.pi/2,0,1.0]))  # prints [2.0]
 
 
 print("########## Binding Raw Python (DONT READ THIS) #################")

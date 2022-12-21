@@ -79,7 +79,7 @@ insert into a geostationary transfer orbit with the following classical orbital 
 
 
 Modeling this problem in ASSET starts with defining the dynamics for each phase. Since the structure of the dynamics is the same for
-all 4 phases, we can model them with a single ASSET ode given below.
+all 4 phases, we can model them with a single ASSET ODE given below.
 
 
 .. code-block:: python

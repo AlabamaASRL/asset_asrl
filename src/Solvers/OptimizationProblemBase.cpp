@@ -8,7 +8,8 @@ void ASSET::OptimizationProblemBase::Build(py::module & m) {
 
 
 	obj.def("setThreads",
-		py::overload_cast<int, int>(&OptimizationProblemBase::setThreads));
+		py::overload_cast<int, int>(&OptimizationProblemBase::setThreads),
+		py::arg("FuncThreads"),py::arg("KKTThreads"));
 
 	obj.def("setThreads",
 		py::overload_cast<int>(&OptimizationProblemBase::setThreads));

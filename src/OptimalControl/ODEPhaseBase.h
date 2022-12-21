@@ -87,8 +87,7 @@ public:
     this->setXVars(Xv);
     this->setUVars(Uv);
     this->setPVars(Pv);
-    this->Threads = std::min(ASSET_DEFAULT_FUNC_THREADS, int(std::thread::hardware_concurrency()));
-    this->optimizer = std::make_shared<PSIOPT>();
+    
   }
   virtual ~ODEPhaseBase() = default;
 
@@ -836,16 +835,14 @@ public:
   void test_threads(int i, int j, int n);
 
   void jet_initialize() {
-      this->Threads = 1;
-      this->optimizer->QPThreads = 1;
+      this->setThreads(1, 1);
       this->optimizer->PrintLevel = 10;
       this->transcribe();
   }
   void jet_release() {
       this->indexer = PhaseIndexer();
       this->optimizer->release();
-      this->Threads = std::max(1, int(std::thread::hardware_concurrency()));
-      this->optimizer->QPThreads = std::min(ASSET_DEFAULT_QP_THREADS, get_core_count());;
+      this->initThreads();
       this->optimizer->PrintLevel = 0;
       this->nlp = std::shared_ptr<NonLinearProgram>();
       this->resetTranscription();

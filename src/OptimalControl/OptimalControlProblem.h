@@ -33,8 +33,7 @@ struct OptimalControlProblem:OptimizationProblemBase {
   std::vector<std::string> phase_names;
 
   OptimalControlProblem() { 
-      this->Threads = std::min(ASSET_DEFAULT_FUNC_THREADS,int(std::thread::hardware_concurrency()));
-      this->optimizer = std::make_shared<PSIOPT>(); 
+      
   }
 
   bool doTranscription = true;
@@ -1316,16 +1315,13 @@ struct OptimalControlProblem:OptimizationProblemBase {
   void transcribe() { this->transcribe(false, false); }
 
   void jet_initialize() {
-      this->Threads = 1;
-      this->optimizer->QPThreads = 1;
+      this->setThreads(1, 1);
       this->optimizer->PrintLevel = 10;
-
       this->transcribe();
   }
   void jet_release() {
       this->optimizer->release();
-      this->Threads = std::max(1, int(std::thread::hardware_concurrency()));
-      this->optimizer->QPThreads = std::min(ASSET_DEFAULT_QP_THREADS, get_core_count());;
+      this->initThreads();
       this->optimizer->PrintLevel = 0;
       this->nlp = std::shared_ptr<NonLinearProgram>();
       for (auto& phase : this->phases) phase->jet_release();

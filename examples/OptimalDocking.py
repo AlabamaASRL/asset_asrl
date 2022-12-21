@@ -319,7 +319,7 @@ def Form1():
     
     
     phase = ode.phase('LGL3',IG,384)
-    #phase.setControlMode('BlockConstant')
+    phase.setControlMode('BlockConstant')
     
     phase.addBoundaryValue("Front",range(0,21),X0[0:21])
     phase.addLUVarBounds('Path',[21,22,23],-MaxThrust,MaxThrust,.1)
@@ -330,7 +330,8 @@ def Form1():
     phase.addDeltaTimeObjective(1)
    
     phase.optimizer.BoundFraction = .995
-    
+    phase.optimizer.PrintLevel = 1
+
     phase.optimize()
    
     Traj = phase.returnTraj()
@@ -398,8 +399,8 @@ def Form2():
     
     Traj = integ.integrate_dense(X0,200/Tstar,1000)
     
-    phase = ode.phase('LGL3',Traj,280)
-    #phase.setControlMode('BlockConstant')
+    phase = ode.phase('LGL3',Traj,384)
+    phase.setControlMode('BlockConstant')
     phase.addBoundaryValue("Front",range(0,14),X0[0:14])
     phase.addLUVarBounds('Path',[14,15,16],-MaxThrust,MaxThrust,.1)
     phase.addLUVarBounds('Path',[17,18,19],-MaxTorque,MaxTorque,1)
@@ -415,6 +416,7 @@ def Form2():
     phase.optimize()
     
     
+    
     Traj = phase.returnTraj()
     
     tf = Traj[-1][13]*Tstar
@@ -426,8 +428,8 @@ def Form2():
     
 if __name__ == "__main__":
 
-    Form2()
-    #Form1()
+    #Form2()
+    Form1()
 
 
 
