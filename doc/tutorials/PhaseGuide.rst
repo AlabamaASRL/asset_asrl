@@ -9,7 +9,7 @@ problem into distinct phases. In ASSET, the dynamics along a phase of the trajec
 discretized using a single transcription scheme. We may apply custom constraints and objectives to phases and optimize them by themselves, or
 combine multiple phases and optimize them all simultaneously. 
 
-To construct a phase we must first define an ODE using what 
+To construct a phase, we must first define an ODE using what 
 we have learned in previous sections on :ref:`vector functions <vectorfunction-guide>` and :ref:`ODEs <ode-guide>`. In this section
 we will utilize the trivial ODE below as a reference while we discuss the phase API.
 
@@ -30,7 +30,7 @@ we will utilize the trivial ODE below as a reference while we discuss the phase 
 Initialization
 ==============
 
-Given some ASSET ode, we can construct a phase object
+Given some ASSET ODE, we can construct a phase object
 using it's :code:`.phase` method. At minimum, we must first specify the transcription mode for the phase dynamics as a string. 
 Here we have chosen, third order Legendre-Gauss-Lobatto collocation or :code:`'LGL3'`, which approximates the trajectory as piecewise cubic splines. We can also
 choose from the 5th and 7th Order LGL methods, the trapezoidal method, or a central shooting scheme. In most
@@ -45,7 +45,7 @@ for almost all applications, as they are almost always significantly faster and 
 
 We can supply an initial guess to the :code:`phase` using the :code:`.setTraj` method. 
 The initial guess should be formatted as a python list where each element 
-is a full ode input (ie: :math:`[\vec{X}_i,t_i,\vec{U}_i,\vec{P}]`) at each point in time along the trajectory.
+is a full ODE input (ie: :math:`[\vec{X}_i,t_i,\vec{U}_i,\vec{P}]`) at each point in time along the trajectory.
 Note, that this is the same format as the output of an :code:`intgrate_dense` call for the ODE's integrator.
 In most cases we will just pass in the initial guess
 and specify the number of segments of the chosen transcription type we want to
@@ -70,7 +70,7 @@ We can also manually specify the initial spacing for segments. This is done by p
 :code:`SegBinSpacing` of length :code:`n >=2` specifying the spacing on the non-dimensional time interval 0-1
 for groups of evenly spaced segments. We then pass another list, :code:`SegsPerBin`, of length :code:`n-1` specifying
 an integer number of segments we want in each group. For example, we can replicate the behavior of the
-default method as shown below. Or alternatively, we could specify that we want to vary the density of 
+default method as shown below. Alternatively, we could specify that we want to vary the density of 
 segments across the :code:`phase`. In most cases, the user's first option should be to just evenly space segments over
 the phase. One can also create a :code:`phase`, set the transcription method, and initial guess in the same
 call as shown on the final line. 
@@ -98,7 +98,7 @@ different control parameterizations, using the :code:`.setControlMode` method.
     # Options: FirstOrderSpline,HighestOrderSpline,BlockConstant,NoSpline
     phase.setControlMode("FirstOrderSpline")
 
-By default,this is set to :code:`'FirstOrderSpline'`, which will ensure that the control history has smooth
+By default, this is set to :code:`'FirstOrderSpline'`, which will ensure that the control history has smooth
 first derivatives (if possible for the chosen transcription). This is typically sufficient to prevent control chattering in
 the :code:`'LGL5'`, and :code:`'LGL7'` methods. We can also set the ControlMode to :code:`'HighestOrderSpline'` to enforce continuity
 in all derivatives possible for a given transcription method. For :code:`'LGL5'`, the control is represented as a piecewise
@@ -113,7 +113,7 @@ constant control history with 1 unique control per segment. This can be specifie
 In our experience this control parameterization can be very robust and typically results in KKT matrices that are faster to factor.
 The caveat is that special care must be taken when re-integrating converged solutions with an explicit integrator. This will be covered in a later section. 
 
-In addition to the state, time, control and ODE parameter variables representing the trajectory, we may also add what we call "static parameters" to the :code:`phase`. 
+In addition to the state, time, control, and ODE parameter variables representing the trajectory, we may also add what we call "static parameters" to the :code:`phase`. 
 These are non-time varying variables that you might need to formulate a custom constraint and objective that are not needed by the dynamics. 
 Note that these are not the same as ODE parameters. We can add static parameters by simply specifying their initial values as shown below.
 
@@ -225,7 +225,7 @@ Equality Constraints
 --------------------
 Equality constraints of the form :math:`\vec{h}(\vec{x}) = \vec{0}`, can be added to a phase using the :code:`.addEqualCon` method. First we specify 
 the phase region to which the constraint will be applied followed by the equality 
-constraint itself (an ASSET vector (or scalar) function). Next we specify which of the indices of time-varying input variables at the phase region,
+constraint itself (an ASSET vector (or scalar) function). Next, we specify which of the indices of time-varying input variables at the phase region,
 as well as any ODE parameters and phase's static parameters we wish to forward to the function. In the trivial example below, we are adding a
 constraint that enforces that the first time-varying inputs in the trajectory and all of the ODE parameters and static parameters should be equal to zero. 
 Custom constraints must be written such that the inputs consist of the time-varying inputs (if any), followed by the ODE parameters (if any), and then the static
@@ -297,7 +297,7 @@ examples below.
     # same as above
     phase.addEqualCon("StaticParams",Args(2).sum() - 2.0,SPVars) 
 
-The previous examples, only illustrate the usage of the phase regions that take at most one time-varying input, however, phase regions :code:`"FrontandBack"`, and
+The previous examples only illustrate the usage of the phase regions that take at most one time-varying input; however, phase regions :code:`"FrontandBack"`, and
 :code:`"PairWisePath"` take two time-varying inputs. An example of how to use a two input phase region is shown below. Here we are constraining that the first and last states should be equal
 and that the difference between the last and first time of the phase should be equal to a static parameter that we have added to the phase. We only specify which time-varying variables
 we want once. The same set is gathered from the first state and last state and forwarded to the function, followed by any ODE parameters (none in this case) 
@@ -340,8 +340,8 @@ enforce known initial and terminal conditions on a phase.
 
 
 Additionally, you can also use the :code:`addDeltaVarEqualCon` method
-to constrain changes in variables from the :code:`"First"` to :code:`"Last"` phase regions to a specified value. This could for example
-be used to enforce a fixed duration for the phase, by supply the index for time (:code:`"6"` in this case). However, constraining the delta time is
+to constrain changes in variables from the :code:`"First"` to :code:`"Last"` phase regions to a specified value. This could, for example,
+be used to enforce a fixed duration for the phase by supplying the index for time (:code:`"6"` in this case). However, constraining the delta time is
 so common that we also provide the :code:`addDeltaTimeEqualCon` method to do just that.
 
 .. code-block:: python
@@ -398,7 +398,7 @@ we offer many simplified alternatives which we now discuss.
 
 The simplest type of inequality constraint we can apply are bounds on the variables. These can be added using the :code:`.addLower/Upper/LUVarBounds` methods as 
 shown below, these can be applied to any of the single time-varying input phase regions or the parameters. For any method, we can also specify a positive scale factor that will be 
-applied to the final bounding function. This can help scale an ill conditioned bound but will not change the meaning of the constraint.
+applied to the final bounding function. This can help scale an ill-conditioned bound but will not change the meaning of the constraint.
 
 
 .. code-block:: python
@@ -487,9 +487,9 @@ of all of the controls (variables :code:`[7,8,9]` for this contrived ODE) to be 
     phase.addLUFuncBound(PhaseRegion,ScalarFunc,XTUVars,LowerBound,UpperBound)
 
 
-These methods can be applied to any ScalarFunction you wish to bound, however, the examples above
+These methods can be applied to any ScalarFunction you wish to bound; however, the examples above
 that bound the :code:`norm` or :code:`squared_norm` are so common that we also provide methods that do just that. Below, we use the :code:`.addLower/Upper/NormBound`
-and :code:`.addLower/Upper/SquaredNormBound` methods the accomplish the same tasks as the previous code block.
+and :code:`.addLower/Upper/SquaredNormBound` methods that accomplish the same tasks as the previous code block.
 
 .. code-block:: python
     
@@ -528,7 +528,7 @@ and :code:`.addLower/Upper/SquaredNormBound` methods the accomplish the same tas
     phase.addLUSquaredNormBound(PhaseRegion,XTUVars,LowerBound,UpperBound)
 
 
-Similar to how we can place equality constraints on the change in a variable from beginning to end of
+Similar to how we can place equality constraints on the change in a variable from the beginning to end of
 a phase, we can also place bounds on the changes in variables as shown below.
 
 .. code-block:: python
@@ -565,8 +565,8 @@ a phase, we can also place bounds on the changes in variables as shown below.
 State Objectives
 ----------------
 The simplest type of objective function that we can add to a phase is a state objective. It is a ScalarFunction that we
-wish to directly minimize that takes some or all of the variables at a phase region. Note, then that if you are trying to maximize something you should
-multiply its value by a negative constant, as ASSET interprets all objective values as values to be minimized. Generalized state objectives can be added to a phase using the :code:`.addStateObjective` function as shown below. The same rules governing
+wish to directly minimize that takes some or all of the variables at a phase region. Note, if you are trying to maximize something you should
+multiply it's value by a negative constant, as ASSET interprets all objective values as values to be minimized. Generalized state objectives can be added to a phase using the :code:`.addStateObjective` function as shown below. The same rules governing
 :code:`.addEqualCon`, and :code:`.addInequalCon` apply here to all possible permutations to the inputs of :code:`.addStateObjective`. The only exception being that the function
 must be an ASSET ScalarFunction.
 
@@ -741,7 +741,7 @@ After finding a solution, we can retrieve the converged trajectory using the :co
 Note the trajectory is returned as a python list where each element is a full-ode input (ie: :math:`[\vec{X}_i,t_i,\vec{U}_i,\vec{P}]`) at each point in time along the trajectory.
 You may also return the table in the form of an :code:`oc.LGLInterpTable` so that it can be sampled as a smooth function of time. See the section on :ref:`Tabular Data and Interpolation` for more details.
 If you added static parameters to the :code:`phase`, these can be retrieved using :code:`.returnStaticParams`. Finally, you can also retrieve an estimate for the co-states
-of a optimal control problem AFTER it has been optimized. These could then be used as the initial guess to an indirect form of the same optimization problem.
+of an optimal control problem AFTER it has been optimized. These could then be used as the initial guess to an indirect form of the same optimization problem.
 
 .. code-block:: python
     
@@ -765,7 +765,7 @@ of a optimal control problem AFTER it has been optimized. These could then be us
 
 
 Additionally, should you want to refine the mesh spacing of the trajectory after a solution, it is not necessary to create an entirely new :code:`phase`.
-Instead you can use the :code:`.refineTraj` methods as shown below. The simplest form of refinement can be accomplished using the :code:`.refineTrajManual` methods. In general these work exactly,
+Instead, you can use the :code:`.refineTraj` methods as shown below. The simplest form of refinement can be accomplished using the :code:`.refineTrajManual` methods. In general these work exactly,
 the same as the :code:`.setTraj` methods except they use the currently loaded trajectory to interpolate the new mesh. 
 The second option is the :code:`.refineTrajEqual` method, which will attempt to refine the trajectory such the estimated error across all segments is equal. For now,
 users should prefer manual mesh refinement, as our automatic refinement method could use some serious improvement. 
@@ -858,7 +858,7 @@ What happens if I over constrain my problem?
 --------------------------------------------
 We do check that the total number of equality constraints added to a problem (dynamics, mesh-spacing, and user equality constraints) is less than 
 the total number of variables. However, most cases of over constraining are much more subtle than this and happen when you have added redundant or conflicting 
-constraints. We do not explicitly check for this at the moment. An example of what we mean by this is illustrated below. Lets say we needed to constrain the duration
+constraints. We do not explicitly check for this at the moment. An example of what we mean by this is illustrated below. Let's say we needed to constrain the duration
 of a phase to be some fixed value, and for the initial time to be equal to 0. We could add a boundary value to the first state in the trajectory to fix the initial time.
 Since the initial time is constrained to be 0, fixing the final time to be :code:`dt` will constrain the phase's duration as we expect. However, if we were to then accidentally use :code:`.addDeltaTimeEqualCon`
 to fix the phase duration as well then the problem is over constrained. Thus you should either fix the initial and final times, or fix the initial time and duration, but not both.
