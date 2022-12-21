@@ -107,7 +107,14 @@ struct LGLInterpTable {
     this->setMethod(LGL3);
     this->loadUnevenData(dnum, xtudat);
   }
-
+  LGLInterpTable(const std::vector<Eigen::VectorXd>& xtudat) {
+      this->XVars = xtudat[0].size()-1;
+      this->UVars = 0;
+      this->axis = xtudat[0].size()-1;
+      this->XtUVars = xtudat[0].size();
+      this->setMethod(LGL3);
+      this->loadUnevenData(xtudat.size()-1, xtudat);
+  }
   LGLInterpTable(int xv, int uv, TranscriptionModes m) {
     this->XVars = xv;
     this->UVars = uv;
@@ -1007,6 +1014,7 @@ struct LGLInterpTable {
     obj.def(py::init<VectorFunctionalX, int, int, int,const std::vector<Eigen::VectorXd>&>());
 
     obj.def(py::init<int, const std::vector<Eigen::VectorXd>&, int>());
+    obj.def(py::init<const std::vector<Eigen::VectorXd>&>());
 
     obj.def(py::init<VectorFunctionalX, int, int, TranscriptionModes>());
 
@@ -1015,6 +1023,10 @@ struct LGLInterpTable {
     obj.def("getTablePtr", &LGLInterpTable::getTablePtr);
     obj.def("loadUnevenData", &LGLInterpTable::loadUnevenData);
     obj.def("Interpolate", &LGLInterpTable::Interpolate<double>);
+
+    obj.def("__call__", py::overload_cast<double>(&LGLInterpTable::Interpolate<double>, py::const_), py::is_operator());
+
+
     obj.def("InterpolateDeriv", &LGLInterpTable::InterpolateDeriv<double>);
     obj.def("makePeriodic", &LGLInterpTable::makePeriodic);
 
