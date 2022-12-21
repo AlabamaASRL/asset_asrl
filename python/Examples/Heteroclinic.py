@@ -6,7 +6,6 @@ from asset_asrl.Astro.AstroModels import CR3BP
 from asset_asrl.Astro.FramePlot import CRPlot
 
 import asset_asrl.Astro.Constants as c
-import asset as astt
 
 vf   = ast.VectorFunctions
 oc   = ast.OptimalControl

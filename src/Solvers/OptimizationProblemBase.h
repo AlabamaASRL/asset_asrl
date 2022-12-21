@@ -29,12 +29,24 @@ namespace ASSET {
 
 		virtual ~OptimizationProblemBase() = default;
 
+		OptimizationProblemBase() {
+			this->optimizer = std::make_shared<PSIOPT>();
+			this->initThreads(); // must called after initing optimizer
+		}
 
 		virtual PSIOPT::ConvergenceFlags solve() = 0;
 		virtual PSIOPT::ConvergenceFlags optimize() = 0;
 		virtual PSIOPT::ConvergenceFlags solve_optimize() = 0;
 		virtual PSIOPT::ConvergenceFlags solve_optimize_solve() = 0;
 		virtual PSIOPT::ConvergenceFlags optimize_solve() = 0;
+
+
+
+		virtual void initThreads() {
+			this->Threads = std::min(ASSET_DEFAULT_FUNC_THREADS, int(std::thread::hardware_concurrency()));
+			this->optimizer->QPThreads = std::min(ASSET_DEFAULT_QP_THREADS, get_core_count());;
+
+		}
 
 		virtual void setThreads(int functhreads, int qpthreads) {
 			if (functhreads < 1 || qpthreads < 1) {
