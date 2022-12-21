@@ -3,7 +3,7 @@
     {
       "name": "x64-Clang-Release",
       "generator": "Ninja",
-      "configurationType": "RelWithDebInfo",
+      "configurationType": "Release",
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
@@ -13,7 +13,7 @@
       "inheritEnvironments": [ "clang_cl_x64" ],
       "variables": [
         {
-          "name": "CMAKE_CXX_FLAGS_RELWITHDEBINFO",
+          "name": "CMAKE_CXX_FLAGS_RELEASE",
           "value": "/MD  /O2 /Ob2 /DNDEBUG /arch:AVX2 /fp:fast /GS- /Gw ",
           "type": "STRING"
         },
