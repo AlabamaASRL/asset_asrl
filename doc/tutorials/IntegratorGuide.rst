@@ -244,7 +244,7 @@ In ASSET, integrators themselves are VectorFunctions and have analytic first and
 derivatives. The input arguments for the integrator when used as a VectorFunction consists of
 the full-state to be integrated and the final time :code:`tf,` and the output is the full-state at time :code:`tf`.
 For example, calling compute as shown below is equivalent to the normal integrate call. This also means
-that we can calculate the jacobian and adjointhessian as well.
+that we can calculate the jacobian and :code:`adjointhessian` as well.
 
 .. code-block:: python
 

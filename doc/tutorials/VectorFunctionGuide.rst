@@ -625,7 +625,7 @@ our scratch pad examples, we simply created a single set of arguments and operat
 in the same scope. Every one of these functions is a fully formed ASSET type and can be immediately passed
 off to other parts of the library to be used as constraints/ODEs/controllers etc. However, obviously it is not a recipe
 for longterm success to simply write expressions inline wherever they are needed. How you package or
-encapsulate the construction of ASSET vector-functions is up to you, but we suggest one of the following two methods.
+encapsulate the construction of ASSET VectorFunctions is up to you, but we suggest one of the following two methods.
 
 Method one involves simply writing a standard python function that takes as arguments
 any meta data or constants, needed to define the function, then writing and returning your ASSET
@@ -678,7 +678,7 @@ Function Composition
 ####################
 
 Now that we have a good understanding of the rules and style for defining
-single vector-functions, we can cover how to call them inside of other functions.
+single VectorFunctions, we can cover how to call them inside of other functions.
 For this final example let us tackle a concrete problem that occurs
 in astrodynamics: frame conversions. Specifically, we wish to write a function that takes
 the position and velocity of some object in Cartesian coordinates, as well as some other vector,
@@ -793,7 +793,7 @@ We also have support for interpreting tabular data as a VectorFunction using dif
 -----------------
 
 Interpolation of vector or scalar data with one input dimension may be accomplished using :code:`vf.InterpTable1D`. This
-class is designed be constructed and behave similarly to scipy's :code:`interp1D` class. To construct a table for interpolating
+class is designed to be constructed and behave similarly to scipy's :code:`interp1D` class. To construct a table for interpolating
 vector data, we pass a list of sorted coordinates values along with an array whose rows or columns are the vectors of values at each
 each coordinate. You may also pass in the data as a list of numpy arrays or lists which include the coordinate element. You have the
 option to choose between linear or cubic interpolation using the kind parameter in the constructor. Cubic interpolation is recommended to ensure
@@ -910,7 +910,7 @@ the x and y coordinates as ASSET ScalarFunctions to the table's call operator.
 Note on Size of VectorFunctions
 ###############################
 
-The vector-function type system has been designed to have good performance for evaluating
+The VectorFunction type system has been designed to have good performance for evaluating
 the value and derivatives of dense VectorFunctions with a small number of arguments (<50).
 It will work for larger expressions, but performance will begin to degrade considerably. This may seem
 strange since it ostensibly designed to be used to define constraints and objective inside of large
