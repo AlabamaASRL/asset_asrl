@@ -16,7 +16,8 @@ Obviously, we will need ASSET, but we will also use numpy for arrays and matplot
 .. code-block:: python
 
     import asset_asrl as ast
-    from asset_asrl.Astro.AstroModels import CR3BP
+    from asset_asrl.Astro.AstroModels import CR3BP 
+    import asset_asrl.Astro.Constants as c
     import numpy as np
     import copy
     import matplotlib.pyplot as plt
@@ -46,16 +47,18 @@ Also, we define a delta-t for our integrator step.
 
     ################################################################################
     # Constants
-    mE = 5.9724e24  # Earth mass
-    mM = 0.07346e24  # Moon mass
-    lstar = 385000 #characteristic distance (km)
+    muE = c.MuEarth  # Earth gravitational parameter
+    muM = c.MuMoon # Moon gravitational parameter
+    lstar = c.LD #Earth-Moon characteristic distance (m)
 
     dt = 3.1415 / 10000
 
 
 Given the known system parameters, we can construct the dynamical model.
 ASSET is written generically from a low level, but we tailor it to astrodynamics by providing some pre-built models, such as the CR3BP.
-The instance of the governing ordinary differential equations (ODE) must be initialized with the system's mu value as shown.
+The instance of the governing ordinary differential equations (ODE) for the CR3BP model is instantiated with the gravitational parameters of the
+Earth and Moon (in :math:`\frac{m^3}{s^2})), along with a characteristic distance (in this case its the average distance between the Earth and Moon in meters).
+The non-dimensional gravity parameter, :math:`\mu`, of the system is stored within the CR3BP model as a member.
 Furthermore, the ODE has an integrator associated with it which we can instantiate with a fixed time step dt.
 The :code:`dt` here is the maximum allowable time step whenever the integrator is invoked.
 
@@ -63,8 +66,10 @@ The :code:`dt` here is the maximum allowable time step whenever the integrator i
 
     ################################################################################
     # System Dynamics
-    mu = mM / (mE + mM)
-    ode = CR3BP(mE, mM, lstar)
+    
+    ode = CR3BP(muE, muM, lstar)
+
+    mu = ode.mu
 
     # Create integrator (= propagator)
     odeItg = ode.integrator(dt)
@@ -325,6 +330,7 @@ Full Code
 
     import asset_asrl as ast
     from asset_asrl.Astro.AstroModels import CR3BP
+    import asset_asrl.Astro.Constants as c
     import numpy as np
     import copy
     import matplotlib.pyplot as plt
@@ -340,16 +346,18 @@ Full Code
 
     ################################################################################
     # Constants
-    mE = 5.9724e24  # Earth mass (kg)
-    mM = 0.07346e24  # Moon mass (kg)
-    lstar = 385000 #characteristic distance (km)
+    muE = c.MuEarth  # Earth gravitational parameter
+    muM = c.MuMoon # Moon gravitational parameter
+    lstar = c.LD #Earth-Moon characteristic distance (m)
 
     dt = 3.1415 / 10000
 
     ################################################################################
     # System Dynamics
-    mu = mM / (mE + mM)
-    ode = CR3BP(mE, mM, lstar)
+    
+    ode = CR3BP(muE, muM, lstar)
+
+    mu = ode.mu
 
     # Create integrator (= propagator)
     odeItg = ode.integrator(dt)

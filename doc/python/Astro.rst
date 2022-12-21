@@ -89,7 +89,7 @@ CR3BP Ballistic
 
 	mu1 = c.MuEarth #gravity parameter of Earth in m^3/s^2
 	mu2 = c.MuMoon #gravity parameter of Moon in m^3/s^2
-	lstar = 398600*1000.0 #Characteristic distance between Earth and Moon in meters
+	lstar = 385000*1000.0 #Characteristic distance between Earth and Moon in meters
 
 	ode = CR3BP(mu1, mu2, lstar)
 
@@ -108,7 +108,7 @@ CR3BP Low-Thrust
 
 	mu1 = c.MuEarth #gravity parameter of Earth in m^3/s^2
 	mu2 = c.MuMoon #gravity parameter of Moon in m^3/s^2
-	lstar = 398600*1000.0 #Characteristic distance between Earth and Moon in meters
+	lstar = 385000*1000.0 #Characteristic distance between Earth and Moon in meters
 
 	#Create the low-thrust model
 	ltacc = .01 #low thrust acceleration in m/s^2

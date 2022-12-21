@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath("@PROJECT_SOURCE_DIR@/src/"))
 # -- Project information -----------------------------------------------------
 
 project = "@PROJECT_NAME@"
-copyright = "2021, UA ASRL"
+copyright = "2022-2023, UA ASRL"
 author = "UA ASRL"
 
 # The full version, including alpha/beta/rc tags
