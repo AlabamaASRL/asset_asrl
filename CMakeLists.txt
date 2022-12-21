@@ -35,17 +35,9 @@ endif()
 ################################################################################
 
 
-#set(BUILD_SHARED_LIBS TRUE)      ### Link Dynamically against MKL and OpenMP
 set(LINK_TIME_OPT FALSE)          ### DO LTO - Recommended for full release
-set(BUILD_ASSET_ALL TRUE)         ### Build Full ASSET PYTHON Lib
-set(BUILD_ASSET_PROFILE FALSE)    ### Build Only minimal set for profiling
+set(CLANG_MAX_INLINE_DEPTH 500)
 set(BUILD_ASSET_WHEEL FALSE)      ### Copy binaries and build wheel for distribution
-set(ASSET_STATIC_ANALYSIS TRUE)  
-set(PYVERSION_EXACT, )
-
-#set(MKL_USE_TBB TRUE) #trash
-
-#-flto=thin /opt:lldltojobs=7
 
 
 ################################################################################
@@ -60,26 +52,25 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND RELEASE_FLAGS "-O2")
 list(APPEND RELEASE_FLAGS "-march=native")
 
-if(ASSET_STATIC_ANALYSIS AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-    list(APPEND RELEASE_FLAGS "-Wunused-variable")
-    list(APPEND RELEASE_FLAGS "-Wunused-value")
-    list(APPEND RELEASE_FLAGS "-Wunused-function")
-    list(APPEND RELEASE_FLAGS "-Wdivision-by-zero")
-    list(APPEND RELEASE_FLAGS "-Warray-bounds")
+if(WIN32)
+     list(APPEND RELEASE_FLAGS "/MD")
+     list(APPEND RELEASE_FLAGS "/DNDEBUG")
+     list(APPEND RELEASE_FLAGS "/O2")
+     list(APPEND RELEASE_FLAGS "/Ob2")
+     list(APPEND RELEASE_FLAGS "/arch:AVX2")
+     list(APPEND RELEASE_FLAGS "/fp:fast")
+     list(APPEND RELEASE_FLAGS "/GS-")
+     list(APPEND RELEASE_FLAGS "/Gw")
 endif()
-
-#list(APPEND RELEASE_FLAGS "-Wall")
 
 if(NOT WIN32)
     list(APPEND RELEASE_FLAGS "-mtune=native")
-
     # Debugging Flags
     set(DEBUG_FLAGS "-g" "-ggdb3")
 
     # Common Flags
     list(APPEND COMMON_FLAGS "-pthread")
 endif()
-
 
 
 if(LINK_TIME_OPT)
@@ -103,12 +94,9 @@ endif()
 
 
 
-
-
-
-set(MAX_INLINE_DEPTH 225)
 list(APPEND COMMON_FLAGS "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-mllvm>")
-list(APPEND COMMON_FLAGS "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-inline-threshold=${MAX_INLINE_DEPTH}>")
+list(APPEND COMMON_FLAGS "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-inline-threshold=${CLANG_MAX_INLINE_DEPTH}>")
+
 
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
@@ -118,10 +106,6 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     list(APPEND RELEASE_FLAGS "--param=large-function-insns=3500") #2700,2700
     list(APPEND RELEASE_FLAGS "--param=large-function-growth=120") #100,100
     list(APPEND RELEASE_FLAGS "--param=inline-min-speedup=10")     #30,15
-
-
-    #list(APPEND RELEASE_FLAGS "--param=max-inline-insns-single=200")  #70,200
-    #list(APPEND RELEASE_FLAGS "--param=max-inline-insns-auto=50")     #15,30
 endif()
 
 
@@ -225,10 +209,8 @@ elseif(APPLE)
 endif()
 
 find_package(MKL REQUIRED)
-#find_package(fmt REQUIRED)
 
 find_package(Python ${PYVERSION_EXACT} REQUIRED COMPONENTS Interpreter Development)
-#set(OpenMP_CXX_FLAGS "")
 
 # Set dependency variables
 set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${MKL_INCLUDE_DIRS})
@@ -238,18 +220,14 @@ if(UNIX)
 endif()
 
 
-#set(PYTHON_EXECUTABLE /Users/cgsandel/opt/anaconda3/bin/python)
 
 ################################################################################
 ################ Linker Flags ##################################################
 if(BUILD_SHARED_LIBS AND NOT APPLE AND NOT WIN32)  # Windows and Linux Dynamic Linking
-  #list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--no-as-needed")
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
-
 elseif(UNIX AND NOT APPLE)  # Linux Static Linking
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl,--end-group")
 elseif(APPLE)  # Apple Dynamic and Static Linking
-  #list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
 
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Xlinker -undefined -Xlinker dynamic_lookup")
 else()  # Windows Static Linking
@@ -277,16 +255,12 @@ if(NOT PIP_INSTALL)
 endif()
 
 message(STATUS "CMAKE DIR LOC" ${CMAKE_CURRENT_SOURCE_DIR})
-#message(STATUS ${LINUX_MKL_OMP_LIBRARY})
 message(STATUS ${OpenMP_CXX_FLAGS})
 message(STATUS ${OpenMP_CXX_LIBRARIES})
 
 ################################################################################
-## Our stuff
 # Code Directories
 add_subdirectory(src)
-# add_subdirectory(impl)
-
 
 # Documentation
 # READ: pip install sphinx,breathe,furo before trying to build docs
@@ -295,5 +269,3 @@ add_subdirectory(doc)
 # Formatting
 include(cmake/clang-format.cmake)
 
-# Testing
-#add_subdirectory(test)
