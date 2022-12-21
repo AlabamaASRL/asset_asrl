@@ -889,9 +889,38 @@ What happens if I add multiple objectives?
 A phase has no restriction of the number of objectives that may be added. If multiple objectives are added, the optimizer will implicitly sum all of their values.
 
 
-Notes on BlockConstant Controls
--------------------------------
+Reintegrating Solutions
+-----------------------
+Reintegration of a phase's trajectory can be accomplished using an ODE's integrator and the tabular
+form of the solution returned by the :code:`phase.returnTrajTable` method. To do this, supply the :code:`LGLInterpTable`
+object returned by :code:`returnTrajTable` to the constructor of the ODE's integrator type. This will automatically
+initialize the integrator to use the control history stored in the trajectory data as a time dependent control law
+when integrating. If the control history of the phase is not :code:`"BlockConstant"`, you can then call :code:`integrate_dense` to
+integrate from the initial full ODE input in the returned trajectory to the final time in the trajectory. This will
+still work if the control history was :code:`"BlockConstant"`, but the result mat have small local errors caused by the instantaneous jumps in the control
+history at the states where segments adjoin. This can be eliminated by using the second method, which integrates
+precisely between each time in the converged trajectory.
 
+.. code-block:: python
+
+    ConvTraj = phase.returnTraj()
+    Tab  = phase.returnTrajTable()
+    
+    integ = ode.integrator(.1,Tab)  # provide the returned table as arg to integrator
+    integ.setAbsTol(1.0e-13)
+    
+    # recall time is variable 6 for this ODE
+
+    ## Do this for non-BlockConstant control or if you don't care about exact accuracy
+    ## Integrate from initial ODE input to final time
+    ReintTraj1 = integ.integrate_dense(ConvTraj[0],ConvTraj[-1][6])
+    
+    ## This is to be preferred if control is BlockConstant
+    ## Integrate precisely between each time so integrator doesnt see instantaneous jump in control
+    ReintTraj2 = [ConvTraj[0]]    
+    for i in range(0,len(ConvTraj)-1):
+        Next = integ.integrate_dense(ReintTraj2[-1],ConvTraj[i+1][6])[1::]
+        ReintTraj2+=Next
 
 
 
