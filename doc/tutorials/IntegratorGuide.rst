@@ -4,12 +4,12 @@ Integrator Tutorial
 ===================
 
 In this section, we will describe usage of ASSET's integrator object. To 
-start we will define an ODE which we want to integrate using what we have learned from the
+start, we will define an ODE which we want to integrate using what we have learned from the
 previous two sections on :ref:`vector functions <vectorfunction-guide>` and :ref:`ODEs <ode-guide>`. 
-As concrete example we use a ballistic two body
-model whose state variables are the position and velocity relative to a central
-with gravitational parameter is :math:`\mu`. This ODE may be defined as shown below. 
-For this example,we will be working in canonical units where :math:`\mu = 1`.
+As an example, we use a ballistic two body
+model whose state variables are the position and velocity relative to a central body
+with gravitational parameter, :math:`\mu`. This ODE may be defined as shown below. 
+For this example, we will be working in canonical units where :math:`\mu = 1`.
 
 
 .. code-block:: python
@@ -113,12 +113,12 @@ yourself using the :code:`.setAbs/RelTol` methods as shown below.
 Integration
 ###########
 
-Now that we have covered initializing integrators, lets examine how we actually
-use them. By far the most used methods are :code:`.integrate` and :code:`integrate_dense`. Both methods,
+Now that we have covered initializing integrators, let's examine how we actually
+use them. By far the most used methods are :code:`.integrate` and :code:`integrate_dense`. Both methods
 take as the first input a full-state vector containing the initial state, time, controls, and
 parameters as well as the final time that we wish to integrate these initial inputs to.
  
-The :code:`.integrate` method  integrates this initial full-state input vector to final time :code:`tf` and returns just the full-state at the final time.
+The :code:`.integrate` method  integrates this initial full-state input vector to final time :code:`tf` and returns only the full-state at the final time.
 :code:`integrate_dense` takes the same inputs but returns all intermediate full-states 
 calculated by the integrator as single python list. We also call :code:`.integrate_dense` 
 with an additional arguments specifying that we would like to return :code:`N` evenly spaced steps
@@ -126,7 +126,7 @@ between :code:`t0` and :code:`tf` rather than the exact steps taken by the solve
 will be calculated from the exact steps taken by the integrator using a fifth order interpolation method. 
 For the :code:`"DOPRI54"` method, interpolated states have effectively
 the exact same error as the true steps taken by the integrator. However, for the :code:`"DOPRI87"` method, interpolated states
-will have the larger locals error owing the difference in order between the integration and interpolation. In practice
+will have the larger local error owing the difference in order between the integration and interpolation. In practice,
 the maximum local error at any point along the trajectory is typically 2 orders of magnitude larger than the integration tolerances. 
 
 
@@ -240,7 +240,7 @@ and maximum Newton iterations may be specified by modifying the :code:`EventTol`
 Derivatives
 ###########
 
-In ASSET integrators themselves are VectorFunctions, and have analytic first and second
+In ASSET, integrators themselves are VectorFunctions and have analytic first and second
 derivatives. The input arguments for the integrator when used as a VectorFunction consists of
 the full-state to be integrated and the final time :code:`tf,` and the output is the full-state at time :code:`tf`.
 For example, calling compute as shown below is equivalent to the normal integrate call. This also means
@@ -292,8 +292,8 @@ Parrallel Integration
 #####################
 
 Finally, for all previously discussed :code:`.integrate methods`, we have corresponding multi-threaded :code:`_parallel`
-version which will integrate lists of initial conditions and final times in parallel. In each case rather
-than passing a single initial state and final time we pass a lists of each. The outputs to the call will then be list
+version which will integrate lists of initial conditions and final times in parallel. In each case, rather
+than passing a single initial state and final time, we pass a lists of each. The outputs to the call will then be a list
 of length :code:`n` containing the outputs of the regular non-parallel method for the ith input state and final time.
 
 .. code-block:: python
@@ -328,10 +328,10 @@ of length :code:`n` containing the outputs of the regular non-parallel method fo
 Local Control Laws
 ##################
 
-In the previous examples we only examined how to integrate ODEs with no control,
-or constant controls, but often time we need to compute controls as a function
+In the previous examples we only examined how to integrate ODEs with no control
+or constant controls, but oftentimes we need to compute controls as a function
 of the local state or time. We can do this in ASSET by initializing our integrator with
-a control law. As an example, lets reuse our :code:`TwoBodyLTODE` ode from the :ref:`ode-guide` section.
+a control law. As an example, let's reuse our :code:`TwoBodyLTODE` ode from the :ref:`ode-guide` section.
 
 .. code-block:: python
 
