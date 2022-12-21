@@ -1,9 +1,6 @@
 [submodule "dep/pybind11"]
 	path = dep/pybind11
 	url = https://github.com/pybind/pybind11.git
-[submodule "dep/autodiff"]
-	path = dep/autodiff
-	url = https://github.com/autodiff/autodiff.git
 [submodule "dep/fmt"]
 	path = dep/fmt
 	url = https://github.com/fmtlib/fmt.git
