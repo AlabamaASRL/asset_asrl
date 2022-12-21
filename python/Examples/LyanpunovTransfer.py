@@ -77,7 +77,7 @@ Xs = np.linspace(x0[0],.83,10)
 cr3bp.vf().SpeedTest(TrajIG[0],100000)
 
 phase = cr3bp.phase(Tmodes.LGL3)
-phase.setTraj(TrajIG,128)
+phase.setTraj(TrajIG,1024)
 phase.addBoundaryValue(PhaseRegs.Front,[1,2,3,5,6],[0,0,0,0,0])
 phase.addBoundaryValue(PhaseRegs.Back, [1,3],[0,0])
 
@@ -101,8 +101,8 @@ plt.axis('equal')
 plt.show()
 
 
-T1 = Trajs[2]
-T2 = Trajs[6]
+T1 = Trajs[6]
+T2 = Trajs[2]
 
 Tcopy = []
 for T in T1:
@@ -115,13 +115,12 @@ for T in T1:
 cr3bp_lt   = oc.ode_6_3.ode(CR3BP(mu,True,.07),6,3)
 
 
-ltphase    = cr3bp_lt.phase(Tmodes.LGL3,Tcopy,512)
+ltphase    = cr3bp_lt.phase(Tmodes.LGL3,Tcopy,128)
 ltphase.setControlMode(oc.ControlModes.BlockConstant)
 
-Tab1 = oc.LGLInterpTable(cr3bp,6,0,Tmodes.LGL3,T1,200)
+Tab1 = oc.LGLInterpTable(cr3bp,6,0,Tmodes.LGL3,T1,1000)
 Tab1.makePeriodic()
-Tab2 = oc.LGLInterpTable(CR3BP(mu),6,0,Tmodes.LGL3,T2,200)
-Tab2 = oc.LGLInterpTable(6,T2,200)
+Tab2 = oc.LGLInterpTable(CR3BP(mu),6,0,Tmodes.LGL3,T2,1000)
 Tab2.makePeriodic()
 
 def RendFun(tab):
@@ -136,7 +135,7 @@ ltphase.setStaticParams([.01,.01])
 ltphase.addBoundaryValue(PhaseRegs.Front,[6],[0])
 ltphase.addEqualCon(PhaseRegs.Front,RendFun(Tab1),range(0,6),[],[0])
 ltphase.addEqualCon(PhaseRegs.Back, RendFun(Tab2),range(0,6),[],[1])
-ltphase.addLUNormBound(PhaseRegs.Path,[7,8,9],.01,1.0,1.0)
+ltphase.addLUNormBound(PhaseRegs.Path,[7,8,9],.001,1.0,1.0)
 ltphase.addIntegralObjective(Args(3).norm(),[7,8,9])
 
 #phase.optimizer.BoundFraction  = .99
