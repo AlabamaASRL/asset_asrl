@@ -22,17 +22,17 @@ Step-By-Step Guide
 	  ..  note:: 
   
 	  Follow the VS installation prompts until you are prompted to select any additional packages to install with VS. 
-	  Here we will want to select **Desktop development with C++**, however we are going to make one change to the defaults for the C++ install and **un-check** the option for "C++ Clang tools for Windows" (shown below).
+	  Here we will want to select **Desktop development with C++**; however, we are going to make one change to the defaults for the C++ install and **un-check** the option for "C++ Clang tools for Windows" (shown below).
 	  Also ensure that the "**C++ CMake Tools for Windows**" is checked.
 	  After doing this continue and finish the installation.
 
 		.. image:: _static/VSoptions.PNG
 
-#. Next we will install the LLVM Compiler Toolkit. An LLVM installation of at least LLVM-11 is required and we recommend using the latest version if possible.
+#. Next we will install the LLVM Compiler Toolkit. An LLVM installation of at least LLVM-11 is required, and we recommend using the latest version if possible.
 
 	  ..  note:: 
   
-	  Navigate to the LLVM github releases page and select your desired version and download the LLVM win64 installer (LLVM-15.0.0-win64.exe for example).
+	  Navigate to the LLVM github releases page, select your desired version, and download the LLVM win64 installer (LLVM-15.0.0-win64.exe for example).
 	  Proceed with the LLVM install, however ensure that the install option "**Do not add LLVM to the system PATH**" is checked.
 	  After finishing the LLVM installation we can proceed with installing Intel MKL.
 
@@ -58,17 +58,17 @@ Step-By-Step Guide
 	  .. warning::
 		If you are using an Alder Lake Intel CPU it may be beneficial to add the system variable "MKL_ENABLE_INSTRUCTIONS" with value "AVX" as well. 
 
-#. We also need to add a few variables to our Path 
+#. We also need to add a few variables to our Path. 
 
 	  ..  note:: 
   
-	  Add the following directories should be added to your system PATH
+	  The following directories should be added to your system PATH
 
 		.. image:: _static/anacondapath.PNG
 
 #. Now, clone the ASSET repo **ADD LINK** to where you want it to live.
 
-#. We are almost there! Now open VS and be sure to run it as administrator to avoid any conflicts when building the Python library. Additionally, ensure that your Python IDE is closed during this step. 
+#. We are almost there! Now, open VS and be sure to run it as administrator to avoid any conflicts when building the Python library. Additionally, ensure that your Python IDE is closed during this step. 
 	 
 	  .. note::
 
@@ -79,7 +79,7 @@ Step-By-Step Guide
 
 	  .. image:: _static/threads.PNG
 
-	  Now we are going to configure the ASSET CMake settings by going to the project dropdown menu and select "Configure ASSET".
+	  Now we are going to configure the ASSET CMake settings by going to the project dropdown menu and selecting "Configure ASSET".
 	  Wait until the output message from CMake says that it is finished and proceed to the build step.
 
 	  .. image:: _static/config.PNG
@@ -88,7 +88,7 @@ Step-By-Step Guide
 
 	  .. image:: _static/build.PNG
 
-#. With that you should have a succesfully built ASSET Python library and are ready to get started with the rest of the tutorials.
+#. With that you should have a successfully built ASSET Python library and are ready to get started with the rest of the tutorials.
 
 	  .. note::
 
@@ -102,7 +102,7 @@ Step-By-Step Guide
 
 Linux Installation
 ------------------
-The dependencies for Linux installations are similar to that of Windows, however we'll be using Visual Studio Code for our IDE and GCC for our compiler:
+The dependencies for Linux installations are similar to that of Windows; however, we'll be using Visual Studio Code for our IDE and GCC for our compiler:
 
 * `Visual Studio Code <https://code.visualstudio.com/download>`_
 	* `C/C++ Extension <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools>`_ 
@@ -114,7 +114,7 @@ The dependencies for Linux installations are similar to that of Windows, however
 
 Step-by-Step Guide
 ^^^^^^^^^^^^^^^^^^
-This guide was written assuming that the user has a working Ubuntu installation, however ASSET will work with other Linux distributions. Simply use the appropriate commands to install the required packages.
+This guide was written assuming that the user has a working Ubuntu installation; however, ASSET will work with other Linux distributions. Simply use the appropriate commands to install the required packages.
 If it is desired to use an IDE other than Visual Studio Code, it is still required that a version of CMake of at least 3.16 is installed.
 
 #. We will begin by installing Visual Studio Code (VSCode). 
@@ -123,7 +123,7 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
   
 	  Install VSC as desired, along with the **C/C++** and **CMake Tools** Extensions.
 
-#. Now install LLVM clang using the package manager.
+#. Now, install LLVM clang using the package manager.
 
 	.. code-block:: console
 
@@ -142,18 +142,18 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 	  ..  note:: 
 
-	  We recommend that you use the oneAPI gui installer through the Intel website, however if it necessary to install via the bash terminal those directions can be found `here <https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-using-package-managers/apt.html#apt>`_.
+	  We recommend that you use the oneAPI gui installer through the Intel website; however, if it necessary to install via the bash terminal, those directions can be found `here <https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-using-package-managers/apt.html#apt>`_.
 
 	  Install with the recommended settings and then proceed to installing Anaconda, if desired.
 	  If you are not using Anaconda you may skip the next step.
 
-#. Now download and install Anaconda.
+#. Now, download and install Anaconda.
 
 	  .. note::
 
 	  Be sure to follow the Anaconda installation directions to make Anaconda your default Python installation.
 
-#. Next we will be setting the required system variables to build ASSET.
+#. Next, we will set the required system variables to build ASSET.
 
 	  ..  note:: 
   
@@ -163,7 +163,7 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 		source /opt/intel/oneapi/setvars.sh
 
-#. After installing the dependencies now open VSCode to build ASSET.
+#. After installing the dependencies, open VSCode to build ASSET.
 	
 	  .. note::
 
@@ -181,7 +181,7 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 	  .. image:: _static/vscodebuild.PNG
 
-#. With that you should have a succesfully built ASSET Python library and are ready to get started with the rest of the tutorials.
+#. With that you should have a successfully built ASSET Python library and are ready to get started with the rest of the tutorials.
 
 	  .. note::
 
@@ -194,7 +194,7 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 Next Steps
 ----------
-If this is your first time using ASSET it's now recommended that you begin reviewing the remaining tutorials, such as :ref:`Vector Function Tutorial`. After you feel comfortable with some of ASSET's coding paradigms, a select set
+If this is your first time using ASSET, it's now recommended that you begin reviewing the remaining tutorials, such as :ref:`Vector Function Tutorial`. After you feel comfortable with some of ASSET's coding paradigms, a select set
 of tutorials that highlight ASSET's features and capabilities are provided in :ref:`Examples`.
 
 
