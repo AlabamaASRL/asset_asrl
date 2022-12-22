@@ -10,23 +10,6 @@ ODEArgs   = oc.ODEArguments
 
 
 
-
-
-
-
-############# Intro ########################
-'''
-In this section, we will explain the usage of ASSETs phase object. Blah Blah
-'''
-
-
-'''
-As introduction, we will walk through using phase to optimize a low-trhrust
-transfer between two-circular orbits using our TwoBodyLTODE model. In particular,
-we will attempt to compute a tarsnfer from a fixed circular orbit at radius 1,
-to a circular orbit at r = 2.
-'''
-
 class Brachistochrone(oc.ODEBase):
     
     def __init__(self,g):
@@ -75,13 +58,12 @@ for t in ts:
 phase = ode.phase("LGL3",Xs,32)
 phase.addBoundaryValue("Front",range(0,4),[x0,y0,v0,0])
 phase.addLUVarBound("Path",4,-0.1,2.00)
-
 phase.addBoundaryValue("Back",[0,1],[xf,yf])
 phase.addDeltaTimeObjective(1.0)
-#phase.optimizer.set_OptLSMode("L1")
 phase.optimize()
 
 Traj = phase.returnTraj()
+
 
 TT = np.array(Traj).T
 

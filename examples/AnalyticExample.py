@@ -6,7 +6,11 @@ import matplotlib.pyplot as plt
 vf = ast.VectorFunctions
 oc = ast.OptimalControl
 Args = vf.Arguments
+'''
+Source for problem formulation
+https://www.hindawi.com/journals/aaa/2014/851720/
 
+'''
 
 class AnalyticODE(oc.ODEBase):
     def __init__(self):
@@ -41,11 +45,13 @@ if __name__ == "__main__":
     tf = 1.0
     u0 = .00
     
-    nsegs = 50
+    nsegs = 20
+    
+    
     
     TrajIG = [[x0,t,u0] for t in np.linspace(t0,tf,100)]
     
-    phase = ode.phase("LGL5",TrajIG,nsegs)
+    phase = ode.phase("LGL3",TrajIG,nsegs)
     phase.addBoundaryValue("Front",[0,1],[x0,t0])
     phase.addBoundaryValue("Back", [1],  [tf])
     phase.addIntegralObjective(AnalyticODE.obj(),[0,2])
@@ -72,7 +78,10 @@ if __name__ == "__main__":
     Lstar = 2*np.cosh(1-t)*np.tanh(1-t)/np.cosh(1)
     ### Analytic control
     Ustar = -(np.tanh(1-t)+.5)*np.cosh(1-t)/np.cosh(1)
-        
+    
+    T[2]=Ustar
+    
+
     plt.plot(t,L,label   =r'$L$' + '-Collocation',marker='o')
     plt.plot(t,Lstar,label   =r'$L$' +'-Analytic')
     

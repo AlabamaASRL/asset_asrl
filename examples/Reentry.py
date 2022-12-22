@@ -5,13 +5,10 @@ import matplotlib.pyplot as plt
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
 Args      = vf.Arguments
-Tmodes    = oc.TranscriptionModes
-PhaseRegs = oc.PhaseRegionFlags
-Cmodes    = oc.ControlModes
 
 '''
 Space Shuttle Reentry
-https://openmdao.github.io/dymos/examples/reentry/reentry.html
+Betts, J.T. Practical methods for Optimal Control and Estimation Using Nonlinear Programming, Cambridge University Press, 2009
 '''
 
 ################### Non Dimensionalize ##################################
@@ -163,7 +160,7 @@ def Plot(Traj1,Traj2):
 
 if __name__ == "__main__":
     ##########################################################################
-    tf  = 1800/Tstar
+    tf  = 1000/Tstar
 
     ht0  = 260000/Lstar
     htf  = 80000 /Lstar
@@ -196,8 +193,7 @@ if __name__ == "__main__":
 
     ode = ShuttleReentry()
     
-
-    phase = ode.phase("LGL3",TrajIG,41)
+    phase = ode.phase("LGL3",TrajIG,40)
     
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
     phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
@@ -205,53 +201,31 @@ if __name__ == "__main__":
     phase.addLUVarBound("Path",7,np.deg2rad(-90.0),np.deg2rad(1.0) ,1.0)
     phase.addUpperDeltaTimeBound(tmax,1.0)
     phase.addBoundaryValue("Back" ,[0,2,3],[htf,vtf,gammatf])
-    phase.addDeltaVarObjective(1,-10.0)
-    phase.setThreads(4,4)
-    ## Our IG is trash, so i turn on line search
-    phase.optimizer.set_SoeLSMode("L1")
+    phase.addDeltaVarObjective(1,-1.0)
+    phase.setThreads(8,8)
     
+    ## Our IG is bad, so i turn on line search
+    phase.optimizer.set_SoeLSMode("L1")
     phase.optimizer.set_OptLSMode("L1")
-    #phase.optimizer.set_MaxIters(50)
     phase.optimizer.set_PrintLevel(1)
     
-    ## IG is trash, solve first before optimize
-    #phase.solve_optimize()
+    ## IG is bad, solve first before optimize
     phase.solve_optimize()
 
     #Refine to more segments and Reoptimize
-    phase.refineTrajManual([0,.5,1],[120,150])
-    #phase.refineTrajManual(300)
-
+    phase.refineTrajManual(300)
     phase.optimize()
 
     Traj1 = phase.returnTraj()
     
-    Tab1 = phase.returnTrajTable()
-   
-    
-    
-    ## Add in Heating Rate Constraint
+    ## Add in Heating Rate Constraint, scale so rhs is order 1
     phase.addUpperFuncBound("Path",QFunc(),[0,2,6],Qlimit,1/Qlimit)
     phase.optimize()
     
-    
-    integ = ode.integrator(.01,Tab1)
-    
-    Tfs = integ.integrate_parallel([Traj1[0]]*1000,[Traj1[-1][5]]*1000,16)
-    
-    for T in Tfs:
-        print(T-Traj1[-1])
-    
-    Traj1r = integ.integrate_dense(Traj1[0],Traj1[-1][5])
-    
-    
-    
-    print(Traj1r[-1]-Traj1[-1]) 
-    #Traj1 = integ.integrate_dense(Traj1[0],Traj1[-1][5])
     Traj2 = phase.returnTraj()
     
-    print(Traj1[-1][5]*Tstar,Traj1[-1][1]*180/np.pi)
-    print(Traj2[-1][5]*Tstar,Traj2[-1][1]*180/np.pi)
+    print("Final Time:",Traj1[-1][5]*Tstar,"(s) , Final Cross Range:",Traj1[-1][1]*180/np.pi, " deg")
+    print("Final Time:",Traj2[-1][5]*Tstar,"(s) , Final Cross Range:",Traj2[-1][1]*180/np.pi, " deg")
    
 
     Plot(Traj1,Traj2)

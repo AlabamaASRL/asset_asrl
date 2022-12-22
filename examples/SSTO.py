@@ -1,5 +1,5 @@
 import numpy as np
-import asset as ast
+import asset_asrl as ast
 import matplotlib.pyplot as plt
 
 vf        = ast.VectorFunctions
@@ -10,7 +10,7 @@ PhaseRegs = oc.PhaseRegionFlags
 Cmodes = oc.ControlModes
 
 
-class SSTO(oc.ode_x_u.ode):
+class SSTO(oc.ODEBase):
     def __init__(self,F_T,Isp,g,rho_ref,h_scale,CDA):
         ############################################################
         args  = oc.ODEArguments(5,1)

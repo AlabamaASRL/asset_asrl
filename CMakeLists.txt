@@ -165,7 +165,6 @@ if(APPLE)
 endif()
 # Set up submodule dependencies
 include_directories(dep/eigen)
-include_directories(dep/autodiff)
 include_directories(dep/fmt/include)
 
 add_subdirectory(dep)

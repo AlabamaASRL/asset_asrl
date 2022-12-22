@@ -117,19 +117,8 @@ def GetManifold(OrbitIn,h,T,Stable=True):
     if(not Stable):ts = -ts
     events = [(CrossMoon(),0,1),
               (Cull(),0,1)]
-    print("S")
-    import time
-    
-    t00=time.perf_counter()
+   
     Results = integ.integrate_dense_parallel(EigIGs,ts,events,16)
-    tff=time.perf_counter()
-    
-    print(tff-t00)
-    
-    t00=time.perf_counter()
-    Results8 = integ.integrate_parallel(EigIGs,ts,events,16)
-    tff=time.perf_counter()
-    print(tff-t00)
     
     Manifolds=[]
     for Result in Results:
@@ -139,24 +128,12 @@ def GetManifold(OrbitIn,h,T,Stable=True):
             Traj.append(eventlocs[0][0])
             Manifolds.append(Traj)
         
-        
-    
-    
     return Manifolds
         
     
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
     
-def GetBest(Orbs1,Orbs2):
+def FindClosestConnection(Orbs1,Orbs2):
     distij =[]
     for i in range(0,len(Orbs1)):
         for j in range(0,len(Orbs2)):
@@ -166,20 +143,7 @@ def GetBest(Orbs1,Orbs2):
     
     return Orbs1[distij[0][1]],Orbs2[distij[0][2]]
             
-import sys    
 
-def Func(Traj):
-    
-    tab = oc.LGLInterpTable(6,Traj,10000)
-    
-    func = oc.InterpFunction(tab,range(0,6))
-    
-    #del(tab)
-    
-    return func
-    
-    
-import gc   
 
 if __name__ == "__main__":
     
@@ -193,16 +157,8 @@ if __name__ == "__main__":
     MansL1 = GetManifold(CL1,1e-5,9.0)
     MansL2 = GetManifold(CL2,1e-5,12.0,False)
     
-    func = Func(CL1)
-    
-
-    import time
-    t00=time.perf_counter()
-    O1,O2 = GetBest(MansL1,MansL2)
-    tff=time.perf_counter()
-    
-    print(tff-t00)
-    
+    ## All the time is spent here, there is probably a better way to do this
+    O1,O2 = FindClosestConnection(MansL1,MansL2)
     
     plot = CRPlot(ode,'Earth','Moon','green','grey')
     
@@ -215,8 +171,6 @@ if __name__ == "__main__":
 
     plot.addTraj(CL2,"L2C",'r',linestyle='solid')
     plot.addTraj(O2,"O2",'r',linestyle='solid')
-
-    
 
     fig = plt.figure()
     ax = plt.subplot()

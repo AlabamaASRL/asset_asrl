@@ -5,12 +5,9 @@ import matplotlib.pyplot as plt
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
 Args      = vf.Arguments
-Tmodes    = oc.TranscriptionModes
-PhaseRegs = oc.PhaseRegionFlags
-Cmodes    = oc.ControlModes
 
 '''
-
+Source for problem formulation
 https://www.hindawi.com/journals/aaa/2014/851720/
 
 '''
@@ -29,14 +26,11 @@ class LTModel(oc.ODEBase):
         
         u,alpha = XtU.UVec().tolist()
        
-        
-       
         rdot = vr
         thetadot =  vt/r
         vrdot    =  (vt**2)/r - 1/(r**2) + amax*u*vf.sin(alpha)
         vtdot    = -(vt*vr)/r            + amax*u*vf.cos(alpha)
         
-       
         ode = vf.stack([rdot,thetadot,vrdot,vtdot])
         ##############################################################
         super().__init__(ode,Xvars,Uvars)
@@ -137,41 +131,31 @@ if __name__ == "__main__":
     
     
     phase = ode.phase("LGL3",ToptIG,400)
-    #phase.setControlMode("BlockConstant")
     phase.addBoundaryValue("Front",range(0,5),IState[0:5])
-    phase.addLUVarBound("Path",5, 0.001, 1, 100.0)
+    phase.addLUVarBound("Path",5, 0.0001, 1, 100.0)
     phase.addLUVarBound("Path",6, -2*np.pi, 2*np.pi, 1.0)
 
     phase.addBoundaryValue("Back",[0,2,3],[RF,0,VF])
     
-    phase.optimizer.PrintLevel = 0
-    phase.optimizer.MaxAccIters = 500
-    phase.optimizer.MaxIters = 1000
-    phase.optimizer.BoundFraction = .997
+    phase.optimizer.set_PrintLevel(1)
+    phase.optimizer.set_MaxAccIters(500)
+    phase.optimizer.set_MaxIters(1000)
+    phase.optimizer.set_BoundFraction(.997)
     phase.optimizer.deltaH = 1.0e-6
    
-    
-    
     # Scale to be order 1 based on initial guess
-    dtscale = 1/ToptIG[-1][4]
-    phase.addDeltaTimeObjective(dtscale)
+    phase.addDeltaTimeObjective(1/100)
     phase.solve_optimize_solve()
     
     TimeOptimal = phase.returnTraj()
     
     phase.removeStateObjective(0)
     
-    phase.setTraj(MoptIG,800)
-    
-    # Scale to be order 1 based on initial guess
-    integscale = 1/MoptIG[-1][4]
-    print(integscale)
+    phase.setTraj(MoptIG,400)
     phase.addIntegralObjective(Args(1)[0]/100,[5])
     
-    #phase.addDeltaTimeEqualCon(122.3)
-    #phase.optimizer.set_OptLSMode("L1")
     phase.optimize_solve()
-    phase.refineTrajManual(900)
+    phase.refineTrajManual(800)
     phase.optimize_solve()
     MassOptimal = phase.returnTraj()
     

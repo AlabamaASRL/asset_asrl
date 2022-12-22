@@ -1,5 +1,5 @@
 import numpy as np
-import asset as ast
+import asset_asrl as ast
 import matplotlib.pyplot as plt
 
 vf        = ast.VectorFunctions
@@ -37,7 +37,7 @@ mf   = 1
 
 
 
-class GoddardRocket(oc.ode_x_u.ode):
+class GoddardRocket(oc.ODEBase):
     def __init__(self,sigma,c,h_ref,Tmag, g):
         ############################################################
         args  = oc.ODEArguments(3,1)

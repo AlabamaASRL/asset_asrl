@@ -2,14 +2,31 @@ import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
 from scipy.spatial.transform import Rotation as R
-import seaborn as sns
 
+'''
+
+Minumum time docking with an out of control target taken from:
+
+J. Michael, K. Chudej, M. Gerdts, and J. Panncek, Optimal Rendezvous
+Path Planning to an Uncontrolled Tumbling Target, in Proceedings of the IFAC
+ACA2013 Conference, W¨urzburg, Germany, Sept. 2013.
+
+I have reformulated the quaternions so that they transform from body to global frame, and
+changed the inital conditions to reflect this. Ive also reforumalted thrust controls to be
+in the body frame rather than global frame and updated path constraint accordingly. 
+
+I also solve this problem in two ways. In the first (Form1) I let the freely spinning
+target be part of the state variables as in the reference. However, since its
+motion is uncontrolled we can actually eliminate it from the ODE and turn the
+rendezvous constraint into a time dependent boundary condtion using an interpoaltion
+table. This problem (Form2) is much smaller and solves faster yielding the same results.
+
+'''
 norm      = np.linalg.norm
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
 Args      = vf.Arguments
 solvs     = ast.Solvers
-Tmodes    =ast.OptimalControl.TranscriptionModes
 
 ##############################################################################
 Lstar   =  10.0         ## m
@@ -92,7 +109,7 @@ class RelDynModel(oc.ODEBase):
         
 
 ##############################################################################
-class RelDynModel2(oc.ode_x_u.ode):
+class RelDynModel2(oc.ODEBase):
     def __init__(self,I1,n,m):
         Xvars = 13
         Uvars = 6
@@ -299,6 +316,8 @@ def Animate(Traj):
     
 def Form1():
     
+
+    
     X0 = np.zeros((27))
     X0[1] = -10.0/Lstar
     X0[9]=1
@@ -308,6 +327,10 @@ def Form1():
     X0[18] = .0349*Tstar
     X0[19] = .017453*Tstar
     
+    
+    ## Rough initial guess for trajectory
+    ## commment out optimize to see what it looks like
+
     X0[21]  = -MaxThrust
     X0[22]  =  MaxThrust
     X0[26]  = -MaxTorque/4
@@ -326,38 +349,18 @@ def Form1():
     phase.addLUVarBounds('Path',[24,25,26],-MaxTorque,MaxTorque,1)
     phase.addLowerNormBound('Path',[0,1,2],2*Srad,1.0)
     phase.addEqualCon('Back',RendCon(Udvec),range(0,20))
+    phase.addDeltaTimeObjective(1.0)
+    phase.optimizer.set_BoundFraction(.995)
+    phase.optimizer.set_PrintLevel(1)
     
-    phase.addDeltaTimeObjective(1)
-   
-    phase.optimizer.BoundFraction = .995
-    phase.optimizer.PrintLevel = 1
-
     phase.optimize()
    
     Traj = phase.returnTraj()
     
-    R1 = []
-    for T in Traj:
-        V = np.zeros((7))
-        u1 = np.dot(R.from_quat(T[6:10]).as_matrix(),Udvec)
-        u2 = np.dot(R.from_quat(T[13:17]).as_matrix(),Udvec)
-        
-        x,y,z = T[0:3]
-       
-        r1 = u1 + T[0:3] - u2
-        R1.append([np.linalg.norm(r1),T[20]])
-        
-    R1 = np.array(R1).T
-    plt.plot(R1[1],R1[0])
-    plt.show()
-        
-        
-        
-    
-    
+
     tf = Traj[-1][20]*Tstar
 
-    print(tf)
+    print("Final Time: ",tf," s")
 
     Animate(Traj)
     
@@ -368,7 +371,7 @@ def Form2():
     integ_torquefree = ode_torquefree.integrator(.01)
     integ_torquefree.Adaptive=True
     
-    
+    ## generate target trajectory for boundary condition
     SimTime = 600/Tstar
     
     TargetTraj_IS = np.zeros((8))
@@ -379,7 +382,7 @@ def Form2():
     TargetTraj_IS[6] = .017453*Tstar
     
     TargetTraj = integ_torquefree.integrate_dense(TargetTraj_IS,SimTime,2000)
-    TargetTab  = oc.LGLInterpTable(ode_torquefree.vf(),7,0,Tmodes.LGL3,TargetTraj,2000)
+    TargetTab  = oc.LGLInterpTable(ode_torquefree.vf(),7,0,TargetTraj)
     
     #########################################################################
     
@@ -406,29 +409,23 @@ def Form2():
     phase.addLUVarBounds('Path',[17,18,19],-MaxTorque,MaxTorque,1)
     phase.addLowerNormBound('Path',[0,1,2],2*Srad,1.0)
     phase.addEqualCon('Last',RendCon2(Udvec,TargetTab),range(0,14))
+    phase.addUpperDeltaTimeBound(SimTime)
     phase.addDeltaTimeObjective(1.0)
-    #phase.optimizer.set_OptLSMode("L1")
-    phase.optimizer.MaxLSIters = 2
-    phase.optimizer.BoundFraction = .995
-    #phase.optimizer.EContol = 1.0e-9
-    phase.optimizer.deltaH = 1.0e-5
-    phase.optimizer.PrintLevel = 0
+    phase.optimizer.set_BoundFraction(.995)
+    
+    phase.optimizer.set_PrintLevel(1)
     phase.optimize()
-    
-    
     
     Traj = phase.returnTraj()
     
     tf = Traj[-1][13]*Tstar
 
-    print(tf)
-    
-    
+    print("Final Time: ",tf," s")    
 
     
 if __name__ == "__main__":
 
-    #Form2()
+    Form2()
     Form1()
 
 

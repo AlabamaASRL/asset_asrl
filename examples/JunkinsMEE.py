@@ -4,7 +4,7 @@ import asset_asrl as ast
 from asset_asrl.Astro.Extensions.ThrusterModels import CSIThruster
 from asset_asrl.Astro.AstroModels import MEETwoBody_CSI
  
-from FramePlot import TBPlot,plt,colpal
+#from FramePlot import TBPlot,plt,colpal
 import asset_asrl.Astro.Constants as c
 
 
@@ -57,7 +57,7 @@ def Run2():
         
     TrajIG = Traj
     
-    phase = ode.phase("LGL5",Traj,128)
+    phase = ode.phase("LGL3",Traj,128)
     phase.integrator.setStepSizes(.3,.00001,10)
     phase.setControlMode("BlockConstant")
     phase.addBoundaryValue("Front",range(0,8),Istate[0:8])
@@ -65,7 +65,8 @@ def Run2():
     phase.addBoundaryValue("Back",[7],[tf])
     phase.addBoundaryValue("Back",range(0,6),XF[0:6])
     phase.addValueObjective("Back",6,-1.0)
-    
+    #phase.addIntegralObjective(Args(3).norm(),range(8,11))
+
     phase.optimizer.set_OptLSMode("AUGLANG")
     phase.optimizer.set_MaxLSIters(2)
     phase.optimizer.set_MaxAccIters(200)
