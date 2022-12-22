@@ -55,7 +55,7 @@ Step-By-Step Guide
 	  .. image:: _static/anacondainstall.PNG
 
 	  Use pip to install SpiceyPy, Sphinx, and Furo.
-	  After installing anaconda, it may be necessary to upgrade numpy through pip, due to potential compatibibility issues with numpy's version of libomp and Intel MKL's libomp.
+	  After installing anaconda, it may be necessary to upgrade numpy through pip, due to potential compatibibility issues with numpy's version of libiomp5md.dll and Intel MKL's version.
 
 	  .. code-bloc:: console
 
@@ -172,6 +172,14 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 	  .. image:: _static/anacondainstall.PNG
 
       Use pip to install SpiceyPy, Sphinx, and Furo.
+
+	  .. warning::
+
+	  if you are using anaconda rather than a generic python installation, it may be necessary to upgrade numpy through pip, due to potential compatibibility issues with numpy's version of libiomp5md.dll and Intel MKL's version.
+
+	  .. code-bloc:: console
+
+	  conda install nomkl
 
 #. Next, we will set the required system variables to build ASSET.
 
