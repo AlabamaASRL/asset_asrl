@@ -1,17 +1,11 @@
 import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
-
-#### PIP INSTALL Basemap if you dont have it
-from mpl_toolkits.basemap import Basemap
+from mpl_toolkits.basemap import Basemap ## PIP INSTALL Basemap if you dont have it
 
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
 Args      = vf.Arguments
-Tmodes    = oc.TranscriptionModes
-PhaseRegs = oc.PhaseRegionFlags
-Cmodes    = oc.ControlModes
-
 
 ############################################################################
 
@@ -103,33 +97,39 @@ mf_phase4 = m0_phase4 - PM2
 class RocketODE(oc.ODEBase):
     def __init__(self,T,mdot):
         ####################################################
-        args  = oc.ODEArguments(7,3)
+        XtU  = oc.ODEArguments(7,3)
         
-        r = args.XVec().head3()
-        v = args.XVec().segment3(3)
-        m = args.XVar(6)
-        u = args.tail3().normalized()
+        R = XtU.XVec().head3()
+        V = XtU.XVec().segment3(3)
+        m = XtU.XVar(6)
         
-        h       = r.norm() - Re
+        # We normalize the control direction in the dynamics so it doesnt have
+        # to be done as a path constraint
+        u = XtU.UVec().normalized()
+        
+        h       = R.norm() - Re
         rho     = RhoAir * vf.exp(-h / h_scale)
-        vr      = v + r.cross(np.array([0,0,We]))
-        D       = (-0.5*CD*S)*rho*(vr*vr.norm())
+        Vr      = V + R.cross(np.array([0,0,We]))
         
-        rdot    =  v
-        vdot    =  (-mu)*r.normalized_power3() + (T*u + D)/m
+        ## We cant let let Vr be exactly 0, derivative of norm of 0 vector is NAN
+        ## Will handle this in inititial conditions
+        D       = (-0.5*CD*S)*rho*(Vr*Vr.norm())
         
-        ode = vf.stack(rdot,vdot,-mdot)
+        Rdot    =  V
+        Vdot    =  (-mu)*R.normalized_power3() + (T*u + D)/m
+        
+        ode = vf.stack(Rdot,Vdot,-mdot)
         ####################################################
         super().__init__(ode,7,3)
 
 def TargetOrbit(at,et,it, Ot,Wt):
-    rvec,vvec = Args(6).tolist([(0,3),(3,3)])
+    R,V = Args(6).tolist([(0,3),(3,3)])
     
-    r    = rvec.norm()
-    v    = vvec.norm()
+    r    = R.norm()
+    v    = V.norm()
     
     #Angular momentum vector
-    hvec = rvec.cross(vvec)
+    hvec = R.cross(V)
     
     #Node vector
     nvec = vf.cross([0,0,1],hvec)
@@ -140,7 +140,7 @@ def TargetOrbit(at,et,it, Ot,Wt):
     # Semi-major axis
     a =  -0.5*mu/eps
     
-    evec = vvec.cross(hvec)/mu - rvec.normalized()
+    evec = V.cross(hvec)/mu - R.normalized()
     #Eccentrcity
     e = evec.norm()
     
@@ -178,7 +178,7 @@ def Plot(Phase1,Phase2,Phase3,Phase4):
             if(x>0):long+=0
             elif(y>0):long+=180
             else:long-=180
-            LLs.append([lat,long-80.649])
+            LLs.append([lat,long-80.649]) 
         return LLs
 
 
@@ -257,10 +257,12 @@ if __name__ == "__main__":
 
     ast.SoftwareInfo()
     
-    at = 24361140 /Lstar
-    et = .7308
-    Ot = np.deg2rad(269.8)
-    Wt = np.deg2rad(130.5)
+    
+    # Target orbital elements
+    at     = 24361140 /Lstar
+    et     = .7308
+    Ot     = np.deg2rad(269.8)
+    Wt     = np.deg2rad(130.5)
     istart = np.deg2rad(28.5)
     
     
@@ -268,15 +270,14 @@ if __name__ == "__main__":
     y0[0:3] = np.array([np.cos(istart),0,np.sin(istart)])*Re
     y0[3:6] =-np.cross(y0[0:3],np.array([0,0,We]))
     y0[3]  += 0.00001/Vstar  # cant be exactly zero,our drag equation's derivative would NAN !!!
-    print(y0[3:6]*Vstar)
     
+    print(y0[3:6])
     
-    ## M0 is the only magic number in the script, just trying to find
-    ## an intital terminal state that is along the orbit, downrange from KSC in
-    ## the correct direction and doesnt pass through earth when LERPed from KSC
-    M0   =-.05
-    #M0   =-.00
-    OEF  = [at,et,istart,Ot,Wt,M0]
+    ## MF is the only magic number in the script, just trying to find
+    ## a mean anomaly such that the terminal state on the orbit is downrange
+    ## eastward from KSC in and doesnt pass through earth when LERPed from KSC
+    MF   =-.05
+    OEF  = [at,et,istart,Ot,Wt,MF]
     yf   = ast.Astro.classic_to_cartesian(OEF,mu)
     
     ts   = np.linspace(0,tf_phase4,1000)
@@ -291,30 +292,22 @@ if __name__ == "__main__":
         X = np.zeros((11))
         X[0:6]= y0 + (yf-y0)*(t/ts[-1])
         X[7]  = t
-        
+        X[8:11]= np.array([0,1,0])
         if(t<tf_phase1):
             m= m0_phase1 + (mf_phase1-m0_phase1)*(t/tf_phase1)
-            #X[0:6]=y0
             X[6]=m
-            X[8:11]= vf.normalize([0,1,0])
             IG1.append(X)
         elif(t<tf_phase2):
             m= m0_phase2 + (mf_phase2-m0_phase2)*(( t-tf_phase1) / (tf_phase2 - tf_phase1))
-            #X[0:6]=y0
             X[6]=m
-            X[8:11]= vf.normalize([0,1,0])
             IG2.append(X)
         elif(t<tf_phase3):
             m= m0_phase3 + (mf_phase3-m0_phase3)*(( t-tf_phase2) / (tf_phase3 - tf_phase2))
-            #X[0:6]=yf
             X[6]=m
-            X[8:11]= vf.normalize([0,1,0])
             IG3.append(X)
         elif(t<tf_phase4):
-            #X[0:6]=yf
             m= m0_phase4 + (mf_phase4-m0_phase4)*(( t-tf_phase3) / (tf_phase4 - tf_phase3))
             X[6]=m
-            X[8:11]= vf.normalize([0,1,0])
             IG4.append(X)
         
     
@@ -327,19 +320,23 @@ if __name__ == "__main__":
     tmode = "LGL3"
     cmode = "HighestOrderSpline"
     
-    nsegs1 = 32
-    nsegs2 = 32
-    nsegs3 = 32
-    nsegs4 = 32
+    nsegs1 = 40
+    nsegs2 = 40
+    nsegs3 = 40
+    nsegs4 = 40
     
     #########################################
     phase1 = ode1.phase(tmode,IG1,nsegs1)
     phase1.setControlMode(cmode)
+    
+    ## Thrust direction is normalized in dynamics, so we dont
+    ## have to enforce norm of 1 on controls. For good measure,
+    ## we do bound the maginitude to prevent it from becoming too large or small
     phase1.addLUNormBound("Path",[8,9,10],.5,1.5)
     phase1.addBoundaryValue("Front",range(0,8),IG1[0][0:8])
     
     #Dont want our bound to interfere with initial condition which starts at Re
-    #so i relax the Earth radius constraint slightly
+    #so i relax the Earth radius constraint slightly here
     phase1.addLowerNormBound("Path",[0,1,2],Re*.999999)
     phase1.addBoundaryValue("Back",[7],[tf_phase1])
     
@@ -349,6 +346,10 @@ if __name__ == "__main__":
     
     phase2.addLowerNormBound("Path",[0,1,2],Re)
     phase2.addLUNormBound("Path",[8,9,10],.5,1.5)
+    
+    ## Fixing initial mass and final time on first 3 phases.
+    ## Since the engine cant be throttled, constraining final mass
+    ## as well would be redundant and overconstrained
     phase2.addBoundaryValue("Front",[6], [m0_phase2])
     phase2.addBoundaryValue("Back", [7] ,[tf_phase2])
     
@@ -368,12 +369,12 @@ if __name__ == "__main__":
     phase4.addLowerNormBound("Path",[0,1,2],Re)
     phase4.addLUNormBound("Path",[8,9,10],.5,1.5)
     phase4.addBoundaryValue("Front",[6], [m0_phase4])
-    phase4.addValueObjective("Back",6,-1.0)
     phase4.addUpperVarBound("Back",7,tf_phase4,1.0)
     phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),range(0,6))
+    # Maximize final mass
+    phase4.addValueObjective("Back",6,-1.0)
+    
     #########################################
-    
-    
     
     ocp = oc.OptimalControlProblem()
     ocp.addPhase(phase1)
@@ -391,9 +392,8 @@ if __name__ == "__main__":
     ocp.optimizer.set_PrintLevel(1)
 
     ocp.solve_optimize()
-    #########################################
     
-    
+
     Phase1Traj = phase1.returnTraj()  # or ocp.Phase(i).returnTraj()
     Phase2Traj = phase2.returnTraj()
     Phase3Traj = phase3.returnTraj()
@@ -403,7 +403,7 @@ if __name__ == "__main__":
     print("Final Mass = ",Phase4Traj[-1][6]*Mstar,' kg')
 
     Plot(Phase1Traj,Phase2Traj,Phase3Traj,Phase4Traj)
-
+    #########################################
 
 
 

@@ -81,6 +81,8 @@ add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
                    ${CMAKE_CURRENT_SOURCE_DIR}/index.rst
                    ${CMAKE_CURRENT_SOURCE_DIR}/conf.py.in
                    ${CMAKE_CURRENT_SOURCE_DIR}/tutorials
+                   ${CMAKE_CURRENT_SOURCE_DIR}/examples
+                   ${CMAKE_CURRENT_SOURCE_DIR}/python
                    COMMENT "Generating Sphinx HTML")
 
 add_custom_target(sphinx ALL DEPENDS ${SPHINX_INDEX_FILE})

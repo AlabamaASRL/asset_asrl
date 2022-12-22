@@ -15,7 +15,7 @@ vf = ast.VectorFunctions
 oc = ast.OptimalControl
 
 Args = vf.Arguments
-sp.furnsh('BasicKernel.txt')
+sp.furnsh('standard.html')
 
 
 JD0 = date.date_to_jd(2023, 6, 14)
@@ -97,15 +97,7 @@ def DVCon():
     return (V1 + DV - V2)
 
 
-#ocp.setLinkParams(1*np.ones((9))/frame.vstar)
 
-'''
-ocp.addLinkEqualCon(DVCon(),"BackToFront",
-                [[0,1],[1,2],[2,3]],
-                [[3,4,5],[3,4,5]],
-                [],[],
-                [range(0,3),range(3,6),range(6,9)])
-'''
 
 for i in range(0,3):
     p0 = ocp.Phase(i)
@@ -121,17 +113,12 @@ for i in range(0,3):
                         i  ,"Last", range(3,6),
                         i+1,"First",range(3,6))
 
-#ocp.addLinkParamObjective(Args(3).norm()*30,[range(0,3),range(3,6),range(6,9)])
-#ocp.addLinkParamInequalCon(.001/frame.vstar - Args(3).norm(),[range(0,3),range(3,6),range(6,9)])
 
 ocp.optimizer.set_OptLSMode("AUGLANG")
-
 ocp.optimizer.MaxLSIters = 2
 ocp.optimizer.MaxAccIters = 100
 ocp.optimizer.deltaH = 1.0e-6
 ocp.optimizer.BoundFraction = .995
-
-
 ocp.optimize()
 
 

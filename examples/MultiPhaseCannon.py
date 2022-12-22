@@ -19,7 +19,6 @@ Rhostar =  Mstar/Lstar**3
 Estar   =  Mstar*(Vstar**2)
 
 
-
 CD      = .5
 RhoAir  = 1.225     /Rhostar
 RhoIron = 7870      /Rhostar
@@ -182,33 +181,14 @@ if __name__ == "__main__":
     ocp.addPhase(aphase)
     ocp.addPhase(dphase)
     
-    '''
+    
     # Enforce continuatiy in time dependent vars
     ocp.addForwardLinkEqualCon(aphase,dphase,[0,1,2,3,4])
-    
-    Make ODE params for both phases equal
     ocp.addDirectLinkEqualCon(0,"ODEParams",[0],
                               1,"ODEParams",[0])
     
-    '''
-    
-    Fun = Args(2)[0]-Args(2)[1]
-    
-    #ocp.addLinkEqualCon(Fun,
-    #                    0,'ODEParams',[0],
-    #                    1,'ODEParams',[0])
-    
-    
-    Fun = Args(12).head(6) - Args(12).tail(6)
-    
-    ocp.addLinkEqualCon(Fun,
-                        aphase,'Back' ,range(0,5),[0],[],
-                        dphase,'Front',range(0,5),[0],[])
-    
     
     ocp.optimizer.set_OptLSMode("L1")
-    #ocp.setThreads(8,8)
-    #ocp.setThreads(FuncThreads = 20 ,KKTThreads=20)
     ocp.optimize()
     
     Ascent  = aphase.returnTraj()

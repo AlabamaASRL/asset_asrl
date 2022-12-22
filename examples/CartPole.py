@@ -8,6 +8,13 @@ vf = ast.VectorFunctions
 oc = ast.OptimalControl
 Args = vf.Arguments
 
+'''
+Example taken from 
+Kelly, M., 2017. An introduction to trajectory optimization: How to do your own direct collocation. SIAM Review, 59(4), pp.849-904.
+
+Compute the minimum effort trajectory to swing a cart pole system to vertical.
+
+'''
 
 class CartPole(oc.ODEBase):
     
@@ -175,19 +182,22 @@ if __name__ == "__main__":
     
     
     ode = CartPole(l,m1,m2,g)
-    phase = ode.phase("LGL3",IG,64)
-    
+    phase = ode.phase("LGL5",IG,64)
     phase.addBoundaryValue("Front",range(0,5),[0,0,0,0,0])
     phase.addBoundaryValue("Back",range(0,5),[d,np.pi,0,0,tf])
+    
+    
     phase.addLUVarBound("Path",5,-umax,umax,1.0)
     phase.addLUVarBound("Path",0,-dmax,dmax,1.0)
     
     phase.addIntegralObjective(Args(1)[0]**2,[5])
-    
-    #phase.setThreads(8,8)
-    phase.optimizer.PrintLevel= 0
+    phase.setThreads(8,8)
+    phase.optimizer.PrintLevel= 1
     phase.optimize()
     
+    
+    
+        
     
     print("Total Time (Sum of all below)             :",phase.optimizer.LastTotalTime," s")
     print("Function/Derivative Eval Time             :",phase.optimizer.LastFuncTime," s")
