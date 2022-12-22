@@ -24,6 +24,9 @@ Step-By-Step Guide
   
 	  Follow the VS installation prompts until you are prompted to select any additional packages to install with VS. 
 	  Here we will want to select **Desktop development with C++**; however, we are going to make one change to the defaults for the C++ install and **un-check** the option for "C++ Clang tools for Windows" (shown below).
+
+	  .. image:: _static/vsstudiodesktopc++.PNG
+
 	  Also ensure that the "**C++ CMake Tools for Windows**" is checked.
 	  After doing this continue and finish the installation.
 
@@ -50,16 +53,31 @@ Step-By-Step Guide
 
 	  ..  note:: 
 	  
-	  Check that Anaconda is set to be placed on the PATH and set Anaconda to be your default Python.
+	  Check that Anaconda is set to be placed on the PATH and set Anaconda to be your default Python.  Additionally install the following packages.
+
+	  * Spiceypy
+
+	  Your version of Anaconda may be installed in "ProgramData" and may be named "Anaconda", "Anaconda3", or "anaconda3", depending on your installation settings.
 
 	  .. image:: _static/anacondainstall.PNG
 
-	  Use pip to install SpiceyPy, Sphinx, and Furo.
+	  
 	  After installing anaconda, it may be necessary to upgrade numpy through pip, due to potential compatibibility issues with numpy's version of libiomp5md.dll and Intel MKL's version.
 
-	  .. code-bloc:: console
+	  .. code-block:: console
 
-	  pip install numpy --upgrade
+		pip install numpy --upgrade
+
+	  .. note::
+
+	  Even if you already have anaconda installed you should install these packages.
+	  if you are wanting to build the documentation locally you will need the following packages installed.
+
+	  * Sphinx and Furo.
+
+	  .. warning::
+
+	    if you aren't using anaconda, you are still going to need numpy (comes with anaconda by default).
 
 
 #. Next we will be adding the required system and PATH variables to build ASSET.
@@ -67,6 +85,7 @@ Step-By-Step Guide
 	  ..  note:: 
   
 	  First, add the Intel oneAPI to a new system variable named "ONEAPI_ROOT" and set the variable value to your oneAPI install directory, as shown below.
+	  If your install directory is different, be sure to point this to the correct folder.
 
 		.. image:: _static/oneapiroot.PNG
 
@@ -79,6 +98,7 @@ Step-By-Step Guide
 	  ..  note:: 
   
 	  The following directories should be added to your system PATH and set as your default Python install.
+	  Once again, be sure to point this to the actual location of the relevant folders on your computer.
 
 		.. image:: _static/anacondapath.PNG
 
@@ -88,19 +108,18 @@ Step-By-Step Guide
 	 
 	  .. note::
 
-	  Open the ASSET folder with VS and wait for it to finish loading. After VS has finished loading the ASSET repo directory, navigate to the CMakeSettings.json file. Here it is recommended to change the number of threads to use when compiling to be the number of physical cores that your computer has.
-	  If your machine has a limited amount of RAM you may want to reduce this to be below the number of cores your computer has to prevent memory paging, which will drastically slow compile times.
+	  Open the ASSET folder with VS and wait for it to finish loading. After VS has finished loading the ASSET repo directory, navigate to the CMakeSettings.json file. Here it is recommended to change the integer number of threads to be the amount of RAM your computer has divided by 3 (rounded down).
 
 	  .. image:: _static/cmakejson.PNG
 
 	  .. image:: _static/threads.PNG
 
-	  Now we are going to configure the ASSET CMake settings by going to the project dropdown menu and selecting "Configure ASSET".
+	  Now we are going to configure the ASSET CMake settings by going to the project dropdown menu and selecting "Configure ASSET" or "Configure Cache" (depending on the version of VS).
 	  Wait until the output message from CMake says that it is finished and proceed to the build step.
 
 	  .. image:: _static/config.PNG
 
-	  The last step is to actually build ASSET! After the configuration step has completed navigate to the Build dropdown menu and choose "Build All" (or Ctrl + Shift + B).
+	  The last step is to actually build ASSET! After the configuration step has completed navigate to the Build dropdown menu and choose "Build All" (or Ctrl + Shift + B). Keep your Python IDE closed until the build completes.
 
 	  .. image:: _static/build.PNG
 
@@ -171,15 +190,24 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 	  .. image:: _static/anacondainstall.PNG
 
-      Use pip to install SpiceyPy, Sphinx, and Furo.
+      * Use pip to install SpiceyPy.
 
 	  .. warning::
 
 	  if you are using anaconda rather than a generic python installation, it may be necessary to upgrade numpy through pip, due to potential compatibibility issues with numpy's version of libiomp5md.dll and Intel MKL's version.
 
-	  .. code-bloc:: console
+	  .. code-block:: console
 
-	  conda install nomkl
+		conda install nomkl
+
+	  Even if you already have anaconda installed you should install these packages.
+	  if you are wanting to build the documentation locally you will need the following packages installed.
+
+	  * Sphinx and Furo.
+
+	  .. warning::
+
+	    if you aren't using anaconda, you are still going to need numpy (comes with anaconda by default).
 
 #. Next, we will set the required system variables to build ASSET.
 
@@ -189,7 +217,7 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 	  .. code-block:: console
 
-		source /opt/intel/oneapi/setvars.sh
+	   source /opt/intel/oneapi/setvars.sh
 
 #. After installing the dependencies, open VSCode to build ASSET.
 	
