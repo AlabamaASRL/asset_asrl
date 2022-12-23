@@ -206,7 +206,7 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 	   source /opt/intel/oneapi/setvars.sh
 
-#. Now, clone the `ASSET repo<https://github.com/AlabamaASRL/asset_asrl>`_  to where you want it to live.
+#. Now, clone the `ASSET repo <https://github.com/AlabamaASRL/asset_asrl>`_  to where you want it to live.
 
 #. After installing the dependencies, open VSCode to build ASSET.
 	
