@@ -75,7 +75,7 @@ PSIOPT Usage
 Each interface for defining optimization problems in ASSET (ex: :code:`OptimalControlProblem`, :code:`ode.phase` ) 
 has as its own instance of PSIOPT attached as a member variable of the class.
 Formulation and solution of the optimization problem is always handled through the respective interface, 
-but users can use this to modify PSIOPT's settings . A list of common settings
+but users can use this reference to modify PSIOPT's settings . A list of common settings
 and their default and suggested values are listed in the table below. In all cases these can be set by using the :code:`.set_XXX(value)` method
 where :code:`XXX` is replaced by the name of the setting
 
@@ -198,7 +198,7 @@ shown below. The :code:`optimize` algorithm will seek to minimize the objective 
 attempts only to find a solution to the equality and inequality constraints. If you are only trying to solve a system of equations and do not have an objective
 function, you should almost always use the :code:`solve` algorithm rather than invoking :code:`optimize`. 
 You may also invoke the :code:`solve` and :code:`optimize` algorithms in sequence
-using :code:`solve_optimize` as shown below. For example, it can often be more robust to call :code:`solve` first when optimizing so that the optimize algorithm will start from a feasible point. 
+using :code:`solve_optimize` as shown below. For example, it can often be more robust to call :code:`solve` first when optimizing so that the :code:`optimize` algorithm will start from a feasible point. 
 Additionally, it often happens that the :code:`optimize` algorithm will be able to minimize the objective function considerably from its initial value,
 but have difficulty exactly satisfying the optimality and constraint tolerances simultaneously.
 In these cases, it is practical to feed this non-converged solution to the solve algorithm in the hopes of finding a nearby solution that satisfies the constraints. 
@@ -217,8 +217,8 @@ separately.
     flag = ocp.optimize_solve()       # Calls optimize, then calls solve IF optimize fails to converge
 
 
-The returned convergence flags are enumerator types defined in :code:`ast.Solvers.ConvergenceFlags`, their meanings and integer values are given in the table below. Should you need to
-use the flags in your code, it is recommended to compare flags their enumerator rather than integer values as shown below, in case that we add more flags in the future.
+The returned convergence flags are enumerator types defined in :code:`ast.Solvers.ConvergenceFlags`, and their meanings and integer values are given in the table below. Should you need to
+use the flags in your code, it is recommended to compare flags to their enumerator rather than integer values as shown below, in case that we add more flags in the future.
 
 .. code-block:: python
     
@@ -291,8 +291,8 @@ When invoking one of PSIOPT's algorithms with a :code:`PrintLevel` of 0, the sol
 and constraint/optimality errors as well as other relevant algorithm parameters are displayed at each iterate. The meaning of each column is given in the table below.
 The constraint and optimality feasibilities are color coded according to their value. The color scheme progresses from dark red to orange, to yellow, to green as the
 value of the feasibility approaches user specified tolerances. When the value is yellow the current value satisfies the corresponding Acc###tol and likewise when it is green it satisfies ###tol.
-Additionally, the right hash mark of 'Prim Obj','Barr Obj','KKT Inf','ECons Inf', and 'ICons Inf' are color coded to show whether the current value is an decrease (green) or increase (red) from the previous iterate. 
-The full console is 119 characters wide, which will fit in a standard console on Windows. However, most Linux terminals are not wide enough by default, so you should widen you terminal if you want to be able to
+Additionally, the right hash mark of 'Prim Obj','Barr Obj','KKT Inf','ECons Inf', and 'ICons Inf' are color coded to show whether the current value is a decrease (green) or increase (red) from the previous iterate. 
+The full console is 119 characters wide, which will fit in a standard console on Windows. However, most Linux terminals are not wide enough by default, so you should widen your terminal if you want to be able to
 make sense of the output. While the console is (in its author's opinion) quite nice to look at, it has non-negligible cost to print, so you should probably suppress output if throughput and performance are of concern. 
 You can suppress some or all of the output by setting :code:`PrintLevel` to a value greater than 1. 
 
@@ -342,14 +342,14 @@ Jet
 ===
 
 In addition to calling PSIOPT to solve or optimize a single problem at a time, we provide the capability to optimize multiple different problems in parallel using
-the :code:`Jet` tool. This can allow you to more efficiently tackle throughput oriented workloads from within a single python process in just a few lines of code,
+the :code:`Jet` tool. This can allow you to more efficiently tackle throughput oriented workloads from within a single python process,
 without having to resort to multiprocessing libraries. There are two ways to do this. In the first method, demonstrated below, we construct a python list 
 of fully configured phases or optimal control problems (or both) as we normally would, but rather than running solve or optimize on each individually, we specify the algorithm we would like Jet to invoke
 using :code:`.setJetJobMode("")`. These options correspond to the methods we have already covered. Having set the job mode, we add the objects a list and then pass the list to the :code:`Jet.map()` function along with 
 the number of threads we want to use, and a bool specifying whether we want to print the console scroll. It is not necessary to set the number of threads for
-each phases or optimal control problem, Jet will take care of optimally allocating the number of threads for each problem.
-After solving all the problems, the function returns the list phases/optimal control problems. We can then access
-each element object to get the solved trajectories as we normally would. You can get the convergence flag of each problem by using the :code:`get_ConvergenceFlag()` method of the optimizer instance
+each phase or optimal control problem, Jet will take care of optimally allocating the number of threads for each problem.
+After solving all the problems, the function returns the list of phases/optimal control problems. We can then access
+each element of the returned list to get the solved trajectories as we normally would. You can get the convergence flag of each problem by using the :code:`get_ConvergenceFlag()` method of the optimizer instance
 attached to each problem.
 
 .. code-block:: python
@@ -402,7 +402,7 @@ attached to each problem.
 
 Alternatively, we can use another method shown below where we leverage a generator function. Rather than creating each phase/optimal control problem directly, we create
 a function that returns them. We can then pass this function, along with a python list of tuples of the arguments we want to pass to our :code:`ProblemGenerator`
-function. Internally, Jet will then expand each element of the :code:`ProblemArgs` list into :code:`ProblemGenerator` function to create all of the phases/optimal control problems on the fly. 
+function. Internally, Jet will then expand each element of the :code:`ProblemArgs` list into the :code:`ProblemGenerator` function to create all of the phases/optimal control problems on the fly. 
 These will then be solved according the job mode and returned as a list as before. This form is particularly efficient whenever construction of each problem requires independent 
 and expensive preprocessing that cannot be parallelized.
 

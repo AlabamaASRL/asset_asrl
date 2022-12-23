@@ -9,9 +9,9 @@ LGLInterpTable and InterpFunction
 
 The :code:`oc.LGLInterpTable` class inside of the optimal control module facilitates the interpolation of time-series data expressed in the
 ODE format. It is distinct from :code:`InterpTable1D` discussed in :ref:`1-D Interpolation`. 
-This can be used to for reintegration of converged trajectories and can also be used incorporate
+This can be used for reintegration of converged trajectories and can also be used incorporate
 arbitrary time-series data into a vector function expression. To illustrate its construction and usage, we will utilize the
-simple two-body low-thrust ode below.
+simple two-body low-thrust ODE below.
 
 
 .. code-block:: python
@@ -45,10 +45,10 @@ simple two-body low-thrust ode below.
             super().__init__(ode,XVars,UVars)
 
 To show how we can construct an :code:`oc.LGLInterpTable` we will generate a trajectory by integrating our ODE with a control law.
-This full ODE format trajectory can be provided along with the ODE, and its dimensions (state,control, and parameters), to the constructor.The :code:`ode` function
-will be used to generate the derivatives of a cubic-hermite spline representation of the trajectory. Alternatively, we can cionstruct an :code:`oc.LGLInterpTable`
+This full ODE format trajectory can be provided along with the ODE, and its dimensions (state,control, and parameters), to the constructor. The :code:`ode` function
+will be used to generate the derivatives of a cubic-hermite spline representation of the trajectory. Alternatively, we can construct an :code:`oc.LGLInterpTable`
 from arbitrary time series data (not necessarily a full ODE trajectory). For example, below we generate another table to interpolate just the controls
-from our integrated trajectory. Note that time is assumed to be the last element each element in the list of data. You may then interpolate
+from our integrated trajectory. Note that time is assumed to be the last element in each element in the list of data. You may then interpolate
 values by supplying a time to the call operator of the object.
 
 .. code-block:: python
@@ -117,7 +117,7 @@ you must specify which elements of the interpolated output are to be interpreted
 
 You can also utilize :code:`oc.LGLInterpTable` objects inside of VectorFunction expressions by wrapping them
 with :code:`oc.InterpFunction` as shown below. To do this we pass a table instance as well as a list of the indices of the outputs
-of the table that we want be included as outputs of our VectorFunction. code:`oc.InterpFunction` objects can be quite useful
+of the table that we want be included as outputs of our VectorFunction. :code:`oc.InterpFunction` objects can be quite useful
 in representing time dependent boundary constraints that are not analytic functions of time.
 
 .. code-block:: python

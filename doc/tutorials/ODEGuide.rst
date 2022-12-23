@@ -4,8 +4,8 @@ ODE Tutorial
 ============
 
 One of ASSET's primary goals is facilitating optimal control and integration of dynamical systems governed by ordinary differential equations (ODEs).
-In ASSET, an ODE is simply a vector function adhering to the state-space formalism shown below. 
-That is, it is a vector function that takes as arguments the state of the system, :math:`\vec{X}`, the current time,
+In ASSET, an ODE is simply a VectorFunction adhering to the state-space formalism shown below. 
+That is, it is a VectorFunction that takes as arguments the state of the system, :math:`\vec{X}`, the current time,
 :math:`t`, time varying controls, :math:`\vec{U}`, some static ODE parameters :math:`\vec{P}`, and returns the time derivative of the state variables. 
 
 .. math::
@@ -20,7 +20,7 @@ However, because we use a common interface between autonomous and non-autonomous
 an explicit time variable even if it is unused in the dynamics. 
 
 
-ODEs can be written using any of the techniques described in the vector functions
+ODEs can be written using any of the techniques described in the VectorFunctions
 :ref:`section <vectorfunction-guide>`, provided that they obey the state space formalism for their inputs and outputs. 
 For example, a simple two body gravitational model with low thrust could be written as shown 
 below. This model would have 6 state variables representing the position and velocity vectors
@@ -59,11 +59,11 @@ the time derivatives of position and velocity in the same order we assumed in th
 ODEArguments
 ############
 
-To simplify the process of defining vector functions adhering to the state space
+To simplify the process of defining VectorFunctions adhering to the state space
 formalism, we provide the :code:`ODEArguments` class inside of the :code:`OptimalControl` module.
 This class is a thin wrapper around the :code:`Arguments` class that allows you to index relevant
 sub-vectors and elements of an ODE's inputs in a clearer way than using :code:`Arguments`. To construct 
-:code:`ODEArguments` we pass the number of state variables, control variables, and ODE parameters (if
+:code:`ODEArguments` we pass the number of state variables, control variables (if any), and ODE parameters (if
 any). The total input size will be the sum of :code:`XVars`, :code:`PVars`, and :code:`UVars` plus 1 for time. We can then
 address the relevant sub-vectors of our input using the :code:`X/U/PVec()` methods. These methods are return regular
 segment types so we can then apply all operations we would to those objects. Similarly, we can also address
@@ -129,10 +129,10 @@ Defining ODE Classes
 If you were to inspect the type of the result of the function above, it would
 be :code:`VectorFunction`, and at this point ASSET has no idea that it is an ODE.
 For ASSET to recognize our function as an ODE and allow us to use it directly with
-all of associated utilities, we need to define it using the class
+all associated utilities, we need to define it using the class
 based style described in :ref:`the vector functions tutorial <vfstyle-guide>`, but inherit from the class :code:`oc.ODEBase`
-rather than :code:`VectorFunction`. Therefore, the correct way to write the :code:`TwoBodyLT` ODE shown below.
-When initializing our base class we simply supply the asset vector function specifying
+rather than :code:`VectorFunction`. Therefore, the correct way to write the :code:`TwoBodyLT` ODE is shown below.
+When initializing our base class we simply supply the asset VectorFunction specifying
 the ode as well as the number of states, controls, and parameters.
 
 .. code-block:: python

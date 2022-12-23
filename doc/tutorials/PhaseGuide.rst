@@ -184,7 +184,7 @@ ODE parameters, :math:`\vec{P}`, and the phase's static parameters, :math:`\vec{
 
 The transcription defect constraints, and segment mesh spacing constraints are formulated automatically by the phase object, and users should not
 attempt to formulate them on their own. Every other constraint and objective must be specified by the user, in terms of the discrete representation of the trajectory. To simplify this process,
-and provide an interface that is invariant to the number of segments, :code:`phase` only allows you to write constraints/objective that gather inputs form certain "phase regions" in the total variables
+and provide an interface that is invariant to the number of segments, :code:`phase` only allows you to write constraints/objectives that gather inputs from certain "phase regions" in the total variables
 vector. A complete list of the currently allowed phase regions is listed below and we will discuss how you can use them in the next section.
 
 
@@ -197,7 +197,7 @@ vector. A complete list of the currently allowed phase regions is listed below a
      - Input Order
    * - :code:`Front`, or :code:`First`
      - Applied to first time-varying-input, the ODE parameters and the phase's static parameters.
-     - :math:`\vec{f}([\vec{V}_0,\vec{P},\vec{S}])`
+     - :math:`\vec{f}([\vec{V}_1,\vec{P},\vec{S}])`
    * - :code:`Back`,or :code:`Last`
      - Applied to last time-varying-input, the ODE parameters and the phase's static parameters.
      - :math:`\vec{f}([\vec{V}_n,\vec{P},\vec{S}])`
@@ -229,7 +229,7 @@ constraint itself (an ASSET vector (or scalar) function). Next, we specify which
 as well as any ODE parameters and phase's static parameters we wish to forward to the function. In the trivial example below, we are adding a
 constraint that enforces that the first time-varying inputs in the trajectory and all of the ODE parameters and static parameters should be equal to zero. 
 Custom constraints must be written such that the inputs consist of the time-varying inputs (if any), followed by the ODE parameters (if any), and then the static
-parameters (if any). However, the variables inside of particular variable group (ex::code:`XtUVars`) can be specified in any order so long as it is consistent
+parameters (if any). However, the variables inside of a particular variable group (ex::code:`XtUVars`) can be specified in any order so long as it is consistent
 with how you have defined your constraint function.
 
 .. code-block:: python
@@ -252,8 +252,6 @@ with how you have defined your constraint function.
 
 For example, below we add a constraint involving the second and third state variables from the 
 last time-varying state in the trajectory, as well as the first ODE parameter and second static parameter. 
-Instead, they can (and generally should) be written in terms of only the variables they actually need. 
-This might allow you to reuse a constraint on a different problem where the indexes or ordering of input variables change.
 
 
 
@@ -369,9 +367,9 @@ so common that we also provide the :code:`addDeltaTimeEqualCon` method to do jus
 Inequality Constraints
 ----------------------
 Adding general inequality constraints, using :code:`.addInequalCon`, works exactly the same as it did for :code:`.addEqualCon`. The only difference
-is that our functions should be constraints should be of the form :math:`\vec{g}(\vec{x}) \leq \vec{0}`. In other words, we assume that our function is in the feasible region whenever
+is that our functions should be constraints of the form :math:`\vec{g}(\vec{x}) \leq \vec{0}`. In other words, we assume that our function is in the feasible region whenever
 its value is negative. For example, if we wanted to add a constraint specifying that all of the initial time-varying input variables, ODE parameters, and the phase's static
-parameters should be positive we could implement that as shown below.
+parameters should be positive, we could implement that as shown below.
 
 .. code-block:: python
 
@@ -739,7 +737,7 @@ the optimizer are handled through the phase itself as shown below. Both of these
 
 After finding a solution, we can retrieve the converged trajectory using the :code:`.returnTraj` method of the :code:`phase`. 
 Note the trajectory is returned as a python list where each element is a full-ode input (ie: :math:`[\vec{X}_i,t_i,\vec{U}_i,\vec{P}]`) at each point in time along the trajectory.
-You may also return the table in the form of an :code:`oc.LGLInterpTable` so that it can be sampled as a smooth function of time. See the section on :ref:`LGLInterpTable and InterpFunction` for more details.
+You may also return the trajectory in the form of an :code:`oc.LGLInterpTable` so that it can be sampled as a smooth function of time. See the section on :ref:`LGLInterpTable and InterpFunction` for more details.
 If you added static parameters to the :code:`phase`, these can be retrieved using :code:`.returnStaticParams`. Finally, you can also retrieve an estimate for the co-states
 of an optimal control problem AFTER it has been optimized. These could then be used as the initial guess to an indirect form of the same optimization problem.
 
@@ -767,7 +765,7 @@ of an optimal control problem AFTER it has been optimized. These could then be u
 
 
 Additionally, should you want to refine the mesh spacing of the trajectory after a solution, it is not necessary to create an entirely new :code:`phase`.
-Instead, you can use the :code:`.refineTraj` methods as shown below. The simplest form of refinement can be accomplished using the :code:`.refineTrajManual` methods. In general these work exactly,
+Instead, you can use the :code:`.refineTraj` methods as shown below. The simplest form of refinement can be accomplished using the :code:`.refineTrajManual` methods. In general these work exactly
 the same as the :code:`.setTraj` methods except they use the currently loaded trajectory to interpolate the new mesh. 
 The second option is the :code:`.refineTrajEqual` method, which will attempt to refine the trajectory such the estimated error across all segments is equal. For now,
 users should prefer manual mesh refinement, as our automatic refinement method could use some serious improvement. 
@@ -805,7 +803,7 @@ Miscellaneous Topics
 
 Shooting Method
 ---------------
-When using the Central Shooting transcription, under the hood, a phase uses an integrator for the corresponding ODE to formulate the shooting constraint and its derivatives.
+When using the Central Shooting transcription, under the hood, a phase uses an integrator for the corresponding ODE to formulate the shooting constraints and its derivatives.
 This :code:`integrator` is always configured to use the :code:`"DOPRI87"` integration scheme, but users can modify the tolerances as well as the minimum and
 maximum step sizes of the integrator to improve performance or increase accuracy. Users can access this :code:`integrator` using the :code:`.integrator` field of the phase and then
 modify its settings just as was shown in the :ref:`integrator tutorial <integrator-guide>`. Note that we set the default step size of the integrator attached to a phase to 0.1. For fastest performance
@@ -828,7 +826,7 @@ Control Rate Constraints
 -------------------------
 You may have noticed from the previous examples, that we do not provide an explicit method for constraining control rates :math:`\dot{\vec{U}}`. 
 However, this can be accomplished manually by using a custom constraint with phase region :code:`'PairWisePath'`.
-For example, if we wanted to the bound rates of the control variables (:code:`[7,8,9]` in this example) to be between -1 and 1, we could do so with the following code.
+For example, if we wanted to bound the rates of the control variables (:code:`[7,8,9]` in this example) to be between -1 and 1, we could do so with the following code.
 :code:`'PairWisePath'` will, as the name suggests, call our :code:`URateBound` function at every sequential pair of time-varying states in the trajectory, thus allowing us to bound a linear estimate of
 the control rates from the times and values of the controls.
 
@@ -863,7 +861,7 @@ the total number of variables. However, most cases of over constraining are much
 constraints. We do not explicitly check for this at the moment. An example of what we mean by this is illustrated below. Let's say we needed to constrain the duration
 of a phase to be some fixed value, and for the initial time to be equal to 0. We could add a boundary value to the first state in the trajectory to fix the initial time.
 Since the initial time is constrained to be 0, fixing the final time to be :code:`dt` will constrain the phase's duration as we expect. However, if we were to then accidentally use :code:`.addDeltaTimeEqualCon`
-to fix the phase duration as well then the problem is over constrained. Thus you should either fix the initial and final times, or fix the initial time and duration, but not both.
+to fix the phase duration as well, then the problem is over constrained. Thus, you should either fix the initial and final times, or fix the initial time and duration, but not both.
 
 .. code-block:: python
 
@@ -882,7 +880,7 @@ to fix the phase duration as well then the problem is over constrained. Thus you
     phase.solve()  # Flying red numbers from the output scroll
 
 For problems with controls, mistakes like this will typically not result in an excess of equality constraints, and thus your only indication that something is wrong will be
-poor/ or erratic performance by the optimizer. Sometimes the optimizer's pivoting perturbation will be able to cope with redundant constraints and return a solutions, other times it will
+poor or erratic performance by the optimizer. Sometimes the optimizer's pivoting perturbation will be able to cope with redundant constraints and return solutions, other times it will
 diverge immediately. In conclusion, don't over constrain your problems...
 
 What happens if I add multiple objectives?
@@ -899,7 +897,7 @@ object returned by :code:`returnTrajTable` to the constructor of the ODE's integ
 initialize the integrator to use the control history stored in the trajectory data as a time dependent control law
 when integrating. If the control history of the phase is not :code:`"BlockConstant"`, you can then call :code:`integrate_dense` to
 integrate from the initial full ODE input in the returned trajectory to the final time in the trajectory. This will
-still work if the control history was :code:`"BlockConstant"`, but the result mat have small local errors caused by the instantaneous jumps in the control
+still work if the control history was :code:`"BlockConstant"`, but the result may have small local errors caused by the instantaneous jumps in the control
 history at the states where segments adjoin. This can be eliminated by using the second method, which integrates
 precisely between each time in the converged trajectory.
 

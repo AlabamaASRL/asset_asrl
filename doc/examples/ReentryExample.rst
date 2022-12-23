@@ -278,11 +278,11 @@ satisfying all constraints before minimizing the objective. Furthermore, we enab
 
     Plot(Traj1,Traj2)
 
-For this problem, PSIOPT is able to find a feasible solution in 29 iterations of the solve algorithm, and then an optimum solution after another 98 iterations
-in the optimize algorithm. We then refine the trajectory to a higher number of segments and re-optimize the solution, which converges in only 5 iterations. 
+For this problem, PSIOPT is able to find a feasible solution in 29 iterations of the :code:`solve` algorithm, and then an optimum solution after another 98 iterations
+in the :code:`optimize` algorithm. We then refine the trajectory to a higher number of segments and re-optimize the solution, which converges in only 5 iterations. 
 The total run-time (i9-12900k) is 90 milliseconds. The final objective value for :math:`\Delta \theta` is 34.141 degrees, which is exactly that given by Betts in [1]. 
 Next we add the path constraint on leading edge heating rate to the phase and optimize the new problem using the previous solution as the initial guess. Owing to the excellent initial guess, the heat rate limited problem converges in
-another 24 iterations taking only 60 milliseconds. The additional heating rate the constraint reduces the maximum cross range of the shuttle to 30.63 degrees (also identical to Betts).
+another 24 iterations taking only 60 milliseconds. The additional heating rate constraint reduces the maximum cross range of the shuttle to 30.63 degrees (also identical to Betts).
 A plot of the converged state and control histories for both problem formulations can be seen below.
 
 

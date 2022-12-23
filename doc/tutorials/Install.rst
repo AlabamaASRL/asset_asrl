@@ -13,7 +13,7 @@ In order to build ASSET on Windows the following dependencies are required:
 * `Intel oneAPI MKL <https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=window&distributions=offline>`_
 * A Python installation with Numpy, however we recommend using Anaconda.
 	* `Anaconda <https://www.anaconda.com/products/distribution>`_
-* SpiceyPy, Sphinx, and Furo
+* The Python packages SpiceyPy, Sphinx, and Furo
 
 
 Step-By-Step Guide
@@ -55,7 +55,7 @@ Step-By-Step Guide
 	  
 	  Check that Anaconda is set to be placed on the PATH and set Anaconda to be your default Python.  Additionally install the following packages.
 
-	  * Spiceypy
+	  * SpiceyPy, Sphinx, and Furo
 
 	  Your version of Anaconda may be installed in "ProgramData" and may be named "Anaconda", "Anaconda3", or "anaconda3", depending on your installation settings.
 
@@ -68,13 +68,6 @@ Step-By-Step Guide
 
 		pip install numpy --upgrade
 
-	  .. note::
-
-	  Even if you already have anaconda installed you should install these packages.
-	  if you are wanting to build the documentation locally you will need the following packages installed.
-
-	  * Sphinx and Furo.
-
 	  .. warning::
 
 	    if you aren't using anaconda, you are still going to need numpy (comes with anaconda by default).
@@ -85,13 +78,13 @@ Step-By-Step Guide
 	  ..  note:: 
   
 	  First, add the Intel oneAPI to a new system variable named "ONEAPI_ROOT" and set the variable value to your oneAPI install directory, as shown below.
-	  If your install directory is different, be sure to point this to the correct folder.
+	  If your install directory is different, be sure to point this to the correct folder. This may have already been set when you installed oneAPI.
 
 		.. image:: _static/oneapiroot.PNG
 
 	  .. warning::
 
-		If you are using an Alder Lake Intel CPU it may be beneficial to add the system variable "MKL_ENABLE_INSTRUCTIONS" with value "AVX" as well. 
+		If you are using an Alder Lake or Raptor Lake Intel CPU it may be beneficial to add the system variable "MKL_ENABLE_INSTRUCTIONS" with value "AVX" as well. 
 
 #. We also need to add a few variables to our Path. 
 
@@ -102,7 +95,7 @@ Step-By-Step Guide
 
 		.. image:: _static/anacondapath.PNG
 
-#. Now, clone the `ASSET repo<https://github.com/AlabamaASRL/asset_asrl>`_  to where you want it to live.
+#. Now, clone the `ASSET repo <https://github.com/AlabamaASRL/asset_asrl>`_  to where you want it to live.
 
 #. We are almost there! Now, open VS and be sure to run it as administrator to avoid any conflicts when building the Python library. Additionally, ensure that your Python IDE is closed during this step. 
 	 
@@ -137,15 +130,16 @@ Step-By-Step Guide
 
 Linux Installation
 ------------------
-The dependencies for Linux installations are similar to that of Windows; however, we'll be using Visual Studio Code for our IDE and GCC for our compiler:
+The dependencies for Linux installations are similar to that of Windows; however, we'll be using Visual Studio Code for our IDE:
 
 * `Visual Studio Code <https://code.visualstudio.com/download>`_
 	* `C/C++ Extension <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools>`_ 
 	* `CMake Tools Extension <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools>`_
 * `LLVM Compiler Toolkit (recommended) <https://github.com/llvm/llvm-project/releases/latest>`_
-	* GCC greater than 9 can also be used
+	* GCC 9 or greater can also be used
 * `Intel oneAPI MKL <https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=linux&distributions=offline>`_
 * `Anaconda <https://www.anaconda.com/products/distribution#linux>`_
+* The Python packages SpiceyPy, Sphinx, and Furo
 
 Step-by-Step Guide
 ^^^^^^^^^^^^^^^^^^
@@ -184,26 +178,19 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 #. Now, download and install Anaconda.
 
-	  .. note::
-
-	  Check that Anaconda is set to be placed on the PATH and set Anaconda to be your default Python.
-
-	  .. image:: _static/anacondainstall.PNG
-
       * Use pip to install SpiceyPy.
 
 	  .. warning::
 
-	  if you are using anaconda rather than a generic python installation, it may be necessary to upgrade numpy through pip, due to potential compatibibility issues with numpy's version of libiomp5md.dll and Intel MKL's version.
+	  if you are using anaconda rather than a generic python installation, it may be necessary to upgrade numpy through pip, due to potential compatibibility issues with numpy's version of openmp and Intel MKL's version.
 
 	  .. code-block:: console
 
 		conda install nomkl
 
-	  Even if you already have anaconda installed you should install these packages.
-	  if you are wanting to build the documentation locally you will need the following packages installed.
+	  Even if you already have anaconda or a python distribution installed you will need these packages.
 
-	  * Sphinx and Furo.
+	  * SpiceyPy, Sphinx, and Furo
 
 	  .. warning::
 

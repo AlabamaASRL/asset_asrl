@@ -49,7 +49,7 @@ To start, we can create an integrator for our ODE by using the :code:`.integrato
 At initialization we can specify the integration scheme as a string as well as the
 default step size to be used. At the moment we provide the adaptive Dormand Prince
 integration schemes of order 8(7) and 5(4). These are specified by the strings :code:`"DOPRI87"` or
-:code:`"DOPRI54"`. If no method is specified, the integration we will default to :code:`"DOPRI87"`. The second
+:code:`"DOPRI54"`. If no method is specified, the integration will default to :code:`"DOPRI87"`. The second
 argument, :code:`DefStepSize` is the first trial step size in the adaptive integration algorithm, which will then
 adjust the step size up or down to meet specified error tolerances. By default, we set the
 integrator's minimum and maximum allowable step sizes to be 10000 times smaller and larger than
@@ -118,15 +118,15 @@ use them. By far the most used methods are :code:`.integrate` and :code:`integra
 take as the first input a full-state vector containing the initial state, time, controls, and
 parameters as well as the final time that we wish to integrate these initial inputs to.
  
-The :code:`.integrate` method  integrates this initial full-state input vector to final time :code:`tf` and returns only the full-state at the final time.
+The :code:`.integrate` method  integrates this initial full-ODE input vector to final time :code:`tf` and returns only the full-ODE input vector at the final time.
 :code:`integrate_dense` takes the same inputs but returns all intermediate full-states 
-calculated by the integrator as single python list. We also call :code:`.integrate_dense` 
-with an additional arguments specifying that we would like to return :code:`N` evenly spaced steps
+calculated by the integrator as single python list. We can also call :code:`.integrate_dense` 
+with an additional argument specifying that we would like to return :code:`N` evenly spaced steps
 between :code:`t0` and :code:`tf` rather than the exact steps taken by the solver. These :code:`N` states and controls
 will be calculated from the exact steps taken by the integrator using a fifth order interpolation method. 
 For the :code:`"DOPRI54"` method, interpolated states have effectively
 the exact same error as the true steps taken by the integrator. However, for the :code:`"DOPRI87"` method, interpolated states
-will have the larger local error owing the difference in order between the integration and interpolation. In practice,
+will have larger local error owing the difference in order between the integration and interpolation. In practice,
 the maximum local error at any point along the trajectory is typically 2 orders of magnitude larger than the integration tolerances. 
 
 
@@ -168,7 +168,7 @@ determine the locations of the event, a direction indicating whether we want to 
 signifying whether integration should stop after encountering a zero. The ScalarFunction should take the same arguments as the underlying ODE.
 The :code:`direction` flag should be set to :code:`0` to capture all zeros, :code:`-1` to capture only zeros where the function value is decreasing, or :code:`1` to capture
 zeros where it is increasing. The :code:`stopcode` should be set to :code:`0` or :code:`False` if you do not want an event to stop integration. To stop after 1 occurrence,
-:code:`stopcode` can be set to :code:`1` or :code:`True`. The :code:`stopcode` can also be set to any positive integer, in which case it specifies that the number of zeros to be encountered
+:code:`stopcode` can be set to :code:`1` or :code:`True`. The :code:`stopcode` can also be set to any positive integer, in which case it specifies the number of zeros to be encountered
 before stopping. When events are appended to an integration call, in addition to the normal return value, a list of lists of the exact full-states where each event occurred is
 also returned. As an example, the code below will calculate the apoapses and periapses of an orbit, and stop after both have been found. Exact roots
 of events are found using a Newton-Raphson method applied to the fifth order spline continuous representation of the trajectory. The root tolerance
@@ -241,10 +241,10 @@ Derivatives
 ###########
 
 In ASSET, integrators themselves are VectorFunctions and have analytic first and second
-derivatives. The input arguments for the integrator when used as a VectorFunction consists of
-the full-state to be integrated and the final time :code:`tf,` and the output is the full-state at time :code:`tf`.
+derivatives. The input arguments for the integrator when used as a VectorFunction consist of
+the full-ODE input to be integrated and the final time :code:`tf,` and the output is the full-ODE at time :code:`tf`.
 For example, calling compute as shown below is equivalent to the normal integrate call. This also means
-that we can calculate the jacobian and :code:`adjointhessian` as well.
+that we can calculate the :code:`jacobian` and :code:`adjointhessian` as well.
 
 .. code-block:: python
 
@@ -291,9 +291,9 @@ interface using the :code:`.integrate_stm` methods, which can be used as shown b
 Parrallel Integration
 #####################
 
-Finally, for all previously discussed :code:`.integrate methods`, we have corresponding multi-threaded :code:`_parallel`
-version which will integrate lists of initial conditions and final times in parallel. In each case, rather
-than passing a single initial state and final time, we pass a lists of each. The outputs to the call will then be a list
+Finally, for all previously discussed :code:`.integrate` methods, we have corresponding multi-threaded :code:`_parallel`
+versions which will integrate lists of initial conditions and final times in parallel. In each case, rather
+than passing a single initial state and final time, we pass lists of each. The outputs to the call will then be a list
 of length :code:`n` containing the outputs of the regular non-parallel method for the ith input state and final time.
 
 .. code-block:: python
@@ -358,8 +358,8 @@ a control law. As an example, let's reuse our :code:`TwoBodyLTODE` ode from the 
 We will add a control to the integrator specifying that throttle should be 80%
 of the maximum and aligned with the spacecraft's instantaneous velocity vector. We do this by first writing
 an ASSET VectorFunction , that is assumed to take only the velocity as arguments and outputs
-the desired control vector. We can then pass this to integrator constructor along with a list
-specifying the indices full-state variables we want to forward to out control law. In this case it
+the desired control vector. We can then pass this to the integrator constructor along with a list
+specifying the indices full-ODE input variables we want to forward to our control law. In this case it
 is :code:`[3,4,5]` which are the velocity variables as we have defined in our ODE.
 This control law will now be applied to all of our integrations.
 
