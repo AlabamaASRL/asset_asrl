@@ -70,8 +70,7 @@ html_theme = "furo"
 html_theme_options = {
     "light_css_variables": {
         "color-brand-primary": "red",
-        "color-brand-content": "#CC3333",
-        "color-admonition-background": "orange",
+        "color-brand-content": "#CC3333"
     },
 }
 
