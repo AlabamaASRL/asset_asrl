@@ -1,9 +1,8 @@
 Examples
 =========
 
-The examples below are meant to introduce ASSET in two contexts: strictly as a python package, and as an open-source library that you may extend.
-New readers should begin at the beginning, since it's important to understand the library architecture and organization before using it to build anything.
-
+The in-depth examples below are meant to demonstrate ASSET's capabilities as a generic optimal control and trajectory design software.
+Many more examples may also be found in the :code:`/examples` folder of the ASSET Github Repo.
 
 .. toctree::
     :maxdepth: 2
@@ -14,5 +13,5 @@ New readers should begin at the beginning, since it's important to understand th
     zermelo
     zermelolink
     MultiTarg
-    CartPole
+    
     

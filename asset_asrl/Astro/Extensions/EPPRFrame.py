@@ -71,29 +71,6 @@ class EPPRFrame(CR3BPFrame):
         Ptraj = []
         F=self.NDInertial_to_Frame_Func()
         for T in ITraj:
-            '''
-            t =T[axis]
-            p1xv = self.BCTable.Interpolate(t)[0:6]
-            p1 =p1xv[0:3]
-            v1 =p1xv[3:6]
-            rdat  = self.RTable.Interpolate(t)
-            r=rdat[0]
-            rdot = rdat[1]
-            DCM = self.GetDCM(t)
-            W = self.WTable.Interpolate(t)[0:3]
-             
-            X = T[0:3]
-            V = T[3:6]
-            Xnd = (X-p1)/r
-            Vnd = (V-v1)/r
-            Xrot = np.matmul(DCM.T,Xnd) 
-            Vrot = np.matmul(DCM.T,Vnd) + np.cross(Xrot,W) - Xrot*rdot/r
-            State = np.zeros((7))
-            State[0:3] = Xrot
-            State[3:6] = Vrot
-            State[6]=t
-            Ptraj.append(State)
-            '''
             Ptraj.append(F.compute(T[0:7]))
 
         return Ptraj
@@ -175,7 +152,7 @@ class EPPRFrame(CR3BPFrame):
     
         realargs = Args(7)
         t = realargs[6]
-        dataargs = vf.Stack([realargs,self.BCFunc.eval(t),self.RFunc.eval(t)])
+        dataargs = vf.stack([realargs,self.BCFunc.eval(t),self.RFunc.eval(t)])
         return state.eval(dataargs)
         
     def Transform_Func(self,OtherFrame):
@@ -303,8 +280,8 @@ class EPPRFrame(CR3BPFrame):
          Wdotacc = vf.cross(RelVec,Wdot)
          Pulseacc1 = (RelVec)*Rscale 
          Pulseacc2 = (v)*Vscale
-         acc = vf.Sum([Grav,Wacc,Wdotacc,BCacc,Pulseacc1,Pulseacc2] + otherAccs)
-         func= vf.Stack([v,acc]+otherEOMs)
+         acc = vf.sum([Grav,Wacc,Wdotacc,BCacc,Pulseacc1,Pulseacc2] + otherAccs)
+         func= vf.stack([v,acc]+otherEOMs)
          return func
         
     def J2_ACC(self,r,t):

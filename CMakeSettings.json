@@ -7,7 +7,7 @@
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
-      "buildCommandArgs": "-j10 -v",
+      "buildCommandArgs": "-j4 -v",
       "ctestCommandArgs": "",
       "intelliSenseMode": "windows-clang-x64",
       "inheritEnvironments": [ "clang_cl_x64" ],

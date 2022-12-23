@@ -7,6 +7,16 @@ from asset_asrl.Astro.FramePlot import CRPlot
 
 import asset_asrl.Astro.Constants as c
 
+'''
+Find a heteroclinic connection between two orbit families in the EM-CR3BP.
+
+Orbits derived from Amanda Haapala's dissertation
+
+https://engineering.purdue.edu/people/kathleen.howell.1/Publications/Dissertations/2014_Haapala.pdf
+
+'''
+
+
 vf   = ast.VectorFunctions
 oc   = ast.OptimalControl
 sol  = ast.Solvers
@@ -60,7 +70,7 @@ def GetManifold(OrbitIn,h,T,Stable=True):
     Orbit = integ.integrate_dense(OrbitIn[0],Period,1000)
     
     times = [O[6]+Period for O in Orbit]
-    Results = integ.integrate_stm_parallel(Orbit,times,16)
+    Results = integ.integrate_stm_parallel(Orbit,times,ast.Utils.get_core_count())
     
 
     EigIGs = []
@@ -118,7 +128,7 @@ def GetManifold(OrbitIn,h,T,Stable=True):
     events = [(CrossMoon(),0,1),
               (Cull(),0,1)]
    
-    Results = integ.integrate_dense_parallel(EigIGs,ts,events,16)
+    Results = integ.integrate_dense_parallel(EigIGs,ts,events,ast.Utils.get_core_count())
     
     Manifolds=[]
     for Result in Results:

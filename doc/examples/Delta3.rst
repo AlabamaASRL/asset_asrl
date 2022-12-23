@@ -10,15 +10,18 @@ Delta 3 Multi-phase GTO Transfer
     Courtesy W. D. Graham.
 
 
-As an example of a real-world multi-phase problem, we will optimize the launch and 
-geostationary transfer orbit insertion of a Delta 3 rockets outlined by Betts in [1].
+As an example of a multi-phase optimal control problem, we will optimize the launch and 
+geostationary transfer orbit insertion of a Delta 3 rocket as described by Betts in [1].
 
-*[1] *Betts, J.T. "Practical methods for Optimal Control and Estimation Using Nonlinear Programming", Cambridge University Press, 2009*
+..  note:: 
 
-The Delta 3 was nominally a
-2 stage rocket consisting of a first stage RS-27A and 9 solid rocket boosters topped with an RL-10 upper stage. The rocket had an interesting staging
+    We should note that this example is derived entirely from publicly available sources (see [1-4]). Furthermore, this problem is routinely 
+    used [1-4] as a benchmark for generic multi-phase optimal control packages such as ASSET.
+
+
+The Delta 3 was nominally a 2 stage rocket consisting of a first stage RS-27A and 9 solid rocket boosters topped with an RL-10 upper stage. The rocket had an interesting staging
 strategy with the first stage liquid engine and only 6 of the 9 SRBs igniting at take off. Following burnout of these 6 solid rocket 
-boosters 75 seconds after launch, the inert mass is ejected and the remaining the  3 boosters are ignited. After another 75 seconds (t+150s) these 3 SRBs
+boosters 75.2 seconds after launch, the inert mass is ejected and the remaining the  3 boosters are ignited. After another 75 seconds (t+150.4s) these 3 SRBs
 too are ejected and the first stage continues to burn until t+261.
 At this point the RL-10 upper stage and payload separate from the first stage and continue to orbit, burning for up to an additional 700 seconds. 
 
@@ -340,6 +343,14 @@ Final Mass Delivered to the GTO is 7529.749kg, which is effectively the same as 
 
 .. image:: _static/Delta3.svg
     :width: 100%
+
+References
+##########
+#. Betts, J.T. "Practical methods for Optimal Control and Estimation Using Nonlinear Programming", Cambridge University Press, 2009
+#. Agamawi, Y. M., & Rao, A. V. (2020). Cgpops: A c++ software for solving multiple-phase optimal control problems using adaptive gaussian quadrature collocation and sparse nonlinear programming. ACM Transactions on Mathematical Software (TOMS), 46(3), 1-38.
+#. Patterson, M. A., & Rao, A. V. (2014). GPOPS-II: A MATLAB software for solving multiple-phase optimal control problems using hp-adaptive Gaussian quadrature collocation methods and sparse nonlinear programming. ACM Transactions on Mathematical Software (TOMS), 41(1), 1-37.
+#. Benson, D. (2005). A Gauss pseudospectral transcription for optimal control (Doctoral dissertation, Massachusetts Institute of Technology).
+
 
 Full Code
 #########

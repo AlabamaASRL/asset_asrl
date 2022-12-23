@@ -19,9 +19,7 @@ For now, the standard problem procedure is the same, where we need to import eve
     oc = ast.OptimalControl
 
     Args = vf.Arguments
-    Tmodes = oc.TranscriptionModes
-    Cmodes = oc.ControlModes
-    PhaseRegs = oc.PhaseRegionFlags
+    
 
 Now that we have all of the tools imported from ASSET, as always we need to identify our dynamics for the problem. Here, for this simple case,
 we have assumed two-body gravity dynamics, plus each spacecraft will be equipped with a low thrust propulsion system. Writing the dynamics is the same as in previous
@@ -40,10 +38,10 @@ examples, where we will use the ASSET VectorFunctions to construct our system of
     
             args = oc.ODEArguments(Xvars, Uvars)
             r = args.head3()
-            v = args.segment_3(3)
+            v = args.segment3(3)
             g = r.normalized_power3() * (-P1mu)
             if ltacc != False:
-                thrust = args.tail_3() * ltacc
+                thrust = args.tail3() * ltacc
                 acc = g + thrust
             else:
                 acc = g
@@ -112,19 +110,19 @@ For now we will show the function that handles all this in three sections, with 
         for i, T in enumerate(Trajs):
 
             ## Create a phase for Each Spacecraft
-            phase = ode.phase(Tmodes.LGL5)
+            phase = ode.phase("LGL5")
             ## Set Initial Guess
             phase.setTraj(T, NSegs)
 
             ##Use block constant control
-            phase.setControlMode(Cmodes.BlockConstant)
+            phase.setControlMode("BlockConstant")
 
             ##Specify that initial state and time are locked at
             ##whatever value is passed to optimizer
-            phase.addValueLock(PhaseRegs.Front, range(0, 7))
+            phase.addValueLock("Front", range(0, 7))
 
             ## Bound Norm of Control Vector over the whole phase
-            phase.addLUNormBound(PhaseRegs.Path, [7, 8, 9], 0.01, 1.0, 1)
+            phase.addLUNormBound("Path", [7, 8, 9], 0.01, 1.0, 1)
 
             # Add TOF objective
             phase.addDeltaTimeObjective(1.0)
@@ -132,7 +130,6 @@ For now we will show the function that handles all this in three sections, with 
             ## add phase to the OCP
             ocp.addPhase(phase)
 
-        ####################################################
 The first section of :code:`MultiSpaceCraft` is very similar to the previous definitions for ASSET optimization routines.
 It takes as arguments the list of initial circular orbits, :code:`Trajs`.
 The next input :code:`IStates` is the list of initial states for each of the spacecraft. Each spacecraft will also need to be given a specific state
@@ -145,52 +142,39 @@ reach some initial final free state.
 .. code-block:: python
 
     ####################################################
-        #Section 2:
-        """
-        Adding a Link constraint to enforce that the terminal state and time
-        of each phase must be equal to a free state added as LinkParameters of the ocp
+    #Section 2:
+    """
+    Adding a Link constraint to enforce that the terminal state and time
+    of each phase must be equal to a free state added as LinkParameters of the ocp
 
-        ie: for each phase(i) Xt_i(tf) - Xt_link = 0
-        """
+    ie: for each phase(i) Xt_i(tf) - Xt_link = 0
+    """
 
-        # First we add an initial guess for the linkParams, which we be a free
-        # terminal position,velocity and time that all phases must hit
-        # The ocp now has 7 link params indexed 0->6
-        ocp.setLinkParams(SetPointIG[0:7])
+    # First we add an initial guess for the linkParams, which we be a free
+    # terminal position,velocity and time that all phases must hit
+    # The ocp now has 7 link params indexed 0->6
+    ocp.setLinkParams(SetPointIG[0:7])
 
-        # Now we need to define the function and varibales needed to express
-        # the constraint
+    # Now we need to define the function and varibales needed to express
+    # the constraint
 
-        ## The constraint function enforces the equality of two length 7 vectors
-        LinkFun = Args(14).head(7) - Args(14).tail(7)
+    ## The constraint function enforces the equality of two length 7 vectors
+    LinkFun = Args(14).head(7) - Args(14).tail(7)
 
-        ## Specifying for each call to collect the x variables indexed
-        ## by xlinkvars (position velocity time) at PhaseReg.Back (last state),
-        ## these will be the first 7 arguments to each call of LinkFun
-        linkregs = [PhaseRegs.Back]
-        phasestolink = [[i] for i in range(0, len(Trajs))]
-        xlinkvars = [range(0, 7)]
+    # Forward the back state in each phase and the linkParams to the function
+    for i in range(0,len(Trajs)):
+        ocp.addLinkEqualCon(LinkFun,[(i,"Back",range(0,7),[],[])],range(0,7))
 
-        ## Specifies that for each call, collect the the ocp link vars representing
-        ## the free state and forward them to LinkFun, these will be the final 7
-        ## arguments for each call
-        linkparmavars = [range(0, 7) for i in range(0, len(Trajs))]
+    ocp.addLinkParamEqualCon(Args(6).head3().dot(Args(6).tail3()), range(0, 6))
 
-        ## combine function and indexing info into LinkConstraint Object and
-        ## add it to the phase
-        ocp.addLinkEqualCon(LinkFun, linkregs, phasestolink, xlinkvars, linkparmavars)
+    ocp.optimizer.set_OptLSMode("L1")
+    ocp.optimizer.set_deltaH(5.0e-8)
+    ocp.optimizer.set_KKTtol(1.0e-9)
+    ocp.optimizer.set_BoundFraction(0.997)
+    ocp.optimizer.PrintLevel = 1
+    ocp.optimizer.set_MaxLSIters(1)
 
-        ocp.addLinkParamEqualCon(Args(6).head3().dot(Args(6).tail3()), range(0, 6))
-
-        ocp.optimizer.QPThreads = 8  # Equal to number of physical cores
-        ocp.optimizer.set_OptLSMode("L1")
-        ocp.optimizer.set_deltaH(5.0e-8)
-        ocp.optimizer.set_KKTtol(1.0e-9)
-        ocp.optimizer.set_BoundFraction(0.997)
-        ocp.optimizer.PrintLevel = 1
-        ocp.optimizer.set_MaxLSIters(1)
-
-        Data = []
+    Data = []
 
 First we must choose which part of each state we desire to enforce this constraint for. Clearly, we wish each spacecraft to arrive at some
 final position, velocity, and time, so we set the link parameters to be the point we passed in :code:`SetPointIG`. It is length 7, and following our convention
@@ -211,40 +195,40 @@ The very last section of the code neccessary for the multi-spacecraft optimizati
 .. code-block:: python
 
     ##################################################################
-        #Section 3:
-        """
-        Now we are going to run an optimization continuation scheme to compute
-        the constellation trajectory for each list of initial states of the spacecraft
+    #Section 3:
+    """
+    Now we are going to run an optimization continuation scheme to compute
+    the constellation trajectory for each list of initial states of the spacecraft
 
-        """
+    """
 
-        for j, Ist in enumerate(IStates):
+    for j, Ist in enumerate(IStates):
 
-            ## For each set Initial condtions subsitute the fixed intial conditions
-            ## to each phase, Because we locked them, they will be fixed at these values
-            ## this avoids having to retranscribe to the problem for every optimize
-            for i, phase in enumerate(ocp.Phases):
-                phase.subVariables(PhaseRegs.Front, range(0, 7), Ist[i][0:7])
+        ## For each set Initial condtions subsitute the fixed intial conditions
+        ## to each phase, Because we locked them, they will be fixed at these values
+        ## this avoids having to retranscribe to the problem for every optimize
+        for i, phase in enumerate(ocp.Phases):
+            phase.subVariables("Front", range(0, 7), Ist[i][0:7])
 
-            # force a retranscription peridically to keep problem well conditioned
-            # This is not strictly necessary
-            if (j > 0) and (j % 8 == 0):
-                ocp.transcribe(False, False)
+        # force a retranscription peridically to keep problem well conditioned
+        # This is not strictly necessary
+        if (j > 0) and (j % 8 == 0):
+            ocp.transcribe(False, False)
 
-            # Solve before optimizing for the intial run
-            if j == 0:
-                ocp.solve()
-            t0 = time.perf_counter()
-            Flag = ocp.optimize()
-            tf = time.perf_counter()
-            print((tf - t0) * 1000.0)
-            if Flag == ast.Solvers.ConvergenceFlags.NOTCONVERGED:
-                ocp.solve_optimize()
+        # Solve before optimizing for the intial run
+        if j == 0:
+            ocp.solve()
+        t0 = time.perf_counter()
+        Flag = ocp.optimize()
+        tf = time.perf_counter()
+        print((tf - t0) * 1000.0)
+        if Flag == ast.Solvers.ConvergenceFlags.NOTCONVERGED:
+            ocp.solve_optimize()
 
-            Data.append(
-                [[phase.returnTraj() for phase in ocp.Phases], ocp.returnLinkParams()]
-            )
-        return Data
+        Data.append(
+            [[phase.returnTraj() for phase in ocp.Phases], ocp.returnLinkParams()]
+        )
+    return Data
 
 The first :code:`for` loop in this section assigns the values of our desired initial conditions into the :code:`ocp.Phases` interface.
 The actual optimization code that executes the solution is likely the simplest bit of code in this problem (as we know constructing a problem statement in a logical manner can be the hardest part of optimization).
@@ -350,6 +334,7 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
 
 Full Code:
 ##########
+
 .. code-block:: python
 
     import numpy as np
@@ -364,9 +349,6 @@ Full Code:
     oc = ast.OptimalControl
 
     Args = vf.Arguments
-    Tmodes = oc.TranscriptionModes
-    Cmodes = oc.ControlModes
-    PhaseRegs = oc.PhaseRegionFlags
 
 
     ################################################################################
@@ -380,10 +362,10 @@ Full Code:
     
             args = oc.ODEArguments(Xvars, Uvars)
             r = args.head3()
-            v = args.segment_3(3)
+            v = args.segment3(3)
             g = r.normalized_power3() * (-P1mu)
             if ltacc != False:
-                thrust = args.tail_3() * ltacc
+                thrust = args.tail3() * ltacc
                 acc = g + thrust
             else:
                 acc = g
@@ -431,19 +413,19 @@ Full Code:
         for i, T in enumerate(Trajs):
 
             ## Create a phase for Each Spacecraft
-            phase = ode.phase(Tmodes.LGL5)
+            phase = ode.phase("LGL5")
             ## Set Initial Guess
             phase.setTraj(T, NSegs)
 
             ##Use block constant control
-            phase.setControlMode(Cmodes.BlockConstant)
+            phase.setControlMode("BlockConstant")
 
             ##Specify that initial state and time are locked at
             ##whatever value is passed to optimizer
-            phase.addValueLock(PhaseRegs.Front, range(0, 7))
+            phase.addValueLock("Front", range(0, 7))
 
             ## Bound Norm of Control Vector over the whole phase
-            phase.addLUNormBound(PhaseRegs.Path, [7, 8, 9], 0.01, 1.0, 1)
+            phase.addLUNormBound("Path", [7, 8, 9], 0.01, 1.0, 1)
 
             # Add TOF objective
             phase.addDeltaTimeObjective(1.0)
@@ -471,25 +453,12 @@ Full Code:
         ## The constraint function enforces the equality of two length 7 vectors
         LinkFun = Args(14).head(7) - Args(14).tail(7)
 
-        ## Specifying for each call to collect the x variables indexed
-        ## by xlinkvars (position velocity time) at PhaseRegs.Back (last state),
-        ## these will be the first 7 arguments to each call of LinkFun
-        linkregs = [PhaseRegs.Back]
-        phasestolink = [[i] for i in range(0, len(Trajs))]
-        xlinkvars = [range(0, 7)]
-
-        ## Specifies that for each call, collect the the ocp link vars representing
-        ## the free state and forward them to LinkFun, these will be the final 7
-        ## arguments for each call
-        linkparmavars = [range(0, 7) for i in range(0, len(Trajs))]
-
-        ## combine function and indexing info into LinkConstraint Object and
-        ## add it to the phase
-        ocp.addLinkEqualCon(LinkFun, linkregs, phasestolink, xlinkvars, linkparmavars)
+        # Forward the back state in each phase and the linkParams to the function
+        for i in range(0,len(Trajs)):
+            ocp.addLinkEqualCon(LinkFun,[(i,"Back",range(0,7),[],[])],range(0,7))
 
         ocp.addLinkParamEqualCon(Args(6).head3().dot(Args(6).tail3()), range(0, 6))
 
-        ocp.optimizer.QPThreads = 8  # Equal to number of physical cores
         ocp.optimizer.set_OptLSMode("L1")
         ocp.optimizer.set_deltaH(5.0e-8)
         ocp.optimizer.set_KKTtol(1.0e-9)
@@ -513,7 +482,7 @@ Full Code:
             ## to each phase, Because we locked them, they will be fixed at these values
             ## this avoids having to retranscribe to the problem for every optimize
             for i, phase in enumerate(ocp.Phases):
-                phase.subVariables(PhaseRegs.Front, range(0, 7), Ist[i][0:7])
+                phase.subVariables("Front", range(0, 7), Ist[i][0:7])
 
             # force a retranscription peridically to keep problem well conditioned
             # This is not strictly necessary
@@ -572,7 +541,7 @@ Full Code:
         axes[1].set_ylabel("Control Magnitude")
         plt.tight_layout()
         axes[0].legend()
-        plt.savefig("Plots/MultiSpacecraftOptimization/multispacecraftoptimization.pdf",
+        plt.savefig("Plots/MultiSpacecraftOptimization/multispacecraftoptimization.svg",
                     dpi = 500)
         plt.show()
 

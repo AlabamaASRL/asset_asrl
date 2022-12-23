@@ -6,6 +6,15 @@ vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
 Args      = vf.Arguments
 
+'''
+This example was taken from the Dymos Optimal control library. It is an excellent
+teaching example of what ODE parameters are used for.
+https://openmdao.github.io/dymos/examples/multi_phase_cannonball/multi_phase_cannonball.html
+Only difference is that we use a simple exponenital atnospheric density function
+
+Assuming constant materiel density, and launch energy we need to find
+the radius of the cannon ball that maximizes range.
+'''
 
 ##########################################
 
@@ -139,8 +148,7 @@ if __name__ == "__main__":
     
     ode = Cannon(CD,RhoAir,RhoIron,h_scale,g)
     integ = ode.integrator(.01)
-    integ.Adaptive = True
-    
+    integ.setAbsTol(1.0e-14)    
     
     IG = np.zeros((6))
     IG[0] = v0
@@ -150,17 +158,14 @@ if __name__ == "__main__":
     IG[5] = rad0
     
     
+    def AscentEvent():
+        args  = oc.ODEArguments(4,0,1)
+        return args[0]*vf.sin(args[1])
     
-    
-    AscentIG = integ.integrate_dense(IG,
-                                     60/Tstar,
-                                     1000,
-                                     lambda x:x[0]*np.sin(x[1])<0)
-    DescentIG = integ.integrate_dense(AscentIG[-1],
-                                      AscentIG[-1][4]+ 30/Tstar,
-                                      1000,
-                                      lambda x:x[2]<0)
-    
+    AscentIG = integ.integrate_dense(IG,60/Tstar,[(AscentEvent(),0,1)])[0]
+
+    DescentIG = integ.integrate_dense(AscentIG[-1],AscentIG[-1][4]+ 1000/Tstar,
+                                      [( oc.ODEArguments(4,0,1)[2],0,1)])[0]
     ##########################################################################
     tmode = "LGL5"
     nsegs = 128
@@ -191,8 +196,14 @@ if __name__ == "__main__":
     ocp.optimizer.set_OptLSMode("L1")
     ocp.optimize()
     
+    
     Ascent  = aphase.returnTraj()
     Descent = dphase.returnTraj()
+    
+    print("Launch Angle:",Ascent[0][1]*180/np.pi," deg")
+    print("Optimized Distance:",Descent[-1][3]*Lstar," m")
+    print("Optimized Radius:"  ,Descent[-1][-1]*Lstar," m")
+
     Plot(Ascent,Descent)
 
     ##########################################################################

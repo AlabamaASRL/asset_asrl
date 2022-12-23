@@ -6,13 +6,13 @@ import matplotlib.pyplot as plt
 vf = ast.VectorFunctions
 oc = ast.OptimalControl
 Args = vf.Arguments
+
 '''
 Source for problem formulation
 https://www.hindawi.com/journals/aaa/2014/851720/
-
 '''
 
-class AnalyticODE(oc.ODEBase):
+class ODE(oc.ODEBase):
     def __init__(self):
         
         XVars =1
@@ -37,7 +37,7 @@ class AnalyticODE(oc.ODEBase):
 
 if __name__ == "__main__":
 
-    ode = AnalyticODE()
+    ode = ODE()
     
     x0 = 1.0
     t0 = 0.0
@@ -51,10 +51,10 @@ if __name__ == "__main__":
     
     TrajIG = [[x0,t,u0] for t in np.linspace(t0,tf,100)]
     
-    phase = ode.phase("LGL3",TrajIG,nsegs)
+    phase = ode.phase("LGL5",TrajIG,nsegs)
     phase.addBoundaryValue("Front",[0,1],[x0,t0])
     phase.addBoundaryValue("Back", [1],  [tf])
-    phase.addIntegralObjective(AnalyticODE.obj(),[0,2])
+    phase.addIntegralObjective(ODE.obj(),[0,2])
     phase.optimize()
     
     

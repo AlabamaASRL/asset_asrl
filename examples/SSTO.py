@@ -5,9 +5,7 @@ import matplotlib.pyplot as plt
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
 Args      = vf.Arguments
-Tmodes    = oc.TranscriptionModes
-PhaseRegs = oc.PhaseRegionFlags
-Cmodes = oc.ControlModes
+
 
 
 class SSTO(oc.ODEBase):
@@ -54,46 +52,47 @@ m0      = 117000    /Mstar
 yf      = 185000.0  /Lstar
 vxf     = 7796.6961 /Vstar
 
-tf     = 120.0/Tstar
-tpitch = 90.0/Tstar
+
+if __name__ == "__main__":
 
 
-ode = SSTO(F_T,Isp,g,rho_ref,h_scale,CDA)
-
-
-def UCon(t = Args(1)[0]):
-    return vf.ifelse(t<tpitch,np.pi/2, 0.0  )
+    tf     = 120.0/Tstar
+    tpitch = 90.0/Tstar
     
-
-IState =np.zeros((7))
-IState[4] =m0
-IState[6] =np.pi/2.0
-integ  = ode.integrator(tf/1000.0,UCon(),[5])
-TrajIG = integ.integrate_dense(IState,tf,300)
-
-phase = ode.phase(Tmodes.LGL3,TrajIG,128)
-phase.addBoundaryValue(PhaseRegs.Front,range(0,6),IState[0:6])
-phase.addBoundaryValue(PhaseRegs.Back ,[1,2,3],[yf,vxf,0])
-phase.addLUVarBound(PhaseRegs.Path,6,-np.pi/1.99,np.pi/1.99,1.0)
-phase.addDeltaTimeObjective(1)
-phase.optimizer.OptLSMode = ast.Solvers.LineSearchModes.L1
-phase.optimizer.MaxLSIters = 1
-phase.optimizer.PrintLevel =1
-phase.optimizer.BoundFraction =.993
-#phase.enable_vectorization(False)
-phase.solve_optimize()
-
-
-TT = np.array(phase.returnTraj()).T
-
-print(TT[5][-1]*Tstar)
-
-plt.plot(TT[0]*Lstar/5280,TT[1]*Lstar/5280,marker='.')
-plt.grid(True)
-plt.xlabel("Downrange (Miles)")
-plt.ylabel("Altitude (Miles)")
-
-plt.axis("Equal")
+    
+    ode = SSTO(F_T,Isp,g,rho_ref,h_scale,CDA)
+    
+    
+    def UCon(t = Args(1)[0]):
+        return vf.ifelse(t<tpitch,np.pi/2, 0.0  )
+        
+    
+    IState =np.zeros((7))
+    IState[4] =m0
+    IState[6] =np.pi/2.0
+    integ  = ode.integrator(tf/1000.0,UCon(),[5])
+    TrajIG = integ.integrate_dense(IState,tf,300)
+    
+    phase = ode.phase("LGL5",TrajIG,128)
+    phase.addBoundaryValue("Front",range(0,6),IState[0:6])
+    phase.addBoundaryValue("Back" ,[1,2,3],[yf,vxf,0])
+    phase.addLUVarBound("Path",6,-np.pi/1.99,np.pi/1.99,1.0)
+    phase.addDeltaTimeObjective(1)
+    phase.optimizer.set_OptLSMode("L1")
+    phase.optimizer.set_BoundFraction(.99)
+    phase.solve_optimize()
+    
+    
+    TT = np.array(phase.returnTraj()).T
+    
+    print(TT[5][-1]*Tstar)
+    
+    plt.plot(TT[0]*Lstar/5280,TT[1]*Lstar/5280,marker='.')
+    plt.grid(True)
+    plt.xlabel("Downrange (Miles)")
+    plt.ylabel("Altitude (Miles)")
+    
+    plt.axis("Equal")
 
 plt.show()
 
