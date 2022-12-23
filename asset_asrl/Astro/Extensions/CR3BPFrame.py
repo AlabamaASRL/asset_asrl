@@ -301,14 +301,11 @@ class CR3BPFrame:
         xdot = v[0]
         ydot = v[1]
         
-        t1     = vf.SumElems([ydot,x],[ 2.0,1.0])
-        t2     = vf.SumElems([xdot,y],[-2.0,1.0])
-        
-        rterms = vf.stack([t1,t2]).padded_lower(1)
-        
-        g1 = r.normalized_power3(-self.P1,(self.mu-1.0))
-        g2 = r.normalized_power3(-self.P2,(-self.mu))
-        
+       
+        rterms = vf.stack([2*ydot+x,-2*xdot+y]).padded_lower(1)
+        g1 = (r-self.P1).normalized_power3()*(self.mu-1.0)
+        g2 = (r-self.P2).normalized_power3()*(-self.mu)
+
         accterms   = [g1,g2,rterms] + otherAccs
         acc = vf.sum(accterms)
         terms = [v,acc] + otherEOMs

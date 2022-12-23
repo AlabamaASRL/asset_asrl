@@ -11,6 +11,16 @@ vf = ast.VectorFunctions
 oc = ast.OptimalControl
 Args = vf.Arguments
 
+'''
+This example was taken from the Dymos Optimal control library.
+https://openmdao.github.io/dymos/examples/mountain_car/mountain_car.html
+
+Goal is to have a car escape from a steep valley in minimum time. The engine is
+not strong enough to climb the slope, so it has to build up speed by oscilating
+back and forth
+'''
+
+
 ##############################################################################
 class MountainCar(oc.ODEBase):
     

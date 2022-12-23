@@ -10,9 +10,6 @@ vf = ast.VectorFunctions
 oc = ast.OptimalControl
 
 Args = vf.Arguments
-Tmodes = oc.TranscriptionModes
-Cmodes = oc.ControlModes
-PhaseRegs = oc.PhaseRegionFlags
 
 
 ################################################################################
@@ -26,10 +23,10 @@ class TwoBody(oc.ode_x_u.ode):
     
         args = oc.ODEArguments(Xvars, Uvars)
         r = args.head3()
-        v = args.segment_3(3)
+        v = args.segment3(3)
         g = r.normalized_power3() * (-P1mu)
         if ltacc != False:
-            thrust = args.tail_3() * ltacc
+            thrust = args.tail3() * ltacc
             acc = g + thrust
         else:
             acc = g
@@ -77,19 +74,19 @@ def MultSpaceCraft(Trajs, IStates, SetPointIG, LTacc=0.01, NSegs=75):
     for i, T in enumerate(Trajs):
 
         ## Create a phase for Each Spacecraft
-        phase = ode.phase(Tmodes.LGL5)
+        phase = ode.phase("LGL5")
         ## Set Initial Guess
         phase.setTraj(T, NSegs)
 
         ##Use block constant control
-        phase.setControlMode(Cmodes.BlockConstant)
+        phase.setControlMode("BlockConstant")
 
         ##Specify that initial state and time are locked at
         ##whatever value is passed to optimizer
-        phase.addValueLock(PhaseRegs.Front, range(0, 7))
+        phase.addValueLock("Front", range(0, 7))
 
         ## Bound Norm of Control Vector over the whole phase
-        phase.addLUNormBound(PhaseRegs.Path, [7, 8, 9], 0.01, 1.0, 1)
+        phase.addLUNormBound("Path", [7, 8, 9], 0.01, 1.0, 1)
 
         # Add TOF objective
         phase.addDeltaTimeObjective(1.0)
@@ -117,25 +114,12 @@ def MultSpaceCraft(Trajs, IStates, SetPointIG, LTacc=0.01, NSegs=75):
     ## The constraint function enforces the equality of two length 7 vectors
     LinkFun = Args(14).head(7) - Args(14).tail(7)
 
-    ## Specifying for each call to collect the x variables indexed
-    ## by xlinkvars (position velocity time) at PhaseRegs.Back (last state),
-    ## these will be the first 7 arguments to each call of LinkFun
-    linkregs = [PhaseRegs.Back]
-    phasestolink = [[i] for i in range(0, len(Trajs))]
-    xlinkvars = [range(0, 7)]
-
-    ## Specifies that for each call, collect the the ocp link vars representing
-    ## the free state and forward them to LinkFun, these will be the final 7
-    ## arguments for each call
-    linkparmavars = [range(0, 7) for i in range(0, len(Trajs))]
-
-    ## combine function and indexing info into LinkConstraint Object and
-    ## add it to the phase
-    ocp.addLinkEqualCon(LinkFun, linkregs, phasestolink, xlinkvars, linkparmavars)
+    # Forward the back state in each phase and the linkParams to the function
+    for i in range(0,len(Trajs)):
+        ocp.addLinkEqualCon(LinkFun,[(i,"Back",range(0,7),[],[])],range(0,7))
 
     ocp.addLinkParamEqualCon(Args(6).head3().dot(Args(6).tail3()), range(0, 6))
 
-    ocp.optimizer.QPThreads = 8  # Equal to number of physical cores
     ocp.optimizer.set_OptLSMode("L1")
     ocp.optimizer.set_deltaH(5.0e-8)
     ocp.optimizer.set_KKTtol(1.0e-9)
@@ -159,7 +143,7 @@ def MultSpaceCraft(Trajs, IStates, SetPointIG, LTacc=0.01, NSegs=75):
         ## to each phase, Because we locked them, they will be fixed at these values
         ## this avoids having to retranscribe to the problem for every optimize
         for i, phase in enumerate(ocp.Phases):
-            phase.subVariables(PhaseRegs.Front, range(0, 7), Ist[i][0:7])
+            phase.subVariables("Front", range(0, 7), Ist[i][0:7])
 
         # force a retranscription peridically to keep problem well conditioned
         # This is not strictly necessary

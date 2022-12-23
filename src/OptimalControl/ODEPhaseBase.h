@@ -182,6 +182,12 @@ public:
   VectorXi addBoundaryValues(PhaseRegionFlags reg, VectorXi args,
                              const VectorXd& value);
   int addValueLock(PhaseRegionFlags reg, VectorXi args);
+
+  int addValueLock(std::string reg, VectorXi args) {
+      return this->addValueLock(strto_PhaseRegionFlag(reg), args);
+  }
+
+
   int addBoundaryValue(PhaseRegionFlags reg, VectorXi args,
                        const VectorXd& value);
   int addBoundaryValue(std::string reg, VectorXi args,

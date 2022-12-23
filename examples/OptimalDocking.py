@@ -12,10 +12,10 @@ Path Planning to an Uncontrolled Tumbling Target, in Proceedings of the IFAC
 ACA2013 Conference, W¨urzburg, Germany, Sept. 2013.
 
 I have reformulated the quaternions so that they transform from body to global frame, and
-changed the inital conditions to reflect this. Ive also reforumalted thrust controls to be
+changed the initial conditions to reflect this. Ive also reforumalted thrust controls to be
 in the body frame rather than global frame and updated path constraint accordingly. 
 
-I also solve this problem in two ways. In the first (Form1) I let the freely spinning
+This script solves this problem in two ways. In the first (Form1) I let the freely spinning
 target be part of the state variables as in the reference. However, since its
 motion is uncontrolled we can actually eliminate it from the ODE and turn the
 rendezvous constraint into a time dependent boundary condtion using an interpoaltion

@@ -1183,8 +1183,10 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   obj.def("addBoundaryValue", py::overload_cast<std::string, VectorXi, const VectorXd&>
       (&ODEPhaseBase::addBoundaryValue), ODEPhaseBase_addBoundaryValue);
 
-  obj.def("addValueLock", &ODEPhaseBase::addValueLock,
+  obj.def("addValueLock", py::overload_cast<std::string, VectorXi>(&ODEPhaseBase::addValueLock),
           ODEPhaseBase_addValueLock);
+  obj.def("addValueLock", py::overload_cast<PhaseRegionFlags, VectorXi>(&ODEPhaseBase::addValueLock),
+      ODEPhaseBase_addValueLock);
 
   obj.def("addBoundaryValues", &ODEPhaseBase::addBoundaryValues,
           ODEPhaseBase_addBoundaryValues);

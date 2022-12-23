@@ -28,20 +28,5 @@ def ReadCopernicusFile(name,Folder = 'Data'):
                 StateHist.append(S)
     return StateHist
            
-def ReadSLSFile(name):
-    StateHist = []
-   
-    with open(name) as csvfile:
-        readCSV = csv.reader(csvfile, delimiter=',')
-        for i,row in enumerate(readCSV):
-            if(i>0):
-                if(i==1):
-                    JD0 = float(row[1])*c.day
-                S=np.zeros((8))
-                for j in range(0,6):
-                    S[j] = float(row[2+j])*0.3048
-                S[6]=float(row[1])*c.day - JD0
-                S[7]=float(row[1])
-                StateHist.append(S)
-    return StateHist
+
 

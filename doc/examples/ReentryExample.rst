@@ -4,7 +4,11 @@ Space Shuttle Reentry
 
 As a next example, we will solve another classic problem outlined by Betts in [1].
 
-*[1] *Betts, J.T. "Practical methods for Optimal Control and Estimation Using Nonlinear Programming", Cambridge University Press, 2009*
+..  note:: 
+
+    We should note that this example is derived entirely from publicly available sources (see [1-4]). Furthermore, this problem is routinely 
+    used [1-4] as a benchmark for optimal control packages such as ASSET.
+
 
 This problem involves maximizing the cross range
 of the Space Shuttle during reentry. The dynamics are written in spherical coordinates and incorporate gravity and an empirical model for the lift and
@@ -188,9 +192,10 @@ Additionally, we can express our heating rate constraint as an ASSET VectorFunct
 
 
 Next we must define a suitable initial guess for the optimization. Bett's problem definition places an upper limit of 2500 sec 
-on this problem, but we will assume an initial guess of :math:`t_f=1000` sec. We are given initial and terminal values of the altitude, velocity, 
-and :math:`\gamma`, so it is natural to construct to the initial guess for these state variables as linear functions over the interval (:math:`0-t_f`).
-:math:`\psi` and :math:`\theta` are only given initial values and we have no good physical intuition for how they will evolve so our initial guess assumes that they are constant. 
+on this problem, but we assume an initial guess of :math:`t_f` = 1000 sec as is done in [2,3]. We are given initial and terminal values of the altitude, velocity, 
+and :math:`\gamma`, so it is natural to construct the initial guess for these state variables as linear functions over the interval (:math:`0-t_f`).
+:math:`\psi` and :math:`\theta` are only given initial values and we have no good physical intuition 
+for how they will evolve so like [2,3] our initial guess assumes that they are constant. 
 For both control angles, we just assume that they are 0.
 
 .. code-block:: python
@@ -228,7 +233,7 @@ For both control angles, we just assume that they are 0.
 With preliminaries completed we can now solve the problem. We first construct our :code:`ode` and :code:`phase` object, and use
 40 LGL3 segments to discretize the problem. We then enforce our known initial conditions as a boundary value constraint. Next, we
 apply the given bounds on our states and controls as path constraints and also place the specified upper bound on the final time. Last, we enforce the terminal conditions
-on altitude, velocity, and flight path angle, and then specify that the objective is to minimize :math:`\Delta -\theta*`. This is equivalent to maximizing :math:`\Delta theta`.
+on altitude, velocity, and flight path angle, and then specify that the objective is to minimize :math:`-\Delta \theta`. This is equivalent to maximizing :math:`\Delta \theta`.
 Given our rather poor initial guess for this problem, PSIOPT is invoked in :code:`solve_optimize` mode, so that it first finds a feasible solution 
 satisfying all constraints before minimizing the objective. Furthermore, we enable the line search as an extra safe-guard.
 
@@ -286,6 +291,14 @@ The complete code for this example is listed at the bottom of this page.
 
 .. image:: _static/ReentryExample.svg
     :width: 100%
+
+References
+##########
+#. Betts, J.T. "Practical methods for Optimal Control and Estimation Using Nonlinear Programming", Cambridge University Press, 2009
+#. Agamawi, Y. M., & Rao, A. V. (2020). Cgpops: A c++ software for solving multiple-phase optimal control problems using adaptive gaussian quadrature collocation and sparse nonlinear programming. ACM Transactions on Mathematical Software (TOMS), 46(3), 1-38.
+#. Patterson, M. A., & Rao, A. V. (2014). GPOPS-II: A MATLAB software for solving multiple-phase optimal control problems using hp-adaptive Gaussian quadrature collocation methods and sparse nonlinear programming. ACM Transactions on Mathematical Software (TOMS), 41(1), 1-37.
+#. Falck, R. (2022). https://openmdao.github.io/dymos/examples/reentry/reentry.html.
+
 
 Full Code
 #########

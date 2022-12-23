@@ -140,8 +140,8 @@ if __name__ == "__main__":
     phase.optimizer.set_PrintLevel(1)
     phase.optimizer.set_MaxAccIters(500)
     phase.optimizer.set_MaxIters(1000)
-    phase.optimizer.set_BoundFraction(.997)
-    phase.optimizer.deltaH = 1.0e-6
+    phase.optimizer.set_BoundFraction(.995)
+    phase.optimizer.deltaH = 1.0e-5
    
     # Scale to be order 1 based on initial guess
     phase.addDeltaTimeObjective(1/100)
@@ -152,8 +152,11 @@ if __name__ == "__main__":
     phase.removeStateObjective(0)
     
     phase.setTraj(MoptIG,400)
+    
     phase.addIntegralObjective(Args(1)[0]/100,[5])
     
+    ## This problem likes to grind, could probabably
+    # be improved by making integral a state variable
     phase.optimize_solve()
     phase.refineTrajManual(800)
     phase.optimize_solve()

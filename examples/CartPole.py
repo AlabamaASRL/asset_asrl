@@ -13,6 +13,9 @@ Example taken from
 Kelly, M., 2017. An introduction to trajectory optimization: How to do your own direct collocation. SIAM Review, 59(4), pp.849-904.
 
 Compute the minimum effort trajectory to swing a cart pole system to vertical.
+The boundary conditions, dynamics and objective are the same as in the reference,
+but we use asset's matrix functions to invert the mass matrix at run-time rather than solving
+for the equations of motion explicitly.
 
 '''
 
