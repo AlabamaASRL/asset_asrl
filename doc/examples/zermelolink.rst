@@ -1,13 +1,13 @@
 Multi-Phase Zermelo's Problem
 ==============================
 
-If you haven't explored :ref:`Zermelo's Problem`, it is highly reccomended that you do so before going much further.
+If you haven't explored :ref:`Zermelo's Problem`, it is highly recommended that you do so before going much further.
 It provides much needed background information about the problem, as well as the initial code that we will be modifying.
 
 The previous example showed Zermelo's problem as a single phase problem. We were only trying to get from point A to B, with some constraints and objectives along
 that single phase. What if instead we wanted travel from A to any arbitrary number of points along the way to our final destination? ASSET is designed to handle exactly this type of problem,
-where each phase can have varying constraints and objectives to solve in the pursuit of our final target. In this example we will expand the single phase Zermelo's problem into multiple phases, which is a very
-usefull tool to have for trajectory optimization.
+where each phase can have varying constraints and objectives to solve in the pursuit of our final target. In this example, we will expand the single phase Zermelo's problem into multiple phases, which is a very
+useful tool to have for trajectory optimization.
 
 Link Constraints:
 #################
@@ -42,7 +42,7 @@ To do this to the previous problem, we only have to make a few additions to the 
 
 Here we will discuss the changes to the :code:`navigate` function that allows us to turn this into a multi-phase problem. We will do this in sections of code to highlight specific changes, with the full, new function after.
 The first change made is to have :code:`navigate` accept a list of points, :code:`Points` rather than just 2 points A and B. We also need to know how many phases this problem is to be broken into.
-For this example we will define each phase to be between each consecutive point. That is phase 1 is between Points A and B, and phase 2 is between points B and C, and so on. We make some minor changes to our
+For this example, we will define each phase to be between each consecutive point. So, phase 1 is between Points A and B, and phase 2 is between points B and C, and so on. We make some minor changes to our
 initial guess generating code to accompany this design choice. Lastly, we are going to need to bring in the :code:`OptimalControlProblem` interface as :code:`ocp`.
 
 Now that we have our guess generator fixed to handle arbitrary size inputs we need to define each phase, as well as change constraints on each phase.
@@ -113,8 +113,8 @@ Using the optimal control problem interface from :code:`ocp`, we add a :code:`oc
 the back state of the previous phase and the front state of the next phase must satisfy that the state variables indicated in brackets (0, 1, and 2 which are x position, y position, and time) must be equal. This ensures continuity
 between the phases and that our trajectory will be continuous. Aftwards we use the :code:`ocp.solve_optimize()` call to evaluate the problem. Then we package our phases into a singular trajectory to make plotting easier.
 
-The final problem looks quite different from the single phase Zermelo problem, as now we move from point to point, all the while satisfying our optimization objectives and constraints for each phase.
-We defined the initial points such that the boat manuevers back to the initial state at the end time. However, any number of points could be added, provided that a feasible solution exists.
+The final problem looks quite different from the single phase Zermelo problem, as we now move from point to point, all the while satisfying our optimization objectives and constraints for each phase.
+We defined the initial points such that the boat maneuvers back to the initial state at the end time. However, any number of points could be added, provided that a feasible solution exists.
 
 As for plots, first we have the comparison of the different wind models and how they affect the movement of the boat. We will take the same approach as last time and leave the technical analysis to you.
 

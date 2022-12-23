@@ -3,7 +3,7 @@ Zermelo's Problem
 
 Ernst Zermelo's question of optimal navigation is a classic in the field of optimal control.
 In this tutorial, we will demonstrate how ASSET can be used to construct a modular solution approach that allows the user to easily manipulate the conditions of the problem.
-These type of parameter estimation tasks were a core motivation during intial development, and although it requires some intermediate programming techniques, the return on investment is extremely compelling.
+These type of parameter estimation tasks were a core motivation during initial development, and although it requires some intermediate programming techniques, the return on investment is extremely compelling.
 This tutorial will move a bit faster than the :ref:`Orbit Family Continuation` example, and focuses more on how to use ASSET rather than how ASSET works.
 We'll also be finding trajectories that optimize an objective instead of just satisfying constraints.
 
@@ -110,7 +110,7 @@ And here's another:
         return vel * np.cos(ang), vel * np.sin(ang)
 
 The astute among you will notice that despite my warnings, these functions don't refer to ASSET, and the second one actually uses NumPy!
-We're permitted to do this because neither of these functions use the :code:`xyt` argument, bypassing the VectorFunction stuff and only dealing with constant numbers.
+We're permitted to do this because neither of these functions use the :code:`xyt` argument, bypassing the use of VectorFunctions and only dealing with constant numbers.
 What's dangerous and disallowed is passing :code:`xyt` to numerical operations.
 If you scroll back up to the definition of :code:`xD` and :code:`yD` in the system dynamics, you'll see that if :code:`wx` and :code:`wy` are numbers, the addition operation is well-defined.
 
@@ -207,7 +207,7 @@ Running and Plotting
 --------------------
 
 Now for the good stuff.
-The work we put in making things generic will allow us to quickly and consicely explore a large parameter space for this problem.
+The work we put in making things generic will allow us to quickly and concisely explore a large parameter space for this problem.
 We'll start by comparing wind models.
 I'm omitting the in-line definition of the plotting functions, but you can find them at the end of the page in the full source listing.
 
