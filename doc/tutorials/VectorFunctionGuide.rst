@@ -21,7 +21,7 @@ Let us begin by importing ASSET and the VectorFunctions module which contains al
 and functions defining the language. From this module, we will then import the Arguments type
 and give it a shorthand name. The :code:`Arguments` type is the base expression in the VectorFunction system
 and represents a function that simply takes some number of input arguments and returns them as outputs.
-It always serves as the starting point for defining a more complicated functional expressions involving
+It always serves as the starting point for defining more complicated functional expressions involving
 some or all of its outputs.
 
 .. code-block:: python
@@ -35,12 +35,12 @@ and returns that vector. Since it is a VectorFunction, we can compute its output
 To do this, we provide either a numpy vector or python list of real valued inputs, and additionally for the second derivative,
 a vector list of lagrange multipliers with same dimensions as the output of the function. One important note, ASSET does not compute
 the full 3D tensor second derivative of vector valued functions, instead it computes the second derivative
-dotted with a vector lagrange multipliers, resulting in 2D symmetric matrix with rows and columns equal to the number of inputs.
-We refer to this as the adjointhessian, and in the case of a function with a single output is equivalent to the normal hessian.
+dotted with a vector lagrange multipliers, resulting in a 2D symmetric matrix with rows and columns equal to the number of inputs.
+We refer to this as the adjointhessian, and in the case of a function with a single output it is equivalent to the normal hessian.
 Since :code:`X` here is a simple linear function, the first derivative is simply the identity matrix and the adjointhessian is zero. This is
-a rather trivial example, but the same methods can applied to any ASSET VectorFunction that we can construct. We should also note that while
+a rather trivial example, but the same methods can be applied to any ASSET VectorFunction that we can construct. We should also note that while
 these methods are available for all VectorFunctions, for most applications and examples you won't ever actually need to explicitly
-call the function or its derivatives at real arguments as that will be handled for you by some other interface such as an integrator or optimal
+call the function or its derivatives at real arguments, as that will be handled for you by some other interface such as an integrator or optimal
 control problem.
 
 .. code-block:: python
@@ -58,7 +58,7 @@ control problem.
 	print( X.adjointhessian(xvals,lvals) ) #prints zero matrix of size 6
 
 
-As you can see, :code:`Arguments` itself does not do any thing very interesting, but what it does do is
+As you can see, :code:`Arguments` itself does not do anything very interesting, but what it does do is
 serve as a starting point for defining functions of elements and sub-vectors. For example, we may
 make a new object referencing one of its elements by using the bracket operator. This will return an object of
 another fundamental type, :code:`Element`, which is itself a function that takes all input arguments and returns the specified 
@@ -257,7 +257,7 @@ This is an explicit choice because in our opinion, for the types of expressions 
 allowing element-wise vector multiplication creates more problems in terms of incorrect problem formulation than it solves.
 However, these operations can be accomplished using methods we describe later. Note,
 this does not apply to ScalarFunctions such as :code:`Element` or :code:`ScalarFunction`, which may be multiplied together with
-no issue, and may also scale in VectorFunction.
+no issue, and may also scale a VectorFunction.
 
 .. code-block:: python
 	
@@ -455,9 +455,9 @@ while the real part is the 4th element(ie: q =[qv,q4]).
 	Krn  = vf.quatRotate(K,V)  ## Rotates 3x1 vector V using quaternion K
 
 
-
 	KpN  = K.cwiseProduct(N)
 	NpC4 = N.cwiseProduct(C4)
+	KdN = K.cwiseQuotient(N)
 
 
 
@@ -471,7 +471,7 @@ In general stack takes a list of ASSET function types and produces another funct
 of all the outputs. There are two signatures for stack, The first one (:code:`vf.stack([f1,f2,...])`) takes a python list
 containing only explicit ASSET function types (ie: :code:`Element`, :code:`ScalarFunction` , :code:`VectorFunction`, :code:`Segment` etc..).
 This version does not allow one to mix in floats or numpy vectors. The second signature (:code:`vf.stack(f1,f2,...)`) does the 
-same thing as the first but does not enclose the objects to be stacked inside of list. Additionally,
+same thing as the first but does not enclose the objects to be stacked inside of a list. Additionally,
 for this second signature, you may mix in arbitrary floats and numpy vectors that will be included in the output.
 
 .. code-block:: python
@@ -503,8 +503,8 @@ Matrix Operations
 While ASSET is and always will be a language for defining functions with vector valued
 inputs and outputs, we do have limited but growing support for interpreting VectorFunctions
 as matrices inside of expressions. This is supported through the :code:`vf.ColMatrix` and :code:`vf.RowMatrix` types.
-These are types constructed from some VectorFunction and interprets the outputs as nxm matrix.
-A :code:`ColMatrix` will interpret the coefficients of output as a column major matrix, whereas :code:`RowMatrix` interprets
+These are types constructed from some VectorFunction and interprets the outputs as :math:`n \times m` matrix.
+A :code:`ColMatrix` will interpret the coefficients of the output as a column major matrix, whereas :code:`RowMatrix` interprets
 them as a row major matrix. Once constructed you may multiply matrices by any other appropriately sized
 Row/ColMatrix functions in any order, or multiply them on the right by appropriately sized VectorFunctions. The result
 of all matrix on matrix operations are assumed to be :code:`ColMatrix` type. The result of Matrix*vector operations is :code:`VectorFunction`.
@@ -551,7 +551,7 @@ To be precise, we support constructing boolean statements involving the outputs 
 using those as conditional statements to control the output of another expression. Conditional statements are constructed by
 applying the comparison operators (>,<,<=,>=) to the outputs of ScalarFunctions. This can be used to dispatch one of
 two functions using the :code:`vf.ifelse()` function as shown below. Note that the output sizes of both the true and false functions
-MUST be the same. Conditional statements may also be combined together using the bitwise or and operators (|,&).
+MUST be the same. Conditional statements may also be combined together using the bitwise or/and operators (|,&).
 
 .. code-block:: python
 
@@ -586,8 +586,7 @@ MUST be the same. Conditional statements may also be combined together using the
 Some Notes on Input Arguments
 #############################
 
-Before moving on any further, we need to make one very important note about how the vector
-function type system works. In all of our previous examples, we have created and partitioned
+Before moving on any further, we need to make one very important note about how the VectorFunction type system works. In all of our previous examples, we have created and partitioned
 one set of arguments of a certain size, from which we constructed other functions. You might
 ask, what happens if we try to mix expressions formulated out of arguments of different sizes?
 This is strictly not allowed, as our entire type system is predicated on the fact that expressions can
@@ -634,18 +633,18 @@ problem specific examples contained in other sections.
 
 .. code-block:: python
 	
-	def FuncMeth(a,b,c):
+	def FuncMethod(a,b,c):
 		x0,x1,x2 = Args(3).tolist()
 		eq1 = x0 +a - x1
 		eq2 = x2*b + x1*c
 		return vf.stack(eq1,eq2)
 
-	func = FuncMeth(1,2,3)
+	func = FuncMethod(1,2,3)
 
 	print(func([1,1,1]))  # prints [1,5]
 	
 Method two involves defining a new class that inherits from the appropriate
-ASSET type (:code:`vf.VectorFunction` if output size is >1, :code:`vf.ScalarFunction` of output size =1)
+ASSET type (:code:`vf.VectorFunction` if output size is >1, :code:`vf.ScalarFunction` if output size =1)
 and then defining and initializing the expression in the constructor. This method should only
 be preferred if you need to store the meta-data as part of the class
 or add additional methods to the object. Otherwise, this method is functionally identical to
@@ -702,10 +701,10 @@ We can then write another function that takes position and velocity as well as t
 to be transformed. We then instantiate our previously defined function that
 computes basis vectors and then "call" it with the position and velocity arguments
 defined inside our new function. Calling the already instantiated function can be accomplished
-by passing the provided, correctly sized function, to the :code:`()` call operator the same way we do for
+by passing other VectorFunctions, to the :code:`()` call operator the same way we do for
 real number arguments. In this case, providing the contiguous segment of size 6 :code:`RV`, is the most efficient
-way to the define the expression. However, if this were not the case, we could also the other
-call signatures shown. We can provide two separate functions, in this case :code:`R` and :code:`V`
+way to the define the expression. However, if this were not the case, we could also use the other
+call signatures shown. We can provide two separate functions, in this case :code:`R` and :code:`V`,
 either as individual arguments or grouped together in a python list. These will be implicitly
 stacked using the same rules governing :code:`vf.stack` and then forwarded to the function.
 
@@ -763,8 +762,8 @@ evaluating :code:`expensive` three times.
 
 
 In the vast majority of cases you should not worry about the cost of reevaluating subexpressions,
-as the run time hit is marginal. There is, however, one way to explicitly ensure to reduce the cost of expensive repeated
-sub expressions should you need to. You can do this by writing a second function where the subexpression appears
+as the run time hit is marginal. There is, however, one way to explicitly reduce the cost of expensive repeated
+sub expressions, should you need to. You can do this by writing a second function where the subexpression appears
 linearly as additional arguments or segments and then using the call operator to compose this new function
 and the original arguments and subexpression together. For example, the following code will produce the same output
 as above while only ever evaluating :code:`expensive` once.
@@ -794,7 +793,7 @@ We also have support for interpreting tabular data as a VectorFunction using dif
 
 Interpolation of vector or scalar data with one input dimension may be accomplished using :code:`vf.InterpTable1D`. This
 class is designed to be constructed and behave similarly to scipy's :code:`interp1D` class. To construct a table for interpolating
-vector data, we pass a list of sorted coordinates values along with an array whose rows or columns are the vectors of values at each
+vector data, we pass a list of sorted coordinate values along with an array whose rows or columns are the vectors of values at 
 each coordinate. You may also pass in the data as a list of numpy arrays or lists which include the coordinate element. You have the
 option to choose between linear or cubic interpolation using the kind parameter in the constructor. Cubic interpolation is recommended to ensure
 that the function is twice differentiable.
@@ -822,7 +821,7 @@ that the function is twice differentiable.
 	print(Tab(np.pi/2.0)) #prints [1,.0]
 
 
-To construct a table for interpolating scalar data, you may just pass in the list of coordinates along with
+To construct a table for interpolating scalar data, you may just pass in the list of coordinates along with a
 1-D numpy array or python list of the values of the function at each point.
 
 .. code-block:: python
@@ -860,7 +859,7 @@ by providing a ScalarFunction argument to the call operator.
 2-D Interpolation
 -----------------
 Similarly, you can also interpret scalar data defined on a 2-D regular grid of coordinates as an ASSET ScalarFunction using the
-:code:`vf.InterpTable2D` class. The class my be constructed by supplying the grid coordinates as either python lists or numpy
+:code:`vf.InterpTable2D` class. The class may be constructed by supplying the grid coordinates as either python lists or numpy
 arrays along with the function values formatted like a numpy meshgrid.
 
 .. code-block:: python
@@ -913,10 +912,10 @@ Note on Size of VectorFunctions
 The VectorFunction type system has been designed to have good performance for evaluating
 the value and derivatives of dense VectorFunctions with a small number of arguments (<50).
 It will work for larger expressions, but performance will begin to degrade considerably. This may seem
-strange since it ostensibly designed to be used to define constraints and objective inside of large
+strange since it is ostensibly designed to be used to define constraints and objective inside of large
 sparse non-linear programs. However, in our experience these problems are almost never composed
 of single monolithic functions, and can generally be decomposed into smaller dense functions that only
-take a partial subsets of the problem variables. In that case, we can define our functions in terms of
+take partial subsets of the problem variables. In that case, we can define our functions in terms of
 only the arguments they take, and then under the hood, ASSET will ensure that the inputs and outputs are gathered and
 scattered to the correct locations inside the larger problem. The specifics of how this works will be discussed in later
 sections.
@@ -932,11 +931,11 @@ sections.
 Binding Raw Python Functions (DON'T DO THIS)
 #############################################
 You also have the option, should you need to, to bind raw python functions
-as ASSET VectorFunctions and ScalarFunctions. This can be accomplished using the  :code:`vf.PyVectorFunction`
+as ASSET VectorFunctions and ScalarFunctions. This can be accomplished using the :code:`vf.PyVectorFunction`
 and  :code:`vf.PyScalarFunction` types as shown below. The function must have a signature accepting as the first argument a 1 dimensional numpy array of input arguments
 (named :code:`X` in this case) and returning a numpy array. Additional parameters on which the implementation depends (these are not mathematical input variables) may be included as additional
 arguments.
-You must also explicit state the input and output (if not scalar) sizes of the function. The function jacobian and hessian will be computed with finite differences
+You must also explicitly state the input and output (if not scalar) sizes of the function. The function jacobian and hessian will be computed with finite differences
 using the user specified jacobian and hessian step sizes.
 
 
@@ -965,7 +964,7 @@ using the user specified jacobian and hessian step sizes.
 
 
 You should be warned that extensive use of these objects inside of the optimizer or an ODE will result in VERY slow and non-parrallelizable code with inexact derivatives. 
-If you find yourself in situation where you don't think you can write an expression without using :code:`vf.PyVectorFunction` or :code:`vf.PyScalarFunction`, 
+If you find yourself in a situation where you don't think you can write an expression without using :code:`vf.PyVectorFunction` or :code:`vf.PyScalarFunction`, 
 please submit an issue on GitHub. We will happily give suggestions on how you might be able to accomplish your task with the standard VectorFunctions. 
 If it's truly not possible, we will consider adding the missing expression to the core library in a future release.
 

@@ -97,7 +97,7 @@ same object. Be careful not to apply duplicate constraints to the same phase.
     # Equivalent to above,make sure you dont accidentally do both.
     # phase0.addBoundaryValue("Front",range(0,6),np.zeros((6)))
 
-Additionally, you make access the list of phases already added to an :code:`ocp` using the :code:`.Phases` field
+Additionally, you may access the list of phases already added to an :code:`ocp` using the :code:`.Phases` field
 of the object. This can allow you to iterate over all phases to apply similar constraints/objectives
 to some or all of the phases as shown below.
 
@@ -160,7 +160,7 @@ Link Equality Constraints
 A link equality constraint of the form :math:`\vec{h}(\vec{x}) = \vec{0}` can be added to the phase using the 
 :code:`.addLinkEqualCon` method. The most general way to link two phases with an equality constraint is shown below. This contrived example is
 enforcing continuity between the last time-varying state variables and in :code:`phase0` and the first-time varying state variables and parameters in :code:`phase1`.
-To illustrate the expected order of arguments we also multiply the result by the 0:sup:`th` link parameter. Our constraint function should be formulated to expect
+To illustrate the expected order of arguments we also multiply the result by the 0th link parameter. Our constraint function should be formulated to expect
 all arguments specified for :code:`phase0` ( :code:`V0`), followed by all specified for :code:`phase1` ( :code:`V0`), followed by the link parameter ( :code:`Lvar`).
 
 .. code-block:: python
@@ -321,7 +321,7 @@ each adjacent phase as shown below. Alternatively, you can use the convenient :c
 
 We should note that basically all simple continuity constraints between phases can be 
 implemented using a combination of :code:`addDirectLinkEqualCon` and :code:`addForwardLinkEqualCon`, 
-and users should only fall have to fall back on the more general form in special cases.
+and users should only have to fall back on the more general form in special cases.
 
 
 

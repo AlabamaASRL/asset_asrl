@@ -21,11 +21,11 @@ geostationary transfer orbit insertion of a Delta 3 rocket as described by Betts
 
 The Delta 3 was nominally a 2 stage rocket consisting of a first stage RS-27A and 9 solid rocket boosters topped with an RL-10 upper stage. The rocket had an interesting staging
 strategy with the first stage liquid engine and only 6 of the 9 SRBs igniting at take off. Following burnout of these 6 solid rocket 
-boosters 75.2 seconds after launch, the inert mass is ejected and the remaining the  3 boosters are ignited. After another 75 seconds (t+150.4s) these 3 SRBs
-too are ejected and the first stage continues to burn until t+261.
+boosters 75.2 seconds after launch, the inert mass is ejected and the remaining 3 boosters are ignited. After another 75.2 seconds (t+150.4s) these 3 SRBs
+too are ejected and the first stage continues to burn until t+261s.
 At this point the RL-10 upper stage and payload separate from the first stage and continue to orbit, burning for up to an additional 700 seconds. 
 
-Betts problem in [1] involves maximizing the mass delivered to a pre-specified geostationary orbit for a launch from cape Canaveral. 
+Betts' problem in [1] involves maximizing the mass delivered to a pre-specified geostationary orbit for a launch from cape Canaveral. 
 This problem can be broken down into 4 phases: 
 
     1. 6 SRBs + First Stage   (  0.0  <= t <=  75.2s)
@@ -120,7 +120,7 @@ As you might have noticed, our model is written in Cartesian coordinates, but ou
 as a set of classical orbital elements. This necessitates writing a custom constraint (below), which will convert from Cartesian coordinates to 
 orbital elements so that we can target the given orbit. Those familiar with this conversion will know that it requires quadrant checks on the RAAN
 and argument of periapse, and thus requires a run-time conditional statement. Such simple conditional statements can be readily handled in ASSET's VectorFunction type system,
-using the :code:`vf.ifelse` function as seen below. The first argument of the function is conditional statement containing at least one ASSET VectorFunction. 
+using the :code:`vf.ifelse` function as seen below. The first argument of the function is a conditional statement containing at least one ASSET VectorFunction. 
 At run time, if this statement, evaluates to True, output of the function will be given by the second argument, 
 and if it evaluates to :code:`False` , the output will be the final argument.
 
@@ -168,7 +168,7 @@ With our dynamics and custom boundary constraint defined we can now begin the ta
 
 Our first step here will be to find a suitable initial guess for all four phases of the rockets flight as shown below. To do this, we adopt a similar
 strategy to Betts of selecting a state along the target orbit, and linearly interpolating from our known initial conditions. We roughly select this terminal state
-such that the linearly interpolated initial guess departs the cape in an easterly direction does not pass under the surface of the Earth. 
+such that the linearly interpolated initial guess departs the cape in an easterly direction and does not pass under the surface of the Earth. 
 This initial guess is evenly partitioned in time to construct the position and velocity along each phase. 
 Because the dynamics do not allow throttling of the engine, we can also supply the exact mass history for each phase. 
 The thrust directions are arbitrarily set to the unit y direction.
@@ -232,14 +232,14 @@ The thrust directions are arbitrarily set to the unit y direction.
 Now we can instantiate (below), the ODE's and phases for each of the 4 rocket stages and combine them into a single optimal control problem. 
 On the first phase we apply our known initial state, time, and mass as a boundary value. The length of the phase is then enforced by fixing the
 final time of the last state to be equal to the burnout time of the first 6 SRB's. 
-The initial position velocity and time of phases 2 and 3 will be dictated by later continuity constraints, 
+The initial position, velocity, and time of phases 2 and 3 will be dictated by later continuity constraints, 
 so along these phases we only need to explicitly enforce the known initial mass and burnout times given in the problem statement. 
-In :code:`phase4`, since the final, burnout time of the final stage not known, we simply place an upper bound to be the time at which all propellant would have been expended.
-Additionally, it is to this phase that we apply out terminal constraint on the target orbit, and our objective to maximize final mass. 
+In :code:`phase4`, since the final burnout time of the final stage is not known, we simply place the upper bound to be the time at which all propellant would have been expended.
+Additionally, it is to this phase that we apply our terminal constraint on the target orbit, and our objective to maximize final mass. 
 
-Finally, we combine these 4 phases into a single optimal control problem and add a link constraint that enforces position, velocity 
+Finally, we combine these 4 phases into a single optimal control problem and add a link constraint that enforces position, velocity, 
 and time continuity between sequential phases. 
-We then run :code:`solve_optimize()` the problem with the line search enabled and return the solution for plotting.
+We then run :code:`solve_optimize()` on the problem with the line search enabled and return the solution for plotting.
 
 
 
