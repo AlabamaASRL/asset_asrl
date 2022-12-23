@@ -102,7 +102,7 @@ class RocketODE(oc.ODEBase):
         R = XtU.XVec().head3()
         V = XtU.XVec().segment3(3)
         m = XtU.XVar(6)
-        
+       
         # We normalize the control direction in the dynamics so it doesnt have
         # to be done as a path constraint
         u = XtU.UVec().normalized()
