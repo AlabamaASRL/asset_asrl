@@ -102,7 +102,7 @@ Step-By-Step Guide
 
 		.. image:: _static/anacondapath.PNG
 
-#. Now, clone the ASSET repo **ADD LINK** to where you want it to live.
+#. Now, clone the `ASSET repo<https://github.com/AlabamaASRL/asset_asrl>`_  to where you want it to live.
 
 #. We are almost there! Now, open VS and be sure to run it as administrator to avoid any conflicts when building the Python library. Additionally, ensure that your Python IDE is closed during this step. 
 	 
@@ -218,6 +218,8 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 	  .. code-block:: console
 
 	   source /opt/intel/oneapi/setvars.sh
+
+#. Now, clone the `ASSET repo<https://github.com/AlabamaASRL/asset_asrl>`_  to where you want it to live.
 
 #. After installing the dependencies, open VSCode to build ASSET.
 	
