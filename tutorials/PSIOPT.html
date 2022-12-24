@@ -1,11 +1,10 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Phase Tutorial" href="Phase.html" /><link rel="prev" title="Optimal Control Problem Tutorial" href="OptimalControlProblem.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Optimal Control Utilities" href="OptimalControlUtilites.html" /><link rel="prev" title="Optimal Control Problem Tutorial" href="OptimalControlProblem.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
         <title>PSIOPT - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
@@ -20,7 +19,6 @@
   --color-code-foreground: black;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
-  --color-admonition-background: orange;
   
   }
   @media not print {
@@ -160,32 +158,30 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ODEGuide.html">ODE Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IntegratorGuide.html">Integrator Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">PSIOPT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Phase.html">Phase Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Integrator.html">Integrators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../examples/examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Example 1: Orbit Family Continuation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Example 2a: Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/ReentryExample.html">Space Shuttle Reentry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/CartPole.html">Cart Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
 </ul>
 </li>
 </ul>
@@ -222,9 +218,9 @@
           </label>
         </div>
         <article role="main">
-          <section id="psiopt">
-<h1>PSIOPT<a class="headerlink" href="#psiopt" title="Permalink to this headline">#</a></h1>
-<p>An efficient method of solving sparse non-linear optimization problems is critical to the success of any trajectory optimization software.
+          <div class="section" id="psiopt">
+<span id="psiopt-guide"></span><h1>PSIOPT<a class="headerlink" href="#psiopt" title="Permalink to this heading">#</a></h1>
+<p>Having an efficient method of solving sparse non-linear optimization problems is critical to the success of any trajectory optimization software.
 While several excellent optimization software packages exist, they all require either commercial products (KNITRO, SNOPT) or are reliant
 on other commercial and restrictively licensed products for optimum performance (IPOPT).
 Therefore, in order to keep ASSET completely open source, the Parallel Sparse Interior-point Optimizer (PSIOPT) was developed and incorporated into the library.
@@ -266,17 +262,17 @@ g+s
 \end{bmatrix}\end{split}\\
 H = \nabla_{_{xx}}f + \nabla_{_{xx}}h\cdot\nu + \nabla_{_{xx}}g\cdot\lambda + \delta I\end{aligned}\end{align} \]</div>
 </div>
-<p>The first and second derivatives of the objectives and constraints appearing in <a class="reference internal" href="#eq-3"><span class="std std-ref">Eq.(3)</span></a> are calculated analytically by ASSET’s vector function type system.
+<p>The first and second derivatives of the objectives and constraints appearing in <a class="reference internal" href="#eq-3"><span class="std std-ref">Eq.(3)</span></a> are calculated analytically by ASSET’s VectorFunction type system.
 Since computation of first and second derivatives is a computationally expensive task, the solver automatically detects independent functions and evaluate them in parallel on multi-core CPUs.
 To solve the resulting linear-system, the software leverages the state of the art sparse-symmetric-indefinite solver MKL PARDISO.</p>
-<section id="psiopt-usage">
-<h2>PSIOPT Usage<a class="headerlink" href="#psiopt-usage" title="Permalink to this headline">#</a></h2>
+<div class="section" id="psiopt-usage">
+<h2>PSIOPT Usage<a class="headerlink" href="#psiopt-usage" title="Permalink to this heading">#</a></h2>
 <p>Each interface for defining optimization problems in ASSET (ex: <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code>, <code class="code docutils literal notranslate"><span class="pre">ode.phase</span></code> )
 has as its own instance of PSIOPT attached as a member variable of the class.
 Formulation and solution of the optimization problem is always handled through the respective interface,
-but users can use this to modify PSIOPT’s settings . A list of common, settings
-and their default and suggested values are listed in the table below. In all cases these can be set by using .set_XXX(value) method
-where XXX is replaced by the name of the setting</p>
+but users can use this reference to modify PSIOPT’s settings . A list of common settings
+and their default and suggested values are listed in the table below. In all cases these can be set by using the <code class="code docutils literal notranslate"><span class="pre">.set_XXX(value)</span></code> method
+where <code class="code docutils literal notranslate"><span class="pre">XXX</span></code> is replaced by the name of the setting</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 
 <span class="n">ocp</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span><span class="o">.</span><span class="n">OptimalControlProblem</span><span class="p">()</span>
@@ -295,7 +291,7 @@ where XXX is replaced by the name of the setting</p>
 </div>
 <div class="table-wrapper colwidths-given docutils container" id="id1">
 <table class="colwidths-given docutils align-default" id="id1" style="width: 100%">
-<caption><span class="caption-text">PSIOPT OPTIONS</span><a class="headerlink" href="#id1" title="Permalink to this table">#</a></caption>
+<caption><span class="caption-text">PSIOPT SETTINGS</span><a class="headerlink" href="#id1" title="Permalink to this table">#</a></caption>
 <colgroup>
 <col style="width: 17%" />
 <col style="width: 50%" />
@@ -398,7 +394,7 @@ solution but can harm robustness when the initial guess is poor.</p></td>
 <td><p>(&lt;1.0) [.95,.999]</p></td>
 </tr>
 <tr class="row-odd"><td><p>QPOrderingMode</p></td>
-<td><p>Fill-in reducing applied to the KKT matrix by MKL-Pardiso. The default, ‘METIS’, is the METIS nested dissection algorithm
+<td><p>Fill-in reducing ordering applied to the KKT matrix by MKL-Pardiso. The default, ‘METIS’, is the METIS nested dissection algorithm
 and generally results in the best scaling of matrix factorization with the number of threads. The alternative, “MINDEG”, the minimum degree algorithm, generally
 results in faster single threaded factorizations, but does not scale well with thread count. Use “MINDEG” when using Jet and “METIS” otherwise.</p></td>
 <td><p>(string) “METIS”</p></td>
@@ -413,11 +409,12 @@ results in faster single threaded factorizations, but does not scale well with t
 </table>
 </div>
 <p>After defining a problem, and potentially modifying the optimizer settings, an optimization problem interface is used to invoke one of or a sequence of PSIOPT’s algorithms as
-shown below. The optimize algorithm will seek to minimize the objective function and also satisfy the equality and inequality constraints. The solve algorithm ignores the objective and
-attempts only to find a solution to the equality and inequality constraints. If you are trying only to solve a system of equations and do not have an objective
-function, you should almost always use the solve algorithm rather than invoking optimize. You may also invoke the solve and optimize algorithms in sequence
-as shown below. For example, it can often be more robust to call solve first when optimizing so that the optimize algorithm will start from a feasible point.
-Additionally, it often happens that the optimize algorithm will be able to minimize the objective function considerably from its initial value,
+shown below. The <code class="code docutils literal notranslate"><span class="pre">optimize</span></code> algorithm will seek to minimize the objective function and also satisfy the equality and inequality constraints. The <code class="code docutils literal notranslate"><span class="pre">solve</span></code> algorithm ignores the objective and
+attempts only to find a solution to the equality and inequality constraints. If you are only trying to solve a system of equations and do not have an objective
+function, you should almost always use the <code class="code docutils literal notranslate"><span class="pre">solve</span></code> algorithm rather than invoking <code class="code docutils literal notranslate"><span class="pre">optimize</span></code>.
+You may also invoke the <code class="code docutils literal notranslate"><span class="pre">solve</span></code> and <code class="code docutils literal notranslate"><span class="pre">optimize</span></code> algorithms in sequence
+using <code class="code docutils literal notranslate"><span class="pre">solve_optimize</span></code> as shown below. For example, it can often be more robust to call <code class="code docutils literal notranslate"><span class="pre">solve</span></code> first when optimizing so that the <code class="code docutils literal notranslate"><span class="pre">optimize</span></code> algorithm will start from a feasible point.
+Additionally, it often happens that the <code class="code docutils literal notranslate"><span class="pre">optimize</span></code> algorithm will be able to minimize the objective function considerably from its initial value,
 but have difficulty exactly satisfying the optimality and constraint tolerances simultaneously.
 In these cases, it is practical to feed this non-converged solution to the solve algorithm in the hopes of finding a nearby solution that satisfies the constraints.
 For the combined call sequences, the function returns the convergence flag of the last algorithm invoked. If you need the convergence flag for each specific algorithm, they should be called
@@ -425,15 +422,15 @@ separately.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>    <span class="c1"># ocp transcribes problem and calls psiopt&#39;s solve algorithm</span>
 <span class="n">flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span> <span class="c1"># ocp transcribes problem and calls psiopt&#39;s optimize algorithm</span>
 
-<span class="n">flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>       <span class="c1"># Calls solve then optimize, functionally equivalent to the two lines above</span>
+<span class="n">flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>       <span class="c1"># Calls solve then optimize, functionally equivalent to calling the two lines above</span>
 
 <span class="n">flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize_solve</span><span class="p">()</span> <span class="c1"># Calls solve then optimize, then calls solve IF optimize fails to converge</span>
 
 <span class="n">flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">optimize_solve</span><span class="p">()</span>       <span class="c1"># Calls optimize, then calls solve IF optimize fails to converge</span>
 </pre></div>
 </div>
-<p>The returned convergence flags are enumerator types defined in ast.Solvers.ConvergenceFlags, their meanings and integer values are given in the table below. Should you need to
-use the flags in your code, it is recommended to compare flags their enumerator rather than integer values as shown below, in case that we add more flags in the future.</p>
+<p>The returned convergence flags are enumerator types defined in <code class="code docutils literal notranslate"><span class="pre">ast.Solvers.ConvergenceFlags</span></code>, and their meanings and integer values are given in the table below. Should you need to
+use the flags in your code, it is recommended to compare flags to their enumerator rather than integer values as shown below, in case that we add more flags in the future.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Cflags</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Solvers</span><span class="o">.</span><span class="n">ConvergenceFlags</span>
 
 <span class="n">flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
@@ -482,17 +479,37 @@ constraints or gradient</p></td>
 </tbody>
 </table>
 </div>
-</section>
-<section id="psiopt-output">
-<h2>PSIOPT Output<a class="headerlink" href="#psiopt-output" title="Permalink to this headline">#</a></h2>
-<p>When invoking one of PSIOPT’s algorithms with a PrintLevel of 0, the solver will produce the console output scroll shown in the figure below. The current objective
+<div class="section" id="threading">
+<h3>Threading<a class="headerlink" href="#threading" title="Permalink to this heading">#</a></h3>
+<p>By default, PSIOPT will set the number of threads used to parallelize function evaluations to be equal to the number of hardware threads
+on your machine up to a maximum of 16. So if your computer has 10 cores and 20 threads (ex: i9-10900k), only 16 threads will be used for function evaluations by default.
+Likewise by default, PSIOPT will set the number of threads used to factor KKT matrices to be equal to the number of physical cores on your machine up to a maximum of 8.
+So, if your computer has 10 cores and 20 threads, only 8 threads will be used for matrix factorization by default. Based on experience, this an appropriate
+threading allocation to solve single problems as fast as possible on most desktop machines. In our experience KKT matrix factorization does not scale beyond
+8 threads on most problems. Furthermore, applying too many threads to function evaluations on small to medium sized problems can actually degrade performance.
+However, you can manually set the thread count by using the <code class="code docutils literal notranslate"><span class="pre">.setThreads</span></code> member function of a <code class="code docutils literal notranslate"><span class="pre">phase</span></code> or <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code>. If speed is of concern we recommend you play around with
+these parameters to find the best option. However, we should note that if you are trying to maximize throughput by running ASSET in multiple processes simultaneously on your desktop or on a server,
+you should almost always set the optimizer to run-serially to prevent over-subscription of the CPU.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">phase</span><span class="o">.</span><span class="n">setThreads</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># force to run serially on a single thread only</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
+
+
+<span class="n">ocp</span><span class="o">.</span><span class="n">setThreads</span><span class="p">(</span><span class="n">FuncThreads</span> <span class="o">=</span> <span class="mi">20</span> <span class="p">,</span><span class="n">KKTThreads</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span> <span class="c1"># Use more than default number of threads</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">Phase</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">setThreads</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>  <span class="c1">#not necessary, will be overridden by the settings of the ocp</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="output">
+<h3>Output<a class="headerlink" href="#output" title="Permalink to this heading">#</a></h3>
+<p>When invoking one of PSIOPT’s algorithms with a <code class="code docutils literal notranslate"><span class="pre">PrintLevel</span></code> of 0, the solver will produce the console output scroll shown in the figure below. The current objective
 and constraint/optimality errors as well as other relevant algorithm parameters are displayed at each iterate. The meaning of each column is given in the table below.
 The constraint and optimality feasibilities are color coded according to their value. The color scheme progresses from dark red to orange, to yellow, to green as the
 value of the feasibility approaches user specified tolerances. When the value is yellow the current value satisfies the corresponding Acc###tol and likewise when it is green it satisfies ###tol.
-Additionally, the right hash mark of ‘Prim Obj’,’Barr Obj’,’KKT Inf’,’ECons Inf’, and ‘ICons Inf’ are color coded to show whether the current value is an decrease (green) or increase (red) from the previous iterate.
-The full console is 119 characters wide, which will fit in a standard console on Windows. However, most Linux terminals are not wide enough by default, so you should widen you terminal if you want to be able to
+Additionally, the right hash mark of ‘Prim Obj’,’Barr Obj’,’KKT Inf’,’ECons Inf’, and ‘ICons Inf’ are color coded to show whether the current value is a decrease (green) or increase (red) from the previous iterate.
+The full console is 119 characters wide, which will fit in a standard console on Windows. However, most Linux terminals are not wide enough by default, so you should widen your terminal if you want to be able to
 make sense of the output. While the console is (in its author’s opinion) quite nice to look at, it has non-negligible cost to print, so you should probably suppress output if throughput and performance are of concern.
-You can suppress some or all of the output by setting PrintLevel to a value greater than 1.</p>
+You can suppress some or all of the output by setting <code class="code docutils literal notranslate"><span class="pre">PrintLevel</span></code> to a value greater than 1.</p>
 <a class="reference internal image-reference" href="../_images/PSIOPTOUT.PNG"><img alt="../_images/PSIOPTOUT.PNG" src="../_images/PSIOPTOUT.PNG" style="width: 100%;" /></a>
 <div class="table-wrapper colwidths-given docutils container" id="id3">
 <table class="colwidths-given docutils align-default" id="id3" style="width: 100%">
@@ -549,16 +566,20 @@ You can suppress some or all of the output by setting PrintLevel to a value grea
 </tbody>
 </table>
 </div>
-</section>
-<section id="jet">
-<h2>Jet<a class="headerlink" href="#jet" title="Permalink to this headline">#</a></h2>
+</div>
+</div>
+<div class="section" id="jet">
+<h2>Jet<a class="headerlink" href="#jet" title="Permalink to this heading">#</a></h2>
 <p>In addition to calling PSIOPT to solve or optimize a single problem at a time, we provide the capability to optimize multiple different problems in parallel using
-the Jet tool. This can allow you to more efficiently tackle throughput oriented workloads from within a single python process in just a few lines of code,
+the <code class="code docutils literal notranslate"><span class="pre">Jet</span></code> tool. This can allow you to more efficiently tackle throughput oriented workloads from within a single python process,
 without having to resort to multiprocessing libraries. There are two ways to do this. In the first method, demonstrated below, we construct a python list
 of fully configured phases or optimal control problems (or both) as we normally would, but rather than running solve or optimize on each individually, we specify the algorithm we would like Jet to invoke
-using <code class="code docutils literal notranslate"><span class="pre">.setJetJobMode(&quot;&quot;)</span></code>. These options correspond to the methods we have already covered. Having set the Job mode, we add the objects a list and then pass the list to the <code class="code docutils literal notranslate"><span class="pre">Jet.map()</span></code> function along with
-the number of threads we want to use, and a bool specifying whether we want to print the console scroll. After solving all the problems, the function returns the list phases/optimal control problems. We can then access
-each element object to get the solved trajectories as we normally would.</p>
+using <code class="code docutils literal notranslate"><span class="pre">.setJetJobMode(&quot;&quot;)</span></code>. These options correspond to the methods we have already covered. Having set the job mode, we add the objects a list and then pass the list to the <code class="code docutils literal notranslate"><span class="pre">Jet.map()</span></code> function along with
+the number of threads we want to use, and a bool specifying whether we want to print the console scroll. It is not necessary to set the number of threads for
+each phase or optimal control problem, Jet will take care of optimally allocating the number of threads for each problem.
+After solving all the problems, the function returns the list of phases/optimal control problems. We can then access
+each element of the returned list to get the solved trajectories as we normally would. You can get the convergence flag of each problem by using the <code class="code docutils literal notranslate"><span class="pre">get_ConvergenceFlag()</span></code> method of the optimizer instance
+attached to each problem.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 
 <span class="n">solvers</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Solvers</span>
@@ -572,6 +593,8 @@ each element object to get the solved trajectories as we normally would.</p>
     <span class="c1">#Define a problem</span>
     <span class="c1">#.</span>
     <span class="c1">#.</span>
+
+    <span class="n">ocp</span><span class="o">.</span><span class="n">setThreads</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Not necessary, Jet will take care of this</span>
 
     <span class="c1">### SET the JetJobMode !!! #####</span>
     <span class="n">ocp</span><span class="o">.</span><span class="n">setJetJobMode</span><span class="p">(</span><span class="s2">&quot;Optimize&quot;</span><span class="p">)</span>
@@ -598,11 +621,14 @@ each element object to get the solved trajectories as we normally would.</p>
 
 <span class="c1">### Access the solved phases/ocps</span>
 <span class="n">ocps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Phase</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+
+<span class="c1">## Get the convergence flag this way</span>
+<span class="n">flag</span> <span class="o">=</span> <span class="n">ocps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">get_ConvergenceFlag</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Alternatively, we can use another method shown below where we leverage a generator function. Here rather than directly creating each phase/optimal control problem directly we create
-a function that returns them. We can then pass this function, along with a python list of tuples of the arguments we want to pass to out ProblemGenerator
-function. Internally, Jet will then expand each element of the <code class="code docutils literal notranslate"><span class="pre">ProblemArgs</span></code> list into <code class="code docutils literal notranslate"><span class="pre">ProblemGenerator</span></code> function to create all of the phases/optimal control problems on the fly.
+<p>Alternatively, we can use another method shown below where we leverage a generator function. Rather than creating each phase/optimal control problem directly, we create
+a function that returns them. We can then pass this function, along with a python list of tuples of the arguments we want to pass to our <code class="code docutils literal notranslate"><span class="pre">ProblemGenerator</span></code>
+function. Internally, Jet will then expand each element of the <code class="code docutils literal notranslate"><span class="pre">ProblemArgs</span></code> list into the <code class="code docutils literal notranslate"><span class="pre">ProblemGenerator</span></code> function to create all of the phases/optimal control problems on the fly.
 These will then be solved according the job mode and returned as a list as before. This form is particularly efficient whenever construction of each problem requires independent
 and expensive preprocessing that cannot be parallelized.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
@@ -629,6 +655,8 @@ and expensive preprocessing that cannot be parallelized.</p>
     <span class="c1">#.</span>
     <span class="c1">#.</span>
 
+    <span class="n">ocp</span><span class="o">.</span><span class="n">setThreads</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Not necessary, Jet will take care of this</span>
+
     <span class="c1">### SET the JetJobMode !!! #####</span>
     <span class="n">ocp</span><span class="o">.</span><span class="n">setJetJobMode</span><span class="p">(</span><span class="s2">&quot;Optimize&quot;</span><span class="p">)</span>
 
@@ -649,25 +677,25 @@ and expensive preprocessing that cannot be parallelized.</p>
 </div>
 <p>For both methods, if console printing is enabled, Jet will dynamically print out its progress, and alert of the convergence rate of each problem and the estimated remaining run-time.</p>
 <a class="reference internal image-reference" href="../_images/JetGif4.GIF"><img alt="../_images/JetGif4.GIF" src="../_images/JetGif4.GIF" style="width: 100%;" /></a>
-<p>We should make a few notes about the performance. First, best performance is usually seen by using of number of threads equal to or slightly greater than the number
+<p>We should make a few notes about the performance. First, best performance is usually seen by using a number of threads equal to or slightly greater than the number
 of physical cores on your machine, anymore can lead to over-subscription of the CPU.
 Second, you should limit the maximum number of problems solved in a single Jet run to somewhere between 2000 and 10000.
 Solving too many problems at a time with Jet puts serious strain on the process heap and performance can degrade considerably. The exact number when this occurs is dependent on
 the size of each optimization problem, but you can generally identify when it happens by observing lower than expected CPU utilization during a run.</p>
-</section>
-</section>
+</div>
+</div>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="Phase.html">
+          <a class="next-page" href="OptimalControlUtilites.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Phase Tutorial</div>
+                <div class="title">Optimal Control Utilities</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -686,7 +714,7 @@ the size of each optimization problem, but you can generally identify when it ha
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2021, UA ASRL
+                Copyright &#169; 2022-2023, UA ASRL
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -715,8 +743,11 @@ the size of each optimization problem, but you can generally identify when it ha
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">PSIOPT</a><ul>
-<li><a class="reference internal" href="#psiopt-usage">PSIOPT Usage</a></li>
-<li><a class="reference internal" href="#psiopt-output">PSIOPT Output</a></li>
+<li><a class="reference internal" href="#psiopt-usage">PSIOPT Usage</a><ul>
+<li><a class="reference internal" href="#threading">Threading</a></li>
+<li><a class="reference internal" href="#output">Output</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#jet">Jet</a></li>
 </ul>
 </li>
@@ -732,7 +763,9 @@ the size of each optimization problem, but you can generally identify when it ha
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>

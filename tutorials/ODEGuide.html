@@ -1,11 +1,10 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Integrator Tutorial" href="IntegratorGuide.html" /><link rel="prev" title="Vector Function Tutorial" href="VectorFunctionGuide.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Integrator Tutorial" href="IntegratorGuide.html" /><link rel="prev" title="Vector Function Tutorial" href="VectorFunctionGuide.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
         <title>ODE Tutorial - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
@@ -20,7 +19,6 @@
   --color-code-foreground: black;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
-  --color-admonition-background: orange;
   
   }
   @media not print {
@@ -160,32 +158,30 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">ODE Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IntegratorGuide.html">Integrator Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PSIOPT.html">PSIOPT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Phase.html">Phase Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Integrator.html">Integrators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../examples/examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Example 1: Orbit Family Continuation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Example 2a: Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/ReentryExample.html">Space Shuttle Reentry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/CartPole.html">Cart Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
 </ul>
 </li>
 </ul>
@@ -222,11 +218,11 @@
           </label>
         </div>
         <article role="main">
-          <section id="ode-tutorial">
-<h1>ODE Tutorial<a class="headerlink" href="#ode-tutorial" title="Permalink to this headline">#</a></h1>
+          <div class="section" id="ode-tutorial">
+<span id="ode-guide"></span><h1>ODE Tutorial<a class="headerlink" href="#ode-tutorial" title="Permalink to this heading">#</a></h1>
 <p>One of ASSET’s primary goals is facilitating optimal control and integration of dynamical systems governed by ordinary differential equations (ODEs).
-In ASSET, an ODE is simply a vector function adhering to the state-space formalism shown below.
-That is, it is a vector function that takes as arguments the state of the system, <span class="math notranslate nohighlight">\(\vec{X}\)</span>, the current time,
+In ASSET, an ODE is simply a VectorFunction adhering to the state-space formalism shown below.
+That is, it is a VectorFunction that takes as arguments the state of the system, <span class="math notranslate nohighlight">\(\vec{X}\)</span>, the current time,
 <span class="math notranslate nohighlight">\(t\)</span>, time varying controls, <span class="math notranslate nohighlight">\(\vec{U}\)</span>, some static ODE parameters <span class="math notranslate nohighlight">\(\vec{P}\)</span>, and returns the time derivative of the state variables.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
@@ -237,9 +233,9 @@ That is, it is a vector function that takes as arguments the state of the system
 <p>Some ODEs do not require the <span class="math notranslate nohighlight">\(\vec{U}\)</span> or <span class="math notranslate nohighlight">\(\vec{P}\)</span> inputs (e.g. ballistic gravity model), and thus it is not necessary to provide them in those cases.
 However, because we use a common interface between autonomous and non-autonomous ODEs, it is always necessary to provide
 an explicit time variable even if it is unused in the dynamics.</p>
-<p>ODE’s can be written using any of the techniques described in the VectorFunctions
-section, provided that they obey the state space formalism for their inputs and outputs.
-For example a simple two body gravitational model with low thrust could be written as shown
+<p>ODEs can be written using any of the techniques described in the VectorFunctions
+<a class="reference internal" href="VectorFunctionGuide.html#vectorfunction-guide"><span class="std std-ref">section</span></a>, provided that they obey the state space formalism for their inputs and outputs.
+For example, a simple two body gravitational model with low thrust could be written as shown
 below. This model would have 6 state variables representing the position and velocity vectors
 relative to the central body, and three control variables representing the thrust direction and engine throttle.
 We implicitly assume that we will later place an upper bound of 1 on the norm of the control so that the acceleration
@@ -270,14 +266,14 @@ the time derivatives of position and velocity in the same order we assumed in th
     <span class="k">return</span> <span class="n">ode</span>
 </pre></div>
 </div>
-<section id="odearguments">
-<h2>ODEArguments<a class="headerlink" href="#odearguments" title="Permalink to this headline">#</a></h2>
-<p>To simplify the process of defining Vector functions adhering to the state space
+<div class="section" id="odearguments">
+<h2>ODEArguments<a class="headerlink" href="#odearguments" title="Permalink to this heading">#</a></h2>
+<p>To simplify the process of defining VectorFunctions adhering to the state space
 formalism, we provide the <code class="code docutils literal notranslate"><span class="pre">ODEArguments</span></code> class inside of the <code class="code docutils literal notranslate"><span class="pre">OptimalControl</span></code> module.
 This class is a thin wrapper around the <code class="code docutils literal notranslate"><span class="pre">Arguments</span></code> class that allows you to index relevant
 sub-vectors and elements of an ODE’s inputs in a clearer way than using <code class="code docutils literal notranslate"><span class="pre">Arguments</span></code>. To construct
-<code class="code docutils literal notranslate"><span class="pre">ODEArguments</span></code> we pass the number of state variables,control variables, and ODE parameters (if
-any). The total input size will be the sum of <code class="code docutils literal notranslate"><span class="pre">XVars</span></code>,:code:<cite>PVars</cite>, and <code class="code docutils literal notranslate"><span class="pre">UVars</span></code> plus 1 for time. We can the
+<code class="code docutils literal notranslate"><span class="pre">ODEArguments</span></code> we pass the number of state variables, control variables (if any), and ODE parameters (if
+any). The total input size will be the sum of <code class="code docutils literal notranslate"><span class="pre">XVars</span></code>, <code class="code docutils literal notranslate"><span class="pre">PVars</span></code>, and <code class="code docutils literal notranslate"><span class="pre">UVars</span></code> plus 1 for time. We can then
 address the relevant sub-vectors of our input using the <code class="code docutils literal notranslate"><span class="pre">X/U/PVec()</span></code> methods. These methods are return regular
 segment types so we can then apply all operations we would to those objects. Similarly, we can also address
 specific elements of each of these sub-vectors using the <code class="code docutils literal notranslate"><span class="pre">X/U/PVar(i)</span></code> methods.</p>
@@ -331,16 +327,16 @@ specific elements of each of these sub-vectors using the <code class="code docut
     <span class="k">return</span> <span class="n">ode</span>
 </pre></div>
 </div>
-</section>
-<section id="defining-ode-classes">
-<h2>Defining ODE Classes<a class="headerlink" href="#defining-ode-classes" title="Permalink to this headline">#</a></h2>
+</div>
+<div class="section" id="defining-ode-classes">
+<h2>Defining ODE Classes<a class="headerlink" href="#defining-ode-classes" title="Permalink to this heading">#</a></h2>
 <p>If you were to inspect the type of the result of the function above, it would
-be VectorFunction, and at this point ASSET has no idea that it is an ODE.
+be <code class="code docutils literal notranslate"><span class="pre">VectorFunction</span></code>, and at this point ASSET has no idea that it is an ODE.
 For ASSET to recognize our function as an ODE and allow us to use it directly with
-all of associated utilities, we need to define it using the class
-based style describing in VectorFunctionGuide, but inherit from the class <code class="code docutils literal notranslate"><span class="pre">oc.ODEBase</span></code>
-rather <code class="code docutils literal notranslate"><span class="pre">VectorFunction</span></code>. Therefore, the correct way to write the TwoBodyLT ODE shown below.
-When initializing our base class we simply supply, the asset vector function specifying
+all associated utilities, we need to define it using the class
+based style described in <a class="reference internal" href="VectorFunctionGuide.html#vfstyle-guide"><span class="std std-ref">the vector functions tutorial</span></a>, but inherit from the class <code class="code docutils literal notranslate"><span class="pre">oc.ODEBase</span></code>
+rather than <code class="code docutils literal notranslate"><span class="pre">VectorFunction</span></code>. Therefore, the correct way to write the <code class="code docutils literal notranslate"><span class="pre">TwoBodyLT</span></code> ODE is shown below.
+When initializing our base class we simply supply the asset VectorFunction specifying
 the ode as well as the number of states, controls, and parameters.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TwoBodyLTODE</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
 
@@ -377,8 +373,8 @@ the ode as well as the number of states, controls, and parameters.</p>
 </div>
 <p>This object is now a full fledged ODE, from which we can dispatch phase and integrator
 objects. We will discuss usage of these in the next sections.</p>
-</section>
-</section>
+</div>
+</div>
 
         </article>
       </div>
@@ -409,7 +405,7 @@ objects. We will discuss usage of these in the next sections.</p>
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2021, UA ASRL
+                Copyright &#169; 2022-2023, UA ASRL
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -454,7 +450,9 @@ objects. We will discuss usage of these in the next sections.</p>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>

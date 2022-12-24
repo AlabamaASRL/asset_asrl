@@ -1,11 +1,10 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
         <title>Python: Installing ASSET - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
@@ -20,7 +19,6 @@
   --color-code-foreground: black;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
-  --color-admonition-background: orange;
   
   }
   @media not print {
@@ -160,32 +158,30 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="tutorials/tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/ODEGuide.html">ODE Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/IntegratorGuide.html">Integrator Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/PSIOPT.html">PSIOPT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/Phase.html">Phase Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/Integrator.html">Integrators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="examples/examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples/halo.html">Example 1: Orbit Family Continuation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/zermelo.html">Example 2a: Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/ReentryExample.html">Space Shuttle Reentry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/CartPole.html">Cart Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python/Astro.html">ASSET Astro Library</a></li>
 </ul>
 </li>
 </ul>
@@ -222,10 +218,10 @@
           </label>
         </div>
         <article role="main">
-          <section id="python-installing-asset">
-<h1>Python: Installing ASSET<a class="headerlink" href="#python-installing-asset" title="Permalink to this headline">#</a></h1>
-<section id="windows-binary-dependencies">
-<h2>Windows Binary Dependencies<a class="headerlink" href="#windows-binary-dependencies" title="Permalink to this headline">#</a></h2>
+          <div class="section" id="python-installing-asset">
+<h1>Python: Installing ASSET<a class="headerlink" href="#python-installing-asset" title="Permalink to this heading">#</a></h1>
+<div class="section" id="windows-binary-dependencies">
+<h2>Windows Binary Dependencies<a class="headerlink" href="#windows-binary-dependencies" title="Permalink to this heading">#</a></h2>
 <p>For windows binary distributions installable via pip or downloaded from github, we statically link intel’s math kernel library into python pyd file, thus
 it is not sctrictly neccessary to have mkl installed on the target system. However, it is still neccessary to download and install the LLVM toolchain, and
 place it’s redistributable LLVM/bin folder on the path. This ensures that the asset python library has access to two neccessary DLLs that are not statically
@@ -247,7 +243,7 @@ virtual environment.</p>
 </pre></div>
 </div>
 <p>Now with ASSET available in your Python directory, the next step is to learn the conventions necessary to construct functions for use with ASSET.
-Head over to <a class="reference internal" href="tutorials/VectorFunctions_tutorial.html#python-vector-functions"><span class="std std-ref">Python: Vector Functions</span></a>.</p>
+Head over to <span class="xref std std-ref">Python: Vector Functions</span>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Some issues have been found with conflicting libomp.dll and libiomp5md.dll on <strong>Windows</strong> machines.
@@ -262,8 +258,8 @@ A few potential fixes for this are as follows:</p>
 </pre></div>
 </div>
 <p>Adding this environment variable to your Python environment may also resolve the issue.</p>
-</section>
-</section>
+</div>
+</div>
 
         </article>
       </div>
@@ -276,7 +272,7 @@ A few potential fixes for this are as follows:</p>
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2021, UA ASRL
+                Copyright &#169; 2022-2023, UA ASRL
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -320,7 +316,9 @@ A few potential fixes for this are as follows:</p>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
 </html>

@@ -1,13 +1,14 @@
+.. _psiopt-guide:
+
 ======
 PSIOPT
 ======
 
-An efficient method of solving sparse non-linear optimization problems is critical to the success of any trajectory optimization software. 
+Having an efficient method of solving sparse non-linear optimization problems is critical to the success of any trajectory optimization software. 
 While several excellent optimization software packages exist, they all require either commercial products (KNITRO, SNOPT) or are reliant
 on other commercial and restrictively licensed products for optimum performance (IPOPT).
 Therefore, in order to keep ASSET completely open source, the Parallel Sparse Interior-point Optimizer (PSIOPT) was developed and incorporated into the library.
 PSIOPT is built to solve non-linear programs (NLP) expressed in standard form as shown in :ref:`Eq.(1)<eq:1>`. 
-
 
 
 .. math::
@@ -64,7 +65,7 @@ will update :math:`\delta` every iteration to keep this perturbation as small as
    H = \nabla_{_{xx}}f + \nabla_{_{xx}}h\cdot\nu + \nabla_{_{xx}}g\cdot\lambda + \delta I
 
 
-The first and second derivatives of the objectives and constraints appearing in :ref:`Eq.(3)<eq:3>` are calculated analytically by ASSET's vector function type system.
+The first and second derivatives of the objectives and constraints appearing in :ref:`Eq.(3)<eq:3>` are calculated analytically by ASSET's VectorFunction type system.
 Since computation of first and second derivatives is a computationally expensive task, the solver automatically detects independent functions and evaluate them in parallel on multi-core CPUs. 
 To solve the resulting linear-system, the software leverages the state of the art sparse-symmetric-indefinite solver MKL PARDISO.
 
@@ -74,9 +75,9 @@ PSIOPT Usage
 Each interface for defining optimization problems in ASSET (ex: :code:`OptimalControlProblem`, :code:`ode.phase` ) 
 has as its own instance of PSIOPT attached as a member variable of the class.
 Formulation and solution of the optimization problem is always handled through the respective interface, 
-but users can use this to modify PSIOPT's settings . A list of common, settings
-and their default and suggested values are listed in the table below. In all cases these can be set by using .set_XXX(value) method
-where XXX is replaced by the name of the setting
+but users can use this reference to modify PSIOPT's settings . A list of common settings
+and their default and suggested values are listed in the table below. In all cases these can be set by using the :code:`.set_XXX(value)` method
+where :code:`XXX` is replaced by the name of the setting
 
 
 .. code-block:: python
@@ -99,7 +100,7 @@ where XXX is replaced by the name of the setting
 
 
 
-.. list-table:: PSIOPT OPTIONS 
+.. list-table:: PSIOPT SETTINGS 
    :width: 100%
    :widths: 20 60 20 20
    :header-rows: 1
@@ -181,7 +182,7 @@ where XXX is replaced by the name of the setting
      - (double) .98 
      - (<1.0) [.95,.999]
    * - QPOrderingMode
-     - Fill-in reducing applied to the KKT matrix by MKL-Pardiso. The default, 'METIS', is the METIS nested dissection algorithm
+     - Fill-in reducing ordering applied to the KKT matrix by MKL-Pardiso. The default, 'METIS', is the METIS nested dissection algorithm
        and generally results in the best scaling of matrix factorization with the number of threads. The alternative, "MINDEG", the minimum degree algorithm, generally
        results in faster single threaded factorizations, but does not scale well with thread count. Use "MINDEG" when using Jet and "METIS" otherwise.
      - (string) "METIS" 
@@ -193,11 +194,12 @@ where XXX is replaced by the name of the setting
 
     
 After defining a problem, and potentially modifying the optimizer settings, an optimization problem interface is used to invoke one of or a sequence of PSIOPT's algorithms as
-shown below. The optimize algorithm will seek to minimize the objective function and also satisfy the equality and inequality constraints. The solve algorithm ignores the objective and
-attempts only to find a solution to the equality and inequality constraints. If you are trying only to solve a system of equations and do not have an objective
-function, you should almost always use the solve algorithm rather than invoking optimize. You may also invoke the solve and optimize algorithms in sequence
-as shown below. For example, it can often be more robust to call solve first when optimizing so that the optimize algorithm will start from a feasible point. 
-Additionally, it often happens that the optimize algorithm will be able to minimize the objective function considerably from its initial value,
+shown below. The :code:`optimize` algorithm will seek to minimize the objective function and also satisfy the equality and inequality constraints. The :code:`solve` algorithm ignores the objective and
+attempts only to find a solution to the equality and inequality constraints. If you are only trying to solve a system of equations and do not have an objective
+function, you should almost always use the :code:`solve` algorithm rather than invoking :code:`optimize`. 
+You may also invoke the :code:`solve` and :code:`optimize` algorithms in sequence
+using :code:`solve_optimize` as shown below. For example, it can often be more robust to call :code:`solve` first when optimizing so that the :code:`optimize` algorithm will start from a feasible point. 
+Additionally, it often happens that the :code:`optimize` algorithm will be able to minimize the objective function considerably from its initial value,
 but have difficulty exactly satisfying the optimality and constraint tolerances simultaneously.
 In these cases, it is practical to feed this non-converged solution to the solve algorithm in the hopes of finding a nearby solution that satisfies the constraints. 
 For the combined call sequences, the function returns the convergence flag of the last algorithm invoked. If you need the convergence flag for each specific algorithm, they should be called
@@ -208,15 +210,15 @@ separately.
     flag = ocp.solve()    # ocp transcribes problem and calls psiopt's solve algorithm
     flag = ocp.optimize() # ocp transcribes problem and calls psiopt's optimize algorithm
 
-    flag = ocp.solve_optimize()       # Calls solve then optimize, functionally equivalent to the two lines above
+    flag = ocp.solve_optimize()       # Calls solve then optimize, functionally equivalent to calling the two lines above
 
     flag = ocp.solve_optimize_solve() # Calls solve then optimize, then calls solve IF optimize fails to converge
 
     flag = ocp.optimize_solve()       # Calls optimize, then calls solve IF optimize fails to converge
 
 
-The returned convergence flags are enumerator types defined in ast.Solvers.ConvergenceFlags, their meanings and integer values are given in the table below. Should you need to
-use the flags in your code, it is recommended to compare flags their enumerator rather than integer values as shown below, in case that we add more flags in the future.
+The returned convergence flags are enumerator types defined in :code:`ast.Solvers.ConvergenceFlags`, and their meanings and integer values are given in the table below. Should you need to
+use the flags in your code, it is recommended to compare flags to their enumerator rather than integer values as shown below, in case that we add more flags in the future.
 
 .. code-block:: python
     
@@ -230,6 +232,7 @@ use the flags in your code, it is recommended to compare flags their enumerator 
         ocp.solve()  
     elif(flag== Cflags.DIVERGING):
         exit()
+
 
 
 
@@ -256,17 +259,42 @@ use the flags in your code, it is recommended to compare flags their enumerator 
        constraints or gradient
      - 3
 
+Threading
+---------
 
-PSIOPT Output
-=============
-When invoking one of PSIOPT's algorithms with a PrintLevel of 0, the solver will produce the console output scroll shown in the figure below. The current objective
+By default, PSIOPT will set the number of threads used to parallelize function evaluations to be equal to the number of hardware threads
+on your machine up to a maximum of 16. So if your computer has 10 cores and 20 threads (ex: i9-10900k), only 16 threads will be used for function evaluations by default.
+Likewise by default, PSIOPT will set the number of threads used to factor KKT matrices to be equal to the number of physical cores on your machine up to a maximum of 8.
+So, if your computer has 10 cores and 20 threads, only 8 threads will be used for matrix factorization by default. Based on experience, this an appropriate
+threading allocation to solve single problems as fast as possible on most desktop machines. In our experience KKT matrix factorization does not scale beyond
+8 threads on most problems. Furthermore, applying too many threads to function evaluations on small to medium sized problems can actually degrade performance.
+However, you can manually set the thread count by using the :code:`.setThreads` member function of a :code:`phase` or :code:`OptimalControlProblem`. If speed is of concern we recommend you play around with
+these parameters to find the best option. However, we should note that if you are trying to maximize throughput by running ASSET in multiple processes simultaneously on your desktop or on a server, 
+you should almost always set the optimizer to run-serially to prevent over-subscription of the CPU.
+
+.. code-block:: python
+
+    phase.setThreads(1,1)  # force to run serially on a single thread only
+    phase.solve_optimize()
+    
+
+    ocp.setThreads(FuncThreads = 20 ,KKTThreads=20) # Use more than default number of threads
+    ocp.Phase(0).setThreads(20,20)  #not necessary, will be overridden by the settings of the ocp
+    ocp.optimize()
+
+    
+
+
+Output
+------
+When invoking one of PSIOPT's algorithms with a :code:`PrintLevel` of 0, the solver will produce the console output scroll shown in the figure below. The current objective
 and constraint/optimality errors as well as other relevant algorithm parameters are displayed at each iterate. The meaning of each column is given in the table below.
 The constraint and optimality feasibilities are color coded according to their value. The color scheme progresses from dark red to orange, to yellow, to green as the
 value of the feasibility approaches user specified tolerances. When the value is yellow the current value satisfies the corresponding Acc###tol and likewise when it is green it satisfies ###tol.
-Additionally, the right hash mark of 'Prim Obj','Barr Obj','KKT Inf','ECons Inf', and 'ICons Inf' are color coded to show whether the current value is an decrease (green) or increase (red) from the previous iterate. 
-The full console is 119 characters wide, which will fit in a standard console on Windows. However, most Linux terminals are not wide enough by default, so you should widen you terminal if you want to be able to
+Additionally, the right hash mark of 'Prim Obj','Barr Obj','KKT Inf','ECons Inf', and 'ICons Inf' are color coded to show whether the current value is a decrease (green) or increase (red) from the previous iterate. 
+The full console is 119 characters wide, which will fit in a standard console on Windows. However, most Linux terminals are not wide enough by default, so you should widen your terminal if you want to be able to
 make sense of the output. While the console is (in its author's opinion) quite nice to look at, it has non-negligible cost to print, so you should probably suppress output if throughput and performance are of concern. 
-You can suppress some or all of the output by setting PrintLevel to a value greater than 1. 
+You can suppress some or all of the output by setting :code:`PrintLevel` to a value greater than 1. 
 
 .. image:: _static/PSIOPTOUT.PNG
     :width: 100%
@@ -314,12 +342,15 @@ Jet
 ===
 
 In addition to calling PSIOPT to solve or optimize a single problem at a time, we provide the capability to optimize multiple different problems in parallel using
-the Jet tool. This can allow you to more efficiently tackle throughput oriented workloads from within a single python process in just a few lines of code,
+the :code:`Jet` tool. This can allow you to more efficiently tackle throughput oriented workloads from within a single python process,
 without having to resort to multiprocessing libraries. There are two ways to do this. In the first method, demonstrated below, we construct a python list 
 of fully configured phases or optimal control problems (or both) as we normally would, but rather than running solve or optimize on each individually, we specify the algorithm we would like Jet to invoke
-using :code:`.setJetJobMode("")`. These options correspond to the methods we have already covered. Having set the Job mode, we add the objects a list and then pass the list to the :code:`Jet.map()` function along with 
-the number of threads we want to use, and a bool specifying whether we want to print the console scroll. After solving all the problems, the function returns the list phases/optimal control problems. We can then access
-each element object to get the solved trajectories as we normally would.
+using :code:`.setJetJobMode("")`. These options correspond to the methods we have already covered. Having set the job mode, we add the objects a list and then pass the list to the :code:`Jet.map()` function along with 
+the number of threads we want to use, and a bool specifying whether we want to print the console scroll. It is not necessary to set the number of threads for
+each phase or optimal control problem, Jet will take care of optimally allocating the number of threads for each problem.
+After solving all the problems, the function returns the list of phases/optimal control problems. We can then access
+each element of the returned list to get the solved trajectories as we normally would. You can get the convergence flag of each problem by using the :code:`get_ConvergenceFlag()` method of the optimizer instance
+attached to each problem.
 
 .. code-block:: python
 
@@ -336,6 +367,8 @@ each element object to get the solved trajectories as we normally would.
         #Define a problem
         #.
         #.
+
+        ocp.setThreads(1,1)  # Not necessary, Jet will take care of this
 
         ### SET the JetJobMode !!! #####
         ocp.setJetJobMode("Optimize")
@@ -362,11 +395,14 @@ each element object to get the solved trajectories as we normally would.
 
     ### Access the solved phases/ocps
     ocps[0].Phase(0).returnTraj()
+
+    ## Get the convergence flag this way
+    flag = ocps[0].optimizer.get_ConvergenceFlag()
         
 
-Alternatively, we can use another method shown below where we leverage a generator function. Here rather than directly creating each phase/optimal control problem directly we create
-a function that returns them. We can then pass this function, along with a python list of tuples of the arguments we want to pass to out ProblemGenerator
-function. Internally, Jet will then expand each element of the :code:`ProblemArgs` list into :code:`ProblemGenerator` function to create all of the phases/optimal control problems on the fly. 
+Alternatively, we can use another method shown below where we leverage a generator function. Rather than creating each phase/optimal control problem directly, we create
+a function that returns them. We can then pass this function, along with a python list of tuples of the arguments we want to pass to our :code:`ProblemGenerator`
+function. Internally, Jet will then expand each element of the :code:`ProblemArgs` list into the :code:`ProblemGenerator` function to create all of the phases/optimal control problems on the fly. 
 These will then be solved according the job mode and returned as a list as before. This form is particularly efficient whenever construction of each problem requires independent 
 and expensive preprocessing that cannot be parallelized.
 
@@ -397,6 +433,8 @@ and expensive preprocessing that cannot be parallelized.
         #.
         #.
 
+        ocp.setThreads(1,1)  # Not necessary, Jet will take care of this
+
         ### SET the JetJobMode !!! #####
         ocp.setJetJobMode("Optimize")
 
@@ -421,7 +459,7 @@ For both methods, if console printing is enabled, Jet will dynamically print out
     :width: 100%
 
 
-We should make a few notes about the performance. First, best performance is usually seen by using of number of threads equal to or slightly greater than the number
+We should make a few notes about the performance. First, best performance is usually seen by using a number of threads equal to or slightly greater than the number
 of physical cores on your machine, anymore can lead to over-subscription of the CPU.
 Second, you should limit the maximum number of problems solved in a single Jet run to somewhere between 2000 and 10000. 
 Solving too many problems at a time with Jet puts serious strain on the process heap and performance can degrade considerably. The exact number when this occurs is dependent on

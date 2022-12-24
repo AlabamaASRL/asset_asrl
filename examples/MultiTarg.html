@@ -1,12 +1,11 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Delta 3 Multi-phase GTO Transfer" href="Delta3.html" /><link rel="prev" title="Example 2b: Multi-Phase Zermelo’s Problem" href="zermelolink.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Python Library Documentation" href="../python/python.html" /><link rel="prev" title="Multi-Phase Zermelo’s Problem" href="zermelolink.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
-        <title>Example 3: Multi-Spacecraft Optimization - ASSET 0.0.1 documentation</title>
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
+        <title>Multi-Spacecraft Optimization - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -20,7 +19,6 @@
   --color-code-foreground: black;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
-  --color-admonition-background: orange;
   
   }
   @media not print {
@@ -160,32 +158,30 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/ODEGuide.html">ODE Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/IntegratorGuide.html">Integrator Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/PSIOPT.html">PSIOPT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Phase.html">Phase Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Integrator.html">Integrators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="examples.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="halo.html">Example 1: Orbit Family Continuation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Example 2a: Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Example 3: Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CartPole.html">Cart Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
 </ul>
 </li>
 </ul>
@@ -222,8 +218,8 @@
           </label>
         </div>
         <article role="main">
-          <section id="example-3-multi-spacecraft-optimization">
-<h1>Example 3: Multi-Spacecraft Optimization<a class="headerlink" href="#example-3-multi-spacecraft-optimization" title="Permalink to this headline">#</a></h1>
+          <div class="section" id="multi-spacecraft-optimization">
+<h1>Multi-Spacecraft Optimization<a class="headerlink" href="#multi-spacecraft-optimization" title="Permalink to this heading">#</a></h1>
 <p>Performing a multi-spacecraft optimization with ASSET is virtually identically to the single spacecraft case, except for one new constraint that we will focus on later.
 For now, the standard problem procedure is the same, where we need to import everything from ASSET with our standard conventions, as well as some plotting tools for the output.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -238,9 +234,6 @@ For now, the standard problem procedure is the same, where we need to import eve
 <span class="n">oc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
 
 <span class="n">Args</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
-<span class="n">Tmodes</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">TranscriptionModes</span>
-<span class="n">Cmodes</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ControlModes</span>
-<span class="n">PhaseRegs</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">PhaseRegionFlags</span>
 </pre></div>
 </div>
 <p>Now that we have all of the tools imported from ASSET, as always we need to identify our dynamics for the problem. Here, for this simple case,
@@ -257,10 +250,10 @@ examples, where we will use the ASSET VectorFunctions to construct our system of
 
         <span class="n">args</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">Xvars</span><span class="p">,</span> <span class="n">Uvars</span><span class="p">)</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">segment_3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">segment3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
         <span class="n">g</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">normalized_power3</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">P1mu</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ltacc</span> <span class="o">!=</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">thrust</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">tail_3</span><span class="p">()</span> <span class="o">*</span> <span class="n">ltacc</span>
+            <span class="n">thrust</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">tail3</span><span class="p">()</span> <span class="o">*</span> <span class="n">ltacc</span>
             <span class="n">acc</span> <span class="o">=</span> <span class="n">g</span> <span class="o">+</span> <span class="n">thrust</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">acc</span> <span class="o">=</span> <span class="n">g</span>
@@ -305,10 +298,10 @@ Assuming that these are planar circular orbits, we can generate them with:</p>
 true anomaly <code class="code docutils literal notranslate"><span class="pre">thetadeg</span></code>. This is also the case for <code class="code docutils literal notranslate"><span class="pre">MakeCircTraj</span></code>, which will call <code class="code docutils literal notranslate"><span class="pre">MakeCircIG</span></code> when it is determining the initial states
 of the spacecraft. To simplify our design flow, <code class="code docutils literal notranslate"><span class="pre">MakeCircTraj</span></code> initializes the ode for each spacecraft, through the ASSET optimal control interface
 and integrates the trajectory out for the given time <code class="code docutils literal notranslate"><span class="pre">tf</span></code> (<code class="code docutils literal notranslate"><span class="pre">n</span></code> determines the number of points to use for the output trajectory).
-<code class="code docutils literal notranslate"><span class="pre">MakeCircTraj</span></code> returns the integrated trajectory for the time tf, and will have a number of states equal to n.</p>
+<code class="code docutils literal notranslate"><span class="pre">MakeCircTraj</span></code> returns the integrated trajectory for the time <code class="code docutils literal notranslate"><span class="pre">tf</span></code>, and will have a number of states equal to <code class="code docutils literal notranslate"><span class="pre">n</span></code>.</p>
 <p>Now, we have our dynamics, as well as a method to produce initial guesses for the multi-spacecraft optimization problem. The next step to do
-is to define a function to wrap our optimization calls in. This is similar to what we have done in the previous Zermelo problem example, except now we will have
-an extra Link Constraint that will enforce that each final states of the spacecraft must be equal to a desired free state that we will add.
+is to define a function to wrap our optimization calls in. This is similar to what we have done in the previous example, <a class="reference internal" href="zermelo.html#zermelo-s-problem"><span class="std std-ref">Zermelo’s Problem</span></a>, except now we will have
+an extra LinkConstraint that will enforce that each final states of the spacecraft must be equal to a desired free state that we will add.
 For now we will show the function that handles all this in three sections, with the final full function definition at the end of the example.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">################################################################################</span>
 <span class="c1">## Solver Function</span>
@@ -323,27 +316,25 @@ For now we will show the function that handles all this in three sections, with 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Trajs</span><span class="p">):</span>
 
         <span class="c1">## Create a phase for Each Spacecraft</span>
-        <span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">Tmodes</span><span class="o">.</span><span class="n">LGL5</span><span class="p">)</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL5&quot;</span><span class="p">)</span>
         <span class="c1">## Set Initial Guess</span>
         <span class="n">phase</span><span class="o">.</span><span class="n">setTraj</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">NSegs</span><span class="p">)</span>
 
         <span class="c1">##Use block constant control</span>
-        <span class="n">phase</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="n">Cmodes</span><span class="o">.</span><span class="n">BlockConstant</span><span class="p">)</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="s2">&quot;BlockConstant&quot;</span><span class="p">)</span>
 
         <span class="c1">##Specify that initial state and time are locked at</span>
         <span class="c1">##whatever value is passed to optimizer</span>
-        <span class="n">phase</span><span class="o">.</span><span class="n">addValueLock</span><span class="p">(</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Front</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">addValueLock</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
 
         <span class="c1">## Bound Norm of Control Vector over the whole phase</span>
-        <span class="n">phase</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># Add TOF objective</span>
         <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaTimeObjective</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 
         <span class="c1">## add phase to the OCP</span>
         <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
-
-    <span class="c1">####################################################</span>
 </pre></div>
 </div>
 <p>The first section of <code class="code docutils literal notranslate"><span class="pre">MultiSpaceCraft</span></code> is very similar to the previous definitions for ASSET optimization routines.
@@ -354,52 +345,39 @@ is given a value of 75. the rest of this code is the same as we have seen in pre
 <p>The next section of code continues the above function. Here we need to define the link constraint that will enforce that each spacecraft
 reach some initial final free state.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">####################################################</span>
-    <span class="c1">#Section 2:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Adding a Link constraint to enforce that the terminal state and time</span>
-<span class="sd">    of each phase must be equal to a free state added as LinkParameters of the ocp</span>
+<span class="c1">#Section 2:</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Adding a Link constraint to enforce that the terminal state and time</span>
+<span class="sd">of each phase must be equal to a free state added as LinkParameters of the ocp</span>
 
-<span class="sd">    ie: for each phase(i) Xt_i(tf) - Xt_link = 0</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">ie: for each phase(i) Xt_i(tf) - Xt_link = 0</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-    <span class="c1"># First we add an initial guess for the linkParams, which we be a free</span>
-    <span class="c1"># terminal position,velocity and time that all phases must hit</span>
-    <span class="c1"># The ocp now has 7 link params indexed 0-&gt;6</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">setLinkParams</span><span class="p">(</span><span class="n">SetPointIG</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
+<span class="c1"># First we add an initial guess for the linkParams, which we be a free</span>
+<span class="c1"># terminal position,velocity and time that all phases must hit</span>
+<span class="c1"># The ocp now has 7 link params indexed 0-&gt;6</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">setLinkParams</span><span class="p">(</span><span class="n">SetPointIG</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
 
-    <span class="c1"># Now we need to define the function and varibales needed to express</span>
-    <span class="c1"># the constraint</span>
+<span class="c1"># Now we need to define the function and varibales needed to express</span>
+<span class="c1"># the constraint</span>
 
-    <span class="c1">## The constraint function enforces the equality of two length 7 vectors</span>
-    <span class="n">LinkFun</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="o">-</span> <span class="n">Args</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+<span class="c1">## The constraint function enforces the equality of two length 7 vectors</span>
+<span class="n">LinkFun</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="o">-</span> <span class="n">Args</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
 
-    <span class="c1">## Specifying for each call to collect the x variables indexed</span>
-    <span class="c1">## by xlinkvars (position velocity time) at PhaseReg.Back (last state),</span>
-    <span class="c1">## these will be the first 7 arguments to each call of LinkFun</span>
-    <span class="n">linkregs</span> <span class="o">=</span> <span class="p">[</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Back</span><span class="p">]</span>
-    <span class="n">phasestolink</span> <span class="o">=</span> <span class="p">[[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Trajs</span><span class="p">))]</span>
-    <span class="n">xlinkvars</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">)]</span>
+<span class="c1"># Forward the back state in each phase and the linkParams to the function</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">Trajs</span><span class="p">)):</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">LinkFun</span><span class="p">,[(</span><span class="n">i</span><span class="p">,</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">),[],[])],</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
 
-    <span class="c1">## Specifies that for each call, collect the the ocp link vars representing</span>
-    <span class="c1">## the free state and forward them to LinkFun, these will be the final 7</span>
-    <span class="c1">## arguments for each call</span>
-    <span class="n">linkparmavars</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Trajs</span><span class="p">))]</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkParamEqualCon</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">tail3</span><span class="p">()),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
 
-    <span class="c1">## combine function and indexing info into LinkConstraint Object and</span>
-    <span class="c1">## add it to the phase</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">LinkFun</span><span class="p">,</span> <span class="n">linkregs</span><span class="p">,</span> <span class="n">phasestolink</span><span class="p">,</span> <span class="n">xlinkvars</span><span class="p">,</span> <span class="n">linkparmavars</span><span class="p">)</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_deltaH</span><span class="p">(</span><span class="mf">5.0e-8</span><span class="p">)</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_KKTtol</span><span class="p">(</span><span class="mf">1.0e-9</span><span class="p">)</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_BoundFraction</span><span class="p">(</span><span class="mf">0.997</span><span class="p">)</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">PrintLevel</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_MaxLSIters</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkParamEqualCon</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">tail3</span><span class="p">()),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-
-    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">QPThreads</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># Equal to number of physical cores</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_deltaH</span><span class="p">(</span><span class="mf">5.0e-8</span><span class="p">)</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_KKTtol</span><span class="p">(</span><span class="mf">1.0e-9</span><span class="p">)</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_BoundFraction</span><span class="p">(</span><span class="mf">0.997</span><span class="p">)</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">PrintLevel</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_MaxLSIters</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="n">Data</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">Data</span> <span class="o">=</span> <span class="p">[]</span>
 </pre></div>
 </div>
 <p>First we must choose which part of each state we desire to enforce this constraint for. Clearly, we wish each spacecraft to arrive at some
@@ -414,40 +392,40 @@ is to create an argument that specifies we want the first 7 variables of <strong
 The last bit of this section is setting the linesearch mode (<code class="code docutils literal notranslate"><span class="pre">ocp.optimizer.OptLSMode</span></code>), as well as tolerances on the optimization problem.</p>
 <p>The very last section of the code neccessary for the multi-spacecraft optimization problem is to actually run the optimizer! We will need to do this for every initial state we pass into the problem, with each state representing a spacecraft in the constellation.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">##################################################################</span>
-    <span class="c1">#Section 3:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Now we are going to run an optimization continuation scheme to compute</span>
-<span class="sd">    the constellation trajectory for each list of initial states of the spacecraft</span>
+<span class="c1">#Section 3:</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Now we are going to run an optimization continuation scheme to compute</span>
+<span class="sd">the constellation trajectory for each list of initial states of the spacecraft</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">Ist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">IStates</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">Ist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">IStates</span><span class="p">):</span>
 
-        <span class="c1">## For each set Initial condtions subsitute the fixed intial conditions</span>
-        <span class="c1">## to each phase, Because we locked them, they will be fixed at these values</span>
-        <span class="c1">## this avoids having to retranscribe to the problem for every optimize</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">phase</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">):</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">subVariables</span><span class="p">(</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Front</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">Ist</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
+    <span class="c1">## For each set Initial condtions subsitute the fixed intial conditions</span>
+    <span class="c1">## to each phase, Because we locked them, they will be fixed at these values</span>
+    <span class="c1">## this avoids having to retranscribe to the problem for every optimize</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">phase</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">):</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">subVariables</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">Ist</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
 
-        <span class="c1"># force a retranscription peridically to keep problem well conditioned</span>
-        <span class="c1"># This is not strictly necessary</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">j</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">ocp</span><span class="o">.</span><span class="n">transcribe</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># force a retranscription peridically to keep problem well conditioned</span>
+    <span class="c1"># This is not strictly necessary</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">j</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">ocp</span><span class="o">.</span><span class="n">transcribe</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
-        <span class="c1"># Solve before optimizing for the intial run</span>
-        <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">ocp</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
-        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
-        <span class="n">Flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
-        <span class="n">tf</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">((</span><span class="n">tf</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1000.0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">Flag</span> <span class="o">==</span> <span class="n">ast</span><span class="o">.</span><span class="n">Solvers</span><span class="o">.</span><span class="n">ConvergenceFlags</span><span class="o">.</span><span class="n">NOTCONVERGED</span><span class="p">:</span>
-            <span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
+    <span class="c1"># Solve before optimizing for the intial run</span>
+    <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ocp</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+    <span class="n">Flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+    <span class="n">tf</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">((</span><span class="n">tf</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1000.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Flag</span> <span class="o">==</span> <span class="n">ast</span><span class="o">.</span><span class="n">Solvers</span><span class="o">.</span><span class="n">ConvergenceFlags</span><span class="o">.</span><span class="n">NOTCONVERGED</span><span class="p">:</span>
+        <span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
 
-        <span class="n">Data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="p">[[</span><span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span> <span class="k">for</span> <span class="n">phase</span> <span class="ow">in</span> <span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">],</span> <span class="n">ocp</span><span class="o">.</span><span class="n">returnLinkParams</span><span class="p">()]</span>
-        <span class="p">)</span>
-    <span class="k">return</span> <span class="n">Data</span>
+    <span class="n">Data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">[[</span><span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span> <span class="k">for</span> <span class="n">phase</span> <span class="ow">in</span> <span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">],</span> <span class="n">ocp</span><span class="o">.</span><span class="n">returnLinkParams</span><span class="p">()]</span>
+    <span class="p">)</span>
+<span class="k">return</span> <span class="n">Data</span>
 </pre></div>
 </div>
 <p>The first <code class="code docutils literal notranslate"><span class="pre">for</span></code> loop in this section assigns the values of our desired initial conditions into the <code class="code docutils literal notranslate"><span class="pre">ocp.Phases</span></code> interface.
@@ -533,17 +511,17 @@ We decide that we want 10 spacecraft and we will space them all out along the sa
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Our initial guess for the final point to target is taken to be the middle spacecrafts last state at the end of its initial trajectory in <code class="code docutils literal notranslate"><span class="pre">SetPointIG</span></code>. All of our initial states are generated in the next <code class="code docutils literal notranslate"><span class="pre">for</span></code>
+<p>Our initial guess for the final point to target is taken to be the middle spacecraft’s last state at the end of its initial trajectory in <code class="code docutils literal notranslate"><span class="pre">SetPointIG</span></code>. All of our initial states are generated in the next <code class="code docutils literal notranslate"><span class="pre">for</span></code>
 loop, where we make sure that every initial state is corresponding to a circular orbit. We are interested in how the low thrust acceleration of the vehicle affects the ability for our spacecraft to rendezvous to the desired final state,
 so we create a list of various non-dimensional accelerations in <code class="code docutils literal notranslate"><span class="pre">accs</span></code>. Now all we do is iterate over the list of accelerations and call our <code class="code docutils literal notranslate"><span class="pre">MultiSpaceCraft</span></code> function with all of the required inputs.
 What we get is an optimization problem that simultaneously solves for the optimal control of all spacecraft to converge on the final point.</p>
-<figure class="align-center">
+<div class="figure align-center">
 <a class="reference internal image-reference" href="../_images/multispacecraftoptimization.svg"><img alt="../_images/multispacecraftoptimization.svg" src="../_images/multispacecraftoptimization.svg" width="100%" /></a>
-</figure>
+</div>
 <p>The top plot shows the spacecraft converging to the final point, indicated by the phase angles between the spacecraft decreasing towards 0. The bottom plot shows the complex control histories of 10 spacecraft
 manuevering in tandem to satisfy a given objective. Any further analysis is outside of the scope of this tutorial and is left to the reader.</p>
-<section id="full-code">
-<h2>Full Code:<a class="headerlink" href="#full-code" title="Permalink to this headline">#</a></h2>
+<div class="section" id="full-code">
+<h2>Full Code:<a class="headerlink" href="#full-code" title="Permalink to this heading">#</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -556,9 +534,6 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
 <span class="n">oc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
 
 <span class="n">Args</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
-<span class="n">Tmodes</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">TranscriptionModes</span>
-<span class="n">Cmodes</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ControlModes</span>
-<span class="n">PhaseRegs</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">PhaseRegionFlags</span>
 
 
 <span class="c1">################################################################################</span>
@@ -572,10 +547,10 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
 
         <span class="n">args</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">Xvars</span><span class="p">,</span> <span class="n">Uvars</span><span class="p">)</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">segment_3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">segment3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
         <span class="n">g</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">normalized_power3</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">P1mu</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ltacc</span> <span class="o">!=</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">thrust</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">tail_3</span><span class="p">()</span> <span class="o">*</span> <span class="n">ltacc</span>
+            <span class="n">thrust</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">tail3</span><span class="p">()</span> <span class="o">*</span> <span class="n">ltacc</span>
             <span class="n">acc</span> <span class="o">=</span> <span class="n">g</span> <span class="o">+</span> <span class="n">thrust</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">acc</span> <span class="o">=</span> <span class="n">g</span>
@@ -623,19 +598,19 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Trajs</span><span class="p">):</span>
 
         <span class="c1">## Create a phase for Each Spacecraft</span>
-        <span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">Tmodes</span><span class="o">.</span><span class="n">LGL5</span><span class="p">)</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL5&quot;</span><span class="p">)</span>
         <span class="c1">## Set Initial Guess</span>
         <span class="n">phase</span><span class="o">.</span><span class="n">setTraj</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">NSegs</span><span class="p">)</span>
 
         <span class="c1">##Use block constant control</span>
-        <span class="n">phase</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="n">Cmodes</span><span class="o">.</span><span class="n">BlockConstant</span><span class="p">)</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="s2">&quot;BlockConstant&quot;</span><span class="p">)</span>
 
         <span class="c1">##Specify that initial state and time are locked at</span>
         <span class="c1">##whatever value is passed to optimizer</span>
-        <span class="n">phase</span><span class="o">.</span><span class="n">addValueLock</span><span class="p">(</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Front</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">addValueLock</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
 
         <span class="c1">## Bound Norm of Control Vector over the whole phase</span>
-        <span class="n">phase</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># Add TOF objective</span>
         <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaTimeObjective</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
@@ -663,25 +638,12 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
     <span class="c1">## The constraint function enforces the equality of two length 7 vectors</span>
     <span class="n">LinkFun</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="o">-</span> <span class="n">Args</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
 
-    <span class="c1">## Specifying for each call to collect the x variables indexed</span>
-    <span class="c1">## by xlinkvars (position velocity time) at PhaseRegs.Back (last state),</span>
-    <span class="c1">## these will be the first 7 arguments to each call of LinkFun</span>
-    <span class="n">linkregs</span> <span class="o">=</span> <span class="p">[</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Back</span><span class="p">]</span>
-    <span class="n">phasestolink</span> <span class="o">=</span> <span class="p">[[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Trajs</span><span class="p">))]</span>
-    <span class="n">xlinkvars</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">)]</span>
-
-    <span class="c1">## Specifies that for each call, collect the the ocp link vars representing</span>
-    <span class="c1">## the free state and forward them to LinkFun, these will be the final 7</span>
-    <span class="c1">## arguments for each call</span>
-    <span class="n">linkparmavars</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Trajs</span><span class="p">))]</span>
-
-    <span class="c1">## combine function and indexing info into LinkConstraint Object and</span>
-    <span class="c1">## add it to the phase</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">LinkFun</span><span class="p">,</span> <span class="n">linkregs</span><span class="p">,</span> <span class="n">phasestolink</span><span class="p">,</span> <span class="n">xlinkvars</span><span class="p">,</span> <span class="n">linkparmavars</span><span class="p">)</span>
+    <span class="c1"># Forward the back state in each phase and the linkParams to the function</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">Trajs</span><span class="p">)):</span>
+        <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">LinkFun</span><span class="p">,[(</span><span class="n">i</span><span class="p">,</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">),[],[])],</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
 
     <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkParamEqualCon</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">tail3</span><span class="p">()),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
 
-    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">QPThreads</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># Equal to number of physical cores</span>
     <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
     <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_deltaH</span><span class="p">(</span><span class="mf">5.0e-8</span><span class="p">)</span>
     <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_KKTtol</span><span class="p">(</span><span class="mf">1.0e-9</span><span class="p">)</span>
@@ -705,7 +667,7 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
         <span class="c1">## to each phase, Because we locked them, they will be fixed at these values</span>
         <span class="c1">## this avoids having to retranscribe to the problem for every optimize</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">phase</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">):</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">subVariables</span><span class="p">(</span><span class="n">PhaseRegs</span><span class="o">.</span><span class="n">Front</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">Ist</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
+            <span class="n">phase</span><span class="o">.</span><span class="n">subVariables</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">Ist</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
 
         <span class="c1"># force a retranscription peridically to keep problem well conditioned</span>
         <span class="c1"># This is not strictly necessary</span>
@@ -764,7 +726,7 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
     <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Control Magnitude&quot;</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
     <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;Plots/MultiSpacecraftOptimization/multispacecraftoptimization.pdf&quot;</span><span class="p">,</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;Plots/MultiSpacecraftOptimization/multispacecraftoptimization.svg&quot;</span><span class="p">,</span>
                 <span class="n">dpi</span> <span class="o">=</span> <span class="mi">500</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
@@ -803,20 +765,20 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
-</section>
-</section>
+</div>
+</div>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="Delta3.html">
+          <a class="next-page" href="../python/python.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Delta 3 Multi-phase GTO Transfer</div>
+                <div class="title">Python Library Documentation</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -827,7 +789,7 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Example 2b: Multi-Phase Zermelo’s Problem</div>
+                <div class="title">Multi-Phase Zermelo’s Problem</div>
                 
               </div>
             </a>
@@ -835,7 +797,7 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2021, UA ASRL
+                Copyright &#169; 2022-2023, UA ASRL
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -863,7 +825,7 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Example 3: Multi-Spacecraft Optimization</a><ul>
+<li><a class="reference internal" href="#">Multi-Spacecraft Optimization</a><ul>
 <li><a class="reference internal" href="#full-code">Full Code:</a></li>
 </ul>
 </li>
@@ -879,7 +841,9 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     </body>
 </html>

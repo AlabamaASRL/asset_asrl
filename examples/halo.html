@@ -1,12 +1,11 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Example 2a: Zermelo’s Problem" href="zermelo.html" /><link rel="prev" title="Examples" href="examples.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Zermelo’s Problem" href="zermelo.html" /><link rel="prev" title="Space Shuttle Reentry" href="ReentryExample.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
-        <title>Example 1: Orbit Family Continuation - ASSET 0.0.1 documentation</title>
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
+        <title>Orbit Family Continuation - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -20,7 +19,6 @@
   --color-code-foreground: black;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
-  --color-admonition-background: orange;
   
   }
   @media not print {
@@ -160,32 +158,30 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/ODEGuide.html">ODE Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/IntegratorGuide.html">Integrator Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/PSIOPT.html">PSIOPT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Phase.html">Phase Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Integrator.html">Integrators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="examples.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Example 1: Orbit Family Continuation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Example 2a: Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CartPole.html">Cart Pole Swing Up</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
 </ul>
 </li>
 </ul>
@@ -222,17 +218,18 @@
           </label>
         </div>
         <article role="main">
-          <section id="example-1-orbit-family-continuation">
-<h1>Example 1: Orbit Family Continuation<a class="headerlink" href="#example-1-orbit-family-continuation" title="Permalink to this headline">#</a></h1>
+          <div class="section" id="orbit-family-continuation">
+<h1>Orbit Family Continuation<a class="headerlink" href="#orbit-family-continuation" title="Permalink to this heading">#</a></h1>
 <p>A use case familiar to all astrodynamicists is the generation of orbit families via continuation from an initial orbit.
 ASSET makes reconvergence of slightly perturbed solutions quick and simple by using common python idioms.
 The scenario we will investigate is in the Earth-Moon CR3BP, where we want to build the L1 Planar and Northern Halo families from two approximate initial conditions.</p>
-<section id="problem-setup">
-<h2>Problem Setup<a class="headerlink" href="#problem-setup" title="Permalink to this headline">#</a></h2>
+<div class="section" id="problem-setup">
+<h2>Problem Setup<a class="headerlink" href="#problem-setup" title="Permalink to this heading">#</a></h2>
 <p>All python scripts begin by importing necessary external packages.
 Obviously, we will need ASSET, but we will also use numpy for arrays and matplotlib for graphing.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.AstroModels</span> <span class="kn">import</span> <span class="n">CR3BP</span>
+<span class="kn">import</span> <span class="nn">asset_asrl.Astro.Constants</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -257,30 +254,34 @@ For our test problem, we are analyzing the Earth-Moon system, so the appropriate
 Also, we define a delta-t for our integrator step.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">################################################################################</span>
 <span class="c1"># Constants</span>
-<span class="n">mE</span> <span class="o">=</span> <span class="mf">5.9724e24</span>  <span class="c1"># Earth mass</span>
-<span class="n">mM</span> <span class="o">=</span> <span class="mf">0.07346e24</span>  <span class="c1"># Moon mass</span>
-<span class="n">lstar</span> <span class="o">=</span> <span class="mi">385000</span> <span class="c1">#characteristic distance (km)</span>
+<span class="n">muE</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">MuEarth</span>  <span class="c1"># Earth gravitational parameter</span>
+<span class="n">muM</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">MuMoon</span> <span class="c1"># Moon gravitational parameter</span>
+<span class="n">lstar</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">LD</span> <span class="c1">#Earth-Moon characteristic distance (m)</span>
 
 <span class="n">dt</span> <span class="o">=</span> <span class="mf">3.1415</span> <span class="o">/</span> <span class="mi">10000</span>
 </pre></div>
 </div>
 <p>Given the known system parameters, we can construct the dynamical model.
 ASSET is written generically from a low level, but we tailor it to astrodynamics by providing some pre-built models, such as the CR3BP.
-The instance of the governing ordinary differential equations (ODE) must be initialized with the system’s mu value as shown.
+The instance of the governing ordinary differential equations (ODE) for the CR3BP model is instantiated with the gravitational parameters of the
+Earth and Moon (in <span class="math notranslate nohighlight">\(\frac{m^3}{s^2}\)</span>), along with a characteristic distance (in this case its the average distance between the Earth and Moon in meters).
+The non-dimensional gravity parameter, <span class="math notranslate nohighlight">\(\mu\)</span>, of the system is stored within the CR3BP model as a member.
 Furthermore, the ODE has an integrator associated with it which we can instantiate with a fixed time step dt.
 The <code class="code docutils literal notranslate"><span class="pre">dt</span></code> here is the maximum allowable time step whenever the integrator is invoked.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">################################################################################</span>
 <span class="c1"># System Dynamics</span>
-<span class="n">mu</span> <span class="o">=</span> <span class="n">mM</span> <span class="o">/</span> <span class="p">(</span><span class="n">mE</span> <span class="o">+</span> <span class="n">mM</span><span class="p">)</span>
-<span class="n">ode</span> <span class="o">=</span> <span class="n">CR3BP</span><span class="p">(</span><span class="n">mE</span><span class="p">,</span> <span class="n">mM</span><span class="p">,</span> <span class="n">lstar</span><span class="p">)</span>
+
+<span class="n">ode</span> <span class="o">=</span> <span class="n">CR3BP</span><span class="p">(</span><span class="n">muE</span><span class="p">,</span> <span class="n">muM</span><span class="p">,</span> <span class="n">lstar</span><span class="p">)</span>
+
+<span class="n">mu</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">mu</span>
 
 <span class="c1"># Create integrator (= propagator)</span>
 <span class="n">odeItg</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="constructing-a-generic-periodic-solver">
-<h2>Constructing a Generic Periodic Solver<a class="headerlink" href="#constructing-a-generic-periodic-solver" title="Permalink to this headline">#</a></h2>
+</div>
+<div class="section" id="constructing-a-generic-periodic-solver">
+<h2>Constructing a Generic Periodic Solver<a class="headerlink" href="#constructing-a-generic-periodic-solver" title="Permalink to this heading">#</a></h2>
 <p>Astrodynamicists are certainly aware that the characteristic that defines periodicity in the CR3BP is an orthogonal crossing of the x-z plane.
 In order to have good code re-usability, let’s define a function that will try to solve a periodic orbit given some inital guess of state and duration.
 Here’s the function signature we will use: <code class="code docutils literal notranslate"><span class="pre">def</span> <span class="pre">solvePeriodic(ig,</span> <span class="pre">tf,</span> <span class="pre">fixInit=[0,</span> <span class="pre">1,</span> <span class="pre">2]):</span></code>
@@ -354,9 +355,9 @@ At the end of the trajectory, the same conditions must hold, except that the fin
 In this scenario, the optimization problem only consists of equality constraints, so we set the value of <code class="code docutils literal notranslate"><span class="pre">EContol</span></code>.
 Then a call to <code class="code docutils literal notranslate"><span class="pre">odePhase.solve()</span></code> runs everything we set up.</p>
 <p>All that remains is to extract the result, which is done via <code class="code docutils literal notranslate"><span class="pre">returnTraj()</span></code>.</p>
-</section>
-<section id="performing-continuation">
-<h2>Performing Continuation<a class="headerlink" href="#performing-continuation" title="Permalink to this headline">#</a></h2>
+</div>
+<div class="section" id="performing-continuation">
+<h2>Performing Continuation<a class="headerlink" href="#performing-continuation" title="Permalink to this heading">#</a></h2>
 <p>In order to generate an orbit family, it is not sufficient to solve only <em>one</em> orbit, so let’s create another function that performs continuation by calling <code class="code docutils literal notranslate"><span class="pre">solvePeriodic</span></code> over a range of inputs.
 Rudimentary continuation increments some parameter of the orbit, and then re-solves for a new orbit with the different parameter.
 Also, most orbit families don’t go on forever, so we need a way to stop the progression.
@@ -403,9 +404,9 @@ Lastly, the <code class="code docutils literal notranslate"><span class="pre">fi
 A guess for the current step is obtained from the previous step by pulling it off the end of the <code class="code docutils literal notranslate"><span class="pre">trajList</span></code> with python’s negative indices.
 Then, the specified term is incremented and the <code class="code docutils literal notranslate"><span class="pre">solvePeriodic</span></code> function handles the rest.
 Of course, this approach doesn’t have any error handling if an orbit doesn’t converge, but we’ve shown that a first-pass approximation can be implemented with very basic knowledge of python capabilities.</p>
-</section>
-<section id="running-and-plotting">
-<h2>Running and Plotting<a class="headerlink" href="#running-and-plotting" title="Permalink to this headline">#</a></h2>
+</div>
+<div class="section" id="running-and-plotting">
+<h2>Running and Plotting<a class="headerlink" href="#running-and-plotting" title="Permalink to this heading">#</a></h2>
 <p>Since we’ve put in the work up front to produce functions that capture the generic concepts of periodicity and continuation, calculating some specific orbit family can be done with minimal code.
 First, here’s a quick plotting function to graph the list of trajectories we expect to recieve from <code class="code docutils literal notranslate"><span class="pre">contin</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plotTrajList</span><span class="p">(</span><span class="n">tList</span><span class="p">,</span> <span class="n">proj</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -467,9 +468,9 @@ Do note that the continuation limit is set such that we do not obtain the <em>fu
 A smarter continuation scheme would be necessary to converge the extreme orbits.
 Also, we do a bit of trickery with the plotting.
 Since it’s more stable to solve for half-orbits, we duplicate the trajectory over the x-z plane so that we see the full orbit.</p>
-<figure class="align-center">
+<div class="figure align-center">
 <a class="reference internal image-reference" href="../_images/Lyapunov.svg"><img alt="../_images/Lyapunov.svg" src="../_images/Lyapunov.svg" width="100%" /></a>
-</figure>
+</div>
 <p>The code for L1 Northern Halos is almost identical, save for the initial conditions.
 One notable change is the explicit definition of <code class="code docutils literal notranslate"><span class="pre">fixInit</span></code>.
 In this case, we allow <span class="math notranslate nohighlight">\(x\)</span> to be adjusted by the solver as we increment <span class="math notranslate nohighlight">\(z\)</span> so that we follow the correct shape of the family.
@@ -493,13 +494,14 @@ Again, we truncate early.</p>
 <span class="n">plotTrajList</span><span class="p">(</span><span class="n">tlp</span><span class="p">)</span>
 </pre></div>
 </div>
-<figure class="align-center">
+<div class="figure align-center">
 <a class="reference internal image-reference" href="../_images/Halo.svg"><img alt="../_images/Halo.svg" src="../_images/Halo.svg" width="100%" /></a>
-</figure>
-<section id="full-code">
-<h3>Full Code<a class="headerlink" href="#full-code" title="Permalink to this headline">#</a></h3>
+</div>
+<div class="section" id="full-code">
+<h3>Full Code<a class="headerlink" href="#full-code" title="Permalink to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.AstroModels</span> <span class="kn">import</span> <span class="n">CR3BP</span>
+<span class="kn">import</span> <span class="nn">asset_asrl.Astro.Constants</span> <span class="k">as</span> <span class="nn">c</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -515,16 +517,18 @@ Again, we truncate early.</p>
 
 <span class="c1">################################################################################</span>
 <span class="c1"># Constants</span>
-<span class="n">mE</span> <span class="o">=</span> <span class="mf">5.9724e24</span>  <span class="c1"># Earth mass (kg)</span>
-<span class="n">mM</span> <span class="o">=</span> <span class="mf">0.07346e24</span>  <span class="c1"># Moon mass (kg)</span>
-<span class="n">lstar</span> <span class="o">=</span> <span class="mi">385000</span> <span class="c1">#characteristic distance (km)</span>
+<span class="n">muE</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">MuEarth</span>  <span class="c1"># Earth gravitational parameter</span>
+<span class="n">muM</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">MuMoon</span> <span class="c1"># Moon gravitational parameter</span>
+<span class="n">lstar</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">LD</span> <span class="c1">#Earth-Moon characteristic distance (m)</span>
 
 <span class="n">dt</span> <span class="o">=</span> <span class="mf">3.1415</span> <span class="o">/</span> <span class="mi">10000</span>
 
 <span class="c1">################################################################################</span>
 <span class="c1"># System Dynamics</span>
-<span class="n">mu</span> <span class="o">=</span> <span class="n">mM</span> <span class="o">/</span> <span class="p">(</span><span class="n">mE</span> <span class="o">+</span> <span class="n">mM</span><span class="p">)</span>
-<span class="n">ode</span> <span class="o">=</span> <span class="n">CR3BP</span><span class="p">(</span><span class="n">mE</span><span class="p">,</span> <span class="n">mM</span><span class="p">,</span> <span class="n">lstar</span><span class="p">)</span>
+
+<span class="n">ode</span> <span class="o">=</span> <span class="n">CR3BP</span><span class="p">(</span><span class="n">muE</span><span class="p">,</span> <span class="n">muM</span><span class="p">,</span> <span class="n">lstar</span><span class="p">)</span>
+
+<span class="n">mu</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">mu</span>
 
 <span class="c1"># Create integrator (= propagator)</span>
 <span class="n">odeItg</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
@@ -663,9 +667,9 @@ Again, we truncate early.</p>
 <span class="n">plotTrajList</span><span class="p">(</span><span class="n">tlp</span><span class="p">,</span> <span class="n">proj</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-</section>
-</section>
+</div>
+</div>
+</div>
 
         </article>
       </div>
@@ -677,18 +681,18 @@ Again, we truncate early.</p>
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Example 2a: Zermelo’s Problem</div>
+                <div class="title">Zermelo’s Problem</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="examples.html">
+          <a class="prev-page" href="ReentryExample.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Examples</div>
+                <div class="title">Space Shuttle Reentry</div>
                 
               </div>
             </a>
@@ -696,7 +700,7 @@ Again, we truncate early.</p>
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2021, UA ASRL
+                Copyright &#169; 2022-2023, UA ASRL
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -724,7 +728,7 @@ Again, we truncate early.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Example 1: Orbit Family Continuation</a><ul>
+<li><a class="reference internal" href="#">Orbit Family Continuation</a><ul>
 <li><a class="reference internal" href="#problem-setup">Problem Setup</a></li>
 <li><a class="reference internal" href="#constructing-a-generic-periodic-solver">Constructing a Generic Periodic Solver</a></li>
 <li><a class="reference internal" href="#performing-continuation">Performing Continuation</a></li>
@@ -746,7 +750,9 @@ Again, we truncate early.</p>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>

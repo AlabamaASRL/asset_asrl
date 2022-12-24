@@ -1,11 +1,10 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="ASSET" href="asset.html" /><link rel="prev" title="Cart Pole Swing Up" href="../examples/CartPole.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="ASSET" href="asset.html" /><link rel="prev" title="Multi-Spacecraft Optimization" href="../examples/MultiTarg.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
         <title>Python Library Documentation - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
@@ -20,7 +19,6 @@
   --color-code-foreground: black;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
-  --color-admonition-background: orange;
   
   }
   @media not print {
@@ -160,32 +158,30 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/ODEGuide.html">ODE Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/IntegratorGuide.html">Integrator Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/PSIOPT.html">PSIOPT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Phase.html">Phase Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Integrator.html">Integrators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../examples/examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Example 1: Orbit Family Continuation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Example 2a: Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/ReentryExample.html">Space Shuttle Reentry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/CartPole.html">Cart Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Python Library Documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Astro.html">ASSET Astro Library</a></li>
 </ul>
 </li>
 </ul>
@@ -222,18 +218,142 @@
           </label>
         </div>
         <article role="main">
-          <section id="python-library-documentation">
-<h1>Python Library Documentation<a class="headerlink" href="#python-library-documentation" title="Permalink to this headline">#</a></h1>
+          <div class="section" id="python-library-documentation">
+<h1>Python Library Documentation<a class="headerlink" href="#python-library-documentation" title="Permalink to this heading">#</a></h1>
 <p>Documentation of Python Functionality</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Python Submodules:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="asset.html">ASSET</a></li>
-<li class="toctree-l1"><a class="reference internal" href="optimalcontrol.html">Optimal Control</a></li>
-<li class="toctree-l1"><a class="reference internal" href="vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asset.html">ASSET</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="asset.html#asset.PyMain"><code class="docutils literal notranslate"><span class="pre">PyMain()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="asset.html#asset.SoftwareInfo"><code class="docutils literal notranslate"><span class="pre">SoftwareInfo()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="optimalcontrol.html">Optimal Control</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__delattr__"><code class="docutils literal notranslate"><span class="pre">__delattr__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__dir__"><code class="docutils literal notranslate"><span class="pre">__dir__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__eq__"><code class="docutils literal notranslate"><span class="pre">__eq__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__format__"><code class="docutils literal notranslate"><span class="pre">__format__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__ge__"><code class="docutils literal notranslate"><span class="pre">__ge__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__getattribute__"><code class="docutils literal notranslate"><span class="pre">__getattribute__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__gt__"><code class="docutils literal notranslate"><span class="pre">__gt__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__hash__"><code class="docutils literal notranslate"><span class="pre">__hash__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__init_subclass__"><code class="docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__le__"><code class="docutils literal notranslate"><span class="pre">__le__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__lt__"><code class="docutils literal notranslate"><span class="pre">__lt__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__ne__"><code class="docutils literal notranslate"><span class="pre">__ne__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__new__"><code class="docutils literal notranslate"><span class="pre">__new__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__reduce__"><code class="docutils literal notranslate"><span class="pre">__reduce__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__reduce_ex__"><code class="docutils literal notranslate"><span class="pre">__reduce_ex__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__repr__"><code class="docutils literal notranslate"><span class="pre">__repr__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__setattr__"><code class="docutils literal notranslate"><span class="pre">__setattr__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__sizeof__"><code class="docutils literal notranslate"><span class="pre">__sizeof__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__str__"><code class="docutils literal notranslate"><span class="pre">__str__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset_asrl.OptimalControl.ODEBase.__subclasshook__"><code class="docutils literal notranslate"><span class="pre">__subclasshook__()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.ControlModes"><code class="docutils literal notranslate"><span class="pre">ControlModes</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.FiniteDiffTable"><code class="docutils literal notranslate"><span class="pre">FiniteDiffTable</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.IntegralModes"><code class="docutils literal notranslate"><span class="pre">IntegralModes</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.InterpFunction"><code class="docutils literal notranslate"><span class="pre">InterpFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.InterpFunction_1"><code class="docutils literal notranslate"><span class="pre">InterpFunction_1</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.InterpFunction_3"><code class="docutils literal notranslate"><span class="pre">InterpFunction_3</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.InterpFunction_6"><code class="docutils literal notranslate"><span class="pre">InterpFunction_6</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.LGLInterpTable"><code class="docutils literal notranslate"><span class="pre">LGLInterpTable</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.LinkConstraint"><code class="docutils literal notranslate"><span class="pre">LinkConstraint</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.LinkFlags"><code class="docutils literal notranslate"><span class="pre">LinkFlags</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.LinkObjective"><code class="docutils literal notranslate"><span class="pre">LinkObjective</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.ODEArguments"><code class="docutils literal notranslate"><span class="pre">ODEArguments</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.OptimalControlProblem"><code class="docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.PhaseInterface"><code class="docutils literal notranslate"><span class="pre">PhaseInterface</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.PhaseRegionFlags"><code class="docutils literal notranslate"><span class="pre">PhaseRegionFlags</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.RKOptions"><code class="docutils literal notranslate"><span class="pre">RKOptions</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.StateConstraint"><code class="docutils literal notranslate"><span class="pre">StateConstraint</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.StateObjective"><code class="docutils literal notranslate"><span class="pre">StateObjective</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.TranscriptionModes"><code class="docutils literal notranslate"><span class="pre">TranscriptionModes</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimalcontrol.html#asset.OptimalControl.strto_PhaseRegionFlag"><code class="docutils literal notranslate"><span class="pre">strto_PhaseRegionFlag()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="vectorfunctions.html">Vector Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.Arguments"><code class="docutils literal notranslate"><span class="pre">Arguments</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.ColMatrix"><code class="docutils literal notranslate"><span class="pre">ColMatrix</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.Comparative"><code class="docutils literal notranslate"><span class="pre">Comparative</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.Conditional"><code class="docutils literal notranslate"><span class="pre">Conditional</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.ConstantScalar"><code class="docutils literal notranslate"><span class="pre">ConstantScalar</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.ConstantVector"><code class="docutils literal notranslate"><span class="pre">ConstantVector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.DynamicStackTest"><code class="docutils literal notranslate"><span class="pre">DynamicStackTest()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.Element"><code class="docutils literal notranslate"><span class="pre">Element</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.InterpTable1D"><code class="docutils literal notranslate"><span class="pre">InterpTable1D</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.InterpTable2D"><code class="docutils literal notranslate"><span class="pre">InterpTable2D</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.PyScalarFunction"><code class="docutils literal notranslate"><span class="pre">PyScalarFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.PyVectorFunction"><code class="docutils literal notranslate"><span class="pre">PyVectorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.RowMatrix"><code class="docutils literal notranslate"><span class="pre">RowMatrix</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.ScalarDynamicStackTest"><code class="docutils literal notranslate"><span class="pre">ScalarDynamicStackTest()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.ScalarFunction"><code class="docutils literal notranslate"><span class="pre">ScalarFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.ScalarRootFinder"><code class="docutils literal notranslate"><span class="pre">ScalarRootFinder()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.Segment"><code class="docutils literal notranslate"><span class="pre">Segment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.Segment2"><code class="docutils literal notranslate"><span class="pre">Segment2</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.Segment3"><code class="docutils literal notranslate"><span class="pre">Segment3</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.Stack"><code class="docutils literal notranslate"><span class="pre">Stack()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.StackScalar"><code class="docutils literal notranslate"><span class="pre">StackScalar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.Sum"><code class="docutils literal notranslate"><span class="pre">Sum()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.SumElems"><code class="docutils literal notranslate"><span class="pre">SumElems()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.SumScalar"><code class="docutils literal notranslate"><span class="pre">SumScalar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.VectorFunction"><code class="docutils literal notranslate"><span class="pre">VectorFunction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.abs"><code class="docutils literal notranslate"><span class="pre">abs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.arccos"><code class="docutils literal notranslate"><span class="pre">arccos()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.arccosh"><code class="docutils literal notranslate"><span class="pre">arccosh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.arcsin"><code class="docutils literal notranslate"><span class="pre">arcsin()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.arcsinh"><code class="docutils literal notranslate"><span class="pre">arcsinh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.arctan"><code class="docutils literal notranslate"><span class="pre">arctan()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.arctan2"><code class="docutils literal notranslate"><span class="pre">arctan2()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.arctanh"><code class="docutils literal notranslate"><span class="pre">arctanh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.cos"><code class="docutils literal notranslate"><span class="pre">cos()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.cosh"><code class="docutils literal notranslate"><span class="pre">cosh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.cross"><code class="docutils literal notranslate"><span class="pre">cross()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.cubed_norm"><code class="docutils literal notranslate"><span class="pre">cubed_norm()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.cwiseProduct"><code class="docutils literal notranslate"><span class="pre">cwiseProduct()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.cwiseQuotient"><code class="docutils literal notranslate"><span class="pre">cwiseQuotient()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.divtest"><code class="docutils literal notranslate"><span class="pre">divtest()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.dot"><code class="docutils literal notranslate"><span class="pre">dot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.doublecross"><code class="docutils literal notranslate"><span class="pre">doublecross()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.exp"><code class="docutils literal notranslate"><span class="pre">exp()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.ifelse"><code class="docutils literal notranslate"><span class="pre">ifelse()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.inverse_cubed_norm"><code class="docutils literal notranslate"><span class="pre">inverse_cubed_norm()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.inverse_four_norm"><code class="docutils literal notranslate"><span class="pre">inverse_four_norm()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.inverse_norm"><code class="docutils literal notranslate"><span class="pre">inverse_norm()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.inverse_squared_norm"><code class="docutils literal notranslate"><span class="pre">inverse_squared_norm()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.log"><code class="docutils literal notranslate"><span class="pre">log()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.matmul"><code class="docutils literal notranslate"><span class="pre">matmul()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.norm"><code class="docutils literal notranslate"><span class="pre">norm()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.normalize"><code class="docutils literal notranslate"><span class="pre">normalize()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.normalized"><code class="docutils literal notranslate"><span class="pre">normalized()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.normalized_power2"><code class="docutils literal notranslate"><span class="pre">normalized_power2()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.normalized_power3"><code class="docutils literal notranslate"><span class="pre">normalized_power3()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.normalized_power4"><code class="docutils literal notranslate"><span class="pre">normalized_power4()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.normalized_power5"><code class="docutils literal notranslate"><span class="pre">normalized_power5()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.pow"><code class="docutils literal notranslate"><span class="pre">pow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.quatProduct"><code class="docutils literal notranslate"><span class="pre">quatProduct()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.quatRotate"><code class="docutils literal notranslate"><span class="pre">quatRotate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.sign"><code class="docutils literal notranslate"><span class="pre">sign()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.sin"><code class="docutils literal notranslate"><span class="pre">sin()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.sinh"><code class="docutils literal notranslate"><span class="pre">sinh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.sqrt"><code class="docutils literal notranslate"><span class="pre">sqrt()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.squared"><code class="docutils literal notranslate"><span class="pre">squared()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.squared_norm"><code class="docutils literal notranslate"><span class="pre">squared_norm()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.stack"><code class="docutils literal notranslate"><span class="pre">stack()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.stack_scalar"><code class="docutils literal notranslate"><span class="pre">stack_scalar()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.sum"><code class="docutils literal notranslate"><span class="pre">sum()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.tan"><code class="docutils literal notranslate"><span class="pre">tan()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="vectorfunctions.html#asset.VectorFunctions.tanh"><code class="docutils literal notranslate"><span class="pre">tanh()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Astro.html">ASSET Astro Library</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Astro.html#example-models">Example Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Astro.html#ephemeris-models">Ephemeris Models</a></li>
+</ul>
+</li>
 </ul>
 </div>
-</section>
+</div>
 
         </article>
       </div>
@@ -249,14 +369,14 @@
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../examples/CartPole.html">
+          <a class="prev-page" href="../examples/MultiTarg.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Cart Pole Swing Up</div>
+                <div class="title">Multi-Spacecraft Optimization</div>
                 
               </div>
             </a>
@@ -264,7 +384,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2021, UA ASRL
+                Copyright &#169; 2022-2023, UA ASRL
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -289,7 +409,9 @@
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     </body>
 </html>

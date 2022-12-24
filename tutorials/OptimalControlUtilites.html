@@ -1,12 +1,11 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Examples" href="../examples/examples.html" /><link rel="prev" title="PSIOPT" href="PSIOPT.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
-        <title>&lt;no title&gt; - ASSET 0.0.1 documentation</title>
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
+        <title>Optimal Control Utilities - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -20,7 +19,6 @@
   --color-code-foreground: black;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
-  --color-admonition-background: orange;
   
   }
   @media not print {
@@ -137,7 +135,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -158,34 +156,32 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="Installation.html">Python: Installing ASSET</a></li>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ODEGuide.html">ODE Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IntegratorGuide.html">Integrator Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PSIOPT.html">PSIOPT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Phase.html">Phase Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Integrator.html">Integrators</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Optimal Control Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../examples/examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Example 1: Orbit Family Continuation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Example 2a: Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/ReentryExample.html">Space Shuttle Reentry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/CartPole.html">Cart Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
 </ul>
 </li>
 </ul>
@@ -216,25 +212,172 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          
+          <div class="section" id="optimal-control-utilities">
+<h1>Optimal Control Utilities<a class="headerlink" href="#optimal-control-utilities" title="Permalink to this heading">#</a></h1>
+<div class="section" id="lglinterptable-and-interpfunction">
+<h2>LGLInterpTable and InterpFunction<a class="headerlink" href="#lglinterptable-and-interpfunction" title="Permalink to this heading">#</a></h2>
+<p id="lgltab-guide">The <code class="code docutils literal notranslate"><span class="pre">oc.LGLInterpTable</span></code> class inside of the optimal control module facilitates the interpolation of time-series data expressed in the
+ODE format. It is distinct from <code class="code docutils literal notranslate"><span class="pre">InterpTable1D</span></code> discussed in <a class="reference internal" href="VectorFunctionGuide.html#d-interpolation"><span class="std std-ref">1-D Interpolation</span></a>.
+This can be used for reintegration of converged trajectories and can also be used incorporate
+arbitrary time-series data into a vector function expression. To illustrate its construction and usage, we will utilize the
+simple two-body low-thrust ODE below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="n">vf</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
+<span class="n">Args</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
+<span class="n">oc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
+
+<span class="k">class</span> <span class="nc">TwoBodyLTODE</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mu</span><span class="p">,</span><span class="n">MaxLTAcc</span><span class="p">):</span>
+        <span class="n">XVars</span> <span class="o">=</span> <span class="mi">6</span>
+        <span class="n">UVars</span> <span class="o">=</span> <span class="mi">3</span>
+
+        <span class="n">XtU</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">XVars</span><span class="p">,</span><span class="n">UVars</span><span class="p">)</span>
+
+        <span class="n">R</span><span class="p">,</span><span class="n">V</span>  <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVec</span><span class="p">()</span>
+
+        <span class="n">G</span> <span class="o">=</span> <span class="o">-</span><span class="n">mu</span><span class="o">*</span><span class="n">R</span><span class="o">.</span><span class="n">normalized_power3</span><span class="p">()</span>
+        <span class="n">Acc</span> <span class="o">=</span> <span class="n">G</span> <span class="o">+</span> <span class="n">U</span><span class="o">*</span><span class="n">MaxLTAcc</span>
+
+        <span class="n">Rdot</span> <span class="o">=</span> <span class="n">V</span>
+        <span class="n">Vdot</span> <span class="o">=</span> <span class="n">Acc</span>
+        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">Rdot</span><span class="p">,</span><span class="n">Vdot</span><span class="p">])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="n">XVars</span><span class="p">,</span><span class="n">UVars</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To show how we can construct an <code class="code docutils literal notranslate"><span class="pre">oc.LGLInterpTable</span></code> we will generate a trajectory by integrating our ODE with a control law.
+This full ODE format trajectory can be provided along with the ODE, and its dimensions (state,control, and parameters), to the constructor. The <code class="code docutils literal notranslate"><span class="pre">ode</span></code> function
+will be used to generate the derivatives of a cubic-hermite spline representation of the trajectory. Alternatively, we can construct an <code class="code docutils literal notranslate"><span class="pre">oc.LGLInterpTable</span></code>
+from arbitrary time series data (not necessarily a full ODE trajectory). For example, below we generate another table to interpolate just the controls
+from our integrated trajectory. Note that time is assumed to be the last element in each element in the list of data. You may then interpolate
+values by supplying a time to the call operator of the object.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ode</span> <span class="o">=</span> <span class="n">TwoBodyLTODE</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mf">.01</span><span class="p">)</span>
+
+<span class="n">r</span>  <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">v</span>  <span class="o">=</span> <span class="mf">1.1</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">tf</span> <span class="o">=</span> <span class="mf">20.0</span>
+
+<span class="n">X0t0U0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">X0t0U0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">r</span>
+<span class="n">X0t0U0</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">=</span><span class="n">v</span>
+<span class="n">X0t0U0</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="n">t0</span>
+
+<span class="k">def</span> <span class="nf">ULaw</span><span class="p">(</span><span class="n">throttle</span><span class="p">):</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">V</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span><span class="o">*</span><span class="n">throttle</span>
+
+<span class="n">integULaw</span>   <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="s2">&quot;DP54&quot;</span><span class="p">,</span><span class="mf">.1</span><span class="p">,</span><span class="n">ULaw</span><span class="p">(</span><span class="mf">0.8</span><span class="p">),[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
+
+<span class="n">TrajI</span>   <span class="o">=</span> <span class="n">integULaw</span><span class="o">.</span><span class="n">integrate_dense</span><span class="p">(</span><span class="n">X0t0U0</span><span class="p">,</span><span class="n">tf</span><span class="p">,</span><span class="mi">6000</span><span class="p">)</span>
+
+
+<span class="c1"># Construct from an ode,its,dimensions,and a trajectory of the correct size</span>
+<span class="c1"># Most accurate interpolation</span>
+<span class="n">Tab1</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">LGLInterpTable</span><span class="p">(</span><span class="n">ode</span><span class="o">.</span><span class="n">vf</span><span class="p">(),</span><span class="mi">6</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">TrajI</span><span class="p">)</span>
+
+
+<span class="c1">## Construct from arbitrary time series data,</span>
+<span class="c1">## Elements consist of data followed by time</span>
+<span class="c1">## No ode needed, but less accurate interpolation</span>
+<span class="n">JustUts</span> <span class="o">=</span> <span class="p">[</span> <span class="nb">list</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">10</span><span class="p">])</span> <span class="o">+</span><span class="p">[</span><span class="n">T</span><span class="p">[</span><span class="mi">6</span><span class="p">]]</span> <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">TrajI</span>  <span class="p">]</span>
+<span class="n">Tab2</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">LGLInterpTable</span><span class="p">(</span><span class="n">JustUts</span><span class="p">)</span>
+
+
+<span class="c1"># Interpolation returns all data stored in the table, including the time</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">Tab1</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span> <span class="c1"># prints [1.,  0.,  0.,  0.,  1.1, 0.,  0.,  0.,  0.8, 0. ]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">Tab2</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span> <span class="c1"># prints [0.,  0.8, 0.,  0. ]</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">oc.LGLInterpTable</span></code> objects may be supplied to the constructor of an integrator, in which case they are interpreted
+as a time dependent control law. If the table contains data of the same size as the ODE’s input, the correct
+control indices are automatically calculated. However, if the data dimensions are not consistent with the ODE’s input size,
+you must specify which elements of the interpolated output are to be interpreted as controls.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Tables consisting of full trajectories of the right size will be interpreted</span>
+<span class="c1"># use the control indices as a time dependent control law ([7,8,9])</span>
+<span class="n">integTab1</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="mf">.1</span><span class="p">,</span><span class="n">Tab1</span><span class="p">)</span>
+
+<span class="c1">## If the data is not the same size as an ODE input you should manually</span>
+<span class="c1">## Specify which elements of the outputs of the table should be controls</span>
+<span class="c1">## Since Tab1 is the right size, this does the same thing as above</span>
+<span class="n">integTab1</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="mf">.1</span><span class="p">,</span><span class="n">Tab1</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+
+<span class="c1"># However, Tab2 is just controls so we need to specify which elements of</span>
+<span class="c1"># the output of the table are the controls</span>
+<span class="n">integTab2</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="mf">.1</span><span class="p">,</span><span class="n">Tab2</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="n">Traj1</span>   <span class="o">=</span> <span class="n">integTab1</span><span class="o">.</span><span class="n">integrate_dense</span><span class="p">(</span><span class="n">X0t0U0</span><span class="p">,</span><span class="n">tf</span><span class="p">)</span>
+<span class="n">Traj2</span>   <span class="o">=</span> <span class="n">integTab2</span><span class="o">.</span><span class="n">integrate_dense</span><span class="p">(</span><span class="n">X0t0U0</span><span class="p">,</span><span class="n">tf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also utilize <code class="code docutils literal notranslate"><span class="pre">oc.LGLInterpTable</span></code> objects inside of VectorFunction expressions by wrapping them
+with <code class="code docutils literal notranslate"><span class="pre">oc.InterpFunction</span></code> as shown below. To do this we pass a table instance as well as a list of the indices of the outputs
+of the table that we want be included as outputs of our VectorFunction. <code class="code docutils literal notranslate"><span class="pre">oc.InterpFunction</span></code> objects can be quite useful
+in representing time dependent boundary constraints that are not analytic functions of time.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># A constraint that enforces that given state and time should</span>
+<span class="c1"># match that held in the table</span>
+<span class="k">def</span> <span class="nf">RendFunc</span><span class="p">(</span><span class="n">Tab</span><span class="p">):</span>
+    <span class="n">X</span><span class="p">,</span><span class="n">t</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">),(</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">)])</span>
+
+    <span class="c1"># Convert table into a vector function</span>
+    <span class="c1"># that takes a time and returns the specified elements in the table</span>
+    <span class="c1"># in this case just, position and velocity</span>
+    <span class="n">X_tfunc</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">InterpFunction</span><span class="p">(</span><span class="n">Tab</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">X</span><span class="o">-</span><span class="n">X_tfunc</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+<span class="n">RFunc</span> <span class="o">=</span> <span class="n">RendFunc</span><span class="p">(</span><span class="n">Tab1</span><span class="p">)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="n">RFunc</span><span class="p">(</span><span class="n">TrajI</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">]))</span>  <span class="c1"># prints [0,0,0,0,0,0]</span>
+</pre></div>
+</div>
+</div>
+</div>
+
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="../examples/examples.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Examples</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="PSIOPT.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">PSIOPT</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2021, UA ASRL
+                Copyright &#169; 2022-2023, UA ASRL
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -250,8 +393,27 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Optimal Control Utilities</a><ul>
+<li><a class="reference internal" href="#lglinterptable-and-interpfunction">LGLInterpTable and InterpFunction</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -259,7 +421,9 @@
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     </body>
 </html>

@@ -1,0 +1,541 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Vector Function Tutorial" href="VectorFunctionGuide.html" /><link rel="prev" title="Tutorials" href="tutorials.html" />
+
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
+        <title>Installing ASSET - ASSET 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: red;
+  --color-brand-content: #CC3333;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">ASSET 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">ASSET 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="VectorFunctionGuide.html">Vector Function Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ODEGuide.html">ODE Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IntegratorGuide.html">Integrator Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PSIOPT.html">PSIOPT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OptimalControlUtilites.html">Optimal Control Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../examples/examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/ReentryExample.html">Space Shuttle Reentry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Multi-Spacecraft Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <div class="section" id="installing-asset">
+<h1>Installing ASSET<a class="headerlink" href="#installing-asset" title="Permalink to this heading">#</a></h1>
+<p>This tutorial will guide you through the complete setup process for installing and building ASSET from scratch on Windows and Linux.</p>
+<div class="section" id="windows-installation">
+<h2>Windows Installation<a class="headerlink" href="#windows-installation" title="Permalink to this heading">#</a></h2>
+<p>In order to build ASSET on Windows the following dependencies are required:</p>
+<ul class="simple">
+<li><p>Visual Studio 2017 or greater <a class="reference external" href="https://visualstudio.microsoft.com/downloads/">(Link to Visual Studio Community 2022)</a></p></li>
+<li><p><a class="reference external" href="https://github.com/llvm/llvm-project/releases/latest">LLVM Compiler Toolkit</a></p></li>
+<li><p><a class="reference external" href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=window&amp;distributions=offline">Intel oneAPI MKL</a></p></li>
+<li><dl class="simple">
+<dt>A Python installation with Numpy, however we recommend using Anaconda.</dt><dd><ul>
+<li><p><a class="reference external" href="https://www.anaconda.com/products/distribution">Anaconda</a></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>The Python packages SpiceyPy, Sphinx, and Furo</p></li>
+</ul>
+<div class="section" id="step-by-step-guide">
+<h3>Step-By-Step Guide<a class="headerlink" href="#step-by-step-guide" title="Permalink to this heading">#</a></h3>
+<ol class="arabic">
+<li><p>We will begin by installing Visual Studio (VS).</p>
+<blockquote>
+<div><p>Follow the VS installation prompts until you are prompted to select any additional packages to install with VS.
+Here we will want to select <strong>Desktop development with C++</strong>; however, we are going to make one change to the defaults for the C++ install and <strong>un-check</strong> the option for “C++ Clang tools for Windows” (shown below).</p>
+<img alt="../_images/vsstudiodesktopc%2B%2B.PNG" src="../_images/vsstudiodesktopc%2B%2B.PNG" />
+<p>Also ensure that the “<strong>C++ CMake Tools for Windows</strong>” is checked.
+After doing this continue and finish the installation.</p>
+<blockquote>
+<div><img alt="../_images/VSoptions.PNG" src="../_images/VSoptions.PNG" />
+</div></blockquote>
+</div></blockquote>
+</li>
+<li><p>Next we will install the LLVM Compiler Toolkit. An LLVM installation of at least LLVM-11 is required, and we recommend using the latest version if possible.</p>
+<blockquote>
+<div><p>Navigate to the LLVM github releases page, select your desired version, and download the LLVM win64 installer (LLVM-15.0.0-win64.exe for example).
+Proceed with the LLVM install, however ensure that the install option “<strong>Do not add LLVM to the system PATH</strong>” is checked.
+After finishing the LLVM installation we can proceed with installing Intel MKL.</p>
+<blockquote>
+<div><img alt="../_images/LLVMnopath.PNG" src="../_images/LLVMnopath.PNG" />
+</div></blockquote>
+</div></blockquote>
+</li>
+<li><p>Download and install the Intel oneAPI MKL, using the offline installer.</p>
+<blockquote>
+<div><p>Install with the recommended settings and then proceed to installing Anaconda, if desired.
+If you are not using Anaconda you may skip the next step.</p>
+</div></blockquote>
+</li>
+<li><p>Now download and install Anaconda.</p>
+<blockquote>
+<div><p>Check that Anaconda is set to be placed on the PATH and set Anaconda to be your default Python.  Additionally install the following packages.</p>
+<ul class="simple">
+<li><p>SpiceyPy, Sphinx, and Furo</p></li>
+</ul>
+<p>Your version of Anaconda may be installed in “ProgramData” and may be named “Anaconda”, “Anaconda3”, or “anaconda3”, depending on your installation settings.</p>
+<img alt="../_images/anacondainstall.PNG" src="../_images/anacondainstall.PNG" />
+<p>After installing anaconda, it may be necessary to upgrade numpy through pip, due to potential compatibibility issues with numpy’s version of libiomp5md.dll and Intel MKL’s version.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install numpy --upgrade</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>if you aren’t using anaconda, you are still going to need numpy (comes with anaconda by default).</p>
+</div>
+</div></blockquote>
+</li>
+<li><p>Next we will be adding the required system and PATH variables to build ASSET.</p>
+<blockquote>
+<div><p>First, add the Intel oneAPI to a new system variable named “ONEAPI_ROOT” and set the variable value to your oneAPI install directory, as shown below.
+If your install directory is different, be sure to point this to the correct folder. This may have already been set when you installed oneAPI.</p>
+<blockquote>
+<div><img alt="../_images/oneapiroot.PNG" src="../_images/oneapiroot.PNG" />
+</div></blockquote>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you are using an Alder Lake or Raptor Lake Intel CPU it may be beneficial to add the system variable “MKL_ENABLE_INSTRUCTIONS” with value “AVX” as well.</p>
+</div>
+</div></blockquote>
+</li>
+<li><p>We also need to add a few variables to our Path.</p>
+<blockquote>
+<div><p>The following directories should be added to your system PATH and set as your default Python install.
+Once again, be sure to point this to the actual location of the relevant folders on your computer.</p>
+<blockquote>
+<div><img alt="../_images/anacondapath.PNG" src="../_images/anacondapath.PNG" />
+</div></blockquote>
+</div></blockquote>
+</li>
+<li><p>Now, clone the <a class="reference external" href="https://github.com/AlabamaASRL/asset_asrl">ASSET repo</a>  to where you want it to live.</p></li>
+<li><p>We are almost there! Now, open VS and be sure to run it as administrator to avoid any conflicts when building the Python library. Additionally, ensure that your Python IDE is closed during this step.</p>
+<blockquote>
+<div><p>Open the ASSET folder with VS and wait for it to finish loading. After VS has finished loading the ASSET repo directory, navigate to the CMakeSettings.json file. Here it is recommended to change the integer number of threads to be the amount of RAM your computer has divided by 3 (rounded down).</p>
+<img alt="../_images/cmakejson.PNG" src="../_images/cmakejson.PNG" />
+<img alt="../_images/threads.PNG" src="../_images/threads.PNG" />
+<p>Now we are going to configure the ASSET CMake settings by going to the project dropdown menu and selecting “Configure ASSET” or “Configure Cache” (depending on the version of VS).
+Wait until the output message from CMake says that it is finished and proceed to the build step.</p>
+<img alt="../_images/config.PNG" src="../_images/config.PNG" />
+<p>The last step is to actually build ASSET! After the configuration step has completed navigate to the Build dropdown menu and choose “Build All” (or Ctrl + Shift + B). Keep your Python IDE closed until the build completes.</p>
+<img alt="../_images/build.PNG" src="../_images/build.PNG" />
+</div></blockquote>
+</li>
+<li><p>With that you should have a successfully built ASSET Python library and are ready to get started with the rest of the tutorials.</p>
+<blockquote>
+<div><p>To import ASSET simply use the following in your Python IDE</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="linux-installation">
+<h2>Linux Installation<a class="headerlink" href="#linux-installation" title="Permalink to this heading">#</a></h2>
+<p>The dependencies for Linux installations are similar to that of Windows; however, we’ll be using Visual Studio Code for our IDE:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><a class="reference external" href="https://code.visualstudio.com/download">Visual Studio Code</a></dt><dd><ul>
+<li><p><a class="reference external" href="https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools">C/C++ Extension</a></p></li>
+<li><p><a class="reference external" href="https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools">CMake Tools Extension</a></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference external" href="https://github.com/llvm/llvm-project/releases/latest">LLVM Compiler Toolkit (recommended)</a></dt><dd><ul>
+<li><p>GCC 9 or greater can also be used</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><a class="reference external" href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=linux&amp;distributions=offline">Intel oneAPI MKL</a></p></li>
+<li><p><a class="reference external" href="https://www.anaconda.com/products/distribution#linux">Anaconda</a></p></li>
+<li><p>The Python packages SpiceyPy, Sphinx, and Furo</p></li>
+</ul>
+<div class="section" id="id3">
+<h3>Step-by-Step Guide<a class="headerlink" href="#id3" title="Permalink to this heading">#</a></h3>
+<p>This guide was written assuming that the user has a working Ubuntu installation; however, ASSET will work with other Linux distributions. Simply use the appropriate commands to install the required packages.
+If it is desired to use an IDE other than Visual Studio Code, it is still required that a version of CMake of at least 3.16 is installed.</p>
+<ol class="arabic">
+<li><p>We will begin by installing Visual Studio Code (VSCode).</p>
+<blockquote>
+<div><p>Install VSC as desired, along with the <strong>C/C++</strong> and <strong>CMake Tools</strong> Extensions.</p>
+</div></blockquote>
+</li>
+<li><p>Now, install LLVM clang using the package manager.</p>
+<blockquote>
+<div><div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">sudo apt install clang lldb lld</span>
+</pre></div>
+</div>
+<ul>
+<li><p>or if you desire to use gcc</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">sudo apt update</span>
+<span class="go">sudo apt install build-essential</span>
+<span class="go">gcc --version</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Download and install the Intel oneAPI MKL, using the offline installer. The complete Linux installation guide for Intel oneAPI can be found <a class="reference external" href="https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top.html">here</a>.</p>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We recommend that you use the oneAPI gui installer through the Intel website; however, if it necessary to install via the bash terminal, those directions can be found <a class="reference external" href="https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-using-package-managers/apt.html#apt">here</a>.</p>
+<p>Install with the recommended settings and then proceed to installing Anaconda, if desired.
+If you are not using Anaconda you may skip the next step.</p>
+</div>
+</div></blockquote>
+</li>
+<li><p>Now, download and install Anaconda.</p>
+<blockquote>
+<div><ul>
+<li><p>Use pip to install SpiceyPy.</p>
+<blockquote>
+<div><p>if you are using anaconda rather than a generic python installation, it may be necessary to upgrade numpy through pip, due to potential compatibibility issues with numpy’s version of openmp and Intel MKL’s version.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">conda install nomkl</span>
+</pre></div>
+</div>
+<p>Even if you already have anaconda or a python distribution installed you will need these packages.</p>
+<ul class="simple">
+<li><p>SpiceyPy, Sphinx, and Furo</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>if you aren’t using anaconda, you are still going to need numpy (comes with anaconda by default).</p>
+</div>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Next, we will set the required system variables to build ASSET.</p>
+<blockquote>
+<div><p>Use the source command to properly setup the oneAPI variables.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">source /opt/intel/oneapi/setvars.sh</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Now, clone the <a class="reference external" href="https://github.com/AlabamaASRL/asset_asrl">ASSET repo</a>  to where you want it to live.</p></li>
+<li><p>After installing the dependencies, open VSCode to build ASSET.</p>
+<blockquote>
+<div><p>Configure the VSCode CMake extension to use the Ninja generator. You may need to install Ninja.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">apt install ninja-build</span>
+</pre></div>
+</div>
+<p>Select the type of build (1) you wish to perform (Release is correct if you are going to be running code using ASSET), and kit to use (2) (gcc or clang).</p>
+<img alt="../_images/vscodevariant.PNG" src="../_images/vscodevariant.PNG" />
+<p>Now hit build to begin building ASSET</p>
+<img alt="../_images/vscodebuild.PNG" src="../_images/vscodebuild.PNG" />
+</div></blockquote>
+</li>
+<li><p>With that you should have a successfully built ASSET Python library and are ready to get started with the rest of the tutorials.</p>
+<blockquote>
+<div><p>To import ASSET simply use the following in your Python IDE</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Permalink to this heading">#</a></h2>
+<p>If this is your first time using ASSET, it’s now recommended that you begin reviewing the remaining tutorials, such as <a class="reference internal" href="VectorFunctionGuide.html#vector-function-tutorial"><span class="std std-ref">Vector Function Tutorial</span></a>. After you feel comfortable with some of ASSET’s coding paradigms, a select set
+of tutorials that highlight ASSET’s features and capabilities are provided in <a class="reference internal" href="../examples/examples.html#examples"><span class="std std-ref">Examples</span></a>.</p>
+</div>
+</div>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="VectorFunctionGuide.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Vector Function Tutorial</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="tutorials.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Tutorials</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022-2023, UA ASRL
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Installing ASSET</a><ul>
+<li><a class="reference internal" href="#windows-installation">Windows Installation</a><ul>
+<li><a class="reference internal" href="#step-by-step-guide">Step-By-Step Guide</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#linux-installation">Linux Installation</a><ul>
+<li><a class="reference internal" href="#id3">Step-by-Step Guide</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#next-steps">Next Steps</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
+    </body>
+</html>

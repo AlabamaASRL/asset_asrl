@@ -1,11 +1,10 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Optimal Control Phase Tutorial" href="PhaseGuide.html" /><link rel="prev" title="ODE Tutorial" href="ODEGuide.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Optimal Control Phase Tutorial" href="PhaseGuide.html" /><link rel="prev" title="ODE Tutorial" href="ODEGuide.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
         <title>Integrator Tutorial - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
@@ -20,7 +19,6 @@
   --color-code-foreground: black;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
-  --color-admonition-background: orange;
   
   }
   @media not print {
@@ -160,32 +158,30 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ODEGuide.html">ODE Tutorial</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Integrator Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PSIOPT.html">PSIOPT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Phase.html">Phase Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Integrator.html">Integrators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../examples/examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Example 1: Orbit Family Continuation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Example 2a: Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/ReentryExample.html">Space Shuttle Reentry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/CartPole.html">Cart Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
 </ul>
 </li>
 </ul>
@@ -222,14 +218,15 @@
           </label>
         </div>
         <article role="main">
-          <section id="integrator-tutorial">
-<h1>Integrator Tutorial<a class="headerlink" href="#integrator-tutorial" title="Permalink to this headline">#</a></h1>
-<p>In this section, we will describe usage of asset’s integrator object. To
-start we will define an ODE which we want to integrate using what we have learned from the
-previous two sections. As concrete example we use a ballistic two body
-model whose state variables are the position and velocity relative to a central
-with gravitational parameter is mu. This ODE may be defined as shown below.
-For this example,we will be working in canonical units where mu=1.</p>
+          <div class="section" id="integrator-tutorial">
+<span id="integrator-guide"></span><h1>Integrator Tutorial<a class="headerlink" href="#integrator-tutorial" title="Permalink to this heading">#</a></h1>
+<p>In this section, we will describe usage of ASSET’s integrator object. To
+start, we will define an ODE which we want to integrate using what we have learned from the
+previous two sections on <a class="reference internal" href="VectorFunctionGuide.html#vectorfunction-guide"><span class="std std-ref">vector functions</span></a> and <a class="reference internal" href="ODEGuide.html#ode-guide"><span class="std std-ref">ODEs</span></a>.
+As an example, we use a ballistic two body
+model whose state variables are the position and velocity relative to a central body
+with gravitational parameter, <span class="math notranslate nohighlight">\(\mu\)</span>. This ODE may be defined as shown below.
+For this example, we will be working in canonical units where <span class="math notranslate nohighlight">\(\mu = 1\)</span>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -257,14 +254,14 @@ For this example,we will be working in canonical units where mu=1.</p>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="n">XVars</span><span class="p">)</span>
 </pre></div>
 </div>
-<section id="initialization">
-<h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this headline">#</a></h2>
+<div class="section" id="initialization">
+<h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this heading">#</a></h2>
 <p>To start, we can create an integrator for our ODE by using the <code class="code docutils literal notranslate"><span class="pre">.integrator</span></code> method of the ODE.
 At initialization we can specify the integration scheme as a string as well as the
-default step size to be used. At the moment we provide the support adaptive Dormand Prince
+default step size to be used. At the moment we provide the adaptive Dormand Prince
 integration schemes of order 8(7) and 5(4). These are specified by the strings <code class="code docutils literal notranslate"><span class="pre">&quot;DOPRI87&quot;</span></code> or
-<code class="code docutils literal notranslate"><span class="pre">&quot;DOPRI54&quot;</span></code>. If no method is specified, the integration we will default to <code class="code docutils literal notranslate"><span class="pre">&quot;DOPRI87&quot;</span></code>. The second
-argument, <code class="code docutils literal notranslate"><span class="pre">DefStepSize</span></code> is first trial step size in the adaptive integration algorithm, which will then
+<code class="code docutils literal notranslate"><span class="pre">&quot;DOPRI54&quot;</span></code>. If no method is specified, the integration will default to <code class="code docutils literal notranslate"><span class="pre">&quot;DOPRI87&quot;</span></code>. The second
+argument, <code class="code docutils literal notranslate"><span class="pre">DefStepSize</span></code> is the first trial step size in the adaptive integration algorithm, which will then
 adjust the step size up or down to meet specified error tolerances. By default, we set the
 integrator’s minimum and maximum allowable step sizes to be 10000 times smaller and larger than
 the default step size. However, you can override this by manually setting all step sizes using the
@@ -291,10 +288,10 @@ the default step size. However, you can override this by manually setting all st
 </pre></div>
 </div>
 <p>Both integration schemes use the standard absolute and relative tolerance
-metrics to asses the accuracy of steps and update the step size adaptively.
+metrics to assess the accuracy of steps and update the step size adaptively.
 By default we set the absolute tolerance on all state variables equal to 1.0e-12
 and the relative tolerance to 0.0. This usually works well for well scaled dynamics
-equations such as our two-body model with mu = 1. However, you can set them manually
+equations such as our two-body model with <span class="math notranslate nohighlight">\(\mu = 1\)</span>. However, you can set them manually
 yourself using the <code class="code docutils literal notranslate"><span class="pre">.setAbs/RelTol</span></code> methods as shown below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TBode</span> <span class="o">=</span> <span class="n">TwoBody</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 <span class="n">DefStepSize</span> <span class="o">=</span> <span class="mf">.1</span>
@@ -317,22 +314,22 @@ yourself using the <code class="code docutils literal notranslate"><span class="
 <span class="n">TBInteg</span><span class="o">.</span><span class="n">setRelTols</span><span class="p">(</span><span class="n">RelTols</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="integration">
-<h2>Integration<a class="headerlink" href="#integration" title="Permalink to this headline">#</a></h2>
-<p>Now that we have covered initializing integrators, lets examine how we actually
-use them. By far the most used methods are integrate and integrate_dense. Both methods,
+</div>
+<div class="section" id="integration">
+<h2>Integration<a class="headerlink" href="#integration" title="Permalink to this heading">#</a></h2>
+<p>Now that we have covered initializing integrators, let’s examine how we actually
+use them. By far the most used methods are <code class="code docutils literal notranslate"><span class="pre">.integrate</span></code> and <code class="code docutils literal notranslate"><span class="pre">integrate_dense</span></code>. Both methods
 take as the first input a full-state vector containing the initial state, time, controls, and
 parameters as well as the final time that we wish to integrate these initial inputs to.</p>
-<p>The <code class="code docutils literal notranslate"><span class="pre">.integrate</span></code> method  integrates this initial full-state input vector to final time <code class="code docutils literal notranslate"><span class="pre">tf</span></code> and returns just the full-state at the final time.
-integrate_dense takes the same inputs but returns all intermediate full-states
-calculated by the integrator as single python list. We also call provide integrate_dense
-with an additional arguments specifying that we would like to return <code class="code docutils literal notranslate"><span class="pre">N</span></code> evenly spaced steps
+<p>The <code class="code docutils literal notranslate"><span class="pre">.integrate</span></code> method  integrates this initial full-ODE input vector to final time <code class="code docutils literal notranslate"><span class="pre">tf</span></code> and returns only the full-ODE input vector at the final time.
+<code class="code docutils literal notranslate"><span class="pre">integrate_dense</span></code> takes the same inputs but returns all intermediate full-states
+calculated by the integrator as single python list. We can also call <code class="code docutils literal notranslate"><span class="pre">.integrate_dense</span></code>
+with an additional argument specifying that we would like to return <code class="code docutils literal notranslate"><span class="pre">N</span></code> evenly spaced steps
 between <code class="code docutils literal notranslate"><span class="pre">t0</span></code> and <code class="code docutils literal notranslate"><span class="pre">tf</span></code> rather than the exact steps taken by the solver. These <code class="code docutils literal notranslate"><span class="pre">N</span></code> states and controls
 will be calculated from the exact steps taken by the integrator using a fifth order interpolation method.
-For the DOPRI54 method, interpolated states have effectively
-the exact same error as the true steps taken by the integrator. However, for the DOPRI87 method, interpolated states
-will have the larger locals error owing the difference in order between the integration and interpolation. In practice
+For the <code class="code docutils literal notranslate"><span class="pre">&quot;DOPRI54&quot;</span></code> method, interpolated states have effectively
+the exact same error as the true steps taken by the integrator. However, for the <code class="code docutils literal notranslate"><span class="pre">&quot;DOPRI87&quot;</span></code> method, interpolated states
+will have larger local error owing the difference in order between the integration and interpolation. In practice,
 the maximum local error at any point along the trajectory is typically 2 orders of magnitude larger than the integration tolerances.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TBode</span> <span class="o">=</span> <span class="n">TwoBody</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 <span class="n">DefStepSize</span> <span class="o">=</span> <span class="mf">.1</span>
@@ -360,16 +357,16 @@ the maximum local error at any point along the trajectory is typically 2 orders 
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/IntegratorFig1.svg"><img alt="../_images/IntegratorFig1.svg" src="../_images/IntegratorFig1.svg" width="90%" /></a>
-</section>
-<section id="event-detection">
-<h2>Event Detection<a class="headerlink" href="#event-detection" title="Permalink to this headline">#</a></h2>
-<p>We can also pass a list of events to be detected during the integration. An single
-event is defined as a tuple consisting of: An asset scalar function whose zeros
+</div>
+<div class="section" id="event-detection">
+<h2>Event Detection<a class="headerlink" href="#event-detection" title="Permalink to this heading">#</a></h2>
+<p>We can also pass a list of events to be detected during the integration. A single
+event is defined as a tuple consisting of: An ASSET ScalarFunction whose zeros
 determine the locations of the event, a direction indicating whether we want to track ascending, descending or all zeros, and a stop code
-signifying whether integration should stop after encountering a zero. The scalar function should take the same arguments as the underlying ODE.
+signifying whether integration should stop after encountering a zero. The ScalarFunction should take the same arguments as the underlying ODE.
 The <code class="code docutils literal notranslate"><span class="pre">direction</span></code> flag should be set to <code class="code docutils literal notranslate"><span class="pre">0</span></code> to capture all zeros, <code class="code docutils literal notranslate"><span class="pre">-1</span></code> to capture only zeros where the function value is decreasing, or <code class="code docutils literal notranslate"><span class="pre">1</span></code> to capture
 zeros where it is increasing. The <code class="code docutils literal notranslate"><span class="pre">stopcode</span></code> should be set to <code class="code docutils literal notranslate"><span class="pre">0</span></code> or <code class="code docutils literal notranslate"><span class="pre">False</span></code> if you do not want an event to stop integration. To stop after 1 occurrence,
-<code class="code docutils literal notranslate"><span class="pre">stopcode</span></code> can be set to <code class="code docutils literal notranslate"><span class="pre">1</span></code> or <code class="code docutils literal notranslate"><span class="pre">True</span></code>. The <code class="code docutils literal notranslate"><span class="pre">stopcode</span></code> can also be set to any positive integer, in which case it specifies that the number of zeros to be encountered
+<code class="code docutils literal notranslate"><span class="pre">stopcode</span></code> can be set to <code class="code docutils literal notranslate"><span class="pre">1</span></code> or <code class="code docutils literal notranslate"><span class="pre">True</span></code>. The <code class="code docutils literal notranslate"><span class="pre">stopcode</span></code> can also be set to any positive integer, in which case it specifies the number of zeros to be encountered
 before stopping. When events are appended to an integration call, in addition to the normal return value, a list of lists of the exact full-states where each event occurred is
 also returned. As an example, the code below will calculate the apoapses and periapses of an orbit, and stop after both have been found. Exact roots
 of events are found using a Newton-Raphson method applied to the fifth order spline continuous representation of the trajectory. The root tolerance
@@ -433,14 +430,14 @@ and maximum Newton iterations may be specified by modifying the <code class="cod
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/IntegratorFig2.svg"><img alt="../_images/IntegratorFig2.svg" src="../_images/IntegratorFig2.svg" width="90%" /></a>
-</section>
-<section id="derivatives">
-<h2>Derivatives<a class="headerlink" href="#derivatives" title="Permalink to this headline">#</a></h2>
-<p>In asset integrators themselves are vector functions, and have analytic first and second
-derivatives. The input arguments for the integrator when used as a vector function consists of
-the full-state to be integrated and the final time <code class="code docutils literal notranslate"><span class="pre">tf,</span></code> and the output is the full-state at time <code class="code docutils literal notranslate"><span class="pre">tf</span></code>.
+</div>
+<div class="section" id="derivatives">
+<h2>Derivatives<a class="headerlink" href="#derivatives" title="Permalink to this heading">#</a></h2>
+<p>In ASSET, integrators themselves are VectorFunctions and have analytic first and second
+derivatives. The input arguments for the integrator when used as a VectorFunction consist of
+the full-ODE input to be integrated and the final time <code class="code docutils literal notranslate"><span class="pre">tf,</span></code> and the output is the full-ODE at time <code class="code docutils literal notranslate"><span class="pre">tf</span></code>.
 For example, calling compute as shown below is equivalent to the normal integrate call. This also means
-that we can calculate the jacobian and adjointhessian as well.</p>
+that we can calculate the <code class="code docutils literal notranslate"><span class="pre">jacobian</span></code> and <code class="code docutils literal notranslate"><span class="pre">adjointhessian</span></code> as well.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r</span>  <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">v</span>  <span class="o">=</span> <span class="mf">1.1</span>
 <span class="n">t0</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -468,7 +465,7 @@ that we can calculate the jacobian and adjointhessian as well.</p>
 </pre></div>
 </div>
 <p>We should note that the jacobian of an integrator is the same as the state transition matrix (STM).
-Since calculation of an ODE’s state transition matrix (STM), is critical to the assessing
+Since calculation of an ODE’s state transition matrix (STM), is critical to assessing
 the stability of periodic orbits and many other applications, we also provide methods to calculate the STM through the integrator
 interface using the <code class="code docutils literal notranslate"><span class="pre">.integrate_stm</span></code> methods, which can be used as shown below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Xftf</span><span class="p">,</span><span class="n">Jac</span> <span class="o">=</span> <span class="n">TBInteg</span><span class="o">.</span><span class="n">integrate_stm</span><span class="p">(</span><span class="n">X0t0</span><span class="p">,</span><span class="n">tf</span><span class="p">)</span>
@@ -478,12 +475,12 @@ interface using the <code class="code docutils literal notranslate"><span class=
 <span class="n">Xftf</span><span class="p">,</span><span class="n">Jac</span><span class="p">,</span> <span class="n">EventLocs</span> <span class="o">=</span> <span class="n">TBInteg</span><span class="o">.</span><span class="n">integrate_stm</span><span class="p">(</span><span class="n">X0t0</span><span class="p">,</span><span class="n">tf</span><span class="p">,</span><span class="n">Events</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="parrallel-integration">
-<h2>Parrallel Integration<a class="headerlink" href="#parrallel-integration" title="Permalink to this headline">#</a></h2>
-<p>Finally, for all previously discussed .iintegrate methods, we have corresponding multi-threaded _parallel
-version which will integrate lists of initial conditions and final times in parallel. In each case rather
-than passing a single initial state and final time we pass a lists of each. The outputs to the call will then be list
+</div>
+<div class="section" id="parrallel-integration">
+<h2>Parrallel Integration<a class="headerlink" href="#parrallel-integration" title="Permalink to this heading">#</a></h2>
+<p>Finally, for all previously discussed <code class="code docutils literal notranslate"><span class="pre">.integrate</span></code> methods, we have corresponding multi-threaded <code class="code docutils literal notranslate"><span class="pre">_parallel</span></code>
+versions which will integrate lists of initial conditions and final times in parallel. In each case, rather
+than passing a single initial state and final time, we pass lists of each. The outputs to the call will then be a list
 of length <code class="code docutils literal notranslate"><span class="pre">n</span></code> containing the outputs of the regular non-parallel method for the ith input state and final time.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="n">nthreads</span> <span class="o">=</span> <span class="mi">8</span>
@@ -512,13 +509,13 @@ of length <code class="code docutils literal notranslate"><span class="pre">n</s
     <span class="n">Traj</span><span class="p">,</span><span class="n">EventLocs</span> <span class="o">=</span> <span class="n">Traj_EventLocs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 </pre></div>
 </div>
-</section>
-<section id="local-control-laws">
-<h2>Local Control Laws<a class="headerlink" href="#local-control-laws" title="Permalink to this headline">#</a></h2>
-<p>In the previous examples we only examined how to integrate ODEs with no control,
-or constant controls, but often time we need to compute controls as a function
-of the local state or time. We can do this in asset by initializing our integrator with
-a control law. As an example,lets reuse our <code class="code docutils literal notranslate"><span class="pre">TwoBodyLTODE</span></code> ode from the ODEGuide section.</p>
+</div>
+<div class="section" id="local-control-laws">
+<h2>Local Control Laws<a class="headerlink" href="#local-control-laws" title="Permalink to this heading">#</a></h2>
+<p>In the previous examples we only examined how to integrate ODEs with no control
+or constant controls, but oftentimes we need to compute controls as a function
+of the local state or time. We can do this in ASSET by initializing our integrator with
+a control law. As an example, let’s reuse our <code class="code docutils literal notranslate"><span class="pre">TwoBodyLTODE</span></code> ode from the <a class="reference internal" href="ODEGuide.html#ode-guide"><span class="std std-ref">ODE Tutorial</span></a> section.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TwoBodyLTODE</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mu</span><span class="p">,</span><span class="n">MaxLTAcc</span><span class="p">):</span>
@@ -542,9 +539,9 @@ a control law. As an example,lets reuse our <code class="code docutils literal n
 </div>
 <p>We will add a control to the integrator specifying that throttle should be 80%
 of the maximum and aligned with the spacecraft’s instantaneous velocity vector. We do this by first writing
-an ASSET vector function , that is assumed to take only the velocity as arguments and outputs
-the desired control vector. We can then pass this to integrator constructor along with a list
-specifying the indices full-state variables we want to forward to out control law. In this case it
+an ASSET VectorFunction , that is assumed to take only the velocity as arguments and outputs
+the desired control vector. We can then pass this to the integrator constructor along with a list
+specifying the indices full-ODE input variables we want to forward to our control law. In this case it
 is <code class="code docutils literal notranslate"><span class="pre">[3,4,5]</span></code> which are the velocity variables as we have defined in our ODE.
 This control law will now be applied to all of our integrations.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">ULaw</span><span class="p">(</span><span class="n">throttle</span><span class="p">):</span>
@@ -571,8 +568,8 @@ This control law will now be applied to all of our integrations.</p>
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/IntegratorFig3.svg"><img alt="../_images/IntegratorFig3.svg" src="../_images/IntegratorFig3.svg" width="50%" /></a>
-</section>
-</section>
+</div>
+</div>
 
         </article>
       </div>
@@ -603,7 +600,7 @@ This control law will now be applied to all of our integrations.</p>
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2021, UA ASRL
+                Copyright &#169; 2022-2023, UA ASRL
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -652,7 +649,10 @@ This control law will now be applied to all of our integrations.</p>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

@@ -1,12 +1,11 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Example 3: Multi-Spacecraft Optimization" href="MultiTarg.html" /><link rel="prev" title="Example 2a: Zermelo’s Problem" href="zermelo.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Multi-Spacecraft Optimization" href="MultiTarg.html" /><link rel="prev" title="Zermelo’s Problem" href="zermelo.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
-        <title>Example 2b: Multi-Phase Zermelo’s Problem - ASSET 0.0.1 documentation</title>
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
+        <title>Multi-Phase Zermelo’s Problem - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -20,7 +19,6 @@
   --color-code-foreground: black;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
-  --color-admonition-background: orange;
   
   }
   @media not print {
@@ -160,32 +158,30 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/ODEGuide.html">ODE Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/IntegratorGuide.html">Integrator Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/PSIOPT.html">PSIOPT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Phase.html">Phase Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Integrator.html">Integrators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="examples.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="halo.html">Example 1: Orbit Family Continuation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Example 2a: Zermelo’s Problem</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CartPole.html">Cart Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
 </ul>
 </li>
 </ul>
@@ -222,18 +218,18 @@
           </label>
         </div>
         <article role="main">
-          <section id="example-2b-multi-phase-zermelo-s-problem">
-<h1>Example 2b: Multi-Phase Zermelo’s Problem<a class="headerlink" href="#example-2b-multi-phase-zermelo-s-problem" title="Permalink to this headline">#</a></h1>
-<p>If you haven’t explored <a class="reference internal" href="zermelo.html#example-2a-zermelo-s-problem"><span class="std std-ref">Example 2a: Zermelo’s Problem</span></a>, it is highly reccomended that you do so before going much further.
+          <div class="section" id="multi-phase-zermelo-s-problem">
+<h1>Multi-Phase Zermelo’s Problem<a class="headerlink" href="#multi-phase-zermelo-s-problem" title="Permalink to this heading">#</a></h1>
+<p>If you haven’t explored <a class="reference internal" href="zermelo.html#zermelo-s-problem"><span class="std std-ref">Zermelo’s Problem</span></a>, it is highly recommended that you do so before going much further.
 It provides much needed background information about the problem, as well as the initial code that we will be modifying.</p>
 <p>The previous example showed Zermelo’s problem as a single phase problem. We were only trying to get from point A to B, with some constraints and objectives along
 that single phase. What if instead we wanted travel from A to any arbitrary number of points along the way to our final destination? ASSET is designed to handle exactly this type of problem,
-where each phase can have varying constraints and objectives to solve in the pursuit of our final target. In this example we will expand the single phase Zermelo’s problem into multiple phases, which is a very
-usefull tool to have for trajectory optimization.</p>
-<section id="link-constraints">
-<h2>Link Constraints:<a class="headerlink" href="#link-constraints" title="Permalink to this headline">#</a></h2>
+where each phase can have varying constraints and objectives to solve in the pursuit of our final target. In this example, we will expand the single phase Zermelo’s problem into multiple phases, which is a very
+useful tool to have for trajectory optimization.</p>
+<div class="section" id="link-constraints">
+<h2>Link Constraints:<a class="headerlink" href="#link-constraints" title="Permalink to this heading">#</a></h2>
 <p>Link Constraints are the way that ASSET handles multi-phase problems. A link constraint enforces that state variables must be equal across phases. That is to say that the final state of phase 1 must be equal to the first state of phase 2.
-To do this to the previous problem, we only have to make a few additions to the code from <a class="reference internal" href="zermelo.html#example-2a-zermelo-s-problem"><span class="std std-ref">Example 2a: Zermelo’s Problem</span></a>. The primary changes occur in the <code class="code docutils literal notranslate"><span class="pre">navigate</span></code> function.</p>
+To do this to the previous problem, we only have to make a few additions to the code from <a class="reference internal" href="zermelo.html#zermelo-s-problem"><span class="std std-ref">Zermelo’s Problem</span></a>. The primary changes occur in the <code class="code docutils literal notranslate"><span class="pre">navigate</span></code> function.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">navigate</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">vM</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">uniformWind</span><span class="p">):</span>
     <span class="c1"># Each phase between two points, therefore</span>
     <span class="c1"># the number of phases is the number of points - 1</span>
@@ -260,7 +256,7 @@ To do this to the previous problem, we only have to make a few additions to the 
 </div>
 <p>Here we will discuss the changes to the <code class="code docutils literal notranslate"><span class="pre">navigate</span></code> function that allows us to turn this into a multi-phase problem. We will do this in sections of code to highlight specific changes, with the full, new function after.
 The first change made is to have <code class="code docutils literal notranslate"><span class="pre">navigate</span></code> accept a list of points, <code class="code docutils literal notranslate"><span class="pre">Points</span></code> rather than just 2 points A and B. We also need to know how many phases this problem is to be broken into.
-For this example we will define each phase to be between each consecutive point. That is phase 1 is between Points A and B, and phase 2 is between points B and C, and so on. We make some minor changes to our
+For this example, we will define each phase to be between each consecutive point. So, phase 1 is between Points A and B, and phase 2 is between points B and C, and so on. We make some minor changes to our
 initial guess generating code to accompany this design choice. Lastly, we are going to need to bring in the <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code> interface as <code class="code docutils literal notranslate"><span class="pre">ocp</span></code>.</p>
 <p>Now that we have our guess generator fixed to handle arbitrary size inputs we need to define each phase, as well as change constraints on each phase.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 2. Initialize phases for each</span>
@@ -323,19 +319,19 @@ phase is at least 0 and never negative. Wrapping the phase construction up we us
 <p>Using the optimal control problem interface from <code class="code docutils literal notranslate"><span class="pre">ocp</span></code>, we add a <code class="code docutils literal notranslate"><span class="pre">ocp.addForwardLinkEqualCon(0,</span> <span class="pre">-1,</span> <span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2])</span></code> constraint, which states that from phase 0 to the last phase (indicated by passing a -1 to the call),
 the back state of the previous phase and the front state of the next phase must satisfy that the state variables indicated in brackets (0, 1, and 2 which are x position, y position, and time) must be equal. This ensures continuity
 between the phases and that our trajectory will be continuous. Aftwards we use the <code class="code docutils literal notranslate"><span class="pre">ocp.solve_optimize()</span></code> call to evaluate the problem. Then we package our phases into a singular trajectory to make plotting easier.</p>
-<p>The final problem looks quite different from the single phase Zermelo problem, as now we move from point to point, all the while satisfying our optimization objectives and constraints for each phase.
-We defined the initial points such that the boat manuevers back to the initial state at the end time. However, any number of points could be added, provided that a feasible solution exists.</p>
+<p>The final problem looks quite different from the single phase Zermelo problem, as we now move from point to point, all the while satisfying our optimization objectives and constraints for each phase.
+We defined the initial points such that the boat maneuvers back to the initial state at the end time. However, any number of points could be added, provided that a feasible solution exists.</p>
 <p>As for plots, first we have the comparison of the different wind models and how they affect the movement of the boat. We will take the same approach as last time and leave the technical analysis to you.</p>
-<figure class="align-center">
+<div class="figure align-center">
 <a class="reference internal image-reference" href="../_images/CompareWindModelsLink.svg"><img alt="../_images/CompareWindModelsLink.svg" src="../_images/CompareWindModelsLink.svg" width="100%" /></a>
-</figure>
+</div>
 <p>The same as last time, we have also a plot to compare how different boat speeds affect the final trajectory in a multi-phase problem.</p>
-<figure class="align-center">
+<div class="figure align-center">
 <a class="reference internal image-reference" href="../_images/CompareBoatSpeedLink.svg"><img alt="../_images/CompareBoatSpeedLink.svg" src="../_images/CompareBoatSpeedLink.svg" width="100%" /></a>
-</figure>
-</section>
-<section id="full-code">
-<h2>Full Code<a class="headerlink" href="#full-code" title="Permalink to this headline">#</a></h2>
+</div>
+</div>
+<div class="section" id="full-code">
+<h2>Full Code<a class="headerlink" href="#full-code" title="Permalink to this heading">#</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
@@ -638,8 +634,8 @@ We defined the initial points such that the boat manuevers back to the initial s
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
-</section>
-</section>
+</div>
+</div>
 
         </article>
       </div>
@@ -651,7 +647,7 @@ We defined the initial points such that the boat manuevers back to the initial s
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Example 3: Multi-Spacecraft Optimization</div>
+                <div class="title">Multi-Spacecraft Optimization</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -662,7 +658,7 @@ We defined the initial points such that the boat manuevers back to the initial s
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Example 2a: Zermelo’s Problem</div>
+                <div class="title">Zermelo’s Problem</div>
                 
               </div>
             </a>
@@ -670,7 +666,7 @@ We defined the initial points such that the boat manuevers back to the initial s
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2021, UA ASRL
+                Copyright &#169; 2022-2023, UA ASRL
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -698,7 +694,7 @@ We defined the initial points such that the boat manuevers back to the initial s
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Example 2b: Multi-Phase Zermelo’s Problem</a><ul>
+<li><a class="reference internal" href="#">Multi-Phase Zermelo’s Problem</a><ul>
 <li><a class="reference internal" href="#link-constraints">Link Constraints:</a></li>
 <li><a class="reference internal" href="#full-code">Full Code</a></li>
 </ul>
@@ -715,7 +711,9 @@ We defined the initial points such that the boat manuevers back to the initial s
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     </body>
 </html>

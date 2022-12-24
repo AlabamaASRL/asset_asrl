@@ -1,11 +1,10 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Example 1: Orbit Family Continuation" href="halo.html" /><link rel="prev" title="Integrators" href="../tutorials/Integrator.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Delta 3 Multi-phase GTO Transfer" href="Delta3.html" /><link rel="prev" title="Optimal Control Utilities" href="../tutorials/OptimalControlUtilites.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
         <title>Examples - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
@@ -20,7 +19,6 @@
   --color-code-foreground: black;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
-  --color-admonition-background: orange;
   
   }
   @media not print {
@@ -160,32 +158,30 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/ODEGuide.html">ODE Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/IntegratorGuide.html">Integrator Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/PSIOPT.html">PSIOPT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Phase.html">Phase Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Integrator.html">Integrators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="halo.html">Example 1: Orbit Family Continuation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Example 2a: Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CartPole.html">Cart Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
 </ul>
 </li>
 </ul>
@@ -222,73 +218,71 @@
           </label>
         </div>
         <article role="main">
-          <section id="examples">
-<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">#</a></h1>
-<p>The examples below are meant to introduce ASSET in two contexts: strictly as a python package, and as an open-source library that you may extend.
-New readers should begin at the beginning, since it’s important to understand the library architecture and organization before using it to build anything.</p>
+          <div class="section" id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">#</a></h1>
+<p>The in-depth examples below are meant to demonstrate ASSET’s capabilities as a generic optimal control and trajectory design software.
+Many more examples may also be found in the <code class="code docutils literal notranslate"><span class="pre">/examples</span></code> folder of the ASSET Github Repo.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="halo.html">Example 1: Orbit Family Continuation</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Delta3.html#references">References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Delta3.html#full-code">Full Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ReentryExample.html#references">References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ReentryExample.html#full-code">Full Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="halo.html">Orbit Family Continuation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="halo.html#problem-setup">Problem Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="halo.html#constructing-a-generic-periodic-solver">Constructing a Generic Periodic Solver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="halo.html#performing-continuation">Performing Continuation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="halo.html#running-and-plotting">Running and Plotting</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="zermelo.html">Example 2a: Zermelo’s Problem</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="zermelo.html">Zermelo’s Problem</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="zermelo.html#problem-setup">Problem Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="zermelo.html#solver-function">Solver Function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="zermelo.html#running-and-plotting">Running and Plotting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="zermelo.html#full-source-listing">Full Source Listing</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="zermelolink.html">Multi-Phase Zermelo’s Problem</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="zermelolink.html#link-constraints">Link Constraints:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="zermelolink.html#full-code">Full Code</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="MultiTarg.html">Multi-Spacecraft Optimization</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="MultiTarg.html#full-code">Full Code:</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Delta3.html#references">References</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ReentryExample.html#references">References</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="CartPole.html">Cart Pole Swing Up</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="CartPole.html#references">References</a></li>
 </ul>
 </li>
 </ul>
 </div>
-</section>
+</div>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="halo.html">
+          <a class="next-page" href="Delta3.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Example 1: Orbit Family Continuation</div>
+                <div class="title">Delta 3 Multi-phase GTO Transfer</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../tutorials/Integrator.html">
+          <a class="prev-page" href="../tutorials/OptimalControlUtilites.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Integrators</div>
+                <div class="title">Optimal Control Utilities</div>
                 
               </div>
             </a>
@@ -296,7 +290,7 @@ New readers should begin at the beginning, since it’s important to understand 
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2021, UA ASRL
+                Copyright &#169; 2022-2023, UA ASRL
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -321,7 +315,9 @@ New readers should begin at the beginning, since it’s important to understand 
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     </body>
 </html>

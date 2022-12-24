@@ -1,11 +1,10 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Cart Pole Swing Up" href="CartPole.html" /><link rel="prev" title="Delta 3 Multi-phase GTO Transfer" href="Delta3.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Orbit Family Continuation" href="halo.html" /><link rel="prev" title="Delta 3 Multi-phase GTO Transfer" href="Delta3.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
         <title>Space Shuttle Reentry - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
@@ -20,7 +19,6 @@
   --color-code-foreground: black;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
-  --color-admonition-background: orange;
   
   }
   @media not print {
@@ -160,32 +158,30 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/ODEGuide.html">ODE Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/IntegratorGuide.html">Integrator Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/PSIOPT.html">PSIOPT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Phase.html">Phase Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../tutorials/Integrator.html">Integrators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="examples.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="halo.html">Example 1: Orbit Family Continuation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Example 2a: Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Space Shuttle Reentry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CartPole.html">Cart Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
 </ul>
 </li>
 </ul>
@@ -222,12 +218,19 @@
           </label>
         </div>
         <article role="main">
-          <section id="space-shuttle-reentry">
-<h1>Space Shuttle Reentry<a class="headerlink" href="#space-shuttle-reentry" title="Permalink to this headline">#</a></h1>
-<p>As a next example, we will solve a classic real world problem outlined by Betts in [ref]. This problem involves maximizing the glide range
+          <div class="section" id="space-shuttle-reentry">
+<h1>Space Shuttle Reentry<a class="headerlink" href="#space-shuttle-reentry" title="Permalink to this heading">#</a></h1>
+<p>As a next example, we will solve another classic problem outlined by Betts in [1].</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We should note that this example is derived entirely from publicly available sources (see [1-4]). Furthermore, this problem is routinely
+used [1-4] as a benchmark for optimal control packages such as ASSET.</p>
+</div>
+<p>This problem involves maximizing the cross range
 of the Space Shuttle during reentry. The dynamics are written in spherical coordinates and incorporate gravity and an empirical model for the lift and
-drag characteristics of the shuttle. The controls are the angle of attack and bank angle of the vehicle and the objective is to maximize the final latitude
-subject to the initial and terminal conditions given in eqY.</p>
+drag characteristics of the shuttle. The state variables are the altitude, <span class="math notranslate nohighlight">\(h\)</span>, latitude, <span class="math notranslate nohighlight">\(\theta\)</span>, velocity, <span class="math notranslate nohighlight">\(v\)</span>, flight path angle, <span class="math notranslate nohighlight">\(\gamma\)</span>,
+and azimuth, <span class="math notranslate nohighlight">\(\psi\)</span>.
+The controls are the angle of attack, <span class="math notranslate nohighlight">\(\alpha\)</span>, and bank angle, <span class="math notranslate nohighlight">\(\beta\)</span>, of the vehicle.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}\dot{h}      &amp;= v \sin(\gamma)\\\dot{\theta} &amp;= \frac{v}{r} \cos(\gamma) \cos(\psi)\\\dot{v}      &amp;= -\frac{D}{m} - g \sin(\gamma)\\\dot{\gamma} &amp;=  \frac{L}{mv}\cos(\beta) + \cos(\gamma)\left( \frac{v}{r} - \frac{g}{v} \right)\\\dot{\psi}   &amp;=  \frac{L}{mv \cos(\gamma)}\sin(\beta) +\frac{v}{r \cos(\theta)}\cos(\gamma)\sin(\psi)\sin(\theta)\end{aligned}\end{align} \]</div>
@@ -236,23 +239,24 @@ subject to the initial and terminal conditions given in eqY.</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}D,L &amp;= \frac{1}{2} C_{L,D} S \rho v^2\\g &amp;= \frac{\mu}{r^2}\\r &amp;= R_e + h\\\rho  &amp;= \rho_0 e^{-h/h_0}\\C_L &amp;= a_0 + a_1 \hat{\alpha}\\C_D &amp;= b_0 + b_1 \hat{\alpha} + b_2 \hat{\alpha}^2\end{aligned}\end{align} \]</div>
 </div>
-<p>Using this, model, to maximize the glide range, it is sufficient to maximize  <span class="math notranslate nohighlight">\(\theta(t_f)\)</span>, which we will do by minimizing <span class="math notranslate nohighlight">\(-\theta(t_f)\)</span>.
-Similar to Betts, we examine the solution to this problem both with and without a path constraint on wing leading edge heating rate, <span class="math notranslate nohighlight">\(q\)</span>.</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}q &amp;=  q_r q_{\alpha} &lt; 70 \frac{BTU}{ft^2 s}\\q_r &amp;= 17700 \sqrt{\rho}(.0001 v)^{3.07}\\q_{\alpha} &amp;= c_0 + c_1 \hat{\alpha} + c_2 \hat{\alpha}^2 + c_3 \hat{\alpha}^3\end{aligned}\end{align} \]</div>
-</div>
 <p>The initial and terminal values of the state variables for this problem are given below.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}h(0)  &amp;=260000\; ft \quad \quad v(0)  &amp;= 25600 \; ft/sec   \quad \quad \gamma(0)&amp;=-1 ^\circ  \quad \quad \theta(0)=0 ^\circ  \quad \quad  \phi(0)=0 ^\circ\\h(t_f)&amp;=80000 \; ft \quad \quad v(t_f)&amp;= 2500 \; ft/sec   \quad \quad \gamma(t_f)&amp;=-5 ^\circ\end{aligned}\end{align} \]</div>
 </div>
-<p>As we have mentioned previously, solving problems in standard units (Miles,Km, fps etc.) is typically very ill conditioned and degrades the performance
+<p>The objective is to maximize the cross range, which for this model and initial conditions is equivalent to maximizing <span class="math notranslate nohighlight">\(\theta(t_f)\)</span>.</p>
+<p>Similar to Betts, we examine the solution to this problem both with and without a path constraint on the wing leading edge heating rate, <span class="math notranslate nohighlight">\(q\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}q &amp;=  q_r q_{\alpha} &lt; 70 \frac{BTU}{ft^2 s}\\q_r &amp;= 17700 \sqrt{\rho}(.0001 v)^{3.07}\\q_{\alpha} &amp;= c_0 + c_1 \hat{\alpha} + c_2 \hat{\alpha}^2 + c_3 \hat{\alpha}^3\end{aligned}\end{align} \]</div>
+</div>
+<p>As we have mentioned previously, solving problems in standard units (Miles, Km, fps etc.) is typically very ill conditioned and degrades the performance
 of an otherwise well posed problem. Therefore, as the first step to solving this problem, we will non-dimensionalize all variables and equations to be of order unity.
-This is done by defining characteristic length,mass, and time units from which we can define other derived units through dimensional analysis. In this example we
-select Lstar to be 100,000 feet and tstar to be 60 seconds. Mstar is then set to be the mass of the shuttle. After constructing our derived units, we can simply divide our physical
+This is done by defining characteristic length, mass, and time units from which we can define other derived units through dimensional analysis. In this example we
+select <code class="code docutils literal notranslate"><span class="pre">Lstar</span></code> to be 100,000 feet and <code class="code docutils literal notranslate"><span class="pre">tstar</span></code> to be 60 seconds. <code class="code docutils literal notranslate"><span class="pre">Mstar</span></code> is then set to be the mass of the shuttle. After constructing our derived units, we can simply divide our physical
 constants by the appropriate unit to get their non-dimensional value.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g0</span> <span class="o">=</span> <span class="mf">32.2</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">################### Non Dimensionalize ##################################</span>
+<span class="n">g0</span> <span class="o">=</span> <span class="mf">32.2</span>
 <span class="n">W</span>  <span class="o">=</span> <span class="mi">203000</span>
 
 <span class="n">Lstar</span> <span class="o">=</span> <span class="mf">100000.0</span>     <span class="c1">## feet</span>
@@ -266,6 +270,7 @@ constants by the appropriate unit to get their non-dimensional value.</p>
 <span class="n">BTUstar</span> <span class="o">=</span> <span class="mf">778.0</span><span class="o">*</span><span class="n">Lstar</span><span class="o">*</span><span class="n">Fstar</span>
 <span class="n">Mustar</span>  <span class="o">=</span> <span class="p">(</span><span class="n">Lstar</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">Tstar</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 
+<span class="n">tmax</span> <span class="o">=</span> <span class="mi">2500</span>            <span class="o">/</span><span class="n">Tstar</span>
 <span class="n">Re</span> <span class="o">=</span> <span class="mi">20902900</span>          <span class="o">/</span><span class="n">Lstar</span>
 <span class="n">S</span>  <span class="o">=</span> <span class="mf">2690.0</span>            <span class="o">/</span><span class="p">(</span><span class="n">Lstar</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">m</span>  <span class="o">=</span> <span class="p">(</span><span class="n">W</span><span class="o">/</span><span class="n">g0</span><span class="p">)</span>            <span class="o">/</span><span class="n">Mstar</span>
@@ -284,23 +289,28 @@ constants by the appropriate unit to get their non-dimensional value.</p>
 <span class="n">c1</span> <span class="o">=</span> <span class="o">-</span><span class="mf">.19213774e-1</span>
 <span class="n">c2</span> <span class="o">=</span> <span class="mf">.21286289e-3</span>
 <span class="n">c3</span> <span class="o">=</span> <span class="o">-</span><span class="mf">.10117e-5</span>
+
+<span class="n">Qlimit</span> <span class="o">=</span> <span class="mf">70.0</span>
+
+<span class="c1">##############################################################################</span>
 </pre></div>
 </div>
-<p>Having Non-dimensionalized our constants, we can now write the EOM’s as an ode_x_u object as we have done in previous examples. For this model, there are
-five state variables  <span class="math notranslate nohighlight">\((h,\theta,v,\gamma,\psi)\)</span> and two control variables <span class="math notranslate nohighlight">\((\alpha,\beta)\)</span>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ShuttleReentry</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ode_x_u</span><span class="o">.</span><span class="n">ode</span><span class="p">):</span>
+<p>Having non-dimensionalized our constants, we can now write the EOM’s as an <code class="code docutils literal notranslate"><span class="pre">oc.ODEBase</span></code> object as we have done in previous examples. For this model, there are
+five state variables <span class="math notranslate nohighlight">\((h,\theta,v,\gamma,\psi)\)</span> and two control variables <span class="math notranslate nohighlight">\((\alpha,\beta)\)</span>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ShuttleReentry</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">Xvars</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">2</span>
+
         <span class="c1">############################################################</span>
-        <span class="n">args</span>  <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">XtU</span>  <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">Xvars</span><span class="p">,</span><span class="n">Uvars</span><span class="p">)</span>
 
-        <span class="n">h</span>       <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">XVar</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">theta</span>   <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">XVar</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">v</span>       <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">XVar</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">gamma</span>   <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">XVar</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">psi</span>     <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">XVar</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">alpha</span>   <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">UVar</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">beta</span>    <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">UVar</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">h</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">gamma</span><span class="p">,</span><span class="n">psi</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="n">alpha</span><span class="p">,</span><span class="n">beta</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
 
         <span class="n">alphadeg</span> <span class="o">=</span> <span class="p">(</span><span class="mf">180.0</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="n">alpha</span>
 
@@ -329,12 +339,13 @@ five state variables  <span class="math notranslate nohighlight">\((h,\theta,v,\
         <span class="n">gammadot</span> <span class="o">=</span> <span class="p">(</span><span class="n">L</span><span class="o">/</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">v</span><span class="p">))</span><span class="o">*</span><span class="n">cbet</span> <span class="o">+</span><span class="n">cgam</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">/</span><span class="n">r</span> <span class="o">-</span> <span class="n">g</span><span class="o">/</span><span class="n">v</span><span class="p">)</span>
         <span class="n">psidot</span>   <span class="o">=</span> <span class="n">L</span><span class="o">*</span><span class="n">sbet</span><span class="o">/</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">cgam</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">v</span><span class="o">/</span><span class="p">(</span><span class="n">r</span><span class="p">))</span><span class="o">*</span><span class="n">cgam</span><span class="o">*</span><span class="n">spsi</span><span class="o">*</span><span class="n">tantheta</span>
 
+
         <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">hdot</span><span class="p">,</span><span class="n">thetadot</span><span class="p">,</span><span class="n">vdot</span><span class="p">,</span><span class="n">gammadot</span><span class="p">,</span><span class="n">psidot</span><span class="p">])</span>
         <span class="c1">##############################################################</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="n">Xvars</span><span class="p">,</span><span class="n">Uvars</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Additionally, we can express our heating rate constraint as an asset vector function for later use in the solution process.</p>
+<p>Additionally, we can express our heating rate constraint as an ASSET VectorFunction.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">QFunc</span><span class="p">():</span>
     <span class="n">h</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
     <span class="n">alphadeg</span> <span class="o">=</span> <span class="p">(</span><span class="mf">180.0</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="n">alpha</span>
@@ -347,24 +358,24 @@ five state variables  <span class="math notranslate nohighlight">\((h,\theta,v,\
     <span class="k">return</span> <span class="n">qa</span><span class="o">*</span><span class="n">qr</span>
 </pre></div>
 </div>
-<p>Next we must define a suitable initial guess for the optimization. Bett’s problem definition places an upper limit of 2500sec
-on this problem, so we will assume an initial guess of slightly less than this value (tf=1800 sec). We are given initial and terminal values of the altitude,velocity,
-and gamma, so it is natural to construct to the initial guess for these state variables linear functions over the interval (0,tf).For theta we only have an initial condition,
-so we assume that it’s final value is proportional to the integral of the velocity divided by the radius of the Earth and then interpolate linearly.
-Psi is also only given an initial value and we have no good physical intuition for how it will evolve so our initial guess assumes that it is constant. For both controls, we just
-assume that they are 0.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tf</span>  <span class="o">=</span> <span class="mi">1800</span><span class="o">/</span><span class="n">Tstar</span>
+<p>Next we must define a suitable initial guess for the optimization. Bett’s problem definition places an upper limit of 2500 sec
+on this problem, but we assume an initial guess of <span class="math notranslate nohighlight">\(t_f\)</span> = 1000 sec as is done in [2,3]. We are given initial and terminal values of the altitude, velocity,
+and <span class="math notranslate nohighlight">\(\gamma\)</span>, so it is natural to construct the initial guess for these state variables as linear functions over the interval (<span class="math notranslate nohighlight">\(0-t_f\)</span>).
+<span class="math notranslate nohighlight">\(\psi\)</span> and <span class="math notranslate nohighlight">\(\theta\)</span> are only given initial values and we have no good physical intuition
+for how they will evolve so like [2,3] our initial guess assumes that they are constant.
+For both control angles, we just assume that they are 0.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tf</span>  <span class="o">=</span> <span class="mi">1000</span><span class="o">/</span><span class="n">Tstar</span>
 
 <span class="n">ht0</span>  <span class="o">=</span> <span class="mi">260000</span><span class="o">/</span><span class="n">Lstar</span>
 <span class="n">htf</span>  <span class="o">=</span> <span class="mi">80000</span> <span class="o">/</span><span class="n">Lstar</span>
 <span class="n">vt0</span>  <span class="o">=</span> <span class="mi">25600</span><span class="o">/</span><span class="n">Vstar</span>
 <span class="n">vtf</span>  <span class="o">=</span> <span class="mi">2500</span> <span class="o">/</span><span class="n">Vstar</span>
 
-<span class="n">thetatf</span> <span class="o">=</span>  <span class="p">(</span><span class="n">vt0</span><span class="o">*</span><span class="n">tf</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">vtf</span><span class="o">-</span><span class="n">vt0</span><span class="p">)</span><span class="o">*</span><span class="n">tf</span><span class="p">)</span><span class="o">/</span><span class="n">Re</span>
 
 <span class="n">gammat0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
 <span class="n">gammatf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="o">-</span><span class="mf">5.0</span><span class="p">)</span>
 <span class="n">psit0</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">90.0</span><span class="p">)</span>
+
 
 <span class="n">ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">tf</span><span class="p">,</span><span class="mi">200</span><span class="p">)</span>
 
@@ -372,7 +383,7 @@ assume that they are 0.</p>
 <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">:</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">8</span><span class="p">))</span>
     <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ht0</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">)</span> <span class="o">+</span> <span class="n">htf</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span>
-    <span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">thetatf</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span>
+    <span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">X</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">vt0</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">)</span> <span class="o">+</span> <span class="n">vtf</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span>
     <span class="n">X</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">gammat0</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">)</span> <span class="o">+</span> <span class="n">gammatf</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span>
     <span class="n">X</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">psit0</span>
@@ -382,15 +393,15 @@ assume that they are 0.</p>
     <span class="n">TrajIG</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>With preliminaries completed we can now solve the problem. We first construct our ode and phase object, and use
-a 64 LGL3 segments to discretize the problem. We then enforce our known initial conditions as a boundary value constraint at  PhaseReg.Front. Next, we
+<p>With preliminaries completed we can now solve the problem. We first construct our <code class="code docutils literal notranslate"><span class="pre">ode</span></code> and <code class="code docutils literal notranslate"><span class="pre">phase</span></code> object, and use
+40 LGL3 segments to discretize the problem. We then enforce our known initial conditions as a boundary value constraint. Next, we
 apply the given bounds on our states and controls as path constraints and also place the specified upper bound on the final time. Last, we enforce the terminal conditions
-on altitude velocity and blank at the back of the trajectory, and then specify that the objective is to minimize deltatheta*-1. This is equivalent to maximizing deltatheta.
-Given our rather poor initial guess for this problem, PSIOPT is invoked in solve_optimize mode, so that it first finds a feasible solution
-satisfying all constraints before minimizing the objective. Furthermore, we enable the line-search during the optimize phase as an extra safe-guard.</p>
+on altitude, velocity, and flight path angle, and then specify that the objective is to minimize <span class="math notranslate nohighlight">\(-\Delta \theta\)</span>. This is equivalent to maximizing <span class="math notranslate nohighlight">\(\Delta \theta\)</span>.
+Given our rather poor initial guess for this problem, PSIOPT is invoked in <code class="code docutils literal notranslate"><span class="pre">solve_optimize</span></code> mode, so that it first finds a feasible solution
+satisfying all constraints before minimizing the objective. Furthermore, we enable the line search as an extra safe-guard.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ode</span> <span class="o">=</span> <span class="n">ShuttleReentry</span><span class="p">()</span>
 
-<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="mi">64</span><span class="p">)</span>
+<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="mi">40</span><span class="p">)</span>
 
 <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span><span class="n">TrajIG</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBounds</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="o">-</span><span class="mf">89.0</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">89.0</span><span class="p">),</span><span class="mf">1.0</span><span class="p">)</span>
@@ -399,50 +410,301 @@ satisfying all constraints before minimizing the objective. Furthermore, we enab
 <span class="n">phase</span><span class="o">.</span><span class="n">addUpperDeltaTimeBound</span><span class="p">(</span><span class="n">tmax</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span> <span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="n">htf</span><span class="p">,</span><span class="n">vtf</span><span class="p">,</span><span class="n">gammatf</span><span class="p">])</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaVarObjective</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">setThreads</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
 
+<span class="c1">## Our IG is bad, so i turn on line search</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_SoeLSMode</span><span class="p">(</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">MaxLSIters</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">MaxAccIters</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">PrintLevel</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_PrintLevel</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
+<span class="c1">## IG is bad, solve first before optimize</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">refineTrajManual</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span>
+
+<span class="c1">#Refine to more segments and Reoptimize</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">refineTrajManual</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
 
 <span class="n">Traj1</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
 
+<span class="c1">## Add in Heating Rate Constraint, scale so rhs is order 1</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">addUpperFuncBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="n">QFunc</span><span class="p">(),[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span><span class="n">Qlimit</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="n">Qlimit</span><span class="p">)</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
 
 <span class="n">Traj2</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
 
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Final Time:&quot;</span><span class="p">,</span><span class="n">Traj1</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="p">,</span><span class="s2">&quot;(s) , Final Cross Range:&quot;</span><span class="p">,</span><span class="n">Traj1</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="s2">&quot; deg&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Final Time:&quot;</span><span class="p">,</span><span class="n">Traj2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="p">,</span><span class="s2">&quot;(s) , Final Cross Range:&quot;</span><span class="p">,</span><span class="n">Traj2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="s2">&quot; deg&quot;</span><span class="p">)</span>
+
+
 <span class="n">Plot</span><span class="p">(</span><span class="n">Traj1</span><span class="p">,</span><span class="n">Traj2</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>For this problem, PSIOPT is able to find a feasible solution in 13 iterations of the solve algorithm, and then an optimum solution after another 66 iterations
-in the optimize algorithm. We then refine the trajectory to a higher number of segments and re-optimize the solution, which converges in only 4 iterations.
-The total run-time (i9-12900k) is 70ms. The final objective value for delta theta is 34.141 degrees, which is exactly that given by Betts in [ref]. Next we add the path constraint on leading edge heating rate
-to the phase and optimize the new problem using the previous solution as the initial guess. Owing to the excellent initial guess, the heat rate limited problem converges in
-another 16 iterations. The additional of the constraint reduces the maximum glide range of the shuttle to 30.631 radians.
+<p>For this problem, PSIOPT is able to find a feasible solution in 29 iterations of the <code class="code docutils literal notranslate"><span class="pre">solve</span></code> algorithm, and then an optimum solution after another 98 iterations
+in the <code class="code docutils literal notranslate"><span class="pre">optimize</span></code> algorithm. We then refine the trajectory to a higher number of segments and re-optimize the solution, which converges in only 5 iterations.
+The total run-time (i9-12900k) is 90 milliseconds. The final objective value for <span class="math notranslate nohighlight">\(\Delta \theta\)</span> is 34.141 degrees, which is exactly that given by Betts in [1].
+Next we add the path constraint on leading edge heating rate to the phase and optimize the new problem using the previous solution as the initial guess. Owing to the excellent initial guess, the heat rate limited problem converges in
+another 24 iterations taking only 60 milliseconds. The additional heating rate constraint reduces the maximum cross range of the shuttle to 30.63 degrees (also identical to Betts).
 A plot of the converged state and control histories for both problem formulations can be seen below.</p>
 <p>The complete code for this example is listed at the bottom of this page.</p>
 <a class="reference internal image-reference" href="../_images/ReentryExample.svg"><img alt="../_images/ReentryExample.svg" src="../_images/ReentryExample.svg" width="100%" /></a>
-<section id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">#</a></h2>
-</section>
-</section>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Betts, J.T. “Practical methods for Optimal Control and Estimation Using Nonlinear Programming”, Cambridge University Press, 2009</p></li>
+<li><p>Agamawi, Y. M., &amp; Rao, A. V. (2020). Cgpops: A c++ software for solving multiple-phase optimal control problems using adaptive gaussian quadrature collocation and sparse nonlinear programming. ACM Transactions on Mathematical Software (TOMS), 46(3), 1-38.</p></li>
+<li><p>Patterson, M. A., &amp; Rao, A. V. (2014). GPOPS-II: A MATLAB software for solving multiple-phase optimal control problems using hp-adaptive Gaussian quadrature collocation methods and sparse nonlinear programming. ACM Transactions on Mathematical Software (TOMS), 41(1), 1-37.</p></li>
+<li><p>Falck, R. (2022). <a class="reference external" href="https://openmdao.github.io/dymos/examples/reentry/reentry.html">https://openmdao.github.io/dymos/examples/reentry/reentry.html</a>.</p></li>
+</ol>
+</div>
+<div class="section" id="full-code">
+<h2>Full Code<a class="headerlink" href="#full-code" title="Permalink to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">vf</span>        <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
+<span class="n">oc</span>        <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
+<span class="n">Args</span>      <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Space Shuttle Reentry</span>
+<span class="sd">Betts, J.T. Practical methods for Optimal Control and Estimation Using Nonlinear Programming, Cambridge University Press, 2009</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">################### Non Dimensionalize ##################################</span>
+<span class="n">g0</span> <span class="o">=</span> <span class="mf">32.2</span>
+<span class="n">W</span>  <span class="o">=</span> <span class="mi">203000</span>
+
+<span class="n">Lstar</span> <span class="o">=</span> <span class="mf">100000.0</span>     <span class="c1">## feet</span>
+<span class="n">Tstar</span> <span class="o">=</span> <span class="mf">60.0</span>         <span class="c1">## sec</span>
+<span class="n">Mstar</span> <span class="o">=</span> <span class="n">W</span><span class="o">/</span><span class="n">g0</span>         <span class="c1">## slugs</span>
+
+<span class="n">Vstar</span>   <span class="o">=</span> <span class="n">Lstar</span><span class="o">/</span><span class="n">Tstar</span>
+<span class="n">Fstar</span>   <span class="o">=</span> <span class="n">Mstar</span><span class="o">*</span><span class="n">Lstar</span><span class="o">/</span><span class="p">(</span><span class="n">Tstar</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">Astar</span>   <span class="o">=</span> <span class="n">Lstar</span><span class="o">/</span><span class="p">(</span><span class="n">Tstar</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">Rhostar</span> <span class="o">=</span> <span class="n">Mstar</span><span class="o">/</span><span class="p">(</span><span class="n">Lstar</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">BTUstar</span> <span class="o">=</span> <span class="mf">778.0</span><span class="o">*</span><span class="n">Lstar</span><span class="o">*</span><span class="n">Fstar</span>
+<span class="n">Mustar</span>  <span class="o">=</span> <span class="p">(</span><span class="n">Lstar</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">Tstar</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">tmax</span> <span class="o">=</span> <span class="mi">2500</span>            <span class="o">/</span><span class="n">Tstar</span>
+<span class="n">Re</span> <span class="o">=</span> <span class="mi">20902900</span>          <span class="o">/</span><span class="n">Lstar</span>
+<span class="n">S</span>  <span class="o">=</span> <span class="mf">2690.0</span>            <span class="o">/</span><span class="p">(</span><span class="n">Lstar</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">m</span>  <span class="o">=</span> <span class="p">(</span><span class="n">W</span><span class="o">/</span><span class="n">g0</span><span class="p">)</span>            <span class="o">/</span><span class="n">Mstar</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.140765e17</span><span class="p">)</span>     <span class="o">/</span><span class="n">Mustar</span>
+<span class="n">rho0</span> <span class="o">=</span><span class="mf">.002378</span>          <span class="o">/</span><span class="n">Rhostar</span>
+<span class="n">h_ref</span> <span class="o">=</span> <span class="mi">23800</span>          <span class="o">/</span><span class="n">Lstar</span>
+
+<span class="n">a0</span> <span class="o">=</span> <span class="o">-</span><span class="mf">.20704</span>
+<span class="n">a1</span> <span class="o">=</span> <span class="mf">.029244</span>
+
+<span class="n">b0</span> <span class="o">=</span> <span class="mf">.07854</span>
+<span class="n">b1</span> <span class="o">=</span> <span class="o">-</span><span class="mf">.61592e-2</span>
+<span class="n">b2</span> <span class="o">=</span> <span class="mf">.621408e-3</span>
+
+<span class="n">c0</span> <span class="o">=</span>  <span class="mf">1.0672181</span>
+<span class="n">c1</span> <span class="o">=</span> <span class="o">-</span><span class="mf">.19213774e-1</span>
+<span class="n">c2</span> <span class="o">=</span> <span class="mf">.21286289e-3</span>
+<span class="n">c3</span> <span class="o">=</span> <span class="o">-</span><span class="mf">.10117e-5</span>
+
+<span class="n">Qlimit</span> <span class="o">=</span> <span class="mf">70.0</span>
+
+<span class="c1">##############################################################################</span>
+<span class="k">class</span> <span class="nc">ShuttleReentry</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">Xvars</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="c1">############################################################</span>
+        <span class="n">XtU</span>  <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">Xvars</span><span class="p">,</span><span class="n">Uvars</span><span class="p">)</span>
+
+
+        <span class="n">h</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">gamma</span><span class="p">,</span><span class="n">psi</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="n">alpha</span><span class="p">,</span><span class="n">beta</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+
+        <span class="n">alphadeg</span> <span class="o">=</span> <span class="p">(</span><span class="mf">180.0</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="n">alpha</span>
+
+        <span class="n">CL</span>  <span class="o">=</span> <span class="n">a0</span> <span class="o">+</span> <span class="n">a1</span><span class="o">*</span><span class="n">alphadeg</span>
+        <span class="n">CD</span>  <span class="o">=</span> <span class="n">b0</span> <span class="o">+</span> <span class="n">b1</span><span class="o">*</span><span class="n">alphadeg</span> <span class="o">+</span> <span class="n">b2</span><span class="o">*</span><span class="p">(</span><span class="n">alphadeg</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">rho</span> <span class="o">=</span> <span class="n">rho0</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">h</span><span class="o">/</span><span class="n">h_ref</span><span class="p">)</span>
+        <span class="n">r</span>   <span class="o">=</span> <span class="n">h</span> <span class="o">+</span> <span class="n">Re</span>
+
+        <span class="n">L</span>   <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">CL</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">rho</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">D</span>   <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">CD</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">rho</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">g</span>   <span class="o">=</span> <span class="n">mu</span><span class="o">/</span><span class="p">(</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">sgam</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma</span><span class="p">)</span>
+        <span class="n">cgam</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma</span><span class="p">)</span>
+
+        <span class="n">sbet</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+        <span class="n">cbet</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+
+        <span class="n">spsi</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
+        <span class="n">cpsi</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
+        <span class="n">tantheta</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+        <span class="n">hdot</span>     <span class="o">=</span> <span class="n">v</span><span class="o">*</span><span class="n">sgam</span>
+        <span class="n">thetadot</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="n">cgam</span><span class="o">*</span><span class="n">cpsi</span>
+        <span class="n">vdot</span>     <span class="o">=</span> <span class="o">-</span><span class="n">D</span><span class="o">/</span><span class="n">m</span> <span class="o">-</span> <span class="n">g</span><span class="o">*</span><span class="n">sgam</span>
+        <span class="n">gammadot</span> <span class="o">=</span> <span class="p">(</span><span class="n">L</span><span class="o">/</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">v</span><span class="p">))</span><span class="o">*</span><span class="n">cbet</span> <span class="o">+</span><span class="n">cgam</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">/</span><span class="n">r</span> <span class="o">-</span> <span class="n">g</span><span class="o">/</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">psidot</span>   <span class="o">=</span> <span class="n">L</span><span class="o">*</span><span class="n">sbet</span><span class="o">/</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">cgam</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">v</span><span class="o">/</span><span class="p">(</span><span class="n">r</span><span class="p">))</span><span class="o">*</span><span class="n">cgam</span><span class="o">*</span><span class="n">spsi</span><span class="o">*</span><span class="n">tantheta</span>
+
+
+        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">hdot</span><span class="p">,</span><span class="n">thetadot</span><span class="p">,</span><span class="n">vdot</span><span class="p">,</span><span class="n">gammadot</span><span class="p">,</span><span class="n">psidot</span><span class="p">])</span>
+        <span class="c1">##############################################################</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="n">Xvars</span><span class="p">,</span><span class="n">Uvars</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">QFunc</span><span class="p">():</span>
+    <span class="n">h</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">alphadeg</span> <span class="o">=</span> <span class="p">(</span><span class="mf">180.0</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="n">alpha</span>
+    <span class="n">rhodim</span> <span class="o">=</span> <span class="n">rho0</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">h</span><span class="o">/</span><span class="n">h_ref</span><span class="p">)</span><span class="o">*</span><span class="n">Rhostar</span>
+    <span class="n">vdim</span> <span class="o">=</span> <span class="n">v</span><span class="o">*</span><span class="n">Vstar</span>
+
+    <span class="n">qr</span> <span class="o">=</span> <span class="mi">17700</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rhodim</span><span class="p">)</span><span class="o">*</span><span class="p">((</span><span class="mf">.0001</span><span class="o">*</span><span class="n">vdim</span><span class="p">)</span><span class="o">**</span><span class="mf">3.07</span><span class="p">)</span>
+    <span class="n">qa</span> <span class="o">=</span> <span class="n">c0</span> <span class="o">+</span> <span class="n">c1</span><span class="o">*</span><span class="n">alphadeg</span> <span class="o">+</span> <span class="n">c2</span><span class="o">*</span><span class="p">(</span><span class="n">alphadeg</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span> <span class="n">c3</span><span class="o">*</span><span class="p">(</span><span class="n">alphadeg</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">qa</span><span class="o">*</span><span class="n">qr</span>
+
+<span class="c1">#############################################################################</span>
+
+<span class="k">def</span> <span class="nf">Plot</span><span class="p">(</span><span class="n">Traj1</span><span class="p">,</span><span class="n">Traj2</span><span class="p">):</span>
+    <span class="n">TT1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Traj1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">TT2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Traj2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT1</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="o">/</span><span class="mf">60.0</span><span class="p">,</span><span class="n">TT1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">Lstar</span><span class="o">/</span><span class="mi">5280</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;No Q limit&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT2</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="o">/</span><span class="mf">60.0</span><span class="p">,</span><span class="n">TT2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">Lstar</span><span class="o">/</span><span class="mi">5280</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Q limited&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Altitude (Miles)&quot;</span><span class="p">)</span>
+
+
+    <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT1</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="o">/</span><span class="mf">60.0</span><span class="p">,</span><span class="n">TT1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">Vstar</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;No Q limit&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT2</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="o">/</span><span class="mf">60.0</span><span class="p">,</span><span class="n">TT2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">Vstar</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Q limited&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+
+    <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Velocity $\frac</span><span class="si">{ft}{s}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
+
+    <span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT1</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="o">/</span><span class="mf">60.0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">TT1</span><span class="p">[</span><span class="mi">6</span><span class="p">]),</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Angle of Attack No Q limit&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT1</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="o">/</span><span class="mf">60.0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">TT1</span><span class="p">[</span><span class="mi">7</span><span class="p">]),</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Bank Angle No Q limit&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dotted&#39;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT2</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="o">/</span><span class="mf">60.0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">TT2</span><span class="p">[</span><span class="mi">6</span><span class="p">]),</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Angle of Attack  Q limited&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT2</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="o">/</span><span class="mf">60.0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">TT2</span><span class="p">[</span><span class="mi">7</span><span class="p">]),</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Bank Angle  Q limited&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dotted&#39;</span><span class="p">)</span>
+
+    <span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Angle(deg)&quot;</span><span class="p">)</span>
+
+    <span class="n">qfunc</span> <span class="o">=</span> <span class="n">QFunc</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="mi">8</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">6</span><span class="p">])</span>
+
+    <span class="n">qs1</span> <span class="o">=</span> <span class="p">[</span><span class="n">qfunc</span><span class="p">(</span><span class="n">T</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">Traj1</span><span class="p">]</span>
+    <span class="n">qs2</span> <span class="o">=</span> <span class="p">[</span><span class="n">qfunc</span><span class="p">(</span><span class="n">T</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">Traj2</span><span class="p">]</span>
+
+    <span class="n">axs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT1</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="o">/</span><span class="mf">60.0</span><span class="p">,</span><span class="n">qs1</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;No Q limit&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT2</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="o">/</span><span class="mf">60.0</span><span class="p">,</span><span class="n">qs2</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Q limited&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+    <span class="n">axs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Q $(\frac</span><span class="si">{BTU}</span><span class="s2">{ft^2 *s})$&quot;</span><span class="p">)</span>
+
+    <span class="n">axs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT2</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="o">/</span><span class="mf">60.0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">TT2</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span><span class="o">*</span><span class="mi">70</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;Q = 70 $\frac</span><span class="si">{BTU}</span><span class="s1">{ft^2 *s}$&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">)</span>
+
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time (min)&quot;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mf">8.0</span><span class="p">,</span> <span class="mf">11.0</span><span class="p">,</span> <span class="n">forward</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1">##########################################################################</span>
+    <span class="n">tf</span>  <span class="o">=</span> <span class="mi">1000</span><span class="o">/</span><span class="n">Tstar</span>
+
+    <span class="n">ht0</span>  <span class="o">=</span> <span class="mi">260000</span><span class="o">/</span><span class="n">Lstar</span>
+    <span class="n">htf</span>  <span class="o">=</span> <span class="mi">80000</span> <span class="o">/</span><span class="n">Lstar</span>
+    <span class="n">vt0</span>  <span class="o">=</span> <span class="mi">25600</span><span class="o">/</span><span class="n">Vstar</span>
+    <span class="n">vtf</span>  <span class="o">=</span> <span class="mi">2500</span> <span class="o">/</span><span class="n">Vstar</span>
+
+
+    <span class="n">gammat0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">gammatf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="o">-</span><span class="mf">5.0</span><span class="p">)</span>
+    <span class="n">psit0</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">90.0</span><span class="p">)</span>
+
+
+    <span class="n">ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">tf</span><span class="p">,</span><span class="mi">200</span><span class="p">)</span>
+
+    <span class="n">TrajIG</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">8</span><span class="p">))</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ht0</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">)</span> <span class="o">+</span> <span class="n">htf</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">vt0</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">)</span> <span class="o">+</span> <span class="n">vtf</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">gammat0</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">)</span> <span class="o">+</span> <span class="n">gammatf</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">psit0</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span><span class="mf">.00</span>
+        <span class="n">X</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span><span class="mf">.00</span>
+        <span class="n">TrajIG</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+
+
+    <span class="c1">################################################################</span>
+
+    <span class="n">ode</span> <span class="o">=</span> <span class="n">ShuttleReentry</span><span class="p">()</span>
+
+    <span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="mi">40</span><span class="p">)</span>
+
+    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span><span class="n">TrajIG</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBounds</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="o">-</span><span class="mf">89.0</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">89.0</span><span class="p">),</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="o">-</span><span class="mf">90.0</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">90.0</span><span class="p">),</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="o">-</span><span class="mf">90.0</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">addUpperDeltaTimeBound</span><span class="p">(</span><span class="n">tmax</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span> <span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="n">htf</span><span class="p">,</span><span class="n">vtf</span><span class="p">,</span><span class="n">gammatf</span><span class="p">])</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaVarObjective</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">setThreads</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+
+    <span class="c1">## Our IG is bad, so i turn on line search</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_SoeLSMode</span><span class="p">(</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_PrintLevel</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1">## IG is bad, solve first before optimize</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
+
+    <span class="c1">#Refine to more segments and Reoptimize</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">refineTrajManual</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+
+    <span class="n">Traj1</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+
+    <span class="c1">## Add in Heating Rate Constraint, scale so rhs is order 1</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">addUpperFuncBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="n">QFunc</span><span class="p">(),[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span><span class="n">Qlimit</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="n">Qlimit</span><span class="p">)</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+
+    <span class="n">Traj2</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Final Time:&quot;</span><span class="p">,</span><span class="n">Traj1</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="p">,</span><span class="s2">&quot;(s) , Final Cross Range:&quot;</span><span class="p">,</span><span class="n">Traj1</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="s2">&quot; deg&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Final Time:&quot;</span><span class="p">,</span><span class="n">Traj2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span><span class="p">,</span><span class="s2">&quot;(s) , Final Cross Range:&quot;</span><span class="p">,</span><span class="n">Traj2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="s2">&quot; deg&quot;</span><span class="p">)</span>
+
+
+    <span class="n">Plot</span><span class="p">(</span><span class="n">Traj1</span><span class="p">,</span><span class="n">Traj2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="CartPole.html">
+          <a class="next-page" href="halo.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Cart Pole Swing Up</div>
+                <div class="title">Orbit Family Continuation</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -461,7 +723,7 @@ A plot of the converged state and control histories for both problem formulation
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2021, UA ASRL
+                Copyright &#169; 2022-2023, UA ASRL
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -491,6 +753,7 @@ A plot of the converged state and control histories for both problem formulation
             <ul>
 <li><a class="reference internal" href="#">Space Shuttle Reentry</a><ul>
 <li><a class="reference internal" href="#references">References</a></li>
+<li><a class="reference internal" href="#full-code">Full Code</a></li>
 </ul>
 </li>
 </ul>
@@ -505,7 +768,9 @@ A plot of the converged state and control histories for both problem formulation
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>

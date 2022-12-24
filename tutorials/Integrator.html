@@ -1,11 +1,10 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Examples" href="../examples/examples.html" /><link rel="prev" title="Python: Vector Functions" href="VectorFunctions_tutorial.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
         <title>Integrators - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
@@ -20,7 +19,6 @@
   --color-code-foreground: black;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
-  --color-admonition-background: orange;
   
   }
   @media not print {
@@ -158,34 +156,32 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1 current has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Installation.html">Python: Installing ASSET</a></li>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ODEGuide.html">ODE Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IntegratorGuide.html">Integrator Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PSIOPT.html">PSIOPT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Phase.html">Phase Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Integrators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../examples/examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Example 1: Orbit Family Continuation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Example 2a: Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/ReentryExample.html">Space Shuttle Reentry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/CartPole.html">Cart Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
 </ul>
 </li>
 </ul>
@@ -222,16 +218,16 @@
           </label>
         </div>
         <article role="main">
-          <section id="integrators">
-<h1>Integrators<a class="headerlink" href="#integrators" title="Permalink to this headline">#</a></h1>
+          <div class="section" id="integrators">
+<h1>Integrators<a class="headerlink" href="#integrators" title="Permalink to this heading">#</a></h1>
 <p>Almost all use cases for ASSET will involve numerical integration of some type.
 To that end, the integration module includes support for a range of common integrator methods.
 In this module we will describe some typical examples for basic integration use, as well as more advanced scenarios involving stopping criteria and integration control laws.</p>
-<section id="basic-use">
-<h2>Basic Use<a class="headerlink" href="#basic-use" title="Permalink to this headline">#</a></h2>
-<p>If you haven’t covered the <a class="reference internal" href="VectorFunctions_tutorial.html#python-vector-functions"><span class="std std-ref">Python: Vector Functions</span></a> tutorial, we would reccomend you do so now before proceeding.
+<div class="section" id="basic-use">
+<h2>Basic Use<a class="headerlink" href="#basic-use" title="Permalink to this heading">#</a></h2>
+<p>If you haven’t covered the <span class="xref std std-ref">Python: Vector Functions</span> tutorial, we would recommend you do so now before proceeding.
 Every ASSET <code class="code docutils literal notranslate"><span class="pre">Integrator</span></code> object requires an <code class="code docutils literal notranslate"><span class="pre">ODE</span></code> instance to be constructed.
-We will start with the same Two-Body Solar Sail ODE that we used in <a class="reference internal" href="VectorFunctions_tutorial.html#python-vector-functions"><span class="std std-ref">Python: Vector Functions</span></a>.</p>
+We will start with the same Two-Body Solar Sail ODE that we used in <span class="xref std std-ref">Python: Vector Functions</span>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset</span> <span class="k">as</span> <span class="nn">ast</span>
 
 <span class="n">vf</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
@@ -272,7 +268,7 @@ By default the flag is set to <code class="code docutils literal notranslate"><s
 </div>
 <p>Now with our integrator setup we can integrate the ODE attached to the integrator through its <code class="code docutils literal notranslate"><span class="pre">integrate_dense</span></code> method.
 As always we will first need an initial state to start our integration with.
-Here we will use the same initial problem formulation that can be found in the <a class="reference internal" href="Phase.html#phase-tutorial"><span class="std std-ref">Phase Tutorial</span></a>.</p>
+Here we will use the same initial problem formulation that can be found in the <span class="xref std std-ref">Phase Tutorial</span>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">R0</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">V0</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">RF</span> <span class="o">=</span> <span class="mf">1.1</span>
@@ -295,9 +291,9 @@ The last argument in the function call is the desired number of states to return
 With that, <code class="code docutils literal notranslate"><span class="pre">IG</span></code> will be populated with the result of the integration.
 But one limitation of the above code is that it is assumed that the control variables are constant throughout the integration, which may not be desirable for highly chaotic dynamics where a good initial guess may be required.
 In support of this ASSET features integrator constructors for applying a control law directly to an integration.</p>
-</section>
-<section id="control-laws">
-<h2>Control Laws<a class="headerlink" href="#control-laws" title="Permalink to this headline">#</a></h2>
+</div>
+<div class="section" id="control-laws">
+<h2>Control Laws<a class="headerlink" href="#control-laws" title="Permalink to this heading">#</a></h2>
 <p>Continuing with the above example, a few simple changes allows one to add a control law to an <code class="code docutils literal notranslate"><span class="pre">integrator</span></code> object.
 If, for example, we wished to generate an initial guess for a solar sailing transfer trajectory, a control law that orients the control vector of the sail in the prograde direction may be useful.
 This control law will orient the sail throughout the integration to direct the normal vector of the sail in the prograde direction, in this case providing a better initial guess for the optimal control problem, as opposed to flying with a fixed sail orientation.
@@ -317,9 +313,9 @@ In this case we defined that our ODE, <code class="code docutils literal notrans
 </pre></div>
 </div>
 <p>Performing the integration after defining our control law is the same as previously shown, by calling <code class="code docutils literal notranslate"><span class="pre">integrate_dense</span></code> on the <code class="code docutils literal notranslate"><span class="pre">integrator</span></code> object and passing the initial state, final time, and the number of states to return.</p>
-</section>
-<section id="state-transition-matrices">
-<h2>State Transition Matrices<a class="headerlink" href="#state-transition-matrices" title="Permalink to this headline">#</a></h2>
+</div>
+<div class="section" id="state-transition-matrices">
+<h2>State Transition Matrices<a class="headerlink" href="#state-transition-matrices" title="Permalink to this heading">#</a></h2>
 <p>As well as having the capbility to integrate states, the ASSET integrators are also capable of integrating state transition matrices (STMs).
 Integrating STMs can be done in one at a time or in parallel.
 Integrating an STM requires no additional parameters to be done, as long as the relevant ODE has been defined.
@@ -351,9 +347,9 @@ The parallel evaluation simply takes a list of initial states and times, and the
 <span class="n">fileStateVec</span><span class="p">,</span> <span class="n">stmVec</span> <span class="o">=</span> <span class="n">integ</span><span class="o">.</span><span class="n">integrate_stm_parallel</span><span class="p">(</span><span class="n">stateList</span><span class="p">,</span> <span class="n">timeList</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="parallel-integration">
-<h2>Parallel Integration<a class="headerlink" href="#parallel-integration" title="Permalink to this headline">#</a></h2>
+</div>
+<div class="section" id="parallel-integration">
+<h2>Parallel Integration<a class="headerlink" href="#parallel-integration" title="Permalink to this heading">#</a></h2>
 <p>Similar to the parallel integration of the STMS, <code class="code docutils literal notranslate"><span class="pre">integrate_dense</span></code> features a similar method, <code class="code docutils literal notranslate"><span class="pre">integrate_dense_parallel</span></code>.
 Using the list of states and times produced in our parallel STM example we can write:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#number of threads to use with the parallel integration</span>
@@ -364,8 +360,8 @@ Using the list of states and times produced in our parallel STM example we can w
 </div>
 <p>Likewise with the STM parallel integration, the return value is a list of the vector results for each initial state and time.
 As a word of caution, the input size for the initial states and times <strong>must</strong> be the same size.</p>
-<section id="full-source-listing">
-<h3>Full Source Listing<a class="headerlink" href="#full-source-listing" title="Permalink to this headline">#</a></h3>
+<div class="section" id="full-source-listing">
+<h3>Full Source Listing<a class="headerlink" href="#full-source-listing" title="Permalink to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset</span> <span class="k">as</span> <span class="nn">ast</span>
 
 <span class="n">vf</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
@@ -448,40 +444,22 @@ As a word of caution, the input size for the initial states and times <strong>mu
 <span class="n">IG_Parallel</span> <span class="o">=</span> <span class="n">integ</span><span class="o">.</span><span class="n">integrate_dense_parallel</span><span class="p">(</span><span class="n">stateList</span><span class="p">,</span> <span class="n">timeList</span><span class="p">,</span> <span class="n">numthreads</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-</section>
-</section>
+</div>
+</div>
+</div>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../examples/examples.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">Examples</div>
-              </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-            </a>
-          <a class="prev-page" href="VectorFunctions_tutorial.html">
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-              <div class="page-info">
-                <div class="context">
-                  <span>Previous</span>
-                </div>
-                
-                <div class="title">Python: Vector Functions</div>
-                
-              </div>
-            </a>
+          
+          
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2021, UA ASRL
+                Copyright &#169; 2022-2023, UA ASRL
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -531,7 +509,9 @@ As a word of caution, the input size for the initial states and times <strong>mu
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     </body>
 </html>

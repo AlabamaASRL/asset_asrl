@@ -1,11 +1,10 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="PSIOPT" href="PSIOPT.html" /><link rel="prev" title="Optimal Control Phase Tutorial" href="PhaseGuide.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="PSIOPT" href="PSIOPT.html" /><link rel="prev" title="Optimal Control Phase Tutorial" href="PhaseGuide.html" />
 
-    <meta name="generator" content="sphinx-4.2.0, furo 2022.09.29"/>
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
         <title>Optimal Control Problem Tutorial - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
@@ -20,7 +19,6 @@
   --color-code-foreground: black;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
-  --color-admonition-background: orange;
   
   }
   @media not print {
@@ -160,32 +158,30 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ODEGuide.html">ODE Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IntegratorGuide.html">Integrator Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Optimal Control Problem Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PSIOPT.html">PSIOPT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Phase.html">Phase Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="VectorFunctions_tutorial.html">Python: Vector Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Integrator.html">Integrators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../examples/examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Example 1: Orbit Family Continuation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Example 2a: Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Example 2b: Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Example 3: Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/ReentryExample.html">Space Shuttle Reentry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/CartPole.html">Cart Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
 </ul>
 </li>
 </ul>
@@ -222,12 +218,12 @@
           </label>
         </div>
         <article role="main">
-          <section id="optimal-control-problem-tutorial">
-<h1>Optimal Control Problem Tutorial<a class="headerlink" href="#optimal-control-problem-tutorial" title="Permalink to this headline">#</a></h1>
-<p>The previous section on phases covers everything you need to know about formulating and solving
+          <div class="section" id="optimal-control-problem-tutorial">
+<h1>Optimal Control Problem Tutorial<a class="headerlink" href="#optimal-control-problem-tutorial" title="Permalink to this heading">#</a></h1>
+<p>The previous section on <a class="reference internal" href="PhaseGuide.html#phase-guide"><span class="std std-ref">phases</span></a> covers everything you need to know about formulating and solving
 single phase optimal control problems. In this section, we will cover how you can link these
 phases together into a multi phase optimal control problem using the <code class="code docutils literal notranslate"><span class="pre">oc.OptimalControlProblem</span></code> type.</p>
-<p>As we walk through OptimalControlPoblems API, we will make the trivial ODEs shown below.</p>
+<p>As we walk through the <code class="code docutils literal notranslate"><span class="pre">OptimalControlPoblem</span></code> API, we will make use of the trivial ODEs shown below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 
@@ -251,19 +247,22 @@ phases together into a multi phase optimal control problem using the <code class
 <span class="n">odeXUP</span> <span class="o">=</span> <span class="n">DummyODE</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-<section id="initialization">
-<h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this headline">#</a></h2>
+<div class="section" id="initialization">
+<h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this heading">#</a></h2>
 <p>To start, we will create 6 phases (2 of each ODE) type, as shown below that we will then link together inside of
 a single optimal control problem. Though not shown here, each phase may be constructed using methods we discussed in the
-previous section.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">phase0</span> <span class="o">=</span> <span class="n">odeX</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">)</span>
-<span class="n">phase1</span> <span class="o">=</span> <span class="n">odeX</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">)</span>
+previous <a class="reference internal" href="PhaseGuide.html#phase-guide"><span class="std std-ref">section</span></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">phase0</span> <span class="o">=</span> <span class="n">odeXUP</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">)</span>
+<span class="n">phase1</span> <span class="o">=</span> <span class="n">odeXUP</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">)</span>
+
+<span class="n">phase0</span><span class="o">.</span><span class="n">setStaticParams</span><span class="p">([</span><span class="mf">0.0</span><span class="p">])</span>
+<span class="n">phase1</span><span class="o">.</span><span class="n">setStaticParams</span><span class="p">([</span><span class="mf">0.0</span><span class="p">])</span>
 
 <span class="n">phase2</span> <span class="o">=</span> <span class="n">odeXU</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">)</span>
 <span class="n">phase3</span> <span class="o">=</span> <span class="n">odeXU</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">)</span>
 
-<span class="n">phase4</span> <span class="o">=</span> <span class="n">odeXUP</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">)</span>
-<span class="n">phase5</span> <span class="o">=</span> <span class="n">odeXUP</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">)</span>
+<span class="n">phase4</span> <span class="o">=</span> <span class="n">odeX</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">)</span>
+<span class="n">phase5</span> <span class="o">=</span> <span class="n">odeX</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">)</span>
 
 <span class="n">phase4</span><span class="o">.</span><span class="n">setStaticParams</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
 <span class="n">phase5</span><span class="o">.</span><span class="n">setStaticParams</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
@@ -275,11 +274,11 @@ previous section.</p>
 <span class="c1">#.</span>
 </pre></div>
 </div>
-<p>We can then create an OptimalControlProblem, and add our phases using the addPhase method.
-The individual phases in an ocp, MUST Be unique objects. The software will detect
-if you attempt to add the same phase to an ocp twice and throw an error. The commented
-out line below will throw an error because the specific phase5 object has already been added to
-the ocp.</p>
+<p>We can then create an <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code> (here named <code class="code docutils literal notranslate"><span class="pre">ocp</span></code>), and add our phases using the <code class="code docutils literal notranslate"><span class="pre">addPhase</span></code> method.
+The individual phases in an <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code> MUST Be unique objects. The software will detect
+if you attempt to add the same phase to an <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code> twice and throw an error. The commented
+out line below will throw an error because the specific <code class="code docutils literal notranslate"><span class="pre">phase5</span></code> object has already been added to
+the <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ocp</span>  <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">OptimalControlProblem</span><span class="p">()</span>
 
 <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase0</span><span class="p">)</span>
@@ -292,56 +291,49 @@ the ocp.</p>
 <span class="c1">#ocp.addPhase(phase5)  #phases must be unique, adding same phase twice will throw error</span>
 </pre></div>
 </div>
-<p>You can access the phases in an ocp using the ocp.Phase(i) method where i
+<p>You can access the phases in an <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code> using the <code class="code docutils literal notranslate"><span class="pre">ocp.Phase(i)</span></code> method where <code class="code docutils literal notranslate"><span class="pre">i</span></code>
 is the index of the phase in the order they were added. If the phase is created
-elswhere in the script you can manipulate it throught that object or via
-the .Phase(i) method as shown below. Note, phases are large stateful objects and we
-do not make copies of them , thus ocp.Phase(0) and phase0 are the EXACT
-same object. Be careful not to apply duplicate constraints to the same phase accidentally
-as WE DO NOT CHECK FOR THIS.</p>
+elsewhere in the script you can manipulate it through that object or via
+the <code class="code docutils literal notranslate"><span class="pre">.Phase(i)</span></code> method as shown below. Note, phases are large stateful objects and we
+do not make copies of them , thus <code class="code docutils literal notranslate"><span class="pre">ocp.Phase(0)</span></code> and <code class="code docutils literal notranslate"><span class="pre">phase0</span></code> are the EXACT
+same object. Be careful not to apply duplicate constraints to the same phase.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ocp</span><span class="o">.</span><span class="n">Phase</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">)))</span>
 
 <span class="c1"># Equivalent to above,make sure you dont accidentally do both.</span>
 <span class="c1"># phase0.addBoundaryValue(&quot;Front&quot;,range(0,6),np.zeros((6)))</span>
 </pre></div>
 </div>
-<p>Additionally, you make access the list of phases already added to an ocp using the .Phases field
+<p>Additionally, you may access the list of phases already added to an <code class="code docutils literal notranslate"><span class="pre">ocp</span></code> using the <code class="code docutils literal notranslate"><span class="pre">.Phases</span></code> field
 of the object. This can allow you to iterate over all phases to apply similar constraints/objectives
 to some or all of the phases as shown below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">phase</span> <span class="ow">in</span> <span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">:</span>
     <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaTimeObjective</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<dl class="simple">
-<dt>As a general rule of thumb, any constraint or objective that can be applied to the individual phases to represent your goal, should be</dt><dd><p>, and not using the OptimalControlPorblem api that we are about to cover in section. For example, if our intent was to minimize</p>
-</dd>
-</dl>
-<p>the total time elpased time of all of our phases, applying a addDeltaTimeObjective to every phase should be preferred to an equivalent formuation using
-LinkObjectives.</p>
-<p>Analogous to the concept of a phase’s static parameters, you may also add additional free variables that we call Link Parameters to an ocp as shown below.</p>
-</section>
-<section id="link-constraints-and-objectives">
-<h2>Link Constraints and Objectives<a class="headerlink" href="#link-constraints-and-objectives" title="Permalink to this headline">#</a></h2>
-<p>Application of link objectives and constraints in an optimal control problem, is built upon the concept of phase regions
-and indexing we covered in phase.</p>
-<section id="link-equality-constraints">
-<h3>Link Equality Constraints<a class="headerlink" href="#link-equality-constraints" title="Permalink to this headline">#</a></h3>
-<p>An optimal control problems link equality constraints of the form f(x) =0, that take as arguments, the variables from one or phases
-at specified phase regions, as well as Link parameters (if any).</p>
-</section>
-<section id="link-inequality-constraints">
-<h3>Link Inequality Constraints<a class="headerlink" href="#link-inequality-constraints" title="Permalink to this headline">#</a></h3>
-</section>
-<section id="link-objectives">
-<h3>Link Objectives<a class="headerlink" href="#link-objectives" title="Permalink to this headline">#</a></h3>
+<p>As a general rule of thumb, any constraint or objective that can be applied to the individual phases to represent your goal, should be,
+and not with the <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code> API that we are about to cover in the next section. For example, if our intent was to minimize
+the total time elapsed time of all of our phases, applying <code class="code docutils literal notranslate"><span class="pre">addDeltaTimeObjective</span></code> to every phase should be preferred to an equivalent formulation using
+Link Objectives.</p>
+<p>Analogous to the concept of a phase’s static parameters, you may also add additional free variables that we call “link parameters” to an <code class="code docutils literal notranslate"><span class="pre">ocp</span></code> as shown below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ocp</span><span class="o">.</span><span class="n">setLinkParams</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">15</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="link-constraints-and-objectives">
+<h2>Link Constraints and Objectives<a class="headerlink" href="#link-constraints-and-objectives" title="Permalink to this heading">#</a></h2>
+<p>Application of link objectives and constraints in an <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code>, is built upon the concept of phase regions
+and indexing we covered in phase <a class="reference internal" href="PhaseGuide.html#phase-guide"><span class="std std-ref">tutorial</span></a>. The total variables vector, <span class="math notranslate nohighlight">\(\vec{x}\)</span>, consists of those defined for each phase, <span class="math notranslate nohighlight">\(\vec{x}^{j}\)</span>, followed by
+the link parameters, <span class="math notranslate nohighlight">\(\vec{L}\)</span>.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}\vec{x} = \begin{bmatrix}
-           \vec{x}^1
-           \vdots
-           \vec{x}^m
-           \vec{L}
-           \end{bmatrix}\\\begin{split}\vec{x}^j = \begin{bmatrix}
+\[\begin{split}\vec{x} = \begin{bmatrix}
+           \vec{x}^1\\
+           \vdots\\
+           \vec{x}^m\\
+           \vec{L}\\
+           \end{bmatrix}
+    \quad \quad \text{where} \quad
+\vec{x}^j = \begin{bmatrix}
            \vec{V}_1^j     \\
            \vec{V}_2^j     \\
            \vdots        \\
@@ -350,11 +342,309 @@ at specified phase regions, as well as Link parameters (if any).</p>
            \vec{P}^j       \\
            \vec{S}^j       \\
           \end{bmatrix}
- \quad \quad \text{where} \quad \vec{V}_i^j = [\vec{X}_i^j,t_i^j,\vec{U}_i^j]\end{split}\end{aligned}\end{align} \]</div>
+ \quad \quad \text{and} \quad \vec{V}_i^j = [\vec{X}_i^j,t_i^j,\vec{U}_i^j]\end{split}\]</div>
 </div>
-</section>
-</section>
-</section>
+<p>Linking constraints and objectives are then functions of the form shown below. They may take as arguments the first
+and/or last time-varying-states as well as any parameters from any number of the constituent phases in any specified order, followed by any
+extra link parameters.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\vec{f}([\vec{V}_{1\lor n}^k,\vec{P}^k,\vec{S}^k,\ldots \vec{L}]) \quad  k \in [1,\ldots m]\]</div>
+</div>
+<div class="section" id="link-equality-constraints">
+<h3>Link Equality Constraints<a class="headerlink" href="#link-equality-constraints" title="Permalink to this heading">#</a></h3>
+<p>A link equality constraint of the form <span class="math notranslate nohighlight">\(\vec{h}(\vec{x}) = \vec{0}\)</span> can be added to the phase using the
+<code class="code docutils literal notranslate"><span class="pre">.addLinkEqualCon</span></code> method. The most general way to link two phases with an equality constraint is shown below. This contrived example is
+enforcing continuity between the last time-varying state variables and in <code class="code docutils literal notranslate"><span class="pre">phase0</span></code> and the first-time varying state variables and parameters in <code class="code docutils literal notranslate"><span class="pre">phase1</span></code>.
+To illustrate the expected order of arguments we also multiply the result by the 0th link parameter. Our constraint function should be formulated to expect
+all arguments specified for <code class="code docutils literal notranslate"><span class="pre">phase0</span></code> ( <code class="code docutils literal notranslate"><span class="pre">V0</span></code>), followed by all specified for <code class="code docutils literal notranslate"><span class="pre">phase1</span></code> ( <code class="code docutils literal notranslate"><span class="pre">V0</span></code>), followed by the link parameter ( <code class="code docutils literal notranslate"><span class="pre">Lvar</span></code>).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">ALinkEqualCon</span><span class="p">():</span>
+    <span class="n">V0</span><span class="p">,</span><span class="n">V1</span><span class="p">,</span><span class="n">Lvar</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">27</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">13</span><span class="p">),(</span><span class="mi">13</span><span class="p">,</span><span class="mi">13</span><span class="p">),(</span><span class="mi">26</span><span class="p">,</span><span class="mi">1</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">V0</span><span class="o">-</span><span class="n">V1</span><span class="p">)</span><span class="o">*</span><span class="n">Lvar</span>
+
+
+<span class="n">XtUvars0</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">)</span>
+<span class="n">OPvars0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">SPvars0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">XtUvars1</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">)</span>
+<span class="n">OPvars1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">SPvars1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">LPvars</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1">## Use index in the of the phase in the ocp to specify each phase</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">ALinkEqualCon</span><span class="p">(),</span>
+                    <span class="mi">0</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="n">XtUvars0</span><span class="p">,</span><span class="n">OPvars0</span><span class="p">,</span><span class="n">SPvars0</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="n">XtUvars1</span><span class="p">,</span><span class="n">OPvars1</span><span class="p">,</span><span class="n">SPvars1</span><span class="p">,</span>
+                    <span class="n">LPvars</span><span class="p">)</span>
+
+<span class="c1">## Same as above, but use the phase objects themselves to specify each phase</span>
+<span class="c1">## You can used phases or integers with any signature, but do not mix them in a single call</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">ALinkEqualCon</span><span class="p">(),</span>
+                    <span class="n">phase0</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="n">XtUvars0</span><span class="p">,</span><span class="n">OPvars0</span><span class="p">,</span><span class="n">SPvars0</span><span class="p">,</span>
+                    <span class="n">phase1</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="n">XtUvars1</span><span class="p">,</span><span class="n">OPvars1</span><span class="p">,</span><span class="n">SPvars1</span><span class="p">,</span>
+                    <span class="n">LPvars</span><span class="p">)</span>
+
+<span class="c1">## Same as above</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">ALinkEqualCon</span><span class="p">(),</span>
+                    <span class="n">ocp</span><span class="o">.</span><span class="n">Phase</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="n">XtUvars0</span><span class="p">,</span><span class="n">OPvars0</span><span class="p">,</span><span class="n">SPvars0</span><span class="p">,</span>
+                    <span class="n">ocp</span><span class="o">.</span><span class="n">Phase</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="n">XtUvars1</span><span class="p">,</span><span class="n">OPvars1</span><span class="p">,</span><span class="n">SPvars1</span><span class="p">,</span>
+                    <span class="n">LPvars</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the constraint function does not need any link parameters, they may be omitted from the function call. Additionally,
+as was the case for the methods in phase, it is only necessary to provide the specific variables needed from each variable group
+required to formulate your custom constraints. The ordering of indices within each group can also be arbitrary so long is it is mathematically
+consistent with the constraint you have defined.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">ALinkEqualCon</span><span class="p">():</span>
+    <span class="n">VS0</span><span class="p">,</span><span class="n">VP1</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">VS0</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">VP1</span><span class="p">)</span>
+
+
+<span class="n">XtUvars0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
+<span class="n">SPvars0</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">XtUvars1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">OPvars1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1">## Enforce that the dot product of the specified variables from each phase region =0</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">ALinkEqualCon</span><span class="p">(),</span>
+                    <span class="mi">0</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="n">XtUvars0</span><span class="p">,[],</span><span class="n">SPvars0</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="n">XtUvars1</span><span class="p">,</span><span class="n">OPvars1</span><span class="p">,[])</span>
+</pre></div>
+</div>
+<p>Furthermore, if your function only requires variables from a single group in each phase, you may omit the others from the function call.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SomeFunc</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="c1">## Only need XtUVars from phases 2 and 3 at the specified regions</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">SomeFunc</span><span class="p">,</span>
+                    <span class="mi">2</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span>
+                    <span class="mi">3</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+
+<span class="n">SomeOtherFunc</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span>
+<span class="c1"># Only needs ODEparams from phases 0 and 1</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">SomeOtherFunc</span><span class="p">,</span>
+                    <span class="mi">0</span><span class="p">,</span><span class="s1">&#39;ODEParams&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="mi">1</span><span class="p">,</span><span class="s1">&#39;ODEParams&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>If you need to express a constraint in terms of more than 2 phases at a time, you can utilize the method shown below. Here we pass a list
+of tuples each containing all of the arguments needed to specify the variables from a phase region.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">TriplePhaseLink</span><span class="p">():</span>
+    <span class="n">X0</span><span class="p">,</span><span class="n">X1</span><span class="p">,</span><span class="n">X2</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">6</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
+
+    <span class="k">return</span> <span class="n">vf</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">X0</span><span class="p">,</span><span class="n">X1</span><span class="p">,</span><span class="n">X2</span><span class="p">)</span>
+
+
+<span class="n">XtUvars</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">SPvars</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># none needed, leave empty but still pass it in</span>
+<span class="n">OPvars</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># none needed, leave empty but still pass it in</span>
+<span class="n">LPvars</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># none needed, leave empty but still pass it in</span>
+
+<span class="c1"># List of tuples of the variables and regions needed from each phase</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">TriplePhaseLink</span><span class="p">(),</span>
+                    <span class="p">[(</span><span class="mi">3</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span> <span class="n">XtUvars</span><span class="p">,</span><span class="n">OPvars</span><span class="p">,</span><span class="n">OPvars</span><span class="p">),</span>
+                     <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span> <span class="n">XtUvars</span><span class="p">,</span><span class="n">OPvars</span><span class="p">,</span><span class="n">OPvars</span><span class="p">),</span>
+                     <span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span> <span class="n">XtUvars</span><span class="p">,</span><span class="n">OPvars</span><span class="p">,</span><span class="n">OPvars</span><span class="p">)],</span>
+                    <span class="n">LPvars</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, if you need to enforce an equality constraint that only involves the link parameters, you can use the <code class="code docutils literal notranslate"><span class="pre">.addLinkParamEqualCon</span></code>
+function as shown below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enforce that the norm of first 3 link params is 1</span>
+<span class="n">LPvec</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkParamEqualCon</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="n">LPvec</span><span class="p">)</span>
+
+<span class="c1"># Apply same constraint to multiple groups of 3 link params</span>
+<span class="n">LPvecs</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="p">,[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">],[</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]]</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkParamEqualCon</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="n">LPvecs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The previously discussed methods can be used define rather complicated phase linkages.
+However, in most cases we just want to enforce simple continuity constraints
+between certain variables in each phase. This can be accomplished using the <code class="code docutils literal notranslate"><span class="pre">addDirectLinkEqualCon</span></code> function as shown below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enforce that variables XtUvars [3,4,5] in the last state of phase0</span>
+<span class="c1"># are equal to the same variables in the first state of phase1</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addDirectLinkEqualCon</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span>
+                          <span class="mi">1</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+
+
+
+<span class="c1"># Enforce continuity between the last time in phase1 (time is index 7)</span>
+<span class="c1"># And the first time in phase2 (time is index 6!!)</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addDirectLinkEqualCon</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,[</span><span class="mi">7</span><span class="p">],</span>
+                          <span class="mi">2</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,[</span><span class="mi">6</span><span class="p">])</span>
+
+
+<span class="c1"># Enforce that the ODE parameters in phase 0 and phase 1 are equal</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addDirectLinkEqualCon</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;ODEParams&#39;</span><span class="p">,[</span><span class="mi">0</span><span class="p">],</span>
+                          <span class="mi">1</span><span class="p">,</span><span class="s1">&#39;ODEParams&#39;</span><span class="p">,[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Another common case is when we have a list of phases all sequentially ordered in time and want to enforce forward time continuity in some common
+set of state, time, or control variables.
+This could be accomplished using <code class="code docutils literal notranslate"><span class="pre">addDirectLinkEqualCon</span></code> in a loop to link the <code class="code docutils literal notranslate"><span class="pre">'Last'</span></code> and <code class="code docutils literal notranslate"><span class="pre">'First'</span></code> states of
+each adjacent phase as shown below. Alternatively, you can use the convenient <code class="code docutils literal notranslate"><span class="pre">addForwardLinkEqualCon</span></code> to accomplish the same thing.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enforce forward time continuity in XtUvars [0,1,2] across all phases</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">ocp</span><span class="o">.</span><span class="n">addDirectLinkEqualCon</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span>
+                              <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="c1">## These accomplish the same thing</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addForwardLinkEqualCon</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="c1">###</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addForwardLinkEqualCon</span><span class="p">(</span><span class="n">phase0</span><span class="p">,</span><span class="n">phase5</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>We should note that basically all simple continuity constraints between phases can be
+implemented using a combination of <code class="code docutils literal notranslate"><span class="pre">addDirectLinkEqualCon</span></code> and <code class="code docutils literal notranslate"><span class="pre">addForwardLinkEqualCon</span></code>,
+and users should only have to fall back on the more general form in special cases.</p>
+</div>
+<div class="section" id="link-inequality-constraints">
+<h3>Link Inequality Constraints<a class="headerlink" href="#link-inequality-constraints" title="Permalink to this heading">#</a></h3>
+<p>A link inequality constraint of the form <span class="math notranslate nohighlight">\(\vec{g}(\vec{x}) \leq \vec{0}\)</span> can be added to the <code class="code docutils literal notranslate"><span class="pre">ocp</span></code> using the
+<code class="code docutils literal notranslate"><span class="pre">.addLinkInequalCon</span></code> method. The interface for two phase and multi-phase linking works exactly the same as <code class="code docutils literal notranslate"><span class="pre">addLinkEqualCon</span></code> in regards
+to order of arguments the different calling signatures.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">ALinkInequalCon</span><span class="p">():</span>
+    <span class="n">VS0</span><span class="p">,</span><span class="n">VP1</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">VS0</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">VP1</span><span class="p">)</span>
+
+
+<span class="n">XtUvars0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
+<span class="n">SPvars0</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">XtUvars1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">OPvars1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1">## Enforce that the dot procuct of the specified variables from each phase region &lt;0</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkInequalCon</span><span class="p">(</span><span class="n">ALinkInequalCon</span><span class="p">(),</span>
+                    <span class="mi">0</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="n">XtUvars0</span><span class="p">,[],</span><span class="n">SPvars0</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="n">XtUvars1</span><span class="p">,</span><span class="n">OPvars1</span><span class="p">,[])</span>
+
+
+
+
+<span class="n">SomeFunc</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="c1">## Only need XtUVars from phases 2 and 3 at the specified regions</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkInequalCon</span><span class="p">(</span><span class="n">SomeFunc</span><span class="p">,</span>
+                    <span class="n">phase2</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span>
+                    <span class="n">phase3</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">TriplePhaseInequality</span><span class="p">():</span>
+    <span class="n">X0</span><span class="p">,</span><span class="n">X1</span><span class="p">,</span><span class="n">X2</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">6</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
+
+    <span class="k">return</span> <span class="n">vf</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">X0</span><span class="p">,</span><span class="n">X1</span><span class="p">,</span><span class="n">X2</span><span class="p">)</span>
+
+
+<span class="n">XtUvars</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">SPvars</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># none needed, leave empty but still pass it in</span>
+<span class="n">OPvars</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># none needed, leave empty but still pass it in</span>
+<span class="n">LPvars</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># none needed, leave empty but still pass it in</span>
+
+<span class="c1"># List of tuples of the variables and regions needed from each phase</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkInequalCon</span><span class="p">(</span><span class="n">TriplePhaseInequality</span><span class="p">(),</span>
+                    <span class="p">[(</span><span class="mi">3</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span> <span class="n">XtUvars</span><span class="p">,</span><span class="n">OPvars</span><span class="p">,</span><span class="n">OPvars</span><span class="p">),</span>
+                     <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span> <span class="n">XtUvars</span><span class="p">,</span><span class="n">OPvars</span><span class="p">,</span><span class="n">OPvars</span><span class="p">),</span>
+                     <span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span> <span class="n">XtUvars</span><span class="p">,</span><span class="n">OPvars</span><span class="p">,</span><span class="n">OPvars</span><span class="p">)],</span>
+                    <span class="n">LPvars</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Additionally, similar to before, if you need to write an inequality constraint only in terms in the link parameters you can use the
+<code class="code docutils literal notranslate"><span class="pre">addLinkParamInequalCon</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enforce that the norm of first 3 link params is &lt; 1</span>
+<span class="n">LPvec</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkParamInequalCon</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="n">LPvec</span><span class="p">)</span>
+
+<span class="c1"># Apply same constraint to multiple groups of 3 link params</span>
+<span class="n">LPvecs</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="p">,[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">],[</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]]</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkParamInequalCon</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="n">LPvecs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="link-objectives">
+<h3>Link Objectives<a class="headerlink" href="#link-objectives" title="Permalink to this heading">#</a></h3>
+<p>You can also add objectives of the form <span class="math notranslate nohighlight">\(f(x)\)</span> using the <code class="code docutils literal notranslate"><span class="pre">addLinkObjective</span></code> method. Once again, the calling signature
+for all methods is identical to <code class="code docutils literal notranslate"><span class="pre">addLinkEqualCon</span></code>. Likewise, objectives involving only the link parameters can be added with
+<code class="code docutils literal notranslate"><span class="pre">addLinkParamObjective</span></code>. Otherwise, the only difference is that the objective must be an ASSET ScalarFunction.
+As was the case with phase, if multiple link objectives are added to an <code class="code docutils literal notranslate"><span class="pre">ocp</span></code>, they along with any objectives defined in each
+phase are implicitly summed by the optimizer.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">ALinkObjective</span><span class="p">():</span>
+    <span class="n">VS0</span><span class="p">,</span><span class="n">VP1</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">VS0</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">VP1</span><span class="p">)</span>  <span class="c1"># is a scalar function</span>
+
+
+<span class="n">XtUvars0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
+<span class="n">SPvars0</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">XtUvars1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">OPvars1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkObjective</span><span class="p">(</span><span class="n">ALinkObjective</span><span class="p">(),</span>
+                    <span class="mi">0</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="n">XtUvars0</span><span class="p">,[],</span><span class="n">SPvars0</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="n">XtUvars1</span><span class="p">,</span><span class="n">OPvars1</span><span class="p">,[])</span>
+
+
+
+<span class="c1"># Minimize the sum of the norms of these groups of 3 link params</span>
+
+<span class="n">LPvecs</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="p">,[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">],[</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]]</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">addLinkParamObjective</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">(),</span><span class="n">LPvecs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="solving-and-optimizing">
+<h2>Solving and Optimizing<a class="headerlink" href="#solving-and-optimizing" title="Permalink to this heading">#</a></h2>
+<p>After constructing an <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code> and its constituent phases, we can now use PSIOPT
+to solve or optimize the entire trajectory. As with phase, the settings of the optimizer can be manipulated through a
+reference to PSIOPT attached to the <code class="code docutils literal notranslate"><span class="pre">ocp</span></code> object.
+Additionally, as before, calls to the optimizer are handled through the <code class="code docutils literal notranslate"><span class="pre">ocp</span></code> itself as shown below.
+Both of these topics are handled in more details in the section on <a class="reference internal" href="PSIOPT.html#psiopt-guide"><span class="std std-ref">PSIOPT</span></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span> <span class="c1">## reference to this ocps instance of psiopt</span>
+<span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
+
+<span class="c1">## Solve just the dynamics,equality, and inequality constraints</span>
+<span class="n">flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+
+<span class="c1">## Optimize objective subject to the dynamic,equality, and inequality constraints</span>
+<span class="n">flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+
+<span class="c1">## Call solve to find feasible point, then optimize objective subject to the dynamic,equality, and inequality constraints</span>
+<span class="n">flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
+
+<span class="c1">## Same as above but calls solve if the optimize call fails to fully converge</span>
+<span class="n">flag</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize_solve</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>After finding a solution, you can retrieve the converged trajectories for each phase using either the original defined phases or
+<code class="code docutils literal notranslate"><span class="pre">ocp.Phase(i)</span></code>. Additionally you can retrieve the values of any link parameters using <code class="code docutils literal notranslate"><span class="pre">returnLinkParams</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Traj0</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">Phase</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+<span class="n">Traj0</span> <span class="o">=</span> <span class="n">phase0</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>   <span class="c1"># Remember phase0 and ocp.Phase(0) are the same object!!</span>
+
+<span class="n">StatParams1</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">Phase</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">returnStaticParams</span><span class="p">()</span>
+
+<span class="n">LinkParams</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">returnLinkParams</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Finally, you can refine the meshes for some or all of the constituent phases and then resolve the problem.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">phase</span> <span class="ow">in</span> <span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">:</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">refineTrajManual</span><span class="p">(</span><span class="mi">5000</span><span class="p">)</span>
+
+<span class="n">ocp</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+
+
+<span class="n">Trajs</span> <span class="o">=</span> <span class="p">[</span><span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span> <span class="k">for</span> <span class="n">phase</span> <span class="ow">in</span> <span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">]</span>
+
+<span class="n">CTrajs</span> <span class="o">=</span> <span class="p">[</span><span class="n">phase</span><span class="o">.</span><span class="n">returnCostateTraj</span><span class="p">()</span> <span class="k">for</span> <span class="n">phase</span> <span class="ow">in</span> <span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
 
         </article>
       </div>
@@ -385,7 +675,7 @@ at specified phase regions, as well as Link parameters (if any).</p>
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2021, UA ASRL
+                Copyright &#169; 2022-2023, UA ASRL
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -421,6 +711,7 @@ at specified phase regions, as well as Link parameters (if any).</p>
 <li><a class="reference internal" href="#link-objectives">Link Objectives</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#solving-and-optimizing">Solving and Optimizing</a></li>
 </ul>
 </li>
 </ul>
@@ -435,7 +726,9 @@ at specified phase regions, as well as Link parameters (if any).</p>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>

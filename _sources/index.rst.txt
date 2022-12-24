@@ -9,7 +9,8 @@ Welcome to ASSET's documentation!
 ASSET (Astrodynamics Software and Science Enabling Toolkit) is a modular, extensible library for trajectory design and optimal control.
 It uses a custom implementation of vector math formalisms to enable rapid implementation of dynamical systems and automatic differentiation.
 The phase object is the core of the optimal control functionality, and by linking multiple phases together, the user can construct scenarios of arbitrary complexity.
-A high-performance interior-point optimizer (PSIOPT) is included with the library, which enables quick turnaround from concept to solution.
+A newly developed high-performance interior-point optimizer (PSIOPT) is included with the library, which enables quick turnaround from concept to solution.
+
 
 .. toctree::
     :maxdepth: 2
@@ -18,6 +19,23 @@ A high-performance interior-point optimizer (PSIOPT) is included with the librar
     tutorials/tutorials.rst
     examples/examples.rst
     python/python.rst
+
+Citation
+========
+
+Cite the following `paper <https://www.researchgate.net/publication/357567956_ASSET_Astrodynamics_Software_and_Science_Enabling_Toolkit>`_ if you used ASSET in your work.
+
+.. note::
+    .. raw:: latex
+
+    @inproceedings{Pezent2022,
+        author = {James B. Pezent and Jared Sikes and William Ledbetter and Rohan Sood and Kathleen C. Howell and Jeffrey R. Stuart},
+        title = {ASSET: Astrodynamics Software and Science Enabling Toolkit},
+        booktitle = {AIAA SCITECH 2022 Forum},
+        pages = {AIAA 2022-1131},
+        year={2022},
+        doi = {10.2514/6.2022-1131}
+    }
 
 
 
