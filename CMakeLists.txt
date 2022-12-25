@@ -49,7 +49,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Release Flags
-list(APPEND RELEASE_FLAGS "-O")
+list(APPEND RELEASE_FLAGS "-O2")
 list(APPEND RELEASE_FLAGS "-march=native")
 
 if(WIN32)
@@ -64,7 +64,7 @@ if(WIN32)
 endif()
 
 if(NOT WIN32)
-    # list(APPEND RELEASE_FLAGS "-mtune=native")
+    list(APPEND RELEASE_FLAGS "-mtune=native")
     # Debugging Flags
     set(DEBUG_FLAGS "-g" "-ggdb3")
 
