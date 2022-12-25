@@ -3,6 +3,9 @@ name: pip-ubuntu-20
 on:
   schedule:
     - cron: "0 20 * * 5"
+  push:
+    branches:
+      - gcc-build-fix
 
 jobs:
   build:
