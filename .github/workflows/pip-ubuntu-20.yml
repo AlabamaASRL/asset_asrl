@@ -3,15 +3,18 @@ name: pip-ubuntu-20
 on:
   schedule:
     - cron: "0 20 * * 5"
+  push:
+    branches:
+      - gcc-build-fix
 
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-20.04]
+        platform: [ubuntu-22.04]
         python-version: ["3.9"]
-        compiler: ["clang-11", "gcc-10"]
+        compiler: ["clang-14"]
 
     runs-on: ${{ matrix.platform }}
 

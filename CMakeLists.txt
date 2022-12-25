@@ -85,7 +85,7 @@ if(LINK_TIME_OPT)
 
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-    set(CMAKE_CXX_COMPILE_OPTIONS_IPO ${CMAKE_CXX_COMPILE_OPTIONS_IPO} -flto=9)
+    set(CMAKE_CXX_COMPILE_OPTIONS_IPO ${CMAKE_CXX_COMPILE_OPTIONS_IPO} -flto=1)
   endif()
 
 else()
@@ -99,7 +99,7 @@ list(APPEND COMMON_FLAGS "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-inline-t
 
 
 
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND FALSE)
     list(APPEND RELEASE_FLAGS "-finline-limit=1000")
     list(APPEND RELEASE_FLAGS "--param=inline-unit-growth=500")    #40,40
     list(APPEND RELEASE_FLAGS "--param=early-inlining-insns=50")   #14,14
@@ -122,6 +122,7 @@ if(APPLE)
   list(APPEND COMMON_FLAGS "-Xlinker -undefined")
   list(APPEND COMMON_FLAGS "-Xlinker dynamic_lookup")
 endif()
+
 
 
 # Combine Flags

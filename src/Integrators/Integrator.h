@@ -53,6 +53,16 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	using ControllerType        = GenericFunction<-1, -1>;
 	using StopFuncType             = GenericConditional<-1>;
 
+
+	using IntegRet = ODEState<double>;
+	using DenseRet = std::vector<ODEState<double>>;
+	using STMRet = std::tuple< IntegRet, Jacobian<double> >;
+
+	using IntegEventRet = std::tuple< IntegRet, EventLocsType >;
+	using DenseEventRet = std::tuple< DenseRet, EventLocsType >;
+	using STMEventRet = std::tuple< IntegRet, Jacobian<double>, EventLocsType >;
+
+
 protected:
 	DODE ode;
 	bool usecontroller = false;
@@ -945,7 +955,7 @@ protected:
 public:
 	////////////////////////////////////////////////////////////////////////////////////
 
-	auto integrate(const ODEState<double>& x0, double tf) const {
+	IntegRet integrate(const ODEState<double>& x0, double tf) const {
 
 		ODEState<double> xf;
 		std::vector<EventPack> events;
@@ -964,7 +974,7 @@ public:
 		return xf;
 	}
 
-	auto integrate(const ODEState<double>& x0, double tf, const std::vector<EventPack>& events) const {
+	IntegEventRet integrate(const ODEState<double>& x0, double tf, const std::vector<EventPack>& events) const {
 
 		ODEState<double> xf;
 		std::vector<std::vector<Eigen::Vector2d>> eventtimes;
@@ -993,7 +1003,9 @@ public:
 	
 	template<class ... Args>
 	auto integrate_parallel_impl(
-		const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd & tfs, int thrs, Args && ... args) {
+		const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd & tfs, int thrs, Args && ... args)->
+		std::vector<decltype(Integrator::integrate(x0s[0], tfs[0], args...))>
+	{
 
 		if (x0s.size() != tfs.size()) {
 			throw std::invalid_argument("List of initial states and final times must be the same size");
@@ -1024,16 +1036,16 @@ public:
 		return results;
 	}
 
-	auto integrate_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, int thrs) {
+	std::vector<IntegRet> integrate_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, int thrs) {
 		return this->integrate_parallel_impl(x0s, tfs, thrs);
 	}
-	auto integrate_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, 
+	std::vector<IntegEventRet> integrate_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs,
 		const std::vector<EventPack>& events,int thrs) {
 		return this->integrate_parallel_impl(x0s, tfs,thrs,events);
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
 
-	auto integrate_dense(const ODEState<double>& x0, double tf) const {
+	DenseRet integrate_dense(const ODEState<double>& x0, double tf) const {
 
 		ODEState<double> xf;
 		std::vector<EventPack> events;
@@ -1050,7 +1062,7 @@ public:
 		return Xs;
 	}
 
-	auto integrate_dense(const ODEState<double>& x0, double tf, const std::vector<EventPack>& events, const bool & alloutput) const {
+	DenseEventRet integrate_dense(const ODEState<double>& x0, double tf, const std::vector<EventPack>& events,  bool  alloutput) const {
 
 		ODEState<double> xf;
 		std::vector<std::vector<Eigen::Vector2d>> eventtimes;
@@ -1076,7 +1088,7 @@ public:
 		else return std::tuple{ midpoints_removed(Xs), eventlocs};
 	}
 
-	auto integrate_dense(const ODEState<double>& x0, double tf, int n, const std::vector<EventPack>& events) const {
+	DenseEventRet integrate_dense(const ODEState<double>& x0, double tf, int n, const std::vector<EventPack>& events) const {
 
 		ODEState<double> xf;
 		std::vector<std::vector<Eigen::Vector2d>> eventtimes;
@@ -1106,7 +1118,7 @@ public:
 		return std::tuple{ Xinterp, eventlocs };
 	}
 
-	auto integrate_dense(const ODEState<double>& x0, double tf, int n) const {
+	DenseRet integrate_dense(const ODEState<double>& x0, double tf, int n) const {
 
 		ODEState<double> xf;
 		std::vector<std::vector<Eigen::Vector2d>> eventtimes;
@@ -1138,7 +1150,7 @@ public:
 	}
 
 
-	std::vector<ODEState<double>> integrate_dense(
+	DenseRet integrate_dense(
 		const ODEState<double>& x0, double tf, int NumStates,
 		std::function<bool(ConstEigenRef<Eigen::VectorXd>)> exitfun) const {
 		VectorX<double> ts =
@@ -1156,7 +1168,9 @@ public:
 
 	template<class ... Args>
 	auto integrate_dense_parallel_impl(
-		const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, int thrs,   Args &&... args) {
+		const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, int thrs,   Args &&... args) ->
+		std::vector< decltype(Integrator::integrate_dense(x0s[0], tfs[0], args...))>
+	{
 
 		if (x0s.size() != tfs.size()) {
 			throw std::invalid_argument("List of initial states and final times must be the same size");
@@ -1187,10 +1201,10 @@ public:
 		return results;
 	}
 
-	auto integrate_dense_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, int thrs) {
+	std::vector< DenseRet> integrate_dense_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, int thrs) {
 		return this->integrate_dense_parallel_impl(x0s, tfs, thrs);
 	}
-	auto integrate_dense_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, 
+	std::vector<DenseEventRet> integrate_dense_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs,
 		const std::vector<EventPack>& events, int thrs) {
 		return this->integrate_dense_parallel_impl(x0s, tfs, thrs, events ,false);
 	}
@@ -1198,7 +1212,9 @@ public:
 
 	template<class ... Args>
 	auto integrate_dense_parallel_impl_n(
-		const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, const std::vector<int>& ns, int thrs, Args &&... args) {
+		const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, const std::vector<int>& ns, int thrs, Args &&... args)->
+		std::vector<decltype(Integrator::integrate_dense(x0s[0], tfs[0], ns[0], args...))>
+	{
 
 		if (x0s.size() != tfs.size()) {
 			throw std::invalid_argument("List of initial states and final times must be the same size");
@@ -1232,23 +1248,23 @@ public:
 		return results;
 	}
 
-	auto integrate_dense_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, const std::vector<int> & ns,
+	std::vector<DenseEventRet>  integrate_dense_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, const std::vector<int> & ns,
 		const std::vector<EventPack>& events, int thrs) {
 		return this->integrate_dense_parallel_impl_n(x0s, tfs,ns, thrs, events);
 	}
-	auto integrate_dense_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, const std::vector<int>& ns, int thrs) {
+	std::vector<DenseRet>  integrate_dense_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, const std::vector<int>& ns, int thrs) {
 		return this->integrate_dense_parallel_impl_n(x0s, tfs,ns,thrs);
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	
 
-	auto integrate_stm(const ODEState<double>& x0, double tf) const {
+	STMRet integrate_stm(const ODEState<double>& x0, double tf) const {
 		auto Xs = this->integrate_dense(x0, tf);
 		Jacobian<double> jx = this->calculate_jacobian(Xs);
 		return std::tuple{ Xs.back(),jx};
 	}
-	auto integrate_stm(const ODEState<double>& x0, double tf, const std::vector<EventPack>& events) const {
+	STMEventRet integrate_stm(const ODEState<double>& x0, double tf, const std::vector<EventPack>& events) const {
 		auto [Xs,eventlocs] = this->integrate_dense(x0, tf, events,false);
 		Jacobian<double> jx = this->calculate_jacobian(Xs);
 		return std::tuple{Xs.back(),jx,eventlocs };
@@ -1256,7 +1272,9 @@ public:
 
 	template<class ... Args>
 	auto integrate_stm_parallel_impl(
-		const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, int thrs, Args && ... args) {
+		const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, int thrs, Args && ... args) ->
+		std::vector<decltype(Integrator::integrate_stm(x0s[0], tfs[0], args...))>
+	{
 
 		if (x0s.size() != tfs.size()) {
 			throw std::invalid_argument("List of initial states and final times must be the same size");
@@ -1287,15 +1305,15 @@ public:
 		return results;
 	}
 	
-	auto integrate_stm_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, int thrs) {
+	std::vector<STMRet> integrate_stm_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, int thrs) {
 		return this->integrate_stm_parallel_impl(x0s, tfs, thrs);
 	}
-	auto integrate_stm_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs,
+	std::vector<STMEventRet> integrate_stm_parallel(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs,
 		const std::vector<EventPack>& events, int thrs) {
 		return this->integrate_stm_parallel_impl(x0s, tfs, thrs, events);
 	}
 
-	auto integrate_stm_parallel(const ODEState<double>& x0, double tf,int thrs) {
+	STMRet integrate_stm_parallel(const ODEState<double>& x0, double tf,int thrs) {
 		this->setPoolThreads(thrs);
 
 		
@@ -1303,9 +1321,8 @@ public:
 		std::vector<ODEState<double>> Xs(thrs + 1);
 		Xs[0] = x0;
 
-		using RetType = std::tuple<ODEState<double>, Jacobian<double>>;
 
-		std::vector<std::future<RetType>> results(thrs);
+		std::vector<std::future<STMRet>> results(thrs);
 
 		Eigen::MatrixXd jxall(this->IRows(), this->IRows());
 		jxall.setIdentity();
@@ -1326,7 +1343,7 @@ public:
 			if (i == (thrs - 1)) Xs[i + 1] = xf;
 		}
 
-		RetType tup_final;
+		STMRet tup_final;
 		std::get<0>(tup_final) = Xs.back();
 		std::get<1>(tup_final) = jxall.topRows(this->ORows());
 		return tup_final;
@@ -1455,14 +1472,7 @@ public:
 
 		}
 
-		using IntegRet = ODEState<double>;
-		using DenseRet = std::vector<ODEState<double>>;
-		using STMRet = std::tuple< IntegRet, Jacobian<double> >;
-
-		using IntegEventRet = std::tuple< IntegRet, EventLocsType > ;
-		using DenseEventRet = std::tuple< DenseRet, EventLocsType >;
-		using STMEventRet   = std::tuple< IntegRet, Jacobian<double>, EventLocsType >;
-
+		
 
 		obj.def("integrate",
 			(IntegRet(Integrator::*)(const ODEState<double>&,double) const) &Integrator::integrate,
@@ -1512,7 +1522,7 @@ public:
 			py::arg("Xt0UP"), py::arg("tf"), py::arg("n"), py::arg("StopFunc"));
 
 		obj.def("integrate_dense",
-			(DenseEventRet(Integrator::*)(const ODEState<double>&, double, const std::vector<EventPack>&, const bool& ) const) & Integrator::integrate_dense,
+			(DenseEventRet(Integrator::*)(const ODEState<double>&, double, const std::vector<EventPack>&,  bool ) const) & Integrator::integrate_dense,
 			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"), py::arg("alloutput") = false);
 
 		obj.def("integrate_dense",
