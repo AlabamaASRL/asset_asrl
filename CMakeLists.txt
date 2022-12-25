@@ -49,7 +49,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Release Flags
-list(APPEND RELEASE_FLAGS "-O2")
+list(APPEND RELEASE_FLAGS "-O")
 list(APPEND RELEASE_FLAGS "-march=native")
 
 if(WIN32)
@@ -64,7 +64,7 @@ if(WIN32)
 endif()
 
 if(NOT WIN32)
-    list(APPEND RELEASE_FLAGS "-mtune=native")
+    # list(APPEND RELEASE_FLAGS "-mtune=native")
     # Debugging Flags
     set(DEBUG_FLAGS "-g" "-ggdb3")
 
@@ -85,7 +85,7 @@ if(LINK_TIME_OPT)
 
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-    set(CMAKE_CXX_COMPILE_OPTIONS_IPO ${CMAKE_CXX_COMPILE_OPTIONS_IPO} -flto=9)
+    set(CMAKE_CXX_COMPILE_OPTIONS_IPO ${CMAKE_CXX_COMPILE_OPTIONS_IPO} -flto=1)
   endif()
 
 else()
