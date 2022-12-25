@@ -236,7 +236,7 @@ struct KeplerPropagator : VectorFunction<KeplerPropagator, 7, 6,
   DENSE_FUNCTION_BASE_TYPES(Base);
 
 
-  GenericFunction<7, 6> propfunc;
+  GenericFunction<-1, -1> propfunc;
   double mu = 1.0;
   double tol = 1.0e-12;
   int iters = 19;
