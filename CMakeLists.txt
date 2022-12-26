@@ -48,6 +48,14 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(NOT WIN32)
+    message("CMAKE_CXX_FLAGS_RELEASE is ${CMAKE_CXX_FLAGS_RELEASE}")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+    message("CMAKE_CXX_FLAGS_RELEASE is ${CMAKE_CXX_FLAGS_RELEASE}")
+endif()
+
+
+
 # Release Flags
 list(APPEND RELEASE_FLAGS "-O2")
 list(APPEND RELEASE_FLAGS "-march=native")
@@ -264,7 +272,7 @@ add_subdirectory(src)
 
 # Documentation
 # READ: pip install sphinx,breathe,furo before trying to build docs
-add_subdirectory(doc)
+# add_subdirectory(doc)
 
 # Formatting
 include(cmake/clang-format.cmake)
