@@ -108,13 +108,15 @@ add_library(astro STATIC
   Astro/ASSET_Astro.cpp
   Astro/KeplerUtils.h 
   Astro/KeplerUtils.cpp
+  Astro/KeplerModel.h 
+  Astro/KeplerModel.cpp
   Astro/LambertSolver.h 
   Astro/LambertSolver.cpp
   Astro/LambertSolverMultiRevTest.h 
   Astro/LambertSolverMultiRevTest.cpp
   )
 
-
+target_precompile_headers(astro REUSE_FROM pch)
 target_include_directories(astro PRIVATE ${INCLUDE_DIRS})
 target_compile_options(astro PUBLIC ${COMPILE_FLAGS})
 

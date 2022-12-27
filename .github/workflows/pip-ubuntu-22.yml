@@ -5,7 +5,7 @@ on:
     - cron: "0 20 * * 5"
   push:
     branches:
-      - gcc-build-fix
+      - master
 
 jobs:
   build:
@@ -14,7 +14,7 @@ jobs:
       matrix:
         platform: [ubuntu-22.04]
         python-version: ["3.9"]
-        compiler: ["clang-14"]
+        compiler: ["clang-13"]
 
     runs-on: ${{ matrix.platform }}
 
