@@ -1,0 +1,660 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Orbit Family Continuation" href="halo.html" /><link rel="prev" title="Space Shuttle Reentry" href="ReentryExample.html" />
+
+    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
+        <title>Cart-Pole Swing Up - ASSET 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: red;
+  --color-brand-content: #CC3333;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">ASSET 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">ASSET 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Install.html">Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/ODEGuide.html">ODE Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/IntegratorGuide.html">Integrator Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/PSIOPT.html">PSIOPT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlUtilites.html">Optimal Control Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="examples.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Cart-Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Multi-Spacecraft Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <div class="section" id="cart-pole-swing-up">
+<h1>Cart-Pole Swing Up<a class="headerlink" href="#cart-pole-swing-up" title="Permalink to this heading">#</a></h1>
+<p>In this example, derived from Kelly’s excellent intro to collocation methods [1], we will compute the minimum effort trajectory to swing a cart-pole system to a vertical orientation.
+The cart with mass, <span class="math notranslate nohighlight">\(m_1\)</span>, is free to move along a horizontal track in the <span class="math notranslate nohighlight">\(x\)</span> direction subject to an applied force, <span class="math notranslate nohighlight">\(F\)</span>.
+The angular position, <span class="math notranslate nohighlight">\(\theta\)</span>, of the attached pole with length, <span class="math notranslate nohighlight">\(l\)</span>, and mass, <span class="math notranslate nohighlight">\(m_2\)</span>, is measured from the <span class="math notranslate nohighlight">\(-y\)</span> direction.
+The dynamics of the combined cart-pole system can be represented as a system of first order ODE’s as shown below.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\vec{X} = [x,\theta,\dot{x},\dot{\theta}]^T \quad \quad \vec{U} = [F]\\\begin{split}
+\dot{\vec{X}}=\begin{bmatrix}
+                \dot{x}\\
+                \dot{\theta}\\
+                \ddot{x}\\
+                \ddot{\theta}\\
+                \end{bmatrix}
+                = \begin{bmatrix}
+                \dot{x}\\
+                \dot{\theta}\\
+                \textbf{M}^{-1} \vec{Q}
+                \end{bmatrix}\end{split}\end{aligned}\end{align} \]</div>
+</div>
+<p>The matrix, <span class="math notranslate nohighlight">\(\textbf{M}\)</span>, and vector, <span class="math notranslate nohighlight">\(\vec{Q}\)</span>, necessary for computing the second time derivatives of <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(\theta\)</span>, can be found by straightforward
+application of Newtonian or Lagrangian mechanics.
+Since <span class="math notranslate nohighlight">\(\textbf{M}\)</span> is a 2 by 2 matrix it is easy to derive an explicit formula for <span class="math notranslate nohighlight">\(\ddot{x}\)</span> and <span class="math notranslate nohighlight">\(\ddot{\theta}\)</span> [1]. However, in this example, we leave the dynamics
+in implicit matrix form in order to demonstrate ASSET’s differentiable matrix inverse expressions.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}\textbf{M} = \begin{bmatrix}
+\cos(\theta) &amp; l \\
+m_1 +m_2 &amp; m_2 l \cos(\theta)
+\end{bmatrix}
+\quad \quad
+\vec{Q} = \begin{bmatrix}
+-g \sin(\theta)  \\
+F + l m_2 \sin(\theta) \dot{\theta}^2
+\end{bmatrix}\end{split}\]</div>
+</div>
+<p>The cart/pole masses, boundary conditions, and path constraints used by Kelly [1] are shown below.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[m_1 = 1\;kg\quad\quad m_2 = .3\;kg\quad\quad l = .5\; m \quad \quad g = 9.81 \; m/s^2\]</div>
+</div>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}x(0) = 0\; m \quad \quad \theta(0)  &amp;= 0 \; rad   \quad \quad \dot{x}(0)&amp;= 0\; m/s  \quad \quad \dot{\theta}(0)=0 \; rad/s\\
+x(1) = 1\; m \quad \quad \theta(1)  &amp;= \pi \; rad   \quad \quad \dot{x}(1)&amp;= 0\; m/s  \quad \quad \dot{\theta}(1)=0 \; rad/s\end{aligned}\end{align} \]</div>
+</div>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[-2\;m \leq x(t)\leq 2\;m  \quad \quad   -20\;N \leq F(t)\leq 20\;N\]</div>
+</div>
+<p>The minimum effort trajectory is obtained by minimizing the integral of the square of the force applied to the cart.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[J = \int_0^1 F(t)^2 \;dt\]</div>
+</div>
+<p>The cart-pole dynamics can be implemented as an ASSET ODE as shown below. Here we use ASSET’s matrix functions to construct a row-major view of the coefficients of <span class="math notranslate nohighlight">\(\textbf{M}\)</span>.
+We can then invert this expression and multiply by <span class="math notranslate nohighlight">\(\vec{Q}\)</span>, to define <span class="math notranslate nohighlight">\(\ddot{x}\)</span> and <span class="math notranslate nohighlight">\(\ddot{\theta}\)</span>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CartPole</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">g</span><span class="p">):</span>
+        <span class="n">Xvars</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1">####################################################</span>
+        <span class="n">XtU</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">Xvars</span><span class="p">,</span><span class="n">Uvars</span><span class="p">)</span>
+
+        <span class="n">x</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">xdot</span><span class="p">,</span><span class="n">thetadot</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVar</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="o">-</span><span class="n">g</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span>
+                        <span class="n">F</span><span class="o">+</span><span class="n">m2</span><span class="o">*</span><span class="n">l</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">thetadot</span><span class="o">**</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">Mvec_rm</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span><span class="n">l</span><span class="p">,</span>
+                            <span class="n">m1</span><span class="o">+</span><span class="n">m2</span><span class="p">,</span><span class="n">m2</span><span class="o">*</span><span class="n">l</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
+
+        <span class="n">M</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">RowMatrix</span><span class="p">(</span><span class="n">Mvec_rm</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">xddot_thetaddot</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span><span class="o">*</span><span class="n">Q</span>
+
+        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">xdot</span><span class="p">,</span><span class="n">thetadot</span><span class="p">,</span><span class="n">xddot_thetaddot</span><span class="p">])</span>
+        <span class="c1">####################################################</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="n">Xvars</span><span class="p">,</span><span class="n">Uvars</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>After implementing the ODE, we define a phase and apply our boundary conditions and integral objective function. The units and time scale of this problem are already well conditioned
+and do not need any non-dimensionalization. Furthermore, it is sufficient to initialize the trajectory with a straight line initial guess between the fixed boundary conditions.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m1</span> <span class="o">=</span> <span class="mi">1</span>     <span class="c1"># Mass of Cart kg</span>
+<span class="n">m2</span> <span class="o">=</span><span class="mf">.3</span>     <span class="c1"># Mass of Pole kg</span>
+<span class="n">l</span>  <span class="o">=</span><span class="mf">.5</span>     <span class="c1"># Length of Pole m</span>
+<span class="n">g</span> <span class="o">=</span> <span class="mf">9.81</span>   <span class="c1"># you already know m/s^2</span>
+
+<span class="n">Fmax</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># N</span>
+<span class="n">xmax</span> <span class="o">=</span> <span class="mi">2</span>   <span class="c1"># m</span>
+
+<span class="n">tf</span>  <span class="o">=</span> <span class="mi">2</span>    <span class="c1"># s</span>
+<span class="n">xf</span>  <span class="o">=</span> <span class="mi">1</span>    <span class="c1"># m</span>
+
+<span class="n">ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">tf</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">IG</span> <span class="o">=</span> <span class="p">[[</span><span class="n">xf</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="mf">.00</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">]</span>
+
+
+<span class="n">ode</span> <span class="o">=</span> <span class="n">CartPole</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">g</span><span class="p">)</span>
+
+<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL5&quot;</span><span class="p">,</span><span class="n">IG</span><span class="p">,</span><span class="mi">64</span><span class="p">)</span>
+<span class="c1">#Fix first state (x,theta,xdot,thetadot) and time</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;First&quot;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),[</span><span class="mi">0</span> <span class="p">,</span><span class="mi">0</span>    <span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="c1">#Fix last state (x,theta,xdot,thetadot) and time</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Last&quot;</span> <span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),[</span><span class="n">xf</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tf</span><span class="p">])</span>
+<span class="c1"># Bound control forces</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="o">-</span><span class="n">Fmax</span><span class="p">,</span><span class="n">Fmax</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="n">xmax</span><span class="p">,</span><span class="n">xmax</span><span class="p">)</span>
+<span class="c1"># Minimize the &quot;control effort&quot;, the integral of square of applied force</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addIntegralObjective</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,[</span><span class="mi">5</span><span class="p">])</span>
+
+<span class="n">phase</span><span class="o">.</span><span class="n">setThreads</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_PrintLevel</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+
+<span class="n">Traj</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>On a 6 core i7-9750H laptop, with 64 LGL5 segments, this problem converges in 12 iterations of the optimize algorithm taking only 28 milliseconds.
+The final objective value is 58.80819. A plot and animation of the converged trajectory can be seen below.</p>
+<a class="reference internal image-reference" href="../_images/CartPoleFig.svg"><img alt="../_images/CartPoleFig.svg" src="../_images/CartPoleFig.svg" width="100%" /></a>
+<a class="reference internal image-reference" href="../_images/CartPoleGif2.gif"><img alt="../_images/CartPoleGif2.gif" src="../_images/CartPoleGif2.gif" style="width: 100%;" /></a>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Kelly, M., 2017. An introduction to trajectory optimization: How to do your own direct collocation. SIAM Review, 59(4), pp.849-904.</p></li>
+</ol>
+</div>
+<div class="section" id="full-code">
+<h2>Full-Code<a class="headerlink" href="#full-code" title="Permalink to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>    <span class="c1"># pip install seaborn if you dont have it</span>
+<span class="kn">import</span> <span class="nn">matplotlib.animation</span> <span class="k">as</span> <span class="nn">animation</span>
+
+<span class="n">vf</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
+<span class="n">oc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
+<span class="n">Args</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Example taken from</span>
+<span class="sd">Kelly, M., 2017. An introduction to trajectory optimization: How to do your own direct collocation. SIAM Review, 59(4), pp.849-904.</span>
+
+<span class="sd">Compute the minimum effort trajectory to swing a cart pole system to vertical.</span>
+<span class="sd">The boundary conditions, dynamics and objective are the same as in the reference,</span>
+<span class="sd">but we use asset&#39;s matrix functions to invert the mass matrix at run-time rather than solving</span>
+<span class="sd">for the equations of motion explicitly.</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="k">class</span> <span class="nc">CartPole</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">g</span><span class="p">):</span>
+        <span class="n">Xvars</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1">####################################################</span>
+        <span class="n">XtU</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">Xvars</span><span class="p">,</span><span class="n">Uvars</span><span class="p">)</span>
+
+        <span class="n">x</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">xdot</span><span class="p">,</span><span class="n">thetadot</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVar</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="o">-</span><span class="n">g</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span>
+                        <span class="n">F</span><span class="o">+</span><span class="n">m2</span><span class="o">*</span><span class="n">l</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">thetadot</span><span class="o">**</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">Mvec_rm</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span><span class="n">l</span><span class="p">,</span>
+                            <span class="n">m1</span><span class="o">+</span><span class="n">m2</span><span class="p">,</span><span class="n">m2</span><span class="o">*</span><span class="n">l</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
+
+        <span class="n">M</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">RowMatrix</span><span class="p">(</span><span class="n">Mvec_rm</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">xddot_thetaddot</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span><span class="o">*</span><span class="n">Q</span>
+
+        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">xdot</span><span class="p">,</span><span class="n">thetadot</span><span class="p">,</span><span class="n">xddot_thetaddot</span><span class="p">])</span>
+        <span class="c1">####################################################</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="n">Xvars</span><span class="p">,</span><span class="n">Uvars</span><span class="p">)</span>
+
+<span class="c1">###############################################################################</span>
+
+<span class="k">def</span> <span class="nf">Plot</span><span class="p">(</span><span class="n">Traj</span><span class="p">):</span>
+
+    <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Traj</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+
+    <span class="n">P0X</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">P0Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">P1X</span>  <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">l</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">P1Y</span>  <span class="o">=</span> <span class="o">-</span><span class="n">l</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">P0X</span><span class="p">)</span>
+
+    <span class="n">cols</span><span class="o">=</span><span class="n">sns</span><span class="o">.</span><span class="n">color_palette</span><span class="p">(</span><span class="s2">&quot;viridis&quot;</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">ax0</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">321</span><span class="p">)</span>
+    <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">323</span><span class="p">)</span>
+    <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">325</span><span class="p">)</span>
+    <span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+
+    <span class="n">axs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ax0</span><span class="p">,</span><span class="n">ax1</span><span class="p">,</span><span class="n">ax2</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">],</span><span class="n">T</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">],</span><span class="n">color</span><span class="o">=</span><span class="n">cols</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+
+
+    <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P0X</span><span class="p">,</span><span class="n">P0Y</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+    <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P1X</span><span class="p">,</span><span class="n">P1Y</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="p">[</span><span class="n">P0X</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">P1X</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="p">[</span><span class="n">P0Y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">P1Y</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">cols</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">)</span>
+
+    <span class="n">ax0</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ax3</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">ax0</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$X$&#39;</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\theta$&#39;</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$U$&#39;</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+
+    <span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$X$&#39;</span><span class="p">)</span>
+    <span class="n">ax3</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$Y$&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mf">10.5</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="n">forward</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">set_tight_layout</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">Animate</span><span class="p">(</span><span class="n">Traj</span><span class="p">):</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Traj</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+
+    <span class="n">P0X</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">P0Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">P1X</span>  <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">l</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">P1Y</span>  <span class="o">=</span> <span class="o">-</span><span class="n">l</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">P0X</span><span class="p">)</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+    <span class="n">ax0</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">321</span><span class="p">,</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">.05</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="o">*</span><span class="mf">1.05</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="mf">1.2</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="mf">1.1</span><span class="p">))</span>
+    <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">323</span><span class="p">,</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">.05</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="o">*</span><span class="mf">1.05</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="mf">1.2</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="mf">1.1</span><span class="p">))</span>
+    <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">325</span><span class="p">,</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">.05</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="o">*</span><span class="mf">1.05</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span><span class="o">*</span><span class="mf">1.2</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span><span class="o">*</span><span class="mf">1.1</span><span class="p">))</span>
+    <span class="n">ax3</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">.4</span><span class="p">,</span> <span class="mf">1.6</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+
+    <span class="n">ax3</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+
+    <span class="n">pole</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">([],[],</span><span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">)</span>
+    <span class="n">X</span><span class="p">,</span> <span class="o">=</span><span class="n">ax0</span><span class="o">.</span><span class="n">plot</span><span class="p">([],[])</span>
+    <span class="n">theta</span><span class="p">,</span> <span class="o">=</span><span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">([],[])</span>
+    <span class="n">U</span><span class="p">,</span> <span class="o">=</span><span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">([],[])</span>
+
+    <span class="k">def</span> <span class="nf">init</span><span class="p">():</span>
+        <span class="n">pole</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],[])</span>
+        <span class="n">U</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],[])</span>
+        <span class="n">X</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],[])</span>
+        <span class="n">theta</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],[])</span>
+        <span class="k">return</span> <span class="n">pole</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">U</span>
+
+    <span class="k">def</span> <span class="nf">animate</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="p">[</span><span class="n">P0X</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">P1X</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="p">[</span><span class="n">P0Y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">P1Y</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+        <span class="n">pole</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">)</span>
+        <span class="n">X</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">theta</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">U</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="n">T</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">pole</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">U</span>
+
+    <span class="n">ani</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">FuncAnimation</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">animate</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">P0X</span><span class="p">),</span>
+                                  <span class="n">interval</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">blit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">init_func</span><span class="o">=</span><span class="n">init</span><span class="p">,</span>
+                                  <span class="n">repeat_delay</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+
+
+
+    <span class="n">ax0</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ax3</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">ax0</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$X$&#39;</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\theta$&#39;</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$U$&#39;</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+    <span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$X$&#39;</span><span class="p">)</span>
+    <span class="n">ax3</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$Y$&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mf">15.5</span><span class="p">,</span> <span class="mf">7.5</span><span class="p">,</span> <span class="n">forward</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+
+
+<span class="c1">##############################################################################</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="n">m1</span> <span class="o">=</span> <span class="mi">1</span>     <span class="c1"># Mass of Cart kg</span>
+    <span class="n">m2</span> <span class="o">=</span><span class="mf">.3</span>     <span class="c1"># Mass of Pole kg</span>
+    <span class="n">l</span>  <span class="o">=</span><span class="mf">.5</span>     <span class="c1"># Length of Pole m</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="mf">9.81</span>   <span class="c1"># you already know m/s^2</span>
+
+    <span class="n">Fmax</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># N</span>
+    <span class="n">xmax</span> <span class="o">=</span> <span class="mi">2</span>   <span class="c1"># m</span>
+
+    <span class="n">tf</span>  <span class="o">=</span> <span class="mi">2</span>    <span class="c1"># s</span>
+    <span class="n">xf</span>  <span class="o">=</span> <span class="mi">1</span>    <span class="c1"># m</span>
+
+    <span class="n">ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">tf</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">IG</span> <span class="o">=</span> <span class="p">[[</span><span class="n">xf</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="mf">.00</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">]</span>
+
+
+    <span class="n">ode</span> <span class="o">=</span> <span class="n">CartPole</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">g</span><span class="p">)</span>
+
+    <span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL5&quot;</span><span class="p">,</span><span class="n">IG</span><span class="p">,</span><span class="mi">64</span><span class="p">)</span>
+    <span class="c1">#Fix first state (x,theta,xdot,thetadot) and time</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;First&quot;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),[</span><span class="mi">0</span> <span class="p">,</span><span class="mi">0</span>    <span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="c1">#Fix last state (x,theta,xdot,thetadot) and time</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Last&quot;</span> <span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),[</span><span class="n">xf</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tf</span><span class="p">])</span>
+    <span class="c1"># Bound control forces</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="o">-</span><span class="n">Fmax</span><span class="p">,</span><span class="n">Fmax</span><span class="p">)</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="n">xmax</span><span class="p">,</span><span class="n">xmax</span><span class="p">)</span>
+    <span class="c1"># Minimize the &quot;control effort&quot;, the integral of square of applied force</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">addIntegralObjective</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,[</span><span class="mi">5</span><span class="p">])</span>
+
+    <span class="n">phase</span><span class="o">.</span><span class="n">setThreads</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_PrintLevel</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">phase</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+
+    <span class="n">Traj</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+
+
+
+    <span class="c1">## Example of how to get exact timing statistics should you need to</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total Time (Sum of all below)             :&quot;</span><span class="p">,</span><span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">LastTotalTime</span><span class="p">,</span><span class="s2">&quot; s&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Function/Derivative Eval Time             :&quot;</span><span class="p">,</span><span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">LastFuncTime</span><span class="p">,</span><span class="s2">&quot; s&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;KKT Matrix Factor/Solve Time              :&quot;</span><span class="p">,</span><span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">LastKKTTime</span><span class="p">,</span><span class="s2">&quot; s&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;KKT Matrix Pre-Analysis/Mem Alloc Time    :&quot;</span><span class="p">,</span><span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">LastPreTime</span><span class="p">,</span><span class="s2">&quot; s&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Miscellaneous (Mostly Console Print) Time :&quot;</span><span class="p">,</span><span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">LastMiscTime</span><span class="p">,</span><span class="s2">&quot; s&quot;</span><span class="p">)</span>
+
+
+
+    <span class="n">Plot</span><span class="p">(</span><span class="n">Traj</span><span class="p">)</span>
+    <span class="n">Animate</span><span class="p">(</span><span class="n">Traj</span><span class="p">)</span>
+
+    <span class="c1">###########################################################################</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="halo.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Orbit Family Continuation</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="ReentryExample.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Space Shuttle Reentry</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022-2023, UA ASRL
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Cart-Pole Swing Up</a><ul>
+<li><a class="reference internal" href="#references">References</a></li>
+<li><a class="reference internal" href="#full-code">Full-Code</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>

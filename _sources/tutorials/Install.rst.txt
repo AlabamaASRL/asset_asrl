@@ -97,6 +97,11 @@ Step-By-Step Guide
 
 #. Now, clone the `ASSET repo <https://github.com/AlabamaASRL/asset_asrl>`_  to where you want it to live.
 
+	  .. note::
+
+	  If you are cloning from the command line, make sure to call :code:`git submodule update --init --recursive` inside of the repository after cloning to ensure that the dependencies are downloaded.
+
+
 #. We are almost there! Now, open VS and be sure to run it as administrator to avoid any conflicts when building the Python library. Additionally, ensure that your Python IDE is closed during this step. 
 	 
 	  .. note::
@@ -207,6 +212,11 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 	   source /opt/intel/oneapi/setvars.sh
 
 #. Now, clone the `ASSET repo <https://github.com/AlabamaASRL/asset_asrl>`_  to where you want it to live.
+
+	.. note::
+
+		  If you are cloning from the command line, make sure to call :code:`git submodule update --init --recursive` inside of the repository after cloning to ensure that the dependencies are downloaded.
+
 
 #. After installing the dependencies, open VSCode to build ASSET.
 	
