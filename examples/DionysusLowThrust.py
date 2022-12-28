@@ -97,7 +97,7 @@ if __name__ == "__main__":
     
     integ = ode.integrator(.1,Tab)
     integ.setAbsTol(1.0e-13)
-    
+   
     ## Do this for non-blockconstant control or if you dont care about exact accuracy
     ReintTraj1 = integ.integrate_dense(ConvTraj[0],ConvTraj[-1][7])
     
@@ -106,7 +106,6 @@ if __name__ == "__main__":
     for i in range(0,len(ConvTraj)-1):
         Next = integ.integrate_dense(ReintTraj2[-1],ConvTraj[i+1][7])[1::]
         ReintTraj2+=Next
-        
     
     
     

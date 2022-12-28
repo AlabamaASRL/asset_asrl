@@ -1,7 +1,7 @@
 import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
-import seaborn as sns
+import seaborn as sns    # pip install seaborn if you dont have it
 import matplotlib.animation as animation
 
 vf = ast.VectorFunctions
@@ -22,13 +22,15 @@ for the equations of motion explicitly.
 class CartPole(oc.ODEBase):
     
     def __init__(self,l,m1,m2,g):
+        Xvars = 4
+        Uvars = 1
+        ####################################################
+        XtU = oc.ODEArguments(Xvars,Uvars)
         
-        args = oc.ODEArguments(4,1)
+        x,theta,xdot,thetadot = XtU.XVec().tolist()
+        F = XtU.UVar(0)
         
-        x,theta,xdot,thetadot = args.XVec().tolist()
-        F = args.UVar(0)
-        
-        rhs = vf.stack([-g*vf.sin(theta),
+        Q = vf.stack([-g*vf.sin(theta),
                         F+m2*l*vf.sin(theta)*thetadot**2])
         
         Mvec_rm = vf.stack(vf.cos(theta),l,
@@ -36,11 +38,11 @@ class CartPole(oc.ODEBase):
         
         M = vf.RowMatrix(Mvec_rm,2,2)
         
-        xddot_thetaddot = M.inverse()*rhs
-        
-
+        xddot_thetaddot = M.inverse()*Q
+    
         ode = vf.stack([xdot,thetadot,xddot_thetaddot])
-        super().__init__(ode,4,1)
+        ####################################################
+        super().__init__(ode,Xvars,Uvars)
         
 ###############################################################################
 
@@ -166,42 +168,43 @@ def Animate(Traj):
 ##############################################################################        
         
 if __name__ == "__main__":
-
-    ast.SoftwareInfo()        
             
     m1 = 1     # Mass of Cart kg
     m2 =.3     # Mass of Pole kg
     l  =.5     # Length of Pole m
-    g = 9.81   # you already know m/s^1
+    g = 9.81   # gravity m/s^2
     
-    umax = 20
-    dmax = 2
+    Fmax = 20  # N
+    xmax = 2   # m
     
-    tf = 2    # s
-    d  = 1           
+    tf  = 2    # s
+    xf  = 1    # m       
     
     ts = np.linspace(0,tf,100)
-    IG = [[d*t/tf,np.pi*t/tf,0,0,t,.00] for t in ts]
+    IG = [[xf*t/tf,np.pi*t/tf,0,0,t,.00] for t in ts]
     
     
     ode = CartPole(l,m1,m2,g)
+    
     phase = ode.phase("LGL5",IG,64)
-    phase.addBoundaryValue("Front",range(0,5),[0,0,0,0,0])
-    phase.addBoundaryValue("Back",range(0,5),[d,np.pi,0,0,tf])
-    
-    
-    phase.addLUVarBound("Path",5,-umax,umax,1.0)
-    phase.addLUVarBound("Path",0,-dmax,dmax,1.0)
-    
+    #Fix first state (x,theta,xdot,thetadot) and time
+    phase.addBoundaryValue("First",range(0,5),[0 ,0    , 0, 0, 0])
+    #Fix last state (x,theta,xdot,thetadot) and time
+    phase.addBoundaryValue("Last" ,range(0,5),[xf,np.pi, 0, 0, tf])
+    # Bound control forces
+    phase.addLUVarBound("Path",5,-Fmax,Fmax)
+    phase.addLUVarBound("Path",0,-xmax,xmax)
+    # Minimize the "control effort", the integral of square of applied force
     phase.addIntegralObjective(Args(1)[0]**2,[5])
+    
     phase.setThreads(8,8)
-    phase.optimizer.PrintLevel= 1
+    phase.optimizer.set_PrintLevel(1)
     phase.optimize()
     
+    Traj = phase.returnTraj()
+
     
-    
-        
-    
+    ## Example of how to get exact timing statistics should you need to
     print("Total Time (Sum of all below)             :",phase.optimizer.LastTotalTime," s")
     print("Function/Derivative Eval Time             :",phase.optimizer.LastFuncTime," s")
     print("KKT Matrix Factor/Solve Time              :",phase.optimizer.LastKKTTime," s")
@@ -209,7 +212,6 @@ if __name__ == "__main__":
     print("Miscellaneous (Mostly Console Print) Time :",phase.optimizer.LastMiscTime," s")
     
     
-    Traj = phase.returnTraj()
    
     Plot(Traj)
     Animate(Traj)

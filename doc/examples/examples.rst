@@ -9,6 +9,7 @@ Many more examples may also be found in the :code:`/examples` folder of the ASSE
 
     Delta3
     ReentryExample
+    CartPole
     halo
     zermelo
     zermelolink
