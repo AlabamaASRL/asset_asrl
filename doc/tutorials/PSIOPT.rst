@@ -455,7 +455,7 @@ and expensive preprocessing that cannot be parallelized.
 
 For both methods, if console printing is enabled, Jet will dynamically print out its progress, and alert of the convergence rate of each problem and the estimated remaining run-time.
 
-.. image:: _static/JetGif4.GIF
+.. image:: _static/JetGif4.gif
     :width: 100%
 
 
