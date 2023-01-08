@@ -62,6 +62,9 @@ DESTINATION  "${SPHINX_BUILD}/tutorials/_static/")
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/examples/_static/"
 DESTINATION  "${SPHINX_BUILD}/examples/_static/")
 
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/.nojekyll"
+DESTINATION  "${SPHINX_BUILD}/")
+
 
 message(STATUS ${BINARY_BUILD_DIR})
 

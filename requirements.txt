@@ -1,6 +1,8 @@
 numpy
 pybind11
-breathe
 sphinx
+furo
+spiceypy
+breathe
 sphinx-rtd-theme
 exhale

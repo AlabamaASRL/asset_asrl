@@ -87,7 +87,7 @@ class CMakeBuild(build_ext):
 
 
 setup(
-    name="asset",
+    name="asset_asrl",
     version="0.0.1",
     author="Alabama ASRL",
     description="High-speed, extensible, object-oriented trajectory design and optimization",
