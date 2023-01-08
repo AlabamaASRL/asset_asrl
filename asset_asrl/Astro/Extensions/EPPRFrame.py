@@ -1,6 +1,5 @@
 import numpy as np
 import asset as ast
-import matplotlib.pyplot as plt
 import asset_asrl.Astro.Constants as c
 from   asset_asrl.Astro.SpiceRead import GetEphemTraj2,PoleVector,SpiceFrameTransform
 import asset_asrl.Astro.Date as dt
