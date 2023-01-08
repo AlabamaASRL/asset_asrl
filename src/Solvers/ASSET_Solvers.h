@@ -13,7 +13,7 @@ namespace ASSET {
 
 	void SolversBuild(FunctionRegistry& reg, py::module& m) {
 		//auto sol = m.def_submodule("Solvers","SubModule Containing PSIOPT,NLP, and Solver Flags");
-
+	
 		auto& sol = reg.getSolversModule();
 		int DSECOND = dsecnd();
 		PSIOPT::Build(sol);

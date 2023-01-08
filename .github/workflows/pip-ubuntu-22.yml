@@ -1,4 +1,4 @@
-name: pip-ubuntu-20
+name: pip-ubuntu-22
 
 on:
   schedule:
@@ -37,3 +37,11 @@ jobs:
 
       - name: Build and install
         run: pip install --verbose .
+      - name: Run CMake on Docs  # Now that library is installed on runner, we can properly doc the pyd
+        run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_SPHINX_DOCS=True
+      - name: Build Sphinx Docs 
+        run: cmake --build build --target sphinx --config Release -- -j1 
+      - name: Deploy Sphinx Docs 
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build/doc/sphinx # The folder the action will deploy to gh-pages
