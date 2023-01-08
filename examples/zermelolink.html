@@ -2,12 +2,13 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Multi-Spacecraft Optimization" href="MultiTarg.html" /><link rel="prev" title="Zermelo’s Problem" href="zermelo.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Multi-Spacecraft Optimization" href="MultiTarg.html" /><link rel="prev" title="Zermelo’s Problem" href="zermelo.html" />
 
-    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
         <title>Multi-Phase Zermelo’s Problem - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -150,7 +151,7 @@
   <span class="sidebar-brand-text">ASSET 0.0.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -219,7 +220,7 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="multi-phase-zermelo-s-problem">
+          <section id="multi-phase-zermelo-s-problem">
 <h1>Multi-Phase Zermelo’s Problem<a class="headerlink" href="#multi-phase-zermelo-s-problem" title="Permalink to this heading">#</a></h1>
 <p>If you haven’t explored <a class="reference internal" href="zermelo.html#zermelo-s-problem"><span class="std std-ref">Zermelo’s Problem</span></a>, it is highly recommended that you do so before going much further.
 It provides much needed background information about the problem, as well as the initial code that we will be modifying.</p>
@@ -227,7 +228,7 @@ It provides much needed background information about the problem, as well as the
 that single phase. What if instead we wanted travel from A to any arbitrary number of points along the way to our final destination? ASSET is designed to handle exactly this type of problem,
 where each phase can have varying constraints and objectives to solve in the pursuit of our final target. In this example, we will expand the single phase Zermelo’s problem into multiple phases, which is a very
 useful tool to have for trajectory optimization.</p>
-<div class="section" id="link-constraints">
+<section id="link-constraints">
 <h2>Link Constraints:<a class="headerlink" href="#link-constraints" title="Permalink to this heading">#</a></h2>
 <p>Link Constraints are the way that ASSET handles multi-phase problems. A link constraint enforces that state variables must be equal across phases. That is to say that the final state of phase 1 must be equal to the first state of phase 2.
 To do this to the previous problem, we only have to make a few additions to the code from <a class="reference internal" href="zermelo.html#zermelo-s-problem"><span class="std std-ref">Zermelo’s Problem</span></a>. The primary changes occur in the <code class="code docutils literal notranslate"><span class="pre">navigate</span></code> function.</p>
@@ -323,15 +324,15 @@ between the phases and that our trajectory will be continuous. Aftwards we use t
 <p>The final problem looks quite different from the single phase Zermelo problem, as we now move from point to point, all the while satisfying our optimization objectives and constraints for each phase.
 We defined the initial points such that the boat maneuvers back to the initial state at the end time. However, any number of points could be added, provided that a feasible solution exists.</p>
 <p>As for plots, first we have the comparison of the different wind models and how they affect the movement of the boat. We will take the same approach as last time and leave the technical analysis to you.</p>
-<div class="figure align-center">
+<figure class="align-center">
 <a class="reference internal image-reference" href="../_images/CompareWindModelsLink.svg"><img alt="../_images/CompareWindModelsLink.svg" src="../_images/CompareWindModelsLink.svg" width="100%" /></a>
-</div>
+</figure>
 <p>The same as last time, we have also a plot to compare how different boat speeds affect the final trajectory in a multi-phase problem.</p>
-<div class="figure align-center">
+<figure class="align-center">
 <a class="reference internal image-reference" href="../_images/CompareBoatSpeedLink.svg"><img alt="../_images/CompareBoatSpeedLink.svg" src="../_images/CompareBoatSpeedLink.svg" width="100%" /></a>
-</div>
-</div>
-<div class="section" id="full-code">
+</figure>
+</section>
+<section id="full-code">
 <h2>Full Code<a class="headerlink" href="#full-code" title="Permalink to this heading">#</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -635,8 +636,8 @@ We defined the initial points such that the boat maneuvers back to the initial s
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
         </article>
       </div>
@@ -675,9 +676,7 @@ We defined the initial points such that the boat maneuvers back to the initial s
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         

@@ -2,12 +2,13 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="PSIOPT" href="PSIOPT.html" /><link rel="prev" title="Optimal Control Phase Tutorial" href="PhaseGuide.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="PSIOPT" href="PSIOPT.html" /><link rel="prev" title="Optimal Control Phase Tutorial" href="PhaseGuide.html" />
 
-    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
         <title>Optimal Control Problem Tutorial - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -150,7 +151,7 @@
   <span class="sidebar-brand-text">ASSET 0.0.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -219,7 +220,7 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="optimal-control-problem-tutorial">
+          <section id="optimal-control-problem-tutorial">
 <h1>Optimal Control Problem Tutorial<a class="headerlink" href="#optimal-control-problem-tutorial" title="Permalink to this heading">#</a></h1>
 <p>The previous section on <a class="reference internal" href="PhaseGuide.html#phase-guide"><span class="std std-ref">phases</span></a> covers everything you need to know about formulating and solving
 single phase optimal control problems. In this section, we will cover how you can link these
@@ -248,7 +249,7 @@ phases together into a multi phase optimal control problem using the <code class
 <span class="n">odeXUP</span> <span class="o">=</span> <span class="n">DummyODE</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="section" id="initialization">
+<section id="initialization">
 <h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this heading">#</a></h2>
 <p>To start, we will create 6 phases (2 of each ODE) type, as shown below that we will then link together inside of
 a single optimal control problem. Though not shown here, each phase may be constructed using methods we discussed in the
@@ -319,8 +320,8 @@ Link Objectives.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ocp</span><span class="o">.</span><span class="n">setLinkParams</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">15</span><span class="p">)))</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="link-constraints-and-objectives">
+</section>
+<section id="link-constraints-and-objectives">
 <h2>Link Constraints and Objectives<a class="headerlink" href="#link-constraints-and-objectives" title="Permalink to this heading">#</a></h2>
 <p>Application of link objectives and constraints in an <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code>, is built upon the concept of phase regions
 and indexing we covered in phase <a class="reference internal" href="PhaseGuide.html#phase-guide"><span class="std std-ref">tutorial</span></a>. The total variables vector, <span class="math notranslate nohighlight">\(\vec{x}\)</span>, consists of those defined for each phase, <span class="math notranslate nohighlight">\(\vec{x}^{j}\)</span>, followed by
@@ -352,7 +353,7 @@ extra link parameters.</p>
 <div class="math notranslate nohighlight">
 \[\vec{f}([\vec{V}_{1\lor n}^k,\vec{P}^k,\vec{S}^k,\ldots \vec{L}]) \quad  k \in [1,\ldots m]\]</div>
 </div>
-<div class="section" id="link-equality-constraints">
+<section id="link-equality-constraints">
 <h3>Link Equality Constraints<a class="headerlink" href="#link-equality-constraints" title="Permalink to this heading">#</a></h3>
 <p>A link equality constraint of the form <span class="math notranslate nohighlight">\(\vec{h}(\vec{x}) = \vec{0}\)</span> can be added to the phase using the
 <code class="code docutils literal notranslate"><span class="pre">.addLinkEqualCon</span></code> method. The most general way to link two phases with an equality constraint is shown below. This contrived example is
@@ -501,8 +502,8 @@ each adjacent phase as shown below. Alternatively, you can use the convenient <c
 <p>We should note that basically all simple continuity constraints between phases can be
 implemented using a combination of <code class="code docutils literal notranslate"><span class="pre">addDirectLinkEqualCon</span></code> and <code class="code docutils literal notranslate"><span class="pre">addForwardLinkEqualCon</span></code>,
 and users should only have to fall back on the more general form in special cases.</p>
-</div>
-<div class="section" id="link-inequality-constraints">
+</section>
+<section id="link-inequality-constraints">
 <h3>Link Inequality Constraints<a class="headerlink" href="#link-inequality-constraints" title="Permalink to this heading">#</a></h3>
 <p>A link inequality constraint of the form <span class="math notranslate nohighlight">\(\vec{g}(\vec{x}) \leq \vec{0}\)</span> can be added to the <code class="code docutils literal notranslate"><span class="pre">ocp</span></code> using the
 <code class="code docutils literal notranslate"><span class="pre">.addLinkInequalCon</span></code> method. The interface for two phase and multi-phase linking works exactly the same as <code class="code docutils literal notranslate"><span class="pre">addLinkEqualCon</span></code> in regards
@@ -563,8 +564,8 @@ to order of arguments the different calling signatures.</p>
 <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkParamInequalCon</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="n">LPvecs</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="link-objectives">
+</section>
+<section id="link-objectives">
 <h3>Link Objectives<a class="headerlink" href="#link-objectives" title="Permalink to this heading">#</a></h3>
 <p>You can also add objectives of the form <span class="math notranslate nohighlight">\(f(x)\)</span> using the <code class="code docutils literal notranslate"><span class="pre">addLinkObjective</span></code> method. Once again, the calling signature
 for all methods is identical to <code class="code docutils literal notranslate"><span class="pre">addLinkEqualCon</span></code>. Likewise, objectives involving only the link parameters can be added with
@@ -595,9 +596,9 @@ phase are implicitly summed by the optimizer.</p>
 <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkParamObjective</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">(),</span><span class="n">LPvecs</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="solving-and-optimizing">
+</section>
+</section>
+<section id="solving-and-optimizing">
 <h2>Solving and Optimizing<a class="headerlink" href="#solving-and-optimizing" title="Permalink to this heading">#</a></h2>
 <p>After constructing an <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code> and its constituent phases, we can now use PSIOPT
 to solve or optimize the entire trajectory. As with phase, the settings of the optimizer can be manipulated through a
@@ -644,8 +645,8 @@ Both of these topics are handled in more details in the section on <a class="ref
 <span class="n">CTrajs</span> <span class="o">=</span> <span class="p">[</span><span class="n">phase</span><span class="o">.</span><span class="n">returnCostateTraj</span><span class="p">()</span> <span class="k">for</span> <span class="n">phase</span> <span class="ow">in</span> <span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">]</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
         </article>
       </div>
@@ -684,9 +685,7 @@ Both of these topics are handled in more details in the section on <a class="ref
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         

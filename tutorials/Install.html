@@ -2,12 +2,13 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Vector Function Tutorial" href="VectorFunctionGuide.html" /><link rel="prev" title="Tutorials" href="tutorials.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Vector Function Tutorial" href="VectorFunctionGuide.html" /><link rel="prev" title="Tutorials" href="tutorials.html" />
 
-    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
         <title>Installing ASSET - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -150,7 +151,7 @@
   <span class="sidebar-brand-text">ASSET 0.0.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -219,10 +220,10 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="installing-asset">
+          <section id="installing-asset">
 <h1>Installing ASSET<a class="headerlink" href="#installing-asset" title="Permalink to this heading">#</a></h1>
 <p>This tutorial will guide you through the complete setup process for installing and building ASSET from scratch on Windows and Linux.</p>
-<div class="section" id="windows-installation">
+<section id="windows-installation">
 <h2>Windows Installation<a class="headerlink" href="#windows-installation" title="Permalink to this heading">#</a></h2>
 <p>In order to build ASSET on Windows the following dependencies are required:</p>
 <ul class="simple">
@@ -238,14 +239,14 @@
 </li>
 <li><p>The Python packages SpiceyPy, Sphinx, and Furo</p></li>
 </ul>
-<div class="section" id="step-by-step-guide">
+<section id="step-by-step-guide">
 <h3>Step-By-Step Guide<a class="headerlink" href="#step-by-step-guide" title="Permalink to this heading">#</a></h3>
 <ol class="arabic">
 <li><p>We will begin by installing Visual Studio (VS).</p>
 <blockquote>
 <div><p>Follow the VS installation prompts until you are prompted to select any additional packages to install with VS.
 Here we will want to select <strong>Desktop development with C++</strong>; however, we are going to make one change to the defaults for the C++ install and <strong>un-check</strong> the option for “C++ Clang tools for Windows” (shown below).</p>
-<img alt="../_images/vsstudiodesktopc%2B%2B.PNG" src="../_images/vsstudiodesktopc%2B%2B.PNG" />
+<img alt="tutorials/_static/vsstudiodesktopc++.PNG" src="tutorials/_static/vsstudiodesktopc++.PNG" />
 <p>Also ensure that the “<strong>C++ CMake Tools for Windows</strong>” is checked.
 After doing this continue and finish the installation.</p>
 <blockquote>
@@ -321,9 +322,9 @@ Once again, be sure to point this to the actual location of the relevant folders
 <img alt="../_images/threads.PNG" src="../_images/threads.PNG" />
 <p>Now we are going to configure the ASSET CMake settings by going to the project dropdown menu and selecting “Configure ASSET” or “Configure Cache” (depending on the version of VS).
 Wait until the output message from CMake says that it is finished and proceed to the build step.</p>
-<img alt="../_images/config.PNG" src="../_images/config.PNG" />
+<img alt="tutorials/_static/config.PNG" src="tutorials/_static/config.PNG" />
 <p>The last step is to actually build ASSET! After the configuration step has completed navigate to the Build dropdown menu and choose “Build All” (or Ctrl + Shift + B). Keep your Python IDE closed until the build completes.</p>
-<img alt="../_images/build.PNG" src="../_images/build.PNG" />
+<img alt="tutorials/_static/build.PNG" src="tutorials/_static/build.PNG" />
 </div></blockquote>
 </li>
 <li><p>With that you should have a successfully built ASSET Python library and are ready to get started with the rest of the tutorials.</p>
@@ -335,9 +336,9 @@ Wait until the output message from CMake says that it is finished and proceed to
 </div></blockquote>
 </li>
 </ol>
-</div>
-</div>
-<div class="section" id="linux-installation">
+</section>
+</section>
+<section id="linux-installation">
 <h2>Linux Installation<a class="headerlink" href="#linux-installation" title="Permalink to this heading">#</a></h2>
 <p>The dependencies for Linux installations are similar to that of Windows; however, we’ll be using Visual Studio Code for our IDE:</p>
 <ul class="simple">
@@ -360,7 +361,7 @@ Wait until the output message from CMake says that it is finished and proceed to
 <li><p><a class="reference external" href="https://www.anaconda.com/products/distribution#linux">Anaconda</a></p></li>
 <li><p>The Python packages SpiceyPy, Sphinx, and Furo</p></li>
 </ul>
-<div class="section" id="id3">
+<section id="id3">
 <h3>Step-by-Step Guide<a class="headerlink" href="#id3" title="Permalink to this heading">#</a></h3>
 <p>This guide was written assuming that the user has a working Ubuntu installation; however, ASSET will work with other Linux distributions. Simply use the appropriate commands to install the required packages.
 If it is desired to use an IDE other than Visual Studio Code, it is still required that a version of CMake of at least 3.16 is installed.</p>
@@ -443,7 +444,7 @@ If you are not using Anaconda you may skip the next step.</p>
 <p>Select the type of build (1) you wish to perform (Release is correct if you are going to be running code using ASSET), and kit to use (2) (gcc or clang).</p>
 <img alt="../_images/vscodevariant.PNG" src="../_images/vscodevariant.PNG" />
 <p>Now hit build to begin building ASSET</p>
-<img alt="../_images/vscodebuild.PNG" src="../_images/vscodebuild.PNG" />
+<img alt="tutorials/_static/vscodebuild.PNG" src="tutorials/_static/vscodebuild.PNG" />
 </div></blockquote>
 </li>
 <li><p>With that you should have a successfully built ASSET Python library and are ready to get started with the rest of the tutorials.</p>
@@ -455,14 +456,62 @@ If you are not using Anaconda you may skip the next step.</p>
 </div></blockquote>
 </li>
 </ol>
+</section>
+</section>
+<section id="docker-installation">
+<h2>Docker Installation<a class="headerlink" href="#docker-installation" title="Permalink to this heading">#</a></h2>
+<p><a class="reference external" href="https://docs.docker.com/get-docker/">Docker Install</a></p>
+<p>ASSET can be ran in a Docker container made by Jason Everett. When using the docker container, there’s no need to install dependencies manually. Just pull (or build) the most recent Docker image and use it.</p>
+<section id="pull-down-development-image">
+<h3>Pull down Development Image<a class="headerlink" href="#pull-down-development-image" title="Permalink to this heading">#</a></h3>
+<p>A working version of the Docker image can be pulled from [Docker Hub]() to skip having to manually build the docker image. To get this image:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker pull jasonmeverett/asset_asrl:1.0</span>
+</pre></div>
 </div>
+<p>Then, to start up the container and run ASSET:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker run -it jasonmeverett/asset_asrl:1.0 bash</span>
+<span class="go">cd /asset_asrl/</span>
+<span class="go">python AnalyticExample.py</span>
+</pre></div>
 </div>
-<div class="section" id="next-steps">
+</section>
+<section id="build-docker-image-from-scratch">
+<h3>Build Docker Image from Scratch<a class="headerlink" href="#build-docker-image-from-scratch" title="Permalink to this heading">#</a></h3>
+<p>The ASSET Docker image can also be built manually.</p>
+<ul class="simple">
+<li><p>Pull down the most recent main repository.</p></li>
+<li><p>Open a terminal in this folder and run:</p></li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker build -t asset:1.0 .</span>
+</pre></div>
+</div>
+<p>This will build the Docker image containing ASSET and all of its dependencies. ASSET examples will be available in the image at <cite>/asset_asrl</cite> in the Docker container.</p>
+</section>
+<section id="using-docker-image-with-new-project-files">
+<h3>Using Docker Image with new Project Files<a class="headerlink" href="#using-docker-image-with-new-project-files" title="Permalink to this heading">#</a></h3>
+<p>If you’d like to use ASSET for a new project (in a different repository), you can mount your project files into the Docker container, which will allow you to utilize ASSET in the Docker container while developing files on your local machine.</p>
+<p>Say you have a directory where you are working on some new Python scripts that utilize ASSET:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">~/</span>
+<span class="go">  myProject/</span>
+<span class="go">        assetScript1.py</span>
+<span class="go">        assetScript2.py</span>
+<span class="go">        ...</span>
+</pre></div>
+</div>
+<p>If you want the <cite>myProject</cite> folder available from within the Docker image, you can “mount” the folder into the Docker image as follows:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd myProject/</span>
+<span class="go">docker run -it -v &quot;$(pwd):/myProject&quot; asset:1.0 bash</span>
+</pre></div>
+</div>
+<p>Now, all files in <cite>myProject/</cite> will be available at <cite>/myProject/</cite> in the Docker container. These two folders will be “mirrored” (any change made in Docker/local will be instantly replicated in the other environment).</p>
+</section>
+</section>
+<section id="next-steps">
 <h2>Next Steps<a class="headerlink" href="#next-steps" title="Permalink to this heading">#</a></h2>
 <p>If this is your first time using ASSET, it’s now recommended that you begin reviewing the remaining tutorials, such as <a class="reference internal" href="VectorFunctionGuide.html#vector-function-tutorial"><span class="std std-ref">Vector Function Tutorial</span></a>. After you feel comfortable with some of ASSET’s coding paradigms, a select set
 of tutorials that highlight ASSET’s features and capabilities are provided in <a class="reference internal" href="../examples/examples.html#examples"><span class="std std-ref">Examples</span></a>.</p>
-</div>
-</div>
+</section>
+</section>
 
         </article>
       </div>
@@ -501,9 +550,7 @@ of tutorials that highlight ASSET’s features and capabilities are provided in 
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -528,6 +575,12 @@ of tutorials that highlight ASSET’s features and capabilities are provided in 
 </li>
 <li><a class="reference internal" href="#linux-installation">Linux Installation</a><ul>
 <li><a class="reference internal" href="#id3">Step-by-Step Guide</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#docker-installation">Docker Installation</a><ul>
+<li><a class="reference internal" href="#pull-down-development-image">Pull down Development Image</a></li>
+<li><a class="reference internal" href="#build-docker-image-from-scratch">Build Docker Image from Scratch</a></li>
+<li><a class="reference internal" href="#using-docker-image-with-new-project-files">Using Docker Image with new Project Files</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#next-steps">Next Steps</a></li>

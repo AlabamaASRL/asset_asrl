@@ -2,12 +2,13 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Python Library Documentation" href="../python/python.html" /><link rel="prev" title="Multi-Phase Zermelo’s Problem" href="zermelolink.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Python Library Documentation" href="../python/python.html" /><link rel="prev" title="Multi-Phase Zermelo’s Problem" href="zermelolink.html" />
 
-    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
         <title>Multi-Spacecraft Optimization - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -150,7 +151,7 @@
   <span class="sidebar-brand-text">ASSET 0.0.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -219,7 +220,7 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="multi-spacecraft-optimization">
+          <section id="multi-spacecraft-optimization">
 <h1>Multi-Spacecraft Optimization<a class="headerlink" href="#multi-spacecraft-optimization" title="Permalink to this heading">#</a></h1>
 <p>Performing a multi-spacecraft optimization with ASSET is virtually identically to the single spacecraft case, except for one new constraint that we will focus on later.
 For now, the standard problem procedure is the same, where we need to import everything from ASSET with our standard conventions, as well as some plotting tools for the output.</p>
@@ -516,12 +517,12 @@ We decide that we want 10 spacecraft and we will space them all out along the sa
 loop, where we make sure that every initial state is corresponding to a circular orbit. We are interested in how the low thrust acceleration of the vehicle affects the ability for our spacecraft to rendezvous to the desired final state,
 so we create a list of various non-dimensional accelerations in <code class="code docutils literal notranslate"><span class="pre">accs</span></code>. Now all we do is iterate over the list of accelerations and call our <code class="code docutils literal notranslate"><span class="pre">MultiSpaceCraft</span></code> function with all of the required inputs.
 What we get is an optimization problem that simultaneously solves for the optimal control of all spacecraft to converge on the final point.</p>
-<div class="figure align-center">
+<figure class="align-center">
 <a class="reference internal image-reference" href="../_images/multispacecraftoptimization.svg"><img alt="../_images/multispacecraftoptimization.svg" src="../_images/multispacecraftoptimization.svg" width="100%" /></a>
-</div>
+</figure>
 <p>The top plot shows the spacecraft converging to the final point, indicated by the phase angles between the spacecraft decreasing towards 0. The bottom plot shows the complex control histories of 10 spacecraft
 manuevering in tandem to satisfy a given objective. Any further analysis is outside of the scope of this tutorial and is left to the reader.</p>
-<div class="section" id="full-code">
+<section id="full-code">
 <h2>Full Code:<a class="headerlink" href="#full-code" title="Permalink to this heading">#</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
@@ -621,7 +622,7 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
 
     <span class="c1">####################################################</span>
     <span class="c1">#Section 2:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adding a Link constraint to enforce that the terminal state and time</span>
 <span class="sd">    of each phase must be equal to a free state added as LinkParameters of the ocp</span>
 
@@ -656,7 +657,7 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
 
     <span class="c1">##################################################################</span>
     <span class="c1">#Section 3:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Now we are going to run an optimization continuation scheme to compute</span>
 <span class="sd">    the constellation trajectory for each list of initial states of the spacecraft</span>
 
@@ -766,8 +767,8 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
         </article>
       </div>
@@ -806,9 +807,7 @@ manuevering in tandem to satisfy a given objective. Any further analysis is outs
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         

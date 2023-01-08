@@ -2,12 +2,13 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Optimal Control Phase Tutorial" href="PhaseGuide.html" /><link rel="prev" title="ODE Tutorial" href="ODEGuide.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Optimal Control Phase Tutorial" href="PhaseGuide.html" /><link rel="prev" title="ODE Tutorial" href="ODEGuide.html" />
 
-    <meta name="generator" content="sphinx-5.3.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.3.0 and Furo 2022.12.07 -->
         <title>Integrator Tutorial - ASSET 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -150,7 +151,7 @@
   <span class="sidebar-brand-text">ASSET 0.0.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -219,7 +220,7 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="integrator-tutorial">
+          <section id="integrator-tutorial">
 <span id="integrator-guide"></span><h1>Integrator Tutorial<a class="headerlink" href="#integrator-tutorial" title="Permalink to this heading">#</a></h1>
 <p>In this section, we will describe usage of ASSET’s integrator object. To
 start, we will define an ODE which we want to integrate using what we have learned from the
@@ -255,7 +256,7 @@ For this example, we will be working in canonical units where <span class="math 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="n">XVars</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="section" id="initialization">
+<section id="initialization">
 <h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this heading">#</a></h2>
 <p>To start, we can create an integrator for our ODE by using the <code class="code docutils literal notranslate"><span class="pre">.integrator</span></code> method of the ODE.
 At initialization we can specify the integration scheme as a string as well as the
@@ -315,8 +316,8 @@ yourself using the <code class="code docutils literal notranslate"><span class="
 <span class="n">TBInteg</span><span class="o">.</span><span class="n">setRelTols</span><span class="p">(</span><span class="n">RelTols</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="integration">
+</section>
+<section id="integration">
 <h2>Integration<a class="headerlink" href="#integration" title="Permalink to this heading">#</a></h2>
 <p>Now that we have covered initializing integrators, let’s examine how we actually
 use them. By far the most used methods are <code class="code docutils literal notranslate"><span class="pre">.integrate</span></code> and <code class="code docutils literal notranslate"><span class="pre">integrate_dense</span></code>. Both methods
@@ -358,8 +359,8 @@ the maximum local error at any point along the trajectory is typically 2 orders 
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/IntegratorFig1.svg"><img alt="../_images/IntegratorFig1.svg" src="../_images/IntegratorFig1.svg" width="90%" /></a>
-</div>
-<div class="section" id="event-detection">
+</section>
+<section id="event-detection">
 <h2>Event Detection<a class="headerlink" href="#event-detection" title="Permalink to this heading">#</a></h2>
 <p>We can also pass a list of events to be detected during the integration. A single
 event is defined as a tuple consisting of: An ASSET ScalarFunction whose zeros
@@ -431,8 +432,8 @@ and maximum Newton iterations may be specified by modifying the <code class="cod
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/IntegratorFig2.svg"><img alt="../_images/IntegratorFig2.svg" src="../_images/IntegratorFig2.svg" width="90%" /></a>
-</div>
-<div class="section" id="derivatives">
+</section>
+<section id="derivatives">
 <h2>Derivatives<a class="headerlink" href="#derivatives" title="Permalink to this heading">#</a></h2>
 <p>In ASSET, integrators themselves are VectorFunctions and have analytic first and second
 derivatives. The input arguments for the integrator when used as a VectorFunction consist of
@@ -476,8 +477,8 @@ interface using the <code class="code docutils literal notranslate"><span class=
 <span class="n">Xftf</span><span class="p">,</span><span class="n">Jac</span><span class="p">,</span> <span class="n">EventLocs</span> <span class="o">=</span> <span class="n">TBInteg</span><span class="o">.</span><span class="n">integrate_stm</span><span class="p">(</span><span class="n">X0t0</span><span class="p">,</span><span class="n">tf</span><span class="p">,</span><span class="n">Events</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="parrallel-integration">
+</section>
+<section id="parrallel-integration">
 <h2>Parrallel Integration<a class="headerlink" href="#parrallel-integration" title="Permalink to this heading">#</a></h2>
 <p>Finally, for all previously discussed <code class="code docutils literal notranslate"><span class="pre">.integrate</span></code> methods, we have corresponding multi-threaded <code class="code docutils literal notranslate"><span class="pre">_parallel</span></code>
 versions which will integrate lists of initial conditions and final times in parallel. In each case, rather
@@ -510,8 +511,8 @@ of length <code class="code docutils literal notranslate"><span class="pre">n</s
     <span class="n">Traj</span><span class="p">,</span><span class="n">EventLocs</span> <span class="o">=</span> <span class="n">Traj_EventLocs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="local-control-laws">
+</section>
+<section id="local-control-laws">
 <h2>Local Control Laws<a class="headerlink" href="#local-control-laws" title="Permalink to this heading">#</a></h2>
 <p>In the previous examples we only examined how to integrate ODEs with no control
 or constant controls, but oftentimes we need to compute controls as a function
@@ -569,8 +570,8 @@ This control law will now be applied to all of our integrations.</p>
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/IntegratorFig3.svg"><img alt="../_images/IntegratorFig3.svg" src="../_images/IntegratorFig3.svg" width="50%" /></a>
-</div>
-</div>
+</section>
+</section>
 
         </article>
       </div>
@@ -609,9 +610,7 @@ This control law will now be applied to all of our integrations.</p>
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
