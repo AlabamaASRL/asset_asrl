@@ -243,6 +243,7 @@ endif()
 if(NOT PIP_INSTALL)
   if(WIN32)
     set(PYTHON_LOCAL_INSTALL_DIR ${Python_SITEARCH})
+    
   else()
     execute_process ( COMMAND ${PYTHON_EXECUTABLE} -m site --user-site
     OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -259,6 +260,7 @@ endif()
 message(STATUS "CMAKE DIR LOC" ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS ${OpenMP_CXX_FLAGS})
 message(STATUS ${OpenMP_CXX_LIBRARIES})
+message(STATUS ${PYTHON_EXECUTABLE})
 
 ################################################################################
 # Code Directories
@@ -271,6 +273,9 @@ if(BUILD_SPHINX_DOCS)
   add_subdirectory(doc)
 endif()
 
+if(TRUE)
+ add_subdirectory(pypiwheel)
+endif()
 
 # Formatting
 include(cmake/clang-format.cmake)

@@ -24,7 +24,6 @@ void SoftwareInfo() {
     int vsize = ASSET::DefaultSuperScalar::SizeAtCompileTime;
 
 
-    
 
 
     std::string assetversion = std::string(ASSET_VERSIONSTRING);
