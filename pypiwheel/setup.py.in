@@ -1,0 +1,68 @@
+import os
+from pathlib import Path
+from setuptools import setup, Extension,find_packages,Distribution
+
+from setuptools.command.build_ext import build_ext
+import shlex
+import shutil
+import subprocess as sp
+import sys
+import warnings
+
+class CustomExtBuilder(build_ext):
+
+    def build_extension(self, ext):
+        if isinstance(ext, Precompiled):
+            return ext.copy_precompiled(self)
+        return super().build_extension(ext)
+
+
+class Precompiled(Extension):
+
+    def __init__(self, name, precompiled, *args, **kwargs):
+        super().__init__(name, [], *args, **kwargs)
+        self.precompiled = Path(precompiled)
+
+        
+    def copy_precompiled(self, builder):
+        if self.precompiled.exists():
+            shutil.copyfile(
+                str(self.precompiled),
+                builder.get_ext_fullpath(self.name)
+            )
+        else:
+            print(f"Error: specified file {self.precompiled} not found!", file=sys.stderr)
+
+
+pyversion = '=='+str(sys.version_info.major)+'.'+str(sys.version_info.minor)+'.*'
+
+def main():
+
+    setup(
+        name = 'asset_asrl',
+        version = '@PROJECT_VERSION@',
+        description = """package_descr""",
+        packages=find_packages(),
+        python_requires = pyversion,
+       
+        ext_modules=[
+            Precompiled(
+                "asset",
+                precompiled="@ASSET_BINARY_NAME@"
+            ),
+        ],
+        
+        install_requires=[
+                    "numpy",
+                    "matplotlib",
+                    "spiceypy",
+                    "mkl",
+                    "intel-openmp"],
+
+        cmdclass=dict(build_ext=CustomExtBuilder),
+    )
+
+if __name__ == '__main__':
+    main()
+
+
