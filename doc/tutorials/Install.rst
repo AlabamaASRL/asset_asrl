@@ -143,6 +143,7 @@ The dependencies for Linux installations are similar to that of Windows; however
 * `Visual Studio Code <https://code.visualstudio.com/download>`_
 	* `C/C++ Extension <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools>`_ 
 	* `CMake Tools Extension <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools>`_
+	* Ensure that you have a working version of `CMake installed <https://cmake.org/install/>`_
 * `LLVM Compiler Toolkit (recommended) <https://github.com/llvm/llvm-project/releases/latest>`_
 	* GCC 9 or greater can also be used
 * `Intel oneAPI MKL <https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=linux&distributions=offline>`_
