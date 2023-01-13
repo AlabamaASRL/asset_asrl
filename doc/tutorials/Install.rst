@@ -1,7 +1,10 @@
 Installing ASSET
 ================
 
-This tutorial will guide you through the complete setup process for installing and building ASSET from scratch on Windows and Linux.
+This tutorial will guide you through the complete setup process for installing and building ASSET from scratch on:
+* Windows
+* Linux
+* Docker
 
 Windows Installation
 --------------------
@@ -247,72 +250,19 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 		import asset_asrl
 
-Docker Installation
--------------------
-`Docker Install <https://docs.docker.com/get-docker/>`_
+Docker
+------
 
+Want to skip installing all of the dependencies? ASSET can be installed through a Docker image. There's also great integrations of Docker and VS Code.
 
-ASSET can be ran in a Docker container made by Jason Everett. When using the docker container, there's no need to install dependencies manually. Just pull (or build) the most recent Docker image and use it.
+Download the Docker/VS Code project template here and get to coding!
 
-Pull down Development Image
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+https://github.com/jasonmeverett/asset-example-project
 
-A working version of the Docker image can be pulled from [Docker Hub]() to skip having to manually build the docker image. To get this image:
+Developing Docker Images 
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: console
-
-	docker pull jasonmeverett/asset_asrl:1.0
-
-Then, to start up the container and run ASSET:
-
-.. code-block:: console
-
-	docker run -it jasonmeverett/asset_asrl:1.0 bash
-	cd /asset_asrl/
-	python AnalyticExample.py
-	
-
-Build Docker Image from Scratch
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The ASSET Docker image can also be built manually.
-
-* Pull down the most recent main repository.
-* Open a terminal in this folder and run:
-
-.. code-block:: console
-
-	docker build -t asset:1.0 .
-	
-
-This will build the Docker image containing ASSET and all of its dependencies. ASSET examples will be available in the image at `/asset_asrl` in the Docker container.
-
-
-Using Docker Image with new Project Files
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-If you'd like to use ASSET for a new project (in a different repository), you can mount your project files into the Docker container, which will allow you to utilize ASSET in the Docker container while developing files on your local machine.
-
-Say you have a directory where you are working on some new Python scripts that utilize ASSET:
-
-.. code-block:: console
-
-	~/
-	  myProject/
-		assetScript1.py
-		assetScript2.py
-		...
-	
-
-If you want the `myProject` folder available from within the Docker image, you can "mount" the folder into the Docker image as follows:
-
-.. code-block:: console
-
-	cd myProject/
-	docker run -it -v "$(pwd):/myProject" asset:1.0 bash
-	
-
-Now, all files in `myProject/` will be available at `/myProject/` in the Docker container. These two folders will be "mirrored" (any change made in Docker/local will be instantly replicated in the other environment).
+Interested in contributing to Docker/ASSET development? Check in-depth details in `Dockerfile` and `Dockerfile-dev` in the repository.
 
 
 
