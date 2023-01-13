@@ -1,0 +1,129 @@
+# ===============================================================================
+#          ___    _____   _____    ______  ______
+#         /   |  / ___/  / ___/   / ____/ /_  __/
+#        / /| |  \__ \   \__ \   / __/     / /
+#       / ___ | ___/ /  ___/ /  / /___    / /
+#      /_/  |_|/____/  /____/  /_____/   /_/
+#
+#  Astrodynamics Software and Science Enabling Toolkit
+#
+#
+#  Dockerfile-dev
+#  --------------
+#     This is a development image that can be used to compile, test, and
+#  run ASSET and its dependencies. To run ASSET in a production environment
+#  without build tools (just runtime dependencies), please use the main
+#  Dockerfile.
+#
+#
+#  Building the Development Image
+#  ------------------------------
+#  * Pull down a clean repo.
+#  * Build the image:
+#
+#    > cd /path/to/asset_asrl
+#    > docker build -t asset-dev -f Dockerfile-dev .
+#
+#  * This will build an image, asset-dev:latest, that has all necessary 
+#      dependencies pre-installed for you in a Ubuntu 22.04 environment.
+#
+#
+#  Compiling ASSET using the Dev Container (CLI)
+#  ---------------------------------------------
+#  * Spawn a new Docker container that mounts the ASSET repo into the container:
+#
+#    > cd /path/to/asset_asrl
+#    > docker run -it --network=host -v "$(pwd):/asset_asrl" asset-dev bash
+#
+#  * This command will spawn an interactive container with ASSET files 
+#      mounted at /asset_asrl/ and open a bash shell.
+#  * Once in the Docker container, you can build ASSET using CMake with standard
+#      CMake commands. Below is an example of building ASSET in this config:
+#        - Release version (-DCMAKE_BUILD_TYPE=Release)
+#        - using 2 cores (-j2) 
+#        - skipping file copies (-DPIP_INSTALL=true)
+#        - compiling against MKL shared libraries (-DBUILD_SHARED_LIBS=true)
+#  
+#    > cd /asset_asrl
+#    > mkdir build
+#    > cd build
+#    > cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=true -DPIP_INSTALL=true ..
+#    > cmake --build . -j2
+#
+#  * Because the directory is mounted, the newly compiled asset lib will be in the
+#      build/ directory on your local machine and within the container
+#
+#
+#  Using the Development Image to run ASSET
+#  ----------------------------------------
+#    If you want to use ASSET for a custom project you're creating, its recommended
+#  that you build the production docker image and follow the instructions for
+#  building a production ASSET project from scratch. There are some scenarios 
+#  where ASSET needs to be used in the development environment (for example, working
+#  on and testing the example scripts)
+#
+# ===============================================================================
+
+
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# -------------------------------
+#       Base image updates
+# -------------------------------
+RUN apt-get update \
+  && apt-get upgrade -y \
+  && apt-get install -y \
+    wget \
+    cmake \
+    git \
+    vim \
+    nano \
+    build-essential \
+    software-properties-common
+
+# -------------------------------
+#        LLVM & CLANG 15
+# -------------------------------
+RUN wget https://apt.llvm.org/llvm.sh \
+  && chmod +x llvm.sh \
+  && ./llvm.sh 15 all \
+  && rm -rf ./llvm.sh \
+  && echo "export CC=/usr/bin/clang-15" >> /root/.bashrc \
+  && echo "export CXX=/usr/bin/clang++-15" >> /root/.bashrc
+
+# -------------------------------
+#            Miniconda
+# -------------------------------
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py39_22.11.1-1-Linux-x86_64.sh \
+  && bash Miniconda3-py39_22.11.1-1-Linux-x86_64.sh -b -p /opt/miniconda3 \
+  && /opt/miniconda3/bin/conda init bash \
+  && /opt/miniconda3/bin/conda create --name asset \
+  && rm Miniconda3-py39_22.11.1-1-Linux-x86_64.sh \
+  && echo "conda activate asset" >> /root/.bashrc \
+  && . /root/.bashrc \
+  && conda deactivate \
+  && conda clean --all
+
+# -------------------------------
+#       ASSET Environment
+# -------------------------------
+RUN . /root/.bashrc \
+  && conda config --add channels conda-forge \
+  && conda install \
+    python=3.9 \
+    mkl \
+    mkl-include \
+    intel-openmp \
+    numpy \
+    scipy \
+    spiceypy \
+    pybind11 \
+    breathe \
+    sphinx \
+    sphinx-rtd-theme \
+    exhale \
+  && echo "export MKLROOT=/opt/miniconda3/envs/asset" >> /root/.bashrc \
+  && conda clean --all
+
