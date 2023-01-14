@@ -222,7 +222,10 @@
         <article role="main">
           <section id="installing-asset">
 <h1>Installing ASSET<a class="headerlink" href="#installing-asset" title="Permalink to this heading">#</a></h1>
-<p>This tutorial will guide you through the complete setup process for installing and building ASSET from scratch on Windows and Linux.</p>
+<p>This tutorial will guide you through the complete setup process for installing and building ASSET from scratch on:
+* Windows
+* Linux
+* Docker</p>
 <section id="windows-installation">
 <h2>Windows Installation<a class="headerlink" href="#windows-installation" title="Permalink to this heading">#</a></h2>
 <p>In order to build ASSET on Windows the following dependencies are required:</p>
@@ -459,52 +462,14 @@ If you are not using Anaconda you may skip the next step.</p>
 </ol>
 </section>
 </section>
-<section id="docker-installation">
-<h2>Docker Installation<a class="headerlink" href="#docker-installation" title="Permalink to this heading">#</a></h2>
-<p><a class="reference external" href="https://docs.docker.com/get-docker/">Docker Install</a></p>
-<p>ASSET can be ran in a Docker container made by Jason Everett. When using the docker container, there’s no need to install dependencies manually. Just pull (or build) the most recent Docker image and use it.</p>
-<section id="pull-down-development-image">
-<h3>Pull down Development Image<a class="headerlink" href="#pull-down-development-image" title="Permalink to this heading">#</a></h3>
-<p>A working version of the Docker image can be pulled from [Docker Hub]() to skip having to manually build the docker image. To get this image:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker pull jasonmeverett/asset_asrl:1.0</span>
-</pre></div>
-</div>
-<p>Then, to start up the container and run ASSET:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker run -it jasonmeverett/asset_asrl:1.0 bash</span>
-<span class="go">cd /asset_asrl/</span>
-<span class="go">python AnalyticExample.py</span>
-</pre></div>
-</div>
-</section>
-<section id="build-docker-image-from-scratch">
-<h3>Build Docker Image from Scratch<a class="headerlink" href="#build-docker-image-from-scratch" title="Permalink to this heading">#</a></h3>
-<p>The ASSET Docker image can also be built manually.</p>
-<ul class="simple">
-<li><p>Pull down the most recent main repository.</p></li>
-<li><p>Open a terminal in this folder and run:</p></li>
-</ul>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker build -t asset:1.0 .</span>
-</pre></div>
-</div>
-<p>This will build the Docker image containing ASSET and all of its dependencies. ASSET examples will be available in the image at <cite>/asset_asrl</cite> in the Docker container.</p>
-</section>
-<section id="using-docker-image-with-new-project-files">
-<h3>Using Docker Image with new Project Files<a class="headerlink" href="#using-docker-image-with-new-project-files" title="Permalink to this heading">#</a></h3>
-<p>If you’d like to use ASSET for a new project (in a different repository), you can mount your project files into the Docker container, which will allow you to utilize ASSET in the Docker container while developing files on your local machine.</p>
-<p>Say you have a directory where you are working on some new Python scripts that utilize ASSET:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">~/</span>
-<span class="go">  myProject/</span>
-<span class="go">        assetScript1.py</span>
-<span class="go">        assetScript2.py</span>
-<span class="go">        ...</span>
-</pre></div>
-</div>
-<p>If you want the <cite>myProject</cite> folder available from within the Docker image, you can “mount” the folder into the Docker image as follows:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd myProject/</span>
-<span class="go">docker run -it -v &quot;$(pwd):/myProject&quot; asset:1.0 bash</span>
-</pre></div>
-</div>
-<p>Now, all files in <cite>myProject/</cite> will be available at <cite>/myProject/</cite> in the Docker container. These two folders will be “mirrored” (any change made in Docker/local will be instantly replicated in the other environment).</p>
+<section id="docker">
+<h2>Docker<a class="headerlink" href="#docker" title="Permalink to this heading">#</a></h2>
+<p>Want to skip installing all of the dependencies? ASSET can be installed through a Docker image. There’s also great integrations of Docker and VS Code.</p>
+<p>Download the Docker/VS Code project template here and get to coding!</p>
+<p><a class="reference external" href="https://github.com/jasonmeverett/asset-example-project">https://github.com/jasonmeverett/asset-example-project</a></p>
+<section id="developing-docker-images">
+<h3>Developing Docker Images<a class="headerlink" href="#developing-docker-images" title="Permalink to this heading">#</a></h3>
+<p>Interested in contributing to Docker/ASSET development? Check in-depth details in <cite>Dockerfile</cite> and <cite>Dockerfile-dev</cite> in the repository.</p>
 </section>
 </section>
 <section id="next-steps">
@@ -578,10 +543,8 @@ of tutorials that highlight ASSET’s features and capabilities are provided in 
 <li><a class="reference internal" href="#id3">Step-by-Step Guide</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#docker-installation">Docker Installation</a><ul>
-<li><a class="reference internal" href="#pull-down-development-image">Pull down Development Image</a></li>
-<li><a class="reference internal" href="#build-docker-image-from-scratch">Build Docker Image from Scratch</a></li>
-<li><a class="reference internal" href="#using-docker-image-with-new-project-files">Using Docker Image with new Project Files</a></li>
+<li><a class="reference internal" href="#docker">Docker</a><ul>
+<li><a class="reference internal" href="#developing-docker-images">Developing Docker Images</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#next-steps">Next Steps</a></li>
