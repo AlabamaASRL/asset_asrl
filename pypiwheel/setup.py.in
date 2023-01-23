@@ -41,7 +41,8 @@ def main():
     setup(
         name = 'asset_asrl',
         version = '@PROJECT_VERSION@',
-        description = """package_descr""",
+        description = "High-speed, extensible, object-oriented trajectory design and optimization",
+        long_description="High-speed, extensible, object-oriented trajectory design and optimization",
         packages=find_packages(),
         python_requires = pyversion,
        
@@ -56,7 +57,8 @@ def main():
                     "numpy",
                     "matplotlib",
                     "spiceypy",
-                    "mkl",
+                    "seaborn",
+                    "basemap",
                     "intel-openmp"],
 
         cmdclass=dict(build_ext=CustomExtBuilder),

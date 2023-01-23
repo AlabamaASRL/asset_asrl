@@ -23,7 +23,9 @@ echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sourc
 sudo apt update
 sudo apt install intel-oneapi-compiler-dpcpp-cpp intel-oneapi-mkl-devel intel-oneapi-mkl intel-oneapi-openmp
 
-source /opt/intel/oneapi/mkl/latest/env/vars.sh
+#source /opt/intel/oneapi/mkl/latest/env/vars.sh
+source /opt/intel/oneapi/setvars.sh
+
 echo "MKLROOT=$MKLROOT" >>$GITHUB_ENV
 echo "INTEL=/opt/intel/oneapi" >>$GITHUB_ENV
 
