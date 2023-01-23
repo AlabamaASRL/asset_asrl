@@ -37,7 +37,7 @@ endif()
 
 set(LINK_TIME_OPT FALSE)          ### DO LTO - Recommended for full release
 set(CLANG_MAX_INLINE_DEPTH 225)
-#set(BUILD_ASSET_WHEEL FALSE)      ### CI Build for generic wheels
+#set(BUILD_ASSET_WHEEL TRUE)      ### CI Build for generic wheels
 
 
 ################################################################################
@@ -60,8 +60,8 @@ if(BUILD_ASSET_WHEEL)
     if(NOT WIN32)
         list(APPEND RELEASE_FLAGS "-mtune=skylake")
     endif()
-    set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
-    set(CLANG_MAX_INLINE_DEPTH 400)
+    #set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
+    #set(CLANG_MAX_INLINE_DEPTH 400)
 else()
     list(APPEND RELEASE_FLAGS "-march=native")
     if(NOT WIN32)
