@@ -37,7 +37,7 @@ endif()
 
 set(LINK_TIME_OPT FALSE)          ### DO LTO - Recommended for full release
 set(CLANG_MAX_INLINE_DEPTH 225)
-set(BUILD_ASSET_WHEEL FALSE)      ### Copy binaries and build wheel for distribution
+#set(BUILD_ASSET_WHEEL FALSE)      ### CI Build for generic wheels
 
 
 ################################################################################
@@ -52,7 +52,23 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Release Flags
 list(APPEND RELEASE_FLAGS "-O2")
-list(APPEND RELEASE_FLAGS "-march=native")
+
+
+## Generic Binary Flags
+if(BUILD_ASSET_WHEEL)
+    list(APPEND RELEASE_FLAGS "-march=x86-64-v3")
+    if(NOT WIN32)
+        list(APPEND RELEASE_FLAGS "-mtune=skylake")
+    endif()
+    set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
+    set(CLANG_MAX_INLINE_DEPTH 400)
+else()
+    list(APPEND RELEASE_FLAGS "-march=native")
+    if(NOT WIN32)
+        list(APPEND RELEASE_FLAGS "-mtune=native")
+    endif()
+endif()
+
 
 if(WIN32)
      list(APPEND RELEASE_FLAGS "/MD")
@@ -66,21 +82,24 @@ if(WIN32)
 endif()
 
 if(NOT WIN32)
-    list(APPEND RELEASE_FLAGS "-mtune=native")
     # Debugging Flags
     set(DEBUG_FLAGS "-g" "-ggdb3")
-
     # Common Flags
     list(APPEND COMMON_FLAGS "-pthread")
 endif()
-
+ 
 
 if(LINK_TIME_OPT)
   if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     if(WIN32)
         ## clang-cl flag
-        list(APPEND RELEASE_FLAGS "-flto=thin")
-        list(APPEND RELEASE_FLAGS "/opt:lldltojobs=8")
+        if(BUILD_ASSET_WHEEL)
+            ## Do full LTO for CI builds since it is single threaded anyway
+            list(APPEND RELEASE_FLAGS "-flto=full")
+        else()
+            list(APPEND RELEASE_FLAGS "-flto=thin")
+            list(APPEND RELEASE_FLAGS "/opt:lldltojobs=8")
+        endif()
     else()
         set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
     endif()
@@ -273,9 +292,7 @@ if(BUILD_SPHINX_DOCS)
   add_subdirectory(doc)
 endif()
 
-if(TRUE)
- add_subdirectory(pypiwheel)
-endif()
+add_subdirectory(pypiwheel)
 
 # Formatting
 include(cmake/clang-format.cmake)
