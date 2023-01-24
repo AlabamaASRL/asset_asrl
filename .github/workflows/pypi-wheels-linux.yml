@@ -1,83 +1,21 @@
-name: pypi-wheels
+name: pypi-wheels-linux
 
 
 on:
   workflow_dispatch:
-  #push:
-  #  branches:
-  #   - packagemanagers
+  push:
+    branches:
+      - packagemanagers
 
 
 jobs:
- build_windows:
-    env:
-      WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/19078/w_BaseKit_p_2023.0.0.25940_offline.exe
-  
-      WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel
-      VS_VER: vs2022
-      ONEAPI_ROOT: C:/Program Files (x86)/Intel/oneAPI/
-      CC: clang-cl.exe
-      CXX: clang-cl.exe
-
-    strategy:
-       fail-fast: false
-       matrix:
-        platform: [windows-latest]
-        python-version: ["3.7","3.8","3.9","3.10","3.11"]
-        compiler: ["clang-cl"]
-
-    runs-on: ${{ matrix.platform }}
-
-    steps:
-
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v1
-        with:
-          version: "15.0"
-      
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-          ref: packagemanagers
-
-      - uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x86_64
-
-      - name: Install MKL
-        run: scripts/windowsoneapi_install.bat $WINDOWS_BASEKIT_URL $WINDOWS_CPP_COMPONENTS
-        shell: bash
-
-      - uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-      
-      - name: Add python requirements
-        run: python -m pip install --upgrade wheel setuptools && python -m pip install -r requirements.txt
-
-      - name: "Create build directory and run CMake"
-        run: > 
-         cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_ASSET_WHEEL=True
-         -DCMAKE_C_COMPILER:FILEPATH="C:/Program Files/LLVM/bin/clang-cl.exe" 
-         -DCMAKE_CXX_COMPILER:FILEPATH="C:/Program Files/LLVM/bin/clang-cl.exe" 
-         -DCMAKE_LINKER:FILEPATH="C:/Program Files/LLVM/bin/lld-link.exe" 
-      
-      - name: "Build Project" 
-        run: cmake --build build --target asset pypiwheel --config Release -- -j1
-
-      - name: 'Upload Wheels'
-        uses: actions/upload-artifact@v3
-        with:
-          name: dist_${{ matrix.python-version }}_${{ matrix.platform }}
-          path: build/pypiwheel/asset_asrl/dist/*.whl
-          retention-days: 1
 
  build_linux:
         strategy:
               fail-fast: false
               matrix:
                 platform: [ubuntu-20.04]
-                python-version: ["3.7","3.8","3.9","3.10","3.11"]
+                python-version: ["3.8","3.9","3.10"]
                 compiler: ["clang-12"]
 
         runs-on: ${{ matrix.platform }}
@@ -123,7 +61,7 @@ jobs:
                 retention-days: 1
 
  upload:
-    needs: [build_windows,build_linux]
+    needs: build_linux
     strategy:
        fail-fast: false
        matrix:
