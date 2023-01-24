@@ -39,8 +39,8 @@ void SoftwareInfo() {
     if (vsize == 2) vecversion = "SSE - 128 bit - 2 doubles";
     else if (vsize == 4) vecversion = "AVX2 - 256 bit - 4 doubles";
     else if (vsize == 8) vecversion = "AVX512 - 512 bit - 8 doubles";
-
     
+
 
     
     std::string ASSET_STR(
