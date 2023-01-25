@@ -3,9 +3,9 @@ name: pypi-wheels-linux
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - packagemanagers
+  #push:
+  #  branches:
+  #    - packagemanagers
 
 
 jobs:

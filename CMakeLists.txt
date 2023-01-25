@@ -61,8 +61,8 @@ if(BUILD_ASSET_WHEEL)
         
         list(APPEND RELEASE_FLAGS "-mtune=skylake")
     endif()
-    set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
-    set(CLANG_MAX_INLINE_DEPTH 400)
+    #set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
+    #set(CLANG_MAX_INLINE_DEPTH 400)
 else()
     list(APPEND RELEASE_FLAGS "-march=native")
     if(NOT WIN32)
