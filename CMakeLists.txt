@@ -57,12 +57,13 @@ list(APPEND RELEASE_FLAGS "-O2")
 ## Generic Binary Flags
 if(BUILD_ASSET_WHEEL)
     list(APPEND RELEASE_FLAGS "-march=x86-64-v3")
+    # Windows runs out of ram with LINK_TIME_OPT on gh-actions
     if(NOT WIN32)
-        
         list(APPEND RELEASE_FLAGS "-mtune=skylake")
+        set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
+        set(CLANG_MAX_INLINE_DEPTH 300)
     endif()
-    #set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
-    #set(CLANG_MAX_INLINE_DEPTH 400)
+    
 else()
     list(APPEND RELEASE_FLAGS "-march=native")
     if(NOT WIN32)
