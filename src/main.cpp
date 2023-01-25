@@ -82,11 +82,18 @@ void SoftwareInfo() {
     fmt::print(fmt::fg(fmt::color::royal_blue), " Linear Solver        : "); fmt::print(fmt::fg(fmt::color::white), "Intel MKL Pardiso"); fmt::print("\n");
 
     fmt::print(fmt::fg(fmt::color::royal_blue), " Compiled With        : "); fmt::print(fmt::fg(fmt::color::white), compiler); fmt::print("\n");
-    fmt::print(fmt::fg(fmt::color::royal_blue), " Compiled On/For      : "); fmt::print(fmt::fg(fmt::color::white), osversion); fmt::print("\n");
+    fmt::print(fmt::fg(fmt::color::royal_blue), " Compiled On          : "); fmt::print(fmt::fg(fmt::color::white), osversion); fmt::print("\n");
 
 
 
     fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n\n", "", 79);
+    fmt::print(fmt::fg(fmt::color::royal_blue), " Copyright/Licensing Notices : See package's .dist.data folder for full text\n");
+
+    fmt::print(fmt::fg(fmt::color::white), "  ASSET    :Apache 2.0 | Copyright (c) 2020-present The University of Alabama-Astrodynamics and Space Research Lab\n");
+    fmt::print(fmt::fg(fmt::color::white), "  Pybind11 :Modified BSD | Copyright (c) 2016 Wenzel Jakob <wenzel.jakob@epfl.ch>, All rights reserved.\n");
+    fmt::print(fmt::fg(fmt::color::white), "  Intel MKL:Intel Simplified Software License (Version October 2022) | Copyright (c) 2022 Intel Corporation \n");
+    fmt::print(fmt::fg(fmt::color::white), "  Eigen    :MPL-2.0. | Copyright (c) Eigen Developers \n");
+    fmt::print(fmt::fg(fmt::color::white), "  fmt      :MIT | Copyright (c) 2012 - present, Victor Zverovich \n");
 
 
 }
