@@ -14,9 +14,9 @@ jobs:
         strategy:
               fail-fast: false
               matrix:
-                platform: [ubuntu-20.04]
-                python-version: ["3.8","3.9","3.10"]
-                compiler: ["clang-12"]
+                platform: [ubuntu-22.04]
+                python-version: ["3.7","3.8","3.9","3.10","3.11"]
+                compiler: ["clang-13"]
 
         runs-on: ${{ matrix.platform }}
 
@@ -51,7 +51,7 @@ jobs:
             run:  auditwheel show build/pypiwheel/asset_asrl/dist/*.whl
 
           - name: Audit Wheel Repair
-            run:  auditwheel repair --plat manylinux_2_31_x86_64 build/pypiwheel/asset_asrl/dist/*.whl
+            run:  auditwheel repair --plat manylinux_2_35_x86_64 build/pypiwheel/asset_asrl/dist/*.whl
 
           - name: 'Upload Wheels'
             uses: actions/upload-artifact@v3
