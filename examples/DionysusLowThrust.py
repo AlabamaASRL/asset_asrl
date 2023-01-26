@@ -33,7 +33,7 @@ if __name__ == "__main__":
     tf_dim   = 3534*c.day #s 
     mass_dim = 4000       #kg
    
-    
+    ast.SoftwareInfo()
     thruster = CSIThruster(Tmag_dim, Isp_dim, mass_dim)
     ode = MEETwoBody_CSI(c.MuSun,c.AU,thruster)
     
