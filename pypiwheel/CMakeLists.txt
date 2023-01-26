@@ -48,9 +48,5 @@ add_custom_command(TARGET pypiwheel
 
 
 message(STATUS ${ASSET_BINARY_NAME})
-#add_custom_command(TARGET pypiwheel POST_BUILD
-#        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:asset> ${PYTHON_LOCAL_INSTALL_DIR}/
-#    COMMENT "Copied asset.pyd to ${PYTHON_LOCAL_INSTALL_DIR}"
-#    )
 
 

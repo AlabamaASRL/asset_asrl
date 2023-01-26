@@ -3,9 +3,7 @@ name: pypi-wheels
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-     - packagemanagers
+  
 
 
 jobs:
@@ -38,7 +36,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
-          ref: packagemanagers
+          
 
       - uses: ilammy/msvc-dev-cmd@v1
         with:
@@ -86,7 +84,7 @@ jobs:
           - uses: actions/checkout@v3
             with:
                 submodules: true
-                ref: packagemanagers
+                
 
           - uses: actions/setup-python@v3
             with:
@@ -135,7 +133,7 @@ jobs:
           - uses: actions/checkout@v3
             with:
                 submodules: true
-                ref: packagemanagers
+                
 
           - uses: actions/setup-python@v3
             with:
