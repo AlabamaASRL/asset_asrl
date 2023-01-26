@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(ASSET VERSION 0.0.1 LANGUAGES CXX)
+project(ASSET VERSION 0.0.2 LANGUAGES CXX)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 set( CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
@@ -37,7 +37,7 @@ endif()
 
 set(LINK_TIME_OPT FALSE)          ### DO LTO - Recommended for full release
 set(CLANG_MAX_INLINE_DEPTH 225)
-set(BUILD_ASSET_WHEEL FALSE)      ### Copy binaries and build wheel for distribution
+#set(BUILD_ASSET_WHEEL TRUE)      ### CI Build for generic wheels
 
 
 ################################################################################
@@ -52,7 +52,25 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Release Flags
 list(APPEND RELEASE_FLAGS "-O2")
-list(APPEND RELEASE_FLAGS "-march=native")
+
+
+## Generic Binary Flags
+if(BUILD_ASSET_WHEEL)
+    list(APPEND RELEASE_FLAGS "-march=x86-64-v3")
+    # Windows runs out of ram with LINK_TIME_OPT on gh-actions
+    if(NOT WIN32)
+        list(APPEND RELEASE_FLAGS "-mtune=skylake")
+        set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
+        set(CLANG_MAX_INLINE_DEPTH 300)
+    endif()
+    
+else()
+    list(APPEND RELEASE_FLAGS "-march=native")
+    if(NOT WIN32)
+        list(APPEND RELEASE_FLAGS "-mtune=native")
+    endif()
+endif()
+
 
 if(WIN32)
      list(APPEND RELEASE_FLAGS "/MD")
@@ -66,21 +84,24 @@ if(WIN32)
 endif()
 
 if(NOT WIN32)
-    list(APPEND RELEASE_FLAGS "-mtune=native")
     # Debugging Flags
     set(DEBUG_FLAGS "-g" "-ggdb3")
-
     # Common Flags
     list(APPEND COMMON_FLAGS "-pthread")
 endif()
-
+ 
 
 if(LINK_TIME_OPT)
   if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     if(WIN32)
         ## clang-cl flag
-        list(APPEND RELEASE_FLAGS "-flto=thin")
-        list(APPEND RELEASE_FLAGS "/opt:lldltojobs=8")
+        if(BUILD_ASSET_WHEEL)
+            ## Do full LTO for CI builds since it is single threaded anyway
+            list(APPEND RELEASE_FLAGS "-flto=full")
+        else()
+            list(APPEND RELEASE_FLAGS "-flto=thin")
+            list(APPEND RELEASE_FLAGS "/opt:lldltojobs=8")
+        endif()
     else()
         set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
     endif()
@@ -243,6 +264,7 @@ endif()
 if(NOT PIP_INSTALL)
   if(WIN32)
     set(PYTHON_LOCAL_INSTALL_DIR ${Python_SITEARCH})
+    
   else()
     execute_process ( COMMAND ${PYTHON_EXECUTABLE} -m site --user-site
     OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -259,6 +281,7 @@ endif()
 message(STATUS "CMAKE DIR LOC" ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS ${OpenMP_CXX_FLAGS})
 message(STATUS ${OpenMP_CXX_LIBRARIES})
+message(STATUS ${PYTHON_EXECUTABLE})
 
 ################################################################################
 # Code Directories
@@ -271,6 +294,7 @@ if(BUILD_SPHINX_DOCS)
   add_subdirectory(doc)
 endif()
 
+add_subdirectory(pypiwheel)
 
 # Formatting
 include(cmake/clang-format.cmake)
