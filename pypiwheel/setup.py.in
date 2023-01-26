@@ -34,8 +34,8 @@ class Precompiled(Extension):
             print(f"Error: specified file {self.precompiled} not found!", file=sys.stderr)
 
 
-pyversion = '=='+str(sys.version_info.major)+'.'+str(sys.version_info.minor)+'.*'
-
+#pyversion = '=='+str(sys.version_info.major)+'.'+str(sys.version_info.minor)+'.*'
+pyversion = '>=3.7.*'
 def main():
 
     setup(
