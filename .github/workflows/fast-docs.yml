@@ -1,0 +1,44 @@
+name: fast-docs
+
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-20.04]
+        python-version: ["3.9"]
+        compiler: ["clang-12"]
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Ubuntu dependencies
+        env:
+          COMPILER: ${{ matrix.compiler }}
+        run: bash $GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh
+
+      - name: Add python requirements
+        run: python -m pip install --upgrade wheel setuptools && python -m pip install -r requirements.txt
+
+      - name: Install asset from pypi 
+        run: pip install asset-asrl
+
+      - name: Run CMake on Docs  # Now that library is installed on runner, we can properly doc the pyd
+        run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_SPHINX_DOCS=True
+      - name: Build Sphinx Docs 
+        run: cmake --build build --target sphinx --config Release -- -j1 
+      - name: Deploy Sphinx Docs 
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build/doc/sphinx # The folder the action will deploy to gh-pages
