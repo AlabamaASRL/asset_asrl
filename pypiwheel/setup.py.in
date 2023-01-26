@@ -1,0 +1,74 @@
+import os
+from pathlib import Path
+from setuptools import setup, Extension,find_packages,Distribution
+
+from setuptools.command.build_ext import build_ext
+import shlex
+import shutil
+import subprocess as sp
+import sys
+import warnings
+
+class CustomExtBuilder(build_ext):
+
+    def build_extension(self, ext):
+        if isinstance(ext, Precompiled):
+            return ext.copy_precompiled(self)
+        return super().build_extension(ext)
+
+
+class Precompiled(Extension):
+
+    def __init__(self, name, precompiled, *args, **kwargs):
+        super().__init__(name, [], *args, **kwargs)
+        self.precompiled = Path(precompiled)
+
+        
+    def copy_precompiled(self, builder):
+        if self.precompiled.exists():
+            shutil.copyfile(
+                str(self.precompiled),
+                builder.get_ext_fullpath(self.name)
+            )
+        else:
+            print(f"Error: specified file {self.precompiled} not found!", file=sys.stderr)
+
+
+#pyversion = '=='+str(sys.version_info.major)+'.'+str(sys.version_info.minor)+'.*'
+pyversion = '>=3.7.*'
+def main():
+
+    setup(
+        name = 'asset_asrl',
+        version = '@PROJECT_VERSION@',
+        description = "High-speed, extensible, object-oriented trajectory design and optimization",
+        long_description="High-speed, extensible, object-oriented trajectory design and optimization",
+        packages=find_packages(),
+        python_requires = pyversion,
+        license = 'Apache 2.0',
+        url ='https://github.com/AlabamaASRL/asset_asrl',
+        data_files=[
+          ('asset_asrl',['asset_asrl/asset-apache2.txt','asset_asrl/eigen-mpl2.txt','asset_asrl/fmt-mit.txt','asset_asrl/issl.pdf','asset_asrl/pybind11-bsd.txt']),
+        ],
+        ext_modules=[
+            Precompiled(
+                "asset",
+                precompiled="@ASSET_BINARY_NAME@"
+            ),
+        ],
+        
+        install_requires=[
+                    "numpy",
+                    "matplotlib",
+                    "spiceypy",
+                    "seaborn",
+                    "basemap",
+                    "intel-openmp"],
+
+        cmdclass=dict(build_ext=CustomExtBuilder),
+    )
+
+if __name__ == '__main__':
+    main()
+
+
