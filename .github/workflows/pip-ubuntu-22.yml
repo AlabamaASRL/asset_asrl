@@ -1,11 +1,13 @@
 name: pip-ubuntu-22
 
 on:
+  workflow_dispatch:
+
   schedule:
     - cron: "0 20 * * 5"
-  push:
-    branches:
-      - master
+  #push:
+  #  branches:
+  #    - master
 
 jobs:
   build:

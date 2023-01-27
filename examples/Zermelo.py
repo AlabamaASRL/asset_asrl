@@ -28,7 +28,7 @@ vecPlotScale = 0.1
 
 ################################################################################
 ## System Dynamics
-class Zermelo(oc.ode_x_u.ode):
+class Zermelo(oc.ODEBase):
     def __init__(self, vMax, wFunc):
         Xvars = 2
         Uvars = 1
