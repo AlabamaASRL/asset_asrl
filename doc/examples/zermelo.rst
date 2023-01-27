@@ -65,7 +65,7 @@ Look below.
 
     ################################################################################
     ## System Dynamics
-    class Zermelo(oc.ode_x_u.ode):
+    class Zermelo(oc.ODEBase):
         def __init__(self, vMax, wFunc):
             Xvars = 2
             Uvars = 1
@@ -319,7 +319,7 @@ How would the phase boundary conditions need to change?
 
     ################################################################################
     ## System Dynamics
-    class Zermelo(oc.ode_x_u.ode):
+    class Zermelo(oc.ODEBase):
         def __init__(self, vMax, wFunc):
             Xvars = 2
             Uvars = 1

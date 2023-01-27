@@ -21,7 +21,7 @@ A newly developed high-performance interior-point optimizer (PSIOPT) is included
     python/python.rst
 
 Citation
-========
+########
 
 Cite the following `paper <https://www.researchgate.net/publication/357567956_ASSET_Astrodynamics_Software_and_Science_Enabling_Toolkit>`_ if you used ASSET in your work.
 
@@ -46,6 +46,31 @@ If you have questions, please email any of:
     jdsikes1@crimson.ua.edu
 
     wgledbetter@crimson.ua.edu
+
+Funding Acknowledgment
+######################
+Open source development and distribution of ASSET is funded by NASA under Grant No. 80NSSC19K1643 as part of the
+`C.29 element of the 2018 ROSES program <https://nspires.nasaprs.com/external/solicitations/summary!init.do?solId=CEB5907A-57A0-379C-7B48-2F538EEB716E>`_.
+ 
+
+Copyright, Licensing, and Legal Notices
+#######################################
+ASSET is provided under the permissive Apache 2.0 License that can be found in the `LICENSE <https://github.com/AlabamaASRL/asset_asrl/blob/master/LICENSE.txt>`_ file on the Github repo.
+
+The license and copyright notices of ASSET's source and redistributable dependencies are shown below. The full text for each respective license can be found in the 
+`notices <https://github.com/AlabamaASRL/asset_asrl/tree/master/notices>`_ folder on the Github repo.
+
+    Pybind11     - BSD License : Copyright (c) 2016 Wenzel Jakob <wenzel.jakob@epfl.ch>, All rights reserved.
+
+    Intel MKL    - Intel Simplified Software License : Copyright (c) 2022 Intel Corporation.
+
+    Eigen        - MPL-2.0 License : Copyright (c) Eigen Developers
+
+    fmt          - MIT License : Copyright (c) 2012 - present, Victor Zverovich
+
+    ctpl         - Apache 2.0 License : Copyright (C) 2014 by Vitaliy Vitsentiy
+
+    rubber_types - MIT License : Copyright (C) 2014 Andreas J. Herrmann
 
 
 ..
