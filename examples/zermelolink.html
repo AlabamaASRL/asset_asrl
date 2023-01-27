@@ -364,7 +364,7 @@ We defined the initial points such that the boat maneuvers back to the initial s
 
 <span class="c1">################################################################################</span>
 <span class="c1">## System Dynamics</span>
-<span class="k">class</span> <span class="nc">Zermelo</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ode_x_u</span><span class="o">.</span><span class="n">ode</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Zermelo</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vMax</span><span class="p">,</span> <span class="n">wFunc</span><span class="p">):</span>
         <span class="n">Xvars</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">1</span>
