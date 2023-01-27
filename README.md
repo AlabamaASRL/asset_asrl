@@ -7,6 +7,15 @@ A newly developed high performance interior-point optimizer (PSIOPT) is included
 
 Development funded by NASA under Grant No. 80NSSC19K1643.
 
+## Download
+-----
+
+You can obtain precompiled binaries from pypi using pip.
+
+```
+pip install asset-asrl
+```
+
 ## Documentation
 -----
 
