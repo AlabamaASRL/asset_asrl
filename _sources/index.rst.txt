@@ -55,7 +55,7 @@ Open source development and distribution of ASSET is funded by NASA under Grant 
 
 Copyright, Licensing, and Legal Notices
 #######################################
-ASSET is provided under the permissive Apache 2.0 License that can be found in the `LICENSE <https://github.com/AlabamaASRL/asset_asrl/blob/master/LICENSE.txt>`_ file on the Github repo.
+ASSET is provided under the permissive Apache 2.0 license that can be found in the `LICENSE <https://github.com/AlabamaASRL/asset_asrl/blob/master/LICENSE.txt>`_ file on the Github repo.
 
 The license and copyright notices of ASSET's source and redistributable dependencies are shown below. The full text for each respective license can be found in the 
 `notices <https://github.com/AlabamaASRL/asset_asrl/tree/master/notices>`_ folder on the Github repo.
