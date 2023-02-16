@@ -4,7 +4,6 @@
 #include "LGLCoeffs.h"
 #include "OptimalControlFlags.h"
 #include "VectorFunctions/ASSET_VectorFunctions.h"
-#include <atomic>
 #include "pch.h"
 
 namespace ASSET {
@@ -29,6 +28,8 @@ struct LGLInterpTable {
   bool BlockedControls = false;
   bool HasOde = false;
   double Order = 3.0;
+  double ErrorWeight;
+
   int BlockSize = 0;
   int NumBlocks = 0;
   int NumStates = 0;
@@ -126,93 +127,7 @@ struct LGLInterpTable {
   std::shared_ptr<LGLInterpTable> getTablePtr() {
     return std::shared_ptr<LGLInterpTable>(this);
   }
-  void setMethod(TranscriptionModes m) {
-    this->Method = m;
-    switch (this->Method) {
-
-      case TranscriptionModes::CentralShooting:
-      case TranscriptionModes::Trapezoidal:
-      case TranscriptionModes::LGL3: {
-          this->BlockSize = 2;
-          this->Tspacing.resize(2);
-          this->Tspacing[0] = 0;
-          this->Tspacing[1] = 1;
-
-          this->Xweights.resize(4, 2);
-          this->DXweights.resize(4, 2);
-          this->Uweights.resize(2, 2);
-          Order = 3.0;
-          for (int i = 0; i < 2; i++) {
-              for (int j = 0; j < 4; j++) {
-                  this->Xweights(j, i) =
-                      LGLCoeffs<2>::Cardinal_XPower_Weights[i][3 - j];
-                  this->DXweights(j, i) =
-                      LGLCoeffs<2>::Cardinal_DXPower_Weights[i][3 - j];
-              }
-              for (int j = 0; j < 2; j++) {
-                  this->Uweights(j, i) =
-                      LGLCoeffs<2>::Cardinal_UPolyPower_Weights[i][1 - j];
-              }
-          }
-
-          break;
-      }
-      case TranscriptionModes::LGL5: {
-          this->BlockSize = 3;
-          this->Tspacing.resize(3);
-          this->Tspacing[0] = 0;
-          this->Tspacing[1] = 0.5;
-          this->Tspacing[2] = 1;
-
-          this->Xweights.resize(6, 3);
-          this->DXweights.resize(6, 3);
-          this->Uweights.resize(3, 3);
-          Order = 5.0;
-          for (int i = 0; i < 3; i++) {
-              for (int j = 0; j < 6; j++) {
-                  this->Xweights(j, i) =
-                      LGLCoeffs<3>::Cardinal_XPower_Weights[i][5 - j];
-                  this->DXweights(j, i) =
-                      LGLCoeffs<3>::Cardinal_DXPower_Weights[i][5 - j];
-              }
-              for (int j = 0; j < 3; j++) {
-                  this->Uweights(j, i) =
-                      LGLCoeffs<3>::Cardinal_UPolyPower_Weights[i][2 - j];
-              }
-          }
-
-          break;
-      }
-        
-      case TranscriptionModes::LGL7: {
-          this->BlockSize = 4;
-          this->Tspacing.resize(4);
-          this->Tspacing[0] = 0;
-          this->Tspacing[1] = 2.65575603264643e-1;
-          this->Tspacing[2] = 1.0 - 2.65575603264643e-1;
-          this->Tspacing[3] = 1.0;
-          this->Xweights.resize(8, 4);
-          this->DXweights.resize(8, 4);
-          this->Uweights.resize(4, 4);
-          Order = 7.0;
-          for (int i = 0; i < 4; i++) {
-              for (int j = 0; j < 8; j++) {
-                  this->Xweights(j, i) =
-                      LGLCoeffs<4>::Cardinal_XPower_Weights[i][7 - j];
-                  this->DXweights(j, i) =
-                      LGLCoeffs<4>::Cardinal_DXPower_Weights[i][7 - j];
-              }
-              for (int j = 0; j < 4; j++) {
-                  this->Uweights(j, i) =
-                      LGLCoeffs<4>::Cardinal_UPolyPower_Weights[i][3 - j];
-              }
-          }
-          break;
-      }
-
-       
-    }
-  }
+  void setMethod(TranscriptionModes m);
 
   void makePeriodic() {
     this->Periodic = true;
@@ -505,12 +420,19 @@ struct LGLInterpTable {
       this->ode.compute(temp2, temp);
       errint[i][0] = errint[i - 1][0] +
                      std::pow((temp - XXd.col(1).head(this->XVars)).norm(),
-                              1.0 / (this->Order - 1)) *
+                              1.0 / (this->Order + 1)) *
                          h;
       errint[i][1] = ts[i];
     }
     return errint;
   }
+
+
+
+  std::vector<Eigen::VectorXd> NewErrorIntegral();
+
+  void DeboorMeshError(Eigen::VectorXd & tsnd, Eigen::MatrixXd & mesh_errors, Eigen::MatrixXd & mesh_dist) const;
+
 
   template <class Scalar>
   VectorX<Scalar> Interpolate(Scalar tglobal) const {
@@ -998,48 +920,7 @@ struct LGLInterpTable {
     return sd;
   }
 
-  static void Build(py::module& m) {
-    auto obj = py::class_<LGLInterpTable, std::shared_ptr<LGLInterpTable>>(
-        m, "LGLInterpTable");
-    obj.def(py::init<VectorFunctionalX, int, int, TranscriptionModes,
-                     const std::vector<Eigen::VectorXd>&, int>());
-
-    obj.def(py::init<VectorFunctionalX, int, int, std::string,
-        const std::vector<Eigen::VectorXd>&, int>());
-
-    obj.def(py::init<VectorFunctionalX, int, int,int, std::string,
-        const std::vector<Eigen::VectorXd>&, int>());
-
-    obj.def(py::init<VectorFunctionalX, int, int, const std::vector<Eigen::VectorXd>&>());
-    obj.def(py::init<VectorFunctionalX, int, int, int,const std::vector<Eigen::VectorXd>&>());
-
-    obj.def(py::init<int, const std::vector<Eigen::VectorXd>&, int>());
-    obj.def(py::init<const std::vector<Eigen::VectorXd>&>());
-
-    obj.def(py::init<VectorFunctionalX, int, int, TranscriptionModes>());
-
-    obj.def(py::init<int, int, TranscriptionModes>());
-    obj.def("loadEvenData", &LGLInterpTable::loadEvenData);
-    obj.def("getTablePtr", &LGLInterpTable::getTablePtr);
-    obj.def("loadUnevenData", &LGLInterpTable::loadUnevenData);
-    obj.def("Interpolate", &LGLInterpTable::Interpolate<double>);
-
-    obj.def("__call__", py::overload_cast<double>(&LGLInterpTable::Interpolate<double>, py::const_), py::is_operator());
-
-
-    obj.def("InterpolateDeriv", &LGLInterpTable::InterpolateDeriv<double>);
-    obj.def("makePeriodic", &LGLInterpTable::makePeriodic);
-
-    obj.def("InterpRange", &LGLInterpTable::InterpRange);
-    obj.def("InterpWholeRange", &LGLInterpTable::InterpWholeRange);
-    obj.def("ErrorIntegral", &LGLInterpTable::ErrorIntegral);
-
-    obj.def_readonly("T0", &LGLInterpTable::T0);
-    obj.def_readonly("TF", &LGLInterpTable::TF);
-
-    obj.def("InterpNonDim", py::overload_cast<int, double, double>(
-                                &LGLInterpTable::NDequidist));
-  }
+  static void Build(py::module& m);
 };
 
 }  // namespace ASSET

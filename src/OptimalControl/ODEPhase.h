@@ -29,6 +29,13 @@ struct ODEPhase : ODEPhaseBase {
   template<class ODET, int CS>
   using LGLType = LGLDefects<ODET, CS>;
 
+  template <class Scalar>
+  using ODEState = typename DODE::template Input<Scalar>;
+  template <class Scalar>
+  using ODEDeriv = typename DODE::template Output<Scalar>;
+
+
+
 
   DODE ode;
   Integrator<DODE> integrator;
@@ -73,30 +80,35 @@ struct ODEPhase : ODEPhaseBase {
       case TranscriptionModes::LGL7:
         this->Table = LGLInterpTable(odetemp, this->XVars(),
                                      this->UVars() + this->PVars(), m);
+        this->Order = 7.0;
         this->numTranCardStates = 4;
         break;
       case TranscriptionModes::LGL5:
         this->Table = LGLInterpTable(odetemp, this->XVars(),
                                      this->UVars() + this->PVars(), m);
+        this->Order = 5.0;
         this->numTranCardStates = 3;
         break;
       case TranscriptionModes::LGL3:
         this->Table = LGLInterpTable(odetemp, this->XVars(),
                                      this->UVars() + this->PVars(), m);
+
+        this->Order = 3.0;
         this->numTranCardStates = 2;
         break;
       case TranscriptionModes::Trapezoidal:
         this->Table = LGLInterpTable(odetemp, this->XVars(),
                                      this->UVars() + this->PVars(),
                                      TranscriptionModes::LGL3);
+
+        this->Order = 2.0;
         this->numTranCardStates = 2;
         break;
       case TranscriptionModes::CentralShooting:
         this->Table = LGLInterpTable(odetemp, this->XVars(),
                                      this->UVars() + this->PVars(),
                                      TranscriptionModes::LGL3);
-       // throw std::invalid_argument("Central Shooting has been disabled for the initial release");
-
+        this->Order = 7.0;
         this->numTranCardStates = 2;
         break;
       default: {
@@ -222,6 +234,284 @@ struct ODEPhase : ODEPhaseBase {
       return ASSET::ConstraintInterface(shooter);
   }
 
+
+  virtual Eigen::VectorXd calc_global_error() const {
+      LGLInterpTable tabtmp = this->Table;
+      tabtmp.loadExactData(this->ActiveTraj);
+
+      Integrator<DODE> Integ;
+
+      if (this->UVars() != 0) {
+          Integ = Integrator<DODE>{ this->ode, this->integrator.DefStepSize ,std::make_shared<LGLInterpTable>(tabtmp) };
+      }
+      else {
+          Integ = Integrator<DODE>{ this->ode, this->integrator.DefStepSize };
+      }
+
+
+      Integ.Adaptive = this->integrator.Adaptive;
+      Integ.FastAdaptiveSTM = this->integrator.FastAdaptiveSTM;
+      Integ.AbsTols = this->integrator.AbsTols;
+      Integ.RelTols = this->integrator.RelTols;
+      Integ.MinStepSize = this->integrator.MinStepSize;
+      Integ.MaxStepSize = this->integrator.MaxStepSize;
+      Integ.EnableVectorization = this->EnableVectorization;
+
+      ODEState<double> Xin;
+      ODEState<double> Xout;
+
+
+      double T0 = this->ActiveTraj[0][this->TVar()];
+      double TF = this->ActiveTraj.back()[this->TVar()];
+
+      
+      int BlockSize = this->numTranCardStates;
+      int numBlocks = (this->ActiveTraj.size() - 1) / (BlockSize - 1);;
+
+      Xin = this->ActiveTraj[0];
+
+      for (int i = 0; i < numBlocks; i++) {
+            int start = (BlockSize - 1) * i;
+            int stop = (BlockSize - 1) * (i + 1);
+
+            double tf = this->ActiveTraj[stop][this->TVar()];
+            Xout = Integ.integrate(Xin, tf);
+            Xin = Xout;
+      }
+     
+      Eigen::VectorXd gerror = (this->ActiveTraj.back() - Xout).head(this->XVars()).cwiseAbs();
+      return gerror;
+  }
+
+  virtual void get_meshinfo_deboor(Eigen::VectorXd& tsnd, Eigen::MatrixXd& mesh_errors, Eigen::MatrixXd& mesh_dist) const {
+
+      double T0 = this->ActiveTraj[0][this->TVar()];
+      double TF = this->ActiveTraj.back()[this->TVar()];
+
+      int BlockSize = this->numTranCardStates;
+      int numBlocks = (this->ActiveTraj.size() - 1) / (BlockSize - 1);;
+
+
+      mesh_errors.resize(this->XVars(), numBlocks + 1);
+      mesh_dist.resize(this->XVars(), numBlocks + 1);
+      tsnd.resize(numBlocks + 1);
+
+
+      Eigen::VectorXd XerrWeights(this->numTranCardStates);
+      Eigen::VectorXd DXerrWeights(this->numTranCardStates);
+      std::vector<ODEDeriv<double>> Derivs(ActiveTraj.size(), ODEDeriv<double>::Zero(this->XVars()));
+
+
+      for (int i = 0; i < this->ActiveTraj.size(); i++) {
+          this->ode.compute(ActiveTraj[i], Derivs[i]);
+      }
+
+      ////////////////////////////////////////////////////
+      auto factorial = [](int n) {
+          double fact = 1;
+          for (int i = 1; i <= n; i++)
+              fact = fact * i;
+          return fact;
+      };
+
+      double PolyFact = factorial(this->Order);
+      double ErrorWeight;
+
+      auto FillErrorInfo = [&](auto CardStates) {
+          for (int i = 0; i < CardStates.value; i++) {
+              XerrWeights[i]  = LGLCoeffs<CardStates.value>::Cardinal_XPower_Weights[i][0]*PolyFact;
+              DXerrWeights[i] = LGLCoeffs<CardStates.value>::Cardinal_DXPower_Weights[i][0]*PolyFact;
+          }
+          ErrorWeight = LGLCoeffs<CardStates.value>::ErrorWeight;
+      };
+
+
+      switch (this->TranscriptionMode) {
+      case TranscriptionModes::LGL7:
+          FillErrorInfo(int_const<4>());
+          break;
+      case TranscriptionModes::LGL5:
+          FillErrorInfo(int_const<3>());
+          break;
+      case TranscriptionModes::LGL3:
+          FillErrorInfo(int_const<2>());
+          break;
+      case TranscriptionModes::CentralShooting:
+          FillErrorInfo(int_const<2>());
+          break;
+      case TranscriptionModes::Trapezoidal:
+          ErrorWeight = 1/12.0;
+          XerrWeights.setZero();
+          DXerrWeights[0] = -1;
+          DXerrWeights[1] =  1;
+          break;
+      default: {
+          throw std::invalid_argument("Invalid Transcription Method");
+          break;
+      }
+      }
+      ////////////////////////////////////////////////////
+      std::vector<ODEDeriv<double>> yvecs(numBlocks);
+      Eigen::VectorXd hs(numBlocks);
+
+      for (int i = 0; i < numBlocks; i++) {
+          int start = (BlockSize - 1) * i;
+
+          hs[i] = this->ActiveTraj[start + (BlockSize - 1)][this->TVar()]
+              - this->ActiveTraj[start][this->TVar()];
+
+          tsnd[i] = (this->ActiveTraj[start][this->TVar()] - T0) / (TF - T0);
+
+          ODEDeriv<double> yvec(this->XVars());
+          yvec.setZero();
+          double powh = std::pow(hs[i], this->Order);
+
+          ODEDeriv<double> dtemp(this->XVars());
+
+
+          if (this->UVars() != 0 && this->ControlMode == BlockConstant) {
+              ODEState<double> tmp = this->ActiveTraj[start + BlockSize - 1];
+              tmp.segment(this->XtVars(),this->UVars()) = this->ActiveTraj[start].segment(this->XtVars(), this->UVars());
+
+              dtemp = Derivs[start + BlockSize - 1];
+              Derivs[start + BlockSize - 1].setZero();
+              this->ode.compute(tmp, Derivs[start + BlockSize - 1]);
+
+          }
+
+          for (int j = 0; j < BlockSize; j++) {
+              yvec += this->ActiveTraj[start + j].head(this->XVars()) * XerrWeights[j] / powh;
+              yvec += Derivs[start + j].head(this->XVars()) * DXerrWeights[j] * hs[i] / powh;
+          }
+
+          if (this->UVars() != 0 && this->ControlMode == BlockConstant) {
+              Derivs[start + BlockSize - 1] = dtemp;
+          }
+
+          yvecs[i] = yvec;
+      }
+
+      tsnd[numBlocks] = 1.0;
+
+
+     
+
+      for (int i = 0; i < numBlocks; i++) {
+          ODEDeriv<double> err_tmp(this->XVars());
+
+
+          if (this->TranscriptionMode == Trapezoidal||this->TranscriptionMode==LGL5) {
+             if (i < (numBlocks - 1)) {
+                  err_tmp = (2 * (yvecs[i] - yvecs[i + 1]) / (hs[i] + hs[i + 1])).cwiseAbs();
+              }
+              else {
+                  err_tmp = (2 * (yvecs[i] - yvecs[i - 1]) / (hs[i] + hs[i - 1])).cwiseAbs();
+              }
+          }
+          else {
+              if (i > 0 && i < (numBlocks - 1)) {
+
+                  err_tmp = ((yvecs[i] - yvecs[i - 1]) / (hs[i] + hs[i - 1])
+                      + (yvecs[i] - yvecs[i + 1]) / (hs[i] + hs[i + 1])).cwiseAbs();
+              }
+              else if (i == 0) {
+                  err_tmp = (2 * (yvecs[i] - yvecs[i + 1]) / (hs[i] + hs[i + 1])).cwiseAbs();
+              }
+              else {
+                  err_tmp = (2 * (yvecs[i] - yvecs[i - 1]) / (hs[i] + hs[i - 1])).cwiseAbs();
+              }
+          }
+
+          
+
+          
+          mesh_dist.col(i) = err_tmp.array().pow(1 / (this->Order + 1));
+          mesh_errors.col(i) = err_tmp * std::pow(std::abs(hs[i]), this->Order + 1) * ErrorWeight;
+          
+         
+      }
+
+      mesh_dist.col(numBlocks) = mesh_dist.col(numBlocks - 1);
+      mesh_errors.col(numBlocks) = mesh_errors.col(numBlocks - 1);
+
+
+
+
+  }
+
+
+  virtual void get_meshinfo_integrator(Eigen::VectorXd& tsnd, Eigen::MatrixXd& mesh_errors, Eigen::MatrixXd& mesh_dist) const {
+
+      Integrator<DODE> Integ;
+
+      if (this->UVars() != 0) {
+          Integ = Integrator<DODE>{ this->ode, this->integrator.DefStepSize ,std::make_shared<LGLInterpTable>(this->Table) };
+      }
+      else {
+          Integ = Integrator<DODE>{ this->ode, this->integrator.DefStepSize};
+      }
+
+     
+      Integ.Adaptive = this->integrator.Adaptive;
+      Integ.FastAdaptiveSTM = this->integrator.FastAdaptiveSTM;
+      Integ.AbsTols = this->integrator.AbsTols;
+      Integ.RelTols = this->integrator.RelTols;
+      Integ.MinStepSize = this->integrator.MinStepSize;
+      Integ.MaxStepSize = this->integrator.MaxStepSize;
+      Integ.EnableVectorization = this->EnableVectorization;
+
+
+     
+
+      ODEState<double> Xin;
+      ODEState<double> Xout;
+
+     
+      double T0 = this->ActiveTraj[0][this->TVar()];
+      double TF = this->ActiveTraj.back()[this->TVar()];
+
+      int numBlocks = this->ActiveTraj.size() - 1;
+      int BlockSize = 2;
+
+
+      mesh_errors.resize(this->XVars(), numBlocks + 1);
+      mesh_dist.resize(this->XVars(), numBlocks + 1);
+      tsnd.resize(numBlocks + 1);
+
+      for (int i = 0; i < numBlocks; i++) {
+          int start = (BlockSize - 1) * i;
+          int stop  = (BlockSize - 1) * (i + 1);
+
+          Xin = this->ActiveTraj[start];
+          double tf = this->ActiveTraj[stop][this->TVar()];
+          Xout = Integ.integrate(Xin, tf);
+
+          mesh_errors.col(i) = (Xout.head(this->XVars()) - this->ActiveTraj[stop].head(this->XVars())).cwiseAbs();
+      }
+
+      mesh_errors.col(numBlocks) = mesh_errors.col(numBlocks - 1);
+      double max_err = mesh_errors.maxCoeff();
+
+      for (int i = 0; i < numBlocks; i++) {
+          int start = (BlockSize - 1) * i;
+          int stop = (BlockSize - 1) * (i + 1);
+
+          double t0 = this->ActiveTraj[start][this->TVar()];
+          double tf = this->ActiveTraj[stop][this->TVar()];
+
+          tsnd[i] = (t0 -T0) / (TF-T0);
+
+
+          double h = std::abs(tf - t0);
+          mesh_dist.col(i) = mesh_errors.col(i)/(std::pow(h, this->Order+1)*max_err);
+          mesh_dist.col(i) = (mesh_dist.col(i).array().pow(1 / (this->Order + 1))).eval();
+      }
+      mesh_dist.col(numBlocks) = mesh_dist.col(numBlocks - 1);
+      tsnd[numBlocks] = 1.0;
+
+  }
+
+  
 
   template<class PyClass>
   static void BuildImpl(PyClass& phase) {
