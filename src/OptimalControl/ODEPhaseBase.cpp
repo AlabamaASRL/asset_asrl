@@ -1,4 +1,5 @@
 #include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
 
 #include "LGLControlSplines.h"
 #include "LGLIntegrals.h"
@@ -532,7 +533,9 @@ void ASSET::ODEPhaseBase::refineTrajManual(VectorXd DBS, VectorXi DPB) {
     throw std::invalid_argument("");
   }
 
-  this->Table.loadRegularData(DPB.sum(), this->ActiveTraj);
+  //this->Table.loadRegularData(DPB.sum(), this->ActiveTraj);
+  this->Table.loadExactData(this->ActiveTraj);
+
   this->ActiveTraj = this->Table.NDdistribute(DBS, DPB);
   this->DefBinSpacing = DBS;
   this->DefsPerBin = DPB;
@@ -583,6 +586,67 @@ std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::refineTrajEqual(int n) {
   this->refineTrajManual(bins, dpb);
 
   return tcopy.NDdistribute(bins, dpb);
+}
+
+std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::refineTrajEqualNew(bool integ, int n)
+{
+
+    Eigen::VectorXd tsnd;
+    Eigen::MatrixXd mesh_errors;
+    Eigen::MatrixXd mesh_dist;
+
+    this->Table.loadExactData(this->ActiveTraj);
+
+
+    if (integ) {
+        this->get_meshinfo_integrator(tsnd, mesh_errors, mesh_dist);
+    }
+    else {
+        this->get_meshinfo_deboor(tsnd, mesh_errors, mesh_dist);
+    }
+
+    Eigen::VectorXd error = mesh_errors.colwise().lpNorm<Eigen::Infinity>();
+    Eigen::VectorXd dist = mesh_dist.colwise().lpNorm<Eigen::Infinity>();
+
+    double maxerror = error.maxCoeff();
+    double meanerror = error.mean();
+
+    fmt::print("Max Error: {0:.4e} , Mean Error {1:.4e}\n", maxerror, meanerror);
+
+
+    Eigen::VectorXd distint(dist.size());
+    distint[0] = 0;
+
+    for (int i = 0; i < dist.size() - 1; i++) {
+        distint[i + 1] = distint[i] + (dist[i]) * (tsnd[i + 1] - tsnd[i]);
+    }
+
+    distint = distint / distint[distint.size() - 1];
+
+    Eigen::VectorXd bins;
+    bins.setLinSpaced(n + 1, 0.0, 1.0);
+    int elem = 0;
+    for (int i = 1; i < n; i++) {
+        double di = double(i) / double(n);
+        auto it = std::upper_bound(distint.cbegin() + elem, distint.cend(), di);
+        elem = int(it - distint.cbegin()) - 1;
+
+        double t0 = tsnd[elem];
+        double t1 = tsnd[elem + 1];
+        double d0 = distint[elem];
+        double d1 = distint[elem + 1];
+        double slope = (d1 - d0) / (t1 - t0);
+        bins[i] = (di - d0) / slope + t0;
+
+    }
+
+
+
+    Eigen::VectorXi dpb = VectorXi::Ones(n);
+
+    this->refineTrajManual(bins, dpb);
+
+    return this->Table.NDdistribute(bins, dpb);
 }
 
 void ASSET::ODEPhaseBase::subVariables(PhaseRegionFlags reg, VectorXi indices,
@@ -640,8 +704,6 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
         return MakeInt(cs, int_const<2>(), pv, integrand, xvv, pvv);
       case 3:
         return MakeInt(cs, int_const<3>(), pv, integrand, xvv, pvv);
-      // case 4:
-      //   return MakeInt(cs, int_const<4>(), pv, integrand, xvv, pvv);
       default:
         return MakeInt(cs, int_const<-1>(), pv, integrand, xvv, pvv);
     }
@@ -651,8 +713,6 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
     switch (pv) {
       case 0:
         return SwitchX(cs, xv, int_const<0>(), integrand, xvv, pvv);
-      // case 1:
-      //   return SwitchX(cs, xv, int_const<1>(), integrand, xvv, pvv);
       default:
         return MakeInt(cs, int_const<-1>(), int_const<-1>(), integrand, xvv,
                        pvv);
@@ -1591,6 +1651,35 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       ODEPhaseBase_addIntegralParamFunction2);
   
 
+  ////////////////////////////////////////////////////
+  obj.def("getMeshInfo", &ODEPhaseBase::getMeshInfo);
+  obj.def("refineTrajEqualNew", &ODEPhaseBase::refineTrajEqualNew);
+  obj.def("refineTrajAuto", &ODEPhaseBase::refineTrajAuto);
+  obj.def("calc_global_error", &ODEPhaseBase::calc_global_error);
+
+  
+
+  obj.def_readwrite("AdaptiveMesh", &ODEPhaseBase::AdaptiveMesh);
+  obj.def_readwrite("PrintMeshInfo", &ODEPhaseBase::PrintMeshInfo);
+  obj.def_readwrite("MaxMeshIters", &ODEPhaseBase::MaxMeshIters);
+  obj.def_readwrite("MeshTol", &ODEPhaseBase::MeshTol);
+  obj.def_readwrite("MeshErrorEstimator", &ODEPhaseBase::MeshErrorEstimator);
+  obj.def_readwrite("MeshErrorCriteria", &ODEPhaseBase::MeshErrorCriteria);
+  obj.def_readwrite("MeshErrorDistributor", &ODEPhaseBase::MeshErrorDistributor);
+
+
+  obj.def_readwrite("NumExtraSegs",  &ODEPhaseBase::NumExtraSegs);
+  obj.def_readwrite("MeshRedFactor", &ODEPhaseBase::MeshRedFactor);
+  obj.def_readwrite("MeshIncFactor", &ODEPhaseBase::MeshIncFactor);
+  obj.def_readwrite("MeshErrFactor", &ODEPhaseBase::MeshErrFactor);
+
+  obj.def_readonly("MeshConverged", &ODEPhaseBase::MeshConverged);
+  obj.def_readwrite("NeverDecrease", &ODEPhaseBase::NeverDecrease);
+
+  obj.def_readonly("MeshTimes", &ODEPhaseBase::MeshTimes);
+  obj.def_readonly("MeshError", &ODEPhaseBase::MeshError);
+  obj.def_readonly("MeshDistFunc", &ODEPhaseBase::MeshDistFunc);
+  obj.def_readonly("MeshDistInt", &ODEPhaseBase::MeshDistInt);
 
   
 }

@@ -190,63 +190,7 @@ void ASSET::OptimalControlProblem::transcribe(bool showstats, bool showfuns) {
   this->doTranscription = false;
 }
 
-ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::solve() {
-  this->checkTranscriptions();
-  if (this->doTranscription) this->transcribe();
-  VectorXd Input = this->makeSolverInput();
-  VectorXd Output = this->optimizer->solve(Input);
-  this->collectSolverOutput(Output);
-  this->collectSolverMultipliers(this->optimizer->LastEqLmults,
-                                 this->optimizer->LastIqLmults);
-  return this->optimizer->ConvergeFlag;
-}
 
-ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::optimize() {
-  this->checkTranscriptions();
-  if (this->doTranscription) this->transcribe();
-  VectorXd Input = this->makeSolverInput();
-  VectorXd Output = this->optimizer->optimize(Input);
-  this->collectSolverOutput(Output);
-  this->collectSolverMultipliers(this->optimizer->LastEqLmults,
-                                 this->optimizer->LastIqLmults);
-  return this->optimizer->ConvergeFlag;
-}
-
-ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::solve_optimize() {
-  this->checkTranscriptions();
-  if (this->doTranscription) this->transcribe();
-  VectorXd Input = this->makeSolverInput();
-  VectorXd Output = this->optimizer->solve_optimize(Input);
-  this->collectSolverOutput(Output);
-  this->collectSolverMultipliers(this->optimizer->LastEqLmults,
-                                 this->optimizer->LastIqLmults);
-  return this->optimizer->ConvergeFlag;
-}
-
-ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::solve_optimize_solve()
-{
-    this->checkTranscriptions();
-    if (this->doTranscription) this->transcribe();
-    VectorXd Input = this->makeSolverInput();
-    VectorXd Output = this->optimizer->solve_optimize_solve(Input);
-    this->collectSolverOutput(Output);
-    this->collectSolverMultipliers(this->optimizer->LastEqLmults,
-        this->optimizer->LastIqLmults);
-    return this->optimizer->ConvergeFlag;
-}
-
-ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::optimize_solve()
-{
-    this->checkTranscriptions();
-    if (this->doTranscription) this->transcribe();
-    VectorXd Input = this->makeSolverInput();
-    VectorXd Output = this->optimizer->optimize_solve(Input);
-    this->collectSolverOutput(Output);
-    this->collectSolverMultipliers(this->optimizer->LastEqLmults,
-        this->optimizer->LastIqLmults);
-    return this->optimizer->ConvergeFlag;
-    return PSIOPT::ConvergenceFlags();
-}
 
 void ASSET::OptimalControlProblem::print_stats(bool showfuns) {
   using std::cout;
@@ -1126,7 +1070,12 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
       >(&OptimalControlProblem::addLinkObjective));
 
 
+  ///////////////////////
+  obj.def_readwrite("AdaptiveMesh", &OptimalControlProblem::AdaptiveMesh);
+  obj.def_readwrite("PrintMeshInfo", &OptimalControlProblem::PrintMeshInfo);
+  obj.def_readwrite("MaxMeshIters", &OptimalControlProblem::MaxMeshIters);
 
+ 
 
 
 }

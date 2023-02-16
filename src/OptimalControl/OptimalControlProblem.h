@@ -76,6 +76,14 @@ struct OptimalControlProblem:OptimizationProblemBase {
   int numProbEqCons = 0;
   int numProbIqCons = 0;
 
+  ///////////////////////////////
+  bool AdaptiveMesh = false;
+  bool PrintMeshInfo = true;
+  int MaxMeshIters = 5;
+
+
+  ///////////////////////////////
+
   int addPhase(PhasePtr p) {
     this->resetTranscription();
     this->phases.push_back(p);
@@ -1329,11 +1337,142 @@ struct OptimalControlProblem:OptimizationProblemBase {
   }
 
 
-  PSIOPT::ConvergenceFlags solve();
-  PSIOPT::ConvergenceFlags optimize();
-  PSIOPT::ConvergenceFlags solve_optimize();
-  PSIOPT::ConvergenceFlags solve_optimize_solve();
-  PSIOPT::ConvergenceFlags optimize_solve();
+  
+
+  ////////////////////////////////////////////////////////////
+
+  void initMeshs() {
+      for (auto& phase : this->phases) {
+          phase->initMeshRefinement();
+      }
+  }
+
+  bool checkMeshs(bool printinfo) {
+      bool converged = true;
+      for (auto& phase : this->phases) {
+          if (phase->AdaptiveMesh) {
+              if(!phase->checkMesh()) converged = false;
+          }
+      }
+      return converged;
+  }
+  void updateMeshs(bool printinfo) {
+      for (auto& phase : this->phases) {
+          if (phase->AdaptiveMesh) {
+              if (!phase->MeshConverged) {
+                  phase->updateMesh();
+              }
+          }
+      }
+  }
+
+  void printMeshs(int iter) {
+      MeshIterateInfo::print_header(iter);
+      for (int i = 0; i < this->phases.size(); i++) {
+          if (this->phases[i]->AdaptiveMesh) {
+              this->phases[i]->MeshIters.back().print(i);
+          }
+      }
+  }
+
+
+  PSIOPT::ConvergenceFlags psipot_call_impl(std::string mode) {
+
+
+      this->checkTranscriptions();
+      if (this->doTranscription) this->transcribe();
+      VectorXd Input = this->makeSolverInput();
+      VectorXd Output;
+
+      if (mode == "solve") {
+          Output = this->optimizer->solve(Input);
+      }
+      else if (mode == "optimize") {
+          Output = this->optimizer->optimize(Input);
+      }
+      else if (mode == "solve_optimize") {
+          Output = this->optimizer->solve_optimize(Input);
+      }
+      else if (mode == "solve_optimize_solve") {
+          Output = this->optimizer->solve_optimize_solve(Input);
+      }
+      else if (mode == "optimize_solve") {
+          Output = this->optimizer->optimize_solve(Input);
+      }
+
+      this->collectSolverOutput(Output);
+      this->collectSolverMultipliers(this->optimizer->LastEqLmults,
+          this->optimizer->LastIqLmults);
+      return this->optimizer->ConvergeFlag;
+  }
+
+  
+  PSIOPT::ConvergenceFlags ocp_call_impl(std::string mode) {
+      if (this->PrintMeshInfo && this->AdaptiveMesh) {
+          fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 65);
+          fmt::print(fmt::fg(fmt::color::dim_gray), "Beginning");
+          fmt::print(": ");
+          fmt::print(fmt::fg(fmt::color::royal_blue), "Adaptive Mesh Refinement");
+          fmt::print("\n");
+      }
+
+
+      PSIOPT::ConvergenceFlags flag = this->psipot_call_impl(mode);
+
+      if (this->AdaptiveMesh) {
+          initMeshs();
+
+          for (int i = 0; i < this->MaxMeshIters; i++) {
+              if (checkMeshs(this->PrintMeshInfo)) {
+                  if (this->PrintMeshInfo)
+                      this->printMeshs(i);
+                  fmt::print(fmt::fg(fmt::color::lime_green), "All Meshes Converged\n");
+                  break;
+              }
+              updateMeshs(this->PrintMeshInfo);
+              if (this->PrintMeshInfo)
+                  this->printMeshs(i);
+
+              flag = this->psipot_call_impl(mode);
+              if (i == this->MaxMeshIters - 1) {
+                  fmt::print(fmt::fg(fmt::color::lime_green), "All Meshes Not Converged\n");
+                  break;
+              }
+          }
+
+      }
+
+      if (this->PrintMeshInfo && this->AdaptiveMesh) {
+          fmt::print(fmt::fg(fmt::color::dim_gray), "Finished ");
+          fmt::print(": ");
+          fmt::print(fmt::fg(fmt::color::royal_blue), "Adaptive Mesh Refinement");
+          fmt::print("\n");
+          fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 65);
+      }
+
+      return flag;
+
+  }
+
+
+
+  PSIOPT::ConvergenceFlags solve() {
+      return ocp_call_impl("solve");
+  }
+  PSIOPT::ConvergenceFlags optimize() {
+      return ocp_call_impl("optimize");
+  }
+  PSIOPT::ConvergenceFlags solve_optimize() {
+      return ocp_call_impl("solve_optimize");
+  }
+  PSIOPT::ConvergenceFlags solve_optimize_solve() {
+      return ocp_call_impl("solve_optimize_solve");
+  }
+  PSIOPT::ConvergenceFlags optimize_solve() {
+      return ocp_call_impl("optimize_solve");
+  }
+
+
 
   void print_stats(bool showfuns);
 
