@@ -1325,12 +1325,14 @@ struct OptimalControlProblem:OptimizationProblemBase {
   void jet_initialize() {
       this->setThreads(1, 1);
       this->optimizer->PrintLevel = 10;
+      this->PrintMeshInfo = false;
       this->transcribe();
   }
   void jet_release() {
       this->optimizer->release();
       this->initThreads();
       this->optimizer->PrintLevel = 0;
+      this->PrintMeshInfo = true;
       this->nlp = std::shared_ptr<NonLinearProgram>();
       for (auto& phase : this->phases) phase->jet_release();
       this->resetTranscription();
@@ -1340,7 +1342,7 @@ struct OptimalControlProblem:OptimizationProblemBase {
   
 
   ////////////////////////////////////////////////////////////
-
+  protected:
   void initMeshs() {
       for (auto& phase : this->phases) {
           phase->initMeshRefinement();
@@ -1350,112 +1352,81 @@ struct OptimalControlProblem:OptimizationProblemBase {
   bool checkMeshs(bool printinfo) {
       bool converged = true;
       for (auto& phase : this->phases) {
-          if (phase->AdaptiveMesh) {
-              if(!phase->checkMesh()) converged = false;
-          }
+          if(!phase->checkMesh()) converged = false;
       }
       return converged;
   }
   void updateMeshs(bool printinfo) {
       for (auto& phase : this->phases) {
-          if (phase->AdaptiveMesh) {
-              if (!phase->MeshConverged) {
+            if (!phase->MeshConverged) {
                   phase->updateMesh();
-              }
-          }
+            }
+          
       }
   }
 
   void printMeshs(int iter) {
       MeshIterateInfo::print_header(iter);
       for (int i = 0; i < this->phases.size(); i++) {
-          if (this->phases[i]->AdaptiveMesh) {
-              this->phases[i]->MeshIters.back().print(i);
-          }
+            this->phases[i]->MeshIters.back().print(i);
       }
   }
 
+  std::array<Eigen::MatrixXi, 2> make_link_Vindex_Cindex(
+      LinkFlags Reg, const Eigen::Matrix<PhaseRegionFlags, -1, 1>& PhaseRegs,
+      const std::vector<Eigen::VectorXi>& PTL,
+      const std::vector<Eigen::VectorXi>& xtv,
+      const std::vector<Eigen::VectorXi>& opv,
+      const std::vector<Eigen::VectorXi>& spv,
+      const std::vector<Eigen::VectorXi>& lv, int orows, int& NextCLoc) const;
 
-  PSIOPT::ConvergenceFlags psipot_call_impl(std::string mode) {
 
-
-      this->checkTranscriptions();
-      if (this->doTranscription) this->transcribe();
-      VectorXd Input = this->makeSolverInput();
-      VectorXd Output;
-
-      if (mode == "solve") {
-          Output = this->optimizer->solve(Input);
-      }
-      else if (mode == "optimize") {
-          Output = this->optimizer->optimize(Input);
-      }
-      else if (mode == "solve_optimize") {
-          Output = this->optimizer->solve_optimize(Input);
-      }
-      else if (mode == "solve_optimize_solve") {
-          Output = this->optimizer->solve_optimize_solve(Input);
-      }
-      else if (mode == "optimize_solve") {
-          Output = this->optimizer->optimize_solve(Input);
-      }
-
-      this->collectSolverOutput(Output);
-      this->collectSolverMultipliers(this->optimizer->LastEqLmults,
-          this->optimizer->LastIqLmults);
-      return this->optimizer->ConvergeFlag;
-  }
+  PSIOPT::ConvergenceFlags psipot_call_impl(std::string mode);
 
   
-  PSIOPT::ConvergenceFlags ocp_call_impl(std::string mode) {
-      if (this->PrintMeshInfo && this->AdaptiveMesh) {
-          fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 65);
-          fmt::print(fmt::fg(fmt::color::dim_gray), "Beginning");
-          fmt::print(": ");
-          fmt::print(fmt::fg(fmt::color::royal_blue), "Adaptive Mesh Refinement");
-          fmt::print("\n");
+  PSIOPT::ConvergenceFlags ocp_call_impl(std::string mode);
+
+  VectorXd makeSolverInput() const {
+      VectorXd Vars(this->numProbVars);
+
+      for (int i = 0; i < this->phases.size(); i++) {
+          int Start = 0;
+          if (i > 0) Start = this->numPhaseVars.segment(0, i).sum();
+          Vars.segment(Start, this->numPhaseVars[i]) =
+              this->phases[i]->makeSolverInput();
       }
+      Vars.tail(this->numLinkParams) = this->ActiveLinkParams;
 
+      return Vars;
+  }
 
-      PSIOPT::ConvergenceFlags flag = this->psipot_call_impl(mode);
-
-      if (this->AdaptiveMesh) {
-          initMeshs();
-
-          for (int i = 0; i < this->MaxMeshIters; i++) {
-              if (checkMeshs(this->PrintMeshInfo)) {
-                  if (this->PrintMeshInfo)
-                      this->printMeshs(i);
-                  fmt::print(fmt::fg(fmt::color::lime_green), "All Meshes Converged\n");
-                  break;
-              }
-              updateMeshs(this->PrintMeshInfo);
-              if (this->PrintMeshInfo)
-                  this->printMeshs(i);
-
-              flag = this->psipot_call_impl(mode);
-              if (i == this->MaxMeshIters - 1) {
-                  fmt::print(fmt::fg(fmt::color::lime_green), "All Meshes Not Converged\n");
-                  break;
-              }
-          }
-
+  void collectSolverOutput(const VectorXd& Vars) {
+      for (int i = 0; i < this->phases.size(); i++) {
+          int Start = 0;
+          if (i > 0) Start = this->numPhaseVars.segment(0, i).sum();
+          this->phases[i]->collectSolverOutput(
+              Vars.segment(Start, this->numPhaseVars[i]));
       }
-
-      if (this->PrintMeshInfo && this->AdaptiveMesh) {
-          fmt::print(fmt::fg(fmt::color::dim_gray), "Finished ");
-          fmt::print(": ");
-          fmt::print(fmt::fg(fmt::color::royal_blue), "Adaptive Mesh Refinement");
-          fmt::print("\n");
-          fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 65);
+      this->ActiveLinkParams = Vars.tail(this->numLinkParams);
+  }
+  void collectSolverMultipliers(const VectorXd& EM, const VectorXd& IM) {
+      this->MultipliersLoaded = true;
+      for (int i = 0; i < this->phases.size(); i++) {
+          int EStart = 0;
+          if (i > 0) EStart = this->numPhaseEqCons.segment(0, i).sum();
+          int IStart = 0;
+          if (i > 0) IStart = this->numPhaseIqCons.segment(0, i).sum();
+          this->phases[i]->collectSolverMultipliers(
+              EM.segment(EStart, this->numPhaseEqCons[i]),
+              IM.segment(IStart, this->numPhaseIqCons[i]));
       }
-
-      return flag;
-
+      this->ActiveEqLmults = EM.tail(this->numLinkEqCons);
+      this->ActiveIqLmults = IM.tail(this->numLinkIqCons);
   }
 
 
 
+ public:
   PSIOPT::ConvergenceFlags solve() {
       return ocp_call_impl("solve");
   }
@@ -1476,52 +1447,9 @@ struct OptimalControlProblem:OptimizationProblemBase {
 
   void print_stats(bool showfuns);
 
-  std::array<Eigen::MatrixXi, 2> make_link_Vindex_Cindex(
-      LinkFlags Reg, const Eigen::Matrix<PhaseRegionFlags, -1, 1>& PhaseRegs,
-      const std::vector<Eigen::VectorXi>& PTL,
-      const std::vector<Eigen::VectorXi>& xtv,
-      const std::vector<Eigen::VectorXi>& opv,
-      const std::vector<Eigen::VectorXi>& spv,
-      const std::vector<Eigen::VectorXi>& lv, int orows, int& NextCLoc) const;
+ 
 
-  VectorXd makeSolverInput() const {
-    VectorXd Vars(this->numProbVars);
-
-    for (int i = 0; i < this->phases.size(); i++) {
-      int Start = 0;
-      if (i > 0) Start = this->numPhaseVars.segment(0, i).sum();
-      Vars.segment(Start, this->numPhaseVars[i]) =
-          this->phases[i]->makeSolverInput();
-    }
-    Vars.tail(this->numLinkParams) = this->ActiveLinkParams;
-
-    return Vars;
-  }
-
-  void collectSolverOutput(const VectorXd& Vars) {
-    for (int i = 0; i < this->phases.size(); i++) {
-      int Start = 0;
-      if (i > 0) Start = this->numPhaseVars.segment(0, i).sum();
-      this->phases[i]->collectSolverOutput(
-          Vars.segment(Start, this->numPhaseVars[i]));
-    }
-    this->ActiveLinkParams = Vars.tail(this->numLinkParams);
-  }
-  void collectSolverMultipliers(const VectorXd& EM, const VectorXd& IM) {
-    this->MultipliersLoaded = true;
-    for (int i = 0; i < this->phases.size(); i++) {
-      int EStart = 0;
-      if (i > 0) EStart = this->numPhaseEqCons.segment(0, i).sum();
-      int IStart = 0;
-      if (i > 0) IStart = this->numPhaseIqCons.segment(0, i).sum();
-      this->phases[i]->collectSolverMultipliers(
-          EM.segment(EStart, this->numPhaseEqCons[i]),
-          IM.segment(IStart, this->numPhaseIqCons[i]));
-    }
-    this->ActiveEqLmults = EM.tail(this->numLinkEqCons);
-    this->ActiveIqLmults = IM.tail(this->numLinkIqCons);
-  }
-
+  
   static void Build(py::module& m);
 };
 

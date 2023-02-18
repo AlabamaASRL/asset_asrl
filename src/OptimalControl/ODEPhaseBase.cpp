@@ -1,5 +1,10 @@
 #include "ODEPhaseBase.h"
 #include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
 
 #include "LGLControlSplines.h"
 #include "LGLIntegrals.h"
@@ -588,65 +593,15 @@ std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::refineTrajEqual(int n) {
   return tcopy.NDdistribute(bins, dpb);
 }
 
-std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::refineTrajEqualNew(bool integ, int n)
+
+void ASSET::ODEPhaseBase::refineTrajAuto()
 {
-
-    Eigen::VectorXd tsnd;
-    Eigen::MatrixXd mesh_errors;
-    Eigen::MatrixXd mesh_dist;
-
-    this->Table.loadExactData(this->ActiveTraj);
-
-
-    if (integ) {
-        this->get_meshinfo_integrator(tsnd, mesh_errors, mesh_dist);
-    }
-    else {
-        this->get_meshinfo_deboor(tsnd, mesh_errors, mesh_dist);
+    this->checkMesh();
+    this->updateMesh();
+    if (this->PrintMeshInfo) {
+        this->MeshIters.back().print(0);
     }
 
-    Eigen::VectorXd error = mesh_errors.colwise().lpNorm<Eigen::Infinity>();
-    Eigen::VectorXd dist = mesh_dist.colwise().lpNorm<Eigen::Infinity>();
-
-    double maxerror = error.maxCoeff();
-    double meanerror = error.mean();
-
-    fmt::print("Max Error: {0:.4e} , Mean Error {1:.4e}\n", maxerror, meanerror);
-
-
-    Eigen::VectorXd distint(dist.size());
-    distint[0] = 0;
-
-    for (int i = 0; i < dist.size() - 1; i++) {
-        distint[i + 1] = distint[i] + (dist[i]) * (tsnd[i + 1] - tsnd[i]);
-    }
-
-    distint = distint / distint[distint.size() - 1];
-
-    Eigen::VectorXd bins;
-    bins.setLinSpaced(n + 1, 0.0, 1.0);
-    int elem = 0;
-    for (int i = 1; i < n; i++) {
-        double di = double(i) / double(n);
-        auto it = std::upper_bound(distint.cbegin() + elem, distint.cend(), di);
-        elem = int(it - distint.cbegin()) - 1;
-
-        double t0 = tsnd[elem];
-        double t1 = tsnd[elem + 1];
-        double d0 = distint[elem];
-        double d1 = distint[elem + 1];
-        double slope = (d1 - d0) / (t1 - t0);
-        bins[i] = (di - d0) / slope + t0;
-
-    }
-
-
-
-    Eigen::VectorXi dpb = VectorXi::Ones(n);
-
-    this->refineTrajManual(bins, dpb);
-
-    return this->Table.NDdistribute(bins, dpb);
 }
 
 void ASSET::ODEPhaseBase::subVariables(PhaseRegionFlags reg, VectorXi indices,
@@ -1084,6 +1039,190 @@ void ASSET::ODEPhaseBase::test_threads(int i, int j, int n) {
   NonLinearProgram::NLPTest(v, n, nlp1, nlp2);
 
   this->resetTranscription();
+}
+
+bool ASSET::ODEPhaseBase::checkMesh()
+{
+
+    Eigen::VectorXd tsnd;
+    Eigen::MatrixXd mesh_errors;
+    Eigen::MatrixXd mesh_dist;
+
+    this->Table.loadExactData(this->ActiveTraj);
+
+
+    if (this->MeshErrorEstimator == "integrator") {
+        this->get_meshinfo_integrator(tsnd, mesh_errors, mesh_dist);
+    }
+    else if (this->MeshErrorEstimator == "deboor") {
+        this->get_meshinfo_deboor(tsnd, mesh_errors, mesh_dist);
+    }
+    else {
+        throw std::invalid_argument("Unknown mesh error estimator");
+    }
+
+
+    Eigen::VectorXd error = mesh_errors.colwise().lpNorm<Eigen::Infinity>();
+    Eigen::VectorXd dist = mesh_dist.colwise().lpNorm<Eigen::Infinity>();
+
+
+
+    this->MeshIters.emplace_back(this->numDefects, this->MeshTol, tsnd, error, dist);
+
+    if (this->MeshErrorCriteria == "endtoend" || this->MeshErrorDistributor == "endtoend") {
+        Eigen::VectorXd error_vec = this->calc_global_error();
+        this->MeshIters.back().global_error = error_vec.lpNorm<Eigen::Infinity>();
+    }
+
+
+    double error_crit;
+
+    if (this->MeshErrorCriteria == "max") {
+        error_crit = this->MeshIters.back().max_error;
+    }
+    else if (this->MeshErrorCriteria == "avg") {
+        error_crit = this->MeshIters.back().avg_error;
+    }
+    else if (this->MeshErrorCriteria == "geometric") {
+        error_crit = this->MeshIters.back().gmean_error;
+    }
+    else if (this->MeshErrorCriteria == "endtoend") {
+        error_crit = this->MeshIters.back().global_error;
+    }
+    else {
+        throw std::invalid_argument("Unknown mesh error criteria");
+    }
+
+
+    if (error_crit < this->MeshTol) {
+        this->MeshConverged = true;
+        this->MeshIters.back().converged = true;
+    }
+    else {
+        this->MeshConverged = false;
+        this->MeshIters.back().converged = false;
+    }
+
+    return this->MeshConverged;
+}
+
+void ASSET::ODEPhaseBase::updateMesh()
+{
+
+    double error_dist;
+
+    if (this->MeshErrorDistributor == "max") {
+        error_dist = this->MeshIters.back().max_error;
+    }
+    else if (this->MeshErrorDistributor == "avg") {
+        error_dist = this->MeshIters.back().avg_error;
+    }
+    else if (this->MeshErrorDistributor == "geometric") {
+        error_dist = this->MeshIters.back().gmean_error;
+    }
+    else if (this->MeshErrorDistributor == "endtoend") {
+        error_dist = this->MeshIters.back().global_error;
+    }
+    else {
+        throw std::invalid_argument("Unknown mesh error distributor");
+    }
+
+    error_dist *= this->MeshErrFactor;
+    int n = int(this->numDefects * std::pow(error_dist / this->MeshTol, 1 / (this->Order + 1)) + this->NumExtraSegs);
+    n = std::clamp(n, int(this->numDefects * this->MeshRedFactor), int(this->numDefects * this->MeshIncFactor));
+    n = std::clamp(n, this->MinSegments, this->MaxSegments);
+
+    this->MeshIters.back().up_numsegs = n;
+    Eigen::VectorXi dpb = VectorXi::Ones(n);
+    Eigen::VectorXd bins = this->MeshIters.back().calc_bins(n);
+    this->refineTrajManual(bins, dpb);
+
+}
+
+
+ASSET::PSIOPT::ConvergenceFlags ASSET::ODEPhaseBase::psipot_call_impl(std::string mode)
+{
+    if (this->doTranscription) this->transcribe();
+    VectorXd Input = this->makeSolverInput();
+    VectorXd Output;
+
+    if (mode == "solve") {
+        Output = this->optimizer->solve(Input);
+    }
+    else if (mode == "optimize") {
+        Output = this->optimizer->optimize(Input);
+    }
+    else if (mode == "solve_optimize") {
+        Output = this->optimizer->solve_optimize(Input);
+    }
+    else if (mode == "solve_optimize_solve") {
+        Output = this->optimizer->solve_optimize_solve(Input);
+    }
+    else if (mode == "optimize_solve") {
+        Output = this->optimizer->optimize_solve(Input);
+    }
+
+    this->collectSolverOutput(Output);
+    this->collectSolverMultipliers(this->optimizer->LastEqLmults,
+        this->optimizer->LastIqLmults);
+    return this->optimizer->ConvergeFlag;
+}
+
+ASSET::PSIOPT::ConvergenceFlags ASSET::ODEPhaseBase::phase_call_impl(std::string mode)
+{
+
+    if (this->PrintMeshInfo && this->AdaptiveMesh) {
+        fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 65);
+        fmt::print(fmt::fg(fmt::color::dim_gray), "Beginning");
+        fmt::print(": ");
+        fmt::print(fmt::fg(fmt::color::royal_blue), "Adaptive Mesh Refinement");
+        fmt::print("\n");
+    }
+
+    PSIOPT::ConvergenceFlags flag = this->psipot_call_impl(mode);
+
+    if (this->AdaptiveMesh) {
+        initMeshRefinement();
+
+        for (int i = 0; i < this->MaxMeshIters; i++) {
+            if (checkMesh()) {
+                if (this->PrintMeshInfo) {
+                    if (this->PrintMeshInfo) {
+                        MeshIterateInfo::print_header(i);
+                        this->MeshIters.back().print(0);
+                    }
+                    fmt::print(fmt::fg(fmt::color::lime_green), "Mesh Converged\n");
+                }
+                break;
+            }
+            else if (i == this->MaxMeshIters - 1) {
+                if (this->PrintMeshInfo) {
+                    MeshIterateInfo::print_header(i);
+                    this->MeshIters.back().print(0);
+                }
+                fmt::print(fmt::fg(fmt::color::red), "Mesh Not Converged\n");
+                break;
+            }
+            else {
+                updateMesh();
+                if (this->PrintMeshInfo) {
+                    MeshIterateInfo::print_header(i);
+                    this->MeshIters.back().print(0);
+                }
+            }
+            flag = this->psipot_call_impl(mode);
+        }
+    }
+
+    if (this->PrintMeshInfo && this->AdaptiveMesh) {
+        fmt::print(fmt::fg(fmt::color::dim_gray), "Finished ");
+        fmt::print(": ");
+        fmt::print(fmt::fg(fmt::color::royal_blue), "Adaptive Mesh Refinement");
+        fmt::print("\n");
+        fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 65);
+    }
+
+    return flag;
 }
 
 void ASSET::ODEPhaseBase::Build(py::module& m) {
@@ -1653,16 +1792,16 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
 
   ////////////////////////////////////////////////////
   obj.def("getMeshInfo", &ODEPhaseBase::getMeshInfo);
-  obj.def("refineTrajEqualNew", &ODEPhaseBase::refineTrajEqualNew);
   obj.def("refineTrajAuto", &ODEPhaseBase::refineTrajAuto);
   obj.def("calc_global_error", &ODEPhaseBase::calc_global_error);
+  obj.def("getMeshIters", &ODEPhaseBase::getMeshIters);
 
   
 
   obj.def_readwrite("AdaptiveMesh", &ODEPhaseBase::AdaptiveMesh);
   obj.def_readwrite("PrintMeshInfo", &ODEPhaseBase::PrintMeshInfo);
   obj.def_readwrite("MaxMeshIters", &ODEPhaseBase::MaxMeshIters);
-  obj.def_readwrite("MeshTol", &ODEPhaseBase::MeshTol);
+  obj.def_readwrite("MeshTol",     &ODEPhaseBase::MeshTol);
   obj.def_readwrite("MeshErrorEstimator", &ODEPhaseBase::MeshErrorEstimator);
   obj.def_readwrite("MeshErrorCriteria", &ODEPhaseBase::MeshErrorCriteria);
   obj.def_readwrite("MeshErrorDistributor", &ODEPhaseBase::MeshErrorDistributor);
@@ -1674,12 +1813,8 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   obj.def_readwrite("MeshErrFactor", &ODEPhaseBase::MeshErrFactor);
 
   obj.def_readonly("MeshConverged", &ODEPhaseBase::MeshConverged);
-  obj.def_readwrite("NeverDecrease", &ODEPhaseBase::NeverDecrease);
 
-  obj.def_readonly("MeshTimes", &ODEPhaseBase::MeshTimes);
-  obj.def_readonly("MeshError", &ODEPhaseBase::MeshError);
-  obj.def_readonly("MeshDistFunc", &ODEPhaseBase::MeshDistFunc);
-  obj.def_readonly("MeshDistInt", &ODEPhaseBase::MeshDistInt);
+ 
 
   
 }

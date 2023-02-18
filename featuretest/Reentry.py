@@ -1,6 +1,7 @@
 import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
+from MeshErrorPlots import PhaseMeshErrorPlot
 
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
@@ -193,7 +194,7 @@ if __name__ == "__main__":
 
     ode = ShuttleReentry()
     
-    phase = ode.phase("LGL7",TrajIG,20)
+    phase = ode.phase("LGL5",TrajIG,20)
     phase.integrator.setAbsTol(1.0e-12)
     #phase.setControlMode("HighestOrderSpline")
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
@@ -209,15 +210,17 @@ if __name__ == "__main__":
     phase.optimizer.set_SoeLSMode("L1")
     phase.optimizer.set_OptLSMode("L1")
     #phase.optimizer.decrH=.4
-    phase.optimizer.set_BoundFraction(.99)
-    phase.optimizer.set_QPOrderingMode("MINDEG")
+    phase.optimizer.set_BoundFraction(.98)
+    #phase.optimizer.set_QPOrderingMode("MINDEG")
     phase.optimizer.set_PrintLevel(2)
     phase.optimizer.set_EContol(1.0e-9)
     phase.MeshTol = 1.0e-7
-    phase.MeshIncFactor = 7.5
+    phase.MeshIncFactor = 9.5
     phase.MeshErrorEstimator = 'integrator'
     phase.AdaptiveMesh = True
-    phase.NeverDecrease = False
+    
+    
+    
     
     ## IG is bad, solve first before optimize
     
@@ -238,12 +241,8 @@ if __name__ == "__main__":
     print(phase.calc_global_error())
     
     
-    plt.plot(phase.MeshTimes,phase.MeshDistInt)
-    plt.show()
-    
-    plt.plot(phase.MeshTimes,phase.MeshError)
-    plt.yscale("log")
-    plt.show()
+    PhaseMeshErrorPlot(phase,show=True)
+
     
     ## Add in Heating Rate Constraint, scale so rhs is order 1
     phase.addUpperFuncBound("Path",QFunc(),[0,2,6],Qlimit,1/Qlimit)

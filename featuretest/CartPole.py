@@ -3,7 +3,7 @@ import asset_asrl as ast
 import matplotlib.pyplot as plt
 import seaborn as sns    # pip install seaborn if you dont have it
 import matplotlib.animation as animation
-
+from MeshErrorPlots import PhaseMeshErrorPlot
 vf = ast.VectorFunctions
 oc = ast.OptimalControl
 Args = vf.Arguments
@@ -228,7 +228,13 @@ def AnimateNew(Traj,save=False):
     
 
 ##############################################################################        
+
+
         
+    
+    
+        
+
 if __name__ == "__main__":
             
     m1 = 1     # Mass of Cart kg
@@ -248,7 +254,7 @@ if __name__ == "__main__":
     
     ode = CartPole(l,m1,m2,g)
     
-    phase = ode.phase("LGL7",IG,64)
+    phase = ode.phase("LGL5",IG,10)
     #phase.setControlMode("HighestOrderSpline")
     #phase.setControlMode("NoSpline")
     #Fix first state (x,theta,xdot,thetadot) and time
@@ -262,48 +268,21 @@ if __name__ == "__main__":
     phase.addIntegralObjective(Args(1)[0]**2,[5])
     
     phase.setThreads(8,8)
-    phase.optimizer.set_PrintLevel(1)
+    phase.optimizer.set_PrintLevel(2)
     phase.optimizer.EContol = 1.0e-10
     phase.MeshErrorEstimator = 'deboor'
-    phase.NeverDecrease = False
     phase.AdaptiveMesh = True
-    phase.MeshTol=1.0e-6
-    phase.MeshIncFactor = 4
+    phase.MeshTol=1.0e-8
+    phase.MeshIncFactor = 5
+    phase.MeshErrFactor = 5
+    phase.MeshErrorDistributor='geometric'
+    phase.NumExtraSegs=1
     #phase.MeshIncFactor=5
     
     phase.optimize()
     
-    import time    
-    t00 = time.perf_counter()
-    g=phase.calc_global_error()
-    tff = time.perf_counter()
-    print(1000*(tff-t00))
-    print(g)
-
-    
-    ts1,merr1,mdist1 = phase.getMeshInfo(False,100)
-    ts2,merr2,mdist2 = phase.getMeshInfo(True,100)
-    
-    
-
-    me1 = np.array(mdist1).T
-    me2 = np.array(mdist2).T
-
-    plt.plot(ts1,me1,color='r')
-    plt.plot(ts2,abs(me2),color='b')
-    
-    plt.plot(phase.MeshTimes,phase.MeshError,color='k')
-
-    #plt.plot(ts2,np.exp((np.log(me1)+np.log(me2))/2),color='k')
-
-    plt.yscale("log")
-    plt.show()
-    
-    plt.plot(phase.MeshTimes,phase.MeshDistInt)
-    plt.show()
-
-
-    
+    PhaseMeshErrorPlot(phase,show=True)
+   
     Traj = phase.returnTraj()
 
     

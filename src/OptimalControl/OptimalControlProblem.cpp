@@ -1,5 +1,7 @@
 #include "OptimalControlProblem.h"
 #include "OptimalControlProblem.h"
+#include "OptimalControlProblem.h"
+#include "OptimalControlProblem.h"
 
 #include "PyDocString/OptimalControl/OptimalControlProblem_doc.h"
 
@@ -188,6 +190,91 @@ void ASSET::OptimalControlProblem::transcribe(bool showstats, bool showfuns) {
                       this->numProbIqCons);
   this->optimizer->setNLP(this->nlp);
   this->doTranscription = false;
+}
+
+ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::psipot_call_impl(std::string mode)
+{
+
+
+    this->checkTranscriptions();
+    if (this->doTranscription) this->transcribe();
+    VectorXd Input = this->makeSolverInput();
+    VectorXd Output;
+
+    if (mode == "solve") {
+        Output = this->optimizer->solve(Input);
+    }
+    else if (mode == "optimize") {
+        Output = this->optimizer->optimize(Input);
+    }
+    else if (mode == "solve_optimize") {
+        Output = this->optimizer->solve_optimize(Input);
+    }
+    else if (mode == "solve_optimize_solve") {
+        Output = this->optimizer->solve_optimize_solve(Input);
+    }
+    else if (mode == "optimize_solve") {
+        Output = this->optimizer->optimize_solve(Input);
+    }
+
+    this->collectSolverOutput(Output);
+    this->collectSolverMultipliers(this->optimizer->LastEqLmults,
+        this->optimizer->LastIqLmults);
+    return this->optimizer->ConvergeFlag;
+}
+
+ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::ocp_call_impl(std::string mode)
+{
+    if (this->PrintMeshInfo && this->AdaptiveMesh) {
+        fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 65);
+        fmt::print(fmt::fg(fmt::color::dim_gray), "Beginning");
+        fmt::print(": ");
+        fmt::print(fmt::fg(fmt::color::royal_blue), "Adaptive Mesh Refinement");
+        fmt::print("\n");
+    }
+
+
+    PSIOPT::ConvergenceFlags flag = this->psipot_call_impl(mode);
+
+    if (this->AdaptiveMesh) {
+        initMeshs();
+
+        for (int i = 0; i < this->MaxMeshIters; i++) {
+
+            if (checkMeshs(this->PrintMeshInfo)) {
+                if (this->PrintMeshInfo)
+                    this->printMeshs(i);
+                fmt::print(fmt::fg(fmt::color::lime_green), "All Meshes Converged\n");
+                break;
+            }
+            else   if (i == this->MaxMeshIters - 1) {
+                if (this->PrintMeshInfo)
+                    this->printMeshs(i);
+                fmt::print(fmt::fg(fmt::color::red), "All Meshes Not Converged\n");
+                break;
+            }
+            else {
+                updateMeshs(this->PrintMeshInfo);
+                if (this->PrintMeshInfo)
+                    this->printMeshs(i);
+            }
+
+            flag = this->psipot_call_impl(mode);
+           
+        }
+
+    }
+
+    if (this->PrintMeshInfo && this->AdaptiveMesh) {
+        fmt::print(fmt::fg(fmt::color::dim_gray), "Finished ");
+        fmt::print(": ");
+        fmt::print(fmt::fg(fmt::color::royal_blue), "Adaptive Mesh Refinement");
+        fmt::print("\n");
+        fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 65);
+    }
+
+    return flag;
+
 }
 
 
