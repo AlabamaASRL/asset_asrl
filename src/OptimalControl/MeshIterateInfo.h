@@ -16,8 +16,6 @@ namespace ASSET {
 		double max_error ;
 		double global_error=-1;
 
-		Eigen::VectorXd global_errorvec ;
-
 		Eigen::VectorXd times;
 		Eigen::VectorXd error;
 		Eigen::VectorXd distribution;
@@ -77,9 +75,9 @@ namespace ASSET {
 
 	   static void print_header(int iter) {
 
-		   fmt::print("{0:=^{1}}\n", "", 64);
+		   fmt::print("{0:=^{1}}\n", "", 62);
 		   fmt::print("Mesh Iteration: {0:}\n",iter);
-		   fmt::print("{0:=^{1}}\n", "", 64);
+		   fmt::print("{0:=^{1}}\n", "", 62);
 		   fmt::print("|Phase|#Segs| Max Err | Avg Err | Geo Err | EtE Err |Up #Segs|\n");
 	   }
 
@@ -129,6 +127,22 @@ namespace ASSET {
 			   fmt::print("   N/A   |");
 		   }
 		   fmt::print("{:<8}|\n", this->up_numsegs);
+
+
+	   }
+
+
+	   static void Build(py::module& m) {
+		   auto obj = py::class_<MeshIterateInfo>(m, "MeshIterateInfo");
+
+		   obj.def_readonly("times", &MeshIterateInfo::times);
+		   obj.def_readonly("error", &MeshIterateInfo::error);
+		   obj.def_readonly("distribution", &MeshIterateInfo::distribution);
+		   obj.def_readonly("distintegral", &MeshIterateInfo::distintegral);
+		   obj.def_readonly("avg_error", &MeshIterateInfo::avg_error);
+		   obj.def_readonly("max_error", &MeshIterateInfo::max_error);
+		   obj.def_readonly("numsegs", &MeshIterateInfo::numsegs);
+		   obj.def_readonly("converged", &MeshIterateInfo::converged);
 
 
 	   }

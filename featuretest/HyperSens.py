@@ -1,6 +1,7 @@
 import numpy as np
 import asset as ast
 import matplotlib.pyplot as plt
+from MeshErrorPlots import PhaseMeshErrorPlot
 
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
@@ -32,9 +33,9 @@ class HyperSens(oc.ode_x_u.ode):
 
 xt0 = 1.5
 xtf = 1.0
-tf  = 10000.0
+tf  = 1000.0
 
-n   = 160
+n   = 30
 
 TrajIG =[[0.0,0,t,0] for t in np.linspace(0,tf,3*n)]
 
@@ -64,7 +65,7 @@ phase.optimizer.set_QPOrderingMode("MINDEG")
 phase.optimizer.QPPivotPerturb =6
 phase.optimizer.MaxIters=100
 phase.optimizer.EContol=1.0e-7
-phase.MeshErrorEstimator='integrator'
+phase.MeshErrorEstimator='deboor'
 
 import time
 
@@ -74,8 +75,8 @@ tff = time.perf_counter()
 
 print(tff-t00)
 
-plt.plot(phase.MeshTimes,phase.MeshDistInt,marker='o')
-plt.show()
+PhaseMeshErrorPlot(phase,show=True)
+
 TT = np.array(phase.returnTraj()).T
 
 

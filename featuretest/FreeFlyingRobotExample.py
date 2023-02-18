@@ -1,6 +1,7 @@
 import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
+from MeshErrorPlots import PhaseMeshErrorPlot
 
 vf = ast.VectorFunctions
 oc = ast.OptimalControl
@@ -62,26 +63,27 @@ if __name__ == "__main__":
         IG.append(T)
     
     
-    phase = ode.phase("LGL3",IG,64)
-    #phase.setControlMode("BlockConstant")
+    phase = ode.phase("LGL3",IG,32)
+    phase.setControlMode("BlockConstant")
     phase.addBoundaryValue("Front",range(0,7),X0)
     phase.addBoundaryValue("Back" ,range(0,7),XF)
     phase.addLUVarBounds("Path"   ,range(7,11),0.0,1.0,1)
     phase.addIntegralObjective(Args(4).sum(),range(7,11))
-    phase.optimizer.set_PrintLevel(0)
+    phase.optimizer.set_PrintLevel(2)
     phase.optimizer.set_OptLSMode("L1")
     phase.optimizer.set_MaxLSIters(2)
     phase.optimizer.set_tols(1.0e-9,1.0e-9,1.0e-9)
     phase.optimizer.MaxAccIters = 100
     phase.optimizer.deltaH=1.0e-6
     phase.AdaptiveMesh=True
-    phase.MeshTol = 1.0e-6
+    phase.MeshTol = 1.0e-8
+    phase.MeshIncFactor=4.0
+    
     phase.MeshErrorEstimator='deboor'
     phase.optimize()
     
-    plt.plot(phase.MeshTimes,phase.MeshDistInt)
-    #plt.yscale("log")
-    plt.show()
+    PhaseMeshErrorPlot(phase,show=True)
+    
     TrajConv = phase.returnTraj()
     
     ##########################################################

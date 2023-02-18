@@ -11,7 +11,6 @@ It uses a custom implementation of vector math formalisms to enable rapid implem
 The phase object is the core of the optimal control functionality, and by linking multiple phases together, the user can construct scenarios of arbitrary complexity.
 A newly developed high-performance interior-point optimizer (PSIOPT) is included with the library, which enables quick turnaround from concept to solution.
 
-
 .. toctree::
     :maxdepth: 2
     :caption: Contents:

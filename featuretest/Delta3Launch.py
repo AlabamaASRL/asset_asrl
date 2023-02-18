@@ -253,7 +253,8 @@ if __name__ == "__main__":
 
     ast.SoftwareInfo()
     
-    
+    from MeshErrorPlots import PhaseMeshErrorPlot
+
     # Target orbital elements
     at     = 24361140 /Lstar
     et     = .7308
@@ -316,10 +317,10 @@ if __name__ == "__main__":
     tmode = "LGL7"
     cmode = "NoSpline"
     
-    nsegs1 = 5
-    nsegs2 = 5
-    nsegs3 = 5
-    nsegs4 = 5
+    nsegs1 = 6
+    nsegs2 = 6
+    nsegs3 = 6
+    nsegs4 = 6
     
     #########################################
     phase1 = ode1.phase(tmode,IG1,nsegs1)
@@ -388,11 +389,11 @@ if __name__ == "__main__":
         phase.MeshRedFactor=.5
         phase.MeshErrorEstimator ='deboor'
         phase.MeshErrorDistributor = 'max'
-        phase.MeshErrorCriteria = 'endtoend'
+        #phase.MeshErrorCriteria = 'endtoend'
 
-        phase.MeshErrFactor=1
+        phase.MeshErrFactor=2
         phase.NumExtraSegs =4
-        phase.MeshTol = 1.0e-10
+        phase.MeshTol = 1.0e-8
     
     
     ## All phases contniuous in everything but mass (var 6)
@@ -407,7 +408,7 @@ if __name__ == "__main__":
 
     import time
     t00 = time.perf_counter()
-    ocp.solve_optimize()
+    ocp.optimize()
     tff = time.perf_counter()
     
     print(1000*(tff-t00))
@@ -417,6 +418,11 @@ if __name__ == "__main__":
     Phase3Traj = phase3.returnTraj()
     Phase4Traj = phase4.returnTraj()
     
+    
+    for phase in ocp.Phases:
+        PhaseMeshErrorPlot(phase,show=False)
+        
+    plt.show()
     
     print("Final Mass = ",Phase4Traj[-1][6]*Mstar,' kg')
 

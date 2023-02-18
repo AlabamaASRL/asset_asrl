@@ -5,6 +5,7 @@ from asset_asrl.Astro.Extensions.ThrusterModels import CSIThruster
 from asset_asrl.Astro.AstroModels import MEETwoBody_CSI,TwoBody
 from asset_asrl.Astro.FramePlot import TBPlot,colpal
 import asset_asrl.Astro.Constants as c
+from MeshErrorPlots import PhaseMeshErrorPlot
 
 
 ##############################################################################
@@ -44,25 +45,23 @@ X0[4]=1.1
 
 Traj = integ.integrate_dense(X0,74/4,1000)
 
-phase = ode.phase("LGL7",Traj,50)
+phase = ode.phase("Trapezoidal",Traj,120)
 phase.integrator.setAbsTol(1.0e-14)
 phase.addBoundaryValue("Front",range(0,7),Traj[0][0:7])
 phase.optimizer.EContol=1.0e-12
 phase.addDeltaTimeEqualCon(Traj[-1][6])
 ts1,merr1,mdist1 = phase.getMeshInfo(False,100)
 
-phase.MeshTol =1.0e-10
+phase.MeshTol =1.0e-7
 Traj1 = phase.returnTraj()
-phase.MeshErrorEstimator = 'deboor'
-phase.NeverDecrease = False
-phase.MeshIncFactor = 1.01
+phase.MeshErrorEstimator = 'integrator'
+phase.MeshIncFactor = 9.01
 phase.AdaptiveMesh = True
 phase.optimizer.PrintLevel =2
 phase.solve()
 
-plt.plot(phase.MeshTimes,phase.MeshError)
-plt.yscale("log")
-plt.show()
+PhaseMeshErrorPlot(phase,show=True)
+
 
 Times  = []
 Errors = []
