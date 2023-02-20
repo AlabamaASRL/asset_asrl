@@ -35,7 +35,7 @@ class Precompiled(Extension):
 
 
 #pyversion = '=='+str(sys.version_info.major)+'.'+str(sys.version_info.minor)+'.*'
-pyversion = '>=3.7.*'
+pyversion = '>=3.7'
 def main():
 
     setup(
