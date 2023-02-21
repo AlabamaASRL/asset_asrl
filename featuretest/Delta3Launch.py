@@ -3,6 +3,9 @@ import asset_asrl as ast
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap ## PIP INSTALL Basemap if you dont have it
 
+from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
+
+
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
 Args      = vf.Arguments
@@ -253,7 +256,6 @@ if __name__ == "__main__":
 
     ast.SoftwareInfo()
     
-    from MeshErrorPlots import PhaseMeshErrorPlot
 
     # Target orbital elements
     at     = 24361140 /Lstar
@@ -273,7 +275,7 @@ if __name__ == "__main__":
     ## MF is the only magic number in the script, just trying to find
     ## a mean anomaly such that the terminal state on the orbit is downrange
     ## eastward from KSC in and doesnt pass through earth when LERPed from KSC
-    MF   =-.05
+    MF   =-.08
     OEF  = [at,et,istart,Ot,Wt,MF]
     yf   = ast.Astro.classic_to_cartesian(OEF,mu)
     
@@ -314,13 +316,13 @@ if __name__ == "__main__":
     ode3 = RocketODE(T_phase3,mdot_phase3)
     ode4 = RocketODE(T_phase4,mdot_phase4)
     
-    tmode = "LGL7"
+    tmode = "LGL5"
     cmode = "NoSpline"
     
-    nsegs1 = 6
-    nsegs2 = 6
-    nsegs3 = 6
-    nsegs4 = 6
+    nsegs1 = 10
+    nsegs2 = 10
+    nsegs3 = 10
+    nsegs4 = 10
     
     #########################################
     phase1 = ode1.phase(tmode,IG1,nsegs1)
@@ -378,22 +380,23 @@ if __name__ == "__main__":
     ocp.addPhase(phase2)
     ocp.addPhase(phase3)
     ocp.addPhase(phase4)
-    ocp.setThreads(1,1)
+    ocp.setThreads(8,8)
     #ocp.optimizer.set_QPOrderingMode("PARMETIS")
     ocp.optimizer.set_EContol(1.0e-10)
     #ocp.optimizer.CNRMode=True
     
-    ocp.AdaptiveMesh=True
+    ocp.setAdaptiveMesh(True)
+   
     for phase in ocp.Phases:
-        phase.AdaptiveMesh = True
+        
         phase.MeshRedFactor=.5
-        phase.MeshErrorEstimator ='deboor'
-        phase.MeshErrorDistributor = 'max'
+        phase.MeshErrorEstimator ='integrator'
+        phase.MeshErrorDistributor = 'geometric'
         #phase.MeshErrorCriteria = 'endtoend'
 
-        phase.MeshErrFactor=2
+        phase.MeshErrFactor=10
         phase.NumExtraSegs =4
-        phase.MeshTol = 1.0e-8
+        phase.MeshTol = 1.0e-5
     
     
     ## All phases contniuous in everything but mass (var 6)

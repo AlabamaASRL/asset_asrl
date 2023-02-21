@@ -549,48 +549,13 @@ void ASSET::ODEPhaseBase::refineTrajManual(VectorXd DBS, VectorXi DPB) {
 }
 
 std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::refineTrajEqual(int n) {
-  LGLInterpTable tcopy = this->Table;
-  tcopy.loadExactData(this->ActiveTraj);
-  std::vector<Eigen::VectorXd> errint = tcopy.ErrorIntegral(n * 8);
-  std::vector<Eigen::VectorXd> erintdt = FDiffData(errint, 1, false);
-  LGLInterpTable etab(1, 0, LGL3);
-  etab.loadEvenData2(errint, erintdt);
-
-  Eigen::VectorXd etargs;
-  etargs.setLinSpaced(n + 1, errint[0][0], errint.back()[0]);
-  Eigen::VectorXd bins;
-  bins.setLinSpaced(n + 1, 0.0, 1.0);
-  Eigen::VectorXd ts;
-  ts.setLinSpaced(n + 1, etab.T0, etab.TF);
-  double low = etab.T0;
-
-  Eigen::VectorXd evl;
-  Eigen::VectorXd evh;
-  Eigen::VectorXd evm;
-  for (int i = 1; i < n; i++) {
-    double high = etab.TF;
-    double mid = (high + low) / 2.0;
-    evl = etab.Interpolate(low);
-    evh = etab.Interpolate(high);
-    for (int j = 0; j < 35; j++) {
-      evm = etab.Interpolate(mid);
-      if (evm[0] < etargs[i]) {
-        low = mid;
-        evl = etab.Interpolate(low);
-      } else {
-        high = mid;
-        evh = etab.Interpolate(high);
-      }
-      mid = (high + low) / 2.0;
-    }
-    bins[i] = (mid - etab.T0) / etab.TotalT;
-  }
-
+  this->checkMesh();
+  this->MeshIters.back().up_numsegs = n;
   Eigen::VectorXi dpb = VectorXi::Ones(n);
-
+  Eigen::VectorXd bins = this->MeshIters.back().calc_bins(n);
   this->refineTrajManual(bins, dpb);
 
-  return tcopy.NDdistribute(bins, dpb);
+  return this->ActiveTraj;
 }
 
 
@@ -682,6 +647,11 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
         return SwitchP(int_const<3>(), xv, pv, integrand, xvv, pvv);
       case 4:
         return SwitchP(int_const<4>(), xv, pv, integrand, xvv, pvv);
+      default:
+      {
+          throw std::invalid_argument("Integral Type not implemented");
+          return SwitchP(int_const<2>(), xv, pv, integrand, xvv, pvv);
+      }
     }
   };
 
@@ -1051,7 +1021,7 @@ bool ASSET::ODEPhaseBase::checkMesh()
     this->Table.loadExactData(this->ActiveTraj);
 
 
-    if (this->MeshErrorEstimator == "integrator") {
+    if (this->MeshErrorEstimator == "integrator"||this->TranscriptionMode==CentralShooting) {
         this->get_meshinfo_integrator(tsnd, mesh_errors, mesh_dist);
     }
     else if (this->MeshErrorEstimator == "deboor") {
@@ -1093,15 +1063,8 @@ bool ASSET::ODEPhaseBase::checkMesh()
         throw std::invalid_argument("Unknown mesh error criteria");
     }
 
-
-    if (error_crit < this->MeshTol) {
-        this->MeshConverged = true;
-        this->MeshIters.back().converged = true;
-    }
-    else {
-        this->MeshConverged = false;
-        this->MeshIters.back().converged = false;
-    }
+    this->MeshConverged = (error_crit < this->MeshTol);
+    this->MeshIters.back().converged = this->MeshConverged;
 
     return this->MeshConverged;
 }
@@ -1161,6 +1124,9 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::ODEPhaseBase::psipot_call_impl(std::strin
     else if (mode == "optimize_solve") {
         Output = this->optimizer->optimize_solve(Input);
     }
+    else {
+        throw std::invalid_argument("Unrecognized PSIOPT mode");
+    }
 
     this->collectSolverOutput(Output);
     this->collectSolverMultipliers(this->optimizer->LastEqLmults,
@@ -1179,42 +1145,77 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::ODEPhaseBase::phase_call_impl(std::string
         fmt::print("\n");
     }
 
+    Utils::Timer Runtimer;
+
+    Runtimer.start();
+
     PSIOPT::ConvergenceFlags flag = this->psipot_call_impl(mode);
 
-    if (this->AdaptiveMesh) {
-        initMeshRefinement();
+    std::string nextmode = mode;
+    if (this->SolveOnlyFirst) {
+        if (nextmode.find(std::string("solve_")) != std::string::npos) {
+            nextmode.erase(0, 6);
+        }
+    }
 
-        for (int i = 0; i < this->MaxMeshIters; i++) {
-            if (checkMesh()) {
-                if (this->PrintMeshInfo) {
+    if (this->AdaptiveMesh) {
+        if (flag >= this->MeshAbortFlag) {
+            if (this->PrintMeshInfo) {
+                fmt::print(fmt::fg(fmt::color::red), "Mesh Iteration 0 Failed to Solve: Aborting\n");
+            }
+        }
+        else {
+            initMeshRefinement();
+            for (int i = 0; i < this->MaxMeshIters; i++) {
+                if (checkMesh()) {
+                    if (this->PrintMeshInfo) {
+                        MeshIterateInfo::print_header(i);
+                        this->MeshIters.back().print(0);
+                        fmt::print(fmt::fg(fmt::color::lime_green), "Mesh Converged\n");
+                    }
+                    break;
+                }
+                else if (i == this->MaxMeshIters - 1) {
+                    if (this->PrintMeshInfo) {
+                        MeshIterateInfo::print_header(i);
+                        this->MeshIters.back().print(0);
+                        fmt::print(fmt::fg(fmt::color::red), "Mesh Not Converged\n");
+                    }
+                    break;
+                }
+                else {
+                    updateMesh();
                     if (this->PrintMeshInfo) {
                         MeshIterateInfo::print_header(i);
                         this->MeshIters.back().print(0);
                     }
-                    fmt::print(fmt::fg(fmt::color::lime_green), "Mesh Converged\n");
                 }
-                break;
-            }
-            else if (i == this->MaxMeshIters - 1) {
-                if (this->PrintMeshInfo) {
-                    MeshIterateInfo::print_header(i);
-                    this->MeshIters.back().print(0);
-                }
-                fmt::print(fmt::fg(fmt::color::red), "Mesh Not Converged\n");
-                break;
-            }
-            else {
-                updateMesh();
-                if (this->PrintMeshInfo) {
-                    MeshIterateInfo::print_header(i);
-                    this->MeshIters.back().print(0);
+                flag = this->psipot_call_impl(nextmode);
+                if (flag >= this->MeshAbortFlag) {
+                    if (this->PrintMeshInfo) {
+                        fmt::print(fmt::fg(fmt::color::red), "Mesh Iteration {0:} Failed to Solve: Aborting\n", i + 1);
+                    }
+                    break;
                 }
             }
-            flag = this->psipot_call_impl(mode);
+
         }
+        
     }
 
     if (this->PrintMeshInfo && this->AdaptiveMesh) {
+
+        Runtimer.stop();
+        double tseconds = double(Runtimer.count<std::chrono::microseconds>()) / 1000000;
+        fmt::print("Total Time:"); 
+        if (tseconds > 0.5) {
+            fmt::print(fmt::fg(fmt::color::cyan), "{0:>10.4f} s\n", tseconds);
+        }
+        else {
+            fmt::print(fmt::fg(fmt::color::cyan), "{0:>10.2f} ms\n", tseconds*1000);
+        }
+
+
         fmt::print(fmt::fg(fmt::color::dim_gray), "Finished ");
         fmt::print(": ");
         fmt::print(fmt::fg(fmt::color::royal_blue), "Adaptive Mesh Refinement");
@@ -1799,12 +1800,17 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   
 
   obj.def_readwrite("AdaptiveMesh", &ODEPhaseBase::AdaptiveMesh);
+
+  obj.def("setAdaptiveMesh", &ODEPhaseBase::setAdaptiveMesh, py::arg("AdaptiveMesh") = true);
+
+
   obj.def_readwrite("PrintMeshInfo", &ODEPhaseBase::PrintMeshInfo);
   obj.def_readwrite("MaxMeshIters", &ODEPhaseBase::MaxMeshIters);
   obj.def_readwrite("MeshTol",     &ODEPhaseBase::MeshTol);
   obj.def_readwrite("MeshErrorEstimator", &ODEPhaseBase::MeshErrorEstimator);
   obj.def_readwrite("MeshErrorCriteria", &ODEPhaseBase::MeshErrorCriteria);
   obj.def_readwrite("MeshErrorDistributor", &ODEPhaseBase::MeshErrorDistributor);
+  obj.def_readwrite("SolveOnlyFirst", &ODEPhaseBase::SolveOnlyFirst);
 
 
   obj.def_readwrite("NumExtraSegs",  &ODEPhaseBase::NumExtraSegs);

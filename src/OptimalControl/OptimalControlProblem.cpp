@@ -216,6 +216,10 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::psipot_call_impl(s
     else if (mode == "optimize_solve") {
         Output = this->optimizer->optimize_solve(Input);
     }
+    else {
+        throw std::invalid_argument("Unrecognized PSIOPT mode");
+    }
+
 
     this->collectSolverOutput(Output);
     this->collectSolverMultipliers(this->optimizer->LastEqLmults,
@@ -233,39 +237,72 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::ocp_call_impl(std:
         fmt::print("\n");
     }
 
+    Utils::Timer Runtimer;
+    Runtimer.start();
 
     PSIOPT::ConvergenceFlags flag = this->psipot_call_impl(mode);
 
-    if (this->AdaptiveMesh) {
-        initMeshs();
-
-        for (int i = 0; i < this->MaxMeshIters; i++) {
-
-            if (checkMeshs(this->PrintMeshInfo)) {
-                if (this->PrintMeshInfo)
-                    this->printMeshs(i);
-                fmt::print(fmt::fg(fmt::color::lime_green), "All Meshes Converged\n");
-                break;
-            }
-            else   if (i == this->MaxMeshIters - 1) {
-                if (this->PrintMeshInfo)
-                    this->printMeshs(i);
-                fmt::print(fmt::fg(fmt::color::red), "All Meshes Not Converged\n");
-                break;
-            }
-            else {
-                updateMeshs(this->PrintMeshInfo);
-                if (this->PrintMeshInfo)
-                    this->printMeshs(i);
-            }
-
-            flag = this->psipot_call_impl(mode);
-           
+    std::string nextmode = mode;
+    if (this->SolveOnlyFirst) {
+        if (nextmode.find(std::string("solve_")) != std::string::npos) {
+            nextmode.erase(0, 6);
         }
+    }
 
+    if (this->AdaptiveMesh) {
+
+        if (flag >= this->MeshAbortFlag) {
+            if (this->PrintMeshInfo) {
+                fmt::print(fmt::fg(fmt::color::red), "Mesh Iteration 0 Failed to Solve: Aborting\n");
+            }
+        }
+        else {
+            initMeshs();
+            for (int i = 0; i < this->MaxMeshIters; i++) {
+                if (checkMeshs(this->PrintMeshInfo)) {
+                    if (this->PrintMeshInfo) {
+                        this->printMeshs(i);
+                        fmt::print(fmt::fg(fmt::color::lime_green), "All Meshes Converged\n");
+                    }
+                        
+                    break;
+                }
+                else   if (i == this->MaxMeshIters - 1) {
+                    if (this->PrintMeshInfo) {
+                        this->printMeshs(i);
+                        fmt::print(fmt::fg(fmt::color::red), "All Meshes Not Converged\n");
+                    }
+                    break;
+                }
+                else {
+                    updateMeshs(this->PrintMeshInfo);
+                    if (this->PrintMeshInfo)
+                        this->printMeshs(i);
+                }
+                flag = this->psipot_call_impl(mode);
+                if (flag >= this->MeshAbortFlag) {
+                    if (this->PrintMeshInfo) {
+                        fmt::print(fmt::fg(fmt::color::red), "Mesh Iteration {0:} Failed to Solve: Aborting\n", i + 1);
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     if (this->PrintMeshInfo && this->AdaptiveMesh) {
+
+        Runtimer.stop();
+        double tseconds = double(Runtimer.count<std::chrono::microseconds>()) / 1000000;
+        fmt::print("Total Time:");
+        if (tseconds > 0.5) {
+            fmt::print(fmt::fg(fmt::color::cyan), "{0:>10.4f} s\n", tseconds);
+        }
+        else {
+            fmt::print(fmt::fg(fmt::color::cyan), "{0:>10.2f} ms\n", tseconds * 1000);
+        }
+
+
         fmt::print(fmt::fg(fmt::color::dim_gray), "Finished ");
         fmt::print(": ");
         fmt::print(fmt::fg(fmt::color::royal_blue), "Adaptive Mesh Refinement");
@@ -927,11 +964,9 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
       (&OptimalControlProblem::addPhase),
       OptimalControlProblem_addPhase);
 
- // obj.def("addPhase", py::overload_cast<PhasePtr, const std::string &>
-  //    (&OptimalControlProblem::addPhase),
-  //    OptimalControlProblem_addPhase);
 
-  //obj.def("getPhaseNum", py::overload_cast<const std::string &>(& OptimalControlProblem::getPhaseNum));
+  obj.def("addPhases", &OptimalControlProblem::addPhases);
+ 
   obj.def("getPhaseNum", py::overload_cast<PhasePtr>(&OptimalControlProblem::getPhaseNum));
 
 
@@ -949,7 +984,7 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
           py::overload_cast<bool, bool>(&OptimalControlProblem::transcribe),
           OptimalControlProblem_transcribe);
 
-  obj.def_readwrite("Phases", &OptimalControlProblem::phases,
+  obj.def_readonly("Phases", &OptimalControlProblem::phases,
                     OptimalControlProblem_Phases);
 
 
@@ -1161,8 +1196,10 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
   obj.def_readwrite("AdaptiveMesh", &OptimalControlProblem::AdaptiveMesh);
   obj.def_readwrite("PrintMeshInfo", &OptimalControlProblem::PrintMeshInfo);
   obj.def_readwrite("MaxMeshIters", &OptimalControlProblem::MaxMeshIters);
+  obj.def_readonly("MeshConverged", &OptimalControlProblem::MeshConverged);
+  obj.def_readwrite("SolveOnlyFirst", &OptimalControlProblem::SolveOnlyFirst);
 
- 
+  obj.def("setAdaptiveMesh",&OptimalControlProblem::setAdaptiveMesh,py::arg("AdaptiveMesh")=true, py::arg("ApplyToPhases") = true);
 
 
 }

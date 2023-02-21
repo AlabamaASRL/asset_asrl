@@ -194,7 +194,7 @@ if __name__ == "__main__":
 
     ode = ShuttleReentry()
     
-    phase = ode.phase("LGL5",TrajIG,20)
+    phase = ode.phase("LGL3",TrajIG,40)
     phase.integrator.setAbsTol(1.0e-12)
     #phase.setControlMode("HighestOrderSpline")
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
@@ -204,7 +204,7 @@ if __name__ == "__main__":
     phase.addUpperDeltaTimeBound(tmax,1.0)
     phase.addBoundaryValue("Back" ,[0,2,3],[htf,vtf,gammatf])
     phase.addDeltaVarObjective(1,-1.0)
-    phase.setThreads(1,1)
+    phase.setThreads(8,8)
     
     ## Our IG is bad, so i turn on line search
     phase.optimizer.set_SoeLSMode("L1")
@@ -213,11 +213,11 @@ if __name__ == "__main__":
     phase.optimizer.set_BoundFraction(.98)
     #phase.optimizer.set_QPOrderingMode("MINDEG")
     phase.optimizer.set_PrintLevel(2)
-    phase.optimizer.set_EContol(1.0e-9)
-    phase.MeshTol = 1.0e-7
-    phase.MeshIncFactor = 9.5
+    phase.optimizer.set_EContol(1.0e-7)
+    phase.MeshTol = 1.0e-6
+    phase.MeshIncFactor = 7.5
     phase.MeshErrorEstimator = 'integrator'
-    phase.AdaptiveMesh = True
+    phase.setAdaptiveMesh(True)#True
     
     
     

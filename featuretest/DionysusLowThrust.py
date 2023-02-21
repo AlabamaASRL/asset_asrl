@@ -43,7 +43,10 @@ def RadFunc():
 def GTO():
     Isp_dim  = 3100        #S
     Tmag_dim = .5         #N
-    tf_dim   = 6*c.day  #s 
+    
+    nd = 0
+    
+    tf_dim   = (6+nd)*c.day  #s 
     mass_dim = 100        #kg
    
     ast.SoftwareInfo()
@@ -56,10 +59,10 @@ def GTO():
     
     ## Already Non Dimesonalized in the correct units from junkins paper
     X0 = np.array([1.8226, 0.725, 0.0, 0.06116, 0.0, 0.])
-    XF = np.array([6.611, 0.0, 0.0, 0.0, 0.0, 53.4071])
+    XF = np.array([6.611, 0.0, 0.0, 0.0, 0.0, 53.4071 + 0*2*np.pi])
     
     
-    print(ast.Astro.modified_to_classic(XF,1))
+    print(53.4071/(2*np.pi))
     Istate = np.zeros((11))
     Istate[0:6]=X0
     Istate[6]=1     # Full mass is non-dimensionalized to one
@@ -80,21 +83,21 @@ def GTO():
         State[9]=.5
         TrajIG.append(State)
         
-        
+    n =256
     #TrajIG = integ.integrate_dense(TrajIG[0],tf,1000)
-    phase = ode.phase("LGL3",TrajIG,150)
-    #phase.setControlMode("HighestOrderSpline")  # This problem only likes this
-    phase.setControlMode("BlockConstant")  # This problem only likes this
+    phase = ode.phase("LGL5",TrajIG,n)
+    phase.setControlMode("NoSpline")  # This problem only likes this
+    #phase.setControlMode("BlockConstant")  # This problem only likes this
 
     phase.integrator.setAbsTol(1.0e-11)
     phase.addBoundaryValue("Front",range(0,8),Istate[0:8])
     phase.addLowerFuncBound("Path",RadFunc(),range(0,6),.98,1.0)
 
-    phase.addLUNormBound("Path",range(8,11),.001,1,1) # Lowbound is leakmass
+    phase.addLUNormBound("Path",range(8,11),.000001,1,1) # Lowbound is leakmass
     phase.addBoundaryValue("Back",[7],[tf])
-    phase.addBoundaryValue("Back",range(0,6),XF[0:6])
-    phase.addValueObjective("Back",6,-.1)
-    #phase.addIntegralObjective(Args(3).squared_norm(),[8,9,10])
+    phase.addBoundaryValue("Back",range(0,5),XF[0:5])
+    phase.addValueObjective("Back",6,-1)
+    phase.addIntegralObjective(Args(3).squared_norm(),[8,9,10])
     #phase.enable_vectorization(False)
     
     
@@ -103,27 +106,31 @@ def GTO():
     phase.optimizer.set_SoeLSMode("L1")
 
     phase.optimizer.set_MaxLSIters(2)
-    phase.optimizer.set_MaxAccIters(130)
-    phase.optimizer.set_BoundFraction(.999)
+    phase.optimizer.set_MaxAccIters(180)
+    phase.optimizer.set_BoundFraction(.99)
     phase.optimizer.set_PrintLevel(1)
     #phase.optimizer.set_deltaH(1.0e-6)
     phase.optimizer.set_decrH(.333)
-    #phase.optimizer.deltaH=1.0e-6
+    phase.optimizer.deltaH=1.0e-5
     phase.MeshTol = 1.0e-6
 
-    phase.optimizer.set_EContol(1.0e-6)
-    phase.optimizer.set_QPOrderingMode("MINDEG")
+    phase.optimizer.set_KKTtol(1.0e-5)
+
+    phase.optimizer.set_EContol(1.0e-7)
+    #phase.optimizer.set_QPOrderingMode("MINDEG")
     import time
 
-    phase.MeshErrorEstimator = 'deboor'
-    #phase.MeshErrorCriteria='endtoend'
+    #phase.MeshErrorEstimator = 'integrator'
+    #phase.MeshErrorDistributor='geometric'
     #phase.AdaptiveMesh = True
-    phase.MeshIncFactor = 10
+    phase.MeshIncFactor = 5
     t00 = time.perf_counter()
 
-    #phase.refineTrajAuto()
+    phase.refineTrajEqual(n)
+    #phase.solve()
     phase.AdaptiveMesh = True
-    phase.solve_optimize()
+   
+    phase.optimize_solve()
 
     
     PhaseMeshErrorPlot(phase,show=True)
@@ -145,7 +152,7 @@ def GTO():
     
     TT = np.array(ConvTraj).T
 
-    plt.plot(TT[7],TT[5])
+    plt.plot(TT[7],TT[1])
     plt.show()
     
     
@@ -182,7 +189,7 @@ def GTO():
     
     plot = TBPlot(ode)
     plot.addTraj(TrajCart, "Transfer",color='r')
-    plot.addTraj(TrajIGCart, "Lerped Initial Guess",color='b')
+    #plot.addTraj(TrajIGCart, "Lerped Initial Guess",color='b')
     
     plot.addTraj(Earth, "Earth",color='g',linestyle='--')
     plot.addTraj(Dion, "Dionysus",color='b',linestyle='--')
@@ -190,8 +197,8 @@ def GTO():
     plot.addPoint(TrajCart[-1], "Arrival",color='k',marker='*',markersize=80)
     plot.addPoint(TrajCart[0], "Departure",color='k',marker='o',markersize=30)
 
-    plot.Plot2dAx(axs[1],legend=True)
-    axs[1].axis("Equal")
+    plot.Plot2dAx(axs[1],legend=True,view=[1,2])
+    #axs[1].axis("Equal")
     axs[1].grid(True)
     
     plt.show()
@@ -201,8 +208,8 @@ def GTO():
 
 def Other():
     Isp_dim  = 3000        #S
-    Tmag_dim = .6         #N
-    tf_dim   = 420*c.day  #s 
+    Tmag_dim = .6          #N
+    tf_dim   = 420*c.day   #s 
     mass_dim = 1000        #kg
    
     ast.SoftwareInfo()
@@ -240,7 +247,7 @@ def Other():
         
         
     #TrajIG = integ.integrate_dense(TrajIG[0],tf,1000)
-    phase = ode.phase("LGL7",TrajIG,60)
+    phase = ode.phase("LGL7",TrajIG,160)
     phase.setControlMode("HighestOrderSpline")  # This problem only likes this
     phase.setControlMode("BlockConstant")  # This problem only likes this
 
@@ -391,7 +398,7 @@ if __name__ == "__main__":
         TrajIG.append(State)
         
         
-    phase = ode.phase("LGL5",TrajIG,64)
+    phase = ode.phase("LGL5",TrajIG,160)
     phase.setControlMode("BlockConstant")  # This problem only likes this
     phase.integrator.setAbsTol(1.0e-11)
     phase.addBoundaryValue("Front",range(0,8),Istate[0:8])
@@ -403,7 +410,7 @@ if __name__ == "__main__":
     #phase.enable_vectorization(False)
     
     
-    phase.setThreads(1,1)
+    phase.setThreads(8,8)
     phase.optimizer.set_OptLSMode("AUGLANG")
     phase.optimizer.set_MaxLSIters(2)
     phase.optimizer.set_MaxAccIters(300)
@@ -445,8 +452,7 @@ if __name__ == "__main__":
        
        
         
-    plt.plot(phase.MeshTimes,phase.MeshDistInt)
-    plt.show()
+    
     #phase.refineTrajEqual(500)
     #phase.optimize()
     Tab2 = phase.returnTrajTable()

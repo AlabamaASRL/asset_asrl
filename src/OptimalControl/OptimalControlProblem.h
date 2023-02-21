@@ -32,9 +32,7 @@ struct OptimalControlProblem:OptimizationProblemBase {
   std::vector<PhasePtr> phases;
   std::vector<std::string> phase_names;
 
-  OptimalControlProblem() { 
-      
-  }
+  
 
   bool doTranscription = true;
   void resetTranscription() { this->doTranscription = true; };
@@ -79,10 +77,29 @@ struct OptimalControlProblem:OptimizationProblemBase {
   ///////////////////////////////
   bool AdaptiveMesh = false;
   bool PrintMeshInfo = true;
+  bool SolveOnlyFirst = true;
   int MaxMeshIters = 5;
+  PSIOPT::ConvergenceFlags MeshAbortFlag = PSIOPT::ConvergenceFlags::DIVERGING;
 
+  bool MeshConverged = false;
+
+  void setAdaptiveMesh(bool amesh, bool applytophases) {
+      this->AdaptiveMesh = amesh;
+      if (applytophases) {
+          for (auto phase : this->phases) {
+              phase->setAdaptiveMesh(amesh);
+          }
+      }
+  }
+  
 
   ///////////////////////////////
+  OptimalControlProblem() {
+
+  }
+  OptimalControlProblem(std::vector<PhasePtr> ps) {
+      this->addPhases(ps);
+  }
 
   int addPhase(PhasePtr p) {
     this->resetTranscription();
@@ -91,6 +108,14 @@ struct OptimalControlProblem:OptimizationProblemBase {
     this->phase_names.push_back(std::to_string(index));
     check_dupilcate_phases();
     return index;
+  }
+
+  std::vector<int> addPhases(std::vector<PhasePtr> ps) {
+      std::vector<int> idxs;
+      for (auto p : ps) {
+          idxs.push_back(this->addPhase(p));
+      }
+      return idxs;
   }
 
   int addPhase(PhasePtr p,const std::string & name) {
@@ -1344,23 +1369,31 @@ struct OptimalControlProblem:OptimizationProblemBase {
   ////////////////////////////////////////////////////////////
   protected:
   void initMeshs() {
+      this->MeshConverged = false;
       for (auto& phase : this->phases) {
-          phase->initMeshRefinement();
+          if (phase->AdaptiveMesh) {
+              phase->initMeshRefinement();
+          }
       }
   }
 
   bool checkMeshs(bool printinfo) {
-      bool converged = true;
+      this->MeshConverged = true;
       for (auto& phase : this->phases) {
-          if(!phase->checkMesh()) converged = false;
+          if (phase->AdaptiveMesh) {
+              if (!phase->checkMesh()) MeshConverged = false;
+          }
       }
-      return converged;
+     
+      return this->MeshConverged;
   }
   void updateMeshs(bool printinfo) {
       for (auto& phase : this->phases) {
-            if (!phase->MeshConverged) {
+          if (phase->AdaptiveMesh) {
+              if (!phase->MeshConverged) {
                   phase->updateMesh();
-            }
+              }
+          }
           
       }
   }
@@ -1368,7 +1401,9 @@ struct OptimalControlProblem:OptimizationProblemBase {
   void printMeshs(int iter) {
       MeshIterateInfo::print_header(iter);
       for (int i = 0; i < this->phases.size(); i++) {
-            this->phases[i]->MeshIters.back().print(i);
+          if (this->phases[i]->AdaptiveMesh) {
+              this->phases[i]->MeshIters.back().print(i);
+          }
       }
   }
 

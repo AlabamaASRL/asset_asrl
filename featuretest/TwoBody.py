@@ -43,9 +43,9 @@ X0 = np.zeros((7))
 X0[0]=1
 X0[4]=1.1
 
-Traj = integ.integrate_dense(X0,74/4,1000)
+Traj = integ.integrate_dense(X0,74,1000)
 
-phase = ode.phase("Trapezoidal",Traj,120)
+phase = ode.phase("LGL7",Traj,64)
 phase.integrator.setAbsTol(1.0e-14)
 phase.addBoundaryValue("Front",range(0,7),Traj[0][0:7])
 phase.optimizer.EContol=1.0e-12
@@ -81,8 +81,16 @@ ts2,merr2,mdist2 = phase.getMeshInfo(True,100)
 me1 = np.array(mdist1).T
 me2 = np.array(mdist2).T
 
+es=[]
+for i in range(0,int((len(me2)-1)/3)):
+    start = 3*i
+    es.append(np.mean(me2[start:start+3]))
+    
+es.append(es[-1])
+
 plt.plot(ts1,me1,color='r')
 plt.plot(ts2,abs(me2),color='b')
+plt.plot(ts1,es,color='k')
 
 
 plt.yscale("log")

@@ -110,6 +110,9 @@ struct ODEPhase : ODEPhaseBase {
                                      TranscriptionModes::LGL3);
         this->Order = 7.0;
         this->numTranCardStates = 2;
+        // Default Central Shooting to BlockConstant!!!
+        this->setControlMode(BlockConstant);
+
         break;
       default: {
         throw std::invalid_argument("Invalid Transcription Method");

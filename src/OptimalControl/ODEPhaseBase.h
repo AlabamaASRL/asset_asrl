@@ -83,8 +83,8 @@ public:
   bool AdaptiveMesh = false;
   bool PrintMeshInfo = true;
   int MaxMeshIters = 5;
-  int MaxSegments = 1000000;
-  int MinSegments = 4;
+  int MaxSegments  = 100000;
+  int MinSegments  = 4;
 
 
   int NumExtraSegs      = 4;
@@ -92,16 +92,22 @@ public:
   double MeshIncFactor  = 10.0;
   double MeshErrFactor  = 10.0;
   bool ForceOneMeshIter = false;
+  bool SolveOnlyFirst = true;
 
   double MeshTol = 1.0e-6;
   std::string MeshErrorEstimator    = "deboor";
   std::string MeshErrorCriteria     = "max" ;  //"max,avg,geometric,endtoend"
   std::string MeshErrorDistributor  = "avg";  // "max,avg,geometric,endtoend"
-
+  PSIOPT::ConvergenceFlags MeshAbortFlag = PSIOPT::ConvergenceFlags::DIVERGING;
 
   bool MeshConverged = false;
 
   std::vector<MeshIterateInfo> MeshIters;
+
+
+  void setAdaptiveMesh(bool amesh) {
+      this->AdaptiveMesh = amesh;
+  }
 
   std::vector<MeshIterateInfo> getMeshIters() const {
       return this->MeshIters;
