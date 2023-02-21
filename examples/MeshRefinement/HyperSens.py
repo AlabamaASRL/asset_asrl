@@ -12,7 +12,7 @@ Cmodes = oc.ControlModes
 
 '''
 Hyper-Sensitive Problem
-Classic mesh refinement benchamrk problem from Rao and company
+Classic hypersensitive mesh refinement benchmark problem from Rao and company
 https://onlinelibrary.wiley.com/doi/epdf/10.1002/oca.2114
 
 '''
@@ -25,7 +25,7 @@ class HyperSens(oc.ODEBase):
         x0 = args.XVar(0)
         u   =args.UVar(0)
         
-        x0dot = -(x0)**3 + u
+        x0dot = -(x0) + u
         jdot  = (u**2 +x0**2)/2.0
         
         ode = vf.stack(x0dot,jdot)
@@ -38,17 +38,24 @@ if __name__ == "__main__":
 
     xt0 = 1.5
     xtf = 1.0
-    tf  = 10000.0
+    tf  = 10000.0  # lower values of final time make this problem easier
     
-    nsegs   = 300
     
-    TrajIG =[[0.0,0,t,0] for t in np.linspace(0,tf,100)]
+    TrajIG =[[0.0,0,t,0] for t in np.linspace(0,tf,1000)]
     
     ode= HyperSens()
     
-    phase = ode.phase("LGL7",TrajIG,nsegs)
-    # Disable splined controls
+    '''
+    For tf  = 10000.0 we need at least 100 segments on initial mesh to approximate
+    hypersensiteve behavior, mesh refinement will take care of the rest
+    '''
+    nsegs   = 100
+
+    phase = ode.phase("LGL5",TrajIG,nsegs)
+    
+    # Disabling splined controls seems to work best for this problem, but splines still work
     phase.setControlMode("NoSpline")
+    
     phase.addBoundaryValue(PhaseRegs.Front,range(0,3),[xt0,0,0])
     phase.addBoundaryValue(PhaseRegs.Back ,[0,2],[xtf,tf])
     phase.addLUVarBound("Path",0,-50,50)
@@ -60,42 +67,129 @@ if __name__ == "__main__":
     phase.optimizer.set_SoeLSMode("L1")
     phase.optimizer.set_MaxLSIters(2)
     phase.optimizer.PrintLevel = 2
-    phase.setThreads(1,1)
-    phase.AdaptiveMesh=True
     
-    # Method to estijate error in mesh
-    # Use the polynomial differenccing scheme of deboor,russell and grebow
-    phase.MeshErrorEstimator='deboor'
-    #Use the phases integrator
-    #phase.MeshErrorEstimator='integrator'
+    '''
+    For tf=10000.0 this problem is so sensitve that the static pivoting order 
+    produced by the default METIS method is structurally singular despite
+    the problem being well posed.
+    MINDEG Ordering MUCH more stable for this particular problem
+    Comment it out , enable console printing, and watch the number of peturbed pivots (PPS)
+     and flying red colors to see what im talking about
+    '''
+    phase.optimizer.set_QPOrderingMode("MINDEG")
+    
+    
+    #########################################
+    #### The New Adaptive Mesh Interface ####
+    #########################################
+    
+    '''
+    Enable auto mesh refinement.It is disabled by default. When disabled everything
+    behaves as it did before. When enabled, after solving the first mesh, we utilize an adaptive
+    mesh stragegy that attempts to estimate and reduce the error in the solution by adding, shifting,
+    and deletinf segments.
+    '''
+    phase.setAdaptiveMesh(True)
     
     # Set Error tolerance on mesh: defaults to 1.0e-6
     phase.MeshTol = 1.0e-7
     
+    # Set Max number of mesh iterations: defaults to 5
+    phase.MaxMeshIters = 5
+    
     # Make sure to set optimizer Econtol to be the same as or smaller than MeshTol
     phase.optimizer.set_EContol(1.0e-7)
-
     
-    # Maximum multiple by which the # of segments can be increased between iterations
-    # This defaults to 10, which is far too agressive for this problem (but still works)
+    '''
+    Specify the method used to estimate the error in each segment of the current trajectory
+    '''
+    ##Use the polynomial differenccing scheme of deboor,russell and grebow
+    phase.MeshErrorEstimator='deboor'
+    #Or use the phases integrator, set the phases integrator tolerances and step sizes
+    ##appropraitely for good performance
+    phase.MeshErrorEstimator='integrator'
+    
+    
+    # Specify which type of error must be less than MeshTol for the problem to be converged
+    ## 'max' (default) will make sure that the max error in any of the segments is less than MeshTol
+    phase.MeshErrorCriteria = 'max'
+    
+    ##'avg' will make sure the average error accross all segments is less than MeshTol
+    #phase.MeshErrorCriteria = 'avg'
+    
+    ##'geometric' will make sure the geometric mean of the avg and max errors is less than MeshTol
+    #phase.MeshErrorCriteria = 'geometric'
+    
+    ## 'endtoend' will reininegrate the entire control history and make sure the max error between
+    ## the collocated and integrated final states is less than MeshTol
+    #phase.MeshErrorCriteria = 'endtoend'
+    
+    '''
+    Specify which measure of error is used to calculate the new number of points in the next mesh
+    This is decoupled from the MeshErrorCriteria to prevent early iterates from grossly overestimating
+    the number of points needed. Our strategy tries to equlibrate error so the max,mean, and
+    geometric measures of error should converge to the same order of magnitude. This particular example
+    is an exception because the solution has a long duration coast phase with nearly 0 error
+    '''
+    phase.MeshErrorDistributor = 'avg'  # default and recommended for all but MeshErrorCriteria = 'endtoend'
+    
+    phase.MeshErrorDistributor = 'max'
+    #phase.MeshErrorDistributor = 'geometric'
+    #phase.MeshErrorDistributor = 'endtoend'  
+
+    '''
+    Maximum multiple by which the # of segments can be increased between iterations
+    this defaults to 10, which is far too agressive for this problem (but still works)
+    '''
     phase.MeshIncFactor=2.0
-    # Minimum multiple by which the # of segments can be reduced between iterations
-    phase.MeshRedFactor=.5
-
-
-    ## MINDEG Ordering MUCH more stable for this problem
-    phase.optimizer.set_QPOrderingMode("MINDEG")
-    phase.optimizer.QPPivotPerturb =6
     
-    phase.optimize_solve()    
+    # Minimum multiple by which the # of segments can be reduced between iterations , Defaults to 0.7
+    phase.MeshRedFactor=.7
+    
+    ## Factor by which we exagerate the error MeshErrorDistributor when calculating the needed number
+    ## of points in the next mesh iter to ensure that he next iter will satisfy the tolerance
+    phase.MeshErrFactor = 10.0  #defaults to 10
+
+
+    '''
+    As before, flag returned indicates whether the last call to psipot converged or not, it does
+    not indicate whether the mesh is accurate/converged. Atm, that is checked by reading MeshConverged field.
+    '''
+    flag = phase.optimize_solve()    
    
-    
-    PhaseMeshErrorPlot(phase,show=True)
-    
+    if(phase.MeshConverged):
+        print("Fly it")
+    else:
+        print("Dont fly it")
+        
+    #######################################################
     TT = np.array(phase.returnTraj()).T
     
+    fig,axs = plt.subplots(1,3)
     
-    plt.plot(TT[2],TT[0])
-    plt.plot(TT[2],TT[3])
-    plt.show()
+    for ax in axs:
+        ax.grid(True)
+        ax.plot(TT[2],TT[0],label='x')
+        ax.plot(TT[2],TT[3],label='u')
+        ax.set_xlabel("t")
+    
+    
+    axs[0].legend()
+    axs[1].set_xlim([0,10])
+    axs[2].set_xlim([tf-10,tf])
 
+    plt.show()
+    ###############################################################
+    '''
+    Will produce 3 plots showing the evolution of the error in the mesh between iterations
+    The first shows the estimated error as calculated by MeshErrorEstimator as a function
+    of non-dimensional time along the trajectory.
+    
+    The second plot shows the error distribution function, which shows where the areas where
+    more segments will be placed.
+    
+    The third plot is the normalized integral of the distribtion function, which is used to generate the mesh
+    spacing for the next iteration. 
+    '''
+    PhaseMeshErrorPlot(phase,show=True)
+    

@@ -1,6 +1,7 @@
 import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
+from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
 
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
@@ -193,7 +194,7 @@ if __name__ == "__main__":
 
     ode = ShuttleReentry()
     
-    phase = ode.phase("LGL3",TrajIG,40)
+    phase = ode.phase("LGL3",TrajIG,10)
     
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
     phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
@@ -207,28 +208,45 @@ if __name__ == "__main__":
     ## Our IG is bad, so i turn on line search
     phase.optimizer.set_SoeLSMode("L1")
     phase.optimizer.set_OptLSMode("L1")
-    phase.optimizer.set_PrintLevel(1)
+    phase.optimizer.set_PrintLevel(2)
+    
+    
+    # Enable auto mesh refinement
+    phase.setAdaptiveMesh(True)
+    phase.MeshTol=1.0e-6
+    phase.optimizer.EContol=1.0e-7
+
+    phase.MeshErrorEstimator='integrator'
+
+    ## If all you care about is how close the resintegrated solution is the the final state you can use this
+    ## Recomended using only for LGL5 and LGL7 rn, for lower ortder methods error estimates used to calcuate the number
+    ## of points in next mesh can siginificantly underestimate the number neccessary to get down the endtoend error
+    phase.MeshErrorCriteria ='endtoend'
+    phase.MeshErrorDistributor ='max'
+
+    ## Note endtoend error can sometimes be smaller than the local error estimates
+    ## because the polynomials can osccilate around the 'true' solution but still nearly
+    ## exactly aproximate the total integral
+    
     
     ## IG is bad, solve first before optimize
     phase.solve_optimize()
-
-    #Refine to more segments and Reoptimize
-    phase.refineTrajManual(300)
-    phase.optimize()
-
     Traj1 = phase.returnTraj()
-    
+    PhaseMeshErrorPlot(phase,show=False)
+
     ## Add in Heating Rate Constraint, scale so rhs is order 1
     phase.addUpperFuncBound("Path",QFunc(),[0,2,6],Qlimit,1/Qlimit)
     phase.optimize()
-    
     Traj2 = phase.returnTraj()
+    PhaseMeshErrorPlot(phase,show=True)
+
     
     print("Final Time:",Traj1[-1][5]*Tstar,"(s) , Final Cross Range:",Traj1[-1][1]*180/np.pi, " deg")
     print("Final Time:",Traj2[-1][5]*Tstar,"(s) , Final Cross Range:",Traj2[-1][1]*180/np.pi, " deg")
    
 
     Plot(Traj1,Traj2)
+    
 
 
     
