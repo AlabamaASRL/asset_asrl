@@ -3,9 +3,6 @@ import asset_asrl as ast
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap ## PIP INSTALL Basemap if you dont have it
 
-from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
-
-
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
 Args      = vf.Arguments
@@ -106,12 +103,16 @@ class RocketODE(oc.ODEBase):
         V = XtU.XVec().segment3(3)
         m = XtU.XVar(6)
        
+        # We normalize the control direction in the dynamics so it doesnt have
+        # to be done as a path constraint
         u = XtU.UVec().normalized()
         
         h       = R.norm() - Re
         rho     = RhoAir * vf.exp(-h / h_scale)
         Vr      = V + R.cross(np.array([0,0,We]))
         
+        ## We cant let let Vr be exactly 0, derivative of norm of 0 vector is NAN
+        ## Will handle this in inititial conditions
         D       = (-0.5*CD*S)*rho*(Vr*Vr.norm())
         
         Rdot    =  V
@@ -256,7 +257,7 @@ if __name__ == "__main__":
 
     ast.SoftwareInfo()
     
-
+    
     # Target orbital elements
     at     = 24361140 /Lstar
     et     = .7308
@@ -268,14 +269,14 @@ if __name__ == "__main__":
     y0      = np.zeros((6))
     y0[0:3] = np.array([np.cos(istart),0,np.sin(istart)])*Re
     y0[3:6] =-np.cross(y0[0:3],np.array([0,0,We]))
-    y0[3]  += 0.000001/Vstar  # cant be exactly zero,our drag equation's derivative would NAN !!!
+    y0[3]  += 0.00001/Vstar  # cant be exactly zero,our drag equation's derivative would NAN !!!
     
     print(y0[3:6])
     
     ## MF is the only magic number in the script, just trying to find
     ## a mean anomaly such that the terminal state on the orbit is downrange
     ## eastward from KSC in and doesnt pass through earth when LERPed from KSC
-    MF   =-.08
+    MF   =-.05
     OEF  = [at,et,istart,Ot,Wt,MF]
     yf   = ast.Astro.classic_to_cartesian(OEF,mu)
     
@@ -316,13 +317,13 @@ if __name__ == "__main__":
     ode3 = RocketODE(T_phase3,mdot_phase3)
     ode4 = RocketODE(T_phase4,mdot_phase4)
     
-    tmode = "LGL5"
-    cmode = "NoSpline"
+    tmode = "LGL3"
+    cmode = "HighestOrderSpline"
     
-    nsegs1 = 10
-    nsegs2 = 10
-    nsegs3 = 10
-    nsegs4 = 10
+    nsegs1 = 40
+    nsegs2 = 40
+    nsegs3 = 40
+    nsegs4 = 40
     
     #########################################
     phase1 = ode1.phase(tmode,IG1,nsegs1)
@@ -380,24 +381,6 @@ if __name__ == "__main__":
     ocp.addPhase(phase2)
     ocp.addPhase(phase3)
     ocp.addPhase(phase4)
-    ocp.setThreads(8,8)
-    #ocp.optimizer.set_QPOrderingMode("PARMETIS")
-    ocp.optimizer.set_EContol(1.0e-10)
-    #ocp.optimizer.CNRMode=True
-    
-    ocp.setAdaptiveMesh(True)
-   
-    for phase in ocp.Phases:
-        
-        phase.MeshRedFactor=.5
-        phase.MeshErrorEstimator ='integrator'
-        phase.MeshErrorDistributor = 'geometric'
-        #phase.MeshErrorCriteria = 'endtoend'
-
-        phase.MeshErrFactor=10
-        phase.NumExtraSegs =4
-        phase.MeshTol = 1.0e-5
-    
     
     ## All phases contniuous in everything but mass (var 6)
     ocp.addForwardLinkEqualCon(phase1,phase4,[0,1,2,3,4,5, 7,8,9,10])
@@ -407,25 +390,15 @@ if __name__ == "__main__":
     ocp.optimizer.set_SoeLSMode("L1")
     ocp.optimizer.set_MaxLSIters(2)
     ocp.optimizer.set_PrintLevel(1)
-    #ocp.optimizer.WideConsole=True
 
-    import time
-    t00 = time.perf_counter()
-    ocp.optimize()
-    tff = time.perf_counter()
+    ocp.solve_optimize()
     
-    print(1000*(tff-t00))
 
     Phase1Traj = phase1.returnTraj()  # or ocp.Phase(i).returnTraj()
     Phase2Traj = phase2.returnTraj()
     Phase3Traj = phase3.returnTraj()
     Phase4Traj = phase4.returnTraj()
     
-    
-    for phase in ocp.Phases:
-        PhaseMeshErrorPlot(phase,show=False)
-        
-    plt.show()
     
     print("Final Mass = ",Phase4Traj[-1][6]*Mstar,' kg')
 

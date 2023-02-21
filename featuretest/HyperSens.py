@@ -33,9 +33,9 @@ class HyperSens(oc.ode_x_u.ode):
 
 xt0 = 1.5
 xtf = 1.0
-tf  = 1000.0
+tf  = 100.0
 
-n   = 30
+n   = 100
 
 TrajIG =[[0.0,0,t,0] for t in np.linspace(0,tf,3*n)]
 
@@ -58,13 +58,16 @@ phase.optimizer.SoeLSMode = ast.Solvers.LineSearchModes.L1
 
 phase.optimizer.MaxLSIters = 2
 phase.optimizer.PrintLevel = 1
-phase.setThreads(8,8)
-#phase.MeshIncFactor = 1.4
+phase.setThreads(1,1)
+phase.MeshIncFactor = 2
+phase.MeshRedFactor = .5
+
 phase.AdaptiveMesh=True
 phase.optimizer.set_QPOrderingMode("MINDEG")
 phase.optimizer.QPPivotPerturb =6
 phase.optimizer.MaxIters=100
 phase.optimizer.EContol=1.0e-7
+phase.MeshTol=1.0e-7
 phase.MeshErrorEstimator='deboor'
 
 import time

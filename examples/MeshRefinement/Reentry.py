@@ -1,7 +1,6 @@
 import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
-from MeshErrorPlots import PhaseMeshErrorPlot
 
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
@@ -195,8 +194,7 @@ if __name__ == "__main__":
     ode = ShuttleReentry()
     
     phase = ode.phase("LGL3",TrajIG,40)
-    phase.integrator.setAbsTol(1.0e-12)
-    #phase.setControlMode("HighestOrderSpline")
+    
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
     phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
     phase.addLUVarBound("Path",6,np.deg2rad(-90.0),np.deg2rad(90.0),1.0)
@@ -209,48 +207,20 @@ if __name__ == "__main__":
     ## Our IG is bad, so i turn on line search
     phase.optimizer.set_SoeLSMode("L1")
     phase.optimizer.set_OptLSMode("L1")
-    #phase.optimizer.decrH=.4
-    phase.optimizer.set_BoundFraction(.98)
-    #phase.optimizer.set_QPOrderingMode("MINDEG")
-    phase.optimizer.set_PrintLevel(2)
-    phase.optimizer.set_EContol(1.0e-7)
-    phase.MeshTol = 1.0e-6
-    phase.MeshIncFactor = 7.5
-    phase.MeshErrorEstimator = 'integrator'
-    phase.setAdaptiveMesh(True)#True
-    
-    
-    
+    phase.optimizer.set_PrintLevel(1)
     
     ## IG is bad, solve first before optimize
-    
-    import time
-    
-    t00 = time.perf_counter()
-    phase.solve_optimize_solve()
-    Traj1 = phase.returnTraj()
-    tff = time.perf_counter()
-    
-    print(1000*(tff-t00))
-    
-    t00 = time.perf_counter()
-    phase.calc_global_error()
-    
-    tff = time.perf_counter()
-    print(1000*(tff-t00))
-    print(phase.calc_global_error())
-    
-    
-    PhaseMeshErrorPlot(phase,show=True)
+    phase.solve_optimize()
 
+    #Refine to more segments and Reoptimize
+    phase.refineTrajManual(300)
+    phase.optimize()
+
+    Traj1 = phase.returnTraj()
     
     ## Add in Heating Rate Constraint, scale so rhs is order 1
     phase.addUpperFuncBound("Path",QFunc(),[0,2,6],Qlimit,1/Qlimit)
     phase.optimize()
-    
-    tff = time.perf_counter()
-    
-    print(1000*(tff-t00))
     
     Traj2 = phase.returnTraj()
     

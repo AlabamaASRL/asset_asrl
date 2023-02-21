@@ -5,7 +5,7 @@ import matplotlib.animation as animation
 
 
 def PhaseMeshErrorPlot(phase,show=True):
-    fig,axs = plt.subplots(3,1)
+    fig,axs = plt.subplots(2,1)
     axs[0].set_ylabel("Error")
     axs[0].set_yscale("log")
     axs[1].set_xlabel("t (0-1)")
@@ -21,7 +21,6 @@ def PhaseMeshErrorPlot(phase,show=True):
     for i,miter in enumerate(Miters):
         axs[0].plot(miter.times,miter.error,color=cols[i],label="Iter: {}".format(i))
         axs[1].plot(miter.times,miter.distribution/max(miter.distribution),color=cols[i])
-        axs[2].plot(miter.times,miter.distintegral,color=cols[i])
 
     axs[0].legend()
     
