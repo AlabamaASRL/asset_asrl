@@ -45,19 +45,21 @@ X0[4]=1.1
 
 Traj = integ.integrate_dense(X0,74,1000)
 
-phase = ode.phase("LGL7",Traj,64)
+phase = ode.phase("LGL7",Traj,32)
 phase.integrator.setAbsTol(1.0e-14)
 phase.addBoundaryValue("Front",range(0,7),Traj[0][0:7])
 phase.optimizer.EContol=1.0e-12
 phase.addDeltaTimeEqualCon(Traj[-1][6])
 ts1,merr1,mdist1 = phase.getMeshInfo(False,100)
 
-phase.MeshTol =1.0e-7
+phase.MeshTol =1.0e-9
 Traj1 = phase.returnTraj()
 phase.MeshErrorEstimator = 'integrator'
 phase.MeshIncFactor = 9.01
 phase.AdaptiveMesh = True
+phase.MeshErrFactor=1.0
 phase.optimizer.PrintLevel =2
+phase.NewError=True
 phase.solve()
 
 PhaseMeshErrorPlot(phase,show=True)
@@ -81,16 +83,11 @@ ts2,merr2,mdist2 = phase.getMeshInfo(True,100)
 me1 = np.array(mdist1).T
 me2 = np.array(mdist2).T
 
-es=[]
-for i in range(0,int((len(me2)-1)/3)):
-    start = 3*i
-    es.append(np.mean(me2[start:start+3]))
-    
-es.append(es[-1])
+
 
 plt.plot(ts1,me1,color='r')
 plt.plot(ts2,abs(me2),color='b')
-plt.plot(ts1,es,color='k')
+#plt.plot(ts1,es,color='k')
 
 
 plt.yscale("log")

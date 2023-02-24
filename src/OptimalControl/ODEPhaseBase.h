@@ -82,17 +82,22 @@ protected:
 public:
   bool AdaptiveMesh = false;
   bool PrintMeshInfo = true;
-  int MaxMeshIters = 5;
+  int MaxMeshIters = 10;
   int MaxSegments  = 100000;
   int MinSegments  = 4;
 
 
   int NumExtraSegs      = 4;
-  double MeshRedFactor  = .7;
-  double MeshIncFactor  = 10.0;
+  double MeshRedFactor  = .6;
+  double MeshIncFactor  = 5.0;
   double MeshErrFactor  = 10.0;
   bool ForceOneMeshIter = false;
   bool SolveOnlyFirst = true;
+  bool NewError = false;
+  bool   DetectControlSwitches = false;
+  double RelSwitchTol = .3;
+  double AbsSwitchTol = 1.0e-6;
+
 
   double MeshTol = 1.0e-6;
   std::string MeshErrorEstimator    = "deboor";
@@ -939,8 +944,7 @@ public:
   virtual void updateMesh();
 
   
-
-
+  virtual Eigen::VectorXd calcSwitches();
   
 
 

@@ -5,7 +5,7 @@ from asset_asrl.Astro.Extensions.ThrusterModels import CSIThruster
 from asset_asrl.Astro.AstroModels import MEETwoBody_CSI
 from asset_asrl.Astro.FramePlot import TBPlot,colpal
 import asset_asrl.Astro.Constants as c
-from MeshErrorPlots import PhaseMeshErrorPlot
+from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
 
 
 ##############################################################################
@@ -80,39 +80,44 @@ def GTO():
         State[0:6]=Xi
         State[6]=1
         State[7]=t
-        State[9]=.5
+        State[9]=.1
         TrajIG.append(State)
         
-    n =256
+    n =300
     #TrajIG = integ.integrate_dense(TrajIG[0],tf,1000)
-    phase = ode.phase("LGL5",TrajIG,n)
-    phase.setControlMode("NoSpline")  # This problem only likes this
-    #phase.setControlMode("BlockConstant")  # This problem only likes this
+    phase = ode.phase("LGL3",TrajIG,n)
+    #phase.setControlMode("NoSpline")  # This problem only likes this
+    phase.setControlMode("BlockConstant")  # This problem only likes this
 
     phase.integrator.setAbsTol(1.0e-11)
     phase.addBoundaryValue("Front",range(0,8),Istate[0:8])
-    phase.addLowerFuncBound("Path",RadFunc(),range(0,6),.98,1.0)
+    phase.addLowerFuncBound("Path",RadFunc(),range(0,6),.99,1.0)
 
-    phase.addLUNormBound("Path",range(8,11),.000001,1,1) # Lowbound is leakmass
+    phase.addLUNormBound("Path",range(8,11),.01/2,1,1) # Lowbound is leakmass
     phase.addBoundaryValue("Back",[7],[tf])
-    phase.addBoundaryValue("Back",range(0,5),XF[0:5])
-    phase.addValueObjective("Back",6,-1)
-    phase.addIntegralObjective(Args(3).squared_norm(),[8,9,10])
+    phase.addBoundaryValue("Back",range(0,6),XF[0:6])
+    phase.addValueObjective("Back",6,-.1)
+    #phase.addIntegralObjective(Args(3).squared_norm(),[8,9,10])
     #phase.enable_vectorization(False)
     
     
     phase.setThreads(8,8)
-    phase.optimizer.set_OptLSMode("L1")
+    phase.optimizer.set_OptLSMode("AUGLANG")
     phase.optimizer.set_SoeLSMode("L1")
 
-    phase.optimizer.set_MaxLSIters(2)
-    phase.optimizer.set_MaxAccIters(180)
-    phase.optimizer.set_BoundFraction(.99)
+    phase.optimizer.set_MaxLSIters(3)
+    phase.optimizer.set_MaxAccIters(100)
+    phase.optimizer.set_BoundFraction(.997)
     phase.optimizer.set_PrintLevel(1)
     #phase.optimizer.set_deltaH(1.0e-6)
-    phase.optimizer.set_decrH(.333)
-    phase.optimizer.deltaH=1.0e-5
+    #phase.optimizer.set_decrH(.333)
+    phase.optimizer.deltaH=1.0e-6
     phase.MeshTol = 1.0e-6
+    phase.RelSwitchTol = .1
+    phase.ForceOneMeshIter=True
+    phase.DetectControlSwitches = True
+    phase.optimizer.MaxAccIters=350
+    phase.optimizer.MaxIters=700
 
     phase.optimizer.set_KKTtol(1.0e-5)
 
@@ -120,17 +125,17 @@ def GTO():
     #phase.optimizer.set_QPOrderingMode("MINDEG")
     import time
 
-    #phase.MeshErrorEstimator = 'integrator'
+    phase.MeshErrorEstimator = 'integrator'
     #phase.MeshErrorDistributor='geometric'
     #phase.AdaptiveMesh = True
     phase.MeshIncFactor = 5
     t00 = time.perf_counter()
 
-    phase.refineTrajEqual(n)
+    #phase.refineTrajEqual(n)
     #phase.solve()
     phase.AdaptiveMesh = True
    
-    phase.optimize_solve()
+    phase.optimize()
 
     
     PhaseMeshErrorPlot(phase,show=True)
@@ -247,19 +252,21 @@ def Other():
         
         
     #TrajIG = integ.integrate_dense(TrajIG[0],tf,1000)
-    phase = ode.phase("LGL7",TrajIG,160)
+    phase = ode.phase("LGL7",TrajIG,15)
+    #phase.setControlMode("NoSpline")  # This problem only likes this
     phase.setControlMode("HighestOrderSpline")  # This problem only likes this
-    phase.setControlMode("BlockConstant")  # This problem only likes this
 
     phase.integrator.setAbsTol(1.0e-11)
     phase.addBoundaryValue("Front",range(0,8),Istate[0:8])
     phase.addLUNormBound("Path",range(8,11),.001,1,1) # Lowbound is leakmass
     phase.addBoundaryValue("Back",[7],[tf])
     phase.addBoundaryValue("Back",range(0,6),XF[0:6])
-    phase.addValueObjective("Back",6,-1.0)
-    #phase.addIntegralObjective(Args(3).squared_norm(),[8,9,10])
+    #phase.addValueObjective("Back",6,-1.0)
+    phase.addIntegralObjective(Args(3).squared_norm(),[8,9,10])
     #phase.enable_vectorization(False)
-    
+    phase.RelSwitchTol = .1
+    phase.ForceOneMeshIter=True
+    phase.DetectControlSwitches = True
     
     phase.setThreads(8,8)
     phase.optimizer.set_OptLSMode("AUGLANG")
@@ -269,19 +276,19 @@ def Other():
     phase.optimizer.set_PrintLevel(1)
     #phase.optimizer.set_deltaH(1.0e-6)
     phase.optimizer.set_decrH(.333)
-    phase.MeshTol = 1.0e-10
-
-    phase.optimizer.set_EContol(1.0e-10)
+    phase.MeshTol = 1.0e-8
+    phase.MeshErrFactor=10.0
+    phase.optimizer.set_EContol(1.0e-8)
     #phase.optimizer.set_QPOrderingMode("MINDEG")
     import time
 
-    phase.MeshErrorEstimator = 'deboor'
+    #phase.MeshErrorEstimator = 'integrator'
    
-    phase.AdaptiveMesh = True
+    #phase.AdaptiveMesh = True
     phase.MeshIncFactor = 5
     t00 = time.perf_counter()
 
-    phase.optimize()
+    phase.solve()
     
     
     PhaseMeshErrorPlot(phase,show=True)
@@ -310,6 +317,7 @@ def Other():
     fig,axs = plt.subplots(1,2)
     
     TT = np.array(ConvTraj).T
+    TT[7]=TT[7]/TT[7][-1]
     axs[0].plot(TT[7],TT[8],label=r'$U_r$')
     axs[0].plot(TT[7],TT[9],label=r'$U_t$')
     axs[0].plot(TT[7],TT[10],label=r'$U_n$')
@@ -357,8 +365,8 @@ def Other():
 
 if __name__ == "__main__":
    
-    #GTO()
-    #Other()
+    GTO()
+    Other()
     
     Isp_dim  = 3000        #S
     Tmag_dim = .32         #N
@@ -398,40 +406,49 @@ if __name__ == "__main__":
         TrajIG.append(State)
         
         
-    phase = ode.phase("LGL5",TrajIG,160)
+    phase = ode.phase("LGL7",TrajIG,100)
     phase.setControlMode("BlockConstant")  # This problem only likes this
     phase.integrator.setAbsTol(1.0e-11)
     phase.addBoundaryValue("Front",range(0,8),Istate[0:8])
-    phase.addLUNormBound("Path",range(8,11),.0001,1,1) # Lowbound is leakmass
+    phase.addLUNormBound("Path",range(8,11),.001,1,1) # Lowbound is leakmass
     phase.addBoundaryValue("Back",[7],[tf])
     phase.addBoundaryValue("Back",range(0,6),XF[0:6])
     phase.addValueObjective("Back",6,-1.0)
     #phase.addIntegralObjective(Args(3).squared_norm(),[8,9,10])
     #phase.enable_vectorization(False)
-    
+    phase.RelSwitchTol = .1
+    phase.ForceOneMeshIter=True
     
     phase.setThreads(8,8)
     phase.optimizer.set_OptLSMode("AUGLANG")
     phase.optimizer.set_MaxLSIters(2)
     phase.optimizer.set_MaxAccIters(300)
     phase.optimizer.set_BoundFraction(.996)
-    phase.optimizer.set_PrintLevel(2)
-    #phase.optimizer.set_deltaH(1.0e-6)
+    phase.optimizer.set_PrintLevel(1)
+    phase.optimizer.set_deltaH(1.0e-6)
     phase.optimizer.set_decrH(.333)
-    phase.MeshTol = 1.0e-6
+    phase.MeshTol = 1.0e-10
+    phase.MeshErrFactor=2000.0
 
-    phase.optimizer.set_EContol(1.0e-10)
-    #phase.optimizer.set_QPOrderingMode("MINDEG")
+    #phase.DetectControlSwitches = True
+    phase.optimizer.set_EContol(1.0e-11)
+    phase.optimizer.set_KKTtol(1.0e-8)
+
+    phase.optimizer.set_QPOrderingMode("MINDEG")
     import time
 
-    phase.MeshErrorEstimator = 'deboor'
+    phase.MeshErrorEstimator = 'integrator'
     
     phase.AdaptiveMesh = True
     phase.MeshIncFactor = 5
     t00 = time.perf_counter()
 
     phase.optimize()
+    #phase.optimize()
+    #phase.optimize()
+
     tff = time.perf_counter()
+    PhaseMeshErrorPlot(phase,show=True)
 
     print(1000*(tff-t00))
 
@@ -501,12 +518,8 @@ if __name__ == "__main__":
     #########################################################################
     TT = np.array(ConvTraj).T
     plt.plot(TT[7]/TT[7][-1],(TT[8]**2+TT[9]**2+TT[10]**2)**.5,label=r'$|U|$',marker='o')
-    plt.plot(TT[7]/TT[7][-1],TT[5],marker='o')
 
-    TT = np.array(ConvTrajI).T
-    plt.plot(TT[7]/TT[7][-1],(TT[8]**2+TT[9]**2+TT[10]**2)**.5,label=r'$|U|$',marker='o')
-    plt.plot(TT[7]/TT[7][-1],TT[5],marker='o')
-
+  
     plt.show()
     '''
     ts, errs,errint = Tab.NewErrorIntegral()

@@ -5,6 +5,7 @@
 #include "ODEPhaseBase.h"
 #include "ODEPhaseBase.h"
 #include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
 
 #include "LGLControlSplines.h"
 #include "LGLIntegrals.h"
@@ -1072,34 +1073,99 @@ bool ASSET::ODEPhaseBase::checkMesh()
 void ASSET::ODEPhaseBase::updateMesh()
 {
 
-    double error_dist;
+    
+    double ntemp=0;
+    for (int i = 0; i < this->MeshIters.back().error.size()-1;i++) {
 
-    if (this->MeshErrorDistributor == "max") {
-        error_dist = this->MeshIters.back().max_error;
+        double nsegs = std::pow((this->MeshIters.back().error[i] * this->MeshErrFactor) / this->MeshTol, 1 / (this->Order + 1));
+        ntemp += std::max(this->MeshRedFactor,nsegs);
     }
-    else if (this->MeshErrorDistributor == "avg") {
-        error_dist = this->MeshIters.back().avg_error;
-    }
-    else if (this->MeshErrorDistributor == "geometric") {
-        error_dist = this->MeshIters.back().gmean_error;
-    }
-    else if (this->MeshErrorDistributor == "endtoend") {
-        error_dist = this->MeshIters.back().global_error;
-    }
-    else {
-        throw std::invalid_argument("Unknown mesh error distributor");
-    }
-
-    error_dist *= this->MeshErrFactor;
-    int n = int(this->numDefects * std::pow(error_dist / this->MeshTol, 1 / (this->Order + 1)) + this->NumExtraSegs);
+    int n = int(std::ceil(ntemp)) + this->NumExtraSegs;
+    
     n = std::clamp(n, int(this->numDefects * this->MeshRedFactor), int(this->numDefects * this->MeshIncFactor));
     n = std::clamp(n, this->MinSegments, this->MaxSegments);
 
-    this->MeshIters.back().up_numsegs = n;
-    Eigen::VectorXi dpb = VectorXi::Ones(n);
     Eigen::VectorXd bins = this->MeshIters.back().calc_bins(n);
-    this->refineTrajManual(bins, dpb);
 
+    if (this->DetectControlSwitches && this->UVars()>0) {
+        Eigen::VectorXd switchvec = this->calcSwitches();
+        std::vector<double> stmp;
+        std::cout << switchvec.transpose() << std::endl;
+
+        for (int i = 0; i < bins.size() - 1; i++) {
+            for (int j = 0; j < switchvec.size(); j++) {
+                if (switchvec[j] > bins[i] && switchvec[j] < bins[i + 1]) {
+                    stmp.push_back(bins[i] / 2.0 + bins[i + 1] / 2.0);
+                    break;
+                }
+            }
+        }
+        switchvec.resize(stmp.size());
+        for (int i = 0; i < stmp.size(); i++) {
+            switchvec[i] = stmp[i];
+        }
+
+        Eigen::VectorXd binstmp(bins.size() + switchvec.size());
+        binstmp.head(bins.size()) = bins;
+        binstmp.tail(switchvec.size()) = switchvec;
+
+        std::sort(binstmp.begin(), binstmp.end());
+        std::cout << switchvec.transpose() << std::endl;
+
+        bins = binstmp;
+    }
+
+    Eigen::VectorXi dpb = VectorXi::Ones(bins.size()-1);
+    this->MeshIters.back().up_numsegs = bins.size() - 1;
+
+    this->refineTrajManual(bins, dpb);
+     
+}
+
+Eigen::VectorXd ASSET::ODEPhaseBase::calcSwitches()
+{
+
+    Eigen::MatrixXd uvals(this->UVars(), this->ActiveTraj.size());
+    Eigen::VectorXd tsnd(this->ActiveTraj.size());
+
+    double T0 = this->ActiveTraj[0][this->TVar()];
+    double TF = this->ActiveTraj.back()[this->TVar()];
+  
+    for (int i = 0; i < this->ActiveTraj.size(); i++) {
+        uvals.col(i) = this->ActiveTraj[i].segment(this->XtVars(), this->UVars());
+        tsnd[i] = (this->ActiveTraj[i][this->TVar()] - T0) / (TF - T0);
+    }
+
+    Eigen::VectorXd umin = uvals.rowwise().minCoeff();
+    Eigen::VectorXd umax  = uvals.rowwise().maxCoeff();
+    Eigen::VectorXd ones(this->UVars());
+    ones.setOnes();
+
+    Eigen::MatrixXd und(this->UVars(), this->ActiveTraj.size());
+
+    for (int i = 0; i < this->ActiveTraj.size(); i++) {
+        und.col(i) = (uvals.col(i)-umin).cwiseQuotient(ones+umax-umin);
+    }
+
+    Eigen::VectorXd udiff;
+    Eigen::VectorXd unddiff;
+    std::vector<double> switches;
+
+    for (int i = 0; i < this->ActiveTraj.size() - 1; i++) {
+        udiff = (uvals.col(i + 1) - uvals.col(i)).cwiseAbs();
+        unddiff = (uvals.col(i + 1) - uvals.col(i)).cwiseAbs();
+        if (udiff.maxCoeff() > this->AbsSwitchTol && unddiff.maxCoeff() > this->RelSwitchTol) {
+            double t = tsnd[i + 1] / 2.0 + tsnd[i] / 2.0;
+            switches.push_back(t);
+        }
+    }
+
+    Eigen::VectorXd switchvec(switches.size());
+    for (int i = 0; i < switches.size(); i++) {
+        switchvec[i] = switches[i];
+    }
+
+    return switchvec;
 }
 
 
@@ -1167,7 +1233,7 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::ODEPhaseBase::phase_call_impl(std::string
         else {
             initMeshRefinement();
             for (int i = 0; i < this->MaxMeshIters; i++) {
-                if (checkMesh()) {
+                if (checkMesh()&&!((i==0)&&this->ForceOneMeshIter )) {
                     if (this->PrintMeshInfo) {
                         MeshIterateInfo::print_header(i);
                         this->MeshIters.back().print(0);
@@ -1798,7 +1864,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   obj.def("getMeshIters", &ODEPhaseBase::getMeshIters);
 
   
-
+  
   obj.def_readwrite("AdaptiveMesh", &ODEPhaseBase::AdaptiveMesh);
 
   obj.def("setAdaptiveMesh", &ODEPhaseBase::setAdaptiveMesh, py::arg("AdaptiveMesh") = true);
@@ -1810,7 +1876,17 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   obj.def_readwrite("MeshErrorEstimator", &ODEPhaseBase::MeshErrorEstimator);
   obj.def_readwrite("MeshErrorCriteria", &ODEPhaseBase::MeshErrorCriteria);
   obj.def_readwrite("MeshErrorDistributor", &ODEPhaseBase::MeshErrorDistributor);
+
+
   obj.def_readwrite("SolveOnlyFirst", &ODEPhaseBase::SolveOnlyFirst);
+  obj.def_readwrite("ForceOneMeshIter", &ODEPhaseBase::ForceOneMeshIter);
+  obj.def_readwrite("NewError", &ODEPhaseBase::NewError);
+
+
+  obj.def_readwrite("DetectControlSwitches", &ODEPhaseBase::DetectControlSwitches);
+  obj.def_readwrite("RelSwitchTol", &ODEPhaseBase::RelSwitchTol);
+  obj.def_readwrite("AbsSwitchTol", &ODEPhaseBase::AbsSwitchTol);
+
 
 
   obj.def_readwrite("NumExtraSegs",  &ODEPhaseBase::NumExtraSegs);
