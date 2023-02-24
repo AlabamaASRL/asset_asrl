@@ -1,6 +1,7 @@
 import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
+from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
 
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
@@ -108,8 +109,8 @@ for t in np.linspace(0,tfIG,100):
 
 ode  = BikeODE(la,lb)
 
-phase = ode.phase("LGL3",TrajIG,128)
-
+phase = ode.phase("LGL5",TrajIG,60)
+phase.setControlMode("BlockConstant")
 phase.addBoundaryValue("Front",[0,1,2,3,4],[x0,y0,psi0,v0,t0])
 
 phase.addLUVarBound("Path",3,vlbound,vubound)
@@ -120,8 +121,14 @@ phase.addInequalCon("Path",ObstacleConstraint(xobs,yobs,obsrad,m),[0,1])
 phase.addBoundaryValue("Back",[0,1],[xf,yf])
 phase.addDeltaTimeObjective(1.0)
 phase.optimizer.set_tols(1.0e-9,1.0e-9,1.0e-9)
+phase.setAdaptiveMesh(True)
+phase.MeshErrorCriteria = 'endtoend'
+phase.ForceOneMeshIter=True
+
+phase.optimizer.PrintLevel=1
 phase.optimize()
 
+PhaseMeshErrorPlot(phase,show=True)
 
 TrajF = phase.returnTraj()
 

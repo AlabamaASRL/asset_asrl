@@ -194,7 +194,7 @@ if __name__ == "__main__":
 
     ode = ShuttleReentry()
     
-    phase = ode.phase("LGL3",TrajIG,10)
+    phase = ode.phase("LGL5",TrajIG,20)
     
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
     phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     
     # Enable auto mesh refinement
     phase.setAdaptiveMesh(True)
-    phase.MeshTol=1.0e-6
+    phase.MeshTol=1.0e-7
     phase.optimizer.EContol=1.0e-7
 
     phase.MeshErrorEstimator='integrator'
@@ -222,20 +222,24 @@ if __name__ == "__main__":
     ## Recomended using only for LGL5 and LGL7 rn, for lower ortder methods error estimates used to calcuate the number
     ## of points in next mesh can siginificantly underestimate the number neccessary to get down the endtoend error
     phase.MeshErrorCriteria ='endtoend'
-    phase.MeshErrorDistributor ='max'
+    phase.MeshErrorDistributor ='avg'
+    phase.MeshErrFactor = 100.0  #defaults to 10
+    phase.NewError=True
 
     ## Note endtoend error can sometimes be smaller than the local error estimates
     ## because the polynomials can osccilate around the 'true' solution but still nearly
     ## exactly aproximate the total integral
     
-    
     ## IG is bad, solve first before optimize
     phase.solve_optimize()
+    
+    
     Traj1 = phase.returnTraj()
     PhaseMeshErrorPlot(phase,show=False)
 
     ## Add in Heating Rate Constraint, scale so rhs is order 1
     phase.addUpperFuncBound("Path",QFunc(),[0,2,6],Qlimit,1/Qlimit)
+   
     phase.optimize()
     Traj2 = phase.returnTraj()
     PhaseMeshErrorPlot(phase,show=True)

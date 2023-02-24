@@ -320,10 +320,10 @@ if __name__ == "__main__":
     tmode = "LGL3"
     cmode = "HighestOrderSpline"
     
-    nsegs1 = 40
-    nsegs2 = 40
-    nsegs3 = 40
-    nsegs4 = 40
+    nsegs1 = 5
+    nsegs2 = 5
+    nsegs3 = 5
+    nsegs4 = 5
     
     #########################################
     phase1 = ode1.phase(tmode,IG1,nsegs1)
@@ -382,6 +382,13 @@ if __name__ == "__main__":
     ocp.addPhase(phase3)
     ocp.addPhase(phase4)
     
+    
+    
+    ocp.setAdaptiveMesh(True,True)
+    
+    for phase in ocp.Phases:
+        phase.MeshErrorCriteria = 'endtoend'
+    
     ## All phases contniuous in everything but mass (var 6)
     ocp.addForwardLinkEqualCon(phase1,phase4,[0,1,2,3,4,5, 7,8,9,10])
     
@@ -389,9 +396,11 @@ if __name__ == "__main__":
     ocp.optimizer.set_OptLSMode("L1")
     ocp.optimizer.set_SoeLSMode("L1")
     ocp.optimizer.set_MaxLSIters(2)
-    ocp.optimizer.set_PrintLevel(1)
+    ocp.optimizer.set_PrintLevel(2)
 
     ocp.solve_optimize()
+    
+
     
 
     Phase1Traj = phase1.returnTraj()  # or ocp.Phase(i).returnTraj()

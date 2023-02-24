@@ -46,33 +46,39 @@ if __name__ == "__main__":
     ode= HyperSens()
     
     '''
-    For tf  = 10000.0 we need at least 100 segments on initial mesh to approximate
-    hypersensiteve behavior, mesh refinement will take care of the rest
+    For tf  = 10000.0 we need at least 80 evenly spaced LGL5 or LGL7 segments on the initial mesh to approximate
+    hypersensiteve behavior and not blow up, mesh refinement will take care of the rest, we'll start with 100
+    to be safe
     '''
     nsegs   = 100
 
-    phase = ode.phase("LGL5",TrajIG,nsegs)
+    phase = ode.phase("LGL7",TrajIG,nsegs)
     
     # Disabling splined controls seems to work best for this problem, but splines still work
-    phase.setControlMode("NoSpline")
+    #phase.setControlMode("NoSpline")
     
+    # Boundary Conditions
     phase.addBoundaryValue(PhaseRegs.Front,range(0,3),[xt0,0,0])
     phase.addBoundaryValue(PhaseRegs.Back ,[0,2],[xtf,tf])
+    
+    # Some loose bounds on variables
     phase.addLUVarBound("Path",0,-50,50)
     phase.addLUVarBound("Path",1,-50,50)
     phase.addLUVarBound("Path",3,-50,50)
+    
+    # Objecyive is final value of second state variable
     phase.addDeltaVarObjective(1,1.0)
     
     phase.optimizer.set_OptLSMode("L1")
     phase.optimizer.set_SoeLSMode("L1")
     phase.optimizer.set_MaxLSIters(2)
     phase.optimizer.PrintLevel = 2
-    
+   
     '''
     For tf=10000.0 this problem is so sensitve that the static pivoting order 
     produced by the default METIS method is structurally singular despite
     the problem being well posed.
-    MINDEG Ordering MUCH more stable for this particular problem
+    However, MINDEG Ordering is stable for this problem problem
     Comment it out , enable console printing, and watch the number of peturbed pivots (PPS)
      and flying red colors to see what im talking about
     '''
@@ -84,10 +90,9 @@ if __name__ == "__main__":
     #########################################
     
     '''
-    Enable auto mesh refinement.It is disabled by default. When disabled everything
+    Enable auto mesh refinement.It is disabled by default. When disabled, everything
     behaves as it did before. When enabled, after solving the first mesh, we utilize an adaptive
-    mesh stragegy that attempts to estimate and reduce the error in the solution by adding, shifting,
-    and deletinf segments.
+    mesh stragegy that calcuates the nuymber and spacing segments to meet as specified toelrance
     '''
     phase.setAdaptiveMesh(True)
     
@@ -103,14 +108,22 @@ if __name__ == "__main__":
     '''
     Specify the method used to estimate the error in each segment of the current trajectory
     '''
-    ##Use the polynomial differenccing scheme of deboor,russell and grebow
+    
+    '''
+    Use the polynomial differenccing scheme of deboor,russell and grebow
+    '''
     phase.MeshErrorEstimator='deboor'
-    #Or use the phases integrator, set the phases integrator tolerances and step sizes
-    ##appropraitely for good performance
-    phase.MeshErrorEstimator='integrator'
+    
+    '''
+    Or use a scheme leveraging an explicit integrator that we came up with, 
+    set the phases integrator tolerances and step sizes appropraitely for good performance
+    '''
+    #phase.MeshErrorEstimator='integrator'
     
     
+    '''
     # Specify which type of error must be less than MeshTol for the problem to be converged
+    '''
     ## 'max' (default) will make sure that the max error in any of the segments is less than MeshTol
     phase.MeshErrorCriteria = 'max'
     
@@ -124,32 +137,27 @@ if __name__ == "__main__":
     ## the collocated and integrated final states is less than MeshTol
     #phase.MeshErrorCriteria = 'endtoend'
     
-    '''
-    Specify which measure of error is used to calculate the new number of points in the next mesh
-    This is decoupled from the MeshErrorCriteria to prevent early iterates from grossly overestimating
-    the number of points needed. Our strategy tries to equlibrate error so the max,mean, and
-    geometric measures of error should converge to the same order of magnitude. This particular example
-    is an exception because the solution has a long duration coast phase with nearly 0 error
-    '''
-    phase.MeshErrorDistributor = 'avg'  # default and recommended for all but MeshErrorCriteria = 'endtoend'
-    
-    phase.MeshErrorDistributor = 'max'
-    #phase.MeshErrorDistributor = 'geometric'
-    #phase.MeshErrorDistributor = 'endtoend'  
 
     '''
     Maximum multiple by which the # of segments can be increased between iterations
-    this defaults to 10, which is far too agressive for this problem (but still works)
+    this defaults to 10, which is too agressive for this problem (but still works).
     '''
-    phase.MeshIncFactor=2.0
+    phase.MeshIncFactor=5.0
     
-    # Minimum multiple by which the # of segments can be reduced between iterations , Defaults to 0.7
-    phase.MeshRedFactor=.7
+    '''
+    Minimum multiple by which the # of segments can be reduced between iterations , Defaults to 0.7
+    '''
+    phase.MeshRedFactor=.25
     
-    ## Factor by which we exagerate the error MeshErrorDistributor when calculating the needed number
-    ## of points in the next mesh iter to ensure that he next iter will satisfy the tolerance
-    phase.MeshErrFactor = 10.0  #defaults to 10
-
+    '''
+    Factor by which we exagerate the error in each segment when calculating the needed number
+    of points in the next mesh. This helps makes the nect iterate more likley to meet the tolerance but can 
+    overprovison the # of segments, When using endtoend convergance criteria and the low order methods, be
+    very agressive with this parameter
+    '''
+    phase.MeshErrFactor = 30.0  #defaults to 10
+    
+    phase.MaxMeshIters = 10
 
     '''
     As before, flag returned indicates whether the last call to psipot converged or not, it does
@@ -175,8 +183,8 @@ if __name__ == "__main__":
     
     
     axs[0].legend()
-    axs[1].set_xlim([0,10])
-    axs[2].set_xlim([tf-10,tf])
+    axs[1].set_xlim([-.1,10])
+    axs[2].set_xlim([tf-10,tf+.1])
 
     plt.show()
     ###############################################################
@@ -189,7 +197,7 @@ if __name__ == "__main__":
     more segments will be placed.
     
     The third plot is the normalized integral of the distribtion function, which is used to generate the mesh
-    spacing for the next iteration. 
+    spacing for the next iteration (the dots on each curve). 
     '''
     PhaseMeshErrorPlot(phase,show=True)
     

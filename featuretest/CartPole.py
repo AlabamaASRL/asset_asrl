@@ -254,7 +254,7 @@ if __name__ == "__main__":
     
     ode = CartPole(l,m1,m2,g)
     
-    phase = ode.phase("LGL7",IG,30)
+    phase = ode.phase("LGL5",IG,30)
     #phase.setControlMode("HighestOrderSpline")
     #phase.setControlMode("NoSpline")
     #Fix first state (x,theta,xdot,thetadot) and time
@@ -272,10 +272,11 @@ if __name__ == "__main__":
     phase.optimizer.EContol = 1.0e-10
     #phase.MeshErrorEstimator = 'integrator'
     phase.AdaptiveMesh = True
-    phase.MeshTol=1.0e-9
+    phase.MeshTol=1.0e-6
     phase.MeshIncFactor = 5
     phase.MeshErrFactor = 5
-    phase.MeshErrorDistributor='geometric'
+    #phase.MeshErrorDistributor='geometric'
+    phase.NewError=True
     phase.NumExtraSegs=1
     #phase.MeshIncFactor=5
     
