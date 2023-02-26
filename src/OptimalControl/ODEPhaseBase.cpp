@@ -1090,12 +1090,14 @@ void ASSET::ODEPhaseBase::updateMesh()
     if (this->DetectControlSwitches && this->UVars()>0) {
         Eigen::VectorXd switchvec = this->calcSwitches();
         std::vector<double> stmp;
-        std::cout << switchvec.transpose() << std::endl;
+       
 
         for (int i = 0; i < bins.size() - 1; i++) {
             for (int j = 0; j < switchvec.size(); j++) {
                 if (switchvec[j] > bins[i] && switchvec[j] < bins[i + 1]) {
-                    stmp.push_back(bins[i] / 2.0 + bins[i + 1] / 2.0);
+                    stmp.push_back(2*bins[i] / 3.0 +   bins[i + 1] / 3.0);
+                    stmp.push_back(  bins[i] / 3.0 + 2*bins[i + 1] / 3.0);
+
                     break;
                 }
             }
@@ -1108,10 +1110,8 @@ void ASSET::ODEPhaseBase::updateMesh()
         Eigen::VectorXd binstmp(bins.size() + switchvec.size());
         binstmp.head(bins.size()) = bins;
         binstmp.tail(switchvec.size()) = switchvec;
-
         std::sort(binstmp.begin(), binstmp.end());
-        std::cout << switchvec.transpose() << std::endl;
-
+        
         bins = binstmp;
     }
 
@@ -1160,12 +1160,8 @@ Eigen::VectorXd ASSET::ODEPhaseBase::calcSwitches()
         }
     }
 
-    Eigen::VectorXd switchvec(switches.size());
-    for (int i = 0; i < switches.size(); i++) {
-        switchvec[i] = switches[i];
-    }
-
-    return switchvec;
+   
+    return stdvector_to_eigenvector(switches);
 }
 
 

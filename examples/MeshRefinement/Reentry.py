@@ -211,24 +211,27 @@ if __name__ == "__main__":
     phase.optimizer.set_PrintLevel(2)
     
     
-    # Enable auto mesh refinement
+   ###########################################################################
+   ############# The New Adaptive Mesh Interface #############################
+   ###########################################################################
+   
     phase.setAdaptiveMesh(True)
     phase.MeshTol=1.0e-7
-    phase.optimizer.EContol=1.0e-7
+    phase.optimizer.EContol=1.0e-7 #Set EContol at least as tight as MeshTol
 
-    phase.MeshErrorEstimator='integrator'
+    # The phase's default stepsizes work well for this problem, but you might need to modify for another!!
+    phase.MeshErrorEstimator='integrator'  
+
 
     ## If all you care about is how close the resintegrated solution is the the final state you can use this
-    ## Recomended using only for LGL5 and LGL7 rn, for lower ortder methods error estimates used to calcuate the number
-    ## of points in next mesh can siginificantly underestimate the number neccessary to get down the endtoend error
+    ## Recomended using LGL5 or LGL7 for endtoend tolerances tighter than 1.0e-6, 
     phase.MeshErrorCriteria ='endtoend'
-    phase.MeshErrorDistributor ='avg'
+    
+    ## When using endtoend, you might need to up the MeshErrFactor, esp for low order methods
     phase.MeshErrFactor = 100.0  #defaults to 10
-    phase.NewError=True
 
-    ## Note endtoend error can sometimes be smaller than the local error estimates
-    ## because the polynomials can osccilate around the 'true' solution but still nearly
-    ## exactly aproximate the total integral
+    ###########################################################################
+    
     
     ## IG is bad, solve first before optimize
     phase.solve_optimize()

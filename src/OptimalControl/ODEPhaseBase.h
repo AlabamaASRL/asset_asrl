@@ -95,6 +95,7 @@ public:
   bool SolveOnlyFirst = true;
   bool NewError = false;
   bool   DetectControlSwitches = false;
+
   double RelSwitchTol = .3;
   double AbsSwitchTol = 1.0e-6;
 

@@ -371,7 +371,7 @@ attached to each problem.
         ocp.setThreads(1,1)  # Not necessary, Jet will take care of this
 
         ### SET the JetJobMode !!! #####
-        ocp.setJetJobMode("Optimize")
+        ocp.setJetJobMode("optimize")
        
         #Or
         #ocp.setJetJobMode("solve")
@@ -436,7 +436,7 @@ and expensive preprocessing that cannot be parallelized.
         ocp.setThreads(1,1)  # Not necessary, Jet will take care of this
 
         ### SET the JetJobMode !!! #####
-        ocp.setJetJobMode("Optimize")
+        ocp.setJetJobMode("optimize")
 
         return ocp
 

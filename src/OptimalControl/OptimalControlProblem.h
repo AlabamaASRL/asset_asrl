@@ -78,7 +78,8 @@ struct OptimalControlProblem:OptimizationProblemBase {
   bool AdaptiveMesh = false;
   bool PrintMeshInfo = true;
   bool SolveOnlyFirst = true;
-  int MaxMeshIters = 5;
+
+  int MaxMeshIters = 10;
   PSIOPT::ConvergenceFlags MeshAbortFlag = PSIOPT::ConvergenceFlags::DIVERGING;
 
   bool MeshConverged = false;

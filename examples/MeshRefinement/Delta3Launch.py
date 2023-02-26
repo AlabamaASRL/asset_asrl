@@ -383,15 +383,45 @@ if __name__ == "__main__":
     ocp.addPhase(phase4)
     
     
+    ###########################################################################
+    ############# The New Adaptive Mesh Interface #############################
+    ###########################################################################
     
-    ocp.setAdaptiveMesh(True,True)
+    EnableAdaptive = True
+    ApplyToAllPhases = True  
     
+    
+    ## Turn on adaptive mesh for the ocp and enable it for all phases CURRENTLY in the ocp
+    ocp.setAdaptiveMesh(EnableAdaptive,ApplyToAllPhases)
+    
+    ## Turn it on for the ocp, but not the phases: allows you selectively enable
+    ## which phases are going to have adaptive mesh
+    ocp.setAdaptiveMesh(True,False)
+    
+    
+    ocp.setAdaptiveMesh(False) # Equalivalent to ocp.setAdaptiveMesh(False,False)
+    ocp.setAdaptiveMesh(True)  # Equalivalent to ocp.setAdaptiveMesh(True,True)
+    ocp.setAdaptiveMesh()      # Equalivalent to ocp.setAdaptiveMesh(True,True)
+    
+    ## ocp controls max mesh iters for problem
+    ocp.MaxMeshIters = 10
+    
+    ## Apply non-default mesh settings phases.
+    ## Need not be the same for all phases
     for phase in ocp.Phases:
-        phase.MeshErrorCriteria = 'endtoend'
+        phase.MeshTol = 1.0e-7
+        phase.MeshErrorCriteria = 'max'
+        phase.MeshErrorEstimator='integrator'  
+
     
-    ## All phases contniuous in everything but mass (var 6)
+    # Not every phase has to be adaptive
+    #phase2.setAdaptiveMesh(False)
+    
+    ###########################################################################
+
+    
+    ## All phases continuous in everything but mass (var 6)
     ocp.addForwardLinkEqualCon(phase1,phase4,[0,1,2,3,4,5, 7,8,9,10])
-    
     
     ocp.optimizer.set_OptLSMode("L1")
     ocp.optimizer.set_SoeLSMode("L1")

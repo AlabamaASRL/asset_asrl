@@ -473,8 +473,6 @@ struct ODEPhase : ODEPhaseBase {
       double T0 = this->ActiveTraj[0][this->TVar()];
       double TF = this->ActiveTraj.back()[this->TVar()];
 
-      //int numBlocks = this->ActiveTraj.size() - 1;
-      //int BlockSize = 2;
       int BlockSize = this->numTranCardStates;
       int numBlocks = (this->ActiveTraj.size() - 1) / (BlockSize - 1);;
 
