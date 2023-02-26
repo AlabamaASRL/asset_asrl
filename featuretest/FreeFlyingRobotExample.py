@@ -63,7 +63,7 @@ if __name__ == "__main__":
         IG.append(T)
     
     
-    phase = ode.phase("LGL3",IG,32)
+    phase = ode.phase("LGL5",IG,25)
     phase.setControlMode("BlockConstant")
     phase.addBoundaryValue("Front",range(0,7),X0)
     phase.addBoundaryValue("Back" ,range(0,7),XF)
@@ -72,14 +72,19 @@ if __name__ == "__main__":
     phase.optimizer.set_PrintLevel(2)
     phase.optimizer.set_OptLSMode("L1")
     phase.optimizer.set_MaxLSIters(2)
-    phase.optimizer.set_tols(1.0e-9,1.0e-9,1.0e-9)
+    phase.optimizer.set_tols(1.0e-7,1.0e-7,1.0e-7)
     phase.optimizer.MaxAccIters = 100
     phase.optimizer.deltaH=1.0e-6
     phase.AdaptiveMesh=True
     phase.MeshTol = 1.0e-8
     phase.MeshIncFactor=4.0
+    phase.DetectControlSwitches=True
+    phase.ForceOneMeshIter = True
+    #phase.RelSwitchTol=.05
+    phase.optimizer.set_QPOrderingMode("MINDEG")
     
-    phase.MeshErrorEstimator='deboor'
+    phase.MeshErrorEstimator='integrator'
+    phase.MeshErrorCriteria ='endtoend'
     phase.optimize()
     
     PhaseMeshErrorPlot(phase,show=True)

@@ -365,8 +365,8 @@ def Other():
 
 if __name__ == "__main__":
    
-    GTO()
-    Other()
+    #GTO()
+    #Other()
     
     Isp_dim  = 3000        #S
     Tmag_dim = .32         #N
@@ -416,7 +416,7 @@ if __name__ == "__main__":
     phase.addValueObjective("Back",6,-1.0)
     #phase.addIntegralObjective(Args(3).squared_norm(),[8,9,10])
     #phase.enable_vectorization(False)
-    phase.RelSwitchTol = .1
+    phase.RelSwitchTol = .3
     phase.ForceOneMeshIter=True
     
     phase.setThreads(8,8)
@@ -427,17 +427,17 @@ if __name__ == "__main__":
     phase.optimizer.set_PrintLevel(1)
     phase.optimizer.set_deltaH(1.0e-6)
     phase.optimizer.set_decrH(.333)
-    phase.MeshTol = 1.0e-10
-    phase.MeshErrFactor=2000.0
+    phase.MeshTol = 1.0e-7
+    phase.MeshErrFactor=50.0
 
-    #phase.DetectControlSwitches = True
+    phase.DetectControlSwitches = True
     phase.optimizer.set_EContol(1.0e-11)
     phase.optimizer.set_KKTtol(1.0e-8)
 
     phase.optimizer.set_QPOrderingMode("MINDEG")
     import time
 
-    phase.MeshErrorEstimator = 'integrator'
+    #phase.MeshErrorEstimator = 'integrator'
     
     phase.AdaptiveMesh = True
     phase.MeshIncFactor = 5

@@ -279,7 +279,7 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::ocp_call_impl(std:
                     if (this->PrintMeshInfo)
                         this->printMeshs(i);
                 }
-                flag = this->psipot_call_impl(mode);
+                flag = this->psipot_call_impl(nextmode);
                 if (flag >= this->MeshAbortFlag) {
                     if (this->PrintMeshInfo) {
                         fmt::print(fmt::fg(fmt::color::red), "Mesh Iteration {0:} Failed to Solve: Aborting\n", i + 1);

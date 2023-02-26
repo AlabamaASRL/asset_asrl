@@ -29,6 +29,7 @@
 #include "Utils/Timer.h"
 #include "Utils/fmtlib.h"
 
+#include "Utils/EigenSTL.h"
 
 
 
