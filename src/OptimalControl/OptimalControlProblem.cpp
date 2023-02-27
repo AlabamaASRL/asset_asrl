@@ -1200,6 +1200,15 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
   obj.def_readwrite("SolveOnlyFirst", &OptimalControlProblem::SolveOnlyFirst);
 
   obj.def("setAdaptiveMesh",&OptimalControlProblem::setAdaptiveMesh,py::arg("AdaptiveMesh")=true, py::arg("ApplyToPhases") = true);
+  obj.def("setMeshTol", &OptimalControlProblem::setMeshTol);
+  obj.def("setMeshRedFactor", &OptimalControlProblem::setMeshRedFactor);
+  obj.def("setMeshIncFactor", &OptimalControlProblem::setMeshIncFactor);
+  obj.def("setMeshErrFactor", &OptimalControlProblem::setMeshErrFactor);
+  obj.def("setMaxMeshIters", &OptimalControlProblem::setMaxMeshIters);
+  obj.def("setMinSegments", &OptimalControlProblem::setMinSegments);
+  obj.def("setMaxSegments", &OptimalControlProblem::setMaxSegments);
+  obj.def("setMeshErrorCriteria", &OptimalControlProblem::setMeshErrorCriteria);
+  obj.def("setMeshErrorEstimator", &OptimalControlProblem::setMeshErrorEstimator);
 
 
 }

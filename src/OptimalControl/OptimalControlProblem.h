@@ -93,6 +93,51 @@ struct OptimalControlProblem:OptimizationProblemBase {
       }
   }
   
+  void setMeshTol(double t) {
+      for (auto phase : this->phases) {
+          phase->setMeshTol(t);
+      }
+  }
+  void setMeshRedFactor(double t) {
+      for (auto phase : this->phases) {
+          phase->setMeshRedFactor(t);
+      }
+  }
+  void setMeshIncFactor(double t) {
+      for (auto phase : this->phases) {
+          phase->setMeshIncFactor(t);
+      }
+  }
+  void setMeshErrFactor(double t) {
+      for (auto phase : this->phases) {
+          phase->setMeshErrFactor(t);
+      }
+  }
+  void setMaxMeshIters(int it) {
+      this->MaxMeshIters = it;
+  }
+  void setMinSegments(int it) {
+      for (auto phase : this->phases) {
+          phase->setMinSegments(it);
+      }
+  }
+  void setMaxSegments(int it) {
+      for (auto phase : this->phases) {
+          phase->setMaxSegments(it);
+      }
+  }
+  void setMeshErrorCriteria(std::string m) {
+      for (auto phase : this->phases) {
+          phase->setMeshErrorCriteria(m);
+      }
+  }
+  void setMeshErrorEstimator(std::string m) {
+      for (auto phase : this->phases) {
+          phase->setMeshErrorEstimator(m);
+      }
+  }
+
+
 
   ///////////////////////////////
   OptimalControlProblem() {

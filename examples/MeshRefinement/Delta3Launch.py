@@ -404,14 +404,17 @@ if __name__ == "__main__":
     ocp.setAdaptiveMesh()      # Equalivalent to ocp.setAdaptiveMesh(True,True)
     
     ## ocp controls max mesh iters for problem
-    ocp.MaxMeshIters = 10
+    ocp.setMaxMeshIters(10)
     
     ## Apply non-default mesh settings phases.
     ## Need not be the same for all phases
+    
+    
+    
     for phase in ocp.Phases:
-        phase.MeshTol = 1.0e-7
-        phase.MeshErrorCriteria = 'max'
-        phase.MeshErrorEstimator='integrator'  
+        phase.setMeshTol(1.0e-7)
+        phase.setMeshErrorCriteria('max')
+        phase.setMeshErrorEstimator('integrator')  
 
     
     # Not every phase has to be adaptive

@@ -88,7 +88,7 @@ public:
 
 
   int NumExtraSegs      = 4;
-  double MeshRedFactor  = .6;
+  double MeshRedFactor  = .5;
   double MeshIncFactor  = 5.0;
   double MeshErrFactor  = 10.0;
   bool ForceOneMeshIter = false;
@@ -114,6 +114,35 @@ public:
   void setAdaptiveMesh(bool amesh) {
       this->AdaptiveMesh = amesh;
   }
+  void setMeshTol(double t) {
+      this->MeshTol = abs(t);
+  }
+  void setMeshRedFactor(double t) {
+      this->MeshRedFactor = abs(t);
+  }
+  void setMeshIncFactor(double t) {
+      this->MeshIncFactor = abs(t);
+  }
+  void setMeshErrFactor(double t) {
+      this->MeshErrFactor = abs(t);
+  }
+  void setMaxMeshIters(int it) {
+      this->MaxMeshIters = abs(it);
+  }
+  void setMinSegments(int it) {
+      this->MinSegments = abs(it);
+  }
+  void setMaxSegments(int it) {
+      this->MaxSegments = abs(it);
+  }
+  void setMeshErrorCriteria(std::string m) {
+      this->MeshErrorCriteria = m;
+  }
+  void setMeshErrorEstimator(std::string m) {
+      this->MeshErrorEstimator = m;
+  }
+  
+
 
   std::vector<MeshIterateInfo> getMeshIters() const {
       return this->MeshIters;
