@@ -1865,13 +1865,22 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
 
   obj.def("setAdaptiveMesh", &ODEPhaseBase::setAdaptiveMesh, py::arg("AdaptiveMesh") = true);
 
+  obj.def("setMeshTol", &ODEPhaseBase::setMeshTol);
+  obj.def("setMeshRedFactor", &ODEPhaseBase::setMeshRedFactor);
+  obj.def("setMeshIncFactor", &ODEPhaseBase::setMeshIncFactor);
+  obj.def("setMeshErrFactor", &ODEPhaseBase::setMeshErrFactor);
+  obj.def("setMaxMeshIters", &ODEPhaseBase::setMaxMeshIters);
+  obj.def("setMinSegments", &ODEPhaseBase::setMinSegments);
+  obj.def("setMaxSegments", &ODEPhaseBase::setMaxSegments);
+  obj.def("setMeshErrorCriteria", &ODEPhaseBase::setMeshErrorCriteria);
+  obj.def("setMeshErrorEstimator", &ODEPhaseBase::setMeshErrorEstimator);
+
 
   obj.def_readwrite("PrintMeshInfo", &ODEPhaseBase::PrintMeshInfo);
   obj.def_readwrite("MaxMeshIters", &ODEPhaseBase::MaxMeshIters);
   obj.def_readwrite("MeshTol",     &ODEPhaseBase::MeshTol);
   obj.def_readwrite("MeshErrorEstimator", &ODEPhaseBase::MeshErrorEstimator);
   obj.def_readwrite("MeshErrorCriteria", &ODEPhaseBase::MeshErrorCriteria);
-  obj.def_readwrite("MeshErrorDistributor", &ODEPhaseBase::MeshErrorDistributor);
 
 
   obj.def_readwrite("SolveOnlyFirst", &ODEPhaseBase::SolveOnlyFirst);
@@ -1889,7 +1898,6 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   obj.def_readwrite("MeshRedFactor", &ODEPhaseBase::MeshRedFactor);
   obj.def_readwrite("MeshIncFactor", &ODEPhaseBase::MeshIncFactor);
   obj.def_readwrite("MeshErrFactor", &ODEPhaseBase::MeshErrFactor);
-
   obj.def_readonly("MeshConverged", &ODEPhaseBase::MeshConverged);
 
  

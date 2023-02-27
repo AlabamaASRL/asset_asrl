@@ -75,10 +75,10 @@ namespace ASSET {
 
 	   static void print_header(int iter) {
 
-		   fmt::print("{0:=^{1}}\n", "", 62);
+		   fmt::print("{0:=^{1}}\n", "", 52);
 		   fmt::print("Mesh Iteration: {0:}\n",iter);
-		   fmt::print("{0:=^{1}}\n", "", 62);
-		   fmt::print("|Phase|#Segs| Max Err | Avg Err | Geo Err | EtE Err |Up #Segs|\n");
+		   fmt::print("{0:=^{1}}\n", "", 52);
+		   fmt::print("|Phase|#Segs| Max Err | Avg Err | EtE Err |Up #Segs|\n");
 	   }
 
 	   void print(int phasenum) {
@@ -115,8 +115,6 @@ namespace ASSET {
 		   fmt::print(calccolor(this->max_error),"{:>9.3e}", this->max_error);
 		   fmt::print("|");
 		   fmt::print(calccolor(this->avg_error), "{:>9.3e}", this->avg_error);
-		   fmt::print("|");
-		   fmt::print(calccolor(this->gmean_error), "{:>9.3e}", this->gmean_error);
 		   fmt::print("|");
 		   if (this->global_error > 0) {
 			   fmt::print(calccolor(this->global_error), "{:>9.3e}", this->global_error);

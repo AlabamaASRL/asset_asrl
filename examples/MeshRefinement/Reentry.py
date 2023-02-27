@@ -194,7 +194,7 @@ if __name__ == "__main__":
 
     ode = ShuttleReentry()
     
-    phase = ode.phase("LGL5",TrajIG,20)
+    phase = ode.phase("LGL3",TrajIG,40)
     
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
     phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
@@ -216,19 +216,19 @@ if __name__ == "__main__":
    ###########################################################################
    
     phase.setAdaptiveMesh(True)
-    phase.MeshTol=1.0e-7
+    phase.setMeshTol(1.0e-7)
     phase.optimizer.EContol=1.0e-7 #Set EContol at least as tight as MeshTol
 
     # The phase's default stepsizes work well for this problem, but you might need to modify for another!!
-    phase.MeshErrorEstimator='integrator'  
+    phase.setMeshErrorEstimator('integrator')  
 
 
     ## If all you care about is how close the resintegrated solution is the the final state you can use this
     ## Recomended using LGL5 or LGL7 for endtoend tolerances tighter than 1.0e-6, 
-    phase.MeshErrorCriteria ='endtoend'
+    phase.setMeshErrorCriteria('endtoend')
     
     ## When using endtoend, you might need to up the MeshErrFactor, esp for low order methods
-    phase.MeshErrFactor = 100.0  #defaults to 10
+    phase.setMeshErrFactor(100.0)  #defaults to 10
 
     ###########################################################################
     

@@ -28,8 +28,8 @@ Additionally, the following boundary conditions are applied to the state variabl
 .. math::
     x(0) = 1.5 \quad\quad x(t_f) =1.0
 
-This optimal control problem exhibits interesting behavior, where the state and control variables are non-zero near t=0,
-rapidly decaying to 0,and then change suddenly near :math:`t=t_f` [1]. For large values of :math:`t_f`, this hypersensitive behavior is very difficult
+This optimal control problem exhibits interesting behavior, where the state and control variables are non-zero near :math:`t=0`,
+rapidly decay to 0, and then change suddenly near :math:`t=t_f` [1]. For large values of :math:`t_f`, this hypersensitive behavior is very difficult
 to approximate using an evenly spaced collocation mesh, necessitating the usage of an adaptive mesh refinement scheme. In this example, we will use :math:`t_f=10000` 
 as shown in [1].
 
@@ -52,7 +52,7 @@ Initial setup for the problem proceeds similarly to what has been shown in many 
 we linearly interpolate between our known boundary constraints over the fixed time horizon. We then construct our phase with this initial
 guess, and apply the boundary constraints on the states and times. The objective is then specified as an integral objective. Loose bounds are also placed
 on the state and control variables.  Additionally, we enable line searches and change the optimizer's fill-in reducing ordering to the Minimum Degree algorithm.
-In our limited experience, the "MINDEG" ordering, while resulting in slower factorizations than the default "METIS" one, produces much more stable factorizations for
+In our limited experience, the :code:`"MINDEG"` ordering, while resulting in slower factorizations than the default :code:`"METIS"` one, produces much more stable factorizations for
 sensitive problems. 
 
 
@@ -96,10 +96,10 @@ when reintegrated.
 
 Beginning in version 0.1.0, we can have the phase deal with these issues automatically by enabling adaptive mesh refinement before optimizing the trajectory as shown below.
 When enabled, after solving the first mesh, ASSET automatically update the number and spacing of segments, and resolve the problem to reduce the estimated error in the trajectory below some user defined tolerance.
-This tolerance is specified using the MeshTol field of the phase. Additionally, you may also specify the maximum number of allowable mesh iterations. As general rule of thumb, Econtol of 
-the optimizer should be the same as or smaller than the mesh tolerance. It is also,recommended that you invoke PSIOPT with post solving enabled. That way, even if the optimize call fails to fully converge, PSIOPT will still
-return a trajectory to mesh refinement algorithm that at least satisfies the dynamics constraints of the mesh. As before, the flag returned by optimize_solve only indicates the convergence status of the last call to PSIOPT.
-To programatically check the convergence of the mesh, you can read the MeshConverged field of the phase. More explanation of the features of adaptive mesh refinement, can be found in the tutorial.
+This tolerance is specified using the MeshTol field of the phase. Additionally, you may also specify the maximum number of allowable mesh iterations. As general rule of thumb, the equality constraint tolerance of 
+the optimizer should be the same as or smaller than the mesh tolerance. It is also recommended that you invoke PSIOPT with post solving enabled. That way, even if the optimize call fails to fully converge, PSIOPT will still
+return a trajectory to mesh refinement algorithm that at least satisfies the dynamics constraints of the mesh. As before, the flag returned by :code:`.optimize_solve` only indicates the convergence status of the last call to PSIOPT.
+To programatically check the convergence of the mesh, you can read the MeshConverged field of the phase. More explanation of the features of adaptive mesh refinement can be found in the :ref:`Adaptive Mesh Refinement Tutorial <mesh-guide>`.
 
 
 .. code-block:: python
@@ -107,10 +107,10 @@ To programatically check the convergence of the mesh, you can read the MeshConve
     # Enable Adaptive Mesh
     phase.setAdaptiveMesh(True)
     ## Set Error tolerance on mesh: 
-    phase.MeshTol = 1.0e-7 #default = 1.0e-6
+    phase.setMeshTol(1.0e-7) #default = 1.0e-6
     ## Set Max number of mesh iterations: 
-    phase.MaxMeshIters = 10 #default = 10
-    ## Make sure to set optimizer Econtol to be the same as or smaller than MeshTol
+    phase.setMaxMeshIters(10) #default = 10
+    ## Make sure to set optimizer EContol to be the same as or smaller than MeshTol
     phase.optimizer.set_EContol(1.0e-7)
     
     flag = phase.optimize_solve() #Recommended to run with post solve enabled    
@@ -197,9 +197,9 @@ Full Code
         # Enable Adaptive Mesh
         phase.setAdaptiveMesh(True)
         ## Set Error tolerance on mesh: 
-        phase.MeshTol = 1.0e-7 #default = 1.0e-6
+        phase.setMeshTol(1.0e-7) #default = 1.0e-6
         ## Set Max number of mesh iterations: 
-        phase.MaxMeshIters = 10 #default = 10
+        phase.setMaxMeshIters(10) #default = 10
         ## Make sure to set optimizer Econtol to be the same as or smaller than MeshTol
         phase.optimizer.set_EContol(1.0e-7)
     

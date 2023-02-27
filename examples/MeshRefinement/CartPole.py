@@ -192,7 +192,7 @@ if __name__ == "__main__":
     
     ode = CartPole(l,m1,m2,g)
     
-    phase = ode.phase("LGL3",IG,64)
+    phase = ode.phase("LGL5",IG,20)
     
     #Fix first state (x,theta,xdot,thetadot) and time
     phase.addBoundaryValue("First",range(0,5),[0 ,0    , 0, 0, 0])
@@ -210,9 +210,9 @@ if __name__ == "__main__":
     
     
     phase.setAdaptiveMesh(True)
-    phase.MeshErrorEstimator='integrator'
-    phase.MeshTol=1.0e-7
-    phase.MeshErrFactor=10
+    phase.setMeshErrorEstimator('integrator')
+    phase.setMeshTol(1.0e-6)
+    phase.setMeshErrFactor(20)
     phase.optimize()
     
     PhaseMeshErrorPlot(phase,show=True)

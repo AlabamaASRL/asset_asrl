@@ -101,49 +101,47 @@ if __name__ == "__main__":
     phase.setAdaptiveMesh(True)
     
     ## Set Error tolerance on mesh: 
-    phase.MeshTol = 1.0e-7 #default = 1.0e-6
-    
-    ## Set Max number of mesh iterations: 
-    phase.MaxMeshIters = 10 #default = 10
-    
+    phase.setMeshTol(1.0e-7) #default = 1.0e-6
     ## Make sure to set optimizer Econtol to be the same as or smaller than MeshTol
     phase.optimizer.set_EContol(1.0e-7)
+    
+    ## Set Max number of mesh iterations: 
+    phase.setMaxMeshIters(10) #default = 10
+    
+    
     
     '''
     Specify the method used to estimate the error in each segment of the current trajectory
     '''
     ##Use the polynomial differencing scheme of deboor
-    phase.MeshErrorEstimator='deboor'  #default
+    phase.setMeshErrorEstimator('deboor')  #default
     
     ##Use the phase's explicit integrator, set the phases integrator tolerances and step sizes appropraitely for good performance
-    #phase.MeshErrorEstimator='integrator' # Not recommended for this problem
+    #phase.setMeshErrorEstimator('integrator') # Not recommended for this problem
     
     
     '''
     # Specify which type of error must be less than MeshTol for the problem to be converged
     '''
     ##'max' will make sure that the max error in any of the segments is less than MeshTol
-    phase.MeshErrorCriteria = 'max'  # default
+    phase.setMeshErrorCriteria('max')  # default
     
     ##'avg' will make sure the average error accross all segments is less than MeshTol
-    #phase.MeshErrorCriteria = 'avg'
-    
-    ##'geometric' will make sure the geometric mean of the avg and max errors is less than MeshTol
-    #phase.MeshErrorCriteria = 'geometric'
+    #phase.setMeshErrorCriteria('avg')
     
     ## 'endtoend' will reininegrate the entire control history and make sure the max error between
     ## the collocated and integrated final states is less than MeshTol
-    #phase.MeshErrorCriteria = 'endtoend'
+    #phase.setMeshErrorCriteria('endtoend')
     
     
     '''
     Parameters controlling how quickly/agressively the mesh can change between iterates
     '''
     ## Maximum multiple by which the # of segments can be increased between iterations
-    phase.MeshIncFactor=5.0  # default = 5
+    phase.setMeshIncFactor(5.0)  # default = 5
     
     ## Minimum multiple by which the # of segments can be reduced between iterations 
-    phase.MeshRedFactor=.5  #default = .5
+    phase.setMeshRedFactor(.5)  #default = .5
     
     '''
     Factor by which we exagerate the error in each segment when calculating the needed number
@@ -151,7 +149,7 @@ if __name__ == "__main__":
     overprovison the # of segments, When using endtoend convergance criteria and/or the low order collocation methods, be
     very agressive with this parameter (=100)
     '''
-    phase.MeshErrFactor = 10.0  #default = 10
+    phase.setMeshErrFactor(10.0)  #default = 10
     
 
     '''
