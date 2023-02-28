@@ -886,7 +886,6 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode, double ObjScale,double Mu,
             for (int i = 0; i < this->InequalCons; i++) {
                 double iqerr = abs(this->getIqCons(RHS2)[i]);
                 double iqmul = abs(this->getIqLmults(XSL)[i]);
-                //TestL1Pen += iqerr * iqmul;
                 if (iqerr > this->IContol*10) {
                     TestL1Pen += iqerr * iqmul;
                 }

@@ -19,7 +19,7 @@ https://ieeexplore.ieee.org/document/7463491  (See case 7 in Table 2)
 
 Goal is to parallel park a car in minumum time into a slot
 that is only marginally longer that the car. ICLOS uses slightly different initial
-conditions than the paper and gets a significatly longer maneuver time. Here,
+conditions than the paper and gets a significantly longer maneuver time. Here,
 we use the same initial conditions as paper and get the same answer to within
 less than a percent.
 '''
@@ -186,7 +186,7 @@ def MakeState(x,y,thetadeg,t):
 
 ###################################################################
 
-def PlotCar(ode,XtU,ax,col='b'):
+def PlotCorners(ode,XtU,SL,ax,col='b'):
     x = XtU[0]
     y = XtU[1]
     theta = XtU[4]
@@ -197,62 +197,233 @@ def PlotCar(ode,XtU,ax,col='b'):
     xs = []
     ys = []
     
+    E = [SL,0]
+    Xs =[]
+    Ys =[]
+    for Loc in [ode.Aloc,ode.Cloc,ode.Dloc,ode.Bloc]:
+        
+        xyl = np.dot(mat,Loc)
+        X = x+xyl[0]
+        Y = y+xyl[1]
+        Xs.append(X)
+        Ys.append(Y)
+        xs = [E[0],X]
+        ys = [E[1],Y]
+                
+        
+    for Loc in [ode.Aloc,ode.Cloc,ode.Dloc,ode.Bloc]:
+        
+        xyl = np.dot(mat,Loc)
+        X = x+xyl[0]
+        Y = y+xyl[1]
+       
+        xs = [0,X]
+        ys = [0,Y]
+        
+    
+def PlotCar(ode,XtU,ax,col='b'):
+    x = XtU[0]
+    y = XtU[1]
+    theta = XtU[4]
+    phi = XtU[5]
+    
+    mat = np.array([[np.cos(theta),-np.sin(theta)],
+                    [np.sin(theta),np.cos(theta)]])
+    
+    mat2 = np.array([[np.cos(phi),-np.sin(phi)],
+                    [np.sin(phi),np.cos(phi)]])
+    
+    xs = []
+    ys = []
+    
     for Loc in [ode.Aloc,ode.Cloc,ode.Dloc,ode.Bloc,ode.Aloc]:
         xyl = np.dot(mat,Loc)
         xs.append(x+xyl[0])
         ys.append(y+xyl[1])
-    ax.plot(xs,ys,color=col)
+        
+        
+    axlen = ode.b_width/1.5
     
-def PlotSlot(ax,k,SL,SW,CL):
-    xlim = 8
+    lenwhl = .3
+    widwhl  =.12
+
+    
+    axles = []
+    axles.append(ax.plot([],[],color='k',linestyle='solid')[0])
+    axles.append(ax.plot([],[],color='k',linestyle='solid')[0])
+
+    
+    backwheels =[]
+    backwheels.append(ax.plot([],[],color='k',linestyle='solid')[0])
+    backwheels.append(ax.plot([],[],color='k',linestyle='solid')[0])
+
+    frontwheels =[]
+    frontwheels.append(ax.plot([],[],color='k',linestyle='solid')[0])
+    frontwheels.append(ax.plot([],[],color='k',linestyle='solid')[0])
+    
+        
+    ax.plot(xs,ys,color=col,label='Car')
+    
+    ######################################
+    
+    blcen =np.array([0,axlen])
+    brcen =np.array([0,-axlen])
+    
+    axleloc1 = np.dot(mat,np.array([0,axlen]))
+    axleloc2 = np.dot(mat,np.array([0,-axlen]))
+    
+    
+
+    axles[0].set_data(np.array([axleloc1[0],axleloc2[0]])+x,np.array([axleloc1[1],axleloc2[1]])+y)
+    ####################################
+    
+    
+    wheelcens = [blcen,brcen]
+    
+    for i,cen in enumerate(wheelcens):
+        Aloc = np.array([lenwhl,widwhl]) +cen
+        Bloc = np.array([lenwhl,-widwhl]) +cen
+        Cloc = np.array([-lenwhl,widwhl]) +cen
+        Dloc = np.array([-lenwhl,-widwhl]) +cen
+        
+        
+        xs = []
+        ys = []
+        
+        for Loc in [Aloc,Cloc,Dloc,Bloc,Aloc]:
+            xyl = np.dot(mat,Loc)
+            xs.append(x+xyl[0])
+            ys.append(y+xyl[1])
+            
+        backwheels[i].set_data(xs,ys)
+
+
+    flcen =np.array([ode.l_axes,axlen])
+    frcen =np.array([ode.l_axes,-axlen])
+    
+    axleloc1 = np.dot(mat,np.array([ode.l_axes,axlen]))
+    axleloc2 = np.dot(mat,np.array([ode.l_axes,-axlen]))
+    axles[1].set_data(np.array([axleloc1[0],axleloc2[0]])+x,np.array([axleloc1[1],axleloc2[1]])+y)
+
+    wheelcens = [flcen,frcen]
+    
+    for i,cen in enumerate(wheelcens):
+        Aloc = np.dot(mat2,np.array([lenwhl,widwhl])) +cen
+        Bloc = np.dot(mat2,np.array([lenwhl,-widwhl])) +cen
+        Cloc = np.dot(mat2,np.array([-lenwhl,widwhl])) +cen
+        Dloc = np.dot(mat2,np.array([-lenwhl,-widwhl])) +cen
+        
+        
+        xs = []
+        ys = []
+        
+        for Loc in [Aloc,Cloc,Dloc,Bloc,Aloc]:
+            xyl = np.dot(mat,Loc)
+            xs.append(x+xyl[0])
+            ys.append(y+xyl[1])
+            
+        frontwheels[i].set_data(xs,ys)
+        
+      
+def PlotSlot(ax,k,SL,SW,CL,nxlim=-8,pxlim=8):
     
     f = Fslot(Args(1)[0],k,SL,SW)
     
-    xs = np.linspace(-xlim,xlim,100000)
+    xs = np.linspace(nxlim,pxlim,100000)
     
     ys = [f([x])[0] for x in xs]
     
     ax.plot(xs,ys,color='r',label='Boundary')
     
+    ax.fill_between(xs, 0, CL,alpha=.2,color='grey',label='Roadway')
     
-    ax.plot([-xlim,xlim],[CL,CL],color='r')
+    ax.fill_between(xs, ys, 0,alpha=.2,color='g',label='Parking Spot')
+
+    ax.plot([nxlim,pxlim],[CL,CL],color='r')
     
 def PlotTraj(ode,Traj,k,SL,SW,CL):
     n= len(Traj)
     cols=sns.color_palette("viridis",n)
     
-    PlotSlot(plt,k,SL,SW,CL)
+    PlotSlot(plt,k,SL,SW,CL,-6.3,10)
+    plt.legend()
     for i,X in enumerate(Traj):
        
         PlotCar(ode,X,plt,cols[i])
     plt.axis("Equal")
+    plt.grid(True)
 
-def Animate(ode,Traj,k,SL,SW,CL):
+def Animate(ode,Traj,k,SL,SW,CL,save =False):
     n = len(Traj)
     fig = plt.figure()
+    
+    axlen = ode.b_width/1.5
+    
+    lenwhl = .3
+    widwhl  =.12
     
     ax = fig.add_subplot(111, aspect='equal')
     
     PlotSlot(ax,k,SL,SW,CL)
     
     car, = ax.plot([],[],color='blue',label='Car')
+    xy, =ax.plot([],[],color='b',linestyle='dotted')
     
+    xydot, =ax.plot([],[],color='k',marker='',linestyle='',markersize=10)
+
+    
+    axles = []
+    axles.append(ax.plot([],[],color='k',linestyle='solid')[0])
+    axles.append(ax.plot([],[],color='k',linestyle='solid')[0])
+
+    
+    backwheels =[]
+    backwheels.append(ax.plot([],[],color='k',linestyle='solid')[0])
+    backwheels.append(ax.plot([],[],color='k',linestyle='solid')[0])
+
+    frontwheels =[]
+    frontwheels.append(ax.plot([],[],color='k',linestyle='solid')[0])
+    frontwheels.append(ax.plot([],[],color='k',linestyle='solid')[0])
+    
+    time_text = ax.text(-5.5, 3.1, '', fontsize=15)
+
     spf = Traj[-1][6]/n
 
     interval = int(spf*1000)
     
     def init():
         car.set_data([],[])
-        return car,
+        xy.set_data([],[])
+        xydot.set_data([],[])
+        for a in axles:
+            a.set_data([],[])
+        
+        for b in backwheels:
+            b.set_data([],[])
+            
+        for f in frontwheels:
+            f.set_data([],[])
+        
+        
+        time_text.set_text('')
+
+        return [car,xy,xydot,time_text]+axles +backwheels + frontwheels
     
     def animate(i):
         XtU = Traj[i]
         x = XtU[0]
         y = XtU[1]
         theta = XtU[4]
+        phi = XtU[5]
+        
+        
+        time_text.set_text(" t = {0:.2f} s".format(XtU[6]))
         
         mat = np.array([[np.cos(theta),-np.sin(theta)],
                         [np.sin(theta),np.cos(theta)]])
+        
+        mat2 = np.array([[np.cos(phi),-np.sin(phi)],
+                        [np.sin(phi),np.cos(phi)]])
         
         xs = []
         ys = []
@@ -262,7 +433,78 @@ def Animate(ode,Traj,k,SL,SW,CL):
             xs.append(x+xyl[0])
             ys.append(y+xyl[1])
         car.set_data(xs,ys)
-        return car,
+        
+        xis=[]
+        yis=[]
+        
+        for j in range(0,i+1):
+            xis.append(Traj[j][0])
+            yis.append(Traj[j][1])
+            
+        xy.set_data(xis,yis)
+        xydot.set_data([x],[y])
+
+        ######################################
+        
+        blcen =np.array([0,axlen])
+        brcen =np.array([0,-axlen])
+        
+        axleloc1 = np.dot(mat,np.array([0,axlen]))
+        axleloc2 = np.dot(mat,np.array([0,-axlen]))
+        
+        
+
+        axles[0].set_data(np.array([axleloc1[0],axleloc2[0]])+x,np.array([axleloc1[1],axleloc2[1]])+y)
+        ####################################
+        
+        
+        wheelcens = [blcen,brcen]
+        
+        for i,cen in enumerate(wheelcens):
+            Aloc = np.array([lenwhl,widwhl]) +cen
+            Bloc = np.array([lenwhl,-widwhl]) +cen
+            Cloc = np.array([-lenwhl,widwhl]) +cen
+            Dloc = np.array([-lenwhl,-widwhl]) +cen
+            
+            
+            xs = []
+            ys = []
+            
+            for Loc in [Aloc,Cloc,Dloc,Bloc,Aloc]:
+                xyl = np.dot(mat,Loc)
+                xs.append(x+xyl[0])
+                ys.append(y+xyl[1])
+                
+            backwheels[i].set_data(xs,ys)
+
+
+        flcen =np.array([ode.l_axes,axlen])
+        frcen =np.array([ode.l_axes,-axlen])
+        
+        axleloc1 = np.dot(mat,np.array([ode.l_axes,axlen]))
+        axleloc2 = np.dot(mat,np.array([ode.l_axes,-axlen]))
+        axles[1].set_data(np.array([axleloc1[0],axleloc2[0]])+x,np.array([axleloc1[1],axleloc2[1]])+y)
+
+        wheelcens = [flcen,frcen]
+        
+        for i,cen in enumerate(wheelcens):
+            Aloc = np.dot(mat2,np.array([lenwhl,widwhl])) +cen
+            Bloc = np.dot(mat2,np.array([lenwhl,-widwhl])) +cen
+            Cloc = np.dot(mat2,np.array([-lenwhl,widwhl])) +cen
+            Dloc = np.dot(mat2,np.array([-lenwhl,-widwhl])) +cen
+            
+            
+            xs = []
+            ys = []
+            
+            for Loc in [Aloc,Cloc,Dloc,Bloc,Aloc]:
+                xyl = np.dot(mat,Loc)
+                xs.append(x+xyl[0])
+                ys.append(y+xyl[1])
+                
+            frontwheels[i].set_data(xs,ys)
+            
+        return [car,xy,xydot,time_text]+axles +backwheels + frontwheels
         
     ani = animation.FuncAnimation(fig, animate, frames=len(Traj),
                                   interval=interval, blit=True, init_func=init,
@@ -271,8 +513,16 @@ def Animate(ode,Traj,k,SL,SW,CL):
     ax.set_xlabel(r'$X$')
     ax.set_ylabel(r'$Y$')
     ax.legend()
+    ax.grid(True)
+    ax.set_xlim([-6.1,8])
     fig.set_size_inches(15.5, 7.5, forward=True)
-
+    fig.tight_layout()
+    
+    if(save):
+        FFwriter = animation.FFMpegWriter( fps=30)
+        ani.save('animation2.mp4', writer = FFwriter,dpi=300)
+        
+    
     plt.show()
     
 ####################################################################
@@ -328,18 +578,18 @@ def Main():
     nsegs1 = 100
     nsegs2 = 200
     
-    k1 = 50   # Parameter of tanh approx to heavyside slot func
+    k1 = 75   # Parameter of tanh approx to heavyside slot func
     k2 = 150  # Larger value to better approx slot
 
     
     phase = ode.phase("LGL5",TrajIG,nsegs1)  ## 5 and 7 work best for this problem
     phase.setStaticParams([k1])
     phase.setControlMode("BlockConstant")
-    phase.addBoundaryValue("Front",range(0,7),XtU0[0:7])
+    phase.addBoundaryValue("First",range(0,7),XtU0[0:7])
     phase.addInequalCon("Path",ode.SlotBounds(SL, SW, CL),[0,1,4],[],[0])
 
-    phase.addInequalCon("Back",ode.FinalYCon(),[1,4])
-    phase.addBoundaryValue("Back",[2,3],[0,0])
+    phase.addInequalCon("Last",ode.FinalYCon(),[1,4])
+    phase.addBoundaryValue("Last",[2,3],[0,0])
     phase.addLUVarBound("Path",0,xmin,xmax)
     phase.addLUVarBound("Path",2,-v_max,v_max)
     phase.addLUVarBound("Path",3,-a_max,a_max)
@@ -357,11 +607,11 @@ def Main():
     phase.optimizer.set_MaxIters(2000)
     phase.optimizer.set_PrintLevel(1)
 
-
     phase.solve_optimize()
     phase.refineTrajManual(nsegs2)
     phase.subVariable("StaticParams",0,k2)  # Change k to higher value
     phase.optimizer.set_KKTtol(1.0e-8)
+    
     phase.optimize()
     
     Traj = phase.returnTraj()
@@ -377,7 +627,7 @@ def Main():
     print("PAPER Maneuver Time: ",18.426,' s')
 
     
-    # Position errors less that a millimeter
+    # Terminal Position errors less that a millimeter
     print(Traj[-1][0:7]-TrajReint[-1][0:7])
     PlotTraj(ode,Traj,k2,SL,SW,CL)
     plt.show()

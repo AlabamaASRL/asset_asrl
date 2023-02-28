@@ -11,6 +11,7 @@
 #include "StateFunction.h"
 #include "VectorFunctions/ASSET_VectorFunctions.h"
 #include "pch.h"
+#include "MeshIterateInfo.h"
 
 namespace ASSET {
 
@@ -51,6 +52,7 @@ protected:
   ControlModes ControlMode = ControlModes::FirstOrderSpline;
   IntegralModes IntegralMode = IntegralModes::BaseIntegral;
   int numTranCardStates = 2;
+  double Order = 3;
 
   LGLInterpTable Table;
 
@@ -74,6 +76,80 @@ protected:
   VectorXi NodeSpacingFuncIndices;
   int TranSpacingFuncIndices = 0;
   int ConstraintOrder = 0;
+
+
+  ///////////////////////
+public:
+  bool AdaptiveMesh = false;
+  bool PrintMeshInfo = true;
+  int MaxMeshIters = 10;
+  int MaxSegments  = 10000;
+  int MinSegments  = 4;
+
+
+  int NumExtraSegs      = 4;
+  double MeshRedFactor  = .5;
+  double MeshIncFactor  = 5.0;
+  double MeshErrFactor  = 10.0;
+  bool ForceOneMeshIter = false;
+  bool SolveOnlyFirst = true;
+  bool NewError = false;
+  bool   DetectControlSwitches = false;
+
+  double RelSwitchTol = .3;
+  double AbsSwitchTol = 1.0e-6;
+
+
+  double MeshTol = 1.0e-6;
+  std::string MeshErrorEstimator    = "deboor";
+  std::string MeshErrorCriteria     = "max" ;  //"max,avg,geometric,endtoend"
+  std::string MeshErrorDistributor  = "avg";  // "max,avg,geometric,endtoend"
+  PSIOPT::ConvergenceFlags MeshAbortFlag = PSIOPT::ConvergenceFlags::DIVERGING;
+
+  bool MeshConverged = false;
+
+  std::vector<MeshIterateInfo> MeshIters;
+
+
+  void setAdaptiveMesh(bool amesh) {
+      this->AdaptiveMesh = amesh;
+  }
+  void setMeshTol(double t) {
+      this->MeshTol = abs(t);
+  }
+  void setMeshRedFactor(double t) {
+      this->MeshRedFactor = abs(t);
+  }
+  void setMeshIncFactor(double t) {
+      this->MeshIncFactor = abs(t);
+  }
+  void setMeshErrFactor(double t) {
+      this->MeshErrFactor = abs(t);
+  }
+  void setMaxMeshIters(int it) {
+      this->MaxMeshIters = abs(it);
+  }
+  void setMinSegments(int it) {
+      this->MinSegments = abs(it);
+  }
+  void setMaxSegments(int it) {
+      this->MaxSegments = abs(it);
+  }
+  void setMeshErrorCriteria(std::string m) {
+      this->MeshErrorCriteria = m;
+  }
+  void setMeshErrorEstimator(std::string m) {
+      this->MeshErrorEstimator = m;
+  }
+  
+
+
+  std::vector<MeshIterateInfo> getMeshIters() const {
+      return this->MeshIters;
+  }
+
+ 
+  ///////////////////
 
 public:
   /////////////////////////////////////////////////////////////////////////////
@@ -658,6 +734,9 @@ public:
   }
   std::vector<Eigen::VectorXd> refineTrajEqual(int n);
 
+  void refineTrajAuto();
+
+
   void setStaticParams(VectorXd parm) {
     this->ActiveStaticParams = parm;
     this->numStatParams = parm.size();
@@ -701,8 +780,6 @@ public:
     return this->Table.NDequidist(num, tl, th);
   }
   LGLInterpTable returnTrajTable()  {
-      //this->Table.loadRegularData(this->DefsPerBin.sum(), this->ActiveTraj);
-
       LGLInterpTable tabt = this->Table;
       tabt.loadExactData(this->ActiveTraj);
       return tabt;
@@ -833,6 +910,11 @@ protected:
     this->ActiveIqLmults = IM;
   }
 
+  PSIOPT::ConvergenceFlags psipot_call_impl(std::string mode);
+
+  PSIOPT::ConvergenceFlags phase_call_impl(std::string mode);
+
+
 public:
   void transcribe(bool showstats, bool showfuns);
 
@@ -843,6 +925,8 @@ public:
   void jet_initialize() {
       this->setThreads(1, 1);
       this->optimizer->PrintLevel = 10;
+      this->PrintMeshInfo = false;
+
       this->transcribe();
   }
   void jet_release() {
@@ -850,61 +934,99 @@ public:
       this->optimizer->release();
       this->initThreads();
       this->optimizer->PrintLevel = 0;
+      this->PrintMeshInfo = true;
       this->nlp = std::shared_ptr<NonLinearProgram>();
       this->resetTranscription();
-
   }
 
 
   PSIOPT::ConvergenceFlags solve() {
-    if (this->doTranscription) this->transcribe();
-    VectorXd Input = this->makeSolverInput();
-    VectorXd Output = this->optimizer->solve(Input);
-    this->collectSolverOutput(Output);
-    this->collectSolverMultipliers(this->optimizer->LastEqLmults,
-                                   this->optimizer->LastIqLmults);
-
-    return this->optimizer->ConvergeFlag;
+      return phase_call_impl("solve");
   }
-
   PSIOPT::ConvergenceFlags optimize() {
-    if (this->doTranscription) this->transcribe();
-    VectorXd Input = this->makeSolverInput();
-    VectorXd Output = this->optimizer->optimize(Input);
-    this->collectSolverOutput(Output);
-    this->collectSolverMultipliers(this->optimizer->LastEqLmults,
-                                   this->optimizer->LastIqLmults);
-    return this->optimizer->ConvergeFlag;
+      return phase_call_impl("optimize");
   }
-
   PSIOPT::ConvergenceFlags solve_optimize() {
-    if (this->doTranscription) this->transcribe();
-    VectorXd Input = this->makeSolverInput();
-    VectorXd Output = this->optimizer->solve_optimize(Input);
-    this->collectSolverOutput(Output);
-    this->collectSolverMultipliers(this->optimizer->LastEqLmults,
-                                   this->optimizer->LastIqLmults);
-    return this->optimizer->ConvergeFlag;
+      return phase_call_impl("solve_optimize");
   }
-
   PSIOPT::ConvergenceFlags solve_optimize_solve() {
-      if (this->doTranscription) this->transcribe();
-      VectorXd Input = this->makeSolverInput();
-      VectorXd Output = this->optimizer->solve_optimize_solve(Input);
-      this->collectSolverOutput(Output);
-      this->collectSolverMultipliers(this->optimizer->LastEqLmults,
-          this->optimizer->LastIqLmults);
-      return this->optimizer->ConvergeFlag;
+      return phase_call_impl("solve_optimize_solve");
   }
   PSIOPT::ConvergenceFlags optimize_solve() {
-      if (this->doTranscription) this->transcribe();
-      VectorXd Input = this->makeSolverInput();
-      VectorXd Output = this->optimizer->optimize_solve(Input);
-      this->collectSolverOutput(Output);
-      this->collectSolverMultipliers(this->optimizer->LastEqLmults,
-          this->optimizer->LastIqLmults);
-      return this->optimizer->ConvergeFlag;
+      return phase_call_impl("optimize_solve");
   }
+
+
+  /////////////////////////////////////////////////////////////////
+
+  virtual void get_meshinfo_integrator(Eigen::VectorXd& tsnd, Eigen::MatrixXd& mesh_errors, Eigen::MatrixXd& mesh_dist) const = 0;
+  virtual void get_meshinfo_deboor(Eigen::VectorXd& tsnd, Eigen::MatrixXd& mesh_errors, Eigen::MatrixXd& mesh_dist) const = 0;
+  virtual Eigen::VectorXd calc_global_error() const = 0;
+
+  
+
+  virtual void initMeshRefinement() {
+      this->MeshConverged = false;
+      this->MeshIters.resize(0);
+  }
+
+  virtual bool checkMesh();
+  virtual void updateMesh();
+
+  
+  virtual Eigen::VectorXd calcSwitches();
+  
+
+
+  auto getMeshInfo(bool integ,int n) {
+
+      Eigen::VectorXd tsnd;
+      Eigen::MatrixXd mesh_errors;
+      Eigen::MatrixXd mesh_dist;
+
+      this->Table.loadExactData(this->ActiveTraj);
+
+
+      if (integ) {
+          this->get_meshinfo_integrator(tsnd, mesh_errors, mesh_dist);
+      }
+      else {
+          this->get_meshinfo_deboor(tsnd, mesh_errors, mesh_dist);
+      }
+
+      Eigen::VectorXd error = mesh_errors.colwise().lpNorm<Eigen::Infinity>();
+      Eigen::VectorXd dist  = mesh_dist.colwise().lpNorm<Eigen::Infinity>();
+
+      Eigen::VectorXd distint(dist.size());
+      distint[0] = 0;
+
+      for (int i = 0; i < dist.size()-1; i++) {
+          distint[i + 1] = distint[i] + (dist[i]) * (tsnd[i + 1] - tsnd[i]);
+      }
+
+      distint = distint / distint[distint.size() - 1];
+
+      Eigen::VectorXd bins;
+      bins.setLinSpaced(n + 1, 0.0, 1.0);
+      int elem = 0;
+      for (int i = 1; i < n; i++) {
+          double di = double(i) / double(n);
+          auto it = std::upper_bound(distint.cbegin()+elem, distint.cend(), di);
+          elem = int(it - distint.cbegin()) - 1;
+
+          double t0 = tsnd[elem];
+          double t1 = tsnd[elem+1];
+          double d0 = distint[elem];
+          double d1 = distint[elem + 1];
+          double slope = (d1 - d0) / (t1 - t0);
+          bins[i] = (di - d0) / slope + t0;
+
+      }
+
+      return std::tuple{ tsnd,bins,error };
+
+  }
+
 
   static void Build(py::module& m);
 };

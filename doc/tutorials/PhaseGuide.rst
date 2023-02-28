@@ -161,7 +161,7 @@ Note that these are not the same as ODE parameters. We can add static parameters
      - Piecewise-Linear (:code:`'FirstOrderSpline'`), Piecewise-Constant (:code:`'BlockConstant'`)
 
 Constraints and Objectives
-=========================
+==========================
 
 Before discussing the interface for adding different types of constraints, it is helpful to briefly overview how we represent a phases's variables
 when formulating an optimization problem. In general we partition a trajectory with :math:`n` states into each time-varying portion :math:`\vec{V}_i` of the ODE's inputs followed by the
@@ -767,10 +767,10 @@ of an optimal control problem AFTER it has been optimized. These could then be u
 Additionally, should you want to refine the mesh spacing of the trajectory after a solution, it is not necessary to create an entirely new :code:`phase`.
 Instead, you can use the :code:`.refineTraj` methods as shown below. The simplest form of refinement can be accomplished using the :code:`.refineTrajManual` methods. In general these work exactly
 the same as the :code:`.setTraj` methods except they use the currently loaded trajectory to interpolate the new mesh. 
-The second option is the :code:`.refineTrajEqual` method, which will attempt to refine the trajectory such the estimated error across all segments is equal. For now,
-users should prefer manual mesh refinement, as our automatic refinement method could use some serious improvement. 
+The second option is the :code:`.refineTrajEqual` method, which will attempt to refine the trajectory such the estimated error across all segments is equal. 
 Fortunately, ASSET's run-time scales basically linear in the number of segments, so it is often a viable strategy to just double or quadruple 
-(or more) the number of segments, re-optimize and call it a day.
+(or more) the number of segments, re-optimize and call it a day. Beginning in version 0.1.0, we also now have a closed loop adaptive mesh refinement method that will automatically update
+the spacing and number of segments to meet desired error tolerances. See the  :ref:`Adaptive Mesh Refinement Tutorial <mesh-guide>` tutorial for more details.
 
 .. code-block:: python
 

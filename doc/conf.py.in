@@ -15,6 +15,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath("@PROJECT_SOURCE_DIR@/python"))
 sys.path.insert(0, os.path.abspath("@PROJECT_SOURCE_DIR@/src/"))
+sys.path.insert(0, os.path.abspath("@PROJECT_SOURCE_DIR@/doc/"))
 
 
 # -- Project information -----------------------------------------------------
@@ -63,8 +64,9 @@ highlight_language = "cpp"
 # html_theme = "sphinx_rtd_theme"
 
 html_theme = "furo"
+html_logo = "@PROJECT_SOURCE_DIR@/doc/_static/ASSETLOGO.svg"
 
-
+#
 #html_sidebars = { '**': ['globaltoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'] }
 
 html_theme_options = {
@@ -77,13 +79,11 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
 
-#html_context = {
-#    'css_files': [
-#        '_static/custom.css',  # overrides for wide tables in RTD theme
-#        ],
-#    }
+
+html_static_path = ['@PROJECT_SOURCE_DIR@/doc/_static']
+
+
 
 # -- Options for PDF output --------------------------------------------------
 pdf_documents = [

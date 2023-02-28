@@ -15,6 +15,7 @@ New readers should begin at the beginning, since it's important to understand th
     PhaseGuide
     OptimalControlProblem
     PSIOPT
+    AutoMeshGuide
     OptimalControlUtilites
     
 
