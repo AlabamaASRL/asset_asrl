@@ -19,6 +19,9 @@ void OptimalControlBuild(FunctionRegistry& reg, py::module& m) {
   StateFunction<GenericFunction<-1, 1>>::Build(oc,"StateObjective");
   LinkFunction<GenericFunction<-1, -1>>::Build(oc,"LinkConstraint");
   LinkFunction<GenericFunction<-1, 1>>::Build(oc, "LinkObjective");
+
+  MeshIterateInfo::Build(oc);
+
   ODEPhaseBase::Build(oc);
   OptimalControlProblem::Build(oc);
   LGLInterpTable::Build(oc);
@@ -30,16 +33,6 @@ void OptimalControlBuild(FunctionRegistry& reg, py::module& m) {
 
   FDDerivArbitrary<Eigen::VectorXd>::Build(oc,"FiniteDiffTable");
   ODEArguments<-1, -1, -1>::Build(oc, "ODEArguments");
-
-
-  //Integrator< GenericODE<GenericFunction<-1, -1>, -1, 0, 0>>::Build(oc, "TestIntegratorX");
-  //Integrator< GenericODE<GenericFunction<-1, -1>, 6, 0, 0>>::Build(oc, "TestIntegrator6");
-
-  //Integrator< GenericODE<GenericFunction<-1, -1>, -1, -1, 0>>::Build(oc, "TestIntegratorXU");
-
-  //reg.Build_Register<Integrator< GenericODE<GenericFunction<-1, -1>, -1, -1, 0>>>(oc, "TestIntegratorXU");
-  //reg.Build_Register<Integrator< GenericODE<GenericFunction<-1, -1>, -1, -1, -1>>>(oc, "TestIntegratorXUP");
-
 
 
   GenericODESBuildPart1(reg, oc);

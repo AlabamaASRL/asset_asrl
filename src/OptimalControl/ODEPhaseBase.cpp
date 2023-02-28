@@ -1,4 +1,11 @@
 #include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
 
 #include "LGLControlSplines.h"
 #include "LGLIntegrals.h"
@@ -532,7 +539,9 @@ void ASSET::ODEPhaseBase::refineTrajManual(VectorXd DBS, VectorXi DPB) {
     throw std::invalid_argument("");
   }
 
-  this->Table.loadRegularData(DPB.sum(), this->ActiveTraj);
+  //this->Table.loadRegularData(DPB.sum(), this->ActiveTraj);
+  this->Table.loadExactData(this->ActiveTraj);
+
   this->ActiveTraj = this->Table.NDdistribute(DBS, DPB);
   this->DefBinSpacing = DBS;
   this->DefsPerBin = DPB;
@@ -541,48 +550,24 @@ void ASSET::ODEPhaseBase::refineTrajManual(VectorXd DBS, VectorXi DPB) {
 }
 
 std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::refineTrajEqual(int n) {
-  LGLInterpTable tcopy = this->Table;
-  tcopy.loadExactData(this->ActiveTraj);
-  std::vector<Eigen::VectorXd> errint = tcopy.ErrorIntegral(n * 8);
-  std::vector<Eigen::VectorXd> erintdt = FDiffData(errint, 1, false);
-  LGLInterpTable etab(1, 0, LGL3);
-  etab.loadEvenData2(errint, erintdt);
-
-  Eigen::VectorXd etargs;
-  etargs.setLinSpaced(n + 1, errint[0][0], errint.back()[0]);
-  Eigen::VectorXd bins;
-  bins.setLinSpaced(n + 1, 0.0, 1.0);
-  Eigen::VectorXd ts;
-  ts.setLinSpaced(n + 1, etab.T0, etab.TF);
-  double low = etab.T0;
-
-  Eigen::VectorXd evl;
-  Eigen::VectorXd evh;
-  Eigen::VectorXd evm;
-  for (int i = 1; i < n; i++) {
-    double high = etab.TF;
-    double mid = (high + low) / 2.0;
-    evl = etab.Interpolate(low);
-    evh = etab.Interpolate(high);
-    for (int j = 0; j < 35; j++) {
-      evm = etab.Interpolate(mid);
-      if (evm[0] < etargs[i]) {
-        low = mid;
-        evl = etab.Interpolate(low);
-      } else {
-        high = mid;
-        evh = etab.Interpolate(high);
-      }
-      mid = (high + low) / 2.0;
-    }
-    bins[i] = (mid - etab.T0) / etab.TotalT;
-  }
-
+  this->checkMesh();
+  this->MeshIters.back().up_numsegs = n;
   Eigen::VectorXi dpb = VectorXi::Ones(n);
-
+  Eigen::VectorXd bins = this->MeshIters.back().calc_bins(n);
   this->refineTrajManual(bins, dpb);
 
-  return tcopy.NDdistribute(bins, dpb);
+  return this->ActiveTraj;
+}
+
+
+void ASSET::ODEPhaseBase::refineTrajAuto()
+{
+    this->checkMesh();
+    this->updateMesh();
+    if (this->PrintMeshInfo) {
+        this->MeshIters.back().print(0);
+    }
+
 }
 
 void ASSET::ODEPhaseBase::subVariables(PhaseRegionFlags reg, VectorXi indices,
@@ -640,8 +625,6 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
         return MakeInt(cs, int_const<2>(), pv, integrand, xvv, pvv);
       case 3:
         return MakeInt(cs, int_const<3>(), pv, integrand, xvv, pvv);
-      // case 4:
-      //   return MakeInt(cs, int_const<4>(), pv, integrand, xvv, pvv);
       default:
         return MakeInt(cs, int_const<-1>(), pv, integrand, xvv, pvv);
     }
@@ -651,8 +634,6 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
     switch (pv) {
       case 0:
         return SwitchX(cs, xv, int_const<0>(), integrand, xvv, pvv);
-      // case 1:
-      //   return SwitchX(cs, xv, int_const<1>(), integrand, xvv, pvv);
       default:
         return MakeInt(cs, int_const<-1>(), int_const<-1>(), integrand, xvv,
                        pvv);
@@ -667,6 +648,11 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
         return SwitchP(int_const<3>(), xv, pv, integrand, xvv, pvv);
       case 4:
         return SwitchP(int_const<4>(), xv, pv, integrand, xvv, pvv);
+      default:
+      {
+          throw std::invalid_argument("Integral Type not implemented");
+          return SwitchP(int_const<2>(), xv, pv, integrand, xvv, pvv);
+      }
     }
   };
 
@@ -1024,6 +1010,282 @@ void ASSET::ODEPhaseBase::test_threads(int i, int j, int n) {
   NonLinearProgram::NLPTest(v, n, nlp1, nlp2);
 
   this->resetTranscription();
+}
+
+bool ASSET::ODEPhaseBase::checkMesh()
+{
+
+    Eigen::VectorXd tsnd;
+    Eigen::MatrixXd mesh_errors;
+    Eigen::MatrixXd mesh_dist;
+
+    this->Table.loadExactData(this->ActiveTraj);
+
+
+    if (this->MeshErrorEstimator == "integrator"||this->TranscriptionMode==CentralShooting) {
+        this->get_meshinfo_integrator(tsnd, mesh_errors, mesh_dist);
+    }
+    else if (this->MeshErrorEstimator == "deboor") {
+        this->get_meshinfo_deboor(tsnd, mesh_errors, mesh_dist);
+    }
+    else {
+        throw std::invalid_argument("Unknown mesh error estimator");
+    }
+
+
+    Eigen::VectorXd error = mesh_errors.colwise().lpNorm<Eigen::Infinity>();
+    Eigen::VectorXd dist = mesh_dist.colwise().lpNorm<Eigen::Infinity>();
+
+
+
+    this->MeshIters.emplace_back(this->numDefects, this->MeshTol, tsnd, error, dist);
+
+    if (this->MeshErrorCriteria == "endtoend" || this->MeshErrorDistributor == "endtoend") {
+        Eigen::VectorXd error_vec = this->calc_global_error();
+        this->MeshIters.back().global_error = error_vec.lpNorm<Eigen::Infinity>();
+    }
+
+
+    double error_crit;
+
+    if (this->MeshErrorCriteria == "max") {
+        error_crit = this->MeshIters.back().max_error;
+    }
+    else if (this->MeshErrorCriteria == "avg") {
+        error_crit = this->MeshIters.back().avg_error;
+    }
+    else if (this->MeshErrorCriteria == "geometric") {
+        error_crit = this->MeshIters.back().gmean_error;
+    }
+    else if (this->MeshErrorCriteria == "endtoend") {
+        error_crit = this->MeshIters.back().global_error;
+    }
+    else {
+        throw std::invalid_argument("Unknown mesh error criteria");
+    }
+
+    this->MeshConverged = (error_crit < this->MeshTol);
+    this->MeshIters.back().converged = this->MeshConverged;
+
+    return this->MeshConverged;
+}
+
+void ASSET::ODEPhaseBase::updateMesh()
+{
+
+    
+    double ntemp=0;
+    for (int i = 0; i < this->MeshIters.back().error.size()-1;i++) {
+
+        double nsegs = std::pow((this->MeshIters.back().error[i] * this->MeshErrFactor) / this->MeshTol, 1 / (this->Order + 1));
+        ntemp += std::max(this->MeshRedFactor,nsegs);
+    }
+    int n = int(std::ceil(ntemp)) + this->NumExtraSegs;
+    
+    n = std::clamp(n, int(this->numDefects * this->MeshRedFactor), int(this->numDefects * this->MeshIncFactor));
+    n = std::clamp(n, this->MinSegments, this->MaxSegments);
+
+    Eigen::VectorXd bins = this->MeshIters.back().calc_bins(n);
+
+    if (this->DetectControlSwitches && this->UVars()>0) {
+        Eigen::VectorXd switchvec = this->calcSwitches();
+        std::vector<double> stmp;
+       
+
+        for (int i = 0; i < bins.size() - 1; i++) {
+            for (int j = 0; j < switchvec.size(); j++) {
+                if (switchvec[j] > bins[i] && switchvec[j] < bins[i + 1]) {
+                    stmp.push_back(2*bins[i] / 3.0 +   bins[i + 1] / 3.0);
+                    stmp.push_back(  bins[i] / 3.0 + 2*bins[i + 1] / 3.0);
+
+                    break;
+                }
+            }
+        }
+        switchvec.resize(stmp.size());
+        for (int i = 0; i < stmp.size(); i++) {
+            switchvec[i] = stmp[i];
+        }
+
+        Eigen::VectorXd binstmp(bins.size() + switchvec.size());
+        binstmp.head(bins.size()) = bins;
+        binstmp.tail(switchvec.size()) = switchvec;
+        std::sort(binstmp.begin(), binstmp.end());
+        
+        bins = binstmp;
+    }
+
+    Eigen::VectorXi dpb = VectorXi::Ones(bins.size()-1);
+    this->MeshIters.back().up_numsegs = bins.size() - 1;
+
+    this->refineTrajManual(bins, dpb);
+     
+}
+
+Eigen::VectorXd ASSET::ODEPhaseBase::calcSwitches()
+{
+
+    Eigen::MatrixXd uvals(this->UVars(), this->ActiveTraj.size());
+    Eigen::VectorXd tsnd(this->ActiveTraj.size());
+
+    double T0 = this->ActiveTraj[0][this->TVar()];
+    double TF = this->ActiveTraj.back()[this->TVar()];
+  
+    for (int i = 0; i < this->ActiveTraj.size(); i++) {
+        uvals.col(i) = this->ActiveTraj[i].segment(this->XtVars(), this->UVars());
+        tsnd[i] = (this->ActiveTraj[i][this->TVar()] - T0) / (TF - T0);
+    }
+
+    Eigen::VectorXd umin = uvals.rowwise().minCoeff();
+    Eigen::VectorXd umax  = uvals.rowwise().maxCoeff();
+    Eigen::VectorXd ones(this->UVars());
+    ones.setOnes();
+
+    Eigen::MatrixXd und(this->UVars(), this->ActiveTraj.size());
+
+    for (int i = 0; i < this->ActiveTraj.size(); i++) {
+        und.col(i) = (uvals.col(i)-umin).cwiseQuotient(ones+umax-umin);
+    }
+
+    Eigen::VectorXd udiff;
+    Eigen::VectorXd unddiff;
+    std::vector<double> switches;
+
+    for (int i = 0; i < this->ActiveTraj.size() - 1; i++) {
+        udiff = (uvals.col(i + 1) - uvals.col(i)).cwiseAbs();
+        unddiff = (uvals.col(i + 1) - uvals.col(i)).cwiseAbs();
+        if (udiff.maxCoeff() > this->AbsSwitchTol && unddiff.maxCoeff() > this->RelSwitchTol) {
+            double t = tsnd[i + 1] / 2.0 + tsnd[i] / 2.0;
+            switches.push_back(t);
+        }
+    }
+
+   
+    return stdvector_to_eigenvector(switches);
+}
+
+
+ASSET::PSIOPT::ConvergenceFlags ASSET::ODEPhaseBase::psipot_call_impl(std::string mode)
+{
+    if (this->doTranscription) this->transcribe();
+    VectorXd Input = this->makeSolverInput();
+    VectorXd Output;
+
+    if (mode == "solve") {
+        Output = this->optimizer->solve(Input);
+    }
+    else if (mode == "optimize") {
+        Output = this->optimizer->optimize(Input);
+    }
+    else if (mode == "solve_optimize") {
+        Output = this->optimizer->solve_optimize(Input);
+    }
+    else if (mode == "solve_optimize_solve") {
+        Output = this->optimizer->solve_optimize_solve(Input);
+    }
+    else if (mode == "optimize_solve") {
+        Output = this->optimizer->optimize_solve(Input);
+    }
+    else {
+        throw std::invalid_argument("Unrecognized PSIOPT mode");
+    }
+
+    this->collectSolverOutput(Output);
+    this->collectSolverMultipliers(this->optimizer->LastEqLmults,
+        this->optimizer->LastIqLmults);
+    return this->optimizer->ConvergeFlag;
+}
+
+ASSET::PSIOPT::ConvergenceFlags ASSET::ODEPhaseBase::phase_call_impl(std::string mode)
+{
+
+    if (this->PrintMeshInfo && this->AdaptiveMesh) {
+        fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 65);
+        fmt::print(fmt::fg(fmt::color::dim_gray), "Beginning");
+        fmt::print(": ");
+        fmt::print(fmt::fg(fmt::color::royal_blue), "Adaptive Mesh Refinement");
+        fmt::print("\n");
+    }
+
+    Utils::Timer Runtimer;
+
+    Runtimer.start();
+
+    PSIOPT::ConvergenceFlags flag = this->psipot_call_impl(mode);
+
+    std::string nextmode = mode;
+    if (this->SolveOnlyFirst) {
+        if (nextmode.find(std::string("solve_")) != std::string::npos) {
+            nextmode.erase(0, 6);
+        }
+    }
+
+    if (this->AdaptiveMesh) {
+        if (flag >= this->MeshAbortFlag) {
+            if (this->PrintMeshInfo) {
+                fmt::print(fmt::fg(fmt::color::red), "Mesh Iteration 0 Failed to Solve: Aborting\n");
+            }
+        }
+        else {
+            initMeshRefinement();
+            for (int i = 0; i < this->MaxMeshIters; i++) {
+                if (checkMesh()&&!((i==0)&&this->ForceOneMeshIter )) {
+                    if (this->PrintMeshInfo) {
+                        MeshIterateInfo::print_header(i);
+                        this->MeshIters.back().print(0);
+                        fmt::print(fmt::fg(fmt::color::lime_green), "Mesh Converged\n");
+                    }
+                    break;
+                }
+                else if (i == this->MaxMeshIters - 1) {
+                    if (this->PrintMeshInfo) {
+                        MeshIterateInfo::print_header(i);
+                        this->MeshIters.back().print(0);
+                        fmt::print(fmt::fg(fmt::color::red), "Mesh Not Converged\n");
+                    }
+                    break;
+                }
+                else {
+                    updateMesh();
+                    if (this->PrintMeshInfo) {
+                        MeshIterateInfo::print_header(i);
+                        this->MeshIters.back().print(0);
+                    }
+                }
+                flag = this->psipot_call_impl(nextmode);
+                if (flag >= this->MeshAbortFlag) {
+                    if (this->PrintMeshInfo) {
+                        fmt::print(fmt::fg(fmt::color::red), "Mesh Iteration {0:} Failed to Solve: Aborting\n", i + 1);
+                    }
+                    break;
+                }
+            }
+
+        }
+        
+    }
+
+    if (this->PrintMeshInfo && this->AdaptiveMesh) {
+
+        Runtimer.stop();
+        double tseconds = double(Runtimer.count<std::chrono::microseconds>()) / 1000000;
+        fmt::print("Total Time:"); 
+        if (tseconds > 0.5) {
+            fmt::print(fmt::fg(fmt::color::cyan), "{0:>10.4f} s\n", tseconds);
+        }
+        else {
+            fmt::print(fmt::fg(fmt::color::cyan), "{0:>10.2f} ms\n", tseconds*1000);
+        }
+
+
+        fmt::print(fmt::fg(fmt::color::dim_gray), "Finished ");
+        fmt::print(": ");
+        fmt::print(fmt::fg(fmt::color::royal_blue), "Adaptive Mesh Refinement");
+        fmt::print("\n");
+        fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 65);
+    }
+
+    return flag;
 }
 
 void ASSET::ODEPhaseBase::Build(py::module& m) {
@@ -1591,6 +1853,54 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       ODEPhaseBase_addIntegralParamFunction2);
   
 
+  ////////////////////////////////////////////////////
+  obj.def("getMeshInfo", &ODEPhaseBase::getMeshInfo);
+  obj.def("refineTrajAuto", &ODEPhaseBase::refineTrajAuto);
+  obj.def("calc_global_error", &ODEPhaseBase::calc_global_error);
+  obj.def("getMeshIters", &ODEPhaseBase::getMeshIters);
+
+  
+  
+  obj.def_readwrite("AdaptiveMesh", &ODEPhaseBase::AdaptiveMesh);
+
+  obj.def("setAdaptiveMesh", &ODEPhaseBase::setAdaptiveMesh, py::arg("AdaptiveMesh") = true);
+
+  obj.def("setMeshTol", &ODEPhaseBase::setMeshTol);
+  obj.def("setMeshRedFactor", &ODEPhaseBase::setMeshRedFactor);
+  obj.def("setMeshIncFactor", &ODEPhaseBase::setMeshIncFactor);
+  obj.def("setMeshErrFactor", &ODEPhaseBase::setMeshErrFactor);
+  obj.def("setMaxMeshIters", &ODEPhaseBase::setMaxMeshIters);
+  obj.def("setMinSegments", &ODEPhaseBase::setMinSegments);
+  obj.def("setMaxSegments", &ODEPhaseBase::setMaxSegments);
+  obj.def("setMeshErrorCriteria", &ODEPhaseBase::setMeshErrorCriteria);
+  obj.def("setMeshErrorEstimator", &ODEPhaseBase::setMeshErrorEstimator);
+
+
+  obj.def_readwrite("PrintMeshInfo", &ODEPhaseBase::PrintMeshInfo);
+  obj.def_readwrite("MaxMeshIters", &ODEPhaseBase::MaxMeshIters);
+  obj.def_readwrite("MeshTol",     &ODEPhaseBase::MeshTol);
+  obj.def_readwrite("MeshErrorEstimator", &ODEPhaseBase::MeshErrorEstimator);
+  obj.def_readwrite("MeshErrorCriteria", &ODEPhaseBase::MeshErrorCriteria);
+
+
+  obj.def_readwrite("SolveOnlyFirst", &ODEPhaseBase::SolveOnlyFirst);
+  obj.def_readwrite("ForceOneMeshIter", &ODEPhaseBase::ForceOneMeshIter);
+  obj.def_readwrite("NewError", &ODEPhaseBase::NewError);
+
+
+  obj.def_readwrite("DetectControlSwitches", &ODEPhaseBase::DetectControlSwitches);
+  obj.def_readwrite("RelSwitchTol", &ODEPhaseBase::RelSwitchTol);
+  obj.def_readwrite("AbsSwitchTol", &ODEPhaseBase::AbsSwitchTol);
+
+
+
+  obj.def_readwrite("NumExtraSegs",  &ODEPhaseBase::NumExtraSegs);
+  obj.def_readwrite("MeshRedFactor", &ODEPhaseBase::MeshRedFactor);
+  obj.def_readwrite("MeshIncFactor", &ODEPhaseBase::MeshIncFactor);
+  obj.def_readwrite("MeshErrFactor", &ODEPhaseBase::MeshErrFactor);
+  obj.def_readonly("MeshConverged", &ODEPhaseBase::MeshConverged);
+
+ 
 
   
 }

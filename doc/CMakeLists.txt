@@ -58,6 +58,8 @@ configure_file(
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/tutorials/_static/"
 DESTINATION  "${SPHINX_BUILD}/tutorials/_static/")
 
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/_static/ASSETLOGO.svg"
+DESTINATION  "${SPHINX_BUILD}/_static/")
 
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/examples/_static/"
 DESTINATION  "${SPHINX_BUILD}/examples/_static/")
@@ -89,19 +91,5 @@ add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
                    COMMENT "Generating Sphinx HTML")
 
 add_custom_target(sphinx ALL DEPENDS ${SPHINX_INDEX_FILE})
-# add_dependencies(sphinx doxygen)
 
 
-
-#add_custom_command(OUTPUT ${SPHINX_PDF_FILE}
-#                   COMMAND
-#                    ${SPHINX_EXECUTABLE} -v -v -v -q -b pdf
-#                   -c ${BINARY_BUILD_DIR}
-#                   -d ${SPHINX_CACHE_DIR}
-#                  ${SPHINX_SOURCE} ${SPHINX_BUILD}
-#                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-#                   DEPENDS
-#                   ${CMAKE_CURRENT_SOURCE_DIR}/index.rst
-#                   COMMENT "Generating Sphinx PDF")
-
-#add_custom_target(sphinx-pdf ALL DEPENDS ${SPHINX_PDF_FILE})

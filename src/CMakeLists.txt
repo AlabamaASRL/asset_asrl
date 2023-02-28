@@ -68,6 +68,8 @@ OptimalControl/PhaseIndexer.h
 OptimalControl/PhaseIndexer.cpp
 OptimalControl/OptimalControlProblem.h
 OptimalControl/OptimalControlProblem.cpp
+OptimalControl/LGLInterpTable.h
+OptimalControl/LGLInterpTable.cpp
 )
 
 target_include_directories(optimalcontrol PRIVATE ${INCLUDE_DIRS})

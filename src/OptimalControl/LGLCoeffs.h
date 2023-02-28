@@ -53,6 +53,11 @@ struct LGLCoeffs<2> {  /// Cubic Hermite-LGL3
   static constexpr STDarray<STDarray<double, 2>, 2>
       Cardinal_UPolyPower_Weights = {STDarray<double, 2>{-1.0, 1.0},
                                      STDarray<double, 2>{1.0, 0.0}};
+
+
+  static constexpr double Order = 3.0;
+  static constexpr double ErrorWeight = 0.0026041666661458227;
+
 };
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
@@ -162,6 +167,10 @@ struct LGLCoeffs<3> {  /// Cubic Hermite-LGL3
       STDarray<double, 3>{-3.0, 4.0, -1.0}};
   static constexpr STDarray<STDarray<double, 3>, 1> UOneSpline_Weights = {
       STDarray<double, 3>{1.0, -4.0, 3.0}};
+
+  static constexpr double Order = 5.0;
+  static constexpr double ErrorWeight = 3.100198409908181e-06;
+
 };
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
@@ -276,12 +285,7 @@ struct LGLCoeffs<4> {
       STDarray<double, 4>{0.0510790703765507, -0.153490305524281,
                           0.551767574740443, 0.550643660407289}};
 
-  // static constexpr STDarray<STDarray<double, 4>, 3> Cardinal_UPoly_Weights =
-  // {STDarray<double, 4>  {1.0- Ti1 / Ti2,Ti1/Ti2,0,0 },
-  // STDarray<double, 4>
-  //{0,0.5,0.5,0},
-  // STDarray<double, 4> {0,0,Ti1 / Ti2,1.0 - Ti1 / Ti2} };
-
+  
   //// Defect Equations
   static constexpr STDarray<STDarray<double, 4>, 3> Cardinal_XDef_Weights = {
       STDarray<double, 4>{bi1, bi21, bi31, bi_11},
@@ -364,6 +368,11 @@ struct LGLCoeffs<4> {
                           10.9353308042859 * 6.0 - 18.9665045333251 * 2.0,
                           -10.9353308042859 * 6.0 + 13.8394878795326 * 2.0,
                           5.12701665379258 * 6.0 - 5.12701665379258 * 2.0}};
+
+
+  static constexpr double Order = 7.0;
+  static constexpr double ErrorWeight = 2.9357939455472746e-09;
+
 };
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////

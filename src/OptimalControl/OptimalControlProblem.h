@@ -32,9 +32,7 @@ struct OptimalControlProblem:OptimizationProblemBase {
   std::vector<PhasePtr> phases;
   std::vector<std::string> phase_names;
 
-  OptimalControlProblem() { 
-      
-  }
+  
 
   bool doTranscription = true;
   void resetTranscription() { this->doTranscription = true; };
@@ -76,6 +74,79 @@ struct OptimalControlProblem:OptimizationProblemBase {
   int numProbEqCons = 0;
   int numProbIqCons = 0;
 
+  ///////////////////////////////
+  bool AdaptiveMesh = false;
+  bool PrintMeshInfo = true;
+  bool SolveOnlyFirst = true;
+
+  int MaxMeshIters = 10;
+  PSIOPT::ConvergenceFlags MeshAbortFlag = PSIOPT::ConvergenceFlags::DIVERGING;
+
+  bool MeshConverged = false;
+
+  void setAdaptiveMesh(bool amesh, bool applytophases) {
+      this->AdaptiveMesh = amesh;
+      if (applytophases) {
+          for (auto phase : this->phases) {
+              phase->setAdaptiveMesh(amesh);
+          }
+      }
+  }
+  
+  void setMeshTol(double t) {
+      for (auto phase : this->phases) {
+          phase->setMeshTol(t);
+      }
+  }
+  void setMeshRedFactor(double t) {
+      for (auto phase : this->phases) {
+          phase->setMeshRedFactor(t);
+      }
+  }
+  void setMeshIncFactor(double t) {
+      for (auto phase : this->phases) {
+          phase->setMeshIncFactor(t);
+      }
+  }
+  void setMeshErrFactor(double t) {
+      for (auto phase : this->phases) {
+          phase->setMeshErrFactor(t);
+      }
+  }
+  void setMaxMeshIters(int it) {
+      this->MaxMeshIters = it;
+  }
+  void setMinSegments(int it) {
+      for (auto phase : this->phases) {
+          phase->setMinSegments(it);
+      }
+  }
+  void setMaxSegments(int it) {
+      for (auto phase : this->phases) {
+          phase->setMaxSegments(it);
+      }
+  }
+  void setMeshErrorCriteria(std::string m) {
+      for (auto phase : this->phases) {
+          phase->setMeshErrorCriteria(m);
+      }
+  }
+  void setMeshErrorEstimator(std::string m) {
+      for (auto phase : this->phases) {
+          phase->setMeshErrorEstimator(m);
+      }
+  }
+
+
+
+  ///////////////////////////////
+  OptimalControlProblem() {
+
+  }
+  OptimalControlProblem(std::vector<PhasePtr> ps) {
+      this->addPhases(ps);
+  }
+
   int addPhase(PhasePtr p) {
     this->resetTranscription();
     this->phases.push_back(p);
@@ -83,6 +154,14 @@ struct OptimalControlProblem:OptimizationProblemBase {
     this->phase_names.push_back(std::to_string(index));
     check_dupilcate_phases();
     return index;
+  }
+
+  std::vector<int> addPhases(std::vector<PhasePtr> ps) {
+      std::vector<int> idxs;
+      for (auto p : ps) {
+          idxs.push_back(this->addPhase(p));
+      }
+      return idxs;
   }
 
   int addPhase(PhasePtr p,const std::string & name) {
@@ -1317,25 +1396,62 @@ struct OptimalControlProblem:OptimizationProblemBase {
   void jet_initialize() {
       this->setThreads(1, 1);
       this->optimizer->PrintLevel = 10;
+      this->PrintMeshInfo = false;
       this->transcribe();
   }
   void jet_release() {
       this->optimizer->release();
       this->initThreads();
       this->optimizer->PrintLevel = 0;
+      this->PrintMeshInfo = true;
       this->nlp = std::shared_ptr<NonLinearProgram>();
       for (auto& phase : this->phases) phase->jet_release();
       this->resetTranscription();
   }
 
 
-  PSIOPT::ConvergenceFlags solve();
-  PSIOPT::ConvergenceFlags optimize();
-  PSIOPT::ConvergenceFlags solve_optimize();
-  PSIOPT::ConvergenceFlags solve_optimize_solve();
-  PSIOPT::ConvergenceFlags optimize_solve();
+  
 
-  void print_stats(bool showfuns);
+  ////////////////////////////////////////////////////////////
+  protected:
+  void initMeshs() {
+      this->MeshConverged = false;
+      for (auto& phase : this->phases) {
+          if (phase->AdaptiveMesh) {
+              phase->initMeshRefinement();
+          }
+      }
+  }
+
+  bool checkMeshs(bool printinfo) {
+      this->MeshConverged = true;
+      for (auto& phase : this->phases) {
+          if (phase->AdaptiveMesh) {
+              if (!phase->checkMesh()) MeshConverged = false;
+          }
+      }
+     
+      return this->MeshConverged;
+  }
+  void updateMeshs(bool printinfo) {
+      for (auto& phase : this->phases) {
+          if (phase->AdaptiveMesh) {
+              if (!phase->MeshConverged) {
+                  phase->updateMesh();
+              }
+          }
+          
+      }
+  }
+
+  void printMeshs(int iter) {
+      MeshIterateInfo::print_header(iter);
+      for (int i = 0; i < this->phases.size(); i++) {
+          if (this->phases[i]->AdaptiveMesh) {
+              this->phases[i]->MeshIters.back().print(i);
+          }
+      }
+  }
 
   std::array<Eigen::MatrixXi, 2> make_link_Vindex_Cindex(
       LinkFlags Reg, const Eigen::Matrix<PhaseRegionFlags, -1, 1>& PhaseRegs,
@@ -1345,44 +1461,76 @@ struct OptimalControlProblem:OptimizationProblemBase {
       const std::vector<Eigen::VectorXi>& spv,
       const std::vector<Eigen::VectorXi>& lv, int orows, int& NextCLoc) const;
 
+
+  PSIOPT::ConvergenceFlags psipot_call_impl(std::string mode);
+
+  
+  PSIOPT::ConvergenceFlags ocp_call_impl(std::string mode);
+
   VectorXd makeSolverInput() const {
-    VectorXd Vars(this->numProbVars);
+      VectorXd Vars(this->numProbVars);
 
-    for (int i = 0; i < this->phases.size(); i++) {
-      int Start = 0;
-      if (i > 0) Start = this->numPhaseVars.segment(0, i).sum();
-      Vars.segment(Start, this->numPhaseVars[i]) =
-          this->phases[i]->makeSolverInput();
-    }
-    Vars.tail(this->numLinkParams) = this->ActiveLinkParams;
+      for (int i = 0; i < this->phases.size(); i++) {
+          int Start = 0;
+          if (i > 0) Start = this->numPhaseVars.segment(0, i).sum();
+          Vars.segment(Start, this->numPhaseVars[i]) =
+              this->phases[i]->makeSolverInput();
+      }
+      Vars.tail(this->numLinkParams) = this->ActiveLinkParams;
 
-    return Vars;
+      return Vars;
   }
 
   void collectSolverOutput(const VectorXd& Vars) {
-    for (int i = 0; i < this->phases.size(); i++) {
-      int Start = 0;
-      if (i > 0) Start = this->numPhaseVars.segment(0, i).sum();
-      this->phases[i]->collectSolverOutput(
-          Vars.segment(Start, this->numPhaseVars[i]));
-    }
-    this->ActiveLinkParams = Vars.tail(this->numLinkParams);
+      for (int i = 0; i < this->phases.size(); i++) {
+          int Start = 0;
+          if (i > 0) Start = this->numPhaseVars.segment(0, i).sum();
+          this->phases[i]->collectSolverOutput(
+              Vars.segment(Start, this->numPhaseVars[i]));
+      }
+      this->ActiveLinkParams = Vars.tail(this->numLinkParams);
   }
   void collectSolverMultipliers(const VectorXd& EM, const VectorXd& IM) {
-    this->MultipliersLoaded = true;
-    for (int i = 0; i < this->phases.size(); i++) {
-      int EStart = 0;
-      if (i > 0) EStart = this->numPhaseEqCons.segment(0, i).sum();
-      int IStart = 0;
-      if (i > 0) IStart = this->numPhaseIqCons.segment(0, i).sum();
-      this->phases[i]->collectSolverMultipliers(
-          EM.segment(EStart, this->numPhaseEqCons[i]),
-          IM.segment(IStart, this->numPhaseIqCons[i]));
-    }
-    this->ActiveEqLmults = EM.tail(this->numLinkEqCons);
-    this->ActiveIqLmults = IM.tail(this->numLinkIqCons);
+      this->MultipliersLoaded = true;
+      for (int i = 0; i < this->phases.size(); i++) {
+          int EStart = 0;
+          if (i > 0) EStart = this->numPhaseEqCons.segment(0, i).sum();
+          int IStart = 0;
+          if (i > 0) IStart = this->numPhaseIqCons.segment(0, i).sum();
+          this->phases[i]->collectSolverMultipliers(
+              EM.segment(EStart, this->numPhaseEqCons[i]),
+              IM.segment(IStart, this->numPhaseIqCons[i]));
+      }
+      this->ActiveEqLmults = EM.tail(this->numLinkEqCons);
+      this->ActiveIqLmults = IM.tail(this->numLinkIqCons);
   }
 
+
+
+ public:
+  PSIOPT::ConvergenceFlags solve() {
+      return ocp_call_impl("solve");
+  }
+  PSIOPT::ConvergenceFlags optimize() {
+      return ocp_call_impl("optimize");
+  }
+  PSIOPT::ConvergenceFlags solve_optimize() {
+      return ocp_call_impl("solve_optimize");
+  }
+  PSIOPT::ConvergenceFlags solve_optimize_solve() {
+      return ocp_call_impl("solve_optimize_solve");
+  }
+  PSIOPT::ConvergenceFlags optimize_solve() {
+      return ocp_call_impl("optimize_solve");
+  }
+
+
+
+  void print_stats(bool showfuns);
+
+ 
+
+  
   static void Build(py::module& m);
 };
 
