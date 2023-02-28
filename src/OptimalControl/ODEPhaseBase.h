@@ -83,7 +83,7 @@ public:
   bool AdaptiveMesh = false;
   bool PrintMeshInfo = true;
   int MaxMeshIters = 10;
-  int MaxSegments  = 100000;
+  int MaxSegments  = 10000;
   int MinSegments  = 4;
 
 

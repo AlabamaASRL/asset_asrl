@@ -1,9 +1,7 @@
 Hyper-Sensitive Optimal Control Problem
 =======================================
-!!!!!!WIP!!!!!!!!
-
 In this example, we will leverage ASSET's adaptive mesh refinement capabilities to solve the
-hyper sensitive optimal control problem [1]. The dynamics for this problem are simple linear ODE
+hyper sensitive optimal control problem [1]. The dynamics for this problem are a simple linear ODE
 with one state variable and one control variable.
 
 .. math::
@@ -49,7 +47,7 @@ The dynamics for the problem can be implemented in ASSET as shown below.
             super().__init__(xdot,1,1)
 
 Initial setup for the problem proceeds similarly to what has been shown in many previous examples and tutorials. For the initial guess
-we linearly interpolate between our known boundary constraints over the fixed time horizon. We then construct our phase with this initial
+we linearly interpolate between our known boundary conditions over the fixed time horizon. We then construct our phase with this initial
 guess, and apply the boundary constraints on the states and times. The objective is then specified as an integral objective. Loose bounds are also placed
 on the state and control variables.  Additionally, we enable line searches and change the optimizer's fill-in reducing ordering to the Minimum Degree algorithm.
 In our limited experience, the :code:`"MINDEG"` ordering, while resulting in slower factorizations than the default :code:`"METIS"` one, produces much more stable factorizations for
@@ -85,7 +83,7 @@ sensitive problems.
     phase.optimizer.PrintLevel = 2
     phase.setThreads(1,1)
 
-To highlight the difficulties of this problem, we initially discretize the with only 10 LGL7 segments.
+To highlight the difficulties of this problem, we initially discretize with only 10 LGL7 segments.
 If we were to now call optimize on our phase (code not shown here), PSIOPT would indeed converge to an optimal solution satisfying our constraints. 
 However this solution, shown below, clearly does not have enough points near the boundaries to approximate the hypersensitive behavior, and even worse, also possesses large errors
 when reintegrated.
@@ -95,11 +93,11 @@ when reintegrated.
 
 
 Beginning in version 0.1.0, we can have the phase deal with these issues automatically by enabling adaptive mesh refinement before optimizing the trajectory as shown below.
-When enabled, after solving the first mesh, ASSET automatically update the number and spacing of segments, and resolve the problem to reduce the estimated error in the trajectory below some user defined tolerance.
-This tolerance is specified using the MeshTol field of the phase. Additionally, you may also specify the maximum number of allowable mesh iterations. As general rule of thumb, the equality constraint tolerance of 
+When enabled, after solving the first mesh, ASSET will automatically update the number and spacing of segments, and resolve the problem to reduce the estimated error in the trajectory below some user defined tolerance.
+This tolerance is specified using the :code:`.setMeshTol` function of the phase. As general rule of thumb, the equality constraint tolerance of 
 the optimizer should be the same as or smaller than the mesh tolerance. It is also recommended that you invoke PSIOPT with post solving enabled. That way, even if the optimize call fails to fully converge, PSIOPT will still
-return a trajectory to mesh refinement algorithm that at least satisfies the dynamics constraints of the mesh. As before, the flag returned by :code:`.optimize_solve` only indicates the convergence status of the last call to PSIOPT.
-To programatically check the convergence of the mesh, you can read the MeshConverged field of the phase. More explanation of the features of adaptive mesh refinement can be found in the :ref:`Adaptive Mesh Refinement Tutorial <mesh-guide>`.
+return a trajectory to the mesh refinement algorithm that at least satisfies the dynamics constraints of the mesh. As before, the flag returned by :code:`.optimize_solve` only indicates the convergence status of the last call to PSIOPT.
+To programatically check the convergence of the mesh, you can read the :code:`.MeshConverged` field of the phase. More explanation of the features of adaptive mesh refinement can be found in the :ref:`Adaptive Mesh Refinement Tutorial <mesh-guide>`.
 
 
 .. code-block:: python
@@ -107,7 +105,7 @@ To programatically check the convergence of the mesh, you can read the MeshConve
     # Enable Adaptive Mesh
     phase.setAdaptiveMesh(True)
     ## Set Error tolerance on mesh: 
-    phase.setMeshTol(1.0e-7) #default = 1.0e-6
+    phase.setMeshTol(1.0e-6) #default = 1.0e-6
     ## Set Max number of mesh iterations: 
     phase.setMaxMeshIters(10) #default = 10
     ## Make sure to set optimizer EContol to be the same as or smaller than MeshTol
@@ -120,8 +118,8 @@ To programatically check the convergence of the mesh, you can read the MeshConve
     else:
         print("Failure")
 
-On i7-13700k, solving this problem with adaptive mesh refinement requires 7 mesh iterations and a total CPU time of 51 milliseconds. The resulting solution, shown
-below, has modestly increased the number LGL7 arcs to 45, but has them clustered towards the ends of the time interval to better approximate the hypersensitive behavior.
+On an i7-13700k, solving this problem with adaptive mesh refinement requires 8 mesh iterations and a total CPU time of 46 milliseconds. The resulting solution, shown
+below, has modestly increased the number of LGL7 arcs to 32, but has them clustered towards the ends of the time interval to better approximate the hypersensitive behavior.
 
 .. image:: _static/RefinedMesh.svg
     :width: 100%
@@ -197,7 +195,7 @@ Full Code
         # Enable Adaptive Mesh
         phase.setAdaptiveMesh(True)
         ## Set Error tolerance on mesh: 
-        phase.setMeshTol(1.0e-7) #default = 1.0e-6
+        phase.setMeshTol(1.0e-6) #default = 1.0e-6
         ## Set Max number of mesh iterations: 
         phase.setMaxMeshIters(10) #default = 10
         ## Make sure to set optimizer Econtol to be the same as or smaller than MeshTol

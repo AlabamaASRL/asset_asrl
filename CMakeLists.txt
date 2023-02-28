@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(ASSET VERSION 0.0.2 LANGUAGES CXX)
+project(ASSET VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 set( CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
@@ -38,6 +38,7 @@ endif()
 set(LINK_TIME_OPT FALSE)          ### DO LTO - Recommended for full release
 set(CLANG_MAX_INLINE_DEPTH 225)
 #set(BUILD_ASSET_WHEEL TRUE)      ### CI Build for generic wheels
+#set(BUILD_SPHINX_DOCS TRUE)      
 
 
 ################################################################################

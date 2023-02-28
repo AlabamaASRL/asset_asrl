@@ -261,7 +261,7 @@ class test_Delta3Launch(unittest.TestCase):
         ocp.setThreads(1,1)
         ocp.setAdaptiveMesh(True,True)
         ocp.MaxMeshIters = 10
-        ocp.PrintMeshInfo=True
+        ocp.PrintMeshInfo=False
         for phase in ocp.Phases:
             phase.MeshErrorEstimator = errest
             phase.MeshErrFactor = 100
