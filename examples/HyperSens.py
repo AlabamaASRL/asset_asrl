@@ -58,7 +58,7 @@ if __name__ == "__main__":
     # Enable Adaptive Mesh
     phase.setAdaptiveMesh(True)
     ## Set Error tolerance on mesh: 
-    phase.setMeshTol(1.0e-7) #default = 1.0e-6
+    phase.setMeshTol(1.0e-6) #default = 1.0e-6
     ## Set Max number of mesh iterations: 
     phase.setMaxMeshIters(10) #default = 10
     ## Make sure to set optimizer Econtol to be the same as or smaller than MeshTol

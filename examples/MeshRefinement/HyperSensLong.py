@@ -48,10 +48,10 @@ if __name__ == "__main__":
     ## Lerp boundary conditions
     TrajIG =[[xt0*(1-t/tf) + xtf*(t/tf),t,0] for t in np.linspace(0,tf,1000)]
     ## All Zeros
-    TrajIG =[[0.0,t,0] for t in np.linspace(0,tf,1000)]
+    #TrajIG =[[0.0,t,0] for t in np.linspace(0,tf,1000)]
     
     '''
-    Neend minimum of 3 segments on initial mesh to get original to converge.
+    Need minimum of 3 segments on initial mesh to get original to converge.
     Need minumum of about 16 segments on initial mesh for cubed version to converge
     '''
     nsegs   = 50
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     phase.setMeshErrorEstimator('deboor')  #default
     
     ##Use the phase's explicit integrator, set the phases integrator tolerances and step sizes appropraitely for good performance
-    #phase.setMeshErrorEstimator('integrator') # Not recommended for this problem
+    #phase.setMeshErrorEstimator('integrator')
     
     
     '''

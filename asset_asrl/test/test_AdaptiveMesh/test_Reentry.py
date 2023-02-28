@@ -187,7 +187,7 @@ class test_Reentry(unittest.TestCase):
         phase.MeshErrorEstimator = errest
         phase.MeshIncFactor=5
         phase.MeshTol=1.0e-7
-        phase.PrintMeshInfo = True
+        phase.PrintMeshInfo = False
         phase.setThreads(1,1)
         Flag1 = phase.solve_optimize()
         

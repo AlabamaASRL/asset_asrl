@@ -2,6 +2,7 @@ import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap ## PIP INSTALL Basemap if you dont have it
+from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
 
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
@@ -320,6 +321,8 @@ if __name__ == "__main__":
     tmode = "LGL3"
     cmode = "HighestOrderSpline"
     
+    
+
     nsegs1 = 5
     nsegs2 = 5
     nsegs3 = 5
@@ -434,8 +437,12 @@ if __name__ == "__main__":
     ocp.solve_optimize()
     
 
+    for phase in ocp.Phases:
+        PhaseMeshErrorPlot(phase,show=False)
+        
+        
+    plt.show()
     
-
     Phase1Traj = phase1.returnTraj()  # or ocp.Phase(i).returnTraj()
     Phase2Traj = phase2.returnTraj()
     Phase3Traj = phase3.returnTraj()

@@ -192,7 +192,7 @@ if __name__ == "__main__":
     
     ode = CartPole(l,m1,m2,g)
     
-    phase = ode.phase("LGL5",IG,20)
+    phase = ode.phase("LGL7",IG,10)
     
     #Fix first state (x,theta,xdot,thetadot) and time
     phase.addBoundaryValue("First",range(0,5),[0 ,0    , 0, 0, 0])
@@ -205,14 +205,23 @@ if __name__ == "__main__":
     phase.addIntegralObjective(Args(1)[0]**2,[5])
     
     phase.setThreads(8,8)
-    phase.optimizer.set_PrintLevel(2)
+    phase.optimizer.set_PrintLevel(1)
     phase.optimizer.EContol = 1.0e-8
     
     
     phase.setAdaptiveMesh(True)
+    
+    '''
+    Integrator estimator works best on this problem, it provides clean and consistent
+    estimates of the error and its distribution with any number of segments
+    .To see what im talking about try LGL3 or Trapezoidal with deboor estimation, notice how the error estimates and
+    distribution function become very noisy. Increasing mesh error factor can
+    help it converge but it doesnt eliminate the noise, which effects the placement of points.
+    LGL5 and LGL7 however, work well with both estimators.
+    '''
     phase.setMeshErrorEstimator('integrator')
-    phase.setMeshTol(1.0e-6)
-    phase.setMeshErrFactor(20)
+    phase.setMeshTol(1.0e-7)
+    phase.setMeshErrFactor(10)
     phase.optimize()
     
     PhaseMeshErrorPlot(phase,show=True)

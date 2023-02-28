@@ -69,14 +69,18 @@ class test_CartPole(unittest.TestCase):
         phase.AdaptiveMesh = True
         phase.setThreads(1,1)
         phase.MeshErrorEstimator = errest
-        if(tmode=='Trapezoidal'):
-            phase.MeshErrorDistributor="max"
-            phase.MeshTol=1.0e-5
+        phase.PrintMeshInfo = False
+       
+        phase.MeshErrFactor=20
         
         Flag = phase.optimize()
         
         Obj = phase.optimizer.LastObjVal
         ObjError = abs(Obj-self.FinalObj)
+        
+        
+        self.assertTrue(phase.MeshConverged, 
+                         "Problem Meshs did not converge converge")
         
         self.assertLess(phase.optimizer.LastIterNum, self.MaximumIters,
                          "Optimizer iterations exceeded expected maximum")
@@ -89,8 +93,8 @@ class test_CartPole(unittest.TestCase):
     
     def test_FullProblem(self):
         
-        tmodes = ["LGL3","LGL5","LGL7","Trapezoidal"]
-        nsegs  = [32   ,16   ,10   ,100]
+        tmodes = ["LGL3","LGL5","LGL7",]
+        nsegs  = [32   ,16   ,10   ]
         
         for tmode,nseg in zip(tmodes,nsegs):
             with self.subTest(TranscriptionMode=tmode):

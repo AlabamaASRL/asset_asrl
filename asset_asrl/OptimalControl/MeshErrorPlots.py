@@ -26,12 +26,14 @@ def PhaseMeshErrorPlot(phase,show=True):
     
     for i,miter in enumerate(Miters):
         axs[0].plot(miter.times,miter.error,color=cols[i],label="Iter: {}".format(i))
-        axs[1].plot(miter.times,miter.distribution/max(miter.distribution),color=cols[i])
+        
+        hs = np.array(miter.times[1:]-miter.times[0:-1])
+        scale =  sum( np.array(miter.distribution[0:-1])*hs)
+        
+        axs[1].plot(miter.times,miter.distribution/scale,color=cols[i])
         axs[2].plot(miter.times,miter.distintegral,color=cols[i])
         
-        if(i<len(Miters)-1 and len(Miters)>1):
-            axs[2].scatter(Miters[i+1].times,np.linspace(0,1,len(Miters[i+1].times)),color=cols[i],s=5)
-        
+    
 
     axs[0].legend()
     
