@@ -37,7 +37,6 @@ class test_InterpTable1D(unittest.TestCase):
 
                 
         kind   = 'cubic'
-        #print(Func(tstab))
         TabAx0 = vf.InterpTable1D(tstab,Func(tstab).T,axis=0,kind=kind)
         TabAx1 = vf.InterpTable1D(tstab,Func(tstab),axis=1,kind=kind)
         
@@ -63,8 +62,8 @@ class test_InterpTable1D(unittest.TestCase):
         
         
         Valtol   = 1.0e-6
-        dValtol  = 1.0e-2
-        d2Valtol = 5.0e-2
+        dValtol  = 1.0e-4
+        d2Valtol = 1.0e-2
         
         
         
@@ -91,6 +90,8 @@ class test_InterpTable1D(unittest.TestCase):
                 dValerr = abs(dVal-dVali).max()
                 d2Valerr = abs(d2Val-d2Vali).max()
                 
+                #print(Valerr,dValerr,d2Valerr)
+                
                 self.assertLess(Valerr, Valtol)
                 self.assertLess(dValerr, dValtol)
                 self.assertLess(d2Valerr, d2Valtol)
@@ -116,20 +117,62 @@ class test_InterpTable1D(unittest.TestCase):
         def dFunc(t) :return np.array([-np.sin(t), np.cos(t)])
         def d2Func(t):return np.array([-np.cos(t),-np.sin(t)])
         
+        n = 100
         
-        tstab = list(np.linspace(0,2*np.pi,500))
-        
-        tscheck = np.linspace(0.01,2*np.pi,37)
-        
+        tstab  = list(np.linspace(0,2*np.pi,n))
+        tstabu = list(np.linspace(0,2*np.pi,n))
+        tstabu.pop(int(n/4))
+        tstabu.pop(int(n/3))
+        tstabu.pop(int(n/2))
+        tstabu.pop(int(2*n/3))
+        tstabu.pop(int(3*n/4))
+
+        tscheck = np.linspace(0.00,2*np.pi,37)
         self.Interp_test(2,Func,dFunc,d2Func,tstab,tscheck)
+        self.Interp_test(2,Func,dFunc,d2Func,tstabu,tscheck)
+
         
         def  Func(t) :return np.array([ np.cos(t)])
         def dFunc(t) :return np.array([-np.sin(t)])
         def d2Func(t):return np.array([-np.cos(t)])
 
         self.Interp_test(1,Func,dFunc,d2Func,tstab,tscheck)
+        self.Interp_test(1,Func,dFunc,d2Func,tstabu,tscheck)
+
+    def test_SmallInput(self):
+        
+        ub = 1
+        
+        tstab  = list(np.linspace(0,ub,5))
+        
+        tstab = [0,.05,.2,.5,.75,.9,1.0]
+        
+        tscheck = np.linspace(0,ub,4000)
+        
+        
+        def  Func(t) :return np.array([ np.cos(t)])
+        
+        fs = Func(tstab)
+        
+        Tab = vf.InterpTable1D(tstab,fs.T,kind='cubic')
+        
+        plt.plot(tscheck,Func(tscheck).T)
+        plt.plot(tscheck,Tab(tscheck).T)
+        plt.scatter(tstab,Tab(tstab).T)
+
+        plt.show()
+        
+        
+        
+        
+        print("S")
+        
+        
+
 
         
+
+
         
         
 if __name__ == "__main__":
