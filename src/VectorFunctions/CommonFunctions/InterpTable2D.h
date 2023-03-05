@@ -227,8 +227,8 @@ namespace ASSET {
 			int xelem, yelem;
 
 			if (this->xeven) {
-				double xlocal = x - xs[0];
-				double xstep = xs[1] - xs[0];
+				double xlocal = x - this->xs[0];
+				double xstep = this->xs[1] - this->xs[0];
 				xelem = std::min(int(xlocal / xstep), this->xsize - 2);
 			}
 			else {
