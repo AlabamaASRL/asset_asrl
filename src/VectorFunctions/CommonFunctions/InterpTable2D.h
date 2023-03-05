@@ -1,6 +1,6 @@
 #pragma once
 #include "VectorFunction.h"
-
+#include "Utils/Timer.h"
 
 namespace ASSET {
 
@@ -21,6 +21,9 @@ namespace ASSET {
 		MatType dzys;
 		MatType dzys_dxs;
 
+		Eigen::Matrix<Eigen::Array4d, -1, -1, Eigen::RowMajor> all_dat;
+
+
 		bool WarnOutOfBounds = true;
 		bool ThrowOutOfBounds = false;
 
@@ -31,7 +34,6 @@ namespace ASSET {
 		double xtotal;
 		int ysize;
 		double ytotal;
-
 
 		InterpTable2D(){}
 
@@ -64,11 +66,11 @@ namespace ASSET {
 			xsize = xs.size();
 			ysize = ys.size();
 
-			if (xsize < 3) {
-				throw std::invalid_argument("X coordinates must be larger than 2");
+			if (xsize < 5) {
+				throw std::invalid_argument("X coordinates must be larger than 4");
 			}
-			if (ysize < 3) {
-				throw std::invalid_argument("Y  coordinates must be larger than 2");
+			if (ysize < 5) {
+				throw std::invalid_argument("Y  coordinates must be larger than 4");
 			}
 
 			if (xsize != zs.cols()) {
@@ -117,88 +119,100 @@ namespace ASSET {
 			dzxs.resize(ysize, xsize);
 			dzys.resize(ysize, xsize);
 			dzys_dxs.resize(ysize, xsize);
+			all_dat.resize(ysize, xsize);
+
 			Eigen::Matrix<double, -1, -1, Eigen::RowMajor> dzys_dxs_tmp(ysize, xsize);
 
 
-			Eigen::Matrix3d stens;
-			stens << 1, 1, 1,
-				-1, 0, 1,
-				-1, 0, 1;
+			Eigen::Matrix<double, 5, 5> stens;
+			stens.row(0).setOnes();
+			Eigen::Matrix<double, 5, 1> rhs;
+			rhs << 0, 1, 0, 0, 0;
+			Eigen::Matrix<double, 5, 1> times;
+			Eigen::Matrix<double, 5, 1> coeffs;
 
-			Eigen::Vector3d rhs;
-			rhs << 0, 1, 0;
 
-			Eigen::Vector3d coeffs;
-
-			for (int i = 0; i < ysize; i++) {
-				for (int j = 0; j < xsize; j++) {
-					if (i == 0) {
-						double ystep1 = ys[i + 1] - ys[i];
-						dzys(i, j) = (zs(i + 1, j) - zs(i, j)) / ystep1;
+			bool hitcent = false;
+			for (int i = 0; i < this->ysize; i++) {
+				int start = 0;
+				bool recalc = true;
+				if (i + 2 <= this->ysize - 1 && i - 2 >= 0) {
+					// central difference
+					if (this->yeven && hitcent) {
+						recalc = false;
 					}
-					else if (i == ysize - 1) {
-						double ystep1 = ys[i] - ys[i-1];
-						dzys(i, j) = (zs(i, j) - zs(i - 1, j)) / ystep1;
-					}
-					else {
-						double ystep1 = ys[i + 1] - ys[i];
-						
-						if (this->yeven) {
-							dzys(i, j) = (zs(i + 1, j) - zs(i - 1, j)) / (2 * ystep1);
-						}
-						else {
-							double ystep2 = ys[i] - ys[i - 1];
-							double yn = -1.0 * ystep2 / ystep1;
-
-							stens(1, 0) = yn;
-							stens(2, 0) = yn * yn;
-							coeffs = stens.inverse() * rhs;
-
-							dzys(i, j) = (coeffs[0] * zs(i - 1, j) + coeffs[1] * zs(i, j) + coeffs[2] * zs(i + 1, j)) / ystep1;
-
-						}
-					}
+					hitcent = true;
+					start = i - 2;
 				}
+				else if (i < this->ysize - 1 - i) {
+					// forward difference
+					start = 0;
+				}
+				else {
+					// backward difference
+					start = this->ysize - 5;
+				}
+				int stepdir = (i < this->ysize - 1) ? 1 : -1;
+				double yi = this->ys[i];
+				double ystep = std::abs(this->ys[i + stepdir] - yi);
+				if (recalc) {
+					times = this->ys.segment(start, 5);
+					times -= Eigen::Matrix<double, 5, 1>::Constant(yi);
+					times /= ystep;
+					stens.row(1) = times.transpose();
+					stens.row(2) = stens.row(1).cwiseProduct(times.transpose());
+					stens.row(3) = stens.row(2).cwiseProduct(times.transpose());
+					stens.row(4) = stens.row(3).cwiseProduct(times.transpose());
+					coeffs = stens.inverse() * rhs;
+				}
+				dzys.row(i) = (coeffs / ystep).transpose() * this->zs.middleRows(start, 5);
+			}
+			
+
+			hitcent = false;
+			for (int i = 0; i < this->xsize; i++) {
+				int start = 0;
+				bool recalc = true;
+				if (i + 2 <= this->xsize - 1 && i - 2 >= 0) {
+					// central difference
+					if (this->xeven && hitcent) {
+						recalc = false;
+					}
+					hitcent = true;
+					start = i - 2;
+				}
+				else if (i < this->xsize - 1 - i) {
+					// forward difference
+					start = 0;
+				}
+				else {
+					// backward difference
+					start = this->xsize - 5;
+				}
+				int stepdir = (i < this->xsize - 1) ? 1 : -1;
+				double xi = this->xs[i];
+				double xstep = std::abs(this->xs[i + stepdir] - xi);
+				if (recalc) {
+					times = this->xs.segment(start, 5);
+					times -= Eigen::Matrix<double, 5, 1>::Constant(xi);
+					times /= xstep;
+					stens.row(1) = times.transpose();
+					stens.row(2) = stens.row(1).cwiseProduct(times.transpose());
+					stens.row(3) = stens.row(2).cwiseProduct(times.transpose());
+					stens.row(4) = stens.row(3).cwiseProduct(times.transpose());
+					coeffs = stens.inverse() * rhs;
+				}
+
+				dzxs.col(i) = this->zs.middleCols(start, 5) * (coeffs / xstep);
+				dzys_dxs.col(i) = this->dzys.middleCols(start, 5) * (coeffs / xstep);
+
 			}
 
-			for (int i = 0; i < ysize; i++) {
-				for (int j = 0; j < xsize; j++) {
-					if (j == 0) {
-						double xstep1 = xs[j + 1] - xs[j];
-
-						dzxs(i, j) = (zs(i, j + 1) - zs(i, j)) / xstep1;
-						dzys_dxs(i, j) = (dzys(i, j + 1) - dzys(i, j)) / xstep1;
-					}
-					else if (j == xsize - 1) {
-						double xstep1 = xs[j] - xs[j-1];
-
-						dzxs(i, j) = (zs(i, j) - zs(i, j - 1)) / xstep1;
-						dzys_dxs(i, j) = (dzys(i, j) - dzys(i, j - 1)) / xstep1;
-					}
-					else {
-						double xstep1 = xs[j + 1] - xs[j];
-
-						if (this->xeven) {
-							dzxs(i, j) = (zs(i, j + 1) - zs(i, j - 1)) / (2 * xstep1);
-							dzys_dxs(i, j) = (dzys(i, j + 1) - dzys(i, j - 1)) / (2 * xstep1);
-						}
-						else {
-
-							double xstep2 = xs[j] - xs[j - 1];
-							double xn = -1.0 * xstep2 / xstep1;
-
-							stens(1, 0) = xn;
-							stens(2, 0) = xn * xn;
-							coeffs = stens.inverse() * rhs;
-
-							dzxs(i, j)    = (coeffs[0] * zs(i, j - 1)    + coeffs[1] * zs(i, j )   + coeffs[2] * zs(i, j + 1)) / (xstep1);
-							dzys_dxs(i, j) = (coeffs[0] * dzys(i, j - 1) + coeffs[1] * dzys(i, j)  + coeffs[2] * dzys(i, j + 1)) / (xstep1);
-
-						}
-					}
-				}
-			}
+			
 		}
+
+
+
 		
 
 		int find_elem(const Eigen::VectorXd& vs, double v) const {
@@ -260,12 +274,13 @@ namespace ASSET {
 
 			Eigen::Matrix4<double> Z;
 
+			
 			double z00 = zs(yelem, xelem);
-			double z10 = zs(yelem, xelem+1);
-			double z01 = zs(yelem+1, xelem);
-			double z11 = zs(yelem+1, xelem+1);
+			double z10 = zs(yelem, xelem + 1);
+			double z01 = zs(yelem + 1, xelem);
+			double z11 = zs(yelem + 1, xelem + 1);
 
-			double dz00_x = dzxs(yelem, xelem)*xstep;
+			double dz00_x = dzxs(yelem, xelem) * xstep;
 			double dz10_x = dzxs(yelem, xelem + 1) * xstep;
 			double dz01_x = dzxs(yelem + 1, xelem) * xstep;
 			double dz11_x = dzxs(yelem + 1, xelem + 1) * xstep;
@@ -287,6 +302,9 @@ namespace ASSET {
 				z10, z11, dz10_y, dz11_y,
 				dz00_x, dz01_x, dz00_xy, dz01_xy,
 				dz10_x, dz11_x, dz10_xy, dz11_xy;
+			
+
+			
 
 			a = L * Z * R;
 			return a;
@@ -545,7 +563,59 @@ namespace ASSET {
 			});
 
 
+		m.def("InterpTable2DSpeedTest", [](const GenericFunction<-1, 1> & tabf,double xl,double xu,double yl,double yu, int nsamps,bool lin) {
 
+			Eigen::ArrayXd xsamps;
+			xsamps.setRandom(nsamps);
+			xsamps +=1;
+			xsamps /= 2;
+			xsamps *= (xu - xl);
+			xsamps += xl;
+
+			Eigen::ArrayXd ysamps;
+			ysamps.setRandom(nsamps);
+			ysamps += 1;
+			ysamps /= 2;
+			ysamps *= (yu - yl);
+			ysamps += yl;
+
+			if (lin) {
+				xsamps.setLinSpaced(xl, xu);
+				ysamps.setLinSpaced(yl, yu);
+			}
+
+
+			Eigen::VectorXd xy(2);
+			Vector1<double> f;
+			f.setZero();
+
+			Utils::Timer Runtimer;
+			Runtimer.start();
+
+			double tmp = 0;
+			for (int i = 0; i < nsamps; i++) {
+
+				
+				xy[0] = xsamps[i];
+				xy[1] = ysamps[i];
+
+				tabf.compute(xy, f);
+				tmp += f[0] / double(i + 3);
+
+				//fmt::print("{0:} \n",f[0]);
+
+
+				f.setZero();
+
+
+			}
+			Runtimer.stop();
+			double tseconds = double(Runtimer.count<std::chrono::microseconds>()) / 1000000;
+			fmt::print("Total Time: {0:} ms \n", tseconds*1000);
+
+
+			return tmp;
+			});
 
 	}
 
