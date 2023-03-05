@@ -107,6 +107,62 @@ namespace ASSET {
 
 		}
 
+
+
+
+        int find_elem(const Eigen::VectorXd& vs, double v) const {
+            int center = int(vs.size() / 2);
+            int shift = (vs[center] > v) ? 0 : center;
+            auto it = std::upper_bound(vs.begin() + shift, vs.end(), v);
+            int elem = int(it - vs.begin()) - 1;
+            return elem;
+        }
+
+        std::tuple<int, int,int> get_xyelems(double x, double y,double z) const {
+            int xelem, yelem,zelem;
+
+            if (this->xeven) {
+                double xlocal = x - this->xs[0];
+                double xstep = this->xs[1] - this->xs[0];
+                xelem = std::min(int(xlocal / xstep), this->xsize - 2);
+            }
+            else {
+                xelem = this->find_elem(this->xs, x);
+            }
+
+            if (this->yeven) {
+                double ylocal = y - this->ys[0];
+                double ystep = this->ys[1] - this->ys[0];
+                yelem = std::min(int(ylocal / ystep), this->ysize - 2);
+            }
+            else {
+                yelem = this->find_elem(this->ys, y);
+            }
+
+            if (this->zeven) {
+                double zlocal = z - this->zs[0];
+                double zstep = this->zs[1] - this->zs[0];
+                zelem = std::min(int(zlocal / zstep), this->zsize - 2);
+            }
+            else {
+                zelem = this->find_elem(this->zs, z);
+            }
+
+
+            xelem = std::min(xelem, this->xsize - 2);
+            yelem = std::min(yelem, this->ysize - 2);
+            zelem = std::min(zelem, this->zsize - 2);
+
+            xelem = std::max(xelem, 0);
+            yelem = std::max(yelem, 0);
+            zelem = std::max(zelem, 0);
+
+            return std::tuple{ xelem,yelem,zelem };
+        }
+
+        Eigen::Matrix<double, 64, 1> get_alphavec(int xelem, int yelem, int zelem) {
+
+        }
 	};
 
 	static void InterpTable3DBuild(py::module& m) {
