@@ -42,7 +42,6 @@ kind = 'cubic'
 
 Tab2D = vf.InterpTable2D(xs,ys,Z,kind=kind)
 Tab2D.ThrowOutOfBounds = True
-Tab2D.cachefriendly=True
 vf.InterpTable2DSpeedTest(Tab2D.sf(),-lim,lim,-lim,lim,10000000,False)
 
 
