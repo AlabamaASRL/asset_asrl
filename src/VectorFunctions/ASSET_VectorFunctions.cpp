@@ -4,6 +4,7 @@
 
 #include "CommonFunctions/InterpTable2D.h"
 #include "CommonFunctions/InterpTable1D.h"
+#include "CommonFunctions/InterpTable3D.h"
 
 namespace ASSET {
 
@@ -54,6 +55,7 @@ void ASSET::VectorFunctionBuild(FunctionRegistry& reg, py::module& m) {
 
   InterpTable1DBuild(mod);
   InterpTable2DBuild(mod);
+  InterpTable3DBuild(mod);
 
   mod.def("ScalarDynamicStackTest", [](const std::vector<GenericFunction<-1, 1>>& funcs) {
 
