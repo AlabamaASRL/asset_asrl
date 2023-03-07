@@ -858,9 +858,18 @@ by providing a ScalarFunction argument to the call operator.
 
 2-D Interpolation
 -----------------
-Similarly, you can also interpret scalar data defined on a 2-D regular grid of coordinates as an ASSET ScalarFunction using the
+Similarly, you can also interpret scalar data defined on a 2-D rectilinear grid of coordinates as an ASSET ScalarFunction using the
 :code:`vf.InterpTable2D` class. The class may be constructed by supplying the grid coordinates as either python lists or numpy
-arrays along with the function values formatted like a numpy meshgrid.
+arrays along with the function values formatted like a numpy meshgrid. The function values MUST be formatted like an xy indexed meshgrid,
+which is the default behavior for np.meshgrid in 2 dimensions
+
+..  note:: 
+
+	 The function values MUST be formatted like an xy indexed meshgrid.If you are 
+	 using np.meshgrid to generate the function values, take note that it assumes xy 
+	 indexing by default. If you index the values wrong and your coordinate dimensions 
+	 are the same size, we will not be able to detect an error.
+
 
 .. code-block:: python
 
@@ -888,20 +897,96 @@ arrays along with the function values formatted like a numpy meshgrid.
 	#print(Tab2D(-6.3,0))       # throws exception
 
 Once constructed, :code:`vf.InterpTable2D` can be converted into an ASSET ScalarFunction by supplying
-the x and y coordinates as ASSET ScalarFunctions to the table's call operator.
+the x and y coordinates to the table's call operator as a singe VectorFunction or two separate ScalarFunctions .
 
 
 .. code-block:: python
 
-	x,y,c= Args(3).tolist()
+	xy,c= Args(3).tolist([(0,2),(2,1)])
+	x,y = xy.tolist()
 
-	TabSf = Tab2D(x,y)  # it is now an asset scalar function of x,y in this expression
+	# Use it as scalar function inside a statement
+	Tab2sf = Tab2D(xy)
+	Tab2sf = Tab2D(x,y)             # Or
+	Tab2sf = Tab2D(vf.stack([x,y])) # Or
 
-	Func = TabSf + c   # Use it as a normal scalar function
+	Func = Tab2sf + c   # Use it as a normal scalar function
 
 	print(Func([np.pi/2,0,1.0]))  # prints [2.0]
 
-	
+3-D Interpolation
+-----------------
+As of version 0.1.0, we also support interpolating scalar data defined on 3 dimensional rectilinear grids
+with the :code:`vf.InterpTable3D` class. To construct it, we supply the coordinate values as three python
+lists/numpy vectors along with the function values. 
+
+..  note:: 
+
+	 The function values MUST be formatted like an ij indexed meshgrid. If you are 
+	 using np.meshgrid to generate the function values, take note that it assumes xy indexing by default,
+	 and this should be changed to ij.If you index the values wrong and your coordinate dimensions are the same size, 
+	 we will not be able to detect an error.
+
+As with the 1D and 2D tables, you can also select between linear or cubic interpolation. Cubic interpolation should be 
+preferred for anything that will end up in an optimizer. Additionally, for cubic interpolation you can specify that
+you want to pre-calculate and cache all possible values of the interpolation coefficients in each voxel of the domain.
+This requires the up front calculation of  :code:`(nx-1)*(ny-1)*(nz-1)` matrix vector products of size (64x64)x(64x1)  and 8 times the storage of the non-cached
+algorithm. However, interpolation will be 10-20 times faster. So use this if the dimensions are small and the interpolator
+will be called a lot.
+
+.. code-block:: python
+
+	def f(x,y,z):return np.cos(x)*np.cos(y)*np.cos(z)
+
+	nx = 100
+	ny = 100
+	nz = 100
+
+	xlim = np.pi
+	ylim = np.pi
+	zlim = np.pi
+
+	xs = np.linspace(-xlim,xlim,nx)
+	ys = np.linspace(-ylim,ylim,ny)
+	zs = np.linspace(-zlim,zlim,nz)
+
+	X,Y,Z = np.meshgrid(xs, ys,zs,indexing = 'ij')
+	Fs    = f(X,Y,Z)    #Scalar data defined on 3-D meshgrid in ij format!!!
+
+	kind = 'cubic' # or 'linear', defaults to 'cubic'
+	cache = False # defaults to False
+	#cache = True # will precalculate and cache all interpolation coeffs
+
+	Tab3D = vf.InterpTable3D(xs,ys,zs,Fs,kind=kind,cache=cache)
+
+	print(Tab3D(0,0,0))  #prints 1.0 
+
+	Tab3D.WarnOutOfBounds=True   # By default
+	print(Tab3D(-10,0,0))        # prints a warning
+	print(Tab3D(0,-10,0))        # prints a warning
+	print(Tab3D(0,0,-10))        # prints a warning
+
+	Tab3D.ThrowOutOfBounds=True
+	#print(Tab3D(-10,0,0))       # throws exception
+
+
+
+Once constructed, :code:`vf.InterpTable3D` can be converted into an ASSET ScalarFunction by supplying
+the x, y, and z coordinates to the table's call operator as a singe VectorFunction or three separate ScalarFunctions.
+
+.. code-block:: python
+
+	xyz,c= Args(4).tolist([(0,3),(3,1)])
+	x,y,z = xyz.tolist()
+
+	# Use it as scalar function inside a statement
+	Tab3sf = Tab3D(xyz)
+	Tab3sf = Tab3D(x,y,z)             # Or
+	Tab3sf = Tab3D(vf.stack([x,y,z])) # Or
+
+	Func = Tab3sf + c
+
+	print(Func([0,0,0,1]))  # prints [2.0]
 
 
 

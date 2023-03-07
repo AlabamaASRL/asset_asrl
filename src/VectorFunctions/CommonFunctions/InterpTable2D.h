@@ -121,8 +121,6 @@ namespace ASSET {
 			dzys_dxs.resize(ysize, xsize);
 			all_dat.resize(ysize, xsize);
 
-			Eigen::Matrix<double, -1, -1, Eigen::RowMajor> dzys_dxs_tmp(ysize, xsize);
-
 
 			Eigen::Matrix<double, 5, 5> stens;
 			stens.row(0).setOnes();
@@ -211,9 +209,6 @@ namespace ASSET {
 			
 		}
 
-
-
-		
 
 		int find_elem(const Eigen::VectorXd& vs, double v) const {
 			int center = int(vs.size() / 2);
@@ -319,7 +314,7 @@ namespace ASSET {
 			if (WarnOutOfBounds || ThrowOutOfBounds) {
 				double xeps = std::numeric_limits<double>::epsilon() * xtotal;
 				if (x<(xs[0] - xeps) || x>(xs[xs.size() - 1] + xeps)) {
-					fmt::print("{0}\n", x);
+					
 					fmt::print(fmt::fg(fmt::color::red),
 						"WARNING: x coordinate falls outside of InterpTable2D range. Data is being extrapolated!!\n");
 					if (ThrowOutOfBounds) {
@@ -471,7 +466,7 @@ namespace ASSET {
 
 		InterpFunction2D() {}
 		InterpFunction2D(std::shared_ptr<InterpTable2D> tab) :tab(tab) {
-			this->setIORows(1, 1);
+			this->setIORows(2, 1);
 		}
 
 
@@ -517,9 +512,6 @@ namespace ASSET {
 
 		}
 
-
-
-
 	};
 
 	
@@ -547,6 +539,8 @@ namespace ASSET {
 		obj.def("__call__", py::overload_cast<double,double>(&InterpTable2D::interp, py::const_), py::is_operator());
 		obj.def("__call__", py::overload_cast<const MatType&, const MatType&>(&InterpTable2D::interp, py::const_), py::is_operator());
 
+
+
 		obj.def("__call__", [](const InterpTable2D& self, const GenericFunction<-1, 1>& x, const GenericFunction<-1, 1>& y) {
 			return GenericFunction<-1, 1>(InterpFunction2D(std::make_shared<InterpTable2D>(self)).eval(stack(x,y)));
 			});
@@ -554,6 +548,15 @@ namespace ASSET {
 		obj.def("__call__", [](const InterpTable2D& self, const Segment<-1, 1, -1>& x, const Segment<-1, 1, -1>& y) {
 			return GenericFunction<-1, 1>(InterpFunction2D(std::make_shared<InterpTable2D>(self)).eval(stack(x, y)));
 			});
+
+		obj.def("__call__", [](const InterpTable2D& self, const Segment<-1, 2, -1>& xy) {
+			return GenericFunction<-1, 1>(InterpFunction2D(std::make_shared<InterpTable2D>(self)).eval(xy));
+			});
+
+		obj.def("__call__", [](const InterpTable2D& self, const GenericFunction<-1, -1>& xy) {
+			return GenericFunction<-1, 1>(InterpFunction2D(std::make_shared<InterpTable2D>(self)).eval(xy));
+			});
+
 
 		obj.def("sf", [](const InterpTable2D& self) {
 			return GenericFunction<-1, 1>(InterpFunction2D(std::make_shared<InterpTable2D>(self)));
