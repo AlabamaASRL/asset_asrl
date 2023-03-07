@@ -28,7 +28,7 @@ Step-By-Step Guide
 	  Follow the VS installation prompts until you are prompted to select any additional packages to install with VS. 
 	  Here we will want to select **Desktop development with C++**; however, we are going to make one change to the defaults for the C++ install and **un-check** the option for "C++ Clang tools for Windows" (shown below).
 
-	  .. image:: _static/vsstudiodesktopc++.PNG
+	  .. image:: _static/vsstudiodesktopc++.png
 
 	  Also ensure that the "**C++ CMake Tools for Windows**" is checked.
 	  After doing this continue and finish the installation.
@@ -118,11 +118,11 @@ Step-By-Step Guide
 	  Now we are going to configure the ASSET CMake settings by going to the project dropdown menu and selecting "Configure ASSET" or "Configure Cache" (depending on the version of VS).
 	  Wait until the output message from CMake says that it is finished and proceed to the build step.
 
-	  .. image:: _static/config.PNG
+	  .. image:: _static/config.png
 
 	  The last step is to actually build ASSET! After the configuration step has completed navigate to the Build dropdown menu and choose "Build All" (or Ctrl + Shift + B). Keep your Python IDE closed until the build completes.
 
-	  .. image:: _static/build.PNG
+	  .. image:: _static/build.png
 
 #. With that you should have a successfully built ASSET Python library and are ready to get started with the rest of the tutorials.
 
@@ -238,7 +238,7 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 
 	  Now hit build to begin building ASSET
 
-	  .. image:: _static/vscodebuild.PNG
+	  .. image:: _static/vscodebuild.png
 
 #. With that you should have a successfully built ASSET Python library and are ready to get started with the rest of the tutorials.
 

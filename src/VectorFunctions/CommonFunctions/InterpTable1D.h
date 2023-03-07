@@ -113,14 +113,14 @@ namespace ASSET {
 			if (tsize != vs.cols()) {
 				throw std::invalid_argument("Length of t coordinates must match length of interpolation axis");
 			}
-			for (int i = 0; i < ts.size() - 1; i++) {
+			for (int i = 0; i < tsize - 1; i++) {
 				if (ts[i + 1] < ts[i]) {
 					throw std::invalid_argument("t Coordinates must be in ascending order");
 				}
 			}
 
 			Eigen::VectorXd testt;
-			testt.setLinSpaced(ts.size(), ts[0], ts[ts.size() - 1]);
+			testt.setLinSpaced(ts.size(), ts[0], ts[tsize - 1]);
 			
 			double terr = (ts - testt).lpNorm<Eigen::Infinity>();
 
@@ -198,10 +198,6 @@ namespace ASSET {
 				auto it = std::upper_bound(ts.cbegin(), ts.cend(), t);
 				telem = int(it - ts.begin()) - 1;
 			}
-
-
-			double tstep = ts[telem + 1] - ts[telem];
-			double tnd = (t - ts[telem]) / tstep;
 
 			telem = std::min(telem, this->tsize - 2);
 			telem = std::max(telem, 0);
