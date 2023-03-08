@@ -107,20 +107,20 @@ namespace ASSET {
 			vlen  = vs.rows();
 			ttotal = ts[tsize - 1] - ts[0];
 
-			if (tsize < 3) {
-				throw std::invalid_argument("t coordinates must be larger than 2");
+			if (tsize < 5) {
+				throw std::invalid_argument("t coordinates must be larger than 4");
 			}
 			if (tsize != vs.cols()) {
 				throw std::invalid_argument("Length of t coordinates must match length of interpolation axis");
 			}
-			for (int i = 0; i < ts.size() - 1; i++) {
+			for (int i = 0; i < tsize - 1; i++) {
 				if (ts[i + 1] < ts[i]) {
 					throw std::invalid_argument("t Coordinates must be in ascending order");
 				}
 			}
 
 			Eigen::VectorXd testt;
-			testt.setLinSpaced(ts.size(), ts[0], ts[ts.size() - 1]);
+			testt.setLinSpaced(ts.size(), ts[0], ts[tsize - 1]);
 			
 			double terr = (ts - testt).lpNorm<Eigen::Infinity>();
 
@@ -133,63 +133,54 @@ namespace ASSET {
 
 		}
 
+
 		void calc_derivs() {
-			
-			dvs_dts.resize(vlen, tsize);
 
+			this->dvs_dts.resize(this->vlen, this->tsize);
 
-			Eigen::Matrix3d stens;
-			stens << 1, 1, 1,
-				-1, 0, 1,
-				-1, 0, 1;
+			Eigen::Matrix<double,5,5> stens;
+			stens.row(0).setOnes();
+			Eigen::Matrix<double, 5, 1> rhs;
+			rhs << 0,1,0,0,0;
+			Eigen::Matrix<double, 5, 1> times;
+			Eigen::Matrix<double, 5, 1> coeffs;
 
-			Eigen::Vector3d rhs;
-			rhs << 0, 1, 0;
-
-			Eigen::Vector3d coeffs;
-
-			for (int i = 0; i < tsize; i++) {
+			bool hitcent = false;
+			for (int i = 0; i < this->tsize; i++) {
+				int start = 0;
+				bool recalc = true;
+				if (i + 2 <= this->tsize - 1 && i - 2 >= 0) {
+					// central difference
+					if (this->teven && hitcent) {
+						recalc = false;
+					}
+					hitcent = true;
+					start = i - 2;
+				}
+				else if (i < this->tsize-1-i) {
+					// forward difference
+					start = 0;
+				}
+				else {
+					// backward difference
+					start = this->tsize - 5;
+				}
+				int stepdir = (i<this->tsize-1)? 1:-1;
+				double ti = this->ts[i];
+				double tstep = std::abs(this->ts[i + stepdir] - ti);
+				if (recalc) {
+					times = this->ts.segment(start, 5);
+					times -= Eigen::Matrix<double, 5, 1>::Constant(ti);
+					times /= tstep;
+					stens.row(1) = times.transpose();
+					stens.row(2) = stens.row(1).cwiseProduct(times.transpose());
+					stens.row(3) = stens.row(2).cwiseProduct(times.transpose());
+					stens.row(4) = stens.row(3).cwiseProduct(times.transpose());
+					coeffs = stens.inverse() * rhs;
+				}
 				
-					if (i == 0) {
-						double tstep1 = ts[i + 1] - ts[i];
+				dvs_dts.col(i) = this->vs.middleCols(start, 5) * (coeffs / tstep);
 
-						if (this->teven) {
-							dvs_dts.col(i) = (-.5*vs.col(i + 2)+2.0*vs.col(i + 1) - 1.5*vs.col(i)) / tstep1;
-
-						}
-						else {
-							dvs_dts.col(i) = (vs.col(i + 1) - vs.col(i)) / tstep1;
-						}
-					}
-					else if (i == tsize - 1) {
-						double tstep1 = ts[i] - ts[i - 1];
-						if (this->teven) {
-							dvs_dts.col(i) = (1.5 * vs.col(i) - 2.0 * vs.col(i - 1) + .5 * vs.col(i - 2)) / tstep1;
-						}
-						else {
-							dvs_dts.col(i) = (vs.col(i) -  vs.col(i - 1) ) / tstep1;
-						}
-						
-					}
-					else {
-						double tstep1 = ts[i + 1] - ts[i];
-
-						if (this->teven) {
-							dvs_dts.col(i) = (vs.col(i + 1) - vs.col(i - 1)) / (2 * tstep1);
-						}
-						else {
-							double tstep2 = ts[i] - ts[i - 1];
-							double tn = -1.0 * tstep2 / tstep1;
-
-							stens(1, 0) = tn;
-							stens(2, 0) = tn * tn;
-							coeffs = stens.inverse() * rhs;
-
-							dvs_dts.col(i) = (coeffs[0] * vs.col(i - 1) + coeffs[1] * vs.col(i) + coeffs[2] * vs.col(i + 1)) / tstep1;
-
-						}
-					}
-				
 			}
 
 		}
@@ -208,10 +199,6 @@ namespace ASSET {
 				telem = int(it - ts.begin()) - 1;
 			}
 
-
-			double tstep = ts[telem + 1] - ts[telem];
-			double tnd = (t - ts[telem]) / tstep;
-
 			telem = std::min(telem, this->tsize - 2);
 			telem = std::max(telem, 0);
 			return telem;
@@ -224,7 +211,7 @@ namespace ASSET {
 				double eps = std::numeric_limits<double>::epsilon() * ttotal;
 				if (t<(ts[0]-eps) || t>(ts[ts.size() - 1]+eps)) {
 					fmt::print(fmt::fg(fmt::color::red),
-						"WARNING: t falls outside of InterpTable1D time range. Data is being extrapolated!!\n");
+						"WARNING: t= {0:} falls outside of InterpTable1D time range. Data is being extrapolated!!\n",t);
 					if (ThrowOutOfBounds) {
 						throw std::invalid_argument("");
 					}
