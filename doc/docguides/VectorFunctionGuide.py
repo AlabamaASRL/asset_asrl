@@ -808,14 +808,66 @@ Tab2D.ThrowOutOfBounds=True
 #print(Tab2D(-6.3,0))       # throws exception
 #############################################
 
-x,y,c= Args(3).tolist()
+xy,c= Args(3).tolist([(0,2),(2,1)])
+x,y = xy.tolist()
 
-TabSf = Tab2D(x,y)  # it is now an asset scalar function of x,y in this expression
+# Use it as scalar function inside a statement
+Tab2sf = Tab2D(xy)
+Tab2sf = Tab2D(x,y)             # Functionally same as above but slower
+Tab2sf = Tab2D(vf.stack([x,y])) # Functionally same as above but slower
 
-Func = TabSf + c   # Use it as a normal scalar function
+Func = Tab2sf + c   # Use it as a normal scalar function
 
 print(Func([np.pi/2,0,1.0]))  # prints [2.0]
 
+############ 3D Tables ##############################
+#####################################################
+def f(x,y,z):return np.cos(x)*np.cos(y)*np.cos(z)
+
+nx = 100
+ny = 100
+nz = 100
+
+xlim = np.pi
+ylim = np.pi
+zlim = np.pi
+
+xs = np.linspace(-xlim,xlim,nx)
+ys = np.linspace(-ylim,ylim,ny)
+zs = np.linspace(-zlim,zlim,nz)
+
+X,Y,Z = np.meshgrid(xs, ys,zs,indexing = 'ij')
+Fs    = f(X,Y,Z)    #Scalar data defined on 3-D meshgrid in ij format!!!
+
+kind = 'cubic' # or 'linear', defaults to 'cubic'
+cache = False # defaults to False
+#cache = True # will precalcuate and cache all interpolation coeffs
+
+Tab3D = vf.InterpTable3D(xs,ys,zs,Fs,kind=kind,cache=cache)
+
+print(Tab3D(0,0,0))  #prints 1.0 
+
+#############################################
+Tab3D.WarnOutOfBounds=True   # By default
+print(Tab3D(-10,0,0))        # prints a warning
+print(Tab3D(0,-10,0))        # prints a warning
+print(Tab3D(0,0,-10))        # prints a warning
+
+Tab3D.ThrowOutOfBounds=True
+#print(Tab3D(-10,0,0))       # throws exception
+#############################################
+
+xyz,c= Args(4).tolist([(0,3),(3,1)])
+x,y,z = xyz.tolist()
+
+# Use it as scalar function inside a statement
+Tab3sf = Tab3D(xyz)
+Tab3sf = Tab3D(x,y,z)             # Functionally same as above but slower
+Tab3sf = Tab3D(vf.stack([x,y,z])) # Functionally same as above but slower
+
+Func = Tab3sf + c
+
+print(Func([0,0,0,1]))  # prints [2.0]
 
 print("########## Binding Raw Python (DONT READ THIS) #################")
 
