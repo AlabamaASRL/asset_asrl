@@ -1,12 +1,4 @@
 #include "ODEPhaseBase.h"
-#include "ODEPhaseBase.h"
-#include "ODEPhaseBase.h"
-#include "ODEPhaseBase.h"
-#include "ODEPhaseBase.h"
-#include "ODEPhaseBase.h"
-#include "ODEPhaseBase.h"
-#include "ODEPhaseBase.h"
-
 #include "LGLControlSplines.h"
 #include "LGLIntegrals.h"
 #include "MeshSpacingConstraints.h"
@@ -489,7 +481,7 @@ std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::returnCostateTraj() const {
 }
 
 void ASSET::ODEPhaseBase::setTraj(const std::vector<Eigen::VectorXd>& mesh,
-                                  Eigen::VectorXd DBS, Eigen::VectorXi DPB) {
+                                  Eigen::VectorXd DBS, Eigen::VectorXi DPB, bool LerpTraj) {
 
   if (mesh.size() == 0) {
         throw std::invalid_argument("Input trajectory is empty");
@@ -516,18 +508,68 @@ void ASSET::ODEPhaseBase::setTraj(const std::vector<Eigen::VectorXd>& mesh,
   }
   for (auto& X : mesh) {
       if (X.hasNaN()) {
-          throw std::invalid_argument("NaN detetected in State Vector in ODEPhaseBase::setTraj");
+          throw std::invalid_argument("NaN detected in State Vector in ODEPhaseBase::setTraj");
       }
   }
 
+
+ 
   this->Table.loadUnevenData(DPB.sum(), mesh);
-  this->ActiveTraj = this->Table.NDdistribute(DBS, DPB);
+
+  if (LerpTraj) {
+
+      double t0 = mesh[0][this->TVar()];
+      double tf = mesh.back()[this->TVar()];
+      Eigen::VectorXd intime_nd(mesh.size());
+      for (int i = 0; i < mesh.size(); i++) {
+          intime_nd[i] = (mesh[i][this->TVar()] - t0) / (tf - t0);
+      }
+        
+      int nstates = (this->numTranCardStates - 1) * DPB.sum() + 1;
+      Eigen::VectorXd outtime_nd(nstates);
+      outtime_nd.setZero();
+
+      Eigen::VectorXd Tspacing = this->Table.Tspacing;
+      Eigen::VectorXd cvect(Tspacing.size());
+
+      this->ActiveTraj.resize(nstates);
+
+      for (int i = 0,start=0; i < DBS.size() - 1;i++) {
+          double bint0 = DBS[i];
+          double bintf = DBS[i+1];
+          double segdt = (bintf - bint0) / DPB[i];
+          for (int j = 0; j < DPB[i]; j++) {
+              cvect.setConstant(outtime_nd[start]);
+              outtime_nd.segment(start, Tspacing.size()) = cvect + Tspacing * segdt;
+              start += (this->numTranCardStates - 1);
+          }
+      }
+
+
+      for (int i = 0, elem=0; i < nstates; i++) {
+          double ti = outtime_nd[i];
+          auto it = std::upper_bound(intime_nd.cbegin() + elem, intime_nd.cend(), ti);
+          elem = int(it -intime_nd.cbegin()) - 1;
+          elem = std::clamp(elem, 0, int(intime_nd.size() - 2));
+          double helem = intime_nd[elem + 1] - intime_nd[elem];
+          double tndlocal = (ti - intime_nd[elem]) / (helem);
+          this->ActiveTraj[i] = mesh[elem] * (1.0 - tndlocal) + mesh[elem + 1] * tndlocal;
+      }
+
+
+  }
+  else {
+      this->ActiveTraj = this->Table.NDdistribute(DBS, DPB);
+  }
+
   this->DefBinSpacing = DBS;
   this->DefsPerBin = DPB;
   this->numDefects = DPB.sum();
   this->TrajectoryLoaded = true;
   this->resetTranscription();
 }
+
+
 
 void ASSET::ODEPhaseBase::refineTrajManual(VectorXd DBS, VectorXi DPB) {
   if ((DBS.size() - 1) != DPB.size()) {
@@ -1302,10 +1344,21 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::overload_cast<const std::vector<Eigen::VectorXd>&, Eigen::VectorXd,
                         Eigen::VectorXi>(&ODEPhaseBase::setTraj),
       ODEPhaseBase_setTraj1);
+
+  obj.def(
+      "setTraj",
+      py::overload_cast<const std::vector<Eigen::VectorXd>&, Eigen::VectorXd,
+      Eigen::VectorXi,bool>(&ODEPhaseBase::setTraj));
+
   obj.def("setTraj",
           py::overload_cast<const std::vector<Eigen::VectorXd>&, int>(
               &ODEPhaseBase::setTraj),
           ODEPhaseBase_setTraj2);
+
+  obj.def("setTraj",
+      py::overload_cast<const std::vector<Eigen::VectorXd>&, int,bool>(
+          &ODEPhaseBase::setTraj));
+
 
   obj.def("switchTranscriptionMode",
           py::overload_cast<TranscriptionModes, VectorXd, VectorXi>(

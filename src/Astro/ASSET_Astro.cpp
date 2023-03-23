@@ -6,8 +6,7 @@ void ASSET::AstroBuild(FunctionRegistry& reg, py::module& m)
 
 	BuildKeplerMod(reg, mod);
 	KeplerUtilsBuild(reg, mod);
-	LambertSolverBuild(reg, mod);
-	LambertSolverBuildMultiRev(reg, mod);
+	LambertSolversBuild(reg, mod);
 
 
 	

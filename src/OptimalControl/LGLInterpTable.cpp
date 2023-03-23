@@ -1,7 +1,5 @@
 #include "LGLInterpTable.h"
-#include "LGLInterpTable.h"
-#include "LGLInterpTable.h"
-#include "LGLInterpTable.h"
+
 
 
 void ASSET::LGLInterpTable::setMethod(TranscriptionModes m)
