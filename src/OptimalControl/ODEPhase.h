@@ -52,6 +52,11 @@ struct ODEPhase : ODEPhaseBase {
       : ODEPhase(ode, Tmode) {
     this->setTraj(Traj, numdef);
   }
+  ODEPhase(const DODE& ode, TranscriptionModes Tmode,
+      const std::vector<Eigen::VectorXd>& Traj, int numdef, bool LerpIG)
+      : ODEPhase(ode, Tmode) {
+      this->setTraj(Traj, numdef,LerpIG);
+  }
 
   ODEPhase(const DODE& ode, std::string Tmode)
       : ODEPhase(ode, strto_TranscriptionMode(Tmode)) {
@@ -61,6 +66,10 @@ struct ODEPhase : ODEPhaseBase {
       const std::vector<Eigen::VectorXd>& Traj, int numdef)
       :ODEPhase(ode, strto_TranscriptionMode(Tmode),Traj,  numdef) {
      
+  }
+  ODEPhase(const DODE& ode, std::string Tmode,
+      const std::vector<Eigen::VectorXd>& Traj, int numdef,bool LerpIG)
+      :ODEPhase(ode, strto_TranscriptionMode(Tmode), Traj, numdef,LerpIG) {
   }
 
   virtual void setTranscriptionMode(TranscriptionModes m) {
@@ -535,9 +544,14 @@ struct ODEPhase : ODEPhaseBase {
       phase.def(py::init<DODE, TranscriptionModes>());
       phase.def(py::init<DODE, TranscriptionModes,
           const std::vector<Eigen::VectorXd>&, int>());
+      phase.def(py::init<DODE, TranscriptionModes,
+          const std::vector<Eigen::VectorXd>&, int,bool>());
+
       phase.def(py::init<DODE, std::string>());
       phase.def(py::init<DODE, std::string,
           const std::vector<Eigen::VectorXd>&, int>());
+      phase.def(py::init<DODE, std::string,
+          const std::vector<Eigen::VectorXd>&, int,bool>());
   }
 
   static void Build(py::module& m) {

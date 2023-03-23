@@ -99,8 +99,8 @@ public:
   double RelSwitchTol = .3;
   double AbsSwitchTol = 1.0e-6;
 
-
   double MeshTol = 1.0e-6;
+
   std::string MeshErrorEstimator    = "deboor";
   std::string MeshErrorCriteria     = "max" ;  //"max,avg,geometric,endtoend"
   std::string MeshErrorDistributor  = "avg";  // "max,avg,geometric,endtoend"
@@ -712,16 +712,26 @@ public:
   /////////////////////////////////////////////////
 
   virtual void setTraj(const std::vector<Eigen::VectorXd>& mesh, Eigen::VectorXd DBS,
-               Eigen::VectorXi DPB);
+               Eigen::VectorXi DPB,bool LerpTraj);
 
-  void setTraj(const std::vector<Eigen::VectorXd>& mesh, int ndef) {
-    VectorXd dbs(2);
-    dbs[0] = 0.0;
-    dbs[1] = 1.0;
-    VectorXi dpb(1);
-    dpb[0] = ndef;
-    this->setTraj(mesh, dbs, dpb);
+  void setTraj(const std::vector<Eigen::VectorXd>& mesh, Eigen::VectorXd DBS,
+      Eigen::VectorXi DPB) {
+      this->setTraj(mesh, DBS, DPB, false);
   }
+
+  void setTraj(const std::vector<Eigen::VectorXd>& mesh, int ndef,bool LerpTraj) {
+      VectorXd dbs(2);
+      dbs[0] = 0.0;
+      dbs[1] = 1.0;
+      VectorXi dpb(1);
+      dpb[0] = ndef;
+      this->setTraj(mesh, dbs, dpb,LerpTraj);
+  }
+  void setTraj(const std::vector<Eigen::VectorXd>& mesh, int ndef) {
+      this->setTraj(mesh, ndef,false);
+  }
+
+  
   void refineTrajManual(VectorXd DBS, VectorXi DPB);
 
   void refineTrajManual(int ndef) {
