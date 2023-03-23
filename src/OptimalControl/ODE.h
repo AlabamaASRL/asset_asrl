@@ -143,7 +143,10 @@ struct GenericODE
         const std::vector<Eigen::VectorXd>& Traj, int numdef) {
             return std::make_shared<ODEPhase<Derived>>(od, Tmode, Traj, numdef);
         });
-
+    obj.def("phase", [](const Derived& od, std::string Tmode,
+        const std::vector<Eigen::VectorXd>& Traj, int numdef,bool LerpIG) {
+            return std::make_shared<ODEPhase<Derived>>(od, Tmode, Traj, numdef, LerpIG);
+        });
     
 
     py::implicitly_convertible<Derived, GenericFunction<-1, -1>>();

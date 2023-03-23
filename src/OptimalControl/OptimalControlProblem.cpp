@@ -1,7 +1,4 @@
 #include "OptimalControlProblem.h"
-#include "OptimalControlProblem.h"
-#include "OptimalControlProblem.h"
-#include "OptimalControlProblem.h"
 
 #include "PyDocString/OptimalControl/OptimalControlProblem_doc.h"
 

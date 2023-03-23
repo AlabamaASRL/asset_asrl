@@ -889,6 +889,29 @@ What happens if I add multiple objectives?
 A phase has no restriction of the number of objectives that may be added. If multiple objectives are added, the optimizer will implicitly sum all of their values.
 
 
+Bad Initial Guesses 
+-------------------
+
+By default we take whatever the supplied initial guess to a phase is and use the specified transcription scheme's interpolation method to generate the initial mesh.
+For compressed collocation methods, when the initial guess is very poor, this can induce osculations in the initial interpolated mesh that are not present in the initial guess
+. This can be avoided by instead interpolating the initial mesh linearly from the supplied initial guess. You can specify the method for the initial interpolation of a phase as shown below.
+If the user supplied initial guess is linear or constant, we recommend using the linear interpolation method.
+
+.. code-block:: python
+       
+
+       LerpIG = False
+       #Interpolate initial mesh using transcriptions interpolation method (same as default)
+       phase = ode.phase("LGL3",TrajIG,nsegs,LerpIG) 
+       phase = ode.phase("LGL3",TrajIG,nsegs) # Above is the same as this
+
+       LerpIG = True
+       #Interpolate initial mesh using linear interpolation
+       phase = ode.phase("LGL3",TrajIG,nsegs,LerpIG)
+       
+
+       
+
 Reintegrating Solutions
 -----------------------
 Reintegration of a phase's trajectory can be accomplished using an ODE's integrator and the tabular
