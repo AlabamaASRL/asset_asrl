@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Optimal Control Problem Tutorial" href="OptimalControlProblem.html" /><link rel="prev" title="Integrator Tutorial" href="IntegratorGuide.html" />
 
     <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
-        <title>Optimal Control Phase Tutorial - ASSET 0.1.0 documentation</title>
+        <title>Optimal Control Phase Tutorial - ASSET 0.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -125,7 +125,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">ASSET 0.1.0 documentation</div></a>
+      <a href="../index.html"><div class="brand">ASSET 0.2.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -151,7 +151,7 @@
     <img class="sidebar-logo" src="../_static/ASSETLOGO.svg" alt="Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">ASSET 0.1.0 documentation</span>
+  <span class="sidebar-brand-text">ASSET 0.2.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -1038,6 +1038,23 @@ diverge immediately. In conclusion, don’t over constrain your problems…</p>
 <h3>What happens if I add multiple objectives?<a class="headerlink" href="#what-happens-if-i-add-multiple-objectives" title="Permalink to this heading">#</a></h3>
 <p>A phase has no restriction of the number of objectives that may be added. If multiple objectives are added, the optimizer will implicitly sum all of their values.</p>
 </section>
+<section id="bad-initial-guesses">
+<h3>Bad Initial Guesses<a class="headerlink" href="#bad-initial-guesses" title="Permalink to this heading">#</a></h3>
+<p>By default we take whatever the supplied initial guess to a phase is and use the specified transcription scheme’s interpolation method to generate the initial mesh.
+For compressed collocation methods, when the initial guess is very poor, this can induce osculations in the initial interpolated mesh that are not present in the initial guess
+. This can be avoided by instead interpolating the initial mesh linearly from the supplied initial guess. You can specify the method for the initial interpolation of a phase as shown below.
+If the user supplied initial guess is linear or constant, we recommend using the linear interpolation method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">LerpIG</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="c1">#Interpolate initial mesh using transcriptions interpolation method (same as default)</span>
+<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="n">nsegs</span><span class="p">,</span><span class="n">LerpIG</span><span class="p">)</span>
+<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="n">nsegs</span><span class="p">)</span> <span class="c1"># Above is the same as this</span>
+
+<span class="n">LerpIG</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="c1">#Interpolate initial mesh using linear interpolation</span>
+<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="n">nsegs</span><span class="p">,</span><span class="n">LerpIG</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 <section id="reintegrating-solutions">
 <h3>Reintegrating Solutions<a class="headerlink" href="#reintegrating-solutions" title="Permalink to this heading">#</a></h3>
 <p>Reintegration of a phase’s trajectory can be accomplished using an ODE’s integrator and the tabular
@@ -1144,6 +1161,7 @@ precisely between each time in the converged trajectory.</p>
 <li><a class="reference internal" href="#control-rate-constraints">Control Rate Constraints</a></li>
 <li><a class="reference internal" href="#what-happens-if-i-over-constrain-my-problem">What happens if I over constrain my problem?</a></li>
 <li><a class="reference internal" href="#what-happens-if-i-add-multiple-objectives">What happens if I add multiple objectives?</a></li>
+<li><a class="reference internal" href="#bad-initial-guesses">Bad Initial Guesses</a></li>
 <li><a class="reference internal" href="#reintegrating-solutions">Reintegrating Solutions</a></li>
 </ul>
 </li>
