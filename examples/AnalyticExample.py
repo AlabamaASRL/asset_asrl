@@ -79,7 +79,7 @@ if __name__ == "__main__":
     ### Analytic control
     Ustar = -(np.tanh(1-t)+.5)*np.cosh(1-t)/np.cosh(1)
     
-    T[2]=Ustar
+    
     
 
     plt.plot(t,L,label   =r'$L$' + '-Collocation',marker='o')
