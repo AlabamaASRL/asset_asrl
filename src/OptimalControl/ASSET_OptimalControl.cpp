@@ -1,12 +1,9 @@
 #include "ASSET_OptimalControl.h"
 #include "ODEArguments.h"
 #include "Integrators/Integrator.h"
+#include "OCUtils.h"
 
 namespace ASSET {
-
-
- 
-
 
 
 void OptimalControlBuild(FunctionRegistry& reg, py::module& m) {
@@ -34,6 +31,7 @@ void OptimalControlBuild(FunctionRegistry& reg, py::module& m) {
   FDDerivArbitrary<Eigen::VectorXd>::Build(oc,"FiniteDiffTable");
   ODEArguments<-1, -1, -1>::Build(oc, "ODEArguments");
 
+  OCUtilsBuild(oc);
 
   GenericODESBuildPart1(reg, oc);
   GenericODESBuildPart2(reg, oc);

@@ -142,6 +142,8 @@ struct PhaseIndexer : ODESize<-1, -1, -1> {
                               const Eigen::VectorXi& rstatpv,
                               const std::vector<int>& Tmodes);
 
+
+  
   int addAccumulation(ConstraintInterface eqfun, PhaseRegionFlags sreg,
                       const Eigen::VectorXi& rxtuv,
                       const Eigen::VectorXi& rodepv,
@@ -163,6 +165,70 @@ struct PhaseIndexer : ODESize<-1, -1, -1> {
   int addObjective(ObjectiveInterface objfun, PhaseRegionFlags sreg,
                    const Eigen::VectorXi& rxtuv, const Eigen::VectorXi& rodepv,
                    const Eigen::VectorXi& rstatpv, ThreadingFlags Tmode);
+
+  //////////////////////////////////////////////////////////////////////
+
+  void addMeshTimeEqCons(int StartCstate, int StopCstate,
+      const std::vector<ConstraintInterface>& eqfuns, const std::vector<int>& Tmodes) {
+      int index = this->nlp->EqualityConstraints.size();
+      int temp = this->nextPhaseEqCon;
+
+      int tvar0 = this->getXTUVarLoc(this->TVar(), StartCstate * (this->DefectCardinalStates - 1));
+      int tvar2 = this->getXTUVarLoc(this->TVar(), StopCstate * (this->DefectCardinalStates - 1));
+
+      MatrixXi vindex(3, 1);
+      vindex(0, 0) = tvar0;
+      vindex(2, 0) = tvar2;
+      MatrixXi cindex(1, 1);
+
+      for (int i = 0; i < eqfuns.size(); i++) {
+          int tvar1 = this->getXTUVarLoc(this->TVar(), (StartCstate + i + 1) * (this->DefectCardinalStates - 1));
+          vindex(1, 0) = tvar1;
+          cindex(0, 0) = nextPhaseEqCon;
+
+          this->nlp->EqualityConstraints.emplace_back(
+              ConstraintFunction(eqfuns[i], vindex, cindex));
+          this->nlp->EqualityConstraints.back().ThreadMode = Tmodes[i];
+          this->nextPhaseEqCon+= eqfuns[i].ORows();
+          this->numEqFuns++;
+      }
+
+      this->numPhaseEqCons += this->nextPhaseEqCon - temp;
+  }
+
+
+  void addMeshTimeIqCons(const std::vector<int> & FreeCStates,
+      const std::vector<ConstraintInterface>& iqfuns, const std::vector<int>& Tmodes) {
+      int index = this->nlp->InequalityConstraints.size();
+      int temp = this->nextPhaseIqCon;
+
+      int tvar0 = this->getXTUVarLoc(this->TVar(), 0);
+      int tvar2 = this->getXTUVarLoc(this->TVar(), (numNodalStates-1) * (this->DefectCardinalStates - 1));
+
+      MatrixXi vindex(3, 1);
+      vindex(0, 0) = tvar0;
+      vindex(2, 0) = tvar2;
+      MatrixXi cindex(1, 1);
+
+      for (int i = 0; i < iqfuns.size(); i++) {
+          int tvar1 = this->getXTUVarLoc(this->TVar(), (FreeCStates[i]) * (this->DefectCardinalStates - 1));
+          vindex(1, 0) = tvar1;
+          cindex(0, 0) = nextPhaseIqCon;
+
+          this->nlp->InequalityConstraints.emplace_back(
+              ConstraintFunction(iqfuns[i], vindex, cindex));
+          this->nlp->InequalityConstraints.back().ThreadMode = Tmodes[i];
+          this->nextPhaseIqCon += iqfuns[i].ORows();
+          this->numIqFuns++;
+      }
+
+      this->numPhaseIqCons += this->nextPhaseIqCon - temp;
+  }
+
+  /////////////////////////////////////////////////////////////////////////
+
+
+
 
   int getXTUVarLoc(int vloc, int State) const {
     int v = 0;

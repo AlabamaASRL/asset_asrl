@@ -70,6 +70,8 @@ OptimalControl/OptimalControlProblem.h
 OptimalControl/OptimalControlProblem.cpp
 OptimalControl/LGLInterpTable.h
 OptimalControl/LGLInterpTable.cpp
+OptimalControl/OCUtils.h
+OptimalControl/OCUtils.cpp
 )
 
 target_include_directories(optimalcontrol PRIVATE ${INCLUDE_DIRS})

@@ -826,30 +826,7 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
   }
 }
 void ASSET::ODEPhaseBase::transcribe_axis_funcs() {
-  VectorXd cspace(this->numDefects + 1);
-  int start = 0;
-  for (int i = 0; i < this->DefsPerBin.size(); i++) {
-    cspace.segment(start, this->DefsPerBin[i] + 1)
-        .setLinSpaced(this->DefBinSpacing[i], this->DefBinSpacing[i + 1]);
-    start += this->DefsPerBin[i];
-  }
-
-  std::vector<ConstraintInterface> AxisFuncs;
-  std::vector<int> Tmodes;
-  Eigen::VectorXi bins(this->Threads + 1);
-  bins.setLinSpaced(0, this->indexer.numNodalStates);
-
-  for (int i = 0; i < this->indexer.numNodalStates - 2; i++) {
-    AxisFuncs.emplace_back(SingleMeshSpacing(cspace[i + 1]));
-    int thrt = Thread0;
-    for (int j = 0; j < this->Threads; j++) {
-      if (i >= bins(j) && i < bins(j + 1)) {
-        thrt =j;
-      }
-    }
-    Tmodes.push_back(thrt);
-  }
-
+  
   VectorXi tloc(1);
   tloc[0] = this->TVar();
 
@@ -866,9 +843,45 @@ void ASSET::ODEPhaseBase::transcribe_axis_funcs() {
                               empty, ThreadingFlags::ByApplication);
   }
 
-  this->indexer.addPartitionedEquality(AxisFuncs,
-                                       PhaseRegionFlags::FrontNodalBackPath,
-                                       tloc, empty, empty, Tmodes);
+
+  if (true) {
+      // Static Mesh
+
+      VectorXd cspace(this->numDefects + 1);
+      int start = 0;
+      for (int i = 0; i < this->DefsPerBin.size(); i++) {
+          cspace.segment(start, this->DefsPerBin[i] + 1)
+              .setLinSpaced(this->DefBinSpacing[i], this->DefBinSpacing[i + 1]);
+          start += this->DefsPerBin[i];
+      }
+
+      std::vector<ConstraintInterface> AxisFuncs;
+      std::vector<int> Tmodes;
+      Eigen::VectorXi bins(this->Threads + 1);
+      bins.setLinSpaced(0, this->indexer.numNodalStates);
+
+      for (int i = 0; i < this->indexer.numNodalStates - 2; i++) {
+          AxisFuncs.emplace_back(SingleMeshSpacing(cspace[i + 1]));
+          int thrt = Thread0;
+          for (int j = 0; j < this->Threads; j++) {
+              if (i >= bins(j) && i < bins(j + 1)) {
+                  thrt = j;
+              }
+          }
+          Tmodes.push_back(thrt);
+      }
+
+
+      this->indexer.addPartitionedEquality(AxisFuncs,
+          PhaseRegionFlags::FrontNodalBackPath,
+          tloc, empty, empty, Tmodes);
+  }
+  else {
+      // Floating Mesh
+
+
+  }
+  
 }
 
 void ASSET::ODEPhaseBase::transcribe_control_funcs() {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Blocked_ODE_Wrapper.h"
-//#include "Integrators/RKIntegrator.h"
 #include "Integrators/Integrator.h"
 
 #include "LGLDefects.h"
