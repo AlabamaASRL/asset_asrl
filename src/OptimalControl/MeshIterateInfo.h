@@ -36,9 +36,6 @@ namespace ASSET {
 
 			this->gmean_error = std::exp((std::log(this->max_error) + std::log(this->avg_error)) / 2.0);
 
-			//this->gmean_error = std::exp((this->error.head(n - 1).array().log()*hs.array()).sum());
-
-
 			////////////////////////////////////////////////////
 			this->distintegral.resize(this->times.size());
 			this->distintegral[0] = 0;
@@ -58,6 +55,46 @@ namespace ASSET {
 		   int elem = 0;
 		   for (int i = 1; i < nbins; i++) {
 			   double di = double(i) / double(nbins);
+			   auto it = std::upper_bound(this->distintegral.cbegin() + elem, this->distintegral.cend(), di);
+			   elem = int(it - this->distintegral.cbegin()) - 1;
+
+			   double t0 = this->times[elem];
+			   double t1 = this->times[elem + 1];
+			   double d0 = this->distintegral[elem];
+			   double d1 = this->distintegral[elem + 1];
+			   double slope = (d1 - d0) / (t1 - t0);
+			   bins[i] = (di - d0) / slope + t0;
+
+		   }
+		   return bins;
+
+	   }
+
+	   Eigen::VectorXd calc_bins2(int nbins,double t00,double tff) {
+
+		   auto it = std::upper_bound(this->times.cbegin(), this->times.cend(), t00);
+		   int elem = (it - this->times.cbegin()) -1;
+		   elem = std::clamp(elem, 0, int(this->times.size()) - 2);
+
+		   double h = this->times[elem + 1] - this->times[elem];
+		   double tloc = (t00 - this->times[elem]) / h;
+		   double d0 = this->distintegral[elem] * (1 - tloc) + this->distintegral[elem+1] * tloc;
+
+		   it = std::upper_bound(this->times.cbegin(), this->times.cend(), tff);
+		   elem = (it - this->times.cbegin()) - 1;
+		   elem = std::clamp(elem, 0, int(this->times.size()) - 2);
+
+		   h = this->times[elem + 1] - this->times[elem];
+		   tloc = (tff - this->times[elem]) / h;
+		   double df = this->distintegral[elem] * (1 - tloc) + this->distintegral[elem+1] * tloc;
+
+
+
+		   Eigen::VectorXd bins;
+		   bins.setLinSpaced(nbins + 1, t00, tff);
+		   elem = 0;
+		   for (int i = 1; i < nbins; i++) {
+			   double di = d0 + (df-d0)*(double(i) / double(nbins));
 			   auto it = std::upper_bound(this->distintegral.cbegin() + elem, this->distintegral.cend(), di);
 			   elem = int(it - this->distintegral.cbegin()) - 1;
 

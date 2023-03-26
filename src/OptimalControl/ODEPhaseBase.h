@@ -77,6 +77,7 @@ protected:
   int TranSpacingFuncIndices = 0;
   int ConstraintOrder = 0;
 
+  VectorXi SwitchStates;
 
   ///////////////////////
 public:
@@ -95,7 +96,7 @@ public:
   bool SolveOnlyFirst = true;
   bool NewError = false;
   bool   DetectControlSwitches = false;
-
+  bool Jfunc = false;
   double RelSwitchTol = .3;
   double AbsSwitchTol = 1.0e-6;
 
@@ -109,6 +110,8 @@ public:
   bool MeshConverged = false;
 
   std::vector<MeshIterateInfo> MeshIters;
+
+  std::vector<ScalarFunctionalX> SwitchingFuncs;
 
 
   void setAdaptiveMesh(bool amesh) {
@@ -978,6 +981,7 @@ public:
   virtual void initMeshRefinement() {
       this->MeshConverged = false;
       this->MeshIters.resize(0);
+      this->SwitchStates.resize(0);
   }
 
   virtual bool checkMesh();

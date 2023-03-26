@@ -4,6 +4,7 @@
 #include "MeshSpacingConstraints.h"
 #include "PyDocString/OptimalControl/ODEPhaseBase_doc.h"
 #include "ValueLock.h"
+#include "OCUtils.h"
 
 int ASSET::ODEPhaseBase::calc_threads()
 {
@@ -581,7 +582,6 @@ void ASSET::ODEPhaseBase::refineTrajManual(VectorXd DBS, VectorXi DPB) {
     throw std::invalid_argument("");
   }
 
-  //this->Table.loadRegularData(DPB.sum(), this->ActiveTraj);
   this->Table.loadExactData(this->ActiveTraj);
 
   this->ActiveTraj = this->Table.NDdistribute(DBS, DPB);
@@ -843,8 +843,9 @@ void ASSET::ODEPhaseBase::transcribe_axis_funcs() {
                               empty, ThreadingFlags::ByApplication);
   }
 
+  bool normalmesh = this->UVars() == 0 || SwitchStates.size() == 0;
 
-  if (true) {
+  if (normalmesh) {
       // Static Mesh
 
       VectorXd cspace(this->numDefects + 1);
@@ -879,6 +880,31 @@ void ASSET::ODEPhaseBase::transcribe_axis_funcs() {
   else {
       // Floating Mesh
 
+      Eigen::VectorXi bins(this->Threads + 1);
+      bins.setLinSpaced(0, this->indexer.numNodalStates);
+
+      for (int s = 0; s < SwitchStates.size() - 1; s++) {
+
+          int start = SwitchStates[s];
+          int stop  = SwitchStates[s+1];
+
+          std::vector<ConstraintInterface> AxisFuncs;
+          std::vector<int> Tmodes;
+
+          VectorXd cspace = this->DefBinSpacing.segment(start, stop - start + 1);
+          cspace -= VectorXd::Constant(cspace.size(), cspace[0]);
+          cspace /= cspace[cspace.size() - 1];
+
+          if (cspace.size() > 2) {
+              for (int i = 0; i < cspace.size() - 2; i++) {
+                  AxisFuncs.emplace_back(SingleMeshSpacing(cspace[i + 1]));
+                  Tmodes.push_back(Thread0);
+              }
+
+              this->indexer.addMeshTimeEqCons(start, stop, AxisFuncs, Tmodes);
+
+          }
+      }
 
   }
   
@@ -1140,41 +1166,91 @@ void ASSET::ODEPhaseBase::updateMesh()
     n = std::clamp(n, int(this->numDefects * this->MeshRedFactor), int(this->numDefects * this->MeshIncFactor));
     n = std::clamp(n, this->MinSegments, this->MaxSegments);
 
-    Eigen::VectorXd bins = this->MeshIters.back().calc_bins(n);
 
     if (this->DetectControlSwitches && this->UVars()>0) {
-        Eigen::VectorXd switchvec = this->calcSwitches();
-        std::vector<double> stmp;
-       
+        std::vector<double> switchvec = eigenvector_to_stdvector(this->calcSwitches()) ;
+        switchvec.push_back(0);
+        switchvec.push_back(1);
+        std::sort(switchvec.begin(), switchvec.end());
 
-        for (int i = 0; i < bins.size() - 1; i++) {
-            for (int j = 0; j < switchvec.size(); j++) {
-                if (switchvec[j] > bins[i] && switchvec[j] < bins[i + 1]) {
-                    stmp.push_back(2*bins[i] / 3.0 +   bins[i + 1] / 3.0);
-                    stmp.push_back(  bins[i] / 3.0 + 2*bins[i + 1] / 3.0);
+        auto last = std::unique(switchvec.begin(), switchvec.end(),
+            [](auto t1, auto t2) {
+                return abs(t1 - t2) < 1.0e-8;
+            });
 
-                    break;
+        switchvec.erase(last, switchvec.end());
+
+        std::sort(switchvec.begin(), switchvec.end());
+
+        Eigen::VectorXd nper(switchvec.size() - 1);
+        nper.setConstant(.01);
+        double ntemp = 0;
+        for (int i = 0; i < this->MeshIters.back().error.size() - 1; i++) {
+
+            double t0 = this->MeshIters.back().times[i];
+            double tf = this->MeshIters.back().times[i+1];
+
+            double nsegs = std::pow((this->MeshIters.back().error[i] * this->MeshErrFactor) / this->MeshTol, 1 / (this->Order + 1));
+            nsegs = std::max(this->MeshRedFactor, nsegs);
+
+            for (int j = 0; j < switchvec.size() - 1; j++) {
+
+                double bt0 = switchvec[j];
+                double btf = switchvec[j + 1];
+
+                if ((t0 >= bt0 && t0 <= btf)|| (tf >= bt0 && tf <= btf)) {
+                    nper[j] += nsegs;
                 }
+
             }
         }
-        switchvec.resize(stmp.size());
-        for (int i = 0; i < stmp.size(); i++) {
-            switchvec[i] = stmp[i];
+        
+        
+        Eigen::VectorXi ns(nper.size());
+            
+        for (int i = 0; i< nper.size(); i++) {
+            ns[i] = std::rint(std::ceil(nper[i])+.01);
         }
 
-        Eigen::VectorXd binstmp(bins.size() + switchvec.size());
-        binstmp.head(bins.size()) = bins;
-        binstmp.tail(switchvec.size()) = switchvec;
-        std::sort(binstmp.begin(), binstmp.end());
         
-        bins = binstmp;
+        Eigen::VectorXd bins(ns.sum() + 1);
+        bins.setLinSpaced(0, 1);
+
+        SwitchStates.resize(switchvec.size());
+        SwitchStates[0]=0;
+
+
+        for (int i = 0,start =0; i < ns.size(); i++) {
+            double bt0 = switchvec[i];
+            double btf = switchvec[i + 1];
+            bins.segment(start, ns[i]+1) = this->MeshIters.back().calc_bins2(ns[i], bt0, btf);
+            start += ns[i];
+            SwitchStates[i + 1] = SwitchStates[i] + ns[i];
+
+        }
+        
+        std::cout << stdvector_to_eigenvector(switchvec).transpose() << std::endl;
+        std::cout << ns << std::endl;
+        std::cout << bins << std::endl;
+        Eigen::VectorXi dpb = VectorXi::Ones(bins.size() - 1);
+        this->MeshIters.back().up_numsegs = bins.size() - 1;
+        this->refineTrajManual(bins, dpb);
+       
+
+
+       
+    }
+    else {
+
+        
+        Eigen::VectorXd bins = this->MeshIters.back().calc_bins(n);
+        Eigen::VectorXi dpb = VectorXi::Ones(bins.size() - 1);
+        this->MeshIters.back().up_numsegs = bins.size() - 1;
+        this->refineTrajManual(bins, dpb);
+
     }
 
-    Eigen::VectorXi dpb = VectorXi::Ones(bins.size()-1);
-    this->MeshIters.back().up_numsegs = bins.size() - 1;
-
-    this->refineTrajManual(bins, dpb);
-     
+    
 }
 
 Eigen::VectorXd ASSET::ODEPhaseBase::calcSwitches()
@@ -1206,14 +1282,55 @@ Eigen::VectorXd ASSET::ODEPhaseBase::calcSwitches()
     Eigen::VectorXd unddiff;
     std::vector<double> switches;
 
-    for (int i = 0; i < this->ActiveTraj.size() - 1; i++) {
-        udiff = (uvals.col(i + 1) - uvals.col(i)).cwiseAbs();
-        unddiff = (uvals.col(i + 1) - uvals.col(i)).cwiseAbs();
-        if (udiff.maxCoeff() > this->AbsSwitchTol && unddiff.maxCoeff() > this->RelSwitchTol) {
-            double t = tsnd[i + 1] / 2.0 + tsnd[i] / 2.0;
-            switches.push_back(t);
+
+    if (Jfunc) {
+
+        Eigen::VectorXd utmp;
+        Eigen::VectorXd jvals;
+        Eigen::VectorXd tjs = tsnd;
+        tjs[tjs.size() - 1] = tjs[tjs.size() - 1] * .99 + tjs[tjs.size() - 2] * .01;
+
+        VectorXi derp(1);
+        derp[0] = 3;
+        for (int i = 0; i < this->UVars(); i++) {
+            utmp = und.row(i).transpose();
+
+            jvals = jump_function_mmod(tsnd, utmp, tjs,derp);
+
+            //std::cout << jvals.transpose() << std::endl;
+
+            std::vector<double> switchons;
+            std::vector<double> switchoffs;
+
+            for (int j = 0; j < jvals.size() - 1; j++) {
+                if (jvals[j]<this->AbsSwitchTol && jvals[j + 1]>this->AbsSwitchTol) {
+                    switchons.push_back(tsnd[j]);
+                }
+                else if (jvals[j] > this->AbsSwitchTol && jvals[j + 1] < this->AbsSwitchTol) {
+                    switchoffs.push_back(tsnd[j]);
+
+                    double t0 = switchons.size() == 0 ? 0 : switchons.back();
+                    switches.push_back(t0 / 2.0 + tsnd[j+1] / 2.0);
+                }
+            }
+
+
+            
+
+        }
+
+    }
+    else {
+        for (int i = 0; i < this->ActiveTraj.size() - 1; i++) {
+            udiff = (uvals.col(i + 1) - uvals.col(i)).cwiseAbs();
+            unddiff = (uvals.col(i + 1) - uvals.col(i)).cwiseAbs();
+            if (udiff.maxCoeff() > this->AbsSwitchTol && unddiff.maxCoeff() > this->RelSwitchTol) {
+                double t = tsnd[i + 1] / 2.0 + tsnd[i] / 2.0;
+                switches.push_back(t);
+            }
         }
     }
+    
 
    
     return stdvector_to_eigenvector(switches);
@@ -1967,6 +2084,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   obj.def_readonly("MeshConverged", &ODEPhaseBase::MeshConverged);
 
  
+  obj.def_readwrite("Jfunc", &ODEPhaseBase::Jfunc);
 
   
 }

@@ -69,9 +69,9 @@ phase.addBoundaryValue("Back",range(0,4),XF[0:4])
 phase.addLUVarBounds("Path",[5,6],-1,1,1)
 
 phase.addDeltaTimeObjective(10)
-#phase.setAdaptiveMesh(True)
+phase.setAdaptiveMesh(True)
 phase.optimizer.PrintLevel = 2
-#phase.DetectControlSwitches = True
+phase.DetectControlSwitches = True
 phase.ForceOneMeshIter = True
 phase.MeshTol=1.0e-9
 #phase.optimizer.set_OptLSMode("L1")

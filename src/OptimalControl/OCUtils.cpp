@@ -41,14 +41,28 @@ namespace ASSET {
                 tupars[k] = { tsin[j],usin[j] };
             }
 
-            //fmt::print("{0},\n", tupars.size());
 
             std::sort(tupars.begin(), tupars.end(),
                 [t](auto t1, auto t2) {
                     return std::abs(t1[0] - t) < std::abs(t2[0] - t);
                 });
 
+            if (tupars.size() > m) {
+                auto nstart = std::stable_partition(tupars.begin(), (tupars.begin() + m),
+                    [t](auto ti) {
+                        return ti[0] > t;
+                    });
 
+                if (nstart == tupars.begin()) {
+                    auto closepos = std::stable_partition((tupars.begin() + m), tupars.end(),
+                        [t](auto ti) {
+                            return ti[0] > t;
+                        });
+
+                    std::swap(tupars[m - 1], tupars[m]);
+                }
+            }
+            
             double q = 0;
             double fs = 0;
 

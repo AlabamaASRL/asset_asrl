@@ -56,25 +56,42 @@ if __name__ == "__main__":
     XtU0 = np.zeros((7))
     
     XtU0[0:3] = [38,2.5,3.25]
-    XtU0[5] = 1
+    XtU0[5] = .0
     XtU0[6] =.71
     
     
     TrajIG =  integ.integrate_dense(XtU0,tf)
     
-    phase = ode.phase("LGL3",TrajIG,32)
+    phase = ode.phase("LGL3",TrajIG,5)
+ 
+    #phase.setControlMode("BlockConstant")
+    
     phase.addBoundaryValue("Front",range(0,5),XtU0[0:5])
     
     phase.addLUVarBound("Path",5,0,1,1.0)
     phase.addLUVarBound("Path",6,u2min,1,1.0)
 
     phase.addStateObjective("Back",Args(4).dot([r1,r2,r3,1.0]),range(0,4))
+    #phase.addLowerVarBound("Path",4,-.00001)
+    
+    f = Args(2)[0]-Args(2)[1]
+    phase.addInequalCon("PairWisePath",f*.001,[4])
     
     phase.addDeltaTimeEqualCon(tf)
     phase.setThreads(1,1)
     phase.setAdaptiveMesh(True)
-    phase.setMeshErrorCriteria("endtoend")
+    phase.DetectControlSwitches = True
+    #phase.ForceOneMeshIter = True
+    #phase.Jfunc = True
+    #phase.setMeshErrorCriteria("endtoend")
+    phase.optimizer.PrintLevel = 1
+    phase.optimizer.KKTtol = 1.0e-8
+    
+    #phase.MaxMeshIters = 1
+
     phase.solve_optimize()
+    
+    #phase.transcribe(True,True)
     
     
 
@@ -84,10 +101,12 @@ if __name__ == "__main__":
     
     
     T = np.array(Traj).T
-    plt.plot(T[4],T[0])
-    plt.plot(T[4],T[1])
-    plt.plot(T[4],T[2])
-    plt.show()
-    plt.plot(T[4],T[5])
+    T[4]  = T[4]/7
+   
+    plt.plot(T[4],T[5],marker='o')
     plt.plot(T[4],T[6])
     plt.show()
+    
+    print(T[4])
+   
+    

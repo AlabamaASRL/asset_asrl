@@ -47,7 +47,7 @@ def Jump(Traj):
     
     U0 = TT[7]
     
-    U0N = ( U0 - min(U0))/(.01+max(U0) - min(U0))
+    U0N = ( U0 - min(U0))/(1+max(U0) - min(U0))
     
     JF = []
     ts = []
@@ -68,14 +68,15 @@ def Jump(Traj):
         
     
     
-    tstmp = np.linspace(ts[0],ts[-1],640)
-    #tstmp = ts[0:-1]
+    tstmp = np.linspace(ts[0],ts[-1],1000)
+    tstmp = ts
     t0 = time.perf_counter()
     jt = oc.jump_function(ts,U0N[1:-1],tstmp,5)
-    jy1 = oc.jump_function_mmod(ts,U0N[1:-1],tstmp,[3,4,5,6,7,8,9])
+    jy1 = oc.jump_function_mmod(t,U0N,tstmp,[3])
+   
     tf = time.perf_counter()
     print(tf-t0)
-    
+    plt.ylim([-0.1,1.2])
     plt.plot(TT[6],U0N)
     plt.plot(ts,JF)
     #plt.plot(tstmp,abs(jt))
@@ -90,19 +91,11 @@ def Jump(Traj):
     
 if __name__ == "__main__":
     
-    
-    ts = np.linspace(0,2,101)
-    ys = [ 1 if t<1 else -1 for t in ts ]
-    
-    js = oc.jump_function_mmod(ts,ys,ts[0:-1],[3,4,5])
-    plt.plot(ts,ys)
-    plt.plot(ts[0:-1],js)
-    
-    plt.show()
+   
     
     
     L = 5
-    tf = 1
+    tf = 9
     
     Traj = []
     
@@ -120,9 +113,9 @@ if __name__ == "__main__":
         
         
     ode = ODE(L)
-    phase = ode.phase("LGL7",Traj,128)
+    phase = ode.phase("LGL5",Traj,5)
     phase.setControlMode("NoSpline")
-    #phase.setControlMode("BlockConstant")
+    phase.setControlMode("BlockConstant")
 
     phase.addBoundaryValue("Front",range(0,7),Traj[0][0:7])
     phase.addBoundaryValue("Back",range(0,6),Traj[-1][0:6])
@@ -130,11 +123,24 @@ if __name__ == "__main__":
     
     phase.addLUVarBounds("Path",[7,8,9],-1,1.,1.0)
     phase.addDeltaTimeObjective(1.0)
-    
-    #phase.setAdaptiveMesh(True)
     phase.optimizer.set_QPOrderingMode("MINDEG")
+
+    phase.setAdaptiveMesh(True)
     phase.optimizer.PrintLevel =1
+    phase.AbsSwitchTol=.15
+    phase.DetectControlSwitches = True
+    phase.ForceOneMeshIter = True
+    phase.Jfunc = False
+    phase.MaxMeshIters=3
+    phase.setMeshErrorEstimator("integrator")
+    phase.optimizer.KKTtol = 1.0e-8
+
+    f = Args(2)[0]-Args(2)[1] +.03
+    phase.addInequalCon("PairWisePath",f*.0001,[6])
     
+    
+    
+
     
     t0 = time.perf_counter()
     phase.solve_optimize()
@@ -142,13 +148,18 @@ if __name__ == "__main__":
     
     print(tf-t0)
     
+    integ = ode.integrator(.01,phase.returnTrajTable())
+    Traj = phase.returnTraj()
+    
+    Traj = integ.integrate_dense(Traj[0],Traj[-1][6])
     
     Jump(phase.returnTraj())
     
     PhaseMeshErrorPlot(phase,show=True)
 
-    T = np.array(phase.returnTraj()).T
+    T = np.array(Traj).T
     
+    T[6]=T[6]/T[6][-1]
     
     plt.plot(T[6],T[7],marker='o')
     plt.plot(T[6],T[8])
