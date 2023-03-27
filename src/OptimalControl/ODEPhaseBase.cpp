@@ -905,6 +905,92 @@ void ASSET::ODEPhaseBase::transcribe_axis_funcs() {
 
           }
       }
+      if (SwitchStates.size() > 2) {
+
+         if (false) 
+          {
+
+              std::vector<ConstraintInterface> AxisFuncs;
+              std::vector<int> Tmodes;
+              std::vector<int> Cstates;
+
+              for (int s = 0; s < SwitchStates.size() - 2; s++) {
+
+                  auto t0titf = Arguments<3>();
+
+                  auto t0 = t0titf.coeff<0>();
+                  auto ti = t0titf.coeff<1>();
+                  auto tf = t0titf.coeff<2>();
+
+                  auto h = tf - t0;
+
+                  double tl = SwitchBounds[s][1];
+                  double th = SwitchBounds[s][2];
+
+                  auto eq1 = (ti - t0) / h - th;
+                  auto eq2 = tl - (ti - t0) / h;
+
+                  auto func = stack(eq1, eq2);
+
+                  AxisFuncs.emplace_back(func);
+                  Tmodes.push_back(Thread0);
+                  Cstates.push_back(SwitchStates[s + 1]);
+
+              }
+
+
+              this->indexer.addMeshTimeIqCons(Cstates, AxisFuncs, Tmodes);
+
+
+          }
+          else if (false) 
+          {
+
+              std::vector<ConstraintInterface> AxisFuncs;
+              std::vector<int> Tmodes;
+              std::vector<Eigen::Vector2i> Cstates;
+
+              for (int s = 0; s < SwitchStates.size() - 2; s++) {
+
+                  auto t0t1t2tf = Arguments<4>();
+
+                  auto t0 = t0t1t2tf.coeff<0>();
+                  auto t1 = t0t1t2tf.coeff<1>();
+                  auto t2 = t0t1t2tf.coeff<2>();
+                  auto tf = t0t1t2tf.coeff<3>();
+
+                  auto h = tf - t0;
+
+                 
+                  double tl = DefBinSpacing[SwitchStates[s + 1]];
+                  double th = DefBinSpacing[SwitchStates[s + 2]];
+
+                 
+                  fmt::print("{0}\n", double((th - tl) / 5.0));
+
+                  auto func =  ((t1-t2)/h) + (th-tl)/40.0;
+
+                  AxisFuncs.emplace_back(func/100);
+                  Tmodes.push_back(Thread0);
+
+                  Eigen::Vector2i k;
+                  k << SwitchStates[s + 1], SwitchStates[s + 2];
+
+                  Cstates.push_back(k);
+
+              }
+
+
+              this->indexer.addMeshTimeIqCons2(Cstates, AxisFuncs, Tmodes);
+
+
+
+          }
+          
+
+      }
+
+      
 
   }
   
@@ -1183,7 +1269,7 @@ void ASSET::ODEPhaseBase::updateMesh()
         std::sort(switchvec.begin(), switchvec.end());
 
         Eigen::VectorXd nper(switchvec.size() - 1);
-        nper.setConstant(.01);
+        nper.setConstant(1);
         double ntemp = 0;
         for (int i = 0; i < this->MeshIters.back().error.size() - 1; i++) {
 
@@ -1207,6 +1293,10 @@ void ASSET::ODEPhaseBase::updateMesh()
         
         
         Eigen::VectorXi ns(nper.size());
+
+        if (nper.sum() > n) {
+            nper = (nper * double(n) / nper.sum()).eval();
+        }
             
         for (int i = 0; i< nper.size(); i++) {
             ns[i] = std::rint(std::ceil(nper[i])+.01);
@@ -1229,9 +1319,7 @@ void ASSET::ODEPhaseBase::updateMesh()
 
         }
         
-        std::cout << stdvector_to_eigenvector(switchvec).transpose() << std::endl;
-        std::cout << ns << std::endl;
-        std::cout << bins << std::endl;
+        
         Eigen::VectorXi dpb = VectorXi::Ones(bins.size() - 1);
         this->MeshIters.back().up_numsegs = bins.size() - 1;
         this->refineTrajManual(bins, dpb);
@@ -1282,8 +1370,9 @@ Eigen::VectorXd ASSET::ODEPhaseBase::calcSwitches()
     Eigen::VectorXd unddiff;
     std::vector<double> switches;
 
+    std::vector<Eigen::Vector3d> swrtp;
 
-    if (Jfunc) {
+    if (true) {
 
         Eigen::VectorXd utmp;
         Eigen::VectorXd jvals;
@@ -1296,28 +1385,80 @@ Eigen::VectorXd ASSET::ODEPhaseBase::calcSwitches()
             utmp = und.row(i).transpose();
 
             jvals = jump_function_mmod(tsnd, utmp, tjs,derp);
-
-            //std::cout << jvals.transpose() << std::endl;
-
             std::vector<double> switchons;
             std::vector<double> switchoffs;
+            bool on = jvals[0] > AbsSwitchTol;
 
             for (int j = 0; j < jvals.size() - 1; j++) {
-                if (jvals[j]<this->AbsSwitchTol && jvals[j + 1]>this->AbsSwitchTol) {
-                    switchons.push_back(tsnd[j]);
-                }
-                else if (jvals[j] > this->AbsSwitchTol && jvals[j + 1] < this->AbsSwitchTol) {
-                    switchoffs.push_back(tsnd[j]);
 
-                    double t0 = switchons.size() == 0 ? 0 : switchons.back();
-                    switches.push_back(t0 / 2.0 + tsnd[j+1] / 2.0);
+                if (on) {
+                    if (jvals[j + 1] < this->AbsSwitchTol) {
+                        if (j != jvals.size() - 2) {
+                            if (jvals[j + 2] < this->AbsSwitchTol) {
+                                on = false;
+                            }
+                        }
+                        else {
+                            on = false;
+                        }
+
+                        if (!on) {
+                            switchoffs.push_back(tsnd[j + 1]);
+                            double t0 = switchons.size() == 0 ? 0 : switchons.back();
+                            switches.push_back(t0 / 2.0 + tsnd[j + 1] / 2.0);
+                            Eigen::Vector3d v;
+                            v << switches.back(), t0, tsnd[j + 1];
+                            swrtp.push_back(v);
+                        }
+                    }
                 }
+                else {
+                    if (jvals[j + 1] > this->AbsSwitchTol) {
+                        on = true;
+                        switchons.push_back(tsnd[j]);
+
+                    }
+                }
+            }
+        }
+
+
+        std::sort(swrtp.begin(), swrtp.end(),
+            [](auto t1, auto t2) {
+                return t1[0] < t2[0];
+            });
+
+        auto last = std::unique(swrtp.begin(), swrtp.end(),
+            [](auto t1, auto t2) {
+                return abs(t1[0] - t2[0]) < 1.0e-12;
+            });
+
+        swrtp.erase(last, swrtp.end());
+
+        for (auto& v : swrtp) {
+            std::cout << v.transpose() << std::endl;
+        }
+       
+        for (int i = 0; i < swrtp.size()-1; i++) {
+
+            if (swrtp[i][2] > swrtp[i + 1][1]) {
+                double avg = swrtp[i][2] / 2 + swrtp[i + 1][1] / 2;
+                //swrtp[i][2] = avg;
+                //swrtp[i + 1][1] = avg;
+
             }
 
 
-            
-
         }
+        for (auto& v : swrtp) {
+            std::cout << v.transpose() << std::endl;
+        }
+
+        this->SwitchBounds = swrtp;
+
+
+        
+
 
     }
     else {

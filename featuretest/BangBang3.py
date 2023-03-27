@@ -62,31 +62,36 @@ for t in ts:
     IG.append(XI)
     
     
-phase = ode.phase("LGL3",IG,32)
+phase = ode.phase("LGL5",IG,100)
 phase.setControlMode("BlockConstant")
 phase.addBoundaryValue("Front",range(0,5),X0[0:5])
 phase.addBoundaryValue("Back",range(0,4),XF[0:4])
 phase.addLUVarBounds("Path",[5,6],-1,1,1)
 
-phase.addDeltaTimeObjective(10)
+phase.addDeltaTimeObjective(1)
 phase.setAdaptiveMesh(True)
 phase.optimizer.PrintLevel = 2
 phase.DetectControlSwitches = True
 phase.ForceOneMeshIter = True
-phase.MeshTol=1.0e-9
+phase.MeshTol=1.0e-7
 #phase.optimizer.set_OptLSMode("L1")
 phase.Threads = 8
 phase.optimizer.QPThreads = 8
 phase.optimizer.KKTtol=1.0e-10
 phase.optimizer.deltaH=1.0e-9
+phase.optimizer.QPOrderingMode = solvs.QPOrderingModes.MINDEG
+phase.optimizer.BoundFraction = .997
+phase.AbsSwitchTol=.1
+phase.setThreads(1,1)
+phase.optimizer.CNRMode = True
 
-phase.optimizer.BoundFraction = .999
 phase.solve_optimize()
 
 Traj = phase.returnTraj()
 
 TT = np.array(Traj).T
 
+TT[4]=TT[4]/TT[4][-1]
 
 plt.plot(TT[4],TT[5])
 plt.plot(TT[4],TT[6])

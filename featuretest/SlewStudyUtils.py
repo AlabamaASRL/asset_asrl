@@ -149,7 +149,7 @@ def FullAxis(Ivec, Tmax, nvec, theta, EigAxTraj, Nsegs):
         I[8:11] *= .6
 
     ode = QuatModel(Ivec)
-    phase = ode.phase(Tmodes.LGL3, IG, Nsegs)
+    phase = ode.phase(Tmodes.LGL7, IG, Nsegs)
 
     phase.setControlMode(oc.ControlModes.BlockConstant)
     phase.addBoundaryValue(PhaseRegs.Front, range(0, 8),
@@ -164,6 +164,10 @@ def FullAxis(Ivec, Tmax, nvec, theta, EigAxTraj, Nsegs):
 
     phase.addEqualCon(PhaseRegs.Back, axang(), range(0, 4))
     phase.addDeltaTimeObjective(1.0)
+    
+    f = Args(2)[0]-Args(2)[1] +.01
+    phase.addInequalCon("PairWisePath",f*.01,[7])
+    
 
     phase.optimizer.OptLSMode = solvs.LineSearchModes.L1
     phase.optimizer.MaxLSIters = 1
@@ -171,17 +175,19 @@ def FullAxis(Ivec, Tmax, nvec, theta, EigAxTraj, Nsegs):
     phase.optimizer.QPOrderingMode = solvs.QPOrderingModes.MINDEG
     phase.optimizer.BoundFraction = .997
     phase.optimizer.deltaH = 1.0e-6
-    phase.optimizer.KKTtol = 1.0e-7
+    phase.optimizer.KKTtol = 1.0e-10
     phase.optimizer.EContol = 1.0e-8
     phase.optimizer.QPParSolve = 1
-    #phase.AdaptiveMesh=True
-    #phase.MeshErrorEstimator="integrator"
+    phase.AdaptiveMesh=True
+    phase.MeshErrorEstimator="integrator"
     phase.ForceOneMeshIter = True
-    #phase.DetectControlSwitches=True
-    phase.RelSwitchTol = .2
-    phase.optimizer.PrintLevel=1
-    phase.MeshTol=1.0e-7
+    phase.DetectControlSwitches=True
+    phase.RelSwitchTol = .1
+    phase.AbsSwitchTol = .4
+    phase.optimizer.PrintLevel=0
+    phase.MeshTol=1.0e-8
     phase.MeshErrFactor=10
+
     
     phase.setJetJobMode("optimize")
     
@@ -198,18 +204,33 @@ if __name__ == "__main__":
     nvec = normalize([1,1,100])
     theta = 2.1
     Tmax = 1
-    Nsegs = 30
+    Nsegs = 10
     
     
 
     T1 = EigAxis(Ivec, Tmax, nvec, theta, Nsegs)
     
-    phases = [FullAxis(Ivec, Tmax, nvec, theta, T1, Nsegs) for i in range(0,100)]
+    #phases = [FullAxis(Ivec, Tmax, nvec, theta, T1, Nsegs) for i in range(0,100)]
     
-    phases = ast.Solvers.Jet.map(phases,16)
+    phase = FullAxis(Ivec, Tmax, nvec, theta, T1, Nsegs)
+    
+    phase.solve_optimize()
     
     
-    T2 = phases[0].returnTraj()
+    T2 = phase.returnTraj()
+    
+    T = np.array(T2).T
+    
+    T[7] = T[7]/T[7][-1]
+    
+    plt.plot(T[7],T[8],marker='o')
+    plt.plot(T[7],T[9],marker='o')
+    plt.plot(T[7],T[10],marker='o')
+    
+    plt.show()
+    
+
+    
     #T2 = FullAxis(Ivec, Tmax, nvec, theta, T1, Nsegs)
     
 

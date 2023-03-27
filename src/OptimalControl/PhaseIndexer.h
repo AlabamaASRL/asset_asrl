@@ -208,13 +208,45 @@ struct PhaseIndexer : ODESize<-1, -1, -1> {
       MatrixXi vindex(3, 1);
       vindex(0, 0) = tvar0;
       vindex(2, 0) = tvar2;
-      MatrixXi cindex(1, 1);
+      MatrixXi cindex(2, 1);
 
       for (int i = 0; i < iqfuns.size(); i++) {
           int tvar1 = this->getXTUVarLoc(this->TVar(), (FreeCStates[i]) * (this->DefectCardinalStates - 1));
           vindex(1, 0) = tvar1;
           cindex(0, 0) = nextPhaseIqCon;
+          cindex(1, 0) = nextPhaseIqCon+1;
 
+          this->nlp->InequalityConstraints.emplace_back(
+              ConstraintFunction(iqfuns[i], vindex, cindex));
+          this->nlp->InequalityConstraints.back().ThreadMode = Tmodes[i];
+          this->nextPhaseIqCon += iqfuns[i].ORows();
+          this->numIqFuns++;
+      }
+
+      this->numPhaseIqCons += this->nextPhaseIqCon - temp;
+  }
+
+  void addMeshTimeIqCons2(const std::vector<Eigen::Vector2i>& FreeCStates,
+      const std::vector<ConstraintInterface>& iqfuns, const std::vector<int>& Tmodes) {
+      int index = this->nlp->InequalityConstraints.size();
+      int temp = this->nextPhaseIqCon;
+
+      int tvar0 = this->getXTUVarLoc(this->TVar(), 0);
+      int tvar3 = this->getXTUVarLoc(this->TVar(), (numNodalStates - 1) * (this->DefectCardinalStates - 1));
+
+      MatrixXi vindex(4, 1);
+      vindex(0, 0) = tvar0;
+      vindex(3, 0) = tvar3;
+      MatrixXi cindex(1, 1);
+
+      for (int i = 0; i < iqfuns.size(); i++) {
+          int tvar1 = this->getXTUVarLoc(this->TVar(), (FreeCStates[i][0]) * (this->DefectCardinalStates - 1));
+          int tvar2 = this->getXTUVarLoc(this->TVar(), (FreeCStates[i][1]) * (this->DefectCardinalStates - 1));
+
+          vindex(1, 0) = tvar1;
+          vindex(2, 0) = tvar2;
+          cindex(0, 0) = nextPhaseIqCon;
+       
           this->nlp->InequalityConstraints.emplace_back(
               ConstraintFunction(iqfuns[i], vindex, cindex));
           this->nlp->InequalityConstraints.back().ThreadMode = Tmodes[i];

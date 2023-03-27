@@ -62,9 +62,9 @@ if __name__ == "__main__":
     
     TrajIG =  integ.integrate_dense(XtU0,tf)
     
-    phase = ode.phase("LGL3",TrajIG,5)
+    phase = ode.phase("LGL5",TrajIG,15)
  
-    #phase.setControlMode("BlockConstant")
+    phase.setControlMode("BlockConstant")
     
     phase.addBoundaryValue("Front",range(0,5),XtU0[0:5])
     
@@ -75,13 +75,13 @@ if __name__ == "__main__":
     #phase.addLowerVarBound("Path",4,-.00001)
     
     f = Args(2)[0]-Args(2)[1]
-    phase.addInequalCon("PairWisePath",f*.001,[4])
+    #phase.addInequalCon("PairWisePath",f*.001,[4])
     
     phase.addDeltaTimeEqualCon(tf)
     phase.setThreads(1,1)
     phase.setAdaptiveMesh(True)
     phase.DetectControlSwitches = True
-    #phase.ForceOneMeshIter = True
+    phase.ForceOneMeshIter = True
     #phase.Jfunc = True
     #phase.setMeshErrorCriteria("endtoend")
     phase.optimizer.PrintLevel = 1

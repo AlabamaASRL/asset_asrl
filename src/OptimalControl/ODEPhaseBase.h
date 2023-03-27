@@ -78,6 +78,9 @@ protected:
   int ConstraintOrder = 0;
 
   VectorXi SwitchStates;
+  std::vector<Eigen::Vector3d> SwitchBounds;
+
+
 
   ///////////////////////
 public:

@@ -11,14 +11,24 @@ namespace ASSET {
 
     }
 
-    Eigen::VectorXd jump_function(const Eigen::VectorXd& tsin, const Eigen::VectorXd& usin, const Eigen::VectorXd& tsout, int m) {
+    Eigen::VectorXd jump_function(const Eigen::VectorXd& tsint, const Eigen::VectorXd& usint, const Eigen::VectorXd& tsoutt, int m) {
+
+        using Scalar = long double;
+
+
+        Eigen::Matrix<Scalar, -1, 1> tsin = tsint.cast<Scalar>();
+        Eigen::Matrix<Scalar, -1, 1> usin = usint.cast<Scalar>();
+        Eigen::Matrix<Scalar, -1, 1> tsout = tsoutt.cast<Scalar>();
+
+
+
 
         int size = tsin.size();
         m = std::min(size, m);
 
-        std::vector < std::array < double, 2>> tupars;
+        std::vector < std::array < Scalar, 2>> tupars;
 
-        double fact = 1;
+        Scalar fact = 1;
         for (int i = 1; i <= (m - 1); i++)
             fact = fact * i;
 
@@ -26,7 +36,7 @@ namespace ASSET {
 
         for (int i = 0, start = 0; i < tsout.size(); i++) {
 
-            double t = tsout[i];
+            Scalar t = tsout[i];
 
             auto it = std::upper_bound(tsin.cbegin() + start, tsin.cend(), t);
             int elem = int(it - tsin.begin());
@@ -63,12 +73,12 @@ namespace ASSET {
                 }
             }
             
-            double q = 0;
-            double fs = 0;
+            Scalar q = 0.0;
+            Scalar fs = 0.0;
 
 
             for (int j = 0; j < m; j++) {
-                double cj = fact;
+                Scalar cj = fact;
 
                 for (int k = 0; k < m; k++) {
                     if (k != j) {
@@ -84,9 +94,33 @@ namespace ASSET {
 
                 }
             }
-
-
             jmp[i] = fs / q;
+
+            if (abs(q) < 1.0e-12) {
+                Scalar q = 0.0;
+                Scalar fs = 0.0;
+
+
+                for (int j = 0; j < m; j++) {
+                    Scalar cj = fact;
+
+                    for (int k = 0; k < m; k++) {
+                        if (k != j) {
+                            cj *= 1.0 / (tupars[j][0] - tupars[k][0]);
+                        }
+                    }
+                    fs += cj * tupars[j][1];
+
+                    if (tupars[j][0] > t) {
+
+                        q += cj;
+                        fmt::print("{0},{1},{2}\n", q,t, tupars[j][0]);
+
+                    }
+                }
+
+            }
+
 
 
         }
