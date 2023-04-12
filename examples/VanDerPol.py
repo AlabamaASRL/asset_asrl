@@ -30,26 +30,38 @@ class VanderPol(oc.ODEBase):
         
 if __name__ == "__main__":
 
-    ode = VanderPol()
+    import time
     
+    
+    t00 = time.perf_counter()
+    ode = VanderPol()
+
     tf = 10.0
     
     TrajIG = [[0,0,t,0] for t in np.linspace(0,tf,100)]
     
-    integ = ode.integrator(.001)
     
     
-    phase = ode.phase('LGL3',TrajIG,256)
+    phase = ode.phase('LGL3',TrajIG,800)
     phase.integrator.setStepSizes(.25,.001,3)
-    phase.setControlMode("BlockConstant")
+    #phase.setControlMode("BlockConstant")
     phase.addBoundaryValue("Front",range(0,3),[0,1,0])
     phase.addLUVarBound("Path",3,-0.75,1.0,1.0)
-    
+    phase.addLUVarBound("Path",0,-0.25,1.0,1.0)
+
     phase.addIntegralObjective(Args(3).squared_norm(),[0,1,3])
     phase.addBoundaryValue("Back",[0,1,2],[0.0,0.0,tf])
-    phase.optimizer.PrintLevel=0
+    phase.optimizer.PrintLevel=1
     phase.setThreads(8,8)
     phase.optimizer.set_tols(1.0e-8,1.0e-8,1.0e-8)
+    #phase.setAdaptiveMesh(True)
+    phase.setMeshErrorEstimator("integrator")
+    
+    tff = time.perf_counter()
+
+    print(tff-t00)
+    
+    
     
     phase.optimize()
     Traj = phase.returnTraj()

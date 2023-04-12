@@ -108,7 +108,7 @@ for t in np.linspace(0,tfIG,100):
 
 ode  = BikeODE(la,lb)
 
-phase = ode.phase("LGL3",TrajIG,128)
+phase = ode.phase("LGL3",TrajIG,40)
 
 phase.addBoundaryValue("Front",[0,1,2,3,4],[x0,y0,psi0,v0,t0])
 

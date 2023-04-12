@@ -35,8 +35,8 @@ endif()
 ################################################################################
 
 
-set(LINK_TIME_OPT FALSE)          ### DO LTO - Recommended for full release
-set(CLANG_MAX_INLINE_DEPTH 225)
+set(LINK_TIME_OPT TRUE)          ### DO LTO - Recommended for full release
+set(CLANG_MAX_INLINE_DEPTH 400)
 #set(BUILD_ASSET_WHEEL TRUE)      ### CI Build for generic wheels
 #set(BUILD_SPHINX_DOCS TRUE)      
 

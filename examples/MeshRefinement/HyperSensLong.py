@@ -34,11 +34,11 @@ class HyperSens(oc.ODEBase):
 
 if __name__ == "__main__":
 
-    xt0 = 1.5
-    xtf = 1.0
-    tf  = 10000.0  # smaller tf makes it easier to solve
+    xt0 = 1.
+    xtf = 1.5
+    tf  = 1000000.0  # smaller tf makes it easier to solve
     
-    cubed = False
+    cubed = True
     ode= HyperSens(cubed)
     
     '''
@@ -48,14 +48,14 @@ if __name__ == "__main__":
     ## Lerp boundary conditions
     TrajIG =[[xt0*(1-t/tf) + xtf*(t/tf),t,0] for t in np.linspace(0,tf,1000)]
     ## All Zeros
-    #TrajIG =[[0.0,t,0] for t in np.linspace(0,tf,1000)]
+    TrajIG =[[0.0,t,0] for t in np.linspace(0,tf,1000)]
     
     '''
     Need minimum of 3 segments on initial mesh to get original to converge.
     Need minumum of about 16 segments on initial mesh for cubed version to converge
     '''
-    nsegs   = 50
-    phase = ode.phase("LGL7",TrajIG,nsegs)  # LGL7 recommended for cubed version
+    nsegs   = 512
+    phase = ode.phase("LGL5",TrajIG,nsegs,True)  # LGL7 recommended for cubed version
     
     # A knob to turn
     phase.setControlMode("NoSpline")
@@ -63,10 +63,13 @@ if __name__ == "__main__":
     # Boundary Conditions
     phase.addBoundaryValue("First",[0,1],[xt0,0])
     phase.addBoundaryValue("Last" ,[0,1],[xtf,tf])
+
+    
     
     #Objective
     phase.addIntegralObjective(Args(2).squared_norm()/2,[0,2])
-    
+   
+
     # Some loose bounds on variables
     phase.addLUVarBound("Path",0,-50,50)
     phase.addLUVarBound("Path",2,-50,50)
@@ -77,8 +80,8 @@ if __name__ == "__main__":
     phase.optimizer.set_SoeLSMode("L1")
     phase.optimizer.set_MaxLSIters(2)
     
-    phase.optimizer.PrintLevel = 2
-    phase.setThreads(1,1)
+    phase.optimizer.PrintLevel = 0
+    phase.setThreads(8,8)
    
     '''
     For tf=10000.0 this problem is so sensitve that the static pivoting order 
@@ -106,8 +109,10 @@ if __name__ == "__main__":
     phase.optimizer.set_EContol(1.0e-7)
     
     ## Set Max number of mesh iterations: 
-    phase.setMaxMeshIters(10) #default = 10
-    
+    phase.setMaxMeshIters(7) #default = 10
+    phase.setMinMeshIters(0) #default = 10
+    phase.SolveOnlyFirst = False
+
     
     
     '''
@@ -117,7 +122,7 @@ if __name__ == "__main__":
     phase.setMeshErrorEstimator('deboor')  #default
     
     ##Use the phase's explicit integrator, set the phases integrator tolerances and step sizes appropraitely for good performance
-    #phase.setMeshErrorEstimator('integrator')
+    phase.setMeshErrorEstimator('integrator')
     
     
     '''
@@ -138,7 +143,7 @@ if __name__ == "__main__":
     Parameters controlling how quickly/agressively the mesh can change between iterates
     '''
     ## Maximum multiple by which the # of segments can be increased between iterations
-    phase.setMeshIncFactor(5.0)  # default = 5
+    phase.setMeshIncFactor(4.0)  # default = 5
     
     ## Minimum multiple by which the # of segments can be reduced between iterations 
     phase.setMeshRedFactor(.5)  #default = .5
@@ -156,7 +161,7 @@ if __name__ == "__main__":
     As before, flag returned indicates whether the last call to psipot converged or not, it does
     not indicate whether the mesh is accurate/converged. Atm, that is checked by reading MeshConverged field.
     '''
-    flag = phase.optimize_solve()    
+    flag = phase.solve_optimize_solve()    
    
     if(phase.MeshConverged):
         print("Fly it")

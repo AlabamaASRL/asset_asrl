@@ -845,7 +845,7 @@ void ASSET::ODEPhaseBase::transcribe_axis_funcs() {
 
   bool normalmesh = this->UVars() == 0 || SwitchStates.size() == 0;
 
-  if (normalmesh) {
+  if (true) {
       // Static Mesh
 
       VectorXd cspace(this->numDefects + 1);
@@ -907,7 +907,8 @@ void ASSET::ODEPhaseBase::transcribe_axis_funcs() {
       }
       if (SwitchStates.size() > 2) {
 
-         if (false) 
+          double h = this->ActiveTraj.back()[this->TVar()] - this->ActiveTraj.front()[this->TVar()];
+         if (true) 
           {
 
               std::vector<ConstraintInterface> AxisFuncs;
@@ -922,7 +923,7 @@ void ASSET::ODEPhaseBase::transcribe_axis_funcs() {
                   auto ti = t0titf.coeff<1>();
                   auto tf = t0titf.coeff<2>();
 
-                  auto h = tf - t0;
+                  //auto h = tf - t0;
 
                   double tl = SwitchBounds[s][1];
                   double th = SwitchBounds[s][2];
@@ -930,7 +931,13 @@ void ASSET::ODEPhaseBase::transcribe_axis_funcs() {
                   auto eq1 = (ti - t0) / h - th;
                   auto eq2 = tl - (ti - t0) / h;
 
-                  auto func = stack(eq1, eq2);
+
+                  fmt::print("{0},{1}\n", tl, th);
+
+
+                  double sfact = std::min(1000.0, 1 / (th - tl));
+
+                  auto func = stack(eq1, eq2)* sfact;
 
                   AxisFuncs.emplace_back(func);
                   Tmodes.push_back(Thread0);
@@ -943,14 +950,14 @@ void ASSET::ODEPhaseBase::transcribe_axis_funcs() {
 
 
           }
-          else if (false) 
+          //else if (true) 
           {
 
               std::vector<ConstraintInterface> AxisFuncs;
               std::vector<int> Tmodes;
               std::vector<Eigen::Vector2i> Cstates;
 
-              for (int s = 0; s < SwitchStates.size() - 2; s++) {
+              for (int s = -1; s < SwitchStates.size() - 2; s++) {
 
                   auto t0t1t2tf = Arguments<4>();
 
@@ -959,18 +966,23 @@ void ASSET::ODEPhaseBase::transcribe_axis_funcs() {
                   auto t2 = t0t1t2tf.coeff<2>();
                   auto tf = t0t1t2tf.coeff<3>();
 
-                  auto h = tf - t0;
+                  //auto h = tf - t0;
 
                  
                   double tl = DefBinSpacing[SwitchStates[s + 1]];
                   double th = DefBinSpacing[SwitchStates[s + 2]];
 
                  
-                  fmt::print("{0}\n", double((th - tl) / 5.0));
+                  //fmt::print("{0}\n", double((th - tl) / 5.0));
 
-                  auto func =  ((t1-t2)/h) + (th-tl)/40.0;
+                  auto func =  ((t1-t2)/h) + (th-tl)*sfactor1;
 
-                  AxisFuncs.emplace_back(func/100);
+                  double sfact = std::min(1000.0, 1 / (th - tl));
+
+                  auto gg = func * (sfact*sfactor2) ;
+                  
+
+                  AxisFuncs.emplace_back(gg);
                   Tmodes.push_back(Thread0);
 
                   Eigen::Vector2i k;
@@ -1192,6 +1204,9 @@ bool ASSET::ODEPhaseBase::checkMesh()
     if (this->MeshErrorEstimator == "integrator"||this->TranscriptionMode==CentralShooting) {
         this->get_meshinfo_integrator(tsnd, mesh_errors, mesh_dist);
     }
+    else if (this->MeshErrorEstimator == "integrator2") {
+        this->get_meshinfo_integrator2(tsnd, mesh_errors, mesh_dist);
+    }
     else if (this->MeshErrorEstimator == "deboor") {
         this->get_meshinfo_deboor(tsnd, mesh_errors, mesh_dist);
     }
@@ -1242,9 +1257,12 @@ void ASSET::ODEPhaseBase::updateMesh()
 
     
     double ntemp=0;
+
+    double eorder = 2 * (2 * this->numTranCardStates - 1) - 2;
+    eorder = this->Order;
     for (int i = 0; i < this->MeshIters.back().error.size()-1;i++) {
 
-        double nsegs = std::pow((this->MeshIters.back().error[i] * this->MeshErrFactor) / this->MeshTol, 1 / (this->Order + 1));
+        double nsegs = std::pow((this->MeshIters.back().error[i] * this->MeshErrFactor) / this->MeshTol, 1 / (eorder + 1));
         ntemp += std::max(this->MeshRedFactor,nsegs);
     }
     int n = int(std::ceil(ntemp)) + this->NumExtraSegs;
@@ -1261,7 +1279,7 @@ void ASSET::ODEPhaseBase::updateMesh()
 
         auto last = std::unique(switchvec.begin(), switchvec.end(),
             [](auto t1, auto t2) {
-                return abs(t1 - t2) < 1.0e-8;
+                return abs(t1 - t2) < 1.0e-5;
             });
 
         switchvec.erase(last, switchvec.end());
@@ -1385,6 +1403,7 @@ Eigen::VectorXd ASSET::ODEPhaseBase::calcSwitches()
             utmp = und.row(i).transpose();
 
             jvals = jump_function_mmod(tsnd, utmp, tjs,derp);
+
             std::vector<double> switchons;
             std::vector<double> switchoffs;
             bool on = jvals[0] > AbsSwitchTol;
@@ -1430,7 +1449,7 @@ Eigen::VectorXd ASSET::ODEPhaseBase::calcSwitches()
 
         auto last = std::unique(swrtp.begin(), swrtp.end(),
             [](auto t1, auto t2) {
-                return abs(t1[0] - t2[0]) < 1.0e-12;
+                return abs(t1[0] - t2[0]) < 1.0e-3;
             });
 
         swrtp.erase(last, swrtp.end());
@@ -1439,14 +1458,19 @@ Eigen::VectorXd ASSET::ODEPhaseBase::calcSwitches()
             std::cout << v.transpose() << std::endl;
         }
        
-        for (int i = 0; i < swrtp.size()-1; i++) {
+        for (int i = 0; i < swrtp.size(); i++) {
 
-            if (swrtp[i][2] > swrtp[i + 1][1]) {
-                double avg = swrtp[i][2] / 2 + swrtp[i + 1][1] / 2;
+            double hh = swrtp[i][2] - swrtp[i][1];
+            //swrtp[i][1] -= hh / 4;
+            //swrtp[i][2] += hh / 4;
+
+
+           // if ( > swrtp[i + 1][1]) {
+            //    double avg = swrtp[i][2] / 2 + swrtp[i + 1][1] / 2;
                 //swrtp[i][2] = avg;
                 //swrtp[i + 1][1] = avg;
 
-            }
+           // }
 
 
         }
@@ -1456,8 +1480,13 @@ Eigen::VectorXd ASSET::ODEPhaseBase::calcSwitches()
 
         this->SwitchBounds = swrtp;
 
+        switches.resize(0);
+        for (int i = 0; i < swrtp.size(); i++) {
+            switches.push_back(swrtp[i][1]);
+            switches.push_back(swrtp[i][2]);
 
-        
+        }
+
 
 
     }
@@ -1465,9 +1494,11 @@ Eigen::VectorXd ASSET::ODEPhaseBase::calcSwitches()
         for (int i = 0; i < this->ActiveTraj.size() - 1; i++) {
             udiff = (uvals.col(i + 1) - uvals.col(i)).cwiseAbs();
             unddiff = (uvals.col(i + 1) - uvals.col(i)).cwiseAbs();
-            if (udiff.maxCoeff() > this->AbsSwitchTol && unddiff.maxCoeff() > this->RelSwitchTol) {
+            if (udiff.maxCoeff() > this->AbsSwitchTol) {
                 double t = tsnd[i + 1] / 2.0 + tsnd[i] / 2.0;
-                switches.push_back(t);
+                switches.push_back(tsnd[i]);
+                switches.push_back(tsnd[i + 1]);
+
             }
         }
     }
@@ -1542,7 +1573,7 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::ODEPhaseBase::phase_call_impl(std::string
         else {
             initMeshRefinement();
             for (int i = 0; i < this->MaxMeshIters; i++) {
-                if (checkMesh()&&!((i==0)&&this->ForceOneMeshIter )) {
+                if (checkMesh()&&(i>=this->MinMeshIters)) {
                     if (this->PrintMeshInfo) {
                         MeshIterateInfo::print_header(i);
                         this->MeshIters.back().print(0);
@@ -2194,6 +2225,8 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   obj.def("setMeshIncFactor", &ODEPhaseBase::setMeshIncFactor);
   obj.def("setMeshErrFactor", &ODEPhaseBase::setMeshErrFactor);
   obj.def("setMaxMeshIters", &ODEPhaseBase::setMaxMeshIters);
+  obj.def("setMinMeshIters", &ODEPhaseBase::setMinMeshIters);
+
   obj.def("setMinSegments", &ODEPhaseBase::setMinSegments);
   obj.def("setMaxSegments", &ODEPhaseBase::setMaxSegments);
   obj.def("setMeshErrorCriteria", &ODEPhaseBase::setMeshErrorCriteria);
@@ -2202,6 +2235,8 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
 
   obj.def_readwrite("PrintMeshInfo", &ODEPhaseBase::PrintMeshInfo);
   obj.def_readwrite("MaxMeshIters", &ODEPhaseBase::MaxMeshIters);
+  obj.def_readwrite("MinMeshIters", &ODEPhaseBase::MinMeshIters);
+
   obj.def_readwrite("MeshTol",     &ODEPhaseBase::MeshTol);
   obj.def_readwrite("MeshErrorEstimator", &ODEPhaseBase::MeshErrorEstimator);
   obj.def_readwrite("MeshErrorCriteria", &ODEPhaseBase::MeshErrorCriteria);
@@ -2227,5 +2262,8 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
  
   obj.def_readwrite("Jfunc", &ODEPhaseBase::Jfunc);
 
-  
+  obj.def("getSwitchStatesTmp", &ODEPhaseBase::getSwitchStatesTmp);
+  obj.def_readwrite("sfactor1", &ODEPhaseBase::sfactor1);
+  obj.def_readwrite("sfactor2", &ODEPhaseBase::sfactor2);
+
 }

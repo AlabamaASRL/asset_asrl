@@ -175,7 +175,7 @@ if __name__ == "__main__":
 
 
     ts = np.linspace(0,tf,200)
-
+    
     TrajIG = []
     for t in ts:
         X = np.zeros((8))
@@ -194,8 +194,8 @@ if __name__ == "__main__":
 
     ode = ShuttleReentry()
     
-    phase = ode.phase("LGL5",TrajIG,20)
-    
+    phase = ode.phase("LGL5",TrajIG,50)
+    #phase.setControlMode("BlockConstant")
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
     phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
     phase.addLUVarBound("Path",6,np.deg2rad(-90.0),np.deg2rad(90.0),1.0)
@@ -208,7 +208,7 @@ if __name__ == "__main__":
     ## Our IG is bad, so i turn on line search
     phase.optimizer.set_SoeLSMode("L1")
     phase.optimizer.set_OptLSMode("L1")
-    phase.optimizer.set_PrintLevel(2)
+    phase.optimizer.set_PrintLevel(1)
     
     
    ###########################################################################
@@ -216,7 +216,7 @@ if __name__ == "__main__":
    ###########################################################################
    
     phase.setAdaptiveMesh(True)
-    phase.setMeshTol(1.0e-7)
+    phase.setMeshTol(1.0e-9)
     phase.optimizer.EContol=1.0e-8 #Set EContol at least as tight as MeshTol
 
     # The phase's default stepsizes work well for this problem, but you might need to modify for another!!
@@ -224,20 +224,92 @@ if __name__ == "__main__":
 
     ## If all you care about is how close the resintegrated solution is the the final state you can use this
     ## Recomended using LGL5 or LGL7 for endtoend tolerances tighter than 1.0e-6, 
-    phase.setMeshErrorCriteria('endtoend')
-    
+    #phase.setMeshErrorCriteria('endtoend')
+    #phase.MaxMeshIters=5
+    #phase.MaxMeshIters=1
     ## When using endtoend, you might need to up the MeshErrFactor, esp for low order methods
-    phase.setMeshErrFactor(100.0)  #defaults to 10
+    phase.setMeshErrFactor(10.0)  #defaults to 10
 
     ###########################################################################
     
     
     ## IG is bad, solve first before optimize
     phase.solve_optimize()
+    Traj = phase.returnTraj()
+    Tab = phase.returnTrajTable()
+    It = phase.getMeshIters()[-1]
+    Errs2 = []
+    Errs3 =[]
+    ts2 = []
+    for i in range(0,len(Traj)-1):
+        t0 = Traj[i][5]
+        tf = Traj[i+1][5]
+        ts2.append((t0 - Traj[0][5])/(Traj[-1][5]-Traj[0][5]))
+        
+        h = tf-t0
+        
+        tm = (t0+tf)/2
+        
+        t1 = (t0+tm)/2
+        
+        t2 = (tf+tm)/2
+        
+        
+        X0 = Traj[i]
+        XF = Traj[i+1]
+        XM = Tab(tm)
+        X1 = Tab(t1)
+        X2 = Tab(t2)
+        
+        f = ode.vf()
+        
+        dX0 = f(X0)
+        dXF = f(XF)
+        dXM = f(XM)
+        dX1 = f(X1)
+        dX2 = f(X2)
+        
+        ddX0 = Tab.InterpolateDeriv(t0).T[1][0:5]
+        ddXF = Tab.InterpolateDeriv(tf).T[1][0:5]
+        ddXM = Tab.InterpolateDeriv(tm).T[1][0:5]
+        ddX1 = Tab.InterpolateDeriv(t1).T[1][0:5]
+        ddX2 = Tab.InterpolateDeriv(t2).T[1][0:5]
+        
+        
+        dX = (dX0 +4*dX1 + 2*dXM + 4*dX2 + dXF)*h/12
+        dXK = (abs(dX0-ddX0) +4*abs(dX1-ddX1) + 2*abs(dXM-ddXM) + 4*abs(dX2-ddX2) + abs(dXF-ddXF))*h/12
+
+        
+        
+        Err = abs(dX - (XF[0:5] - X0[0:5])).max()
+        
+        nn = 1#It.error[i]
+        
+        Errs2.append(Err/nn)
+        Errs3.append(dXK.max()/nn)
+
+        
+        
+    Errs2.append(Errs2[-1])
+    Errs3.append(Errs3[-1])
+    ts2.append(1)
+        
+        
+        
+        
+        
+
     
+    plt.plot(It.times,It.error)
+    plt.plot(ts2,Errs2)
+    plt.plot(ts2,Errs3)
+
+    plt.yscale("Log")
+    plt.show()
+
     
     Traj1 = phase.returnTraj()
-    PhaseMeshErrorPlot(phase,show=False)
+    #PhaseMeshErrorPlot(phase,show=False)
 
     ## Add in Heating Rate Constraint, scale so rhs is order 1
     phase.addUpperFuncBound("Path",QFunc(),[0,2,6],Qlimit,1/Qlimit)

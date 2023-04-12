@@ -1,6 +1,7 @@
 import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
+from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
 
 
 vf = ast.VectorFunctions
@@ -45,17 +46,26 @@ if __name__ == "__main__":
     tf = 1.0
     u0 = .00
     
-    nsegs = 20
+    nsegs = 120
     
     
     
     TrajIG = [[x0,t,u0] for t in np.linspace(t0,tf,100)]
     
-    phase = ode.phase("LGL5",TrajIG,nsegs)
+    phase = ode.phase("LGL3",TrajIG,nsegs)
     phase.addBoundaryValue("Front",[0,1],[x0,t0])
     phase.addBoundaryValue("Back", [1],  [tf])
     phase.addIntegralObjective(ODE.obj(),[0,2])
+    phase.setAdaptiveMesh(True)
+    phase.setMeshErrFactor(1.0)
+    phase.MinMeshIters = 3
+    phase.MeshErrorEstimator = 'integrator'
+    phase.NumExtraSegs = 0
+    phase.MeshRedFactor=.05
+    phase.MeshTol =1.0e-10
     phase.optimize()
+
+    PhaseMeshErrorPlot(phase,show=True)
     
     
     Traj = phase.returnTraj()
@@ -79,7 +89,7 @@ if __name__ == "__main__":
     ### Analytic control
     Ustar = -(np.tanh(1-t)+.5)*np.cosh(1-t)/np.cosh(1)
     
-    T[2]=Ustar
+    #T[2]=Ustar
     
 
     plt.plot(t,L,label   =r'$L$' + '-Collocation',marker='o')

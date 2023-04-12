@@ -133,6 +133,9 @@ struct LGLCoeffs<3> {  /// Cubic Hermite-LGL3
   static constexpr STDarray<STDarray<double, 3>, 2> Cardinal_DXDef_Weights = {
       STDarray<double, 3>{c4, c6, c7}, STDarray<double, 3>{d4, d6, d7}};
 
+
+  //static constexpr double d  = c1 + c2+ c3;
+
   static constexpr STDarray<double, 2> Interior_DXDef_Weights = {c5, d5};
 
   /// Weights for Integrals
@@ -299,6 +302,8 @@ struct LGLCoeffs<4> {
 
   static constexpr STDarray<double, 3> Interior_DXDef_Weights = {wi11, wicc,
                                                                  wi44};
+
+  static constexpr double d = wi1/ wi21;
 
   /// Weights for Integrals
   static constexpr STDarray<double, 4> Cardinal_Integral_Weights = {w0, w2, w4,

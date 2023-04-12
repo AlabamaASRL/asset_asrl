@@ -2,6 +2,7 @@ import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
 
+from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
 
 vf = ast.VectorFunctions
 oc = ast.OptimalControl
@@ -62,9 +63,9 @@ if __name__ == "__main__":
     
     TrajIG =  integ.integrate_dense(XtU0,tf)
     
-    phase = ode.phase("LGL5",TrajIG,15)
+    phase = ode.phase("LGL3",TrajIG,10)
  
-    phase.setControlMode("BlockConstant")
+    #phase.setControlMode("BlockConstant")
     
     phase.addBoundaryValue("Front",range(0,5),XtU0[0:5])
     
@@ -81,19 +82,22 @@ if __name__ == "__main__":
     phase.setThreads(1,1)
     phase.setAdaptiveMesh(True)
     phase.DetectControlSwitches = True
+    phase.MinMeshIters = 2
     phase.ForceOneMeshIter = True
     #phase.Jfunc = True
+    phase.MeshTol=1.0e-7
     #phase.setMeshErrorCriteria("endtoend")
-    phase.optimizer.PrintLevel = 1
+    phase.optimizer.PrintLevel = 2
     phase.optimizer.KKTtol = 1.0e-8
-    
+    #phase.optimizer.set_QPOrderingMode("MINDEG")
     #phase.MaxMeshIters = 1
 
     phase.solve_optimize()
-    
+
     #phase.transcribe(True,True)
     
-    
+    PhaseMeshErrorPlot(phase,show=True)
+
 
     Traj = phase.returnTraj()    
     

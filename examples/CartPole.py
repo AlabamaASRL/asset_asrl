@@ -177,7 +177,7 @@ if __name__ == "__main__":
     Fmax = 20  # N
     xmax = 2   # m
     
-    tf  = 2    # s
+    tf  = 2.0    # s
     xf  = 1    # m       
     
     ts = np.linspace(0,tf,100)
@@ -187,6 +187,10 @@ if __name__ == "__main__":
     ode = CartPole(l,m1,m2,g)
     
     phase = ode.phase("LGL5",IG,64)
+    phase.integrator.setStepSizes(.5,.1,3)
+    phase.integrator.setAbsTol(1.0e-9)
+    
+    #phase.setControlMode("BlockConstant")
     #Fix first state (x,theta,xdot,thetadot) and time
     phase.addBoundaryValue("First",range(0,5),[0 ,0    , 0, 0, 0])
     #Fix last state (x,theta,xdot,thetadot) and time
@@ -197,7 +201,7 @@ if __name__ == "__main__":
     # Minimize the "control effort", the integral of square of applied force
     phase.addIntegralObjective(Args(1)[0]**2,[5])
     
-    phase.setThreads(8,8)
+    phase.setThreads(1,1)
     phase.optimizer.set_PrintLevel(1)
     phase.optimize()
     

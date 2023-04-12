@@ -58,7 +58,7 @@ def MakeOrbit(ode, OrbitIG,Jconst,nsegs=100):
     
 def GetManifold(ode,OrbitIn,dx,dt,nman=50,Stable=True):
     integ =ode.integrator("DOPRI87",.01)
-    integ.setAbsTol(1.0e-13)
+    integ.setAbsTol(1.0e-14)
     
     Period = OrbitIn[-1][6]
     Orbit = integ.integrate_dense(OrbitIn[0],Period,nman)
@@ -162,7 +162,7 @@ def MakeHeteroclinic(ode,Man1,Man2,L1Orbit,L2Orbit):
         t = Vt[3]
         return (V - VelFunc(t)).squared_norm()
     
-    phase1 = ode.phase("LGL7",Man1[1::],50)
+    phase1 = ode.phase("CentralShooting",Man1[1::],32)
     
     phase1.addLowerVarBound('Front',6,-L1Orbit[-1][6])
     phase1.addUpperVarBound('Front',6,2*L1Orbit[-1][6])
@@ -171,7 +171,7 @@ def MakeHeteroclinic(ode,Man1,Man2,L1Orbit,L2Orbit):
     phase1.addEqualCon("First",PosCon(OrbitTab1),[0,1,2,6])
     phase1.addStateObjective("First",DVObj(OrbitTab1),[3,4,5,6])
 
-    phase2 = ode.phase("LGL7",Man2[0:-1],50)
+    phase2 = ode.phase("CentralShooting",Man2[0:-1],32)
     # Arriving at Orbit2
     phase2.addEqualCon("Last",PosCon(OrbitTab2),[0,1,2,6])
     phase2.addStateObjective("Last",DVObj(OrbitTab2),[3,4,5,6])
@@ -183,10 +183,11 @@ def MakeHeteroclinic(ode,Man1,Man2,L1Orbit,L2Orbit):
     ocp = oc.OptimalControlProblem()
     ocp.addPhase(phase1)
     ocp.addPhase(phase2)
+    ocp.setThreads(6,8)
 
     #Enforce continuity in position and velocity between phases
     ocp.addForwardLinkEqualCon(phase1,phase2,range(0,6))
-    ocp.setAdaptiveMesh()
+    #ocp.setAdaptiveMesh()
     
     ocp.optimizer.set_EContol(1.0e-9)
     ocp.optimizer.set_OptLSMode("L1")
@@ -208,9 +209,9 @@ if __name__ == "__main__":
     
     
     Jconst = 3.15    # Jacobi of target orbits
-    dx     = 1.0e-5  # Manifold Perturbation
-    dt     = 12.0    # Manifold Propagation Time
-    nman   = 100     # # of Manifold trajectories
+    dx     = 5.0e-6  # Manifold Perturbation
+    dt     = 24.0    # Manifold Propagation Time
+    nman   = 1000     # # of Manifold trajectories
     nsegs  = 100     # Segments per orbit
     
     

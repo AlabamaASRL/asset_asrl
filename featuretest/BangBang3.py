@@ -2,6 +2,7 @@ import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
 import time
+from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
 
 norm = np.linalg.norm
 vf        = ast.VectorFunctions
@@ -62,8 +63,8 @@ for t in ts:
     IG.append(XI)
     
     
-phase = ode.phase("LGL5",IG,100)
-phase.setControlMode("BlockConstant")
+phase = ode.phase("LGL3",IG,32)
+#phase.setControlMode("NoSpline")
 phase.addBoundaryValue("Front",range(0,5),X0[0:5])
 phase.addBoundaryValue("Back",range(0,4),XF[0:4])
 phase.addLUVarBounds("Path",[5,6],-1,1,1)
@@ -71,8 +72,8 @@ phase.addLUVarBounds("Path",[5,6],-1,1,1)
 phase.addDeltaTimeObjective(1)
 phase.setAdaptiveMesh(True)
 phase.optimizer.PrintLevel = 2
-phase.DetectControlSwitches = True
-phase.ForceOneMeshIter = True
+#phase.DetectControlSwitches = True
+phase.MinMeshIters = 1
 phase.MeshTol=1.0e-7
 #phase.optimizer.set_OptLSMode("L1")
 phase.Threads = 8
@@ -81,9 +82,15 @@ phase.optimizer.KKTtol=1.0e-10
 phase.optimizer.deltaH=1.0e-9
 phase.optimizer.QPOrderingMode = solvs.QPOrderingModes.MINDEG
 phase.optimizer.BoundFraction = .997
-phase.AbsSwitchTol=.1
+phase.AbsSwitchTol=.3
 phase.setThreads(1,1)
-phase.optimizer.CNRMode = True
+phase.MaxMeshIters=6
+phase.MeshTol=1.0e-7
+phase.MeshErrFactor=20
+
+#phase.setMeshErrorEstimator("integrator")
+
+#phase.optimizer.CNRMode = True
 
 phase.solve_optimize()
 
@@ -95,5 +102,13 @@ TT[4]=TT[4]/TT[4][-1]
 
 plt.plot(TT[4],TT[5])
 plt.plot(TT[4],TT[6])
+
+ss = phase.getSwitchStatesTmp()
+
+PhaseMeshErrorPlot(phase,show=True)
+
+for s in ss:
+    
+    plt.plot([TT[4][s]]*2,[-1,1],color='k')
 
 plt.show()

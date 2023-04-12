@@ -84,9 +84,18 @@ protected:
 
   ///////////////////////
 public:
+
+    VectorXi getSwitchStatesTmp() {
+        VectorXi tmp = this->SwitchStates*(numTranCardStates - 1);
+        return tmp;
+    }
+
+
   bool AdaptiveMesh = false;
   bool PrintMeshInfo = true;
   int MaxMeshIters = 10;
+  int MinMeshIters = 0;
+
   int MaxSegments  = 10000;
   int MinSegments  = 4;
 
@@ -114,8 +123,10 @@ public:
 
   std::vector<MeshIterateInfo> MeshIters;
 
-  std::vector<ScalarFunctionalX> SwitchingFuncs;
+  std::vector<ScalarFunctionalX> SwitchIndicators;
 
+  double sfactor1 = .1;
+  double sfactor2 = .2;
 
   void setAdaptiveMesh(bool amesh) {
       this->AdaptiveMesh = amesh;
@@ -135,6 +146,10 @@ public:
   void setMaxMeshIters(int it) {
       this->MaxMeshIters = abs(it);
   }
+  void setMinMeshIters(int it) {
+      this->MinMeshIters = abs(it);
+  }
+
   void setMinSegments(int it) {
       this->MinSegments = abs(it);
   }
@@ -976,6 +991,8 @@ public:
   /////////////////////////////////////////////////////////////////
 
   virtual void get_meshinfo_integrator(Eigen::VectorXd& tsnd, Eigen::MatrixXd& mesh_errors, Eigen::MatrixXd& mesh_dist) const = 0;
+  virtual void get_meshinfo_integrator2(Eigen::VectorXd& tsnd, Eigen::MatrixXd& mesh_errors, Eigen::MatrixXd& mesh_dist) const = 0;
+
   virtual void get_meshinfo_deboor(Eigen::VectorXd& tsnd, Eigen::MatrixXd& mesh_errors, Eigen::MatrixXd& mesh_dist) const = 0;
   virtual Eigen::VectorXd calc_global_error() const = 0;
 

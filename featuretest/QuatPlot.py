@@ -86,12 +86,12 @@ def AnimSlew(traj,sp=6,Qsig=[],fname = 'Video',Anim=True,Elev=30,Azim =0,Ivec=[1
     XT,=ax.plot(xbasis[0],xbasis[1],xbasis[2], color="r")
     YT,=ax.plot(ybasis[0],ybasis[1],ybasis[2], color="g")
     ZT,=ax.plot(zbasis[0],zbasis[1],zbasis[2], color="b")
-    HT,=ax.plot(hbasis[0],hbasis[1],hbasis[2], color="k")
+    #HT,=ax.plot(hbasis[0],hbasis[1],hbasis[2], color="k")
 
     XTT,=ax.plot([0,xbasis[0][-1]],[0,xbasis[1][-1]],[0,xbasis[2][-1]], color="r",marker='o',markeredgecolor='black',markerfacecolor='black')
     YTT,=ax.plot([0,ybasis[0][-1]],[0,ybasis[1][-1]],[0,ybasis[2][-1]], color="g",marker='o',markeredgecolor='black',markerfacecolor='black')
     ZTT,=ax.plot([0,zbasis[0][-1]],[0,zbasis[1][-1]],[0,zbasis[2][-1]], color="b",marker='o',markeredgecolor='black',markerfacecolor='black')
-    HTT,=ax.plot([0,hbasis[0][-1]],[0,hbasis[1][-1]],[0,hbasis[2][-1]], color="k",marker='o',markeredgecolor='black',markerfacecolor='black')
+    #HTT,=ax.plot([0,hbasis[0][-1]],[0,hbasis[1][-1]],[0,hbasis[2][-1]], color="k",marker='o',markeredgecolor='black',markerfacecolor='black')
 
     #ax.set_aspect("equal")
     #ax.set_title('Horizon Track and Final Orientation')
@@ -165,22 +165,22 @@ def AnimSlew(traj,sp=6,Qsig=[],fname = 'Video',Anim=True,Elev=30,Azim =0,Ivec=[1
         XT.set_data([], [])
         YT.set_data([], [])
         ZT.set_data([], [])
-        HT.set_data([], [])
+        #HT.set_data([], [])
 
         XT.set_3d_properties([], 'z')
         YT.set_3d_properties([], 'z')
         ZT.set_3d_properties([], 'z')
-        HT.set_3d_properties([], 'z')
+        #HT.set_3d_properties([], 'z')
         
         XTT.set_data([], [])
         YTT.set_data([], [])
         ZTT.set_data([], [])
-        HTT.set_data([], [])
+        #HTT.set_data([], [])
         
         XTT.set_3d_properties([], 'z')
         YTT.set_3d_properties([], 'z')
         ZTT.set_3d_properties([], 'z')
-        HTT.set_3d_properties([], 'z')
+        #HTT.set_3d_properties([], 'z')
         
         TX.set_data([], [])
         TY.set_data([], [])

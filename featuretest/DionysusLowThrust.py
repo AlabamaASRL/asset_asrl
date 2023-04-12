@@ -5,6 +5,7 @@ from asset_asrl.Astro.Extensions.ThrusterModels import CSIThruster
 from asset_asrl.Astro.AstroModels import MEETwoBody_CSI
 from asset_asrl.Astro.FramePlot import TBPlot,colpal
 import asset_asrl.Astro.Constants as c
+from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
 
 
 ##############################################################################
@@ -66,7 +67,7 @@ if __name__ == "__main__":
         TrajIG.append(State)
         
         
-    phase = ode.phase("LGL3",TrajIG,160)
+    phase = ode.phase("LGL5",TrajIG,100)
     phase.setControlMode("BlockConstant")  # This problem only likes this
     
     phase.addBoundaryValue("Front",range(0,8),Istate[0:8])
@@ -85,9 +86,13 @@ if __name__ == "__main__":
     phase.optimizer.set_deltaH(1.0e-6)
     phase.optimizer.set_EContol(1.0e-9)
     phase.setAdaptiveMesh(True)
+    phase.AbsSwitchTol=.1
+    phase.DetectControlSwitches=True
+    phase.MinMeshIters = 1
     
     phase.optimize()
     
+    PhaseMeshErrorPlot(phase,show=True)
     
     ConvTraj = phase.returnTraj()
     
@@ -120,7 +125,7 @@ if __name__ == "__main__":
     fig,axs = plt.subplots(1,2)
     
     TT = np.array(ConvTraj).T
-    
+    TT[7] = TT[7]/TT[7][-1]
     
     U0N = ( TT[8] - min(TT[8]))/(1+max(TT[8]) - min(TT[8]))
     U1N = ( TT[9] - min(TT[9]))/(1+max(TT[9]) - min(TT[9]))

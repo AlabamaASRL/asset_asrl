@@ -252,6 +252,10 @@ public:
 	bool FastAdaptiveSTM = true;
 	double EventTol = 1.0e-6;
 	int MaxEventIters = 10;
+	bool VectorizeCalls = false;
+
+	double StepFrac = .9;
+	double ErrPowFac = 1;
 
 
 	ODEDeriv<double> AbsTols;
@@ -320,11 +324,11 @@ protected:
 		}
 	}
 
-	template <RKOptions RKOp>
+	template <RKOptions RKOp, class Scalar>
 	inline void stepper_compute_impl( 
-		const ODEState<double>& x, double tf, ODEState<double>& xf, ODEState<double>& xf_est,
-		bool dofsal,     ODEDeriv<double>& xdot_prev,
-		bool domidpoint, ODEState<double>& xf_mid) const {
+		const ODEState<Scalar>& x, Scalar tf, ODEState<Scalar>& xf, ODEState<Scalar>& xf_est,
+		bool dofsal,     ODEDeriv<Scalar>& xdot_prev,
+		bool domidpoint, ODEState<Scalar>& xf_mid) const {
 
 		using RKData = RKCoeffs<RKOp>;
 		constexpr int Stages = RKData::Stages;
@@ -334,8 +338,8 @@ protected:
 		auto Impl = [&](auto& Kvals, auto& xtup) {
 
 			xtup = x;
-			double t0 = xtup[this->ode.TVar()];
-			double h = tf - t0;
+			Scalar t0 = xtup[this->ode.TVar()];
+			Scalar h = tf - t0;
 
 			if (dofsal||domidpoint) {
 				Kvals[0] = xdot_prev * h;
@@ -348,14 +352,14 @@ protected:
 
 			if constexpr (true) {
 				for (int i = 0; i < Stgsm1; i++) {
-					double ti = t0 + RKData::Times[i] * h;
+					Scalar ti = t0 + RKData::Times[i] * h;
 					xtup = x;
 					xtup[this->ode.TVar()] = ti;
 					const int ip1 = i + 1;
 					const int js = isDiag ? i : 0;
 					for (int j = js; j < ip1; j++) {
 						xtup.template segment<DODE::XV>(0, this->ode.XVars()) +=
-							RKData::ACoeffs[i][j] * Kvals[j];
+							Scalar(RKData::ACoeffs[i][j]) * Kvals[j];
 					}
 
 					this->update_control(xtup);
@@ -365,42 +369,40 @@ protected:
 				}
 			}
 			else {
+
 				const int tvar = this->ode.TVar();
 
 				ASSET::constexpr_for_loop(
 					std::integral_constant<int, 0>(),
 					std::integral_constant<int, Stgsm1>(), [&](auto i) {
-						double ti = t0 + RKData::Times[i.value] * h;
-						xtup = x;
-						xtup[tvar] = ti;
-						constexpr int ip1 = i.value + 1;
-						const int js = isDiag ? i.value : 0;
+						Scalar ti = t0 + RKData::Times[i.value] * h;
+					xtup = x;
+					xtup[tvar] = ti;
+					constexpr int ip1 = i.value + 1;
+					const int js = isDiag ? i.value : 0;
 
-						ASSET::constexpr_for_loop(
-							std::integral_constant<int, 0>(),
-							std::integral_constant<int, ip1>(), [&](auto j) {
-								if constexpr (RKData::ACoeffs[i.value][j.value] != 0.0) {
-									xtup.template segment<DODE::XV>(0, tvar) +=
-										RKData::ACoeffs[i.value][j.value] * Kvals[j.value];
-								}
-								
-							});
+					ASSET::constexpr_for_loop(
+						std::integral_constant<int, 0>(),
+						std::integral_constant<int, ip1>(), [&](auto j) {
+							if constexpr (RKData::ACoeffs[i.value][j.value] != 0.0) {
+								xtup.template segment<DODE::XV>(0, tvar) +=
+									Scalar( RKData::ACoeffs[i.value][j.value]) * Kvals[j.value];
+							}
 
-						this->update_control(xtup);
-						this->ode.compute(xtup, Kvals[ip1]);
+						});
 
-						Kvals[ip1] *= h;
+				this->update_control(xtup);
+				this->ode.compute(xtup, Kvals[ip1]);
+
+				Kvals[ip1] *= h;
 					});
-
-
 			}
-
-
+			
 			xtup = x;
 			xtup[this->ode.TVar()] = tf;
 			for (int i = 0; i < Stages; i++) {
 				xtup.template segment<DODE::XV>(0, this->ode.XVars()) +=
-					RKData::BCoeffs[i] * Kvals[i];
+					Scalar(RKData::BCoeffs[i]) * Kvals[i];
 			}
 
 
@@ -418,7 +420,7 @@ protected:
 
 			for (int i = 0; i < Stages; i++) {
 				xtup.template segment<DODE::XV>(0, this->ode.XVars()) +=
-					RKData::CCoeffs[i] * Kvals[i];
+					Scalar(RKData::CCoeffs[i]) * Kvals[i];
 			}
 
 			xf_est = xtup; // Estimate
@@ -431,14 +433,14 @@ protected:
 
 				for (int i = 0; i < Stages; i++) {
 					xtup.template segment<DODE::XV>(0, this->ode.XVars()) +=
-						(RKData::MidCoeffs[i]/2.0) * Kvals[i];
+						Scalar(RKData::MidCoeffs[i]/2.0) * Kvals[i];
 				}
 
 				if constexpr (!RKData::FSAL) {
 					Kvals.back().setZero();
 					this->ode.compute(xf, Kvals.back());
 					xtup.template segment<DODE::XV>(0, this->ode.XVars()) +=
-						(RKData::MidCoeffs.back()/2.0) * Kvals.back() * h;
+						Scalar(RKData::MidCoeffs.back()/2.0) * Kvals.back() * h;
 					xdot_prev = Kvals.back();
 				}
 
@@ -451,26 +453,27 @@ protected:
 		};
 
 		MemoryManager::allocate_run(this->ode.IRows(), Impl,
-			ArrayOfTempSpecs<ODEDeriv<double>, Stages>(this->ode.ORows(), 1),
-			TempSpec<ODEState<double>>(this->ode.IRows(), 1));
+			ArrayOfTempSpecs<ODEDeriv<Scalar>, Stages>(this->ode.ORows(), 1),
+			TempSpec<ODEState<Scalar>>(this->ode.IRows(), 1));
 
 	}
 
 
 
+	template<class Scalar>
 	inline void stepper_compute(
-		const ODEState<double>& x, double tf, 
-		ODEState<double>& xf, ODEState<double>& xf_est,
-		ODEDeriv<double>& xdot_prev,
-		bool domidpoint, ODEState<double>& xf_mid) const {
+		const ODEState<Scalar>& x, Scalar tf,
+		ODEState<Scalar>& xf, ODEState<Scalar>& xf_est,
+		ODEDeriv<Scalar>& xdot_prev,
+		bool domidpoint, ODEState<Scalar>& xf_mid) const {
 
 
 		switch (this->RKMethod) {
 		case RKOptions::DOPRI54: {
-			this->stepper_compute_impl<RKOptions::DOPRI54>(x, tf, xf, xf_est, true, xdot_prev, domidpoint, xf_mid);
+			this->stepper_compute_impl<RKOptions::DOPRI54, Scalar>(x, tf, xf, xf_est, true, xdot_prev, domidpoint, xf_mid);
 		}break;
 		case RKOptions::DOPRI87: {
-			this->stepper_compute_impl<RKOptions::DOPRI87>(x, tf, xf, xf_est, false, xdot_prev, domidpoint, xf_mid);
+			this->stepper_compute_impl<RKOptions::DOPRI87, Scalar>(x, tf, xf, xf_est, false, xdot_prev, domidpoint, xf_mid);
 		}break;
 		default: {
 		}
@@ -499,6 +502,7 @@ protected:
 		int numsteps = int(abs(H / this->DefStepSize)) + 1;
 		double h = .9*(H / double(numsteps));
 		
+
 		ODEState<double> xi = x;
 		this->update_control(xi);
 
@@ -599,7 +603,7 @@ protected:
 
 				double err = Abserror[worst];
 				double acc = Errvec[worst];
-				double hnext = h * pow((acc / err), 1.0 / this->ErrorOrder);
+				double hnext = this->StepFrac*h * pow((acc / err), 1.0 / (this->ErrorOrder+ErrPowFac));
 
 				if (hnext / h > this->MaxStepChange)
 					h *= this->MaxStepChange;
@@ -679,6 +683,322 @@ protected:
 		}
 		return xi;
 	}
+
+
+
+
+	std::vector<Output<double>> 
+		integrate_impl_vectorized(
+		const std::vector<ODEState<double>>& xs,
+		const Eigen::VectorXd & tfs,
+		const std::vector<EventPack>& events,
+		std::vector < std::vector<std::vector<Eigen::Vector2d>>>& eventtimes_s,
+		bool storestates,
+		bool storederivs,
+		bool storemidpoints,
+		std::vector<std::vector<ODEState<double>>>& states_s,
+		std::vector<std::vector<ODEDeriv<double>>>& derivs_s) const {
+
+
+		int ntrajs = xs.size();
+		Eigen::VectorXd hs(ntrajs);
+		Eigen::VectorXd Hs(ntrajs);
+		std::vector<ODEState<double>> xis = xs;
+		std::vector<ODEDeriv<double>> xdotis(ntrajs);
+		Eigen::VectorXd tnexts(ntrajs);
+
+		std::vector<std::vector<Vector1<double>>> prev_event_vals_s(ntrajs);
+		std::vector<std::vector<Vector1<double>>> next_event_vals_s(ntrajs);
+
+
+		for (int i = 0; i < ntrajs; i++) {
+			if (xis[i].size() != this->ode.IRows()) {
+				throw std::invalid_argument("Incorrectly sized input state.");
+			}
+			this->update_control(xis[i]);
+
+			double t0 = xis[i][this->ode.TVar()];
+			Hs[i] = tfs[i] - t0;
+			int numsteps = int(abs(Hs[i] / this->DefStepSize)) + 1;
+			hs[i] = .9 * (Hs[i] / double(numsteps));
+
+			xdotis[i].resize(this->ode.ORows());
+			xdotis[i].setZero();
+			this->ode.compute(xis[i], xdotis[i]);
+
+
+
+			prev_event_vals_s[i].resize(events.size());
+			next_event_vals_s[i].resize(events.size());
+
+			for (int j = 0; j < events.size(); j++) {
+				prev_event_vals_s[i][j].setZero();
+				next_event_vals_s[i][j].setZero();
+
+				if (std::get<0>(events[j]).IRows() != this->ode.IRows()) {
+					throw std::invalid_argument("Input size of event function must equal input size of ode.");
+				}
+
+				std::get<0>(events[j]).compute(xis[i], prev_event_vals_s[i][j]);
+			}
+			if (events.size() > 0) {
+				eventtimes_s[i].resize(events.size());
+			}
+
+
+			if (storestates) {
+				states_s[i].resize(0);
+				derivs_s[i].resize(0);
+				if (storemidpoints) {
+					states_s[i].reserve(numsteps * 2 + 2);
+					if (storederivs) derivs_s[i].reserve(numsteps * 2 + 2);
+				}
+				else {
+					states_s[i].reserve(numsteps + 2);
+					if (storederivs) derivs_s[i].reserve(numsteps + 2);
+				}
+				states_s[i].push_back(xis[i]);
+				if (storederivs) derivs_s[i].push_back(xdotis[i]);
+			}
+		}
+
+		
+
+		
+
+		using SuperScalar = ASSET::DefaultSuperScalar;
+		
+
+		ODEState<double> xnext(this->ode.IRows());
+		ODEState<double> xnext_est(this->ode.IRows());
+		ODEState<double> xnext_mid(this->ode.IRows());
+		ODEDeriv<double> xdotnext(this->ode.ORows());
+
+
+		ODEState<double> xi(this->ode.IRows());
+
+		ODEState<SuperScalar> xi_SS(this->ode.IRows());
+
+		ODEState<SuperScalar> xnext_SS(this->ode.IRows());
+		ODEState<SuperScalar> xnext_est_SS(this->ode.IRows());
+		ODEState<SuperScalar> xnext_mid_SS(this->ode.IRows());
+		ODEDeriv<SuperScalar> xdotnext_SS(this->ode.ORows());
+		SuperScalar tnext_SS;
+
+
+
+		ODEDeriv<double> Abserror;
+		ODEDeriv<double> Abserror_max;
+		ODEDeriv<double> Errvec;
+
+		ODEDeriv<SuperScalar> Abserror_SS;
+
+
+		std::vector<bool> continueloops(ntrajs,true);
+		std::vector<bool> HitMinimums(ntrajs, false);
+
+
+		int numrunning = ntrajs;
+		int lastrunning = ntrajs - 1;
+
+		while (numrunning>0) {
+
+
+
+			std::array<int, SuperScalar::SizeAtCompileTime> idxs;
+
+			int V = 0;
+			
+			for (int i = 0; i < ntrajs; i++) {
+				if (continueloops[i]) {
+					double tnext = xis[i][this->ode.TVar()] + hs[i];
+					
+
+					if (Hs[i] > 0.0) {
+						if ((tnext - tfs[i]) >= 0.0) {
+							hs[i] = tfs[i] - xis[i][this->ode.TVar()];
+							tnext = tfs[i];
+							continueloops[i] = false;
+						}
+					}
+					else {
+						if ((tnext - tfs[i]) <= 0.0) {
+							hs[i] = tfs[i] - xis[i][this->ode.TVar()];
+							tnext = tfs[i];
+							continueloops[i] = false;
+						}
+					}
+
+					for (int k = 0; k < this->ode.IRows(); k++) {
+						xi_SS[k][V] = xis[i][k];
+					}
+					for (int k = 0; k < this->ode.ORows(); k++) {
+						xdotnext_SS[k][V] = xdotis[i][k];
+					}
+
+					idxs[V] = i;
+					tnext_SS[V] = tnext;
+					V++;
+
+					int Vmax = (i==lastrunning)&&V!= SuperScalar::SizeAtCompileTime ? V: SuperScalar::SizeAtCompileTime;
+
+					
+
+					if (V == Vmax) {
+						V = 0;
+						xnext_SS.setZero();
+						xnext_est_SS.setZero();
+						xnext_mid_SS.setZero();
+
+						this->stepper_compute(xi_SS, tnext_SS, xnext_SS, xnext_est_SS, xdotnext_SS, storemidpoints || storederivs, xnext_mid_SS);
+
+						Abserror_SS =
+							(xnext_SS.head(this->ode.XVars()) - xnext_est_SS.head(this->ode.XVars()))
+							.cwiseAbs();
+
+
+						for (int V = 0; V <Vmax; V++) {
+
+							int itmp = idxs[V];
+
+							for (int k = 0; k < this->ode.IRows(); k++) {
+								xnext[k] = xnext_SS[k][V];
+								//xnext_est[k] = xnext_est_SS[k][V];
+								xnext_mid[k] = xnext_mid_SS[k][V];
+
+							}
+							for (int k = 0; k < this->ode.ORows(); k++) {
+								xdotnext[k] = xdotnext_SS[k][V];
+								Abserror[k] = Abserror_SS[k][V];
+
+							}
+
+
+							if (this->Adaptive) {
+
+								double h = hs[itmp];
+
+								//Abserror =
+								//	(xnext.head(this->ode.XVars()) - xnext_est.head(this->ode.XVars()))
+								//	.cwiseAbs();
+
+								Errvec = this->AbsTols + xnext.head(this->ode.XVars()).cwiseAbs().cwiseProduct(this->RelTols);
+
+								Abserror_max = Abserror.cwiseQuotient(Errvec);
+								int worst = 0;
+								Abserror_max.maxCoeff(&worst);
+
+								double err = Abserror[worst];
+								double acc = Errvec[worst];
+								//double hnext = .9 * h * pow((acc / err), 1.0 / (this->ErrorOrder + 1));
+								double hnext = this->StepFrac * h * pow((acc / err), 1.0 / (this->ErrorOrder + ErrPowFac));
+
+								if (hnext / h > this->MaxStepChange)
+									h *= this->MaxStepChange;
+								else if (hnext / h < 1. / this->MaxStepChange)
+									h /= this->MaxStepChange;
+								else
+									h = hnext;
+
+								if (abs(h) > this->MaxStepSize)
+									h = this->MaxStepSize * h / abs(h);
+
+								if (abs(h) < this->MinStepSize) {
+									h = this->MinStepSize * h / abs(h);
+						
+									HitMinimums[itmp] = true;
+								}
+								else {
+									HitMinimums[itmp] = false;
+								}
+
+								hs[itmp] = h;
+
+								if ((err - acc) > 0 && !HitMinimums[itmp]) {
+									continueloops[itmp] = true;
+									continue;
+								}
+
+
+							}
+
+
+							bool eventbreak = false;
+							for (int j = 0; j < events.size(); j++) {
+								next_event_vals_s[itmp][j].setZero();
+								std::get<0>(events[j]).compute(xnext, next_event_vals_s[itmp][j]);
+
+								double vprev = prev_event_vals_s[itmp][j][0];
+								double vnext = next_event_vals_s[itmp][j][0];
+
+								int dir = std::get<1>(events[j]);
+
+								double vprod = vprev * vnext;
+
+								if (vprod < 0.0) {
+									if ((dir > 0 && vnext > 0) || (dir < 0 && vnext < 0) || dir == 0) {
+										Eigen::Vector2d times;
+										times[0] = xis[itmp][this->ode.TVar()];
+										times[1] = xnext[this->ode.TVar()];
+										eventtimes_s[itmp][j].push_back(times);
+										int stop = std::get<2>(events[j]);
+
+										if (stop != 0) {
+											if (eventtimes_s[itmp][j].size() == stop) {
+												eventbreak = true;
+											}
+										}
+									}
+								}
+							}
+
+
+							xis[itmp] = xnext;
+							xdotis[itmp] = xdotnext;
+							prev_event_vals_s[itmp] = next_event_vals_s[itmp];
+
+							if (storestates) {
+								if (storemidpoints) {
+									states_s[itmp].push_back(xnext_mid);
+									if (storederivs) {
+										xdotnext.setZero();
+										this->ode.compute(xnext_mid, xdotnext);
+										derivs_s[itmp].push_back(xdotnext);
+									}
+								}
+								states_s[itmp].push_back(xi);
+								if (storederivs) derivs_s[itmp].push_back(xdotis[itmp]);
+							}
+
+							if (eventbreak) continueloops[itmp] = false;
+
+
+						}
+					}
+				}
+			}
+			
+
+			
+			numrunning = 0;
+
+			for (int i = 0; i < ntrajs; i++) {
+				if (continueloops[i]) {
+					lastrunning = i;
+					numrunning++;
+				}
+			}
+
+			
+
+
+			
+			
+		}
+		return xis;
+	}
+
+
 
 
 
@@ -972,6 +1292,63 @@ public:
 		xf = this->integrate_impl(x0, tf, events, eventtimes,
 								  storestates, storederivs, storemidpoints, Xs, dXs);
 		return xf;
+	}
+
+	std::vector<ODEState<double>> integrate_v(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd & tfs, bool vectorize) const {
+
+		if (!vectorize) {
+
+			std::vector<ODEState<double>> xfs(x0s.size());
+			std::vector<EventPack> events;
+			std::vector<std::vector<Eigen::Vector2d>> eventtimes;
+
+
+
+			bool storestates = false;
+			bool storederivs = false;
+			bool storemidpoints = false;
+			std::vector<ODEState<double>> Xs;
+			std::vector<ODEDeriv<double>> dXs;
+
+			for (int i = 0; i < x0s.size(); i++) {
+
+				xfs[i] = this->integrate_impl(x0s[i], tfs[i], events, eventtimes,
+					storestates, storederivs, storemidpoints, Xs, dXs);
+			}
+			
+			return xfs;
+
+		}
+		else {
+
+
+			std::vector<EventPack> events;
+			std::vector<std::vector<std::vector<Eigen::Vector2d>>> eventtimes;
+
+
+
+			bool storestates = false;
+			bool storederivs = false;
+			bool storemidpoints = false;
+			std::vector<std::vector<ODEState<double>>> Xs;
+			std::vector<std::vector<ODEDeriv<double>>> dXs;
+
+
+			return integrate_impl_vectorized(
+				x0s,
+				tfs,
+				events,
+				eventtimes,
+				storestates,
+				storederivs,
+				storemidpoints,
+				Xs,
+				dXs);
+
+
+
+		}
+		
 	}
 
 	IntegEventRet integrate(const ODEState<double>& x0, double tf, const std::vector<EventPack>& events) const {
@@ -1486,6 +1863,11 @@ public:
 		//	py::overload_cast<const ODEState<double>&, double, const std::vector<EventPack>&>(&Integrator::integrate, py::const_),
 		//	py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"));
 
+		obj.def("integrate_v",
+			(std::vector<IntegRet>(Integrator::*)
+				(const std::vector<ODEState<double>>&, const Eigen::VectorXd&, bool)) & Integrator::integrate_v,
+			py::arg("Xt0UPs"), py::arg("tfs"), py::arg("vectorize")=false, py::call_guard<py::gil_scoped_release>());
+
 
 		obj.def("integrate_parallel",
 			(std::vector<IntegRet>(Integrator::*)
@@ -1659,6 +2041,10 @@ public:
 		obj.def_readwrite("MinStepSize", &Integrator::MinStepSize);
 		obj.def_readwrite("MaxStepChange", &Integrator::MaxStepChange);
 		obj.def_readwrite("FastAdaptiveSTM", &Integrator::FastAdaptiveSTM);
+
+		obj.def_readwrite("StepFrac", &Integrator::StepFrac);
+		obj.def_readwrite("ErrPowFac", &Integrator::ErrPowFac);
+
 
 		obj.def_readwrite("Adaptive", &Integrator::Adaptive);
 		obj.def_readwrite("AbsTols", &Integrator::AbsTols);

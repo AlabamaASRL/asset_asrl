@@ -341,7 +341,7 @@ def Form1():
     IG = integ.integrate_dense(X0,200/Tstar,1000)
     
     
-    phase = ode.phase('LGL3',IG,384)
+    phase = ode.phase('LGL3',IG,512)
     phase.setControlMode('BlockConstant')
     
     phase.addBoundaryValue("Front",range(0,21),X0[0:21])
@@ -402,7 +402,7 @@ def Form2():
     
     Traj = integ.integrate_dense(X0,200/Tstar,1000)
     
-    phase = ode.phase('LGL3',Traj,384)
+    phase = ode.phase('LGL3',Traj,512)
     phase.setControlMode('BlockConstant')
     phase.addBoundaryValue("Front",range(0,14),X0[0:14])
     phase.addLUVarBounds('Path',[14,15,16],-MaxThrust,MaxThrust,.1)

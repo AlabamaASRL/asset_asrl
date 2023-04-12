@@ -192,8 +192,8 @@ if __name__ == "__main__":
     
     ode = CartPole(l,m1,m2,g)
     
-    phase = ode.phase("LGL7",IG,10)
-    
+    phase = ode.phase("Trapezoidal",IG,20)
+    phase.setControlMode("BlockConstant")
     #Fix first state (x,theta,xdot,thetadot) and time
     phase.addBoundaryValue("First",range(0,5),[0 ,0    , 0, 0, 0])
     #Fix last state (x,theta,xdot,thetadot) and time
@@ -219,9 +219,14 @@ if __name__ == "__main__":
     help it converge but it doesnt eliminate the noise, which effects the placement of points.
     LGL5 and LGL7 however, work well with both estimators.
     '''
-    phase.setMeshErrorEstimator('integrator')
-    phase.setMeshTol(1.0e-7)
-    phase.setMeshErrFactor(10)
+    #phase.setMeshErrorEstimator('integrator')
+    phase.setMeshTol(1.0e-6)
+    #phase.setMeshErrFactor(1)
+    phase.MaxMeshIters=10
+    phase.MeshRedFactor=0.5
+    #phase.setMaxSegments(20)
+    
+    #phase.MinMeshIters = 9
     phase.optimize()
     
     PhaseMeshErrorPlot(phase,show=True)

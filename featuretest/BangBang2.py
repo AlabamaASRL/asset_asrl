@@ -45,7 +45,7 @@ def Jump(Traj):
     
     TT = np.array(Traj).T
     
-    U0 = TT[9]
+    U0 = TT[7]
     
     U0N = ( U0 - min(U0))/(1+max(U0) - min(U0))
     
@@ -89,6 +89,9 @@ def Jump(Traj):
     
     plt.show()
     
+def test(*args):
+    
+    print(list(args))
     
     
 if __name__ == "__main__":
@@ -116,9 +119,15 @@ if __name__ == "__main__":
         
         
     ode = ODE(L)
-    phase = ode.phase("LGL5",Traj,20)
-    phase.setControlMode("NoSpline")
-    phase.setControlMode("BlockConstant")
+    
+    
+    tmp = ode.ode
+    
+    
+   
+    phase = ode.phase("LGL3",Traj,20)
+    #phase.setControlMode("NoSpline")
+    #phase.setControlMode("BlockConstant")
     #phase.setControlMode("HighestOrderSpline")
 
     phase.addBoundaryValue("Front",range(0,7),Traj[0][0:7])
@@ -128,28 +137,31 @@ if __name__ == "__main__":
     phase.addLUVarBounds("Path",[7,8,9],-1,1.,1.0)
     phase.addDeltaTimeObjective(1.0)
    
-    #phase.optimizer.set_QPOrderingMode("MINDEG")
+    phase.optimizer.set_QPOrderingMode("MINDEG")
 
-    phase.setAdaptiveMesh(True)
+    #phase.setAdaptiveMesh(True)
     phase.optimizer.PrintLevel =1
-    phase.AbsSwitchTol=.1
-    phase.DetectControlSwitches = True
-    phase.ForceOneMeshIter = True
-    
+    phase.AbsSwitchTol=.05
+    #phase.DetectControlSwitches = True
+    phase.MinMeshIters = 6
+    phase.setThreads(1,1)
     phase.MaxMeshIters=9
-    phase.setMeshErrorEstimator("integrator")
+    #phase.setMeshErrorEstimator("integrator")
     #phase.setMeshErrorCriteria("endtoend")
-    phase.optimizer.KKTtol = 1.0e-8
-    phase.MeshTol = 1.0e-7
+    phase.optimizer.KKTtol = 1.0e-10
+    phase.MeshTol = 1.0e-6
+    phase.MeshErrFactor=20
 
-    f = Args(2)[0]-Args(2)[1] +.03
-    #phase.addInequalCon("PairWisePath",f*.0001,[6])
+
+    f = Args(2)[0]-Args(2)[1] +.001
+    #$phase.addInequalCon("PairWisePath",f*.0001,[6])
     
     
 
     
     t0 = time.perf_counter()
     phase.solve_optimize()
+
     tf = time.perf_counter()
     #phase.transcribe(True,True)
 
@@ -158,9 +170,9 @@ if __name__ == "__main__":
     integ = ode.integrator(.01,phase.returnTrajTable())
     Traj = phase.returnTraj()
     
-    Traj1 = integ.integrate_dense(Traj[0],Traj[-1][6])
+    #Traj = integ.integrate_dense(Traj[0],Traj[-1][6])
     
-    print(Traj1[-1]-Traj[-1])
+    #print(Traj1[-1]-Traj[-1])
     
     Jump(phase.returnTraj())
     
@@ -173,6 +185,14 @@ if __name__ == "__main__":
     plt.plot(T[6],T[7],marker='o')
     plt.plot(T[6],T[8])
     plt.plot(T[6],T[9])
+    
+    ss = phase.getSwitchStatesTmp()
+
+    for s in ss:
+        
+        plt.plot([T[6][s]]*2,[-1,1],color='k')
+
+    
     plt.show()
     
 

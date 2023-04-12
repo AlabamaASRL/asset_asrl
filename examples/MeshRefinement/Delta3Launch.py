@@ -415,7 +415,7 @@ if __name__ == "__main__":
     
     
     for phase in ocp.Phases:
-        phase.setMeshTol(1.0e-7)
+        phase.setMeshTol(1.0e-9)
         phase.setMeshErrorCriteria('max')
         phase.setMeshErrorEstimator('integrator')  
 

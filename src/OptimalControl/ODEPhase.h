@@ -536,6 +536,91 @@ struct ODEPhase : ODEPhaseBase {
 
   }
 
+  virtual void get_meshinfo_integrator2(Eigen::VectorXd& tsnd, Eigen::MatrixXd& mesh_errors, Eigen::MatrixXd& mesh_dist) const {
+
+      Integrator<DODE> Integ;
+
+      if (this->UVars() != 0) {
+          Integ = Integrator<DODE>{ this->ode, this->integrator.DefStepSize ,std::make_shared<LGLInterpTable>(this->Table) };
+      }
+      else {
+          Integ = Integrator<DODE>{ this->ode, this->integrator.DefStepSize };
+      }
+
+
+      Integ.Adaptive = this->integrator.Adaptive;
+      Integ.FastAdaptiveSTM = this->integrator.FastAdaptiveSTM;
+      Integ.AbsTols = this->integrator.AbsTols;
+      Integ.RelTols = this->integrator.RelTols;
+      Integ.MinStepSize = this->integrator.MinStepSize;
+      Integ.MaxStepSize = this->integrator.MaxStepSize;
+      Integ.EnableVectorization = this->EnableVectorization;
+
+
+
+
+      ODEState<double> Xin;
+      ODEState<double> Xout;
+
+
+      double T0 = this->ActiveTraj[0][this->TVar()];
+      double TF = this->ActiveTraj.back()[this->TVar()];
+
+      int BlockSize = this->numTranCardStates;
+      int numBlocks = (this->ActiveTraj.size() - 1) / (BlockSize - 1);;
+
+
+      mesh_errors.resize(this->XVars(), numBlocks + 1);
+      mesh_dist.resize(this->XVars(), numBlocks + 1);
+      tsnd.resize(numBlocks + 1);
+
+      Eigen::MatrixXd tmp_mat(this->XVars(), this->ActiveTraj.size() - 1);
+
+
+      for (int i = 0; i < this->ActiveTraj.size() - 1; i++) {
+          int start = i;
+          int stop = (i + 1);
+
+          Xin = this->ActiveTraj[start];
+          double tf = this->ActiveTraj[stop][this->TVar()];
+          Xout = Integ.integrate(Xin, tf);
+
+          tmp_mat.col(i) = (Xout.head(this->XVars()) - this->ActiveTraj[stop].head(this->XVars())).cwiseAbs();
+      }
+
+
+
+      double max_err = tmp_mat.maxCoeff();
+      ODEDeriv<double> evec(this->XVars());
+
+      for (int i = 0; i < numBlocks; i++) {
+          int start = (BlockSize - 1) * i;
+          int stop = (BlockSize - 1) * (i + 1);
+
+          double t0 = this->ActiveTraj[start][this->TVar()];
+          double tf = this->ActiveTraj[stop][this->TVar()];
+
+          tsnd[i] = (t0 - T0) / (TF - T0);
+
+
+          Xin = this->ActiveTraj[start];
+          Xout = Integ.integrate(Xin, tf);
+
+          evec = (Xout.head(this->XVars()) - this->ActiveTraj[stop].head(this->XVars())).cwiseAbs();
+
+          
+          double h = std::abs(tf - t0);
+          mesh_errors.col(i) = evec;
+          mesh_dist.col(i) = mesh_errors.col(i) / (std::pow(h, this->Order + 1)*max_err );
+          mesh_dist.col(i) = (mesh_dist.col(i).array().pow(1 / (this->Order + 1))).eval();
+      }
+
+      mesh_errors.col(numBlocks) = mesh_errors.col(numBlocks - 1);
+      mesh_dist.col(numBlocks) = mesh_dist.col(numBlocks - 1);
+      tsnd[numBlocks] = 1.0;
+
+  }
+
   
 
   template<class PyClass>
