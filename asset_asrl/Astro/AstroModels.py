@@ -312,7 +312,7 @@ class EPPR_SolarSail(ODEBase,CR3BPFrame):
                                      otherEOMs=[],
                                      ActiveAltBodies = ActiveAltBodies, 
                                      Enable_J2=Enable_J2)
-        ODEBase.ode.__init__(self,odeeq,6,3)   
+        ODEBase.__init__(self,odeeq,6,3)   
         self.CalcSubPoints(func = self.CR3BP_ZeroAlpha.vf())
         ###################################
     
