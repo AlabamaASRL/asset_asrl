@@ -158,8 +158,13 @@ struct GenericODE
 
     Integrator<Derived>::BuildConstructors(obj);
     
+    ODESize<_XV, _UV, _PV>::BuildODESizeMembers<decltype(obj), Derived>(obj);
+
 
     obj.def("vf", [](const Derived& od) { return od.func; });
+   
+
+
   }
 };
 

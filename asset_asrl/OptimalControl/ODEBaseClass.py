@@ -49,3 +49,52 @@ class ODEBase:
         return self.ode.integrator(*args)
     def vf(self):
         return self.ode.vf()
+    
+    
+    def XVars(self):
+        return self.ode.XVars()
+    def UVars(self):
+        return self.ode.UVars()
+    def PVars(self):
+        return self.ode.PVars()
+    def TVar(self):
+        return self.ode.TVar()
+    
+    def XtVars(self):
+        return self.ode.XtVars()
+    def XtUVars(self):
+        return self.ode.XtUVars()
+    def XtUPVars(self):
+        return self.ode.XtUPVars()
+    
+    
+    def idxs_impl(func,*args):
+        if(len(args)>1  ):
+            return func(list(args))
+        elif(len(args)==1 and isinstance(args[0], int)):
+            return 
+    
+    def Xidxs(self,*args):
+        if(len(args)>1):
+            return self.ode.Xidxs(list(args))
+        else:
+            return self.ode.Xidxs(*args)
+        
+    def Xtidxs(self,*args):
+        if(len(args)>1):
+            return self.ode.Xtidxs(list(args))
+        else:
+            return self.ode.Xtidxs(*args)
+        
+    def XtUidxs(self,*args):
+        if(len(args)>1):
+            return self.ode.XtUidxs(list(args))
+        else:
+            return self.ode.XtUidxs(*args)
+        
+    def Uidxs(self,*args):
+        if(len(args)>1):
+            return self.ode.Uidxs(list(args))
+        else:
+            return self.ode.Uidxs(*args)
+        
