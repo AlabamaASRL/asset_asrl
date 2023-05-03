@@ -106,7 +106,7 @@ def GetManifold(ode,OrbitIn,dx,dt,nman=50,Stable=True):
     # Event for detecting departure from lunar SOI and close encounters
     def Cull(ode):
         X = Args(7)
-        alt = (X-ode.P2).head3().norm()-.015
+        alt = (X.head3()-ode.P2).norm()-.015
         y = (X[1]-.15)*(X[1]+.15)
         return alt*y
     

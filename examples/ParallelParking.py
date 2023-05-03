@@ -575,14 +575,14 @@ def Main():
     plt.show()
 
     ###############################
-    nsegs1 = 100
+    nsegs1 = 50
     nsegs2 = 200
     
     k1 = 75   # Parameter of tanh approx to heavyside slot func
     k2 = 150  # Larger value to better approx slot
 
     
-    phase = ode.phase("LGL5",TrajIG,nsegs1)  ## 5 and 7 work best for this problem
+    phase = ode.phase("LGL5",TrajIG,nsegs1,True)  ## 5 and 7 work best for this problem
     phase.setStaticParams([k1])
     phase.setControlMode("BlockConstant")
     phase.addBoundaryValue("First",range(0,7),XtU0[0:7])
