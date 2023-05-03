@@ -109,14 +109,11 @@ for t in np.linspace(0,tfIG,100):
 ode  = BikeODE(la,lb)
 
 phase = ode.phase("LGL3",TrajIG,128)
-
 phase.addBoundaryValue("Front",[0,1,2,3,4],[x0,y0,psi0,v0,t0])
-
 phase.addLUVarBound("Path",3,vlbound,vubound)
 phase.addLUVarBound("Path",5,-accbound,accbound)
 phase.addLUVarBound("Path",6,-np.pi/6,np.pi/6)
 phase.addInequalCon("Path",ObstacleConstraint(xobs,yobs,obsrad,m),[0,1])
-
 phase.addBoundaryValue("Back",[0,1],[xf,yf])
 phase.addDeltaTimeObjective(1.0)
 phase.optimizer.set_tols(1.0e-9,1.0e-9,1.0e-9)

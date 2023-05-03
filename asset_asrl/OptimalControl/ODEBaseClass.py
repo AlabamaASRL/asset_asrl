@@ -31,14 +31,10 @@ class ODEBase:
             if(hasUvars and hasPvars):
                 self.ode = _asset.OptimalControl.ode_x_u_p.ode(odefunc,Xvars,Uvars,Pvars)
             elif(hasUvars):
-                Pvars = 0
                 self.ode = _asset.OptimalControl.ode_x_u.ode(odefunc,Xvars,Uvars)
             elif(hasPvars):
-                Uvars = 0
                 self.ode = _asset.OptimalControl.ode_x_u_p.ode(odefunc,Xvars,0,Pvars)
             else:
-                Uvars = 0
-                Pvars = 0
                 self.ode = _asset.OptimalControl.ode_x.ode(odefunc,Xvars)
                 
         
@@ -49,3 +45,47 @@ class ODEBase:
         return self.ode.integrator(*args)
     def vf(self):
         return self.ode.vf()
+    
+    
+    def XVars(self):
+        return self.ode.XVars()
+    def UVars(self):
+        return self.ode.UVars()
+    def PVars(self):
+        return self.ode.PVars()
+    def TVar(self):
+        return self.ode.TVar()
+    
+    def XtVars(self):
+        return self.ode.XtVars()
+    def XtUVars(self):
+        return self.ode.XtUVars()
+    def XtUPVars(self):
+        return self.ode.XtUPVars()
+    
+    
+   
+    def Xidxs(self,*args):
+        if(len(args)>1):
+            return self.ode.Xidxs(list(args))
+        else:
+            return self.ode.Xidxs(*args)
+        
+    def Xtidxs(self,*args):
+        if(len(args)>1):
+            return self.ode.Xtidxs(list(args))
+        else:
+            return self.ode.Xtidxs(*args)
+        
+    def XtUidxs(self,*args):
+        if(len(args)>1):
+            return self.ode.XtUidxs(list(args))
+        else:
+            return self.ode.XtUidxs(*args)
+        
+    def Uidxs(self,*args):
+        if(len(args)>1):
+            return self.ode.Uidxs(list(args))
+        else:
+            return self.ode.Uidxs(*args)
+        

@@ -25,12 +25,36 @@ def PhaseMeshErrorPlot(phase,show=True):
     axs[0].plot([0,1],[tol, tol],color='k',linestyle='dashed',label='tol={0:.2e}'.format(tol))
     
     for i,miter in enumerate(Miters):
-        axs[0].plot(miter.times,miter.error,color=cols[i],label="Iter: {}".format(i))
         
-        hs = np.array(miter.times[1:]-miter.times[0:-1])
-        scale =  sum( np.array(miter.distribution[0:-1])*hs)
+        timestmp = []
+        errtmp   = []
+        distmp   = []
         
-        axs[1].plot(miter.times,miter.distribution/scale,color=cols[i])
+        
+        for j in range(0,len(miter.times)-1):
+            timestmp.append(miter.times[j])
+            timestmp.append(miter.times[j+1])
+            
+            errtmp.append(miter.error[j])
+            errtmp.append(miter.error[j])
+            
+            distmp.append(miter.distribution[j])
+            distmp.append(miter.distribution[j])
+            
+
+        
+        times = np.array(timestmp)
+        error = np.array(errtmp)
+        distribution = np.array(distmp)
+
+
+        axs[0].plot(times,error,color=cols[i],label="Iter: {}".format(i))
+        
+        hs = np.array(times[1:]-times[0:-1])
+        scale =  sum( np.array(distribution[0:-1])*hs)
+        
+        axs[1].plot(times,distribution/scale,color=cols[i])
+        
         axs[2].plot(miter.times,miter.distintegral,color=cols[i])
         
     

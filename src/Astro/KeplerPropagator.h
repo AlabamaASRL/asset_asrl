@@ -11,9 +11,17 @@ namespace ASSET {
             auto psi = Arguments<1>().coeff<0>();
             auto sqsi = sqrt(psi);
 
-            auto f = IfElseFunction{ psi > tol,
-              (1.0 - cos(sqsi)) / psi,
-              (1.0 - cosh(sqrt(-1.0 * psi))) / psi };
+
+            auto ell = (1.0 - cos(sqsi)) / psi;
+            auto hyp = (1.0 - cosh(sqrt(-1.0 * psi))) / psi;
+            Vector1<double> v;
+            v[0] = .5;
+
+            auto par = Constant<1, 1>(1, v);
+
+            auto f = IfElseFunction{ psi > tol,ell,
+                IfElseFunction{psi < -tol,hyp,par} };
+
             return GenericFunction<1, 1>(f);
 
         }
@@ -23,9 +31,19 @@ namespace ASSET {
             auto psi = Arguments<1>().coeff<0>();
             auto sqsi = sqrt(psi);
 
-            auto f = IfElseFunction{ psi > tol,
-              (sqsi - sin(sqsi)) / (sqsi * psi),
-              (sinh(sqrt(-1.0 * psi)) - sqrt(-1.0 * psi)) / sqrt(-1.0 * psi * psi * psi) };
+           
+            auto ell =  (sqsi - sin(sqsi)) / (sqsi * psi);
+            auto hyp = (sinh(sqrt(-1.0 * psi)) - sqrt(-1.0 * psi)) / sqrt(-1.0 * psi * psi * psi);
+
+            Vector1<double> v;
+            
+            v[0] = 1 / 6.0;
+
+            auto par = Constant<1, 1>(1, v);
+
+            auto f = IfElseFunction{ psi > tol,ell,
+                IfElseFunction{psi < -tol,hyp,par} };
+
 
             return GenericFunction<1, 1>(f);
 
@@ -37,11 +55,20 @@ namespace ASSET {
             auto psi = Arguments<1>().coeff<0>();
             auto sqsi = sqrt(psi);
 
-            auto f = IfElseFunction{ psi > tol,
-              stack((1.0 - cos(sqsi)) / psi,
-                  (sqsi - sin(sqsi)) / (sqsi * psi)),
-              stack((1.0 - cosh(sqrt(-1.0 * psi))) / psi,
-                  (sinh(sqrt(-1.0 * psi)) - sqrt(-1.0 * psi)) / sqrt(-1.0 * psi * psi * psi)) };
+           
+            auto ell = stack((1.0 - cos(sqsi)) / psi, (sqsi - sin(sqsi)) / (sqsi * psi));
+            auto hyp = stack((1.0 - cosh(sqrt(-1.0 * psi))) / psi,
+                (sinh(sqrt(-1.0 * psi)) - sqrt(-1.0 * psi)) / sqrt(-1.0 * psi * psi * psi));
+
+            Vector2<double> v;
+            v[0] = .5;
+            v[1] = 1 / 6.0;
+
+            auto par = Constant<1, 2>(1, v);
+
+            auto f = IfElseFunction{ psi > tol,ell,
+                IfElseFunction{psi < -tol,hyp,par} };
+
 
             return GenericFunction<1, 2>(f);
 
@@ -213,9 +240,9 @@ namespace ASSET {
             auto X0hyp = signdt * sqrt(-1.0 / alpha) * log(abs((-2.0 * mu * alpha * dt) /
                 (R.dot(V) + signdt) * sqrt(-mu / alpha) * (1.0 - r * alpha)));
 
-            auto X0IG = GenericFunction<7, 1>(IfElseFunction{ alpha > 0.0,X0ell,X0hyp });
+            auto X0IG = GenericFunction<7, 1>(IfElseFunction{ alpha >= 0.0,X0ell,X0hyp });
 
-            auto XF = Funiv(mu, conictol,roottol,iters).eval(stack(X0ell, dt, r, drv, alpha));
+            auto XF = Funiv(mu, conictol,roottol,iters).eval(stack(X0IG, dt, r, drv, alpha));
 
             auto FG = FGs(mu, conictol).eval(XF);
 
