@@ -707,7 +707,16 @@ protected:
 		std::vector<std::vector<ODEDeriv<double>>>& derivs_s) const {
 
 
+		if (xs.size() != tfs.size()) {
+			throw std::invalid_argument("Number of initial states and final times must match.");
+		}
+		if (xs.size() ==0) {
+			throw std::invalid_argument("Must supply at least one initial state.");
+		}
+
 		int ntrajs = xs.size();
+
+
 		Eigen::VectorXd hs(ntrajs);
 		Eigen::VectorXd Hs(ntrajs);
 		std::vector<ODEState<double>> xis = xs;
