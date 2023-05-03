@@ -81,8 +81,8 @@ class test_CartPole(unittest.TestCase):
     
     def test_FullProblem(self):
         
-        tmodes = ["LGL3","LGL5","LGL7","Trapezoidal"]
-        nsegs  = [256   ,128   ,96   ,256]
+        tmodes = ["LGL3","LGL5","LGL7","Trapezoidal","CentralShooting"]
+        nsegs  = [256   ,128   ,96   ,256,256]
         for tmode,nseg in zip(tmodes,nsegs):
             with self.subTest(TranscriptionMode=tmode):
                 with self.subTest(cmode="HighestOrderSpline"):

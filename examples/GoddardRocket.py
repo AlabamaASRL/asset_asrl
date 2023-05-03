@@ -131,6 +131,8 @@ if __name__ == "__main__":
     phase1.addBoundaryValue("Path",[4],[1])
     
     phase2 = ode.phase("LGL3",TrajIG2,32)
+    # PathCon makse Control splines redundant for LGL>3
+    phase2.setControlMode("NoSpline") 
     phase2.addLUVarBound("Path",4,0.0,1.0,1.0)
     phase2.addEqualCon("Path",PathCon(sigma,c,h_ref,Tmag, g),[0,1,2,4])
     

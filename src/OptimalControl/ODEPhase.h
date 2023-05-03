@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Blocked_ODE_Wrapper.h"
-//#include "Integrators/RKIntegrator.h"
 #include "Integrators/Integrator.h"
 
 #include "LGLDefects.h"
@@ -40,6 +39,7 @@ struct ODEPhase : ODEPhaseBase {
   DODE ode;
   Integrator<DODE> integrator;
   bool EnableHessianSparsity = false;
+  bool OldShootingDefect = false;
 
   ODEPhase(const DODE& ode, TranscriptionModes Tmode)
       : ODEPhaseBase(ode.XVars(), ode.UVars(), ode.PVars()) {
@@ -239,11 +239,20 @@ struct ODEPhase : ODEPhaseBase {
       Integ.MinStepSize = this->integrator.MinStepSize;
       Integ.MaxStepSize = this->integrator.MaxStepSize;
       Integ.EnableVectorization = this->EnableVectorization;
+      Integ.VectorizeBatchCalls = this->integrator.VectorizeBatchCalls;
 
-      auto shooter = ShootingDefect{ this->ode, Integ };
-      shooter.EnableHessianSparsity = this->EnableHessianSparsity;
-
-      return ASSET::ConstraintInterface(shooter);
+      if (OldShootingDefect) {
+          auto shooter = ShootingDefect{ this->ode, Integ };
+          shooter.EnableHessianSparsity = this->EnableHessianSparsity;
+          return ASSET::ConstraintInterface(shooter);
+      }
+      else {
+          auto shooter = CentralShootingDefect{ this->ode, Integ };
+          shooter.EnableHessianSparsity = this->EnableHessianSparsity;
+          shooter.EnableVectorization = this->EnableVectorization;
+          return ASSET::ConstraintInterface(shooter);
+      }
+      
   }
 
 
@@ -561,6 +570,8 @@ struct ODEPhase : ODEPhaseBase {
     BuildImpl(phase);
     phase.def_readwrite("integrator", &ODEPhase<DODE>::integrator);
     phase.def_readwrite("EnableHessianSparsity",  &ODEPhase<DODE>::EnableHessianSparsity);
+    phase.def_readwrite("OldShootingDefect", &ODEPhase<DODE>::OldShootingDefect);
+
   }
 };
 
