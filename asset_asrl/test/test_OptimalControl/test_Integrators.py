@@ -300,6 +300,142 @@ class test_Integrators(unittest.TestCase):
                              "STM Integration Error exceeds expected maximum")
             
         
+    def test_BatchCalls1(self):
+        a = -.5
+        b = 16
+        
+        x0 = 1
+        xdot0 =.25
+        t0 = .1
+        tf = 10
+        
+        abstol = 1.0e-13
+        
+        defstepsize = .01
+        minstepsize = .0000000001
+        
+        errtol = 1.0e-11
+        
+        ode = CauchyEulerODE(a,b)
+        
+        integ = ode.integrator("DOPRI87",defstepsize)
+        integ.setAbsTol(abstol)
+        integ.setStepSizes(defstepsize,minstepsize,10)
+        integ.VectorizeBatchCalls = True
+        
+        batchsizes = [1,3,4,15,100,1003]
+        X0 = [x0,xdot0,t0]
+        
+        for batchsize in batchsizes:
+            
+            tfs = np.linspace(tf,tf*2,batchsize)
+            
+            X0s = [X0]*batchsize
+            
+            Xfs = integ.integrate(X0s,tfs)
+            
+            for tfi,Xf in zip(tfs,Xfs):
+                
+                
+                xs,xdots,ts = ode.analytic(x0, xdot0, t0, tfi,5)
+
+                xerr = abs(xs[-1]-Xf[0])
+                xdoterr = abs(xdots[-1]-Xf[1])
+                
+                maxerr = max(xerr,xdoterr)
+                
+                self.assertLess(maxerr, errtol,
+                                 "Integration Error exceeds expected maximum")
+            
+            
+    def test_BatchCalls2(self):
+            
+            kprop = ast.Astro.Kepler.KeplerPropagator(1.0) # Ground Truth
+            ode1 = ast.Astro.Kepler.ode(1)
+            ode2 = ast.OptimalControl.ode_6.ode(ode1.vf(),6)
+            ode3 = ast.OptimalControl.ode_x.ode(ode1.vf(),6)
+            ode4 = ast.OptimalControl.ode_x_u.ode(ode1.vf(),6,0)
+            ode5 = ast.OptimalControl.ode_x_u_p.ode(ode1.vf(),6,0,0)
+            
+            for ode in [ode1,ode2,ode3,ode4,ode5]:
+
+                integ = ode.integrator(.001)
+                integ.setAbsTol(1.0e-13)
+                integ.VectorizeBatchCalls = True
+    
+                Xtol = 1.0e-11
+                Jtol = 1.0e-10
+                Htol = 1.0e-9
+                
+                
+                x0  = 1
+                vy0 = 1.35
+                vz0 = .1
+                tf  = 10
+                
+                X0 = np.zeros((7))
+                X0[0]=x0
+                X0[4]=vy0
+                X0[5]=vz0
+                
+                batchsizes = [1,3,4,5,15,42,69,103]
+    
+                for batchsize in batchsizes:
+                    
+                    tfs = np.linspace(tf*.5,tf*1.5,batchsize)
+                    
+                    X0s = [X0]*batchsize
+                    
+                    LF = np.ones((7))
+                    LF[6]=0
+                    LFs = [LF]*batchsize
+                    
+                    
+                    Result1 = integ.integrate(X0s,tfs)
+                    Result2 = integ.integrate_stm(X0s,tfs)
+                    Result3 = integ.integrate_stm2(X0s,tfs,LFs)
+    
+                    
+                    for tfi,Res1,Res2,Res3 in zip(tfs,Result1,Result2,Result3):
+                        
+                        Xf1 = Res1
+                        Xf2,J2 = Res2
+                        Xf3,J3,H3 = Res3
+                        
+                        
+                        
+                        KX = np.copy(X0)
+                        KX[6]=tfi
+                        fx,jx,gx,hx = kprop.vf().computeall(KX,np.ones((6)))
+                        
+                        for Xf in [Xf1,Xf2,Xf3]:
+                            
+                            Xerr = np.linalg.norm(Xf[0:6]-fx)
+                            
+                            
+                            self.assertLess(Xerr, Xtol,
+                                             "State Integration Error exceeds expected maximum")
+                        for J in [J2,J3]:
+                        
+                            Jerr = abs((J[0:6,0:6]-jx[0:6,0:6])).max()
+                            
+                            self.assertLess(Jerr, Jtol,
+                                             "STM Integration Error exceeds expected maximum")
+                            
+                        Herr = abs((H3[0:6,0:6]-hx[0:6,0:6])/hx[0:6,0:6]).max()
+                        
+                        self.assertLess(Herr, Htol,
+                                         "Hessian Integration Error exceeds expected maximum")
+                    
+
+            
+            
+        
+    
+
+        
+        
+        
         
         
         

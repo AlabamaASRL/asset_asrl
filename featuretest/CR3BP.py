@@ -60,7 +60,7 @@ def Perf2():
     
     kp  = ast.Astro.Kepler.KeplerPropagator(1.0).vf()
     
-    DT = 3
+    DT = -3
     Istate = [1,
               0.,
               0,
@@ -124,9 +124,14 @@ def Perf2():
             
 def Perf():
     
+    mu = .01
+    
+    mu = 2.528009215182033e-5
+    
+    
     np.set_printoptions(linewidth=180)
-    odePy = CR3BP(.01,False)
-    odeCPP= CR3BP(.01,True)
+    odePy = CR3BP(mu,False)
+    odeCPP= CR3BP(mu,True)
     
     integPy = odePy.integrator("DP87",0.01)
     integPy.setAbsTol(1.0e-12)
@@ -139,10 +144,13 @@ def Perf():
     
 
     Istate = [0.80, 0.0, 0.01, 0.0, 0.6276410653920693-.8, 0.,0]
-    DT = 0.5
+    
+    Istate = [1.04867586089512202 - mu,0,0,0,-0.09354853663949217,0,0]
+    
+    DT = 70.539450415125
     
     
-    nevals = 300
+    nevals = 4
     
     L = np.ones((7))
     L[6]=0
@@ -198,6 +206,15 @@ def Perf():
         JH1  =TimeIt("CPP   -No Vectorization",integCPP.integrate_stm2_v,Istates,DTs,Lstates,False)
         JH2  =TimeIt("CPP  -   Vectorization",integCPP.integrate_stm2_v,Istates,DTs ,Lstates,True)
         
+        tmp = integPy.vf()
+        In = np.zeros((8))
+        In[0:7]=Istate
+        In[7] = DT
+        
+        TimeIt("CPP  -  One No Vectorization",tmp.adjointhessian,In,np.zeros((7)))
+        
+        
+        
     tf = time.perf_counter()
     
     
@@ -217,4 +234,4 @@ def Perf():
     
     
 if __name__ == "__main__":
-    Perf()
+    Perf2()
