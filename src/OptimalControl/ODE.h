@@ -158,11 +158,17 @@ struct GenericODE
 
     Integrator<Derived>::BuildConstructors(obj);
     
-    ODESize<_XV, _UV, _PV>::BuildODESizeMembers<decltype(obj), Derived>(obj);
+    ODESize<_XV, _UV, _PV>:: template BuildODESizeMembers<decltype(obj), Derived>(obj);
 
 
     obj.def("vf", [](const Derived& od) { return od.func; });
    
+
+    obj.def("shooting_defect", [](const Derived& ode, const Integrator<Derived>& integ) {
+        auto shooter = CentralShootingDefect<Derived, Integrator<Derived>>(ode, integ);
+            return GenericFunction<-1,-1>(shooter);
+        });
+
 
 
   }

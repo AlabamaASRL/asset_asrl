@@ -123,7 +123,7 @@ class test_MultiPhaseCannon(unittest.TestCase):
         ##########################################################################
         
         aphase = ode.phase(tmode,AscentIG, nsegs)
-        aphase.addLowerVarBound("ODEParams",0,0.0,1)
+        aphase.addLowerVarBound("ODEParams",0,0.01/Lstar,1)
         aphase.addLowerVarBound("Front",1,0.0,1.0)
         aphase.addBoundaryValue("Front",[2,3,4],[h0,r0,0])
         
@@ -145,9 +145,9 @@ class test_MultiPhaseCannon(unittest.TestCase):
         ocp.optimizer.set_OptLSMode("L1")
         ocp.optimizer.MaxLSIters = 2
         ocp.optimizer.PrintLevel = 3
-        ocp.optimizer.QPThreads = 1
-        ocp.Threads = 1
-        
+        ocp.setThreads(1,1)
+        ocp.optimizer.set_QPOrderingMode("MINDEG")
+       
         Flag = ocp.optimize()
         
         Ascent  = aphase.returnTraj()
@@ -168,8 +168,8 @@ class test_MultiPhaseCannon(unittest.TestCase):
         
     def test_FullProblem(self):
         
-        tmodes = ["LGL3","LGL5","LGL7","Trapezoidal"]
-        nsegs  = [16   ,16   ,16   ,128]
+        tmodes = ["LGL3","LGL5","LGL7","Trapezoidal","CentralShooting"]
+        nsegs  = [16   ,16   ,16   ,128,8]
 
         for tmode,nseg in zip(tmodes,nsegs):
             with self.subTest(TranscriptionMode=tmode):

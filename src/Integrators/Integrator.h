@@ -16,7 +16,8 @@ namespace ASSET {
 	template<int OR>
 	struct InterpFunction;
 
-
+	template<class DODE, class Integrator>
+	struct CentralShootingDefect;
 	
 
 
@@ -63,6 +64,8 @@ struct Integrator:VectorFunction<Integrator<DODE>,SZ_SUM<DODE::IRC,1>::value,DOD
 	using STMEventRet = std::tuple< IntegRet, Jacobian<double>, EventLocsType >;
 
 
+	friend CentralShootingDefect<DODE, Integrator>;
+
 protected:
 	DODE ode;
 	bool usecontroller = false;
@@ -80,6 +83,7 @@ protected:
 public:
 
 	Integrator() {
+		this->EnableVectorization = true;
 		this->pool = std::make_shared<ctpl::ThreadPool>();
 	}
 	
@@ -252,7 +256,7 @@ public:
 	bool FastAdaptiveSTM = true;
 	double EventTol = 1.0e-6;
 	int MaxEventIters = 10;
-	bool VectorizeCalls = false;
+	bool VectorizeBatchCalls = true;
 
 	double StepFrac = .9;
 	double ErrPowFac = 1;
@@ -312,7 +316,14 @@ public:
 
 	/////////////////////////////////////////////////////////////////////////////////////
 
+	
+
 protected:
+
+	double calc_hnext(double h, double err,double accerr) const {
+		return this->StepFrac * h * pow((accerr / err), 1.0 / (this->ErrorOrder + ErrPowFac));
+	}
+
 
 	template<class State>
 	void update_control(State& xtup) const {
@@ -541,13 +552,8 @@ protected:
 				if (storederivs) derivs.reserve(numsteps * 2 + 2);
 			}
 			else {
-				
 				states.reserve(numsteps + 2);
-				
-				
-				
 				if (storederivs) derivs.reserve(numsteps + 2);
-
 			}
 			states.push_back(xi);
 			if (storederivs) derivs.push_back(xdoti);
@@ -603,7 +609,8 @@ protected:
 
 				double err = Abserror[worst];
 				double acc = Errvec[worst];
-				double hnext = this->StepFrac*h * pow((acc / err), 1.0 / (this->ErrorOrder+ErrPowFac));
+				double hnext = calc_hnext(h, err, acc);
+				
 
 				if (hnext / h > this->MaxStepChange)
 					h *= this->MaxStepChange;
@@ -787,11 +794,10 @@ protected:
 
 
 
-		ODEDeriv<double> Abserror;
-		ODEDeriv<double> Abserror_max;
-		ODEDeriv<double> Errvec;
-
-		ODEDeriv<SuperScalar> Abserror_SS;
+		ODEDeriv<double> Abserror(ode.XVars());
+		ODEDeriv<double> Abserror_max(ode.XVars());
+		ODEDeriv<double> Errvec(ode.XVars());
+		ODEDeriv<SuperScalar> Abserror_SS(ode.XVars());
 
 
 		std::vector<bool> continueloops(ntrajs,true);
@@ -800,6 +806,18 @@ protected:
 
 		int numrunning = ntrajs;
 		int lastrunning = ntrajs - 1;
+
+		if (ntrajs < SuperScalar::SizeAtCompileTime) {
+
+			for (int V = 0; V < SuperScalar::SizeAtCompileTime; V++) {
+				for (int k = 0; k < this->ode.IRows(); k++) {
+					xi_SS[k][V] = xis[0][k];
+				}
+				for (int k = 0; k < this->ode.ORows(); k++) {
+					xdotnext_SS[k][V] = xdotis[0][k];
+				}
+			}
+		}
 
 		while (numrunning>0) {
 
@@ -863,7 +881,6 @@ protected:
 
 							for (int k = 0; k < this->ode.IRows(); k++) {
 								xnext[k] = xnext_SS[k][V];
-								//xnext_est[k] = xnext_est_SS[k][V];
 								xnext_mid[k] = xnext_mid_SS[k][V];
 
 							}
@@ -878,10 +895,6 @@ protected:
 
 								double h = hs[itmp];
 
-								//Abserror =
-								//	(xnext.head(this->ode.XVars()) - xnext_est.head(this->ode.XVars()))
-								//	.cwiseAbs();
-
 								Errvec = this->AbsTols + xnext.head(this->ode.XVars()).cwiseAbs().cwiseProduct(this->RelTols);
 
 								Abserror_max = Abserror.cwiseQuotient(Errvec);
@@ -890,8 +903,7 @@ protected:
 
 								double err = Abserror[worst];
 								double acc = Errvec[worst];
-								//double hnext = .9 * h * pow((acc / err), 1.0 / (this->ErrorOrder + 1));
-								double hnext = this->StepFrac * h * pow((acc / err), 1.0 / (this->ErrorOrder + ErrPowFac));
+								double hnext = calc_hnext(h,err,acc);
 
 								if (hnext / h > this->MaxStepChange)
 									h *= this->MaxStepChange;
@@ -905,7 +917,6 @@ protected:
 
 								if (abs(h) < this->MinStepSize) {
 									h = this->MinStepSize * h / abs(h);
-						
 									HitMinimums[itmp] = true;
 								}
 								else {
@@ -1162,6 +1173,17 @@ protected:
 		std::vector<Hessian<double>> jxalls(ntrajs);
 		std::vector<Jacobian<double>> jxs(ntrajs);
 
+
+		if (ntrajs < DefaultSuperScalar::SizeAtCompileTime) {
+			// Pad out inputs to prevent junk data being given to stepper
+			for (int v = 0; v < DefaultSuperScalar::SizeAtCompileTime; v++) {
+				for (int j = 0; j < this->ode.IRows(); j++) {
+					stepper_inputSS[j][v] = Xs_S[0][0][j];
+				}
+			}
+		}
+
+
 		for (int n = 0; n < npacks; n++) {
 
 
@@ -1374,11 +1396,6 @@ protected:
 	}
 
 	
-
-
-
-
-
 	std::tuple <std::vector<Jacobian<double>>, std::vector<Hessian<double>> >
 		calculate_jacobians_hessians(const std::vector<std::vector<ODEState<double>>>& Xs_S, const std::vector<ODEState<double>>& Lf_S) const {
 
@@ -1400,6 +1417,9 @@ protected:
 		Hessian<double> jtwist(this->IRows(), this->IRows());
 		Hessian<double> hxall(this->IRows(), this->IRows());
 
+		jxall.setZero();
+		jtwist.setZero();
+		hxall.setZero();
 
 
 
@@ -1426,11 +1446,22 @@ protected:
 
 		std::vector<std::tuple < Jacobian<double>, Hessian < double> >> hjxs(ntrajs);
 
+		if (ntrajs < DefaultSuperScalar::SizeAtCompileTime) {
+			// Pad out inputs to prevent junk data being given to stepper
+			for (int v = 0; v < DefaultSuperScalar::SizeAtCompileTime; v++) {
+				for (int j = 0; j < this->ode.IRows(); j++) {
+					stepper_inputSS[j][v] = Xs_S[0][0][j];
+				}
+			}
+		}
+
 
 		for (int n = 0; n < npacks; n++) {
 
 
 			int vmax = std::min(vsize, ntrajs - n * vsize);
+			stepper_adjvarsSS.setZero();
+
 
 			for (int v = 0; v < vmax; v++) {
 				int idx = idxs[n * vsize + v];
@@ -1543,6 +1574,10 @@ protected:
 public:
 	////////////////////////////////////////////////////////////////////////////////////
 
+
+	
+
+	///////////////////////////////////////////////////////////////////////////////////
 	IntegRet integrate(const ODEState<double>& x0, double tf) const {
 
 		ODEState<double> xf;
@@ -1562,9 +1597,9 @@ public:
 		return xf;
 	}
 
-	std::vector<ODEState<double>> integrate_v(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd & tfs, bool vectorize) const {
+	std::vector<ODEState<double>> integrate(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd & tfs) const {
 
-		if (!vectorize) {
+		if (!VectorizeBatchCalls) {
 
 			std::vector<ODEState<double>> xfs(x0s.size());
 			std::vector<EventPack> events;
@@ -1609,28 +1644,18 @@ public:
 				storemidpoints,
 				Xs,
 				dXs);
-
-
-
 		}
-		
 	}
 
 
-	std::vector<STMRet> integrate_stm_v(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, bool vectorize) const {
+	std::vector<STMRet> integrate_stm(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs) const {
 
-		if (!vectorize) {
-
+		if (!VectorizeBatchCalls) {
 			std::vector<STMRet> rets(x0s.size());
-
 			for (int i = 0; i < x0s.size(); i++) {
-
 				rets[i] = this->integrate_stm(x0s[i], tfs[i]);
-
 			}
-
 			return rets;
-
 		}
 		else {
 
@@ -1643,7 +1668,6 @@ public:
 			std::vector<std::vector<ODEState<double>>> Xs(x0s.size());
 			std::vector<std::vector<ODEDeriv<double>>> dXs(x0s.size());
 
-
 			auto Xfs = integrate_impl_vectorized(
 				x0s,
 				tfs,
@@ -1655,14 +1679,7 @@ public:
 				Xs,
 				dXs);
 
-			//for (int i = 0; i < x0s.size(); i++) {
-			//	Xs[i] = this->integrate_dense(x0s[i], tfs[i]);
-			//}
-
-
-
 			auto Jacs = this->calculate_jacobians(Xs);
-
 			std::vector<STMRet> rets(x0s.size());
 
 			for (int i = 0; i < x0s.size(); i++) {
@@ -1671,32 +1688,21 @@ public:
 
 			}
 			return rets;
-
 		}
-
 	}
 
 
 	std::vector<std::tuple<ODEState<double>,Jacobian<double>,Hessian<double>>> 
-		integrate_stm2_v(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, const std::vector<ODEState<double>>& lfs, bool vectorize) const {
+		integrate_stm2(const std::vector<ODEState<double>>& x0s, const Eigen::VectorXd& tfs, const std::vector<ODEState<double>>& lfs) const {
 
-		if (!vectorize) {
-
+		if (!VectorizeBatchCalls) {
 			std::vector<std::tuple<ODEState<double>, Jacobian<double>, Hessian<double>>> rets(x0s.size());
-
 			for (int i = 0; i < x0s.size(); i++) {
-
 				auto Xs = this->integrate_dense(x0s[i], tfs[i]);
-
 				auto [J, H] = this->calculate_jacobian_hessian(Xs, lfs[i]);
-
-
 				rets[i] = std::tuple{Xs.back(),J,H};
-
 			}
-
 			return rets;
-
 		}
 		else {
 
@@ -1721,14 +1727,7 @@ public:
 				Xs,
 				dXs);
 
-			//for (int i = 0; i < x0s.size(); i++) {
-			//	Xs[i] = this->integrate_dense(x0s[i], tfs[i]);
-			//}
-
-
-
 			auto [Js, Hs] = this->calculate_jacobians_hessians(Xs,lfs);
-
 			std::vector<std::tuple<ODEState<double>, Jacobian<double>, Hessian<double>>> rets(x0s.size());
 
 			for (int i = 0; i < x0s.size(); i++) {
@@ -2250,22 +2249,21 @@ public:
 			(IntegEventRet(Integrator::*)(const ODEState<double>&, double, const std::vector<EventPack>&) const) & Integrator::integrate,
 			py::arg("Xt0UP"), py::arg("tf"), py::arg("Events"));
 
-		
-		obj.def("integrate_v",
+		obj.def("integrate",
 			(std::vector<IntegRet>(Integrator::*)
-				(const std::vector<ODEState<double>>&, const Eigen::VectorXd&, bool)) & Integrator::integrate_v,
-			py::arg("Xt0UPs"), py::arg("tfs"), py::arg("vectorize")=false, py::call_guard<py::gil_scoped_release>());
+				(const std::vector<ODEState<double>>&, const Eigen::VectorXd&)const) & Integrator::integrate,
+			py::arg("Xt0UPs"), py::arg("tfs"), py::call_guard<py::gil_scoped_release>());
 
-		obj.def("integrate_stm_v",
+		obj.def("integrate_stm",
 			(std::vector<STMRet>(Integrator::*)
-				(const std::vector<ODEState<double>>&, const Eigen::VectorXd&, bool)) & Integrator::integrate_stm_v,
-			py::arg("Xt0UPs"), py::arg("tfs"), py::arg("vectorize") = false, py::call_guard<py::gil_scoped_release>());
+				(const std::vector<ODEState<double>>&, const Eigen::VectorXd&)const) & Integrator::integrate_stm,
+			py::arg("Xt0UPs"), py::arg("tfs"), py::call_guard<py::gil_scoped_release>());
 
-		obj.def("integrate_stm2_v",
+		obj.def("integrate_stm2",
 			(std::vector<std::tuple<ODEState<double>, Jacobian<double>, Hessian<double>>>
 				(Integrator::*)
-				(const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<ODEState<double>>&,bool)) & Integrator::integrate_stm2_v,
-			py::arg("Xt0UPs"), py::arg("tfs"), py::arg("Lfs"), py::arg("vectorize") = false, py::call_guard<py::gil_scoped_release>());
+				(const std::vector<ODEState<double>>&, const Eigen::VectorXd&, const std::vector<ODEState<double>>&)const) & Integrator::integrate_stm2,
+			py::arg("Xt0UPs"), py::arg("tfs"), py::arg("Lfs"), py::call_guard<py::gil_scoped_release>());
 
 
 
@@ -2404,6 +2402,9 @@ public:
 
 		obj.def_readwrite("EventTol", &Integrator::EventTol);
 		obj.def_readwrite("MaxEventIters", &Integrator::MaxEventIters);
+		obj.def_readwrite("VectorizeBatchCalls", &Integrator::VectorizeBatchCalls);
+
+		
 
 	}
 

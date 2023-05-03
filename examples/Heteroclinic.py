@@ -74,21 +74,20 @@ def GetManifold(ode,OrbitIn,dx,dt,nman=50,Stable=True):
         Xf,Jac = Result
         
         vals,vecs = np.linalg.eig(Jac[0:6,0:6])
+        vecs = vecs.T
         
-        Vec = np.real(vecs[0])
+        idxs = list(range(0,6))
+        idxs.sort(key = lambda x:np.abs(vals[x]))
+       
+        if(Stable):
+            Vec = np.real(vecs[idxs[0]])
+        else:
+            Vec = np.real(vecs[idxs[-1]])
+
         
         Xp = np.copy(Orbit[i])
         Xp[0:3]+=normalize(Vec[0:3])*dx
         
-        EigIGs.append(Xp)
-        
-        Xp = np.copy(Orbit[i])
-        Xp[0:3]-=normalize(Vec[0:3])*dx
-        
-        Vec = np.real(vecs[1])
-    
-        Xp = np.copy(Orbit[i])
-        Xp[0:3]+=normalize(Vec[0:3])*dx
         EigIGs.append(Xp)
         
         Xp = np.copy(Orbit[i])

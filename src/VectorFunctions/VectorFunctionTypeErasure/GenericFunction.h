@@ -334,6 +334,7 @@ namespace ASSET {
             Eigen::BenchTimer t1;
             Eigen::BenchTimer t2;
             l.setOnes();
+            L.setOnes();
             fx.setZero();
             jx.setZero();
             hx.setZero();
@@ -353,20 +354,25 @@ namespace ASSET {
 
                 this->func.compute_jacobian_adjointgradient_adjointhessian(x, fx, jx, gx, hx,
                     l);
-                dummy += fx[0] + jx(0, 0) + hx(0, 0);
+                dummy += fx[0] +jx(0, 0) + hx(0, 0);
             }
             t1.stop();
 
             std::cout << dummy << std::endl;
 
-            ASSET::DefaultSuperScalar dummy2(0);
+            ASSET::DefaultSuperScalar dummy2(0.0);
             t2.start();
             int n2 = n / ASSET::DefaultSuperScalar::SizeAtCompileTime;
             for (int i = 0; i < n2; i++) {
-                X[0] += ASSET::DefaultSuperScalar((1.0 / double(n + 1)));
+                // X[0] += ASSET::DefaultSuperScalar((1.0 / double(n + 1)));
+
+                FX.setZero();
+                JX.setZero();
+                HX.setZero();
+
                 this->func.compute_jacobian_adjointgradient_adjointhessian(X, FX, JX, GX, HX,
                     L);
-                dummy2 += FX[0] + JX(0, 0) + HX(0, 0);
+                dummy2 += FX[0] +JX(0, 0) + HX(0, 0);
             }
             t2.stop();
 
