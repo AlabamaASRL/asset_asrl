@@ -646,6 +646,18 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
     Funtimer.stop();
   }
 
+
+  if (this->EqualCons > 0) {
+    this->LastEqCons = this->getEqCons(RHS);
+    this->LastEqLmults = this->getEqLmults(XSL);
+
+  }
+  if (this->InequalCons > 0) {
+    this->LastIqCons = this->getIqCons(RHS) - this->getSlacks(XSL);
+    this->LastIqLmults = this->getIqLmults(XSL);
+  }
+
+
   Runtimer.stop();
   this->LastIterNum += iters.size();
   double qptime = double(QPtimer.count<std::chrono::microseconds>()) / 1000000.0;
@@ -760,7 +772,7 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
                               const std::vector<IterateInfo>& iters) {
 
 
-  // Do not modify RHS,XSL,DXSL. EigenRef<VectorXd> doesnt like to be explicitlty const in this instance,
+  // Do not modify RHS,XSL,DXSL. EigenRef<VectorXd> doesnt like to be explicitly const in this instance,
   // I will fix this later in refactor
 
   double alpha = 1.0;
@@ -935,10 +947,7 @@ Eigen::VectorXd ASSET::PSIOPT::optimize(const Eigen::VectorXd& x) {
     print_Finished("Optimization Algorithm ");
   }
 
-  if (this->EqualCons > 0)
-    this->LastEqLmults = this->getEqLmults(XSLans);
-  if (this->InequalCons > 0)
-    this->LastIqLmults = this->getIqLmults(XSLans);
+ 
 
   t.stop();
   double tottime = double(t.count<std::chrono::microseconds>()) / 1000.0;
@@ -1002,10 +1011,7 @@ Eigen::VectorXd ASSET::PSIOPT::solve_optimize(const Eigen::VectorXd& x) {
     print_Header();
   }
 
-  if (this->EqualCons > 0)
-    this->LastEqLmults = this->getEqLmults(XSLans);
-  if (this->InequalCons > 0)
-    this->LastIqLmults = this->getIqLmults(XSLans);
+  
   return this->getPrimals(XSLans);
 }
 
@@ -1073,10 +1079,7 @@ Eigen::VectorXd ASSET::PSIOPT::solve_optimize_solve(const Eigen::VectorXd& x) {
     print_Header();
   }
 
-  if (this->EqualCons > 0)
-    this->LastEqLmults = this->getEqLmults(XSLans);
-  if (this->InequalCons > 0)
-    this->LastIqLmults = this->getIqLmults(XSLans);
+ 
   return this->getPrimals(XSLans);
 }
 
@@ -1134,10 +1137,7 @@ Eigen::VectorXd ASSET::PSIOPT::optimize_solve(const Eigen::VectorXd& x) {
     print_Header();
   }
 
-  if (this->EqualCons > 0)
-    this->LastEqLmults = this->getEqLmults(XSLans);
-  if (this->InequalCons > 0)
-    this->LastIqLmults = this->getIqLmults(XSLans);
+  
   return this->getPrimals(XSLans);
 }
 
@@ -1175,10 +1175,7 @@ Eigen::VectorXd ASSET::PSIOPT::solve(const Eigen::VectorXd& x) {
     print_Finished("PSIOPT ");
     print_Header();
   }
-  if (this->EqualCons > 0)
-    this->LastEqLmults = this->getEqLmults(XSLans);
-  if (this->InequalCons > 0)
-    this->LastIqLmults = this->getIqLmults(XSLans);
+  
 
   return this->getPrimals(XSLans);
 }
