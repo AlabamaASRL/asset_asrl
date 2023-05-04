@@ -1,18 +1,15 @@
 #include "ASSET_VectorFunctions.h"
 
 namespace ASSET {
-	void ArgsSegBuildPart4(FunctionRegistry& reg, py::module& m) {
-		using Gen = GenericFunction<-1, -1>;
-		using GenS = GenericFunction<-1, 1>;
-		using SEG = Segment<-1, -1, -1>;
-		using SEG2 = Segment<-1, 2, -1>;
-		using SEG3 = Segment<-1, 3, -1>;
-		using ELEM = Segment<-1, 1, -1>;
+  void ArgsSegBuildPart4(FunctionRegistry& reg, py::module& m) {
+    using Gen = GenericFunction<-1, -1>;
+    using GenS = GenericFunction<-1, 1>;
+    using SEG = Segment<-1, -1, -1>;
+    using SEG2 = Segment<-1, 2, -1>;
+    using SEG3 = Segment<-1, 3, -1>;
+    using ELEM = Segment<-1, 1, -1>;
 
-		reg.Build_Register<SEG2>(m, "Segment2");
+    reg.Build_Register<SEG2>(m, "Segment2");
+  }
 
-		
-
-	}
-
-}
+}  // namespace ASSET
