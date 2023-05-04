@@ -1,19 +1,17 @@
 #pragma once
+#include <pybind11/pybind11.h>
+
 #include <iostream>
 #include <string>
-#include <pybind11/pybind11.h>
+
 #include "fmtlib.h"
 
 
 namespace ASSET {
 
-    struct ColorScheme {
-
-    };
+  struct ColorScheme {};
 
 
-    void enable_color_console();
+  void enable_color_console();
 
-}
-
-
+}  // namespace ASSET

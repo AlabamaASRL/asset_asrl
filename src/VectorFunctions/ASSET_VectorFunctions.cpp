@@ -1,20 +1,11 @@
 #include "ASSET_VectorFunctions.h"
 
+#include "CommonFunctions/InterpTable1D.h"
+#include "CommonFunctions/InterpTable2D.h"
+#include "CommonFunctions/InterpTable3D.h"
 #include "Utils/fmtlib.h"
 
-#include "CommonFunctions/InterpTable2D.h"
-#include "CommonFunctions/InterpTable1D.h"
-#include "CommonFunctions/InterpTable3D.h"
-
-namespace ASSET {
-
-
-
-    
-
-
-
-}  // namespace ASSET
+namespace ASSET {}  // namespace ASSET
 
 void ASSET::VectorFunctionBuild(FunctionRegistry& reg, py::module& m) {
   auto& mod = reg.getVectorFunctionsModule();
@@ -58,16 +49,10 @@ void ASSET::VectorFunctionBuild(FunctionRegistry& reg, py::module& m) {
   InterpTable3DBuild(mod);
 
   mod.def("ScalarDynamicStackTest", [](const std::vector<GenericFunction<-1, 1>>& funcs) {
-
-	  return GenericFunction<-1, -1>(DynamicStackedOutputs{ funcs });
-
-	  });
+    return GenericFunction<-1, -1>(DynamicStackedOutputs {funcs});
+  });
 
   mod.def("DynamicStackTest", [](const std::vector<GenericFunction<-1, -1>>& funcs) {
-
-	  return GenericFunction<-1, -1>(DynamicStackedOutputs{ funcs });
-
-	  });
-
-  
+    return GenericFunction<-1, -1>(DynamicStackedOutputs {funcs});
+  });
 }
