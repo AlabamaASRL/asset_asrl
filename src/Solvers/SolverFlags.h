@@ -1,10 +1,4 @@
 #pragma once
 
 
-namespace ASSET {
-
-
-
-
-
-}
+namespace ASSET {}

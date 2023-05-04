@@ -1,9 +1,8 @@
 #pragma once
 
 #include "../VectorFunction.h"
-
-#include "AutoDiffFunction.h"
 #include "ArcTan2.h"
+#include "AutoDiffFunction.h"
 #include "CallAndAppend.h"
 #include "Comparative.h"
 #include "Conditional.h"
@@ -19,8 +18,8 @@
 #include "FunctionVectorSums.h"
 #include "LambdaFunction.h"
 #include "MatrixFunction.h"
-#include "MatrixProduct.h"
 #include "MatrixInverse.h"
+#include "MatrixProduct.h"
 #include "NestedFunction.h"
 #include "Normalized.h"
 #include "Norms.h"
@@ -31,10 +30,9 @@
 #include "Scaled.h"
 #include "Segment.h"
 #include "SignFunction.h"
-
 #include "Stacked.h"
 #include "Summation.h"
 #include "Value.h"
 #include "VectorProducts.h"
-#include "VectorScalarFunctionProduct.h"
 #include "VectorScalarFunctionDivision.h"
+#include "VectorScalarFunctionProduct.h"
