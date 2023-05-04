@@ -231,7 +231,14 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::psipot_call_impl(s
 
 
   this->collectSolverOutput(Output);
-  this->collectSolverMultipliers(this->optimizer->LastEqLmults, this->optimizer->LastIqLmults);
+  //this->collectSolverMultipliers(this->optimizer->LastEqLmults, this->optimizer->LastIqLmults);
+
+  this->collectPostOptInfo(this->optimizer->LastEqCons,
+                           this->optimizer->LastEqLmults,
+                           this->optimizer->LastIqCons,
+                           this->optimizer->LastIqLmults);
+
+
   return this->optimizer->ConvergeFlag;
 }
 

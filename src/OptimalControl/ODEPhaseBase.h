@@ -60,8 +60,12 @@ namespace ASSET {
     VectorXd ActiveStaticParams;
 
     bool MultipliersLoaded = false;
+    bool PostOptInfoValid = false;
+
     VectorXd ActiveEqLmults;
     VectorXd ActiveIqLmults;
+    VectorXd ActiveEqCons;
+    VectorXd ActiveIqCons;
 
     std::vector<StateConstraint> userEqualities;
     std::vector<StateConstraint> userInequalities;
@@ -158,6 +162,9 @@ namespace ASSET {
       this->doTranscription = true;
     };
 
+    void invalidatePostOptInfo() {
+      this->PostOptInfoValid = false;
+    };
 
     ODEPhaseBase() {
     }
@@ -171,6 +178,7 @@ namespace ASSET {
     //////////////////////////////////////////////////
     virtual void setControlMode(ControlModes m) {
       this->resetTranscription();
+      this->invalidatePostOptInfo();
       this->ControlMode = m;
       if (this->ControlMode == BlockConstant) {
         this->Table.BlockedControls = true;
@@ -211,6 +219,7 @@ namespace ASSET {
     /////////////////////////////////////////////////
     int addEqualCon(StateConstraint con) {
       this->resetTranscription();
+      this->invalidatePostOptInfo();
       int index = int(this->userEqualities.size());
       this->userEqualities.emplace_back(con);
       this->userEqualities.back().StorageIndex = index;
@@ -267,6 +276,8 @@ namespace ASSET {
     //////////////////////////////////////////////////
     int addInequalCon(StateConstraint con) {
       this->resetTranscription();
+      this->invalidatePostOptInfo();
+
       int index = int(this->userInequalities.size());
       this->userInequalities.emplace_back(con);
       this->userInequalities.back().StorageIndex = index;
@@ -577,6 +588,8 @@ namespace ASSET {
     //////////////////////////////////////////////////
     int addStateObjective(StateObjective obj) {
       this->resetTranscription();
+      this->invalidatePostOptInfo();
+
       int index = int(this->userStateObjectives.size());
       this->userStateObjectives.emplace_back(obj);
       this->userStateObjectives.back().StorageIndex = index;
@@ -613,6 +626,8 @@ namespace ASSET {
     ///////////////////////////////////////////////////
     int addIntegralObjective(StateObjective obj) {
       this->resetTranscription();
+      this->invalidatePostOptInfo();
+
       int index = int(this->userIntegrands.size());
       this->userIntegrands.emplace_back(obj);
       this->userIntegrands.back().StorageIndex = index;
@@ -654,30 +669,40 @@ namespace ASSET {
     /////////////////////////////////////////////////
     void removeEqualCon(int ith) {
       this->resetTranscription();
+      this->invalidatePostOptInfo();
+
       if (ith < 0)
         ith = (this->userEqualities.size() + ith);
       this->userEqualities.erase(this->userEqualities.begin() + ith);
     }
     void removeInequalCon(int ith) {
       this->resetTranscription();
+      this->invalidatePostOptInfo();
+
       if (ith < 0)
         ith = (this->userInequalities.size() + ith);
       this->userInequalities.erase(this->userInequalities.begin() + ith);
     }
     void removeStateObjective(int ith) {
       this->resetTranscription();
+      this->invalidatePostOptInfo();
+
       if (ith < 0)
         ith = (this->userStateObjectives.size() + ith);
       this->userStateObjectives.erase(this->userStateObjectives.begin() + ith);
     }
     void removeIntegralObjective(int ith) {
       this->resetTranscription();
+      this->invalidatePostOptInfo();
+
       if (ith < 0)
         ith = (this->userIntegrands.size() + ith);
       this->userIntegrands.erase(this->userIntegrands.begin() + ith);
     }
     void removeIntegralParamFunction(int ith) {
       this->resetTranscription();
+      this->invalidatePostOptInfo();
+
       if (ith < 0)
         ith = (this->userParamIntegrands.size() + ith);
       this->userParamIntegrands.erase(this->userParamIntegrands.begin() + ith);
@@ -777,22 +802,42 @@ namespace ASSET {
     }
 
     std::vector<Eigen::VectorXd> returnEqualConLmults(int index) const {
-      if (!this->MultipliersLoaded) {
+      if (!this->PostOptInfoValid) {
         throw std::invalid_argument("No multipliers to return, a solve or optimize call must be made "
                                     "before returning constraint multipliers ");
       }
       int Gindex = this->userEqualities[index].GlobalIndex;
       return this->indexer.getFuncEqMultipliers(Gindex, this->ActiveEqLmults);
     }
+    std::vector<Eigen::VectorXd> returnEqualConVals(int index) const {
+      if (!this->PostOptInfoValid) {
+        throw std::invalid_argument("No constraints to return, a solve or optimize call must be made "
+                                    "before returning constraint values ");
+      }
+      int Gindex = this->userEqualities[index].GlobalIndex;
+      return this->indexer.getFuncEqMultipliers(Gindex, this->ActiveEqCons);
+    }
+
     std::vector<Eigen::VectorXd> returnInequalConLmults(int index) const {
-      if (!this->MultipliersLoaded) {
+      if (!this->PostOptInfoValid) {
         throw std::invalid_argument("No multipliers to return, a solve or optimize call must be made "
                                     "before returning constraint multipliers ");
       }
       int Gindex = this->userInequalities[index].GlobalIndex;
       return this->indexer.getFuncIqMultipliers(Gindex, this->ActiveIqLmults);
     }
+
+    std::vector<Eigen::VectorXd> returnInequalConVals(int index) const {
+      if (!this->PostOptInfoValid) {
+        throw std::invalid_argument("No constraints to return, a solve or optimize call must be made "
+                                    "before returning constraint values ");
+      }
+      int Gindex = this->userInequalities[index].GlobalIndex;
+      return this->indexer.getFuncIqMultipliers(Gindex, this->ActiveIqCons);
+    }
+
     std::vector<Eigen::VectorXd> returnCostateTraj() const;
+    std::vector<Eigen::VectorXd> returnTrajError() const;
 
     /////////////////////////////////////////////////
    protected:
@@ -894,6 +939,18 @@ namespace ASSET {
       this->ActiveEqLmults = EM;
       this->ActiveIqLmults = IM;
     }
+
+    void collectPostOptInfo(const VectorXd& EC, const VectorXd& EM, const VectorXd& IC, const VectorXd& IM) {
+
+      this->PostOptInfoValid = true;
+      this->MultipliersLoaded = true;
+
+      this->ActiveEqCons = EC;
+      this->ActiveIqCons = IC;
+      this->ActiveEqLmults = EM;
+      this->ActiveIqLmults = IM;
+    }
+
 
     PSIOPT::ConvergenceFlags psipot_call_impl(std::string mode);
 

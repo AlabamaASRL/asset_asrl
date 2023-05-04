@@ -52,9 +52,19 @@ namespace ASSET {
       return this->ActiveLinkParams;
     }
 
+
+    bool MultipliersLoaded = false;
+    bool PostOptInfoValid = false;
+
+    void invalidatePostOptInfo() {
+      this->PostOptInfoValid = false;
+    };
+
     VectorXd ActiveEqLmults;
     VectorXd ActiveIqLmults;
-    bool MultipliersLoaded = false;
+    VectorXd ActiveEqCons;
+    VectorXd ActiveIqCons;
+
 
     VectorXi LinkParamLocs;
 
@@ -1431,7 +1441,24 @@ namespace ASSET {
         ith = (this->LinkObjectives.size() + ith);
       this->LinkObjectives.erase(this->LinkObjectives.begin() + ith);
     }
+    ///////////////////////////////////////////////////
+    
+    std::vector<Eigen::VectorXd> returnLinkEqualConVals(int index) const {
+      if (!this->PostOptInfoValid) {
+        throw std::invalid_argument(" Come up with an error message.");
+      }
 
+      int Gindex = this->LinkEqualities[index].GlobalIndex;
+
+      auto Cindex = this->nlp->EqualityConstraints[Gindex].index_data.Cindex;
+      std::vector<Eigen::VectorXd> cvals;
+
+      for (int i = 0; i < Cindex.cols(); i++) {
+       //TODO
+      }
+
+    }
+    
     ///////////////////////////////////////////////////
     void checkTranscriptions() {
       for (int i = 0; i < this->phases.size(); i++) {
@@ -1709,6 +1736,30 @@ namespace ASSET {
       this->ActiveIqLmults = IM.tail(this->numLinkIqCons);
     }
 
+
+    void collectPostOptInfo(const VectorXd& EC, const VectorXd& EM, const VectorXd& IC, const VectorXd& IM) {
+      this->MultipliersLoaded = true;
+      this->PostOptInfoValid = true;
+
+      for (int i = 0; i < this->phases.size(); i++) {
+        int EStart = 0;
+        if (i > 0)
+          EStart = this->numPhaseEqCons.segment(0, i).sum();
+        int IStart = 0;
+        if (i > 0)
+          IStart = this->numPhaseIqCons.segment(0, i).sum();
+        this->phases[i]->collectPostOptInfo(
+            EC.segment(EStart, this->numPhaseEqCons[i]),
+            EM.segment(EStart, this->numPhaseEqCons[i]),
+            IC.segment(IStart, this->numPhaseIqCons[i]),
+            IM.segment(IStart, this->numPhaseIqCons[i]));
+
+      }
+      this->ActiveEqLmults = EM.tail(this->numLinkEqCons);
+      this->ActiveIqLmults = IM.tail(this->numLinkIqCons);
+      this->ActiveEqCons = EC.tail(this->numLinkEqCons);
+      this->ActiveIqCons = IC.tail(this->numLinkIqCons);
+    }
 
    public:
     PSIOPT::ConvergenceFlags solve() {
