@@ -201,6 +201,16 @@ if __name__ == "__main__":
     phase.addLUVarBound("Path",7,np.deg2rad(-90.0),np.deg2rad(1.0) ,1.0)
     phase.addUpperDeltaTimeBound(tmax,1.0)
     phase.addBoundaryValue("Back" ,[0,2,3],[htf,vtf,gammatf])
+    phase.removeEqualCon(0)
+    phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
+    
+    phase.removeEqualCon(-1)
+    phase.removeEqualCon(-1)
+
+    phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
+    idx=phase.addBoundaryValue("Back" ,[0,2,3],[htf,vtf,gammatf])
+
+    
     phase.addDeltaVarObjective(1,-1.0)
     phase.setThreads(8,8)
     
