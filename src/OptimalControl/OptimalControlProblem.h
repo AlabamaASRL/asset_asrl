@@ -39,9 +39,9 @@ namespace ASSET {
       this->doTranscription = true;
     };
 
-    std::vector<LinkConstraint> LinkEqualities;
-    std::vector<LinkConstraint> LinkInequalities;
-    std::vector<LinkObjective> LinkObjectives;
+    std::map<int, LinkConstraint> LinkEqualities;
+    std::map<int, LinkConstraint> LinkInequalities;
+    std::map<int, LinkObjective>  LinkObjectives;
 
     VectorXd ActiveLinkParams;
     void setLinkParams(VectorXd lp) {
@@ -391,15 +391,37 @@ namespace ASSET {
       return this->makeLinkFunc<FuncType, decltype(pack0), OutType>(f, packs, lv);
     }
 
+    template<class FuncMap>
+    void removeFuncImpl(FuncMap& map, int index, const std::string& funcstr) {
+      this->resetTranscription();
+      this->invalidatePostOptInfo();
+      if (index == -1 && map.size() > 0) {
+        index = map.rbegin()->first;
+      }
+
+      if (map.count(index) == 0) {
+        throw std::invalid_argument(fmt::format("No {0:} with index {1:} exists in Optimal Control Problem.", funcstr, index));
+      }
+      map.erase(index);
+    }
+
+    template<class FuncType, class FuncMap>
+    int addFuncImpl(FuncType func, FuncMap& map, const std::string& funcstr) {
+      this->resetTranscription();
+      this->invalidatePostOptInfo();
+      int index = map.size() == 0 ? 0 : map.rbegin()->first + 1;
+      map[index] = func;
+      map[index].StorageIndex = index;
+      fmt::print("{0:} index = {1:}\n", funcstr, index);
+
+      check_function_size(map.at(index), funcstr);
+      return index;
+    }
+    
+
     ////////////////////////////////////////////////
     int addLinkEqualCon(LinkConstraint lc) {
-      this->resetTranscription();
-      this->LinkEqualities.emplace_back(lc);
-      int index = int(this->LinkEqualities.size()) - 1;
-      this->LinkEqualities.back().StorageIndex = index;
-      check_function_size(this->LinkEqualities.back(), "Link Equality Constraint");
-
-      return index;
+      return addFuncImpl(lc, this->LinkEqualities, "Link Equality Constraint");
     }
     ////////////////////////////////////////////
 
@@ -842,18 +864,11 @@ namespace ASSET {
     ////////////////////////////////////////////////////////////////////
 
     int addLinkInequalCon(LinkConstraint lc) {
-      this->resetTranscription();
-      this->LinkInequalities.emplace_back(lc);
-      int index = int(this->LinkInequalities.size()) - 1;
-      this->LinkInequalities.back().StorageIndex = index;
-      check_function_size(this->LinkInequalities.back(), "Link Inequality Constraint");
-
-      return index;
+      return addFuncImpl(lc, this->LinkInequalities, "Link Inequality Constrain");
     }
 
 
-    ////////////////////////////////////////////
-
+    
     /////////////// THE NEW INEQUALCON INTERFACE//////////////////////////////
 
     int addLinkInequalCon(VectorFunctionalX lc, std::vector<PhaseIndexPack> packs, VectorXi lv) {
@@ -1136,12 +1151,7 @@ namespace ASSET {
     ////////////////////////////////////////////////////////////////////
 
     int addLinkObjective(LinkObjective lc) {
-      this->resetTranscription();
-      this->LinkObjectives.emplace_back(lc);
-      int index = int(this->LinkObjectives.size()) - 1;
-      this->LinkObjectives.back().StorageIndex = index;
-      check_function_size(this->LinkObjectives.back(), "Link Objective");
-      return index;
+      return addFuncImpl(lc, this->LinkObjectives, "Link Objective");
     }
     /////////////// THE NEW INEQUALCON INTERFACE//////////////////////////////
 
@@ -1423,41 +1433,107 @@ namespace ASSET {
 
     ///////////////////////////////////////////////////
 
-    void removeLinkEqualCon(int ith) {
-      this->resetTranscription();
-      if (ith < 0)
-        ith = (this->LinkEqualities.size() + ith);
-      this->LinkEqualities.erase(this->LinkEqualities.begin() + ith);
+    void removeLinkEqualCon(int index) {
+      this->removeFuncImpl(this->LinkEqualities, index, "Equality Constraint");
     }
-    void removeLinkInequalCon(int ith) {
-      this->resetTranscription();
-      if (ith < 0)
-        ith = (this->LinkInequalities.size() + ith);
-      this->LinkInequalities.erase(this->LinkInequalities.begin() + ith);
+    void removeLinkInequalCon(int index) {
+      this->removeFuncImpl(this->LinkInequalities, index, "Inequality Constraint");
     }
-    void removeLinkObjective(int ith) {
-      this->resetTranscription();
-      if (ith < 0)
-        ith = (this->LinkObjectives.size() + ith);
-      this->LinkObjectives.erase(this->LinkObjectives.begin() + ith);
+    void removeLinkObjective(int index) {
+      this->removeFuncImpl(this->LinkObjectives, index, "Link Objective");
     }
     ///////////////////////////////////////////////////
     
+     
+
+
     std::vector<Eigen::VectorXd> returnLinkEqualConVals(int index) const {
       if (!this->PostOptInfoValid) {
-        throw std::invalid_argument(" Come up with an error message.");
+        throw std::invalid_argument(" Post optimization info unavailable.");
       }
 
-      int Gindex = this->LinkEqualities[index].GlobalIndex;
-
+      int Gindex = this->LinkEqualities.at(index).GlobalIndex;
       auto Cindex = this->nlp->EqualityConstraints[Gindex].index_data.Cindex;
-      std::vector<Eigen::VectorXd> cvals;
+      int offset = this->numPhaseEqCons.sum();
 
+      std::vector<Eigen::VectorXd> Allvals;
       for (int i = 0; i < Cindex.cols(); i++) {
-       //TODO
+        VectorXd vals(Cindex.rows());
+        for (int j = 0; j < Cindex.rows(); j++) {
+          int idx = Cindex(j,i) - offset;
+          vals[j] = this->ActiveEqCons[idx];
+        }
+        Allvals.push_back(vals);
+      }
+      return Allvals;
+    }
+
+    std::vector<Eigen::VectorXd> returnLinkEqualConLmults(int index) const {
+      if (!this->PostOptInfoValid) {
+        throw std::invalid_argument(" Post optimization info unavailable.");
+      }
+      int Gindex = this->LinkEqualities.at(index).GlobalIndex;
+      auto Cindex = this->nlp->EqualityConstraints[Gindex].index_data.Cindex;
+      int offset = this->numPhaseEqCons.sum();
+      
+
+      std::vector<Eigen::VectorXd> Allvals;
+      for (int i = 0; i < Cindex.cols(); i++) {
+        VectorXd vals(Cindex.rows());
+        for (int j = 0; j < Cindex.rows(); j++) {
+          int idx = Cindex(j, i) - offset;
+          vals[j] = this->ActiveEqLmults[idx];
+        }
+        Allvals.push_back(vals);
+      }
+      return Allvals;
+    }
+
+
+    std::vector<Eigen::VectorXd> returnLinkInequalConVals(int index) const {
+      if (!this->PostOptInfoValid) {
+        throw std::invalid_argument(" Post optimization info unavailable.");
       }
 
+      int Gindex = this->LinkInequalities.at(index).GlobalIndex;
+      auto Cindex = this->nlp->InequalityConstraints[Gindex].index_data.Cindex;
+      int offset = this->numPhaseIqCons.sum();
+
+      std::vector<Eigen::VectorXd> Allvals;
+      for (int i = 0; i < Cindex.cols(); i++) {
+        VectorXd vals(Cindex.rows());
+        for (int j = 0; j < Cindex.rows(); j++) {
+          int idx = Cindex(j, i) - offset;
+          vals[j] = this->ActiveIqCons[idx];
+        }
+        Allvals.push_back(vals);
+      }
+      return Allvals;
     }
+
+    std::vector<Eigen::VectorXd> returnLinkInequalConLmults(int index) const {
+      if (!this->PostOptInfoValid) {
+        throw std::invalid_argument(" Post optimization info unavailable.");
+      }
+
+      int Gindex = this->LinkInequalities.at(index).GlobalIndex;
+      auto Cindex = this->nlp->InequalityConstraints[Gindex].index_data.Cindex;
+      int offset = this->numPhaseIqCons.sum();
+
+      std::vector<Eigen::VectorXd> Allvals;
+      for (int i = 0; i < Cindex.cols(); i++) {
+        VectorXd vals(Cindex.rows());
+        for (int j = 0; j < Cindex.rows(); j++) {
+          int idx = Cindex(j, i) - offset;
+          vals[j] = this->ActiveIqLmults[idx];
+        }
+        Allvals.push_back(vals);
+      }
+      return Allvals;
+    }
+
+
+
     
     ///////////////////////////////////////////////////
     void checkTranscriptions() {

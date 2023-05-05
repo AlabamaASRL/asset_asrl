@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 from asset_asrl.Astro.AstroModels import CR3BP
 from asset_asrl.Astro.FramePlot import CRPlot
+from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
 
 import asset_asrl.Astro.Constants as c
 
@@ -161,8 +162,7 @@ def MakeHeteroclinic(ode,Man1,Man2,L1Orbit,L2Orbit):
         t = Vt[3]
         return (V - VelFunc(t)).squared_norm()
     
-    phase1 = ode.phase("LGL5",Man1[1::],90)
-    
+    phase1 = ode.phase("LGL7",Man1[1::],50)
     phase1.addLowerVarBound('Front',6,-L1Orbit[-1][6])
     phase1.addUpperVarBound('Front',6,2*L1Orbit[-1][6])
 
@@ -170,7 +170,7 @@ def MakeHeteroclinic(ode,Man1,Man2,L1Orbit,L2Orbit):
     con1 = phase1.addEqualCon("First",PosCon(OrbitTab1),[0,1,2,6])
     phase1.addStateObjective("First",DVObj(OrbitTab1),[3,4,5,6])
 
-    phase2 = ode.phase("LGL5",Man2[0:-1],90)
+    phase2 = ode.phase("LGL7",Man2[0:-1],50)
     # Arriving at Orbit2
     con2 = phase2.addEqualCon("Last",PosCon(OrbitTab2),[0,1,2,6])
     phase2.addStateObjective("Last",DVObj(OrbitTab2),[3,4,5,6])
@@ -180,43 +180,61 @@ def MakeHeteroclinic(ode,Man1,Man2,L1Orbit,L2Orbit):
 
     
     ocp = oc.OptimalControlProblem()
+    
     ocp.addPhase(phase1)
     ocp.addPhase(phase2)
 
     #Enforce continuity in position and velocity between phases
-    ocp.addForwardLinkEqualCon(phase1,phase2,range(0,6))
+    idx = ocp.addForwardLinkEqualCon(phase1,phase2,range(0,6))
     
     ocp.setMeshTol(1.0e-9)
-    #ocp.setAdaptiveMesh()
+    ocp.setAdaptiveMesh()
     ocp.optimizer.PrintLevel = 1
     ocp.optimizer.set_EContol(1.0e-9)
     ocp.optimizer.set_OptLSMode("L1")
     #ocp.setMeshErrorEstimator("integrator")
     ocp.optimizer.set_QPOrderingMode("MINDEG")
-    
+    phase1.integrator.setAbsTol(1.0e-13)
+    phase2.integrator.setAbsTol(1.0e-13)
+    phase1.refineTrajEqual(80)
+    phase2.refineTrajEqual(80)
     
     ocp.optimize()
     
-    Vals1 = phase1.returnEqualConVals(con1)
-    Vals2 = phase2.returnEqualConVals(con2)
+
+    Vals1 = phase1.returnEqualConLmults(con1)
+    Vals2 = phase2.returnEqualConLmults(con2)
+    Vals3 = ocp.returnLinkEqualConLmults(idx)
     
-    E1 = phase1.returnTrajError()
+    E1 = phase1.returnCostateTraj()
     
     E1 = np.array(E1).T
     
+    
+    Vals = np.array(Vals1).T
+    
+    plt.scatter([E1[6][0],E1[6][0],E1[6][0]],Vals)
+    
+    
     for i in range(0,6):
         
-        plt.plot(E1[6],abs(E1[i]))
+        plt.plot(E1[6],E1[i])
         
     
-    plt.yscale("log")
+    #plt.yscale("log")
     plt.show()
     
+    for phase in ocp.Phases:
+        PhaseMeshErrorPlot(phase,show=False)
+        
+        
+    plt.show()
     
     
     print(Vals1)
     print(Vals2)
-    
+    print(Vals3)
+
 
     Traj1 = phase1.returnTraj()
     Traj2 = phase2.returnTraj()
@@ -233,7 +251,7 @@ def MakeHeteroclinic(ode,Man1,Man2,L1Orbit,L2Orbit):
 if __name__ == "__main__":
     
     
-    Jconst = 3.135    # Jacobi of target orbits
+    Jconst = 3.15    # Jacobi of target orbits
     dx     = 1.0e-5  # Manifold Perturbation
     dt     = 12.0    # Manifold Propagation Time
     nman   = 100     # # of Manifold trajectories

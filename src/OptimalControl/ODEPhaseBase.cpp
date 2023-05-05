@@ -726,7 +726,7 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
     }
   };
 
-  for (auto& ob: this->userIntegrands) {
+  for (auto& [key, ob]: this->userIntegrands) {
     int xp = ob.XtUVars.size();
     int sop = ob.OPVars.size() + ob.SPVars.size();
     VectorXi xtrap(xp + 1);
@@ -765,7 +765,7 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
     ob.PhaseLocalIndex = PLindex;
   }
 
-  for (auto& ob: this->userParamIntegrands) {
+  for (auto& [key, ob]: this->userParamIntegrands) {
     int xp = ob.XtUVars.size();
     int sop = ob.OPVars.size() + ob.SPVars.size();
     VectorXi xtrap(xp + 1);
@@ -802,7 +802,7 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
   }
 }
 void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
-  for (auto& eq: this->userEqualities) {
+  for (auto& [key, eq]: this->userEqualities) {
     ThreadingFlags ThreadMode =
         eq.Func.thread_safe() ? ThreadingFlags::ByApplication : ThreadingFlags::MainThread;
     if (eq.RegionFlag == PhaseRegionFlags::Path || eq.RegionFlag == PhaseRegionFlags::PairWisePath)
@@ -814,7 +814,7 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
     eq.GlobalIndex = Gindex;
     eq.PhaseLocalIndex = PLindex;
   }
-  for (auto& iq: this->userInequalities) {
+  for (auto& [key,iq]: this->userInequalities) {
     ThreadingFlags ThreadMode =
         iq.Func.thread_safe() ? ThreadingFlags::ByApplication : ThreadingFlags::MainThread;
     if (iq.RegionFlag == PhaseRegionFlags::Path || iq.RegionFlag == PhaseRegionFlags::PairWisePath) {
@@ -828,7 +828,7 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
     iq.GlobalIndex = Gindex;
     iq.PhaseLocalIndex = PLindex;
   }
-  for (auto& ob: this->userStateObjectives) {
+  for (auto& [key, ob]: this->userStateObjectives) {
     ThreadingFlags ThreadMode =
         ob.Func.thread_safe() ? ThreadingFlags::ByApplication : ThreadingFlags::MainThread;
     if (ob.RegionFlag == PhaseRegionFlags::Path || ob.RegionFlag == PhaseRegionFlags::PairWisePath)
@@ -1009,15 +1009,15 @@ void ASSET::ODEPhaseBase::check_functions(int pnum) {
   std::string iobj = "Integral objective";
   std::string ipcon = "Integral parameter";
 
-  for (auto& f: this->userEqualities)
+  for (auto& [key,f]: this->userEqualities)
     CheckFun(eq, f);
-  for (auto& f: this->userInequalities)
+  for (auto& [key, f]: this->userInequalities)
     CheckFun(iq, f);
-  for (auto& f: this->userIntegrands)
+  for (auto& [key, f]: this->userIntegrands)
     CheckFun(iobj, f);
-  for (auto& f: this->userParamIntegrands)
+  for (auto& [key, f]: this->userParamIntegrands)
     CheckFun(ipcon, f);
-  for (auto& f: this->userStateObjectives)
+  for (auto& [key, f]: this->userStateObjectives)
     CheckFun(sobj, f);
 }
 
