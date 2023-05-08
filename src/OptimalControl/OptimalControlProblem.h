@@ -412,7 +412,6 @@ namespace ASSET {
       int index = map.size() == 0 ? 0 : map.rbegin()->first + 1;
       map[index] = func;
       map[index].StorageIndex = index;
-      fmt::print("{0:} index = {1:}\n", funcstr, index);
 
       check_function_size(map.at(index), funcstr);
       return index;
@@ -1451,6 +1450,10 @@ namespace ASSET {
       if (!this->PostOptInfoValid) {
         throw std::invalid_argument(" Post optimization info unavailable.");
       }
+      if (this->LinkEqualities.count(index) == 0) {
+        throw std::invalid_argument(
+            fmt::format("No Equality Constraint with index {0:} exists in Optimal Control Problem.", index));
+      }
 
       int Gindex = this->LinkEqualities.at(index).GlobalIndex;
       auto Cindex = this->nlp->EqualityConstraints[Gindex].index_data.Cindex;
@@ -1472,6 +1475,11 @@ namespace ASSET {
       if (!this->PostOptInfoValid) {
         throw std::invalid_argument(" Post optimization info unavailable.");
       }
+      if (this->LinkEqualities.count(index) == 0) {
+        throw std::invalid_argument(
+            fmt::format("No Equality Constraint with index {0:} exists in Optimal Control Problem.", index));
+      }
+
       int Gindex = this->LinkEqualities.at(index).GlobalIndex;
       auto Cindex = this->nlp->EqualityConstraints[Gindex].index_data.Cindex;
       int offset = this->numPhaseEqCons.sum();
@@ -1494,7 +1502,10 @@ namespace ASSET {
       if (!this->PostOptInfoValid) {
         throw std::invalid_argument(" Post optimization info unavailable.");
       }
-
+      if (this->LinkInequalities.count(index) == 0) {
+        throw std::invalid_argument(
+            fmt::format("No Inequality Constraint with index {0:} exists in Optimal Control Problem.", index));
+      }
       int Gindex = this->LinkInequalities.at(index).GlobalIndex;
       auto Cindex = this->nlp->InequalityConstraints[Gindex].index_data.Cindex;
       int offset = this->numPhaseIqCons.sum();
@@ -1514,6 +1525,10 @@ namespace ASSET {
     std::vector<Eigen::VectorXd> returnLinkInequalConLmults(int index) const {
       if (!this->PostOptInfoValid) {
         throw std::invalid_argument(" Post optimization info unavailable.");
+      }
+      if (this->LinkInequalities.count(index) == 0) {
+        throw std::invalid_argument(fmt::format(
+            "No Inequality Constraint with index {0:} exists in Optimal Control Problem.", index));
       }
 
       int Gindex = this->LinkInequalities.at(index).GlobalIndex;
@@ -1712,6 +1727,7 @@ namespace ASSET {
       for (auto& phase: this->phases)
         phase->jet_release();
       this->resetTranscription();
+      this->invalidatePostOptInfo();
     }
 
 

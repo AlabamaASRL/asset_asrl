@@ -160,6 +160,8 @@ Note that these are not the same as ODE parameters. We can add static parameters
      - Trapezoidal Rule
      - Piecewise-Linear (:code:`'FirstOrderSpline'`), Piecewise-Constant (:code:`'BlockConstant'`)
 
+.. _conobj-guide:
+
 Constraints and Objectives
 ==========================
 
@@ -946,4 +948,126 @@ precisely between each time in the converged trajectory.
         ReintTraj2+=Next
 
 
+Referencing and Removing Constraints
+------------------------------------
+
+When adding any of the 5 types of constraints/objectives covered :ref:`previously <conobj-guide>`, an integer identifier or list of integers is returned by the 
+method. This identifier can be used to remove a constraint/objective from the problem. This can be quite useful when you
+want to express some homotopic or continuation scheme without having to create a new phase at each step. Given the identifier for
+a function of a certain type, it can be removed from the phase using the corresponding :code:`.remove#####(id)` method as shown below.
+
+
+.. code-block:: python
+
+    ###########################
+    ## Ex. Equality Constraint
+    edx1 = phase.addBoundaryValue("Front",range(0,5),np.zeros((5)))
+    edx2 = phase.addEqualCon("Path",Args(3).norm()-1.0,[8,9,10]) 
+    edx3 = phase.addDeltaVarEqualCon(6,1.0)
+
+    ## Removal order doesnt matter
+    phase.removeEqualCon(edx1)
+    phase.removeEqualCon(edx3)
+    phase.removeEqualCon(edx2)
+
+
+    #############################
+    ## Ex. Inequality Constraint
+    idx1 = phase.addInequalCon("Path", Args(4).sum(),[0,1,2],[],[1])
+    idx2 = phase.addLUVarBound("StaticParams",0,-1.0,1.0)
+    idx3 = phase.addLUFuncBound("Path",Args(3).norm(),[8,9,10],0,1)
+
+    phase.removeInequalCon(idx2)
+    phase.removeInequalCon(idx3)
+    phase.removeInequalCon(idx1)
+
+    #######################
+    ## Ex. State Objective
+    sdx1 = phase.addStateObjective("Back",Args(3).squared_norm(),[0,1,2])
+    sdx2 = phase.addValueObjective("Back",6,1.0)
+    sdx3 = phase.addDeltaTimeObjective(1.0)
+
+    phase.removeStateObjective(sdx3)
+    phase.removeStateObjective(sdx2)
+    phase.removeStateObjective(sdx1)
+
+
+    ##########################
+    ## Ex. Integral Objective
+    intdx1 = phase.addIntegralObjective(Args(3).norm(),[7,8,9])
+
+    phase.removeIntegralObjective(intdx1)
+
+    ##########################
+    ## Ex. Integral Parameter Function
+    ipdx1 = phase.addIntegralParamFunction(Args(3).norm(),[7,8,9],IntSPVar)
+
+    phase.removeIntegralParamFunction(ipdx1)
+
+
+
+.. _phaseremove-guide:
+
+Retrieving Constraint Violations and Multipliers
+------------------------------------------------
+Immediately after a call to PSIOPT, users can retrieve the constraint violations and Lagrange multipliers associated with user applied constraints
+as well as the dynamics transcription and control spline constraints. This can be helpful when debugging non-converging problems. For equality and inequality constraints, constraint
+violations and multipliers are retrieved by supplying a constraint functions id to the phase's :code:`.return####Vals(id)` and :code:`.return####Lmults(id)` methods as shown below.
+In all cases, the violations/multipliers are returned as a list of numpy arrays, each of which contains the output/multipliers associated with each call to the function inside of
+the optimization problem. For constraints applied only at a single state, the returned list will contain only one numpy array. In general, for path constraints, the list will contain the same number of elements
+as the returned trajectory, and the constraint violations in the ith element will be associated with calling the constraint with variables from the ith state as inputs. Note that for inequality constraints, the return values do not have slacks applied, thus
+negative values indicate that the constraint is in the feasible region and positive values indicate that the constraint is in the infeasible region.
+
+.. code-block:: python
+
+    edx = phase.addBoundaryValue("Front",range(0,5),np.zeros((5)))
+    idx = phase.addLUVarBound("Path",0,-1.0,1.0)
+
+    phase.optimize()
+
+    ecvals = phase.returnEqualConVals(edx)
+    ecmults = phase.returnEqualConLmults(edx)
+
+    print(ecvals[0])
+    print(ecmults[0])
+
+
+    icvals  = phase.returnInequalConVals(idx)
+    icmults = phase.returnInequalConLmults(idx)
+
+    for icval,icmult in zip(icvals,icmults):
+        print(icval)
+        print(icmult)
+
+
+Transcription defect constraint violations can be retrieved with the :code:`.returnTrajError()` method. Here each element in the returned list 
+is a numpy array of size containing the subset of the defect equality constraint errors roughly attributable to the given time. This association is not rigorous or exact,
+and is only meant as a guide for roughly determining where the defect constraints become difficult to satisfy. Furthermore, this error is only related to solution
+of the optimal control problem, and is not the mesh error estimated by the adaptive mesh refinement scheme (though the two can be correlated). In our formulation, co-states are interpolated directly
+from the Lagrange multipliers associated with the transcription defect constraints, so users can use the previously discussed :code:`.returnCostateTraj()` to examine the behavior of the multipliers.
+
+
+.. code-block:: python
+
+    ETraj = phase.returnTrajError()
+
+    for Et in ETraj:
+        Et[0:6]  # The defect error
+        Et[6]    # roughly at time t
+
+
+Finally, for the you can also retrieve the constraint values and multipliers for the control spline regularization functions as shown below. If no spline constraints are applied,
+the returned lists will be empty.
+
+.. code-block:: python
+    
+    Usm = phase.returnUSplineConLmults()
+    Usc = phase.returnUSplineConVals()
+
+
+
+
+
+
+    
 

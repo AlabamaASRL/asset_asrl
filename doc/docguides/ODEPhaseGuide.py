@@ -508,7 +508,79 @@ def URateBound(LBoundVec,UBoundVec):
 
 phase.addInequalCon("PairWisePath",URateBound(-np.ones(3),np.ones(3)),[6,7,8,9])
     
+###############################################################################
+
+###########################
+## Ex. Equality Constraint
+edx1 = phase.addBoundaryValue("Front",range(0,5),np.zeros((5)))
+edx2 = phase.addEqualCon("Path",Args(3).norm()-1.0,[8,9,10]) 
+edx3 = phase.addDeltaVarEqualCon(6,1.0)
+
+## Removal order doesnt matter
+phase.removeEqualCon(edx1)
+phase.removeEqualCon(edx3)
+phase.removeEqualCon(edx2)
+
+
+#############################
+## Ex. Inequality Constraint
+idx1 = phase.addInequalCon("Path", Args(4).sum(),[0,1,2],[],[1])
+idx2 = phase.addLUVarBound("StaticParams",0,-1.0,1.0)
+idx3 = phase.addLUFuncBound("Path",Args(3).norm(),[8,9,10],0,1)
+
+phase.removeInequalCon(idx2)
+phase.removeInequalCon(idx3)
+phase.removeInequalCon(idx1)
+
+#######################
+## Ex. State Objective
+
+sdx1 = phase.addStateObjective("Back",Args(3).squared_norm(),[0,1,2])
+sdx2 = phase.addValueObjective("Back",6,1.0)
+sdx3 = phase.addDeltaTimeObjective(1.0)
+
+phase.removeStateObjective(sdx3)
+phase.removeStateObjective(sdx2)
+phase.removeStateObjective(sdx1)
+
+
+##########################
+## Ex. Integral Objective
+intdx1 = phase.addIntegralObjective(Args(3).norm(),[7,8,9])
+
+phase.removeIntegralObjective(intdx1)
+
+##########################
+## Ex. Integral Parameter Function
+ipdx1 = phase.addIntegralParamFunction(Args(3).norm(),[7,8,9],IntSPVar)
+
+phase.removeIntegralParamFunction(ipdx1)
+
+###############################################################################
+
+edx = phase.addBoundaryValue("Front",range(0,5),np.zeros((5)))
+idx = phase.addLUVarBound("Path",0,-1.0,1.0)
+
+phase.optimize()
+
+ecvals = phase.returnEqualConVals(edx)
+ecmults = phase.returnEqualConLmults(edx)
+
+print(ecvals[0])
+print(ecmults[0])
+
+
+icvals = phase.returnInequalConVals(idx)
+icmults = phase.returnInequalConLmults(idx)
+
+for icval,icmult in zip(icvals,icmults):
+    print(icval)
+    print(icmult)
     
+
+
+
+
     
 
 
