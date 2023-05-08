@@ -463,6 +463,8 @@ namespace ASSET {
         Scalar tlocal = tglobal - this->T0;
 
         if (this->Periodic) {
+
+
           Scalar frac = tlocal / this->TotalT;
           if (frac > 1.0) {
             tlocal -= int(frac) * this->TotalT;

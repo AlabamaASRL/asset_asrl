@@ -899,13 +899,14 @@ void ASSET::ODEPhaseBase::transcribe_control_funcs() {
     TUis[i][0] = this->TVar();
     TUis[i][1] = this->TVar() + 1 + i;
   }
+  this->ControlFuncsIndex = -1;
 
   if (this->TranscriptionMode == TranscriptionModes::LGL7) {
     if (this->UVars() > 0) {
       if (this->ControlMode == ControlModes::HighestOrderSpline) {
         LGLControlSpline<4, -1, 2> lgl7spln2(this->UVars());
 
-        this->indexer.addEquality(lgl7spln2,
+        this->ControlFuncsIndex = this->indexer.addEquality(lgl7spln2,
                                   PhaseRegionFlags::DefectPairWisePath,
                                   TUvarT,
                                   empty,
@@ -915,7 +916,7 @@ void ASSET::ODEPhaseBase::transcribe_control_funcs() {
       } else if (this->ControlMode == ControlModes::FirstOrderSpline) {
         LGLControlSpline<4, -1, 1> lgl7spln1(this->UVars());
 
-        this->indexer.addEquality(lgl7spln1,
+        this->ControlFuncsIndex = this->indexer.addEquality(lgl7spln1,
                                   PhaseRegionFlags::DefectPairWisePath,
                                   TUvarT,
                                   empty,
@@ -929,7 +930,7 @@ void ASSET::ODEPhaseBase::transcribe_control_funcs() {
           || this->ControlMode == ControlModes::FirstOrderSpline) {
         LGLControlSpline<3, -1, 1> lgl5spln1(this->UVars());
 
-        this->indexer.addEquality(lgl5spln1,
+        this->ControlFuncsIndex = this->indexer.addEquality(lgl5spln1,
                                   PhaseRegionFlags::DefectPairWisePath,
                                   TUvarT,
                                   empty,
@@ -1431,6 +1432,10 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
 
   obj.def("returnCostateTraj", &ODEPhaseBase::returnCostateTraj, ODEPhaseBase_returnCostateTraj);
   obj.def("returnTrajError", &ODEPhaseBase::returnTrajError);
+
+  obj.def("returnUSplineConLmults", &ODEPhaseBase::returnUSplineConLmults);
+  obj.def("returnUSplineConVals", &ODEPhaseBase::returnUSplineConVals);
+
 
   obj.def("returnEqualConLmults", &ODEPhaseBase::returnEqualConLmults, ODEPhaseBase_returnEqualConLmults);
   obj.def("returnEqualConVals", &ODEPhaseBase::returnEqualConVals);

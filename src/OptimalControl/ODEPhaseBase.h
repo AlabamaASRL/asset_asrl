@@ -74,7 +74,7 @@ namespace ASSET {
     std::map<int, StateObjective> userParamIntegrands;
 
     int DynamicsFuncIndex = 0;
-    int ControlFuncsIndex = 0;
+    int ControlFuncsIndex = -1;
     VectorXi NodeSpacingFuncIndices;
     int TranSpacingFuncIndices = 0;
     int ConstraintOrder = 0;
@@ -219,7 +219,7 @@ namespace ASSET {
     void removeFuncImpl(FuncMap& map, int index, const std::string& funcstr) {
       this->resetTranscription();
       this->invalidatePostOptInfo();
-      if (index == -1 && map.size()>0) {
+      if (index == -1 && map.size() > 0) {
         index = map.rbegin()->first;
       }
 
@@ -229,15 +229,13 @@ namespace ASSET {
       map.erase(index);
     }
 
-    template<class FuncType,class FuncMap>
+    template<class FuncType, class FuncMap>
     int addFuncImpl(FuncType func, FuncMap& map, const std::string& funcstr) {
       this->resetTranscription();
       this->invalidatePostOptInfo();
       int index = map.size() == 0 ? 0 : map.rbegin()->first + 1;
       map[index] = func;
       map[index].StorageIndex = index;
-      fmt::print("{0:} index = {1:}\n",funcstr, index);
-
       check_function_size(map.at(index), funcstr);
       return index;
     }
@@ -245,7 +243,7 @@ namespace ASSET {
 
     /////////////////////////////////////////////////
     int addEqualCon(StateConstraint con) {
-      return addFuncImpl(con,this->userEqualities,"Equality Constraint");
+      return addFuncImpl(con, this->userEqualities, "Equality Constraint");
     }
     int addEqualCon(PhaseRegionFlags reg, VectorFunctionalX fun, VectorXi vars) {
       return this->addEqualCon(StateConstraint(fun, reg, vars));
@@ -658,8 +656,6 @@ namespace ASSET {
     /////////////////////////////////////////////////
 
 
-    
-
     void removeEqualCon(int index) {
       this->removeFuncImpl(this->userEqualities, index, "Equality Constraint");
     }
@@ -676,7 +672,6 @@ namespace ASSET {
       this->removeFuncImpl(this->userParamIntegrands, index, "Integral Parameter Function");
     }
 
-    /////////////////////////////////////////////////
 
     /////////////////////////////////////////////////
 
@@ -768,6 +763,34 @@ namespace ASSET {
 
     Eigen::VectorXd returnStaticParams() const {
       return this->ActiveStaticParams;
+    }
+
+
+    std::vector<Eigen::VectorXd> returnUSplineConLmults() const {
+
+      if (!this->PostOptInfoValid) {
+        throw std::invalid_argument("No multipliers to return, a solve or optimize call must be made "
+                                    "before returning constraint multipliers ");
+      }
+
+      if (this->ControlFuncsIndex < 0) {
+        return std::vector<Eigen::VectorXd>();
+      } else {
+        return this->indexer.getFuncEqMultipliers(this->ControlFuncsIndex, this->ActiveEqLmults);
+      }
+    }
+
+    std::vector<Eigen::VectorXd> returnUSplineConVals() const {
+
+      if (!this->PostOptInfoValid) {
+        throw std::invalid_argument("No constraints to return, a solve or optimize call must be made "
+                                    "before returning constraint values ");
+      }
+      if (this->ControlFuncsIndex < 0) {
+        return std::vector<Eigen::VectorXd>();
+      } else {
+        return this->indexer.getFuncEqMultipliers(this->ControlFuncsIndex, this->ActiveEqCons);
+      }
     }
 
     std::vector<Eigen::VectorXd> returnEqualConLmults(int index) const {
@@ -950,6 +973,7 @@ namespace ASSET {
       this->PrintMeshInfo = true;
       this->nlp = std::shared_ptr<NonLinearProgram>();
       this->resetTranscription();
+      this->invalidatePostOptInfo();
     }
 
 

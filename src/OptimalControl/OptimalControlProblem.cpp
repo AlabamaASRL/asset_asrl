@@ -49,8 +49,6 @@ void ASSET::OptimalControlProblem::check_functions() {
     for (int i = 0; i < func.PhasesTolink.size(); i++) {
       for (int j = 0; j < func.PhasesTolink[i].size(); j++) {
         int pnum = func.PhasesTolink[i][j];
-        // std::cout << pnum << std::endl;
-        // std::cout << this->phases.size() << std::endl;
         if (pnum >= this->phases.size() || pnum < 0) {
           fmt::print(fmt::fg(fmt::color::red),
                      "Transcription Error!!!\n"
