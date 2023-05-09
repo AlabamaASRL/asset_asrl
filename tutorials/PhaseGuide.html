@@ -375,7 +375,7 @@ Two states per segment.</p></td>
 </div>
 </section>
 <section id="constraints-and-objectives">
-<h2>Constraints and Objectives<a class="headerlink" href="#constraints-and-objectives" title="Permalink to this heading">#</a></h2>
+<span id="conobj-guide"></span><h2>Constraints and Objectives<a class="headerlink" href="#constraints-and-objectives" title="Permalink to this heading">#</a></h2>
 <p>Before discussing the interface for adding different types of constraints, it is helpful to briefly overview how we represent a phases’s variables
 when formulating an optimization problem. In general we partition a trajectory with <span class="math notranslate nohighlight">\(n\)</span> states into each time-varying portion <span class="math notranslate nohighlight">\(\vec{V}_i\)</span> of the ODE’s inputs followed by the
 ODE parameters, <span class="math notranslate nohighlight">\(\vec{P}\)</span>, and the phase’s static parameters, <span class="math notranslate nohighlight">\(\vec{S}\)</span>, below.</p>
@@ -1087,6 +1087,107 @@ precisely between each time in the converged trajectory.</p>
 </pre></div>
 </div>
 </section>
+<section id="referencing-and-removing-constraints">
+<span id="phaseremove-guide"></span><h3>Referencing and Removing Constraints<a class="headerlink" href="#referencing-and-removing-constraints" title="Permalink to this heading">#</a></h3>
+<p>When adding any of the 5 types of constraints/objectives covered <a class="reference internal" href="#conobj-guide"><span class="std std-ref">previously</span></a>, an integer identifier or list of integers is returned by the
+method. This identifier can be used to remove a constraint/objective from the problem. This can be quite useful when you
+want to express some homotopic or continuation scheme without having to create a new phase at each step. Given the identifier for
+a function of a certain type, it can be removed from the phase using the corresponding <code class="code docutils literal notranslate"><span class="pre">.remove#####(id)</span></code> method as shown below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">###########################</span>
+<span class="c1">## Ex. Equality Constraint</span>
+<span class="n">edx1</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">)))</span>
+<span class="n">edx2</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">])</span>
+<span class="n">edx3</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaVarEqualCon</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+
+<span class="c1">## Removal order doesn&#39;t matter</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">removeEqualCon</span><span class="p">(</span><span class="n">edx1</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">removeEqualCon</span><span class="p">(</span><span class="n">edx3</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">removeEqualCon</span><span class="p">(</span><span class="n">edx2</span><span class="p">)</span>
+
+
+<span class="c1">#############################</span>
+<span class="c1">## Ex. Inequality Constraint</span>
+<span class="n">idx1</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span> <span class="n">Args</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(),[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[],[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">idx2</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">&quot;StaticParams&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">idx3</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addLUFuncBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">(),[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">phase</span><span class="o">.</span><span class="n">removeInequalCon</span><span class="p">(</span><span class="n">idx2</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">removeInequalCon</span><span class="p">(</span><span class="n">idx3</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">removeInequalCon</span><span class="p">(</span><span class="n">idx1</span><span class="p">)</span>
+
+<span class="c1">#######################</span>
+<span class="c1">## Ex. State Objective</span>
+<span class="n">sdx1</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addStateObjective</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">squared_norm</span><span class="p">(),[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">sdx2</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addValueObjective</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">sdx3</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaTimeObjective</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+
+<span class="n">phase</span><span class="o">.</span><span class="n">removeStateObjective</span><span class="p">(</span><span class="n">sdx3</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">removeStateObjective</span><span class="p">(</span><span class="n">sdx2</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">removeStateObjective</span><span class="p">(</span><span class="n">sdx1</span><span class="p">)</span>
+
+
+<span class="c1">##########################</span>
+<span class="c1">## Ex. Integral Objective</span>
+<span class="n">intdx1</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addIntegralObjective</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">(),[</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">])</span>
+
+<span class="n">phase</span><span class="o">.</span><span class="n">removeIntegralObjective</span><span class="p">(</span><span class="n">intdx1</span><span class="p">)</span>
+
+<span class="c1">##########################</span>
+<span class="c1">## Ex. Integral Parameter Function</span>
+<span class="n">ipdx1</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addIntegralParamFunction</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">(),[</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">],</span><span class="n">IntSPVar</span><span class="p">)</span>
+
+<span class="n">phase</span><span class="o">.</span><span class="n">removeIntegralParamFunction</span><span class="p">(</span><span class="n">ipdx1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="retrieving-constraint-violations-and-multipliers">
+<h3>Retrieving Constraint Violations and Multipliers<a class="headerlink" href="#retrieving-constraint-violations-and-multipliers" title="Permalink to this heading">#</a></h3>
+<p>Immediately after a call to PSIOPT, users can retrieve the constraint violations and Lagrange multipliers associated with user applied constraints
+as well as the dynamics transcription and control spline constraints. This can be helpful when debugging non-converging problems. For equality and inequality constraints, constraint
+violations and multipliers are retrieved by supplying a constraint functions id to the phase’s <code class="code docutils literal notranslate"><span class="pre">.return####Vals(id)</span></code> and <code class="code docutils literal notranslate"><span class="pre">.return####Lmults(id)</span></code> methods as shown below.
+In all cases, the violations/multipliers are returned as a list of numpy arrays, each of which contains the output/multipliers associated with each call to the function inside of
+the optimization problem. For constraints applied only at a single state, the returned list will contain only one numpy array. In general, for path constraints, the list will contain the same number of elements
+as the returned trajectory, and the constraint violations in the ith element will be associated with calling the constraint with variables from the ith state as inputs. Note that for inequality constraints, the return values do not have slacks applied, thus
+negative values indicate that the constraint is in the feasible region and positive values indicate that the constraint is in the infeasible region.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">edx</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">)))</span>
+<span class="n">idx</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+
+<span class="n">phase</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+
+<span class="n">ecvals</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnEqualConVals</span><span class="p">(</span><span class="n">edx</span><span class="p">)</span>
+<span class="n">ecmults</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnEqualConLmults</span><span class="p">(</span><span class="n">edx</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">ecvals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ecmults</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+<span class="n">icvals</span>  <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnInequalConVals</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+<span class="n">icmults</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnInequalConLmults</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">icval</span><span class="p">,</span><span class="n">icmult</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">icvals</span><span class="p">,</span><span class="n">icmults</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">icval</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">icmult</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Transcription defect constraint violations can be retrieved with the <code class="code docutils literal notranslate"><span class="pre">.returnTrajError()</span></code> method. Here each element in the returned list
+is a numpy array containing the subset of the defect equality constraint errors roughly attributable to the given time. This association is not rigorous or exact,
+and is only meant as a guide for roughly determining where the defect constraints become difficult to satisfy. Furthermore, this error is only related to solution
+of the optimal control problem, and is not the mesh error estimated by the adaptive mesh refinement scheme (though the two can be correlated). In our formulation, co-states are interpolated directly
+from the Lagrange multipliers associated with the transcription defect constraints, so users can use the previously discussed <code class="code docutils literal notranslate"><span class="pre">.returnCostateTraj()</span></code> to examine the behavior of the multipliers.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ETraj</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnTrajError</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">Et</span> <span class="ow">in</span> <span class="n">ETraj</span><span class="p">:</span>
+    <span class="n">Et</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>  <span class="c1"># The defect error</span>
+    <span class="n">Et</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>    <span class="c1"># roughly at time t</span>
+</pre></div>
+</div>
+<p>Finally, for the you can also retrieve the constraint values and multipliers for the control spline regularization functions as shown below. If no spline constraints are applied,
+the returned lists will be empty.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Usm</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnUSplineConLmults</span><span class="p">()</span>
+<span class="n">Usc</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnUSplineConVals</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 
@@ -1163,6 +1264,8 @@ precisely between each time in the converged trajectory.</p>
 <li><a class="reference internal" href="#what-happens-if-i-add-multiple-objectives">What happens if I add multiple objectives?</a></li>
 <li><a class="reference internal" href="#bad-initial-guesses">Bad Initial Guesses</a></li>
 <li><a class="reference internal" href="#reintegrating-solutions">Reintegrating Solutions</a></li>
+<li><a class="reference internal" href="#referencing-and-removing-constraints">Referencing and Removing Constraints</a></li>
+<li><a class="reference internal" href="#retrieving-constraint-violations-and-multipliers">Retrieving Constraint Violations and Multipliers</a></li>
 </ul>
 </li>
 </ul>

@@ -327,7 +327,7 @@ Link Objectives.</p>
 </div>
 </section>
 <section id="link-constraints-and-objectives">
-<h2>Link Constraints and Objectives<a class="headerlink" href="#link-constraints-and-objectives" title="Permalink to this heading">#</a></h2>
+<span id="link-guide"></span><h2>Link Constraints and Objectives<a class="headerlink" href="#link-constraints-and-objectives" title="Permalink to this heading">#</a></h2>
 <p>Application of link objectives and constraints in an <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code>, is built upon the concept of phase regions
 and indexing we covered in phase <a class="reference internal" href="PhaseGuide.html#phase-guide"><span class="std std-ref">tutorial</span></a>. The total variables vector, <span class="math notranslate nohighlight">\(\vec{x}\)</span>, consists of those defined for each phase, <span class="math notranslate nohighlight">\(\vec{x}^{j}\)</span>, followed by
 the link parameters, <span class="math notranslate nohighlight">\(\vec{L}\)</span>.</p>
@@ -651,6 +651,71 @@ Both of these topics are handled in more details in the section on <a class="ref
 </pre></div>
 </div>
 </section>
+<section id="miscellaneous-topics">
+<h2>Miscellaneous Topics<a class="headerlink" href="#miscellaneous-topics" title="Permalink to this heading">#</a></h2>
+<section id="referencing-and-removing-constraints">
+<h3>Referencing and Removing Constraints<a class="headerlink" href="#referencing-and-removing-constraints" title="Permalink to this heading">#</a></h3>
+<p>When adding any of the 3 types of constraints/objectives covered <a class="reference internal" href="#link-guide"><span class="std std-ref">previously</span></a>, an integer identifier or list of integers is returned by the
+method. This identifier can be used to remove a constraint/objective from the optimal control problem. This can be quite useful when you
+want to express some homotopic or continuation scheme without having to create a new ocp at each step. Given the identifier for
+a function of a certain type, it can be removed from the phase using the corresponding <code class="code docutils literal notranslate"><span class="pre">.removeLink#####(id)</span></code> method as shown below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">###########################</span>
+<span class="c1">## Ex. Equality Constraint</span>
+
+<span class="n">eq1</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">SomeFunc</span><span class="p">,</span>
+                    <span class="mi">2</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span>
+                    <span class="mi">3</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="n">ocp</span><span class="o">.</span><span class="n">removeLinkEqualCon</span><span class="p">(</span><span class="n">eq1</span><span class="p">)</span>
+
+<span class="c1">###########################</span>
+<span class="c1">## Ex. Inequality Constraint</span>
+
+<span class="n">iq1</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkInequalCon</span><span class="p">(</span><span class="n">ALinkInequalCon</span><span class="p">(),</span>
+                    <span class="mi">0</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="n">XtUvars0</span><span class="p">,[],</span><span class="n">SPvars0</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="n">XtUvars1</span><span class="p">,</span><span class="n">OPvars1</span><span class="p">,[])</span>
+
+
+<span class="n">ocp</span><span class="o">.</span><span class="n">removeLinkInequalCon</span><span class="p">(</span><span class="n">iq1</span><span class="p">)</span>
+
+<span class="c1">###########################</span>
+<span class="c1">## Ex.Link Objective</span>
+
+<span class="n">ob1</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkObjective</span><span class="p">(</span><span class="n">ALinkObjective</span><span class="p">(),</span>
+                    <span class="mi">0</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="n">XtUvars0</span><span class="p">,[],</span><span class="n">SPvars0</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="n">XtUvars1</span><span class="p">,</span><span class="n">OPvars1</span><span class="p">,[])</span>
+
+<span class="n">ocp</span><span class="o">.</span><span class="n">removeLinkObjective</span><span class="p">(</span><span class="n">ob1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="retrieving-constraint-violations-and-multipliers">
+<h3>Retrieving Constraint Violations and Multipliers<a class="headerlink" href="#retrieving-constraint-violations-and-multipliers" title="Permalink to this heading">#</a></h3>
+<p>Immediately after a call to PSIOPT, users can retrieve the constraint violations and Lagrange multipliers associated with user applied link constraints.
+For equality and inequality constraints, constraint violations and multipliers are retrieved by supplying a constraint function’s id to the phase’s <code class="code docutils literal notranslate"><span class="pre">.returnLink####Vals(id)</span></code> and <code class="code docutils literal notranslate"><span class="pre">.returnLink####Lmults(id)</span></code> methods as shown below.
+In all cases, the violations/multipliers are returned as a list of numpy arrays each of which contains the output/multipliers associated with each call to the function inside
+the optimization problem.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">eq1</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkEqualCon</span><span class="p">(</span><span class="n">SomeFunc</span><span class="p">,</span>
+                    <span class="mi">2</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span>
+                    <span class="mi">3</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+
+<span class="n">iq1</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">addLinkInequalCon</span><span class="p">(</span><span class="n">ALinkInequalCon</span><span class="p">(),</span>
+                    <span class="mi">0</span><span class="p">,</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="n">XtUvars0</span><span class="p">,[],</span><span class="n">SPvars0</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">,</span><span class="s1">&#39;First&#39;</span><span class="p">,</span><span class="n">XtUvars1</span><span class="p">,</span><span class="n">OPvars1</span><span class="p">,[])</span>
+
+<span class="n">ocp</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+
+<span class="n">ecvals</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">returnEqualConVals</span><span class="p">(</span><span class="n">eq1</span><span class="p">)</span>
+<span class="n">ecmults</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">returnEqualConLmults</span><span class="p">(</span><span class="n">eq1</span><span class="p">)</span>
+
+<span class="n">icvals</span>  <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">returnInequalConVals</span><span class="p">(</span><span class="n">iq1</span><span class="p">)</span>
+<span class="n">icmults</span> <span class="o">=</span> <span class="n">ocp</span><span class="o">.</span><span class="n">returnInequalConLmults</span><span class="p">(</span><span class="n">iq1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Additionally, the multipliers and constraint values for the phases inside of an optimal control can be retrieved as shown in the <a class="reference internal" href="PhaseGuide.html#phaseremove-guide"><span class="std std-ref">phase tutorial</span></a>.</p>
+</section>
+</section>
 </section>
 
         </article>
@@ -717,6 +782,11 @@ Both of these topics are handled in more details in the section on <a class="ref
 </ul>
 </li>
 <li><a class="reference internal" href="#solving-and-optimizing">Solving and Optimizing</a></li>
+<li><a class="reference internal" href="#miscellaneous-topics">Miscellaneous Topics</a><ul>
+<li><a class="reference internal" href="#referencing-and-removing-constraints">Referencing and Removing Constraints</a></li>
+<li><a class="reference internal" href="#retrieving-constraint-violations-and-multipliers">Retrieving Constraint Violations and Multipliers</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
