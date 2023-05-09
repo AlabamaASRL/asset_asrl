@@ -489,6 +489,7 @@ void ASSET::PhaseIndexer::collectSolverOutput(const Eigen::VectorXd& Vars,
 
 std::vector<Eigen::VectorXd> ASSET::PhaseIndexer::getFuncEqMultipliers(
     int Gindex, const Eigen::VectorXd& EMultphase) const {
+
   Eigen::MatrixXi CDX = this->nlp->EqualityConstraints[Gindex].index_data.Cindex;
   std::vector<Eigen::VectorXd> mults;
   for (int i = 0; i < CDX.cols(); i++) {

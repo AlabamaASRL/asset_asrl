@@ -424,12 +424,12 @@ int ASSET::ODEPhaseBase::addDeltaVarObjective(int var, double scale) {
 }
 
 std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::returnCostateTraj() const {
-  if (!this->MultipliersLoaded) {
+  if (!this->PostOptInfoValid) {
     throw std::invalid_argument("No costates to return,a solve or optimize call must be made before "
                                 "returning the costate trajectory ");
   }
-  auto TrajTemp = this->indexer.getFuncEqMultipliers(this->DynamicsFuncIndex, this->ActiveEqLmults);
 
+  auto TrajTemp = this->indexer.getFuncEqMultipliers(this->DynamicsFuncIndex, this->ActiveEqLmults);
 
   std::vector<Eigen::VectorXd> tmp;
   int k = 0;
@@ -483,6 +483,48 @@ std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::returnCostateTraj() const {
 
 
   return Costates;
+}
+
+std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::returnTrajError() const {
+
+ if (!this->PostOptInfoValid) {
+    throw std::invalid_argument("No trajectory errors to return,a solve or optimize call must be made before "
+                                "returning the trajectory error ");
+  }
+
+  auto ErrTrajTemp = this->indexer.getFuncEqMultipliers(this->DynamicsFuncIndex, this->ActiveEqCons);
+
+
+  std::vector<Eigen::VectorXd> ErrTraj;
+  int k = 0;
+  int stride = (this->numTranCardStates - 1);
+  auto getSpace = [&](int i) {
+    if (this->numTranCardStates == 4) {
+      return LGLCoeffs<4>::InteriorSpacings[i];
+    } else if (this->numTranCardStates == 3) {
+      return LGLCoeffs<3>::InteriorSpacings[i];
+    } else if (this->numTranCardStates == 2) {
+      return LGLCoeffs<2>::InteriorSpacings[i];
+    } else {
+      std::invalid_argument("Error estimation Not Implemented for specified Transcription "
+                            "Mode");
+      return 0.0;
+    }
+  };
+  for (auto& T: ErrTrajTemp) {
+    VectorXd x0 = this->ActiveTraj[k * (stride)];
+    VectorXd xf = this->ActiveTraj[k * (stride) + stride];
+    double t0 = x0[this->TVar()];
+    double h = xf[this->TVar()] - x0[this->TVar()];
+    for (int i = 0; i < stride; i++) {
+      VectorXd cs(this->XVars() + 1);
+      cs.head(this->XVars()) = T.segment(i * this->XVars(), this->XVars());
+      cs[this->TVar()] = t0 + h * getSpace(i);
+      ErrTraj.push_back(cs);
+    }
+    k++;
+  }
+  return ErrTraj;
 }
 
 void ASSET::ODEPhaseBase::setTraj(const std::vector<Eigen::VectorXd>& mesh,
@@ -568,6 +610,7 @@ void ASSET::ODEPhaseBase::setTraj(const std::vector<Eigen::VectorXd>& mesh,
   this->numDefects = DPB.sum();
   this->TrajectoryLoaded = true;
   this->resetTranscription();
+  this->invalidatePostOptInfo();
 }
 
 
@@ -579,14 +622,13 @@ void ASSET::ODEPhaseBase::refineTrajManual(VectorXd DBS, VectorXi DPB) {
     throw std::invalid_argument("");
   }
 
-  // this->Table.loadRegularData(DPB.sum(), this->ActiveTraj);
   this->Table.loadExactData(this->ActiveTraj);
-
   this->ActiveTraj = this->Table.NDdistribute(DBS, DPB);
   this->DefBinSpacing = DBS;
   this->DefsPerBin = DPB;
   this->numDefects = DPB.sum();
   this->resetTranscription();
+  this->invalidatePostOptInfo();
 }
 
 std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::refineTrajEqual(int n) {
@@ -684,7 +726,7 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
     }
   };
 
-  for (auto& ob: this->userIntegrands) {
+  for (auto& [key, ob]: this->userIntegrands) {
     int xp = ob.XtUVars.size();
     int sop = ob.OPVars.size() + ob.SPVars.size();
     VectorXi xtrap(xp + 1);
@@ -723,7 +765,7 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
     ob.PhaseLocalIndex = PLindex;
   }
 
-  for (auto& ob: this->userParamIntegrands) {
+  for (auto& [key, ob]: this->userParamIntegrands) {
     int xp = ob.XtUVars.size();
     int sop = ob.OPVars.size() + ob.SPVars.size();
     VectorXi xtrap(xp + 1);
@@ -760,7 +802,7 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
   }
 }
 void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
-  for (auto& eq: this->userEqualities) {
+  for (auto& [key, eq]: this->userEqualities) {
     ThreadingFlags ThreadMode =
         eq.Func.thread_safe() ? ThreadingFlags::ByApplication : ThreadingFlags::MainThread;
     if (eq.RegionFlag == PhaseRegionFlags::Path || eq.RegionFlag == PhaseRegionFlags::PairWisePath)
@@ -772,7 +814,7 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
     eq.GlobalIndex = Gindex;
     eq.PhaseLocalIndex = PLindex;
   }
-  for (auto& iq: this->userInequalities) {
+  for (auto& [key,iq]: this->userInequalities) {
     ThreadingFlags ThreadMode =
         iq.Func.thread_safe() ? ThreadingFlags::ByApplication : ThreadingFlags::MainThread;
     if (iq.RegionFlag == PhaseRegionFlags::Path || iq.RegionFlag == PhaseRegionFlags::PairWisePath) {
@@ -786,7 +828,7 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
     iq.GlobalIndex = Gindex;
     iq.PhaseLocalIndex = PLindex;
   }
-  for (auto& ob: this->userStateObjectives) {
+  for (auto& [key, ob]: this->userStateObjectives) {
     ThreadingFlags ThreadMode =
         ob.Func.thread_safe() ? ThreadingFlags::ByApplication : ThreadingFlags::MainThread;
     if (ob.RegionFlag == PhaseRegionFlags::Path || ob.RegionFlag == PhaseRegionFlags::PairWisePath)
@@ -857,13 +899,14 @@ void ASSET::ODEPhaseBase::transcribe_control_funcs() {
     TUis[i][0] = this->TVar();
     TUis[i][1] = this->TVar() + 1 + i;
   }
+  this->ControlFuncsIndex = -1;
 
   if (this->TranscriptionMode == TranscriptionModes::LGL7) {
     if (this->UVars() > 0) {
       if (this->ControlMode == ControlModes::HighestOrderSpline) {
         LGLControlSpline<4, -1, 2> lgl7spln2(this->UVars());
 
-        this->indexer.addEquality(lgl7spln2,
+        this->ControlFuncsIndex = this->indexer.addEquality(lgl7spln2,
                                   PhaseRegionFlags::DefectPairWisePath,
                                   TUvarT,
                                   empty,
@@ -873,7 +916,7 @@ void ASSET::ODEPhaseBase::transcribe_control_funcs() {
       } else if (this->ControlMode == ControlModes::FirstOrderSpline) {
         LGLControlSpline<4, -1, 1> lgl7spln1(this->UVars());
 
-        this->indexer.addEquality(lgl7spln1,
+        this->ControlFuncsIndex = this->indexer.addEquality(lgl7spln1,
                                   PhaseRegionFlags::DefectPairWisePath,
                                   TUvarT,
                                   empty,
@@ -887,7 +930,7 @@ void ASSET::ODEPhaseBase::transcribe_control_funcs() {
           || this->ControlMode == ControlModes::FirstOrderSpline) {
         LGLControlSpline<3, -1, 1> lgl5spln1(this->UVars());
 
-        this->indexer.addEquality(lgl5spln1,
+        this->ControlFuncsIndex = this->indexer.addEquality(lgl5spln1,
                                   PhaseRegionFlags::DefectPairWisePath,
                                   TUvarT,
                                   empty,
@@ -967,15 +1010,15 @@ void ASSET::ODEPhaseBase::check_functions(int pnum) {
   std::string iobj = "Integral objective";
   std::string ipcon = "Integral parameter";
 
-  for (auto& f: this->userEqualities)
+  for (auto& [key,f]: this->userEqualities)
     CheckFun(eq, f);
-  for (auto& f: this->userInequalities)
+  for (auto& [key, f]: this->userInequalities)
     CheckFun(iq, f);
-  for (auto& f: this->userIntegrands)
+  for (auto& [key, f]: this->userIntegrands)
     CheckFun(iobj, f);
-  for (auto& f: this->userParamIntegrands)
+  for (auto& [key, f]: this->userParamIntegrands)
     CheckFun(ipcon, f);
-  for (auto& f: this->userStateObjectives)
+  for (auto& [key, f]: this->userStateObjectives)
     CheckFun(sobj, f);
 }
 
@@ -1208,7 +1251,11 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::ODEPhaseBase::psipot_call_impl(std::strin
   }
 
   this->collectSolverOutput(Output);
-  this->collectSolverMultipliers(this->optimizer->LastEqLmults, this->optimizer->LastIqLmults);
+
+  this->collectPostOptInfo(this->optimizer->LastEqCons, this->optimizer->LastEqLmults, 
+                           this->optimizer->LastIqCons, this->optimizer->LastIqLmults );
+
+
   return this->optimizer->ConvergeFlag;
 }
 
@@ -1383,10 +1430,19 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   obj.def("returnTrajTable", &ODEPhaseBase::returnTrajTable);
 
   obj.def("returnCostateTraj", &ODEPhaseBase::returnCostateTraj, ODEPhaseBase_returnCostateTraj);
+  obj.def("returnTrajError", &ODEPhaseBase::returnTrajError);
+
+  obj.def("returnUSplineConLmults", &ODEPhaseBase::returnUSplineConLmults);
+  obj.def("returnUSplineConVals", &ODEPhaseBase::returnUSplineConVals);
+
 
   obj.def("returnEqualConLmults", &ODEPhaseBase::returnEqualConLmults, ODEPhaseBase_returnEqualConLmults);
+  obj.def("returnEqualConVals", &ODEPhaseBase::returnEqualConVals);
+
   obj.def(
       "returnInequalConLmults", &ODEPhaseBase::returnInequalConLmults, ODEPhaseBase_returnInequalConLmults);
+  obj.def("returnInequalConVals", &ODEPhaseBase::returnInequalConVals);
+
 
   obj.def("returnStaticParams", &ODEPhaseBase::returnStaticParams, ODEPhaseBase_returnStaticParam);
 
