@@ -1251,7 +1251,6 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::ODEPhaseBase::psipot_call_impl(std::strin
   }
 
   this->collectSolverOutput(Output);
-  //this->collectSolverMultipliers(this->optimizer->LastEqLmults, this->optimizer->LastIqLmults);
 
   this->collectPostOptInfo(this->optimizer->LastEqCons, this->optimizer->LastEqLmults, 
                            this->optimizer->LastIqCons, this->optimizer->LastIqLmults );
