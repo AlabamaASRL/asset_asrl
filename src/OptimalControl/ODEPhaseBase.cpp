@@ -428,8 +428,8 @@ std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::returnCostateTraj() const {
     throw std::invalid_argument("No costates to return,a solve or optimize call must be made before "
                                 "returning the costate trajectory ");
   }
-  auto TrajTemp = this->indexer.getFuncEqMultipliers(this->DynamicsFuncIndex, this->ActiveEqLmults);
 
+  auto TrajTemp = this->indexer.getFuncEqMultipliers(this->DynamicsFuncIndex, this->ActiveEqLmults);
 
   std::vector<Eigen::VectorXd> tmp;
   int k = 0;

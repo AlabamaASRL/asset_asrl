@@ -934,6 +934,8 @@ namespace ASSET {
 
     void collectPostOptInfo(const VectorXd& EC, const VectorXd& EM, const VectorXd& IC, const VectorXd& IM) {
 
+    
+
       this->PostOptInfoValid = true;
       this->MultipliersLoaded = true;
 
