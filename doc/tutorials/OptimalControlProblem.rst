@@ -119,6 +119,7 @@ Analogous to the concept of a phase's static parameters, you may also add additi
     ocp.setLinkParams(np.ones((15)))
 
 
+.. _link-guide:
 
 Link Constraints and Objectives
 ===============================
@@ -489,3 +490,75 @@ Finally, you can refine the meshes for some or all of the constituent phases and
 
 
 
+Miscellaneous Topics
+====================
+
+Referencing and Removing Constraints
+------------------------------------
+
+When adding any of the 3 types of constraints/objectives covered :ref:`previously <link-guide>`, an integer identifier or list of integers is returned by the 
+method. This identifier can be used to remove a constraint/objective from the optimal control problem. This can be quite useful when you
+want to express some homotopic or continuation scheme without having to create a new ocp at each step. Given the identifier for
+a function of a certain type, it can be removed from the phase using the corresponding :code:`.removeLink#####(id)` method as shown below.
+
+.. code-block:: python
+
+    ###########################
+    ## Ex. Equality Constraint
+
+    eq1 = ocp.addLinkEqualCon(SomeFunc,
+                        2,'Last', range(0,3),
+                        3,'First',range(0,3))
+
+    ocp.removeLinkEqualCon(eq1)
+
+    ###########################
+    ## Ex. Inequality Constraint
+
+    iq1 = ocp.addLinkInequalCon(ALinkInequalCon(),
+                        0,'Last', XtUvars0,[],SPvars0,
+                        1,'First',XtUvars1,OPvars1,[])
+
+
+    ocp.removeLinkInequalCon(iq1)
+
+    ###########################
+    ## Ex.Link Objective
+
+    ob1 = ocp.addLinkObjective(ALinkObjective(),
+                        0,'Last', XtUvars0,[],SPvars0,
+                        1,'First',XtUvars1,OPvars1,[])
+
+    ocp.removeLinkObjective(ob1)
+
+
+Retrieving Constraint Violations and Multipliers
+------------------------------------------------
+Immediately after a call to PSIOPT, users can retrieve the constraint violations and Lagrange multipliers associated with user applied link constraints.
+For equality and inequality constraints, constraint violations and multipliers are retrieved by supplying a constraint function's id to the phase's :code:`.returnLink####Vals(id)` and :code:`.returnLink####Lmults(id)` methods as shown below.
+In all cases, the violations/multipliers are returned as a list of numpy arrays each of which contains the output/multipliers associated with each call to the function inside
+the optimization problem.
+
+.. code-block:: python
+
+    
+    eq1 = ocp.addLinkEqualCon(SomeFunc,
+                        2,'Last', range(0,3),
+                        3,'First',range(0,3))
+
+   
+    iq1 = ocp.addLinkInequalCon(ALinkInequalCon(),
+                        0,'Last', XtUvars0,[],SPvars0,
+                        1,'First',XtUvars1,OPvars1,[])
+
+    ocp.optimize()
+
+    ecvals = ocp.returnEqualConVals(eq1)
+    ecmults = ocp.returnEqualConLmults(eq1)
+
+    icvals  = ocp.returnInequalConVals(iq1)
+    icmults = ocp.returnInequalConLmults(iq1)
+
+
+
+Additionally, the multipliers and constraint values for the phases inside of an optimal control can be retrieved as shown in the :ref:`phase tutorial <phaseremove-guide>`.

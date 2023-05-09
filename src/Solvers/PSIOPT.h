@@ -418,6 +418,11 @@ namespace ASSET {
     Eigen::VectorXd LastEqLmults;
     Eigen::VectorXd LastIqLmults;
 
+    Eigen::VectorXd LastEqCons;
+    Eigen::VectorXd LastIqCons;
+
+
+
     /////////////////////////////////////////////////////////////////////
 
     using EarlyCallBackType = std::function<int(int,

@@ -49,8 +49,6 @@ void ASSET::OptimalControlProblem::check_functions() {
     for (int i = 0; i < func.PhasesTolink.size(); i++) {
       for (int j = 0; j < func.PhasesTolink[i].size(); j++) {
         int pnum = func.PhasesTolink[i][j];
-        // std::cout << pnum << std::endl;
-        // std::cout << this->phases.size() << std::endl;
         if (pnum >= this->phases.size() || pnum < 0) {
           fmt::print(fmt::fg(fmt::color::red),
                      "Transcription Error!!!\n"
@@ -118,11 +116,11 @@ void ASSET::OptimalControlProblem::check_functions() {
   std::string obj = "Link Objective";
 
 
-  for (auto& f: this->LinkEqualities)
+  for (auto& [key,f]: this->LinkEqualities)
     CheckFunc(eq, f);
-  for (auto& f: this->LinkInequalities)
+  for (auto& [key, f]: this->LinkInequalities)
     CheckFunc(iq, f);
-  for (auto& f: this->LinkObjectives)
+  for (auto& [key, f]: this->LinkObjectives)
     CheckFunc(obj, f);
 }
 
@@ -144,7 +142,7 @@ void ASSET::OptimalControlProblem::transcribe_links() {
   this->numEqFuns = 0;
   this->numIqFuns = 0;
   this->numObjFuns = 0;
-  for (auto& Eq: this->LinkEqualities) {
+  for (auto& [key,Eq]: this->LinkEqualities) {
     auto VC = this->make_link_Vindex_Cindex(Eq.LinkFlag,
                                             Eq.PhaseRegFlags,
                                             Eq.PhasesTolink,
@@ -155,9 +153,10 @@ void ASSET::OptimalControlProblem::transcribe_links() {
                                             Eq.Func.ORows(),
                                             NextEq);
     this->nlp->EqualityConstraints.emplace_back(ConstraintFunction(Eq.Func, VC[0], VC[1]));
+    Eq.GlobalIndex = this->nlp->EqualityConstraints.size() - 1;
     this->numEqFuns++;
   }
-  for (auto& Iq: this->LinkInequalities) {
+  for (auto& [key,Iq]: this->LinkInequalities) {
     auto VC = this->make_link_Vindex_Cindex(Iq.LinkFlag,
                                             Iq.PhaseRegFlags,
                                             Iq.PhasesTolink,
@@ -168,9 +167,10 @@ void ASSET::OptimalControlProblem::transcribe_links() {
                                             Iq.Func.ORows(),
                                             NextIq);
     this->nlp->InequalityConstraints.emplace_back(ConstraintFunction(Iq.Func, VC[0], VC[1]));
+    Iq.GlobalIndex = this->nlp->InequalityConstraints.size() - 1;
     this->numIqFuns++;
   }
-  for (auto& Ob: this->LinkObjectives) {
+  for (auto& [key,Ob]: this->LinkObjectives) {
     int dummy = 0;
     auto VC = this->make_link_Vindex_Cindex(Ob.LinkFlag,
                                             Ob.PhaseRegFlags,
@@ -182,6 +182,8 @@ void ASSET::OptimalControlProblem::transcribe_links() {
                                             Ob.Func.ORows(),
                                             dummy);
     this->nlp->Objectives.emplace_back(ObjectiveFunction(Ob.Func, VC[0]));
+    Ob.GlobalIndex = this->nlp->Objectives.size() - 1;
+
     this->numObjFuns++;
   }
 
@@ -231,7 +233,13 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::OptimalControlProblem::psipot_call_impl(s
 
 
   this->collectSolverOutput(Output);
-  this->collectSolverMultipliers(this->optimizer->LastEqLmults, this->optimizer->LastIqLmults);
+
+  this->collectPostOptInfo(this->optimizer->LastEqCons,
+                           this->optimizer->LastEqLmults,
+                           this->optimizer->LastIqCons,
+                           this->optimizer->LastIqLmults);
+
+
   return this->optimizer->ConvergeFlag;
 }
 
@@ -1283,6 +1291,15 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
 
 
   ///////////////////////
+  obj.def("returnLinkEqualConVals", &OptimalControlProblem::returnLinkEqualConVals);
+  obj.def("returnLinkEqualConLmults", &OptimalControlProblem::returnLinkEqualConLmults);
+
+  obj.def("returnLinkInequalConVals", &OptimalControlProblem::returnLinkInequalConVals);
+  obj.def("returnLinkInequalConLmults", &OptimalControlProblem::returnLinkInequalConLmults);
+
+
+  ///////////////////////
+
   obj.def_readwrite("AdaptiveMesh", &OptimalControlProblem::AdaptiveMesh);
   obj.def_readwrite("PrintMeshInfo", &OptimalControlProblem::PrintMeshInfo);
   obj.def_readwrite("MaxMeshIters", &OptimalControlProblem::MaxMeshIters);
