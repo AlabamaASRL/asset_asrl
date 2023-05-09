@@ -201,7 +201,7 @@ namespace ASSET {
         case TranscriptionModes::CentralShooting: {
 
           auto shooter = this->make_shooter();
-          this->indexer.addEquality(
+          this->DynamicsFuncIndex = this->indexer.addEquality(
               shooter, PhaseRegionFlags::DefectPath, StateT, OParT, empty, ThreadingFlags::ByApplication);
 
 

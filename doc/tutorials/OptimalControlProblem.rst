@@ -534,7 +534,7 @@ a function of a certain type, it can be removed from the phase using the corresp
 
 Retrieving Constraint Violations and Multipliers
 ------------------------------------------------
-Immediately after any call to PSIOPT, users can retrieve the constraint violations and Lagrange multipliers associated with user applied link constraints.
+Immediately after a call to PSIOPT, users can retrieve the constraint violations and Lagrange multipliers associated with user applied link constraints.
 For equality and inequality constraints, constraint violations and multipliers are retrieved by supplying a constraint function's id to the phase's :code:`.returnLink####Vals(id)` and :code:`.returnLink####Lmults(id)` methods as shown below.
 In all cases, the violations/multipliers are returned as a list of numpy arrays each of which contains the output/multipliers associated with each call to the function inside
 the optimization problem.
@@ -561,4 +561,4 @@ the optimization problem.
 
 
 
-Additionally, the multipliers and constraint values for the phases inside of an optimal control can be retrieved as shown in the :ref:`phase tutorial <conobj-guide>`.
+Additionally, the multipliers and constraint values for the phases inside of an optimal control can be retrieved as shown in the :ref:`phase tutorial <phaseremove-guide>`.

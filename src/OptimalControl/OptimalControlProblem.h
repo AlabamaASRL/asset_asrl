@@ -1483,7 +1483,7 @@ namespace ASSET {
       int Gindex = this->LinkEqualities.at(index).GlobalIndex;
       auto Cindex = this->nlp->EqualityConstraints[Gindex].index_data.Cindex;
       int offset = this->numPhaseEqCons.sum();
-      
+
 
       std::vector<Eigen::VectorXd> Allvals;
       for (int i = 0; i < Cindex.cols(); i++) {

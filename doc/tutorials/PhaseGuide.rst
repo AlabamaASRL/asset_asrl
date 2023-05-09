@@ -948,6 +948,8 @@ precisely between each time in the converged trajectory.
         ReintTraj2+=Next
 
 
+.. _phaseremove-guide:
+
 Referencing and Removing Constraints
 ------------------------------------
 
@@ -965,7 +967,7 @@ a function of a certain type, it can be removed from the phase using the corresp
     edx2 = phase.addEqualCon("Path",Args(3).norm()-1.0,[8,9,10]) 
     edx3 = phase.addDeltaVarEqualCon(6,1.0)
 
-    ## Removal order doesnt matter
+    ## Removal order doesn't matter
     phase.removeEqualCon(edx1)
     phase.removeEqualCon(edx3)
     phase.removeEqualCon(edx2)
@@ -1006,7 +1008,6 @@ a function of a certain type, it can be removed from the phase using the corresp
 
 
 
-.. _phaseremove-guide:
 
 Retrieving Constraint Violations and Multipliers
 ------------------------------------------------
@@ -1041,7 +1042,7 @@ negative values indicate that the constraint is in the feasible region and posit
 
 
 Transcription defect constraint violations can be retrieved with the :code:`.returnTrajError()` method. Here each element in the returned list 
-is a numpy array of size containing the subset of the defect equality constraint errors roughly attributable to the given time. This association is not rigorous or exact,
+is a numpy array containing the subset of the defect equality constraint errors roughly attributable to the given time. This association is not rigorous or exact,
 and is only meant as a guide for roughly determining where the defect constraints become difficult to satisfy. Furthermore, this error is only related to solution
 of the optimal control problem, and is not the mesh error estimated by the adaptive mesh refinement scheme (though the two can be correlated). In our formulation, co-states are interpolated directly
 from the Lagrange multipliers associated with the transcription defect constraints, so users can use the previously discussed :code:`.returnCostateTraj()` to examine the behavior of the multipliers.
