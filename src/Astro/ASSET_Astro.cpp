@@ -13,8 +13,9 @@ void ASSET::AstroBuild(FunctionRegistry& reg, py::module& m) {
   //////////// Binding Misc CPP Functions here for now ////////
   /////////////////////////////////////////////////////////////
 
-  mod.def("ModifiedDynamics",
-          [](double mu) { return GenericFunction<-1, -1>(ModifiedDynamics_Impl::Definition(mu)); });
+ 
+  mod.def("ModifiedDynamics", [](double mu) { return GenericFunction<-1, -1>(MEEDynamics(mu)); });
+
 
   mod.def("J2Cartesian", [](double mu, double J2, double Rb) {
     return GenericFunction<-1, -1>(J2Cartesian_Impl::Definition(mu, J2, Rb));
