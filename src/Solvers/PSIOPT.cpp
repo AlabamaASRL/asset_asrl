@@ -4,6 +4,8 @@
 
 #include "PyDocString/Solvers/PSIOPT_doc.h"
 
+// setNLP ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void ASSET::PSIOPT::setNLP(std::shared_ptr<NonLinearProgram> np) {
   this->nlp = np;
   this->PrimalVars = this->nlp->PrimalVars;
@@ -20,6 +22,8 @@ void ASSET::PSIOPT::setNLP(std::shared_ptr<NonLinearProgram> np) {
     spmat = this->KKTSol.getMatrix();
   this->QPanalyzed = false;
 }
+
+// max_primal_dual_step //////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::max_primal_dual_step(Eigen::Ref<Eigen::VectorXd> XSL,
                                          Eigen::Ref<Eigen::VectorXd> DXSL,
@@ -59,6 +63,8 @@ void ASSET::PSIOPT::max_primal_dual_step(Eigen::Ref<Eigen::VectorXd> XSL,
   alphad = Lmax;
 }
 
+// fill_iter_info ////////////////////////////////////////////////////////////////////////////////////////////
+
 void ASSET::PSIOPT::fill_iter_info(Eigen::Ref<Eigen::VectorXd> XSL,
                                    Eigen::Ref<Eigen::VectorXd> RHS,
                                    double pobj,
@@ -97,7 +103,9 @@ void ASSET::PSIOPT::fill_iter_info(Eigen::Ref<Eigen::VectorXd> XSL,
     iter.AllConNormErr = this->getAllCons(RHS).norm();
 }
 
-void ASSET::PSIOPT::evalNLP(int algmode,
+// evalNLP ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ASSET::PSIOPT::evalNLP(AlgorithmModes algmode,
                             double ObjScale,
                             ConstEigenRef<VectorXd> XSL,
                             double& val,
@@ -127,8 +135,10 @@ void ASSET::PSIOPT::evalNLP(int algmode,
   }
 }
 
+// convergeCheck /////////////////////////////////////////////////////////////////////////////////////////////
+
 ASSET::PSIOPT::ConvergenceFlags ASSET::PSIOPT::convergeCheck(std::vector<IterateInfo>& iters) {
-  ConvergenceFlags Flag = CONVERGED;
+  ConvergenceFlags Flag = ConvergenceFlags::CONVERGED;
   IterateInfo last = iters.back();
   bool KKTFeas = (last.KKTInf < this->KKTtol);
   bool EConFeas = (last.EConInf < this->EContol);
@@ -169,6 +179,8 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::PSIOPT::convergeCheck(std::vector<Iterate
   return Flag;
 }
 
+// printPSIOPT ///////////////////////////////////////////////////////////////////////////////////////////////
+
 void ASSET::PSIOPT::printPSIOPT() {
 
   std::string PsioptStr = "       ____    _____    ____          ____     ____   ______\n"
@@ -181,6 +193,8 @@ void ASSET::PSIOPT::printPSIOPT() {
   fmt::print(fmt::fg(fmt::color::crimson), " \n       Parallel Sparse Interior-point Optimizer\n");
   print_Header();
 }
+
+// print_settings ////////////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::print_settings() {
   using std::cout;
@@ -203,8 +217,12 @@ void ASSET::PSIOPT::print_settings() {
       "|{0:<6}|{1:>8.3e}|{2:>8.3e}|{3:>8.3e}|\n", "ICons", this->IContol, this->AccIContol, this->DivIContol);
 }
 
+// print_matrixinfo //////////////////////////////////////////////////////////////////////////////////////////
+
 void ASSET::PSIOPT::print_matrixinfo() {
 }
+
+// print_stats ///////////////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::print_stats() {
   printPSIOPT();
@@ -236,6 +254,8 @@ void ASSET::PSIOPT::print_stats() {
 
   // fmt::print("\n");
 }
+
+// print_last_iterate ////////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::print_last_iterate(const std::vector<IterateInfo>& iters) {
   auto last = iters.back();
@@ -326,12 +346,16 @@ void ASSET::PSIOPT::print_last_iterate(const std::vector<IterateInfo>& iters) {
   }
 }
 
+// print_Beginning ///////////////////////////////////////////////////////////////////////////////////////////
+
 void ASSET::PSIOPT::print_Beginning(std::string msg) const {
   fmt::print(fmt::fg(fmt::color::dim_gray), "Beginning");
   fmt::print(": ");
   fmt::print(fmt::fg(fmt::color::royal_blue), msg);
   fmt::print("\n");
 }
+
+// print_Finished ////////////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::print_Finished(std::string msg) const {
 
@@ -340,6 +364,8 @@ void ASSET::PSIOPT::print_Finished(std::string msg) const {
   fmt::print(fmt::fg(fmt::color::royal_blue), msg);
   fmt::print("\n");
 }
+
+// print_ExitStats ///////////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::print_ExitStats(ConvergenceFlags ExitCode,
                                     const std::vector<IterateInfo>& iters,
@@ -399,6 +425,8 @@ void ASSET::PSIOPT::print_ExitStats(ConvergenceFlags ExitCode,
   }
 }
 
+// calculate_color ///////////////////////////////////////////////////////////////////////////////////////////
+
 fmt::text_style ASSET::PSIOPT::calculate_color(double val, double targ, double acc) {
   auto level1 = std::log(targ);
   auto level3 = std::log(acc);
@@ -421,6 +449,8 @@ fmt::text_style ASSET::PSIOPT::calculate_color(double val, double targ, double a
     c = fmt::color::dark_red;
   return fmt::fg(c);
 }
+
+// factor_impl ///////////////////////////////////////////////////////////////////////////////////////////////
 
 int ASSET::PSIOPT::factor_impl(
     bool docompute, bool Zfac, double ipurt, double incpurt0, double incpurt, double& finalpert) {
@@ -464,6 +494,8 @@ int ASSET::PSIOPT::factor_impl(
   }
   return this->MaxRefac;
 }
+
+// alg_impl //////////////////////////////////////////////////////////////////////////////////////////////////
 
 Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
                                         BarrierModes barmode,
@@ -650,7 +682,6 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
   if (this->EqualCons > 0) {
     this->LastEqCons = this->getEqCons(RHS);
     this->LastEqLmults = this->getEqLmults(XSL);
-
   }
   if (this->InequalCons > 0) {
     this->LastIqCons = this->getIqCons(RHS) - this->getSlacks(XSL);
@@ -675,8 +706,9 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
   return XSL;
 }
 
-Eigen::VectorXd ASSET::PSIOPT::init_impl(const Eigen::VectorXd& x, double Mu, bool docompute) {
+// init_impl /////////////////////////////////////////////////////////////////////////////////////////////////
 
+Eigen::VectorXd ASSET::PSIOPT::init_impl(const Eigen::VectorXd& x, double Mu, bool docompute) {
 
   Utils::Timer kktt;
   kktt.start();
@@ -757,6 +789,7 @@ Eigen::VectorXd ASSET::PSIOPT::init_impl(const Eigen::VectorXd& x, double Mu, bo
   return XSL;
 }
 
+// ls_impl ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
                               double ObjScale,
@@ -918,6 +951,7 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
   return alpha;
 }
 
+// optimize //////////////////////////////////////////////////////////////////////////////////////////////////
 
 Eigen::VectorXd ASSET::PSIOPT::optimize(const Eigen::VectorXd& x) {
 
@@ -942,12 +976,12 @@ Eigen::VectorXd ASSET::PSIOPT::optimize(const Eigen::VectorXd& x) {
   if (this->PrintLevel < 2) {
     print_Beginning("Optimization Algorithm ");
   }
-  XSLans = this->alg_impl(OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
+  XSLans = this->alg_impl(
+      AlgorithmModes::OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
   if (this->PrintLevel < 2) {
     print_Finished("Optimization Algorithm ");
   }
 
- 
 
   t.stop();
   double tottime = double(t.count<std::chrono::microseconds>()) / 1000.0;
@@ -962,6 +996,8 @@ Eigen::VectorXd ASSET::PSIOPT::optimize(const Eigen::VectorXd& x) {
   }
   return this->getPrimals(XSLans);
 }
+
+// solve_optimize ////////////////////////////////////////////////////////////////////////////////////////////
 
 Eigen::VectorXd ASSET::PSIOPT::solve_optimize(const Eigen::VectorXd& x) {
 
@@ -996,7 +1032,8 @@ Eigen::VectorXd ASSET::PSIOPT::solve_optimize(const Eigen::VectorXd& x) {
   if (this->PrintLevel < 2) {
     print_Beginning("Optimization Algorithm ");
   }
-  XSLans = this->alg_impl(OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
+  XSLans = this->alg_impl(
+      AlgorithmModes::OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
 
   t.stop();
   double tottime = double(t.count<std::chrono::microseconds>()) / 1000.0;
@@ -1011,9 +1048,11 @@ Eigen::VectorXd ASSET::PSIOPT::solve_optimize(const Eigen::VectorXd& x) {
     print_Header();
   }
 
-  
+
   return this->getPrimals(XSLans);
 }
+
+// solve_optimize_solve //////////////////////////////////////////////////////////////////////////////////////
 
 Eigen::VectorXd ASSET::PSIOPT::solve_optimize_solve(const Eigen::VectorXd& x) {
   this->zero_timing_stats();
@@ -1047,7 +1086,8 @@ Eigen::VectorXd ASSET::PSIOPT::solve_optimize_solve(const Eigen::VectorXd& x) {
   if (this->PrintLevel < 2) {
     print_Beginning("Optimization Algorithm ");
   }
-  XSLans = this->alg_impl(OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
+  XSLans = this->alg_impl(
+      AlgorithmModes::OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
   if (this->PrintLevel < 2) {
     print_Finished("Optimization Algorithm ");
   }
@@ -1079,9 +1119,10 @@ Eigen::VectorXd ASSET::PSIOPT::solve_optimize_solve(const Eigen::VectorXd& x) {
     print_Header();
   }
 
- 
   return this->getPrimals(XSLans);
 }
+
+// optimize_solve ////////////////////////////////////////////////////////////////////////////////////////////
 
 Eigen::VectorXd ASSET::PSIOPT::optimize_solve(const Eigen::VectorXd& x) {
   this->zero_timing_stats();
@@ -1103,7 +1144,8 @@ Eigen::VectorXd ASSET::PSIOPT::optimize_solve(const Eigen::VectorXd& x) {
     print_Beginning("Optimization Algorithm ");
   }
 
-  XSLans = this->alg_impl(OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
+  XSLans = this->alg_impl(
+      AlgorithmModes::OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
 
   if (this->PrintLevel < 2) {
     print_Finished("Optimization Algorithm ");
@@ -1137,9 +1179,10 @@ Eigen::VectorXd ASSET::PSIOPT::optimize_solve(const Eigen::VectorXd& x) {
     print_Header();
   }
 
-  
   return this->getPrimals(XSLans);
 }
+
+// solve /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Eigen::VectorXd ASSET::PSIOPT::solve(const Eigen::VectorXd& x) {
 
@@ -1175,10 +1218,11 @@ Eigen::VectorXd ASSET::PSIOPT::solve(const Eigen::VectorXd& x) {
     print_Finished("PSIOPT ");
     print_Header();
   }
-  
 
   return this->getPrimals(XSLans);
 }
+
+// Python Binding ////////////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::Build(py::module& m) {
   using namespace doc;
