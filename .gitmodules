@@ -8,3 +8,6 @@
 	path = dep/eigen
 	url = https://gitlab.com/wgledbetter/eigen.git
 	branch = asset-3.4
+[submodule "dep/spdlog"]
+	path = dep/spdlog
+	url = https://github.com/gabime/spdlog.git
