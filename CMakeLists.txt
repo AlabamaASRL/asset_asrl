@@ -38,7 +38,7 @@ endif()
 set(LINK_TIME_OPT FALSE)          ### DO LTO - Recommended for full release
 set(CLANG_MAX_INLINE_DEPTH 225)
 #set(BUILD_ASSET_WHEEL TRUE)      ### CI Build for generic wheels
-#set(BUILD_SPHINX_DOCS TRUE)      
+#set(BUILD_SPHINX_DOCS TRUE)
 
 
 ################################################################################
@@ -64,7 +64,7 @@ if(BUILD_ASSET_WHEEL)
         set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
         set(CLANG_MAX_INLINE_DEPTH 300)
     endif()
-    
+
 else()
     list(APPEND RELEASE_FLAGS "-march=native")
     if(NOT WIN32)
@@ -90,7 +90,7 @@ if(NOT WIN32)
     # Common Flags
     list(APPEND COMMON_FLAGS "-pthread")
 endif()
- 
+
 
 if(LINK_TIME_OPT)
   if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
@@ -141,7 +141,7 @@ if(NOT WIN32)
   list(APPEND RELEASE_FLAGS "-fno-asynchronous-unwind-tables")
   list(APPEND RELEASE_FLAGS "-ffast-math")
 endif()
- 
+
 if(APPLE)
   list(APPEND COMMON_FLAGS "-Xlinker -undefined")
   list(APPEND COMMON_FLAGS "-Xlinker dynamic_lookup")
@@ -227,9 +227,9 @@ elseif(APPLE)
       list(APPEND COMPILE_FLAGS ${OpenMP_CXX_FLAGS})
     endif()
 
-    
+
   endif()
-  
+
 endif()
 
 find_package(MKL REQUIRED)
@@ -265,7 +265,7 @@ endif()
 if(NOT PIP_INSTALL)
   if(WIN32)
     set(PYTHON_LOCAL_INSTALL_DIR ${Python_SITEARCH})
-    
+
   else()
     execute_process ( COMMAND ${PYTHON_EXECUTABLE} -m site --user-site
     OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -299,4 +299,3 @@ add_subdirectory(pypiwheel)
 
 # Formatting
 include(cmake/clang-format.cmake)
-

@@ -10,9 +10,9 @@ namespace ASSET {
   // Color Removing File Sink ////////////////////////////////////////////////////////////////////////////////
 
   template<typename Mutex>
-  class color_removing_file_sink : public spdlog::sinks::base_sink<Mutex> {
+  class style_removing_file_sink : public spdlog::sinks::base_sink<Mutex> {
    public:
-    explicit color_removing_file_sink(const spdlog::filename_t &filename,
+    explicit style_removing_file_sink(const spdlog::filename_t &filename,
                                       bool truncate = false,
                                       const spdlog::file_event_handlers &event_handlers = {})
         : file_helper_ {event_handlers} {
@@ -27,21 +27,20 @@ namespace ASSET {
       spdlog::memory_buf_t formatted;
       spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
 
-      // Remove color
+      // Remove style
       int nAfter, nRemove;
       char *mPtr;
-      char *colorCharPtr = std::find(formatted.begin(), formatted.end(), '\033');
-      while (colorCharPtr != formatted.end()) {
-        mPtr = std::find(colorCharPtr, formatted.end(), 'm');
-        nRemove = mPtr - colorCharPtr + 1;
+      char *styleCharPtr = std::find(formatted.begin(), formatted.end(), '\033');
+      while (styleCharPtr != formatted.end()) {
+        mPtr = std::find(styleCharPtr, formatted.end(), 'm');
+        nRemove = mPtr - styleCharPtr + 1;
         nAfter = formatted.end() - mPtr;
         for (int i = 0; i < nAfter; i++) {
-          *(colorCharPtr + i) = *(colorCharPtr + i + nRemove);
+          *(styleCharPtr + i) = *(styleCharPtr + i + nRemove);
         }
         formatted.resize(formatted.size() - nRemove);
-        // formatted.size_ = formatted.size_ - nRemove;
 
-        colorCharPtr = std::find(formatted.begin(), formatted.end(), '\033');
+        styleCharPtr = std::find(formatted.begin(), formatted.end(), '\033');
       }
 
       file_helper_.write(formatted);
@@ -56,7 +55,7 @@ namespace ASSET {
 
   // Useful Types ////////////////////////////////////////////////////////////////////////////////////////////
 
-  using color_removing_file_sink_mt = color_removing_file_sink<std::mutex>;
-  using color_removing_file_sink_st = color_removing_file_sink<spdlog::details::null_mutex>;
+  using style_removing_file_sink_mt = style_removing_file_sink<std::mutex>;
+  using style_removing_file_sink_st = style_removing_file_sink<spdlog::details::null_mutex>;
 
 }  // namespace ASSET

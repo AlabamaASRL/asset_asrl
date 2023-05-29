@@ -1,4 +1,5 @@
 #pragma once
+
 #include "BenchUtils.h"
 #include "CRTPBase.h"
 #include "FunctionReturnType.h"
@@ -7,6 +8,7 @@
 #include "MathFunctions.h"
 #include "STDExtensions.h"
 #include "SizingHelpers.h"
+#include "SpdlogSinks.h"
 #include "ThreadPool.h"
 #include "TupleIterator.h"
 #include "TypeErasure.h"

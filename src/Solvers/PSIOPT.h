@@ -1,10 +1,20 @@
 
 #pragma once
 
+#include <spdlog/async.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
+
+#include <chrono>
+#include <ctime>
+#include <filesystem>
+
 #include "IterateInfo.h"
 #include "NonLinearProgram.h"
 #include "PardisoInterface.h"
 #include "Utils/ColorText.h"
+#include "Utils/SpdlogSinks.h"
 #include "pch.h"
 
 namespace ASSET {
@@ -142,11 +152,13 @@ namespace ASSET {
 
     PSIOPT() {
       this->QPThreads = std::min(ASSET_DEFAULT_QP_THREADS, get_core_count());
+      this->initLogger();
     }
 
     PSIOPT(std::shared_ptr<NonLinearProgram> np) {
       this->QPThreads = std::min(ASSET_DEFAULT_QP_THREADS, get_core_count());
       this->setNLP(np);
+      this->initLogger();
     }
 
     // Members ===============================================================================================
@@ -269,6 +281,12 @@ namespace ASSET {
     LateCallBackType LateCallBack;    // = [](const IterateInfo& i, EigenRef<VectorXd> XSL,
                                       // EigenRef<VectorXd> AGXFX) {return 0; };
     bool LateCallBackEnabled = false;
+
+    spdlog::level::level_enum fileLogLevel = spdlog::level::trace;
+    spdlog::level::level_enum consoleLogLevel = spdlog::level::trace;
+    std::shared_ptr<style_removing_file_sink_mt> fileSink;
+    std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> consoleSink;
+    std::shared_ptr<spdlog::logger> log;
 
     // Setters ===============================================================================================
 
@@ -489,6 +507,21 @@ namespace ASSET {
 
     void set_PrintLevel(int plevel) {
       this->PrintLevel = plevel;
+
+      // Rough mapping from PSIOPT integers to spdlog level enum
+      if (plevel >= 4) {
+        this->consoleLogLevel = spdlog::level::off;
+      } else if (plevel == 3) {
+        this->consoleLogLevel = spdlog::level::critical;
+      } else if (plevel == 2) {
+        this->consoleLogLevel = spdlog::level::info;
+      } else if (plevel == 1) {
+        this->consoleLogLevel = spdlog::level::debug;
+      } else {
+        this->consoleLogLevel = spdlog::level::trace;
+      }
+
+      this->consoleSink->set_level(this->consoleLogLevel);
     }
 
     // -------------------------------------------------------------------------------------------------------
@@ -585,6 +618,54 @@ namespace ASSET {
 
     EigenRef<VectorXd> getAllCons(EigenRef<VectorXd> AGX_FX) const {
       return AGX_FX.tail(this->InequalCons + this->EqualCons);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    inline void initLogger() {
+      // Ensure unique name to make sure different intantiations of PSIOPT don't co-mingle.
+      std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+      std::tm* ltm = std::localtime(&now);
+
+      int id = 0;
+      std::string loggerBaseName = fmt::format("PSIOPT_{}-{}-{}_{}-{}-{}_{}",
+                                               1900 + ltm->tm_year,
+                                               1 + ltm->tm_mon,
+                                               ltm->tm_mday,
+                                               ltm->tm_hour,
+                                               ltm->tm_min,
+                                               ltm->tm_sec);
+      std::string loggerName = fmt::format("{}_{}", loggerBaseName, id);
+      std::string loggerFileName = fmt::format("{}{}", loggerName, ".log");
+
+      if (std::filesystem::exists(loggerFileName)) {
+        // Bad. We want unique log files.
+        while (std::filesystem::exists(fmt::format("{}_{}{}", loggerBaseName, id, ".log"))) {
+          id++;
+        }
+
+        loggerName = fmt::format("{}_{}", loggerBaseName, id);
+        loggerFileName = fmt::format("{}{}", loggerName, ".log");
+      }
+
+      // Create file sink
+      this->fileSink = std::make_shared<style_removing_file_sink_mt>(loggerFileName, true);
+      this->fileSink->set_level(this->fileLogLevel);
+
+      // Create color console sink
+      this->consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+      this->consoleSink->set_level(this->consoleLogLevel);
+      this->consoleSink->set_pattern("%v");
+
+      // Create logger
+      spdlog::init_thread_pool(8192, 1);
+      std::vector<spdlog::sink_ptr> sinks {this->fileSink, this->consoleSink};
+      this->log = std::make_shared<spdlog::async_logger>(loggerName.c_str(),
+                                                         sinks.begin(),
+                                                         sinks.end(),
+                                                         spdlog::thread_pool(),
+                                                         spdlog::async_overflow_policy::block);
+      spdlog::register_logger(this->log);
     }
 
     // Utilities =============================================================================================
@@ -853,18 +934,18 @@ namespace ASSET {
 
     ConvergenceFlags convergeCheck(std::vector<IterateInfo>& iters);
 
-    static void printPSIOPT();
+    void printPSIOPT();
 
     void print_settings();
     void print_matrixinfo();
     void print_stats();
     void print_last_iterate(const std::vector<IterateInfo>& iters);
 
-    static void print_Header() {
-      fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 65);
+    void print_Header(spdlog::level::level_enum level = spdlog::level::critical) {
+      this->log->log(level, fmt::format(fmt::fg(fmt::color::white), "{0:=^{1}}", "", 65));
     }
-    void print_Beginning(std::string msg) const;
-    void print_Finished(std::string msg) const;
+    void print_Beginning(std::string msg, spdlog::level::level_enum level) const;
+    void print_Finished(std::string msg, spdlog::level::level_enum level) const;
     void print_ExitStats(ConvergenceFlags ExitCode,
                          const std::vector<IterateInfo>& iters,
                          double tottime,
