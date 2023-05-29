@@ -1,3 +1,5 @@
+#pragma once
+
 #include <spdlog/common.h>
 #include <spdlog/sinks/base_sink.h>
 
