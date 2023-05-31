@@ -4,6 +4,8 @@
 
 namespace ASSET {
 
+
+  
   struct InterpTable1D {
 
     enum class InterpType {
@@ -429,29 +431,33 @@ namespace ASSET {
             py::overload_cast<const Eigen::VectorXd&>(&InterpTable1D::interp, py::const_),
             py::is_operator());
 
-    obj.def("__call__", [](const InterpTable1D& self, const GenericFunction<-1, 1>& t) {
+    obj.def("__call__", [](std::shared_ptr<InterpTable1D> & self, const GenericFunction<-1, 1>& t) {
       py::object pyfun;
-      if (self.vlen == 1) {
-        auto f = GenericFunction<-1, 1>(InterpFunction1D<1>(std::make_shared<InterpTable1D>(self)).eval(t));
+      if (self->vlen == 1) {
+        auto f = GenericFunction<-1, 1>(InterpFunction1D<1>(self).eval(t));
         pyfun = py::cast(f);
       } else {
-        auto f = GenericFunction<-1, -1>(InterpFunction1D<-1>(std::make_shared<InterpTable1D>(self)).eval(t));
+        auto f = GenericFunction<-1, -1>(InterpFunction1D<-1>(self).eval(t));
         pyfun = py::cast(f);
       }
       return pyfun;
     });
 
-    obj.def("__call__", [](const InterpTable1D& self, const Segment<-1, 1, -1>& t) {
+    
+    obj.def("__call__", [](std::shared_ptr<InterpTable1D>& self, const Segment<-1, 1, -1>& t) {
       py::object pyfun;
-      if (self.vlen == 1) {
-        auto f = GenericFunction<-1, 1>(InterpFunction1D<1>(std::make_shared<InterpTable1D>(self)).eval(t));
+      fmt::print("Call\n");
+      if (self->vlen == 1) {
+        auto f = GenericFunction<-1, 1>(InterpFunction1D<1>(self).eval(t));
         pyfun = py::cast(f);
       } else {
-        auto f = GenericFunction<-1, -1>(InterpFunction1D<-1>(std::make_shared<InterpTable1D>(self)).eval(t));
+        auto f = GenericFunction<-1, -1>(InterpFunction1D<-1>(self).eval(t));
         pyfun = py::cast(f);
       }
       return pyfun;
     });
+
+    
 
 
     obj.def("interp_deriv1", &InterpTable1D::interp_deriv1);
@@ -461,15 +467,15 @@ namespace ASSET {
     obj.def_readwrite("ThrowOutOfBounds", &InterpTable1D::ThrowOutOfBounds);
 
 
-    obj.def("sf", [](const InterpTable1D& self) {
-      if (self.vlen != 1) {
+    obj.def("sf", [](std::shared_ptr<InterpTable1D>& self) {
+      if (self->vlen != 1) {
         throw std::invalid_argument(
             "InterpTable1D storing Vector data cannot be converted to Scalar Function.");
       }
-      return GenericFunction<-1, 1>(InterpFunction1D<1>(std::make_shared<InterpTable1D>(self)));
+      return GenericFunction<-1, 1>(InterpFunction1D<1>(self));
     });
-    obj.def("vf", [](const InterpTable1D& self) {
-      return GenericFunction<-1, -1>(InterpFunction1D<-1>(std::make_shared<InterpTable1D>(self)));
+    obj.def("vf", [](std::shared_ptr<InterpTable1D>& self) {
+      return GenericFunction<-1, -1>(InterpFunction1D<-1>(self));
     });
   }
 
