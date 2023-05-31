@@ -843,7 +843,7 @@ namespace ASSET {
     obj.def("interp_deriv2",
             py::overload_cast<double, double, double>(&InterpTable3D::interp_deriv2, py::const_));
 
-    obj.def_readwrite("WarnOutOfBounds", &InterpTable3D::WarnOutOfBounds);
+    obj.def_readwrite("WarnOutOfBounds" , &InterpTable3D::WarnOutOfBounds);
     obj.def_readwrite("ThrowOutOfBounds", &InterpTable3D::ThrowOutOfBounds);
 
     obj.def("__call__",
@@ -851,36 +851,36 @@ namespace ASSET {
             py::is_operator());
 
     obj.def("__call__",
-            [](const InterpTable3D& self,
+            [](std::shared_ptr<InterpTable3D>& self,
                const GenericFunction<-1, 1>& x,
                const GenericFunction<-1, 1>& y,
                const GenericFunction<-1, 1>& z) {
               return GenericFunction<-1, 1>(
-                  InterpFunction3D(std::make_shared<InterpTable3D>(self)).eval(stack(x, y, z)));
+                  InterpFunction3D(self).eval(stack(x, y, z)));
             });
 
     obj.def("__call__",
-            [](const InterpTable3D& self,
+            [](std::shared_ptr<InterpTable3D>& self,
                const Segment<-1, 1, -1>& x,
                const Segment<-1, 1, -1>& y,
                const Segment<-1, 1, -1>& z) {
               return GenericFunction<-1, 1>(
-                  InterpFunction3D(std::make_shared<InterpTable3D>(self)).eval(stack(x, y, z)));
+                  InterpFunction3D(self).eval(stack(x, y, z)));
             });
 
-    obj.def("__call__", [](const InterpTable3D& self, const Segment<-1, 3, -1>& xyz) {
-      return GenericFunction<-1, 1>(InterpFunction3D(std::make_shared<InterpTable3D>(self)).eval(xyz));
+    obj.def("__call__", [](std::shared_ptr<InterpTable3D>& self, const Segment<-1, 3, -1>& xyz) {
+      return GenericFunction<-1, 1>(InterpFunction3D(self).eval(xyz));
     });
 
-    obj.def("__call__", [](const InterpTable3D& self, const GenericFunction<-1, -1>& xyz) {
-      return GenericFunction<-1, 1>(InterpFunction3D(std::make_shared<InterpTable3D>(self)).eval(xyz));
+    obj.def("__call__", [](std::shared_ptr<InterpTable3D>& self, const GenericFunction<-1, -1>& xyz) {
+      return GenericFunction<-1, 1>(InterpFunction3D(self).eval(xyz));
     });
 
-    obj.def("sf", [](const InterpTable3D& self) {
-      return GenericFunction<-1, 1>(InterpFunction3D(std::make_shared<InterpTable3D>(self)));
+    obj.def("sf", [](std::shared_ptr<InterpTable3D>& self) {
+      return GenericFunction<-1, 1>(InterpFunction3D(self));
     });
-    obj.def("vf", [](const InterpTable3D& self) {
-      return GenericFunction<-1, -1>(InterpFunction3D(std::make_shared<InterpTable3D>(self)));
+    obj.def("vf", [](std::shared_ptr<InterpTable3D>& self) {
+      return GenericFunction<-1, -1>(InterpFunction3D(self));
     });
 
 
