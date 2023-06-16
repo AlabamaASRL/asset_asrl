@@ -299,6 +299,78 @@ class test_Integrators(unittest.TestCase):
             self.assertLess(Jerr, Jtol,
                              "STM Integration Error exceeds expected maximum")
             
+    def test_EventDetection(self):
+        
+        r  = 1.0
+        v  = 1.1
+        t0 = 0.0
+        tf = 200.0
+        
+        
+        X0t0 = np.zeros((7))
+        X0t0[0]=r
+        X0t0[4]=v
+        X0t0[6]=t0
+        
+        def ApseFunc():
+            R,V = Args(7).tolist([(0,3),(3,3)])
+            return R.dot(V)
+        
+        direction = -1
+        stopcode = False
+        ApoApseEvent  = (ApseFunc(),direction,stopcode)
+        
+        direction = 1
+        stopcode = False
+        PeriApseEvent  = (ApseFunc(),direction,stopcode)
+        
+        direction = 0
+        stopcode  = 10  
+        AllApseEvent  = (ApseFunc(),direction,stopcode)
+        
+        
+        Events = [ApoApseEvent,PeriApseEvent,AllApseEvent]
+        
+        
+        
+        ode = ast.Astro.Kepler.ode(1)
+        
+        integ = ode.integrator(.01)
+        integ.setAbsTol(1.0e-13)
+        integ.Adaptive=True
+        integ.FastAdaptiveSTM = False
+        
+        
+        integ.EventTol =1.0e-10
+        integ.MaxEventIters =12
+        
+        Xf, EventLocs1 = integ.integrate(X0t0,tf,Events)
+        Xf, EventLocs2 = integ.integrate(X0t0,tf,Events)
+
+        self.assertTrue(len(EventLocs1)==len(EventLocs2))
+        
+        self.assertTrue(len(EventLocs1[0])==5)
+        self.assertTrue(len(EventLocs1[1])==5)
+        self.assertTrue(len(EventLocs1[2])==10)
+        
+        
+        afunc = ApseFunc()
+
+        for i in range(0,len(EventLocs1)):
+            self.assertTrue(len(EventLocs1[i])==len(EventLocs2[i]))
+
+            for j in range(0,len(EventLocs1[i])):
+                Xerr = np.linalg.norm(EventLocs1[i][j][0:6]-EventLocs2[i][j][0:6])
+                Fxerr = abs(afunc(EventLocs1[i][j])[0])
+                
+                self.assertLess(Xerr, 1.0e-10,
+                                 "Forward time and backward time event states are different")
+                
+                self.assertLess(Fxerr, integ.EventTol,
+                                 "Event root error exceeds tolerance")
+                
+                
+        
         
     def test_BatchCalls1(self):
         a = -.5
