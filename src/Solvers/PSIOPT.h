@@ -1,38 +1,51 @@
 
 #pragma once
+
+#include <spdlog/async.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
+
+#include <chrono>
+#include <ctime>
+#include <filesystem>
+
 #include "IterateInfo.h"
 #include "NonLinearProgram.h"
 #include "PardisoInterface.h"
 #include "Utils/ColorText.h"
+#include "Utils/SpdlogSinks.h"
 #include "pch.h"
 
 namespace ASSET {
 
-  struct IterateInfo;
-
   struct PSIOPT {
 
+    // Enums =================================================================================================
 
-    enum BarrierModes {
+    enum class BarrierModes {
       PROBE,
       LOQO,
       FIACCO,
       BARDISABLED
     };
-    enum LineSearchModes {
+
+    enum class LineSearchModes {
       AUGLANG,
       LANG,
       L1,
       L2,
       NOLS
     };
-    enum AlgorithmModes {
+
+    enum class AlgorithmModes {
       OPT,
       OPTNO,
       SOE,
       INIT
     };
-    enum ConvergenceFlags {
+
+    enum class ConvergenceFlags {
       CONVERGED,
       ACCEPTABLE,
       NOTCONVERGED,
@@ -58,16 +71,17 @@ namespace ASSET {
       E8 = 8,
       E13 = 13,
     };
-    enum PDStepStrategies {
+
+    enum class PDStepStrategies {
       PrimSlackEq_Iq,
       AllMinimum,
       PrimSlack_EqIq,
       MaxEq
     };
 
+    // Enum String Conversions ===============================================================================
 
     static QPOrderingModes strto_OrderingMode(const std::string& str) {
-
       if (str.compare("MINDEG") == 0)
         return MINDEG;
       else if (str.compare("METIS") == 0)
@@ -82,41 +96,73 @@ namespace ASSET {
         return MINDEG;
       }
     }
-    static LineSearchModes strto_LineSearchMode(const std::string& str) {
 
+    // -------------------------------------------------------------------------------------------------------
+
+    static LineSearchModes strto_LineSearchMode(const std::string& str) {
       if (str.compare("L1") == 0)
-        return L1;
+        return LineSearchModes::L1;
       else if (str.compare("NOLS") == 0)
-        return NOLS;
+        return LineSearchModes::NOLS;
       else if (str.compare("LANG") == 0)
-        return LANG;
+        return LineSearchModes::LANG;
       else if (str.compare("AUGLANG") == 0)
-        return AUGLANG;
+        return LineSearchModes::AUGLANG;
       else {
         auto msg = fmt::format("Unrecognized LineSearchMode: {0}\n"
                                "Valid Options Are: AUGLANG, LANG, L1, NOLS ",
                                str);
         throw std::invalid_argument(msg);
-        return L1;
+        return LineSearchModes::L1;
       }
     }
-    static BarrierModes strto_BarrierMode(const std::string& str) {
 
+    // -------------------------------------------------------------------------------------------------------
+
+    static BarrierModes strto_BarrierMode(const std::string& str) {
       if (str.compare("PROBE") == 0)
-        return PROBE;
+        return BarrierModes::PROBE;
       else if (str.compare("LOQO") == 0)
-        return LOQO;
+        return BarrierModes::LOQO;
       else {
         auto msg = fmt::format("Unrecognized BarrierMode: {0}\n"
                                "Valid Options Are: LOQO, PROBE ",
                                str);
         throw std::invalid_argument(msg);
-        return LOQO;
+        return BarrierModes::LOQO;
       }
     }
 
+    // Types =================================================================================================
 
     using VectorXd = Eigen::VectorXd;
+
+    using EarlyCallBackType = std::function<int(int,
+                                                double,
+                                                EigenRef<VectorXd>,
+                                                double,
+                                                EigenRef<VectorXd>,
+                                                EigenRef<VectorXd>,
+                                                Eigen::SparseMatrix<double, Eigen::RowMajor>&)>;
+
+    using LateCallBackType =
+        std::function<int(const IterateInfo&, ConstEigenRef<VectorXd>, ConstEigenRef<VectorXd>)>;
+
+    // Constructors ==========================================================================================
+
+    PSIOPT() {
+      this->QPThreads = std::min(ASSET_DEFAULT_QP_THREADS, get_core_count());
+      this->initLogger();
+    }
+
+    PSIOPT(std::shared_ptr<NonLinearProgram> np) {
+      this->QPThreads = std::min(ASSET_DEFAULT_QP_THREADS, get_core_count());
+      this->setNLP(np);
+      this->initLogger();
+    }
+
+    // Members ===============================================================================================
+
     std::shared_ptr<NonLinearProgram> nlp;
 
     int PrimalVars = 0;
@@ -132,14 +178,6 @@ namespace ASSET {
     QPOrderingModes QPOrd = QPOrderingModes::METIS;
     QPPivotModes QPPivotStrategy = QPPivotModes::TwoByTwo;
 
-    void set_QPOrderingMode(QPOrderingModes mode) {
-      this->QPOrd = mode;
-    }
-    void set_QPOrderingMode(const std::string& str) {
-      this->QPOrd = strto_OrderingMode(str);
-    }
-
-
     int QPMatching = 1;
     int QPScaling = 0;
     int QPPivotPerturb = 8;
@@ -150,35 +188,9 @@ namespace ASSET {
     bool Diagnostic = false;
     int QPParSolve = 0;
 
-
-    /////////////////////////////////////////////////////////////////////
     int MaxIters = 500;
     int MaxLSIters = 2;
     int MaxAccIters = 50;
-
-    void set_MaxIters(int MaxIters) {
-      if (MaxIters < 1) {
-        throw std::invalid_argument("MaxIters must be greater than 0.");
-      }
-      this->MaxIters = MaxIters;
-    }
-    void set_MaxAccIters(int MaxAccIters) {
-      if (MaxAccIters < 1) {
-        throw std::invalid_argument("MaxAccIters must be greater than 0.");
-      }
-      this->MaxAccIters = MaxAccIters;
-    }
-    void set_MaxLSIters(int MaxLSIters) {
-      if (MaxLSIters < 0) {
-        throw std::invalid_argument("MaxLSIters must be positive.");
-      }
-      this->MaxLSIters = MaxLSIters;
-    }
-    void set_AllMaxIters(int m1, int m2) {
-      set_MaxIters(m1);
-      set_MaxAccIters(m2);
-    }
-
 
     int MaxRefac = 15;
 
@@ -190,146 +202,37 @@ namespace ASSET {
     BarrierModes OptBarMode = BarrierModes::LOQO;
     BarrierModes SoeBarMode = BarrierModes::LOQO;
 
-    void set_OptBarMode(BarrierModes mode) {
-      this->OptBarMode = mode;
-    }
-    void set_OptBarMode(const std::string& str) {
-      this->OptBarMode = strto_BarrierMode(str);
-    }
-    void set_SoeBarMode(BarrierModes mode) {
-      this->SoeBarMode = mode;
-    }
-    void set_SoeBarMode(const std::string& str) {
-      this->SoeBarMode = strto_BarrierMode(str);
-    }
-
-
     LineSearchModes OptLSMode = LineSearchModes::NOLS;
     LineSearchModes SoeLSMode = LineSearchModes::NOLS;
-
-    void set_OptLSMode(LineSearchModes mode) {
-      this->OptLSMode = mode;
-    }
-    void set_OptLSMode(const std::string& str) {
-      this->OptLSMode = strto_LineSearchMode(str);
-    }
-    void set_SoeLSMode(LineSearchModes mode) {
-      this->SoeLSMode = mode;
-    }
-    void set_SoeLSMode(const std::string& str) {
-      this->SoeLSMode = strto_LineSearchMode(str);
-    }
-
 
     double MaxCPUtime = 1200;
     double ObjScale = 1.0;
 
-    /////////////////////////////////////////////////////////////////////////
     double KKTtol = 1.0e-6;
     double EContol = 1.0e-6;
     double IContol = 1.0e-6;
     double Bartol = 1.0e-6;
-
-    void set_KKTtol(double KKTtol) {
-      this->KKTtol = std::abs(KKTtol);
-    }
-    void set_Bartol(double Bartol) {
-      this->Bartol = std::abs(Bartol);
-    }
-    void set_EContol(double EContol) {
-      this->EContol = std::abs(EContol);
-    }
-    void set_IContol(double IContol) {
-      this->IContol = std::abs(IContol);
-    }
-    void set_tols(double KKTtol, double EContol, double IContol, double Bartol) {
-      this->set_KKTtol(KKTtol);
-      this->set_EContol(EContol);
-      this->set_IContol(IContol);
-      this->set_Bartol(Bartol);
-    }
 
     double AccKKTtol = 1.0e-2;
     double AccEContol = 1.0e-3;
     double AccIContol = 1.0e-3;
     double AccBartol = 1.0e-3;
 
-    void set_AccKKTtol(double AccKKTtol) {
-      this->AccKKTtol = std::abs(AccKKTtol);
-    }
-    void set_AccBartol(double AccBartol) {
-      this->AccBartol = std::abs(AccBartol);
-    }
-    void set_AccEContol(double AccEContol) {
-      this->AccEContol = std::abs(AccEContol);
-    }
-    void set_AccIContol(double AccIContol) {
-      this->AccIContol = std::abs(AccIContol);
-    }
-    void set_Acctols(double AccKKTtol, double AccEContol, double AccIContol, double AccBartol) {
-      this->set_AccKKTtol(AccKKTtol);
-      this->set_AccEContol(AccEContol);
-      this->set_AccIContol(AccIContol);
-      this->set_AccBartol(AccBartol);
-    }
-
     double UnAccKKTtol = 10;
     double UnAccEContol = 2;
     double UnAccIContol = 2;
     double UnAccBartol = 2;
-
-    void set_UnAcctols(double kktol, double etol, double itol, double bartol) {
-      this->UnAccKKTtol = kktol;
-      this->UnAccBartol = bartol;
-      this->UnAccEContol = etol;
-      this->UnAccIContol = itol;
-    }
 
     double DivKKTtol = 1.0e15;
     double DivEContol = 1.0e15;
     double DivIContol = 1.0e15;
     double DivBartol = 1.0e15;
 
-    void set_DivKKTtol(double DivKKTtol) {
-      this->DivKKTtol = std::abs(DivKKTtol);
-    }
-    void set_DivBartol(double DivBartol) {
-      this->DivBartol = std::abs(DivBartol);
-    }
-    void set_DivEContol(double DivEContol) {
-      this->DivEContol = std::abs(DivEContol);
-    }
-    void set_DivIContol(double DivIContol) {
-      this->DivIContol = std::abs(DivIContol);
-    }
-    void set_Divtols(double DivKKTtol, double DivEContol, double DivIContol, double DivBartol) {
-      this->set_DivKKTtol(DivKKTtol);
-      this->set_DivEContol(DivEContol);
-      this->set_DivIContol(DivIContol);
-      this->set_DivBartol(DivBartol);
-    }
-
-
-    /////////////////////////////////////////////////////////////////////////
-
     double ExObjVal = -1.0e20;
 
-
     double BoundFraction = 0.98;
-    void set_BoundFraction(double BoundFraction) {
-      if (BoundFraction >= 1.0 || BoundFraction <= 0.0) {
-        throw std::invalid_argument("BoundFraction must be between 0 and 1.");
-      }
-      this->BoundFraction = BoundFraction;
-    }
 
     double BoundPush = 1.0e-3;
-    void set_BoundPush(double BoundPush) {
-      if (BoundPush <= 0.0) {
-        throw std::invalid_argument("BoundPush must be greater than 0.");
-      }
-      this->BoundPush = BoundPush;
-    }
 
     double NegSlackReset = 1.0e-12;
 
@@ -337,47 +240,11 @@ namespace ASSET {
     double minLSstep = .01;
     double alphaRed = 2.0;
 
-    void set_alphaRed(double ared) {
-      if (ared <= 1.0) {
-        throw std::invalid_argument("alphaRed must be greater than 1.0");
-      }
-      this->alphaRed = ared;
-    }
-
-    /////////////////////////////////////////////////////////////////////////
     double deltaH = 1.0e-5;
     double incrH = 8.00;
     double decrH = 0.333333;
 
-    void set_deltaH(double deltaH) {
-      if (deltaH <= 0.0) {
-        throw std::invalid_argument("deltaH must be greater than 0.");
-      }
-      this->deltaH = deltaH;
-    }
-    void set_incrH(double incrH) {
-      if (incrH <= 1.0) {
-        throw std::invalid_argument("incrH must  greater than 1.0.");
-      }
-      this->incrH = incrH;
-    }
-    void set_decrH(double decrH) {
-      if (decrH >= 1.0 || decrH <= 0) {
-        throw std::invalid_argument("decrH must be between 0 and 1.");
-      }
-      this->decrH = decrH;
-    }
-    void set_HpertParams(double deltaH, double incrH, double decrH) {
-      this->set_deltaH(deltaH);
-      this->set_incrH(incrH);
-      this->set_decrH(decrH);
-    }
-    /////////////////////////////////////////////////////////////////////////
     ConvergenceFlags ConvergeFlag = ConvergenceFlags::NOTCONVERGED;
-    ConvergenceFlags get_ConvergenceFlag() const {
-      return this->ConvergeFlag;
-    }
-
 
     double initMu = 0.001;
     double MaxMu = 100.0;
@@ -385,11 +252,8 @@ namespace ASSET {
 
     bool CNRMode = false;
     int PrintLevel = 0;
-    void set_PrintLevel(int plevel) {
-      this->PrintLevel = plevel;
-    }
 
-    PDStepStrategies PDStepStrategy = PrimSlackEq_Iq;
+    PDStepStrategies PDStepStrategy = PDStepStrategies::PrimSlackEq_Iq;
     bool storespmat = false;
     Eigen::SparseMatrix<double, Eigen::RowMajor> spmat;
     double LastObjVal = 0.0;
@@ -402,16 +266,6 @@ namespace ASSET {
     double LastKKTTime = 0;
     int LastIterNum = 0;
 
-    void zero_timing_stats() {
-      this->LastTotalTime = 0;
-      this->LastPreTime = 0;
-      this->LastMiscTime = 0;
-      this->LastFuncTime = 0;
-      this->LastKKTTime = 0;
-      this->LastIterNum = 0;
-    }
-
-
     bool WideConsole = false;
     int FactorMem = 0;
     int FactorFlops = 0;
@@ -421,53 +275,259 @@ namespace ASSET {
     Eigen::VectorXd LastEqCons;
     Eigen::VectorXd LastIqCons;
 
-
-
-    /////////////////////////////////////////////////////////////////////
-
-    using EarlyCallBackType = std::function<int(int,
-                                                double,
-                                                EigenRef<VectorXd>,
-                                                double,
-                                                EigenRef<VectorXd>,
-                                                EigenRef<VectorXd>,
-                                                Eigen::SparseMatrix<double, Eigen::RowMajor>&)>;
-
-    using LateCallBackType =
-        std::function<int(const IterateInfo&, ConstEigenRef<VectorXd>, ConstEigenRef<VectorXd>)>;
-
     EarlyCallBackType EarlyCallBack;  // = [](int i, EigenRef<VectorXd> XSL, EigenRef<VectorXd>
                                       // GX, EigenRef<VectorXd> AGXFX) {return 0; };
     bool EarlyCallBackEnabled = false;
-    LateCallBackType LateCallBack;  // = [](const IterateInfo& i, EigenRef<VectorXd> XSL,
-                                    // EigenRef<VectorXd> AGXFX) {return 0; };
+    LateCallBackType LateCallBack;    // = [](const IterateInfo& i, EigenRef<VectorXd> XSL,
+                                      // EigenRef<VectorXd> AGXFX) {return 0; };
     bool LateCallBackEnabled = false;
 
-    ////////////////////////////////////////////////////////////////////
+    spdlog::level::level_enum fileLogLevel = spdlog::level::trace;
+    spdlog::level::level_enum consoleLogLevel = spdlog::level::trace;
+    std::shared_ptr<style_removing_file_sink_mt> fileSink;
+    std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> consoleSink;
+    std::shared_ptr<spdlog::logger> log;
 
-    PSIOPT() {
-      this->QPThreads = std::min(ASSET_DEFAULT_QP_THREADS, get_core_count());
-    }
-    PSIOPT(std::shared_ptr<NonLinearProgram> np) {
-      this->QPThreads = std::min(ASSET_DEFAULT_QP_THREADS, get_core_count());
-      this->setNLP(np);
-    }
+    // Setters ===============================================================================================
 
-    void release() {
-      this->KKTSol.release();
-      this->QPanalyzed = false;
-      this->nlp = std::shared_ptr<NonLinearProgram>();
-      this->LastEqLmults.resize(0);
-      this->LastIqLmults.resize(0);
+    void set_QPOrderingMode(QPOrderingModes mode) {
+      this->QPOrd = mode;
     }
 
+    void set_QPOrderingMode(const std::string& str) {
+      this->QPOrd = strto_OrderingMode(str);
+    }
 
-    void setNLP(std::shared_ptr<NonLinearProgram> np);
+    // -------------------------------------------------------------------------------------------------------
+
+    void set_MaxIters(int MaxIters) {
+      if (MaxIters < 1) {
+        throw std::invalid_argument("MaxIters must be greater than 0.");
+      }
+      this->MaxIters = MaxIters;
+    }
+
+    void set_MaxAccIters(int MaxAccIters) {
+      if (MaxAccIters < 1) {
+        throw std::invalid_argument("MaxAccIters must be greater than 0.");
+      }
+      this->MaxAccIters = MaxAccIters;
+    }
+
+    void set_MaxLSIters(int MaxLSIters) {
+      if (MaxLSIters < 0) {
+        throw std::invalid_argument("MaxLSIters must be positive.");
+      }
+      this->MaxLSIters = MaxLSIters;
+    }
+
+    void set_AllMaxIters(int m1, int m2) {
+      set_MaxIters(m1);
+      set_MaxAccIters(m2);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    void set_OptBarMode(BarrierModes mode) {
+      this->OptBarMode = mode;
+    }
+
+    void set_OptBarMode(const std::string& str) {
+      this->OptBarMode = strto_BarrierMode(str);
+    }
+
+    void set_SoeBarMode(BarrierModes mode) {
+      this->SoeBarMode = mode;
+    }
+
+    void set_SoeBarMode(const std::string& str) {
+      this->SoeBarMode = strto_BarrierMode(str);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    void set_OptLSMode(LineSearchModes mode) {
+      this->OptLSMode = mode;
+    }
+
+    void set_OptLSMode(const std::string& str) {
+      this->OptLSMode = strto_LineSearchMode(str);
+    }
+
+    void set_SoeLSMode(LineSearchModes mode) {
+      this->SoeLSMode = mode;
+    }
+
+    void set_SoeLSMode(const std::string& str) {
+      this->SoeLSMode = strto_LineSearchMode(str);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    void set_KKTtol(double KKTtol) {
+      this->KKTtol = std::abs(KKTtol);
+    }
+
+    void set_Bartol(double Bartol) {
+      this->Bartol = std::abs(Bartol);
+    }
+
+    void set_EContol(double EContol) {
+      this->EContol = std::abs(EContol);
+    }
+
+    void set_IContol(double IContol) {
+      this->IContol = std::abs(IContol);
+    }
+
+    void set_tols(double KKTtol, double EContol, double IContol, double Bartol) {
+      this->set_KKTtol(KKTtol);
+      this->set_EContol(EContol);
+      this->set_IContol(IContol);
+      this->set_Bartol(Bartol);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    void set_AccKKTtol(double AccKKTtol) {
+      this->AccKKTtol = std::abs(AccKKTtol);
+    }
+
+    void set_AccBartol(double AccBartol) {
+      this->AccBartol = std::abs(AccBartol);
+    }
+
+    void set_AccEContol(double AccEContol) {
+      this->AccEContol = std::abs(AccEContol);
+    }
+
+    void set_AccIContol(double AccIContol) {
+      this->AccIContol = std::abs(AccIContol);
+    }
+
+    void set_Acctols(double AccKKTtol, double AccEContol, double AccIContol, double AccBartol) {
+      this->set_AccKKTtol(AccKKTtol);
+      this->set_AccEContol(AccEContol);
+      this->set_AccIContol(AccIContol);
+      this->set_AccBartol(AccBartol);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    void set_UnAcctols(double kktol, double etol, double itol, double bartol) {
+      this->UnAccKKTtol = kktol;
+      this->UnAccBartol = bartol;
+      this->UnAccEContol = etol;
+      this->UnAccIContol = itol;
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    void set_DivKKTtol(double DivKKTtol) {
+      this->DivKKTtol = std::abs(DivKKTtol);
+    }
+
+    void set_DivBartol(double DivBartol) {
+      this->DivBartol = std::abs(DivBartol);
+    }
+
+    void set_DivEContol(double DivEContol) {
+      this->DivEContol = std::abs(DivEContol);
+    }
+
+    void set_DivIContol(double DivIContol) {
+      this->DivIContol = std::abs(DivIContol);
+    }
+
+    void set_Divtols(double DivKKTtol, double DivEContol, double DivIContol, double DivBartol) {
+      this->set_DivKKTtol(DivKKTtol);
+      this->set_DivEContol(DivEContol);
+      this->set_DivIContol(DivIContol);
+      this->set_DivBartol(DivBartol);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    void set_BoundFraction(double BoundFraction) {
+      if (BoundFraction >= 1.0 || BoundFraction <= 0.0) {
+        throw std::invalid_argument("BoundFraction must be between 0 and 1.");
+      }
+      this->BoundFraction = BoundFraction;
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    void set_BoundPush(double BoundPush) {
+      if (BoundPush <= 0.0) {
+        throw std::invalid_argument("BoundPush must be greater than 0.");
+      }
+      this->BoundPush = BoundPush;
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    void set_alphaRed(double ared) {
+      if (ared <= 1.0) {
+        throw std::invalid_argument("alphaRed must be greater than 1.0");
+      }
+      this->alphaRed = ared;
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    void set_deltaH(double deltaH) {
+      if (deltaH <= 0.0) {
+        throw std::invalid_argument("deltaH must be greater than 0.");
+      }
+      this->deltaH = deltaH;
+    }
+
+    void set_incrH(double incrH) {
+      if (incrH <= 1.0) {
+        throw std::invalid_argument("incrH must  greater than 1.0.");
+      }
+      this->incrH = incrH;
+    }
+
+    void set_decrH(double decrH) {
+      if (decrH >= 1.0 || decrH <= 0) {
+        throw std::invalid_argument("decrH must be between 0 and 1.");
+      }
+      this->decrH = decrH;
+    }
+
+    void set_HpertParams(double deltaH, double incrH, double decrH) {
+      this->set_deltaH(deltaH);
+      this->set_incrH(incrH);
+      this->set_decrH(decrH);
+    }
+
+
+    // -------------------------------------------------------------------------------------------------------
+
+    void set_PrintLevel(int plevel) {
+      this->PrintLevel = plevel;
+
+      // Rough mapping from PSIOPT integers to spdlog level enum
+      if (plevel >= 4) {
+        this->consoleLogLevel = spdlog::level::off;
+      } else if (plevel == 3) {
+        this->consoleLogLevel = spdlog::level::critical;
+      } else if (plevel == 2) {
+        this->consoleLogLevel = spdlog::level::info;
+      } else if (plevel == 1) {
+        this->consoleLogLevel = spdlog::level::debug;
+      } else {
+        this->consoleLogLevel = spdlog::level::trace;
+      }
+
+      this->consoleSink->set_level(this->consoleLogLevel);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
     Eigen::MatrixXd getSPmat() {
       return this->spmat.toDense();
-    }
-    Eigen::MatrixXd getSPmat2() {
-      return this->KKTSol.getMatrixTwisted(this->spmat);
     }
 
     void setQPParams() {
@@ -501,13 +561,23 @@ namespace ASSET {
     void disable_late_callback() {
       this->LateCallBackEnabled = false;
     }
-    /////////////////////////////////////////////////////////////////////////////////////////
+
+    // Getters ===============================================================================================
+
+    ConvergenceFlags get_ConvergenceFlag() const {
+      return this->ConvergeFlag;
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
     EigenRef<VectorXd> getPrimals(EigenRef<VectorXd> XSL) const {
       return XSL.head(this->PrimalVars);
     }
+
     EigenRef<VectorXd> getSlacks(EigenRef<VectorXd> XSL) const {
       return XSL.segment(this->PrimalVars, this->SlackVars);
     }
+
     EigenRef<VectorXd> getPrimalsSlacks(EigenRef<VectorXd> XSL) const {
       return XSL.head(this->PrimalVars + this->SlackVars);
     }
@@ -519,29 +589,114 @@ namespace ASSET {
     EigenRef<VectorXd> getEqLmults(EigenRef<VectorXd> XSL) const {
       return XSL.segment(this->PrimalVars + this->SlackVars, this->EqualCons);
     }
+
     EigenRef<VectorXd> getIqLmults(EigenRef<VectorXd> XSL) const {
       return XSL.tail(this->InequalCons);
     }
-    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    // -------------------------------------------------------------------------------------------------------
+
     EigenRef<VectorXd> getPrimGrad(EigenRef<VectorXd> GX_or_AGX_FX) const {
       return GX_or_AGX_FX.head(this->PrimalVars);
     }
+
     EigenRef<VectorXd> getDualGrad(EigenRef<VectorXd> AGX_FX) const {
       return AGX_FX.segment(this->PrimalVars, this->SlackVars);
     }
+
     EigenRef<VectorXd> getPrimDualGrad(EigenRef<VectorXd> AGX_FX) const {
       return AGX_FX.head(this->PrimalVars + this->SlackVars);
     }
+
     EigenRef<VectorXd> getEqCons(EigenRef<VectorXd> AGX_FX) const {
       return AGX_FX.segment(this->PrimalVars + this->SlackVars, this->EqualCons);
     }
+
     EigenRef<VectorXd> getIqCons(EigenRef<VectorXd> AGX_FX) const {
       return AGX_FX.tail(this->InequalCons);
     }
+
     EigenRef<VectorXd> getAllCons(EigenRef<VectorXd> AGX_FX) const {
       return AGX_FX.tail(this->InequalCons + this->EqualCons);
     }
-    /////////////////////////////////////////////////////////////////////////////////////////////
+
+    // -------------------------------------------------------------------------------------------------------
+
+    inline void initLogger() {
+      // Ensure unique name to make sure different intantiations of PSIOPT don't co-mingle.
+      std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+      std::tm* ltm = std::localtime(&now);
+
+      int id = 0;
+      std::string loggerBaseName = fmt::format("PSIOPT_{}-{}-{}_{}-{}-{}_{}",
+                                               1900 + ltm->tm_year,
+                                               1 + ltm->tm_mon,
+                                               ltm->tm_mday,
+                                               ltm->tm_hour,
+                                               ltm->tm_min,
+                                               ltm->tm_sec);
+      std::string loggerName = fmt::format("{}_{}", loggerBaseName, id);
+      std::string loggerFileName = fmt::format("{}{}", loggerName, ".log");
+
+      if (std::filesystem::exists(loggerFileName)) {
+        // Bad. We want unique log files.
+        while (std::filesystem::exists(fmt::format("{}_{}{}", loggerBaseName, id, ".log"))) {
+          id++;
+        }
+
+        loggerName = fmt::format("{}_{}", loggerBaseName, id);
+        loggerFileName = fmt::format("{}{}", loggerName, ".log");
+      }
+
+      // Create file sink
+      this->fileSink = std::make_shared<style_removing_file_sink_mt>(loggerFileName, true);
+      this->fileSink->set_level(this->fileLogLevel);
+
+      // Create color console sink
+      this->consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+      this->consoleSink->set_level(this->consoleLogLevel);
+      this->consoleSink->set_pattern("%v");
+
+      // Create logger
+      spdlog::init_thread_pool(8192, 1);
+      std::vector<spdlog::sink_ptr> sinks {this->fileSink, this->consoleSink};
+      this->log = std::make_shared<spdlog::async_logger>(loggerName.c_str(),
+                                                         sinks.begin(),
+                                                         sinks.end(),
+                                                         spdlog::thread_pool(),
+                                                         spdlog::async_overflow_policy::block);
+      spdlog::register_logger(this->log);
+    }
+
+    // Utilities =============================================================================================
+
+    Eigen::MatrixXd getSPmat2() {
+      return this->KKTSol.getMatrixTwisted(this->spmat);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    void zero_timing_stats() {
+      this->LastTotalTime = 0;
+      this->LastPreTime = 0;
+      this->LastMiscTime = 0;
+      this->LastFuncTime = 0;
+      this->LastKKTTime = 0;
+      this->LastIterNum = 0;
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    void release() {
+      this->KKTSol.release();
+      this->QPanalyzed = false;
+      this->nlp = std::shared_ptr<NonLinearProgram>();
+      this->LastEqLmults.resize(0);
+      this->LastIqLmults.resize(0);
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
     void apply_reset_slacks(Eigen::Ref<Eigen::VectorXd> S, Eigen::Ref<Eigen::VectorXd> FXI) const {
       for (int i = 0; i < this->SlackVars; i++) {
         double fxi = FXI[i];
@@ -558,6 +713,7 @@ namespace ASSET {
         }
       }
     }
+
     double max_step_to_boundary(Eigen::Ref<Eigen::VectorXd> SLI,
                                 Eigen::Ref<Eigen::VectorXd> dSLI,
                                 double bfrac) const {
@@ -571,6 +727,7 @@ namespace ASSET {
       }
       return alpha;
     }
+
     void complementarity(Eigen::Ref<Eigen::VectorXd> S,
                          Eigen::Ref<Eigen::VectorXd> LI,
                          double& avgcomp,
@@ -582,6 +739,8 @@ namespace ASSET {
       avgcomp = StLI.sum() / double(StLI.size());
     }
 
+    // -------------------------------------------------------------------------------------------------------
+
     double barrier_objective(Eigen::Ref<Eigen::VectorXd> S, double mu) const {
       double psi = 0;
       for (int i = 0; i < this->InequalCons; i++) {
@@ -589,12 +748,14 @@ namespace ASSET {
       }
       return psi;
     }
+
     void barrier_gradient(Eigen::Ref<Eigen::VectorXd> S,
                           Eigen::Ref<Eigen::VectorXd> LI,
                           double mu,
                           Eigen::Ref<Eigen::VectorXd> AGS) const {
       AGS = LI - mu * (S.cwiseInverse());
     }
+
     void barrier_gradient(Eigen::Ref<Eigen::VectorXd> LI, Eigen::Ref<Eigen::VectorXd> AGS) const {
       AGS = LI;
     }
@@ -612,6 +773,8 @@ namespace ASSET {
       this->nlp->assignKKTSlackHessian(hp, KKTmat);
     }
 
+    // -------------------------------------------------------------------------------------------------------
+
     double LOQOMu(Eigen::Ref<Eigen::VectorXd> S,
                   Eigen::Ref<Eigen::VectorXd> LI,
                   double avgcomp,
@@ -621,6 +784,7 @@ namespace ASSET {
       double sigma = std::min(0.8, abs(sigmat));
       return sigma * avgcomp;
     }
+
     double MPCMu(Eigen::Ref<Eigen::VectorXd> S,
                  Eigen::Ref<Eigen::VectorXd> LI,
                  double avgcomp,
@@ -632,7 +796,21 @@ namespace ASSET {
       return std::pow(navgcomp / avgcomp, 3) * avgcomp;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // -------------------------------------------------------------------------------------------------------
+
+    bool analyze_KKT_Matrix() {
+      bool docompute = true;
+      if (this->QPanalyzed && !(this->ForceQPanalysis)) {
+        docompute = false;
+      } else {
+        this->QPanalyzed = true;
+        docompute = true;
+      }
+      return docompute;
+    }
+
+    // Evaluators ============================================================================================
+
     void evalKKT(double ObjScale,
                  ConstEigenRef<VectorXd> XSL,
                  double& val,
@@ -650,6 +828,8 @@ namespace ASSET {
                          this->getIqCons(AGXS_FX),
                          KKTmat);
     }
+
+    // -------------------------------------------------------------------------------------------------------
 
     void evalKKTNO(double ObjScale,
                    ConstEigenRef<VectorXd> XSL,
@@ -669,6 +849,8 @@ namespace ASSET {
                            KKTmat);
     }
 
+    // -------------------------------------------------------------------------------------------------------
+
     void evalAUG(double ObjScale,
                  ConstEigenRef<VectorXd> XSL,
                  double& val,
@@ -686,6 +868,8 @@ namespace ASSET {
                          this->getIqCons(AGXS_FX),
                          KKTmat);
     }
+
+    // -------------------------------------------------------------------------------------------------------
 
     void evalSOE(double ObjScale,
                  ConstEigenRef<VectorXd> XSL,
@@ -705,6 +889,8 @@ namespace ASSET {
                          KKTmat);
     }
 
+    // -------------------------------------------------------------------------------------------------------
+
     void evalRHS(double ObjScale,
                  const Eigen::Ref<const Eigen::VectorXd>& XSL,
                  double& val,
@@ -721,6 +907,10 @@ namespace ASSET {
                          this->getIqCons(AGXS_FX));
     }
 
+    // Declarations ==========================================================================================
+
+    void setNLP(std::shared_ptr<NonLinearProgram> np);
+
     void max_primal_dual_step(Eigen::Ref<Eigen::VectorXd> XSL,
                               Eigen::Ref<Eigen::VectorXd> DXSL,
                               double bfrac,
@@ -734,7 +924,7 @@ namespace ASSET {
                         double mu,
                         IterateInfo& iter) const;
 
-    void evalNLP(int algmode,
+    void evalNLP(AlgorithmModes algmode,
                  double ObjScale,
                  ConstEigenRef<VectorXd> XSL,
                  double& val,
@@ -744,18 +934,18 @@ namespace ASSET {
 
     ConvergenceFlags convergeCheck(std::vector<IterateInfo>& iters);
 
-    static void printPSIOPT();
+    void printPSIOPT();
 
     void print_settings();
     void print_matrixinfo();
     void print_stats();
     void print_last_iterate(const std::vector<IterateInfo>& iters);
 
-    static void print_Header() {
-      fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 65);
+    void print_Header(spdlog::level::level_enum level = spdlog::level::critical) {
+      this->log->log(level, fmt::format(fmt::fg(fmt::color::white), "{0:=^{1}}", "", 65));
     }
-    void print_Beginning(std::string msg) const;
-    void print_Finished(std::string msg) const;
+    void print_Beginning(std::string msg, spdlog::level::level_enum level) const;
+    void print_Finished(std::string msg, spdlog::level::level_enum level) const;
     void print_ExitStats(ConvergenceFlags ExitCode,
                          const std::vector<IterateInfo>& iters,
                          double tottime,
@@ -767,17 +957,6 @@ namespace ASSET {
     int factor_impl(
         bool docompute, bool ZFac, double ipurt, double incpurt0, double incpurt, double& finalpert);
 
-    bool analyze_KKT_Matrix() {
-      bool docompute = true;
-      if (this->QPanalyzed && !(this->ForceQPanalysis)) {
-        docompute = false;
-      } else {
-        this->QPanalyzed = true;
-        docompute = true;
-      }
-      return docompute;
-    }
-
     Eigen::VectorXd alg_impl(AlgorithmModes algmode,
                              BarrierModes barmode,
                              LineSearchModes lsmode,
@@ -785,9 +964,7 @@ namespace ASSET {
                              double MuI,
                              Eigen::Ref<Eigen::VectorXd> xsl);
 
-
     Eigen::VectorXd init_impl(const Eigen::VectorXd& x, double Mu, bool docompute);
-
 
     double ls_impl(LineSearchModes lsmode,
                    double ObjScale,
@@ -802,6 +979,7 @@ namespace ASSET {
                    IterateInfo& Citer,
                    const std::vector<IterateInfo>& iters);
 
+    // -------------------------------------------------------------------------------------------------------
 
     Eigen::VectorXd optimize(const Eigen::VectorXd& x);
 
@@ -811,8 +989,9 @@ namespace ASSET {
 
     Eigen::VectorXd optimize_solve(const Eigen::VectorXd& x);
 
-
     Eigen::VectorXd solve(const Eigen::VectorXd& x);
+
+    // Python Binding ========================================================================================
 
     static void Build(py::module& m);
   };

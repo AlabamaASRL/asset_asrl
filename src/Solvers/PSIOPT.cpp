@@ -4,6 +4,8 @@
 
 #include "PyDocString/Solvers/PSIOPT_doc.h"
 
+// setNLP ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void ASSET::PSIOPT::setNLP(std::shared_ptr<NonLinearProgram> np) {
   this->nlp = np;
   this->PrimalVars = this->nlp->PrimalVars;
@@ -20,6 +22,8 @@ void ASSET::PSIOPT::setNLP(std::shared_ptr<NonLinearProgram> np) {
     spmat = this->KKTSol.getMatrix();
   this->QPanalyzed = false;
 }
+
+// max_primal_dual_step //////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::max_primal_dual_step(Eigen::Ref<Eigen::VectorXd> XSL,
                                          Eigen::Ref<Eigen::VectorXd> DXSL,
@@ -59,6 +63,8 @@ void ASSET::PSIOPT::max_primal_dual_step(Eigen::Ref<Eigen::VectorXd> XSL,
   alphad = Lmax;
 }
 
+// fill_iter_info ////////////////////////////////////////////////////////////////////////////////////////////
+
 void ASSET::PSIOPT::fill_iter_info(Eigen::Ref<Eigen::VectorXd> XSL,
                                    Eigen::Ref<Eigen::VectorXd> RHS,
                                    double pobj,
@@ -97,7 +103,9 @@ void ASSET::PSIOPT::fill_iter_info(Eigen::Ref<Eigen::VectorXd> XSL,
     iter.AllConNormErr = this->getAllCons(RHS).norm();
 }
 
-void ASSET::PSIOPT::evalNLP(int algmode,
+// evalNLP ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ASSET::PSIOPT::evalNLP(AlgorithmModes algmode,
                             double ObjScale,
                             ConstEigenRef<VectorXd> XSL,
                             double& val,
@@ -127,8 +135,10 @@ void ASSET::PSIOPT::evalNLP(int algmode,
   }
 }
 
+// convergeCheck /////////////////////////////////////////////////////////////////////////////////////////////
+
 ASSET::PSIOPT::ConvergenceFlags ASSET::PSIOPT::convergeCheck(std::vector<IterateInfo>& iters) {
-  ConvergenceFlags Flag = CONVERGED;
+  ConvergenceFlags Flag = ConvergenceFlags::CONVERGED;
   IterateInfo last = iters.back();
   bool KKTFeas = (last.KKTInf < this->KKTtol);
   bool EConFeas = (last.EConInf < this->EContol);
@@ -169,18 +179,30 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::PSIOPT::convergeCheck(std::vector<Iterate
   return Flag;
 }
 
+// printPSIOPT ///////////////////////////////////////////////////////////////////////////////////////////////
+
 void ASSET::PSIOPT::printPSIOPT() {
 
-  std::string PsioptStr = "       ____    _____    ____          ____     ____   ______\n"
-                          "      / __ \\  / ___/   /  _/         / __ \\   / __ \\ /_  __/\n"
-                          "     / /_/ /  \\__ \\    / /   ______ / / / /  / /_/ /  / /   \n"
-                          "    / ____/  ___/ /  _/ /   /_____// /_/ /  / ____/  / /    \n"
-                          "   /_/      /____/  /___/          \\____/  /_/      /_/    \n";
+  std::string PsioptStrL1 = "       ____    _____    ____          ____     ____   ______";
+  std::string PsioptStrL2 = "      / __ \\  / ___/   /  _/         / __ \\   / __ \\ /_  __/";
+  std::string PsioptStrL3 = "     / /_/ /  \\__ \\    / /   ______ / / / /  / /_/ /  / /   ";
+  std::string PsioptStrL4 = "    / ____/  ___/ /  _/ /   /_____// /_/ /  / ____/  / /    ";
+  std::string PsioptStrL5 = "   /_/      /____/  /___/          \\____/  /_/      /_/    ";
   print_Header();
-  fmt::print(fmt::fg(fmt::color::crimson), PsioptStr);
-  fmt::print(fmt::fg(fmt::color::crimson), " \n       Parallel Sparse Interior-point Optimizer\n");
+
+  this->log->critical(fmt::format(fmt::fg(fmt::color::crimson), PsioptStrL1));
+  this->log->critical(fmt::format(fmt::fg(fmt::color::crimson), PsioptStrL2));
+  this->log->critical(fmt::format(fmt::fg(fmt::color::crimson), PsioptStrL3));
+  this->log->critical(fmt::format(fmt::fg(fmt::color::crimson), PsioptStrL4));
+  this->log->critical(fmt::format(fmt::fg(fmt::color::crimson), PsioptStrL5));
+
+  this->log->critical("");
+  this->log->critical(
+      fmt::format(fmt::fg(fmt::color::crimson), "       Parallel Sparse Interior-point Optimizer"));
   print_Header();
 }
+
+// print_settings ////////////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::print_settings() {
   using std::cout;
@@ -189,22 +211,27 @@ void ASSET::PSIOPT::print_settings() {
   auto cyan = fmt::fg(fmt::color::cyan);
   auto magenta = fmt::fg(fmt::color::magenta);
 
-  fmt::print(magenta, "Convergence Criteria\n\n");
+  this->log->critical(fmt::format(magenta, "Convergence Criteria"));
+  this->log->critical("");
 
-  fmt::print("{0:_^{1}}\n", "", 39);
-  fmt::print("|------|   tol   | Acctol  | Divtol  |\n");
-  fmt::print(
-      "|{0:<6}|{1:>8.3e}|{2:>8.3e}|{3:>8.3e}|\n", "KKT", this->KKTtol, this->AccKKTtol, this->DivKKTtol);
-  fmt::print(
-      "|{0:<6}|{1:>8.3e}|{2:>8.3e}|{3:>8.3e}|\n", "Bar", this->Bartol, this->AccBartol, this->DivBartol);
-  fmt::print(
-      "|{0:<6}|{1:>8.3e}|{2:>8.3e}|{3:>8.3e}|\n", "ECons", this->EContol, this->AccEContol, this->DivEContol);
-  fmt::print(
-      "|{0:<6}|{1:>8.3e}|{2:>8.3e}|{3:>8.3e}|\n", "ICons", this->IContol, this->AccIContol, this->DivIContol);
+  this->log->critical(fmt::format("{0:_^{1}}", "", 39));
+  this->log->critical(fmt::format("|------|   tol   | Acctol  | Divtol  |"));
+  this->log->critical(fmt::format(
+      "|{0:<6}|{1:>8.3e}|{2:>8.3e}|{3:>8.3e}|", "KKT", this->KKTtol, this->AccKKTtol, this->DivKKTtol));
+  this->log->critical(fmt::format(
+      "|{0:<6}|{1:>8.3e}|{2:>8.3e}|{3:>8.3e}|", "Bar", this->Bartol, this->AccBartol, this->DivBartol));
+  this->log->critical(fmt::format(
+      "|{0:<6}|{1:>8.3e}|{2:>8.3e}|{3:>8.3e}|", "ECons", this->EContol, this->AccEContol, this->DivEContol));
+  this->log->critical(fmt::format(
+      "|{0:<6}|{1:>8.3e}|{2:>8.3e}|{3:>8.3e}|", "ICons", this->IContol, this->AccIContol, this->DivIContol));
 }
+
+// print_matrixinfo //////////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::print_matrixinfo() {
 }
+
+// print_stats ///////////////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::print_stats() {
   printPSIOPT();
@@ -212,30 +239,32 @@ void ASSET::PSIOPT::print_stats() {
   auto cyan = fmt::fg(fmt::color::cyan);
   auto magenta = fmt::fg(fmt::color::magenta);
 
-  fmt::print(magenta, "Problem Statistics\n\n");
+  this->log->critical(fmt::format(magenta, "Problem Statistics"));
+  this->log->critical("");
 
-  fmt::print(" Primal Variables         : ");
-  fmt::print(cyan, "{:<10}\n", this->PrimalVars);
-  fmt::print(" Equality Constraints     : ");
-  fmt::print(cyan, "{:<10}\n", this->EqualCons);
-  fmt::print(" Inequality Constraints   : ");
-  fmt::print(cyan, "{:<10}\n", this->InequalCons);
-  fmt::print("\n");
-  fmt::print(" KKT-Matrix DIM (P+E+2*I) : ");
-  fmt::print(cyan, "{:<10}\n", this->KKTdim);
-  fmt::print(" KKT-Matrix NNZs          : ");
-  fmt::print(cyan, "{:<10}\n", this->KKTSol.getMatrix().nonZeros());
-  fmt::print(" KKT-Matrix NNZ%          : ");
-  fmt::print(
-      cyan,
-      "{:.6f}%\n",
-      100.0 * double(this->KKTSol.getMatrix().nonZeros()) / (double(this->KKTdim) * double(this->KKTdim)));
-  fmt::print("\n");
+  this->log->critical(
+      fmt::format("{}{}", " Primal Variables         : ", fmt::format(cyan, "{:<10}", this->PrimalVars)));
+  this->log->critical("{}{}", " Equality Constraints     : ", fmt::format(cyan, "{:<10}", this->EqualCons));
+  this->log->critical("{}{}", " Inequality Constraints   : ", fmt::format(cyan, "{:<10}", this->InequalCons));
+  this->log->critical("");
+  this->log->critical("{}{}", " KKT-Matrix DIM (P+E+2*I) : ", fmt::format(cyan, "{:<10}", this->KKTdim));
+  this->log->critical("{}{}",
+                      " KKT-Matrix NNZs          : ",
+                      fmt::format(cyan, "{:<10}", this->KKTSol.getMatrix().nonZeros()));
+  this->log->critical("{}{}",
+                      " KKT-Matrix NNZ%          : ",
+                      fmt::format(cyan,
+                                  "{:.6f}%",
+                                  100.0 * double(this->KKTSol.getMatrix().nonZeros())
+                                      / (double(this->KKTdim) * double(this->KKTdim))));
+  this->log->critical("");
 
   // print_settings();
 
   // fmt::print("\n");
 }
+
+// print_last_iterate ////////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::print_last_iterate(const std::vector<IterateInfo>& iters) {
   auto last = iters.back();
@@ -243,17 +272,17 @@ void ASSET::PSIOPT::print_last_iterate(const std::vector<IterateInfo>& iters) {
 
   if (last.iter % 10 == 0) {
     if (WideConsole) {
-      fmt::print("{0:=^{1}}\n", "", 159);
-      fmt::print("|Iter| Mu Val | Prim Obj |  Bar Obj |  KKT Inf |  Bar Inf | ECons Inf| ICons Inf|Max "
-                 "EMult|Max IMult| AlphaP | AlphaD | AlphaT | Merit Val|LSI|PPS|HFI| HPert |\n");
+      this->log->critical(fmt::format("{0:=^{1}}", "", 159));
+      this->log->critical(
+          "|Iter| Mu Val | Prim Obj |  Bar Obj |  KKT Inf |  Bar Inf | ECons Inf| ICons Inf|Max "
+          "EMult|Max IMult| AlphaP | AlphaD | AlphaT | Merit Val|LSI|PPS|HFI| HPert |");
     } else {
-      fmt::print("{0:=^{1}}\n", "", 119);
-      fmt::print("|Iter| Mu Val | Prim Obj |  Bar Obj |  KKT Inf |  Bar Inf | ECons Inf| ICons Inf| AlphaP | "
-                 "AlphaD |LS| PPS |HF| HPert |\n");
+      this->log->critical(fmt::format("{0:=^{1}}\n", "", 119));
+      this->log->critical(
+          "|Iter| Mu Val | Prim Obj |  Bar Obj |  KKT Inf |  Bar Inf | ECons Inf| ICons Inf| AlphaP | "
+          "AlphaD |LS| PPS |HF| HPert |");
     }
-    auto tst = "|Iter|Mu Val | Prim Obj |KKT Inf |ECon Inf|ICon Inf|AlphaM |LS|PPS|HF| HPert |\n";
   }
-
 
   fmt::text_style PHashcol = fmt::text_style();
   fmt::text_style EHashcol = fmt::text_style();
@@ -282,64 +311,74 @@ void ASSET::PSIOPT::print_last_iterate(const std::vector<IterateInfo>& iters) {
   }
 
 
-  auto hash = []() { fmt::print("|"); };
-  auto chash = [](fmt::text_style c) { fmt::print(c, "|"); };
+  auto hash = []() { return fmt::format("|"); };
+  auto chash = [](fmt::text_style c) { return fmt::format(c, "|"); };
 
-  hash();
-  fmt::print("{:<4}", last.iter);
-  hash();
-  fmt::print("{:.2e}", last.Mu);
-  hash();
-  fmt::print("{:>10.3e}", last.PrimObj);
-  chash(PHashcol);
-  fmt::print("{:>10.3e}", last.BarrObj);
-  chash(BOHashcol);
-  fmt::print(Kcol, "{:>10.4e}", last.KKTInf);
-  chash(KHashcol);
-  fmt::print(Bcol, "{:>10.4e}", last.BarrInf);
-  chash(BHashcol);
-  fmt::print(Ecol, "{:>10.4e}", last.EConInf);
-  chash(EHashcol);
-  fmt::print(Icol, "{:>10.4e}", last.IConInf);
-  chash(IHashcol);
+  std::string line = "";
+  line += hash();
+  line += fmt::format("{:<4}", last.iter);
+  line += hash();
+  line += fmt::format("{:.2e}", last.Mu);
+  line += hash();
+  line += fmt::format("{:>10.3e}", last.PrimObj);
+  line += chash(PHashcol);
+  line += fmt::format("{:>10.3e}", last.BarrObj);
+  line += chash(BOHashcol);
+  line += fmt::format(Kcol, "{:>10.4e}", last.KKTInf);
+  line += chash(KHashcol);
+  line += fmt::format(Bcol, "{:>10.4e}", last.BarrInf);
+  line += chash(BHashcol);
+  line += fmt::format(Ecol, "{:>10.4e}", last.EConInf);
+  line += chash(EHashcol);
+  line += fmt::format(Icol, "{:>10.4e}", last.IConInf);
+  line += chash(IHashcol);
 
   if (WideConsole) {
-    fmt::print("{:>9.3e}|{:>9.3e}|{:>8.2e}|{:>8.2e}|{:>8.2e}|{:>10.3e}|{:>3}|{:>3}|{:>3}|{:>6.1e}|\n",
-               last.MaxEMult,
-               last.MaxIMult,
-               last.alphaP,
-               last.alphaD,
-               last.alphaT,
-               last.MeritVal,
-               last.LSiters,
-               last.PPivots,
-               last.Hfacs,
-               last.Hpert);
+    line += fmt::format("{:>9.3e}|{:>9.3e}|{:>8.2e}|{:>8.2e}|{:>8.2e}|{:>10.3e}|{:>3}|{:>3}|{:>3}|{:>6.1e}|",
+                        last.MaxEMult,
+                        last.MaxIMult,
+                        last.alphaP,
+                        last.alphaD,
+                        last.alphaT,
+                        last.MeritVal,
+                        last.LSiters,
+                        last.PPivots,
+                        last.Hfacs,
+                        last.Hpert);
   } else {
-    fmt::print("{:>8.2e}|{:>8.2e}|{:>2}|{:>5}|{:>2}|{:>6.1e}|\n",
-               last.alphaT * last.alphaP,
-               last.alphaT * last.alphaD,
-               last.LSiters,
-               last.PPivots,
-               last.Hfacs,
-               last.Hpert);
+    line += fmt::format("{:>8.2e}|{:>8.2e}|{:>2}|{:>5}|{:>2}|{:>6.1e}|",
+                        last.alphaT * last.alphaP,
+                        last.alphaT * last.alphaD,
+                        last.LSiters,
+                        last.PPivots,
+                        last.Hfacs,
+                        last.Hpert);
   }
+
+  this->log->critical(line);
 }
 
-void ASSET::PSIOPT::print_Beginning(std::string msg) const {
-  fmt::print(fmt::fg(fmt::color::dim_gray), "Beginning");
-  fmt::print(": ");
-  fmt::print(fmt::fg(fmt::color::royal_blue), msg);
-  fmt::print("\n");
+// print_Beginning ///////////////////////////////////////////////////////////////////////////////////////////
+
+void ASSET::PSIOPT::print_Beginning(std::string msg,
+                                    spdlog::level::level_enum level = spdlog::level::critical) const {
+  this->log->log(level,
+                 fmt::format("{}: {}",
+                             fmt::format(fmt::fg(fmt::color::dim_gray), "Beginning"),
+                             fmt::format(fmt::fg(fmt::color::royal_blue), msg)));
 }
 
-void ASSET::PSIOPT::print_Finished(std::string msg) const {
+// print_Finished ////////////////////////////////////////////////////////////////////////////////////////////
 
-  fmt::print(fmt::fg(fmt::color::dim_gray), "Finished ");
-  fmt::print(": ");
-  fmt::print(fmt::fg(fmt::color::royal_blue), msg);
-  fmt::print("\n");
+void ASSET::PSIOPT::print_Finished(std::string msg,
+                                   spdlog::level::level_enum level = spdlog::level::critical) const {
+  this->log->log(level,
+                 fmt::format("{}: {}",
+                             fmt::format(fmt::fg(fmt::color::dim_gray), "Finished "),
+                             fmt::format(fmt::fg(fmt::color::royal_blue), msg)));
 }
+
+// print_ExitStats ///////////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::print_ExitStats(ConvergenceFlags ExitCode,
                                     const std::vector<IterateInfo>& iters,
@@ -356,48 +395,38 @@ void ASSET::PSIOPT::print_ExitStats(ConvergenceFlags ExitCode,
   int iternum = int(iters.size());
   double printtime = tottime - nlptime - qptime;
   auto TColor = fmt::fg(fmt::color::cyan);
-  auto Printtime = [&](const char* msg, double t1) {
-    fmt::print(msg);
-    fmt::print(TColor, "{0:>10.3f} ms {1:>10.3f} ms/iter\n", t1, double(t1 / iternum));
+  auto Printtime = [&](const char* msg, double t) {
+    this->log->debug(fmt::format("{0}{1:>10.3f} ms {2:>10.3f} ms/iter", msg, t, double(t / iternum)));
   };
 
-  if (this->PrintLevel < 3) {
-    if (ExitCode == ConvergenceFlags::CONVERGED) {
-      fmt::print(fmt::fg(fmt::color::lime_green), "\nOptimal Solution Found\n");
-    } else if (ExitCode == ConvergenceFlags::ACCEPTABLE) {
-      fmt::print(fmt::fg(fmt::color::yellow), "\nAcceptable Solution Found\n");
-    } else if (ExitCode == ConvergenceFlags::DIVERGING) {
-      fmt::print(fmt::fg(fmt::color::dark_red), "\nSolution Diverging\n");
-    } else if (ExitCode == ConvergenceFlags::NOTCONVERGED) {
-      fmt::print(fmt::fg(fmt::color::red), "\nNo Solution Found\n");
-    }
+  std::string line = "";
+  if (ExitCode == ConvergenceFlags::CONVERGED) {
+    line += fmt::format(fmt::fg(fmt::color::lime_green), "Optimal Solution Found");
+  } else if (ExitCode == ConvergenceFlags::ACCEPTABLE) {
+    line += fmt::format(fmt::fg(fmt::color::yellow), "Acceptable Solution Found");
+  } else if (ExitCode == ConvergenceFlags::DIVERGING) {
+    line += fmt::format(fmt::fg(fmt::color::dark_red), "Solution Diverging");
+  } else if (ExitCode == ConvergenceFlags::NOTCONVERGED) {
+    line += fmt::format(fmt::fg(fmt::color::red), "No Solution Found");
   }
+  this->log->info("");
+  this->log->info(line);
 
-  if (this->PrintLevel < 2) {
-
-    fmt::print(" Iterations : ");
-    fmt::print("{:<5}\n", iternum);
-    fmt::print(" Prim Obj   : ");
-    fmt::print("{:<15.8e}\n", last.PrimObj);
-    fmt::print(" KKT Inf    : ");
-    fmt::print(Kcol, "{:<15.8e}\n", last.KKTInf);
-    fmt::print(" Bar Inf    : ");
-    fmt::print(Bcol, "{:<15.8e}\n", last.BarrInf);
-    fmt::print(" ECons Inf  : ");
-    fmt::print(Ecol, "{:<15.8e}\n", last.EConInf);
-    fmt::print(" ICons Inf  : ");
-    fmt::print(Icol, "{:<15.8e}\n", last.IConInf);
-
-    fmt::print("\n");
-
-    Printtime(" NLP Function Evaluation Time : ", nlptime);
-    Printtime(" KKT Matrix Factor/Solve Time : ", qptime);
-    Printtime(" Console Print Time           : ", printtime);
-    Printtime(" Total Time (NLP+KKT+Print)   : ", tottime);
-
-    fmt::print("\n");
-  }
+  this->log->debug(fmt::format(" Iterations : {:<5}", iternum));
+  this->log->debug(fmt::format(" Prim Obj   : {:<15.8e}", last.PrimObj));
+  this->log->debug(fmt::format(" KKT Inf    : {:<15.8e}", last.KKTInf));
+  this->log->debug(fmt::format(" Bar Inf    : {:<15.8e}", last.BarrInf));
+  this->log->debug(fmt::format(" ECons Inf  : {:<15.8e}", last.EConInf));
+  this->log->debug(fmt::format(" ICons Inf  : {:<15.8e}", last.IConInf));
+  this->log->debug("");
+  Printtime(" NLP Function Evaluation Time : ", nlptime);
+  Printtime(" KKT Matrix Factor/Solve Time : ", qptime);
+  Printtime(" Console Print Time           : ", printtime);
+  Printtime(" Total Time (NLP+KKT+Print)   : ", tottime);
+  this->log->debug("");
 }
+
+// calculate_color ///////////////////////////////////////////////////////////////////////////////////////////
 
 fmt::text_style ASSET::PSIOPT::calculate_color(double val, double targ, double acc) {
   auto level1 = std::log(targ);
@@ -421,6 +450,8 @@ fmt::text_style ASSET::PSIOPT::calculate_color(double val, double targ, double a
     c = fmt::color::dark_red;
   return fmt::fg(c);
 }
+
+// factor_impl ///////////////////////////////////////////////////////////////////////////////////////////////
 
 int ASSET::PSIOPT::factor_impl(
     bool docompute, bool Zfac, double ipurt, double incpurt0, double incpurt, double& finalpert) {
@@ -464,6 +495,8 @@ int ASSET::PSIOPT::factor_impl(
   }
   return this->MaxRefac;
 }
+
+// alg_impl //////////////////////////////////////////////////////////////////////////////////////////////////
 
 Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
                                         BarrierModes barmode,
@@ -650,7 +683,6 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
   if (this->EqualCons > 0) {
     this->LastEqCons = this->getEqCons(RHS);
     this->LastEqLmults = this->getEqLmults(XSL);
-
   }
   if (this->InequalCons > 0) {
     this->LastIqCons = this->getIqCons(RHS) - this->getSlacks(XSL);
@@ -675,8 +707,9 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
   return XSL;
 }
 
-Eigen::VectorXd ASSET::PSIOPT::init_impl(const Eigen::VectorXd& x, double Mu, bool docompute) {
+// init_impl /////////////////////////////////////////////////////////////////////////////////////////////////
 
+Eigen::VectorXd ASSET::PSIOPT::init_impl(const Eigen::VectorXd& x, double Mu, bool docompute) {
 
   Utils::Timer kktt;
   kktt.start();
@@ -733,18 +766,15 @@ Eigen::VectorXd ASSET::PSIOPT::init_impl(const Eigen::VectorXd& x, double Mu, bo
   this->FactorFlops = this->KKTSol.m_flops;
   this->FactorMem = this->KKTSol.m_mem;
 
-  if (this->PrintLevel < 2) {
-    auto cyan = fmt::fg(fmt::color::cyan);
-    if (docompute) {
-      fmt::print(" LDLT Factor NNZs      : ");
-      fmt::print(cyan, "{0:<10}\n", this->FactorMem);
-      fmt::print(" LDLT Factor FLOPs     : ");
-      fmt::print(cyan, "{0} MFLOPs\n", this->FactorFlops);
-    }
-    fmt::print(" Analysis/Reorder Time : ");
-    fmt::print(cyan, "{0:.3f} ms\n", pretime * 1000);
-    print_Finished("KKT-Matrix Analysis ");
+  auto cyan = fmt::fg(fmt::color::cyan);
+  if (docompute) {
+    this->log->debug(
+        fmt::format(" LDLD Factor NNZs      : {}", fmt::format(cyan, "{:<10}", this->FactorMem)));
+    this->log->debug(fmt::format(" LDLD Factor FLOPs     : {}", fmt::format("{} MFLOPs", this->FactorFlops)));
   }
+  this->log->debug(
+      fmt::format(" Analysis/Reorder Time : {}", fmt::format(cyan, "{:.3f} ms", pretime * 1000)));
+  print_Finished("KKT-Matrix Analysis ", spdlog::level::debug);
 
   Eigen::VectorXd dx = -this->KKTSol.solve(RHS);
 
@@ -757,6 +787,7 @@ Eigen::VectorXd ASSET::PSIOPT::init_impl(const Eigen::VectorXd& x, double Mu, bo
   return XSL;
 }
 
+// ls_impl ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
                               double ObjScale,
@@ -918,6 +949,7 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
   return alpha;
 }
 
+// optimize //////////////////////////////////////////////////////////////////////////////////////////////////
 
 Eigen::VectorXd ASSET::PSIOPT::optimize(const Eigen::VectorXd& x) {
 
@@ -942,26 +974,26 @@ Eigen::VectorXd ASSET::PSIOPT::optimize(const Eigen::VectorXd& x) {
   if (this->PrintLevel < 2) {
     print_Beginning("Optimization Algorithm ");
   }
-  XSLans = this->alg_impl(OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
+  XSLans = this->alg_impl(
+      AlgorithmModes::OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
   if (this->PrintLevel < 2) {
     print_Finished("Optimization Algorithm ");
   }
 
- 
 
   t.stop();
   double tottime = double(t.count<std::chrono::microseconds>()) / 1000.0;
   this->LastTotalTime = tottime / 1000.0;
   this->LastMiscTime = this->LastTotalTime - this->LastPreTime - this->LastKKTTime - this->LastFuncTime;
 
-  if (this->PrintLevel < 2) {
-    fmt::print(" PSIOPT Total Time : ");
-    fmt::print(fmt::fg(fmt::color::cyan), "{0:.3f} ms\n", tottime);
-    print_Finished("PSIOPT ");
-    print_Header();
-  }
+  this->log->debug(
+      fmt::format(" PSIOPT Total Time : {}", fmt::format(fmt::fg(fmt::color::cyan), "{0:.3f} ms", tottime)));
+  print_Finished("PSIOPT ", spdlog::level::debug);
+  print_Header(spdlog::level::debug);
   return this->getPrimals(XSLans);
 }
+
+// solve_optimize ////////////////////////////////////////////////////////////////////////////////////////////
 
 Eigen::VectorXd ASSET::PSIOPT::solve_optimize(const Eigen::VectorXd& x) {
 
@@ -996,24 +1028,24 @@ Eigen::VectorXd ASSET::PSIOPT::solve_optimize(const Eigen::VectorXd& x) {
   if (this->PrintLevel < 2) {
     print_Beginning("Optimization Algorithm ");
   }
-  XSLans = this->alg_impl(OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
+  XSLans = this->alg_impl(
+      AlgorithmModes::OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
 
   t.stop();
   double tottime = double(t.count<std::chrono::microseconds>()) / 1000.0;
   this->LastTotalTime = tottime / 1000.0;
   this->LastMiscTime = this->LastTotalTime - this->LastPreTime - this->LastKKTTime - this->LastFuncTime;
 
-  if (this->PrintLevel < 2) {
-    print_Finished("Optimization Algorithm ");
-    fmt::print(" PSIOPT Total Time : ");
-    fmt::print(fmt::fg(fmt::color::cyan), "{0:.3f} ms\n", tottime);
-    print_Finished("PSIOPT ");
-    print_Header();
-  }
+  print_Finished("Optimization Algorithm ", spdlog::level::debug);
+  this->log->debug(
+      fmt::format(" PSIOPT Total Time : {}", fmt::format(fmt::fg(fmt::color::cyan), "{0:.3f} ms", tottime)));
+  print_Finished("PSIOPT ", spdlog::level::debug);
+  print_Header(spdlog::level::debug);
 
-  
   return this->getPrimals(XSLans);
 }
+
+// solve_optimize_solve //////////////////////////////////////////////////////////////////////////////////////
 
 Eigen::VectorXd ASSET::PSIOPT::solve_optimize_solve(const Eigen::VectorXd& x) {
   this->zero_timing_stats();
@@ -1047,7 +1079,8 @@ Eigen::VectorXd ASSET::PSIOPT::solve_optimize_solve(const Eigen::VectorXd& x) {
   if (this->PrintLevel < 2) {
     print_Beginning("Optimization Algorithm ");
   }
-  XSLans = this->alg_impl(OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
+  XSLans = this->alg_impl(
+      AlgorithmModes::OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
   if (this->PrintLevel < 2) {
     print_Finished("Optimization Algorithm ");
   }
@@ -1072,16 +1105,14 @@ Eigen::VectorXd ASSET::PSIOPT::solve_optimize_solve(const Eigen::VectorXd& x) {
   this->LastTotalTime = tottime / 1000.0;
   this->LastMiscTime = this->LastTotalTime - this->LastPreTime - this->LastKKTTime - this->LastFuncTime;
 
-  if (this->PrintLevel < 2) {
-    fmt::print(" PSIOPT Total Time : ");
-    fmt::print(fmt::fg(fmt::color::cyan), "{0:.3f} ms\n", tottime);
-    print_Finished("PSIOPT ");
-    print_Header();
-  }
+  this->log->debug(" PSIOPT Total Time : {}", fmt::format(fmt::fg(fmt::color::cyan), "{0:.3f} ms", tottime));
+  print_Finished("PSIOPT ", spdlog::level::debug);
+  print_Header(spdlog::level::debug);
 
- 
   return this->getPrimals(XSLans);
 }
+
+// optimize_solve ////////////////////////////////////////////////////////////////////////////////////////////
 
 Eigen::VectorXd ASSET::PSIOPT::optimize_solve(const Eigen::VectorXd& x) {
   this->zero_timing_stats();
@@ -1103,7 +1134,8 @@ Eigen::VectorXd ASSET::PSIOPT::optimize_solve(const Eigen::VectorXd& x) {
     print_Beginning("Optimization Algorithm ");
   }
 
-  XSLans = this->alg_impl(OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
+  XSLans = this->alg_impl(
+      AlgorithmModes::OPT, this->OptBarMode, this->OptLSMode, this->ObjScale, this->initMu, XSL);
 
   if (this->PrintLevel < 2) {
     print_Finished("Optimization Algorithm ");
@@ -1130,16 +1162,15 @@ Eigen::VectorXd ASSET::PSIOPT::optimize_solve(const Eigen::VectorXd& x) {
   this->LastTotalTime = tottime / 1000.0;
   this->LastMiscTime = this->LastTotalTime - this->LastPreTime - this->LastKKTTime - this->LastFuncTime;
 
-  if (this->PrintLevel < 2) {
-    fmt::print(" PSIOPT Total Time : ");
-    fmt::print(fmt::fg(fmt::color::cyan), "{0:.3f} ms\n", tottime);
-    print_Finished("PSIOPT ");
-    print_Header();
-  }
+  this->log->debug(
+      fmt::format(" PSIOPT Total Time : {}", fmt::format(fmt::fg(fmt::color::cyan), "{0:.3f} ms", tottime)));
+  print_Finished("PSIOPT ", spdlog::level::debug);
+  print_Header(spdlog::level::debug);
 
-  
   return this->getPrimals(XSLans);
 }
+
+// solve /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Eigen::VectorXd ASSET::PSIOPT::solve(const Eigen::VectorXd& x) {
 
@@ -1168,17 +1199,16 @@ Eigen::VectorXd ASSET::PSIOPT::solve(const Eigen::VectorXd& x) {
   this->LastTotalTime = tottime / 1000.0;
   this->LastMiscTime = this->LastTotalTime - this->LastPreTime - this->LastKKTTime - this->LastFuncTime;
 
-  if (this->PrintLevel < 2) {
-    print_Finished("Solve Algorithm ");
-    fmt::print(" PSIOPT Total Time : ");
-    fmt::print(fmt::fg(fmt::color::cyan), "{0:.3f} ms\n", tottime);
-    print_Finished("PSIOPT ");
-    print_Header();
-  }
-  
+  print_Finished("Solve Algorithm ", spdlog::level::debug);
+  this->log->debug(
+      fmt::format(" PSIOPT Total Time : {}", fmt::format(fmt::fg(fmt::color::cyan), "{0:.3f} ms", tottime)));
+  print_Finished("PSIOPT ", spdlog::level::debug);
+  print_Header(spdlog::level::debug);
 
   return this->getPrimals(XSLans);
 }
+
+// Python Binding ////////////////////////////////////////////////////////////////////////////////////////////
 
 void ASSET::PSIOPT::Build(py::module& m) {
   using namespace doc;
