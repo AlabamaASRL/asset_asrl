@@ -15,12 +15,13 @@ namespace ASSET {
 
   struct FunctionRegistry {
     using VectorFunctionalX = GenericFunction<-1, -1>;
-    using ScalarFunctionalX = GenericFunction<-1, 1>;
+    using ScalarFunctionalX = GenericFunction<-1,  1>;
 
     py::module& mod;
     py::module vfmod;
     py::module ocmod;
     py::module solmod;
+    py::module extmod;
 
     py::class_<VectorFunctionalX> vfuncx;
     py::class_<ScalarFunctionalX> sfuncx;
@@ -32,7 +33,7 @@ namespace ASSET {
           ocmod(m.def_submodule("OptimalControl",
                                 "SubModule Containing Optimal Control ODEs, Phases, and Utilities")),
           solmod(m.def_submodule("Solvers", "SubModule Containing PSIOPT,NLP, and Solver Flags")),
-
+          extmod(m.def_submodule("Extensions", "User Defined Extensions")),
           vfuncx(py::class_<VectorFunctionalX>(this->vfmod, "VectorFunction")),
           sfuncx(py::class_<ScalarFunctionalX>(this->vfmod, "ScalarFunction")) {
     }

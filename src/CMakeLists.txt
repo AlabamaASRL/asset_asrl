@@ -6,6 +6,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Utils)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/VectorFunctions)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Integrators)
 
+include_directories(${PROJECT_SOURCE_DIR}/extensions)
+
+
+
 set(ASSET_INCLUDES
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/OptimalControl
@@ -132,7 +136,7 @@ target_compile_options(astro PUBLIC ${COMPILE_FLAGS})
 
 #-------------------------------------------------------------------------------
 ## ASSET Python Module
-pybind11_add_module(asset main.cpp )
+pybind11_add_module(asset main.cpp)
 
 
 target_compile_options(asset PUBLIC  ${COMPILE_FLAGS})
@@ -142,6 +146,7 @@ target_link_libraries(asset PUBLIC utils)
 target_link_libraries(asset PUBLIC optimalcontrol)
 target_link_libraries(asset PUBLIC vectorfunctions)
 target_link_libraries(asset PUBLIC astro)
+target_link_libraries(asset PUBLIC asset_extensions)
 
 target_include_directories(asset PRIVATE ${INCLUDE_DIRS})
 target_link_libraries(asset PRIVATE ${LINK_LIBS})
