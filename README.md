@@ -1,3 +1,6 @@
+
+<img src="https://github.com/AlabamaASRL/asset_asrl/assets/40646929/ebd03b27-df85-41bb-9cd0-6bfa06c14f26" width="300" height="300" align="center">
+
 # ASSET: Astrodynamics Software and Science Enabling Toolkit
 
 ASSET (Astrodynamics Software and Science Enabling Toolkit) is a modular, extensible library for trajectory design and optimal control.
