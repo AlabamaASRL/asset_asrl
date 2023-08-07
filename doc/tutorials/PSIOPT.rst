@@ -145,7 +145,7 @@ where :code:`XXX` is replaced by the name of the setting
    * - OptLSMode
      - Line Search algorithm to be used by the optimization algorithm. It is disabled by default, but we suggest enabling the
        L1 penalty function line search or Augmented Lagrangian line search for sensitive problems with poor initial guesses.
-     - (string) 'NOLS'
+     - (string) 'AUGLANG'
      - ['AUGLANG','L1','NOLS']
    * - SoeLSMode
      - Line Search algorithm to be used by the solve algorithm. It is disabled by default.
@@ -179,7 +179,7 @@ where :code:`XXX` is replaced by the name of the setting
      - Fraction of the full step to the boundary that the slack variables or inequality constraint multipliers will take. Must be less
        than 1.0 to prevent slacks and multipliers from becoming negative. Values close to one will lead to faster convergence when near the
        solution but can harm robustness when the initial guess is poor. 
-     - (double) .98 
+     - (double) .99 
      - (<1.0) [.95,.999]
    * - QPOrderingMode
      - Fill-in reducing ordering applied to the KKT matrix by MKL-Pardiso. The default, 'METIS', is the METIS nested dissection algorithm

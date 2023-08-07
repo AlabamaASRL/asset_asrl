@@ -204,7 +204,7 @@ namespace ASSET {
     }
 
 
-    LineSearchModes OptLSMode = LineSearchModes::NOLS;
+    LineSearchModes OptLSMode = LineSearchModes::AUGLANG;
     LineSearchModes SoeLSMode = LineSearchModes::NOLS;
 
     void set_OptLSMode(LineSearchModes mode) {
@@ -315,7 +315,8 @@ namespace ASSET {
     double ExObjVal = -1.0e20;
 
 
-    double BoundFraction = 0.98;
+    double BoundFraction = 0.99;
+
     void set_BoundFraction(double BoundFraction) {
       if (BoundFraction >= 1.0 || BoundFraction <= 0.0) {
         throw std::invalid_argument("BoundFraction must be between 0 and 1.");
