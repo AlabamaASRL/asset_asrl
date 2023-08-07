@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Adaptive Mesh Refinement Tutorial" href="AutoMeshGuide.html" /><link rel="prev" title="Optimal Control Problem Tutorial" href="OptimalControlProblem.html" />
 
     <!-- Generated with Sphinx 6.2.1 and Furo 2023.07.26 -->
-        <title>PSIOPT - ASSET 0.2.0 documentation</title>
+        <title>PSIOPT - ASSET 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -125,7 +125,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">ASSET 0.2.0 documentation</div></a>
+      <a href="../index.html"><div class="brand">ASSET 0.3.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -151,7 +151,7 @@
     <img class="sidebar-logo" src="../_static/ASSETLOGO.svg" alt="Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">ASSET 0.2.0 documentation</span>
+  <span class="sidebar-brand-text">ASSET 0.3.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -356,7 +356,7 @@ acceptable solutions set this to be greater than or equal to MaxIters.</p></td>
 <tr class="row-odd"><td><p>OptLSMode</p></td>
 <td><p>Line Search algorithm to be used by the optimization algorithm. It is disabled by default, but we suggest enabling the
 L1 penalty function line search or Augmented Lagrangian line search for sensitive problems with poor initial guesses.</p></td>
-<td><p>(string) ‘NOLS’</p></td>
+<td><p>(string) ‘AUGLANG’</p></td>
 <td><p>[‘AUGLANG’,’L1’,’NOLS’]</p></td>
 </tr>
 <tr class="row-even"><td><p>SoeLSMode</p></td>
@@ -397,7 +397,7 @@ Thus it is typically slower than the ‘LOQO’ algorithm.</p></td>
 <td><p>Fraction of the full step to the boundary that the slack variables or inequality constraint multipliers will take. Must be less
 than 1.0 to prevent slacks and multipliers from becoming negative. Values close to one will lead to faster convergence when near the
 solution but can harm robustness when the initial guess is poor.</p></td>
-<td><p>(double) .98</p></td>
+<td><p>(double) .99</p></td>
 <td><p>(&lt;1.0) [.95,.999]</p></td>
 </tr>
 <tr class="row-odd"><td><p>QPOrderingMode</p></td>
