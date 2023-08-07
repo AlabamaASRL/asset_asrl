@@ -444,8 +444,7 @@ namespace ASSET {
       Integ.EnableVectorization = this->EnableVectorization;
 
 
-      ODEState<double> Xin;
-      ODEState<double> Xout;
+     
 
       double T0 = this->ActiveTraj[0][this->TVar()];
       double TF = this->ActiveTraj.back()[this->TVar()];
