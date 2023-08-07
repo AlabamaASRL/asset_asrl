@@ -232,9 +232,7 @@ void ASSET::PSIOPT::print_stats() {
       100.0 * double(this->KKTSol.getMatrix().nonZeros()) / (double(this->KKTdim) * double(this->KKTdim)));
   fmt::print("\n");
 
-  // print_settings();
-
-  // fmt::print("\n");
+  
 }
 
 void ASSET::PSIOPT::print_last_iterate(const std::vector<IterateInfo>& iters) {
@@ -453,14 +451,14 @@ int ASSET::PSIOPT::factor_impl(
     Factor();
     RankDef();
     IncEigs = Inertia();
-    finalpert += p;
+    finalpert = p;
+
 
     if (IncEigs <= 0)
       return i + 1;
-    if (i == 0)
-      p *= incpurt0;
-    else
-      p *= incpurt;
+    if (i == 0) p *= incpurt0;
+    else p *= incpurt;
+    p -= finalpert;
   }
   return this->MaxRefac;
 }
@@ -515,6 +513,9 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
     /////////////////////////////////////////////////////////////
 
     this->evalNLP(algmode, ObjScale, XSL, PrimObj, PGX, RHS, this->KKTSol.getMatrix());
+
+
+    
 
 
     if (this->InequalCons > 0) {
@@ -588,20 +589,26 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
     }
 
     DXSL = -this->KKTSol.solve(RHS);
-
-    if (Diagnostic) {
-    }
-
+    bool GoodStep = std::isfinite(DXSL.squaredNorm());
     if (this->InequalCons > 0)
       this->max_primal_dual_step(XSL, DXSL, this->BoundFraction, alphap, alphad);
     /////////////////////////////////////////////////////////////////////
-
+    if (Diagnostic) {
+    }
     QPtimer.stop();
 
     Funtimer.start();
     //////////////////////////////////////////////////////////////////////
 
-    alpha = ls_impl(lsmode, ObjScale, Mu, PrimObj, BarrObj, XSL, DXSL, Temp, RHS, RHS2, Citer, iters);
+    if (GoodStep) {
+      double lsobjscale = algmode == SOE || algmode == OPTNO ? 0.0 : 1.0;
+      alpha = ls_impl(
+          lsmode, ObjScale * lsobjscale, Mu, PrimObj, BarrObj, XSL, DXSL, Temp, RHS, RHS2, Citer, iters);
+
+    } else {
+      Citer.Hfacs = -1;
+    }
+
 
 
     //////////////////////////////////////////////////////////////////////
@@ -621,12 +628,17 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
     }
 
     ExitCode = this->convergeCheck(iters);
+    if (!GoodStep)
+      ExitCode = ConvergenceFlags::DIVERGING;
+      
     if (this->PrintLevel == 0) {
       this->print_last_iterate(iters);
     }
 
-    if (ExitCode == ConvergenceFlags::CONVERGED || ExitCode == ConvergenceFlags::ACCEPTABLE
-        || ExitCode == ConvergenceFlags::DIVERGING || i == (this->MaxIters - 1)) {
+    if (ExitCode == ConvergenceFlags::CONVERGED 
+        || ExitCode == ConvergenceFlags::ACCEPTABLE
+        || ExitCode == ConvergenceFlags::DIVERGING 
+        || i == (this->MaxIters - 1) ) {
 
       this->ConvergeFlag = ExitCode;
       break;
@@ -806,6 +818,7 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
     double LangInit = PrimObj + BarrObj;
     double InitL1Pen = this->getLmults(XSL).cwiseAbs().dot(this->getAllCons(RHS).cwiseAbs());
     double InitL2Pen = this->getAllCons(RHS).squaredNorm();
+    double InitLinfPenalty = this->getAllCons(RHS).lpNorm<Eigen::Infinity>();
 
     double sc = .1 + std::abs(vv - cv) / InitL2Pen;
     if (InitL2Pen == 0.0)
@@ -830,10 +843,14 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
       double LangTest = ptest + btest;
       double TestL1Pen = this->getLmults(XSL).cwiseAbs().dot(this->getAllCons(RHS2).cwiseAbs());
       double TestL2Pen = this->getAllCons(RHS2).squaredNorm();
+      double TestLinfPenalty = this->getAllCons(RHS2).lpNorm<Eigen::Infinity>();
+
       LangTest += TestL1Pen + TestL2Pen * sc;
 
       Citer.MeritVal = LangTest;
-      if (LangTest < LangInit) {
+      if (LangTest < LangInit 
+          || (ptest < PrimObj) && (TestL2Pen < InitL2Pen)
+          || (ptest < PrimObj) && (TestLinfPenalty < InitLinfPenalty)) {
         Citer.LSiters = j;
         break;
       } else {
@@ -850,6 +867,7 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
     double LangInit = PrimObj + BarrObj;
     double InitL1Pen = this->getLmults(XSL).cwiseAbs().dot(this->getAllCons(RHS).cwiseAbs());
     double InitL2Pen = this->getAllCons(RHS).squaredNorm();
+    double InitLinfPenalty = this->getAllCons(RHS).lpNorm<Eigen::Infinity>();
 
     double sc = .01 + std::abs(vv - cv) / InitL2Pen;
     if (InitL2Pen == 0.0)
@@ -895,6 +913,7 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
 
 
       double TestL2Pen = this->getAllCons(RHS2).squaredNorm();
+      double TestLinfPenalty = this->getAllCons(RHS2).lpNorm<Eigen::Infinity>();
 
       if (TestL2Pen < EContol * EContol * EqualCons + IContol * IContol * InequalCons) {
         TestL2Pen = 0;
@@ -903,7 +922,8 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
       LangTest += TestL1Pen + TestL2Pen * sc;
 
       Citer.MeritVal = LangTest;
-      if (LangTest < LangInit) {
+      if (LangTest < LangInit || (ptest < PrimObj) && (TestL2Pen < InitL2Pen)
+          || (ptest < PrimObj) && (TestLinfPenalty < InitLinfPenalty)) {
         Citer.LSiters = j;
         break;
       } else {
