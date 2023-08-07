@@ -522,31 +522,33 @@ namespace ASSET {
 
 
     obj.def("__call__",
-            [](const InterpTable2D& self, const GenericFunction<-1, 1>& x, const GenericFunction<-1, 1>& y) {
+            [](std::shared_ptr<InterpTable2D>& self,
+               const GenericFunction<-1, 1>& x,
+               const GenericFunction<-1, 1>& y) {
               return GenericFunction<-1, 1>(
-                  InterpFunction2D(std::make_shared<InterpTable2D>(self)).eval(stack(x, y)));
+                  InterpFunction2D(self).eval(stack(x, y)));
             });
 
     obj.def("__call__",
-            [](const InterpTable2D& self, const Segment<-1, 1, -1>& x, const Segment<-1, 1, -1>& y) {
+            [](std::shared_ptr<InterpTable2D> & self, const Segment<-1, 1, -1>& x, const Segment<-1, 1, -1>& y) {
               return GenericFunction<-1, 1>(
-                  InterpFunction2D(std::make_shared<InterpTable2D>(self)).eval(stack(x, y)));
+                  InterpFunction2D(self).eval(stack(x, y)));
             });
 
-    obj.def("__call__", [](const InterpTable2D& self, const Segment<-1, 2, -1>& xy) {
-      return GenericFunction<-1, 1>(InterpFunction2D(std::make_shared<InterpTable2D>(self)).eval(xy));
+    obj.def("__call__", [](std::shared_ptr<InterpTable2D>& self, const Segment<-1, 2, -1>& xy) {
+      return GenericFunction<-1, 1>(InterpFunction2D(self).eval(xy));
     });
 
-    obj.def("__call__", [](const InterpTable2D& self, const GenericFunction<-1, -1>& xy) {
-      return GenericFunction<-1, 1>(InterpFunction2D(std::make_shared<InterpTable2D>(self)).eval(xy));
+    obj.def("__call__", [](std::shared_ptr<InterpTable2D>& self, const GenericFunction<-1, -1>& xy) {
+      return GenericFunction<-1, 1>(InterpFunction2D(self).eval(xy));
     });
 
 
-    obj.def("sf", [](const InterpTable2D& self) {
-      return GenericFunction<-1, 1>(InterpFunction2D(std::make_shared<InterpTable2D>(self)));
+    obj.def("sf", [](std::shared_ptr<InterpTable2D>& self) {
+      return GenericFunction<-1, 1>(InterpFunction2D(self));
     });
-    obj.def("vf", [](const InterpTable2D& self) {
-      return GenericFunction<-1, -1>(InterpFunction2D(std::make_shared<InterpTable2D>(self)));
+    obj.def("vf", [](std::shared_ptr<InterpTable2D>& self) {
+      return GenericFunction<-1, -1>(InterpFunction2D(self));
     });
 
 

@@ -1015,6 +1015,8 @@ namespace ASSET {
 
       Vector1<double> x;
       Vector1<double> fx;
+      Vector1<double> fl;
+
       Vector1<double> jx;
 
       std::vector<std::vector<ODEState<double>>> eventstates(events.size());
@@ -1024,7 +1026,7 @@ namespace ASSET {
 
           auto func = std::get<0>(events[i]).eval(tabfunc);
 
-          auto rootfind = [&](auto x0) {
+          auto newton = [&](auto x0) {
             x[0] = x0;
             for (int k = 0; k < MaxEventIters; k++) {
               fx.setZero();
@@ -1038,31 +1040,75 @@ namespace ASSET {
             return x[0];
           };
 
+          auto bisect =[&](auto tlow, auto thigh,int iters) {
+            double tm  = (tlow + thigh) / 2.0;
+            x[0] = tlow;
+            fl = func.compute(x);
+            int sgnfl = (fl[0] >= 0) - (fl[0] <= 0);
+
+            x[0] = tm;
+            fx = func.compute(x);
+            int sgnfx = (fx[0] >= 0) - (fx[0] <= 0);
+            
+            for (int i = 0; i < 5; i++) {
+              if (sgnfx == sgnfl) {
+                tlow = tm;
+                sgnfl = sgnfx;
+              } else {
+                thigh = tm;
+              }
+
+              tm = (tlow + thigh) / 2.0;
+              if ((thigh - tlow) / 2.0 < abs(EventTol))
+                break;
+
+              x[0] = tm;
+              fx = func.compute(x);
+              sgnfx = (fx[0] >= 0) - (fx[0] <= 0);
+              
+            }
+            
+            return std::array<double,3> {tm,tlow,thigh};
+          };
+
           for (auto& eventtime: eventtimes[i]) {
 
 
-            double tlow = eventtime[0];
+            double tlow  = eventtime[0];
             double thigh = eventtime[1];
 
-            double x0 = (tlow + thigh) / 2.0;
-
-            double tevent = rootfind(x0);
-
-            if (tlow < thigh) {
-              if (tevent > tlow && tevent < thigh) {
-                ODEState<double> ei(this->ode.IRows());
-                ei.setZero();
-                tab->InterpolateRef(tevent, ei);
-                eventstates[i].push_back(ei);
-              }
-            } else {
-              if (tevent < tlow && tevent > thigh) {
-                ODEState<double> ei(this->ode.IRows());
-                ei.setZero();
-                tab->InterpolateRef(tevent, ei);
-                eventstates[i].push_back(ei);
-              }
+            if (thigh < tlow) {
+              std::swap(tlow, thigh);
             }
+
+
+            auto res = bisect(tlow, thigh, 2);
+            double tig =res[0];
+            double tlow2 = res[1];
+            double thigh2 = res[2];
+
+            double tevent = newton(tig);
+
+           if (tevent > tlow && tevent < thigh) {
+              ODEState<double> ei(this->ode.IRows());
+              ei.setZero();
+              tab->InterpolateRef(tevent, ei);
+              eventstates[i].push_back(ei);
+           } else {
+           
+             res = bisect(tlow2, thigh2, MaxEventIters);
+             tig = res[0];
+             tevent = newton(tig);
+
+             if (tevent > tlow && tevent < thigh) {
+                ODEState<double> ei(this->ode.IRows());
+                ei.setZero();
+                tab->InterpolateRef(tevent, ei);
+                eventstates[i].push_back(ei);
+             }// else give up
+           }
+
+
           }
         }
       }
