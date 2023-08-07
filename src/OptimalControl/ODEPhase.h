@@ -401,27 +401,17 @@ namespace ASSET {
       for (int i = 0; i < numBlocks; i++) {
         ODEDeriv<double> err_tmp(this->XVars());
 
+        if (i > 0 && i < (numBlocks - 1)) {
 
-        if (this->TranscriptionMode == Trapezoidal || this->TranscriptionMode == LGL5) {
-          if (i < (numBlocks - 1)) {
-            err_tmp = (2 * (yvecs[i] - yvecs[i + 1]) / (hs[i] + hs[i + 1])).cwiseAbs();
-          } else {
-            err_tmp = (2 * (yvecs[i] - yvecs[i - 1]) / (hs[i] + hs[i - 1])).cwiseAbs();
-          }
+        err_tmp = ((yvecs[i] - yvecs[i - 1]) / (hs[i] + hs[i - 1])).cwiseAbs()
+                    + ((yvecs[i + 1] - yvecs[i]) / (hs[i] + hs[i + 1])).cwiseAbs();
+
+        } else if (i == 0) {
+        err_tmp = (2 * (yvecs[i] - yvecs[i + 1]) / (hs[i] + hs[i + 1])).cwiseAbs();
         } else {
-          if (i > 0 && i < (numBlocks - 1)) {
-
-            err_tmp = ((yvecs[i] - yvecs[i - 1]) / (hs[i] + hs[i - 1])
-                       + (yvecs[i] - yvecs[i + 1]) / (hs[i] + hs[i + 1]))
-                          .cwiseAbs();
-          } else if (i == 0) {
-            err_tmp = (2 * (yvecs[i] - yvecs[i + 1]) / (hs[i] + hs[i + 1])).cwiseAbs();
-          } else {
-            err_tmp = (2 * (yvecs[i] - yvecs[i - 1]) / (hs[i] + hs[i - 1])).cwiseAbs();
-          }
+        err_tmp = (2 * (yvecs[i] - yvecs[i - 1]) / (hs[i] + hs[i - 1])).cwiseAbs();
         }
-
-
+        
         mesh_dist.col(i) = err_tmp.array().pow(1 / (this->Order + 1));
         mesh_errors.col(i) = err_tmp * std::pow(std::abs(hs[i]), this->Order + 1) * ErrorWeight;
       }
@@ -437,11 +427,11 @@ namespace ASSET {
 
       Integrator<DODE> Integ;
 
-      if (this->UVars() != 0) {
+      if (this->UVars() == 0 || this->ControlMode == BlockConstant) {
+        Integ = Integrator<DODE> {this->ode, this->integrator.DefStepSize};
+      } else {
         Integ = Integrator<DODE> {
             this->ode, this->integrator.DefStepSize, std::make_shared<LGLInterpTable>(this->Table)};
-      } else {
-        Integ = Integrator<DODE> {this->ode, this->integrator.DefStepSize};
       }
 
 
@@ -457,14 +447,11 @@ namespace ASSET {
       ODEState<double> Xin;
       ODEState<double> Xout;
 
-
       double T0 = this->ActiveTraj[0][this->TVar()];
       double TF = this->ActiveTraj.back()[this->TVar()];
 
       int BlockSize = this->numTranCardStates;
       int numBlocks = (this->ActiveTraj.size() - 1) / (BlockSize - 1);
-      ;
-
 
       mesh_errors.resize(this->XVars(), numBlocks + 1);
       mesh_dist.resize(this->XVars(), numBlocks + 1);
@@ -473,18 +460,21 @@ namespace ASSET {
       Eigen::MatrixXd tmp_mat(this->XVars(), this->ActiveTraj.size() - 1);
 
 
+      std::vector<ODEState<double>> Xins(this->ActiveTraj.size() - 1);
+      Eigen::VectorXd tfs(this->ActiveTraj.size() - 1);
+
       for (int i = 0; i < this->ActiveTraj.size() - 1; i++) {
-        int start = i;
-        int stop = (i + 1);
+        Xins[i] = this->ActiveTraj[i];
+        tfs[i] = this->ActiveTraj[i + 1][this->TVar()];
+      }
+      auto Xouts = Integ.integrate(Xins, tfs);
 
-        Xin = this->ActiveTraj[start];
-        double tf = this->ActiveTraj[stop][this->TVar()];
-        Xout = Integ.integrate(Xin, tf);
-
-        tmp_mat.col(i) = (Xout.head(this->XVars()) - this->ActiveTraj[stop].head(this->XVars())).cwiseAbs();
+      for (int i = 0; i < this->ActiveTraj.size() - 1; i++) {
+        tmp_mat.col(i) =
+            (Xouts[i].head(this->XVars()) - this->ActiveTraj[i + 1].head(this->XVars())).cwiseAbs();
       }
 
-
+      
       double max_err = tmp_mat.maxCoeff();
       ODEDeriv<double> evec(this->XVars());
 
@@ -503,6 +493,15 @@ namespace ASSET {
           evec += tmp_mat.col(start + j) / (BlockSize - 1);
         }
 
+        evec.setZero();
+
+        for (int j = 0; j < BlockSize - 1; j++) {
+          double ti = this->ActiveTraj[start + j][this->TVar()];
+          double tn = this->ActiveTraj[start + j + 1][this->TVar()];
+
+          evec += tmp_mat.col(start + j) * std::abs((tn - ti) / (tf - t0));
+          
+        }
 
         double h = std::abs(tf - t0);
         mesh_errors.col(i) = evec;
@@ -514,6 +513,7 @@ namespace ASSET {
       mesh_dist.col(numBlocks) = mesh_dist.col(numBlocks - 1);
       tsnd[numBlocks] = 1.0;
     }
+
 
 
     template<class PyClass>
