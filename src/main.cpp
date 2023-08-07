@@ -6,7 +6,7 @@
 #include "Utils/ASSET_Utils.h"
 #include "VectorFunctions/ASSET_VectorFunctions.h"
 #include "pch.h"
-
+#include "ASSET_Extensions.h"
 
 using namespace ASSET;
 using namespace rubber_types;
@@ -159,4 +159,7 @@ PYBIND11_MODULE(asset, m) {
   OptimalControlBuild(reg, m);
   UtilsBuild(m);
   AstroBuild(reg, m);
+
+  ExtensionsBuild(reg, reg.extmod);
+
 }
