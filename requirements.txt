@@ -4,5 +4,4 @@ sphinx
 furo
 spiceypy
 breathe
-sphinx-rtd-theme
 exhale
