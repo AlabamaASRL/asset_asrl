@@ -1,15 +1,15 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="./">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
 
-    <!-- Generated with Sphinx 6.2.1 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>Installation - ASSET 0.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -226,16 +226,16 @@
         </div>
         <article role="main">
           <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h1>
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
 <p>ASSET is packaged using the standard python conventions, which makes getting started</p>
 <section id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading">#</a></h2>
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">#</a></h2>
 <p>Most of ASSET’s dependencies are automatically installed during the <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> process, or are included as submodules in the git repository.
 However, some libraries do require manual installation.
 Intel’s Math Kernel Library (MKL) is mandatory for users on x86 systems, and although only officially supported on Intel, our dev team has seen comparable performance using AMD.
 If you are using an ARM architecture (Apple M1)</p>
 <section id="mkl">
-<h3>MKL<a class="headerlink" href="#mkl" title="Permalink to this heading">#</a></h3>
+<h3>MKL<a class="headerlink" href="#mkl" title="Link to this heading">#</a></h3>
 <p>In our opinion, the easiest way to install MKL is using <a class="reference external" href="https://anaconda.org/intel">Intel’s Anaconda channel</a>.
 For the default configuration, run <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">-c</span> <span class="pre">intel</span> <span class="pre">mkl-devel</span> <span class="pre">mkl-static</span></code> to download the static MKL libraries for your platform.
 Then you must set the <code class="docutils literal notranslate"><span class="pre">MKLROOT</span></code> environment variable to point to the install location.
@@ -243,7 +243,7 @@ On Unix-based systems, this will be the root of your current conda environment, 
 For example, your <code class="docutils literal notranslate"><span class="pre">MKLROOT</span></code> may be <code class="docutils literal notranslate"><span class="pre">~/.conda/envs/asset/</span></code>.</p>
 </section>
 <section id="doxygen">
-<h3>Doxygen<a class="headerlink" href="#doxygen" title="Permalink to this heading">#</a></h3>
+<h3>Doxygen<a class="headerlink" href="#doxygen" title="Link to this heading">#</a></h3>
 <p>Again, doxygen is only required if you plan to build documentation locally.</p>
 </section>
 </section>
@@ -303,9 +303,9 @@ For example, your <code class="docutils literal notranslate"><span class="pre">M
       
     </aside>
   </div>
-</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
-    <script src="_static/scripts/furo.js"></script>
+</div><script src="_static/documentation_options.js?v=e259d695"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=32e29ea5"></script>
     </body>
 </html>

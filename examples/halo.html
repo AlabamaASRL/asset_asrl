@@ -1,15 +1,15 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Zermelo’s Problem" href="zermelo.html" /><link rel="prev" title="Hyper-Sensitive Optimal Control Problem" href="HyperSensitive.html" />
 
-    <!-- Generated with Sphinx 6.2.1 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>Orbit Family Continuation - ASSET 0.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -226,12 +226,12 @@
         </div>
         <article role="main">
           <section id="orbit-family-continuation">
-<h1>Orbit Family Continuation<a class="headerlink" href="#orbit-family-continuation" title="Permalink to this heading">#</a></h1>
+<h1>Orbit Family Continuation<a class="headerlink" href="#orbit-family-continuation" title="Link to this heading">#</a></h1>
 <p>A use case familiar to all astrodynamicists is the generation of orbit families via continuation from an initial orbit.
 ASSET makes reconvergence of slightly perturbed solutions quick and simple by using common python idioms.
 The scenario we will investigate is in the Earth-Moon CR3BP, where we want to build the L1 Planar and Northern Halo families from two approximate initial conditions.</p>
 <section id="problem-setup">
-<h2>Problem Setup<a class="headerlink" href="#problem-setup" title="Permalink to this heading">#</a></h2>
+<h2>Problem Setup<a class="headerlink" href="#problem-setup" title="Link to this heading">#</a></h2>
 <p>All python scripts begin by importing necessary external packages.
 Obviously, we will need ASSET, but we will also use numpy for arrays and matplotlib for graphing.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
@@ -288,7 +288,7 @@ The <code class="code docutils literal notranslate"><span class="pre">dt</span><
 </div>
 </section>
 <section id="constructing-a-generic-periodic-solver">
-<h2>Constructing a Generic Periodic Solver<a class="headerlink" href="#constructing-a-generic-periodic-solver" title="Permalink to this heading">#</a></h2>
+<h2>Constructing a Generic Periodic Solver<a class="headerlink" href="#constructing-a-generic-periodic-solver" title="Link to this heading">#</a></h2>
 <p>Astrodynamicists are certainly aware that the characteristic that defines periodicity in the CR3BP is an orthogonal crossing of the x-z plane.
 In order to have good code re-usability, let’s define a function that will try to solve a periodic orbit given some inital guess of state and duration.
 Here’s the function signature we will use: <code class="code docutils literal notranslate"><span class="pre">def</span> <span class="pre">solvePeriodic(ig,</span> <span class="pre">tf,</span> <span class="pre">fixInit=[0,</span> <span class="pre">1,</span> <span class="pre">2]):</span></code>
@@ -364,7 +364,7 @@ Then a call to <code class="code docutils literal notranslate"><span class="pre"
 <p>All that remains is to extract the result, which is done via <code class="code docutils literal notranslate"><span class="pre">returnTraj()</span></code>.</p>
 </section>
 <section id="performing-continuation">
-<h2>Performing Continuation<a class="headerlink" href="#performing-continuation" title="Permalink to this heading">#</a></h2>
+<h2>Performing Continuation<a class="headerlink" href="#performing-continuation" title="Link to this heading">#</a></h2>
 <p>In order to generate an orbit family, it is not sufficient to solve only <em>one</em> orbit, so let’s create another function that performs continuation by calling <code class="code docutils literal notranslate"><span class="pre">solvePeriodic</span></code> over a range of inputs.
 Rudimentary continuation increments some parameter of the orbit, and then re-solves for a new orbit with the different parameter.
 Also, most orbit families don’t go on forever, so we need a way to stop the progression.
@@ -413,7 +413,7 @@ Then, the specified term is incremented and the <code class="code docutils liter
 Of course, this approach doesn’t have any error handling if an orbit doesn’t converge, but we’ve shown that a first-pass approximation can be implemented with very basic knowledge of python capabilities.</p>
 </section>
 <section id="running-and-plotting">
-<h2>Running and Plotting<a class="headerlink" href="#running-and-plotting" title="Permalink to this heading">#</a></h2>
+<h2>Running and Plotting<a class="headerlink" href="#running-and-plotting" title="Link to this heading">#</a></h2>
 <p>Since we’ve put in the work up front to produce functions that capture the generic concepts of periodicity and continuation, calculating some specific orbit family can be done with minimal code.
 First, here’s a quick plotting function to graph the list of trajectories we expect to recieve from <code class="code docutils literal notranslate"><span class="pre">contin</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plotTrajList</span><span class="p">(</span><span class="n">tList</span><span class="p">,</span> <span class="n">proj</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -505,7 +505,7 @@ Again, we truncate early.</p>
 <a class="reference internal image-reference" href="../_images/Halo.svg"><img alt="../_images/Halo.svg" src="../_images/Halo.svg" width="100%" /></a>
 </figure>
 <section id="full-code">
-<h3>Full Code<a class="headerlink" href="#full-code" title="Permalink to this heading">#</a></h3>
+<h3>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.AstroModels</span> <span class="kn">import</span> <span class="n">CR3BP</span>
 <span class="kn">import</span> <span class="nn">asset_asrl.Astro.Constants</span> <span class="k">as</span> <span class="nn">c</span>
@@ -752,10 +752,10 @@ Again, we truncate early.</p>
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
+</div><script src="../_static/documentation_options.js?v=e259d695"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

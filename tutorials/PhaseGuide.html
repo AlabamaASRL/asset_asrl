@@ -1,15 +1,15 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Optimal Control Problem Tutorial" href="OptimalControlProblem.html" /><link rel="prev" title="Integrator Tutorial" href="IntegratorGuide.html" />
 
-    <!-- Generated with Sphinx 6.2.1 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>Optimal Control Phase Tutorial - ASSET 0.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -226,7 +226,7 @@
         </div>
         <article role="main">
           <section id="optimal-control-phase-tutorial">
-<span id="phase-guide"></span><h1>Optimal Control Phase Tutorial<a class="headerlink" href="#optimal-control-phase-tutorial" title="Permalink to this heading">#</a></h1>
+<span id="phase-guide"></span><h1>Optimal Control Phase Tutorial<a class="headerlink" href="#optimal-control-phase-tutorial" title="Link to this heading">#</a></h1>
 <p>Like many other optimal control packages, ASSET divides a large, potentially heterogeneous optimal control
 problem into distinct phases. In ASSET, the dynamics along a phase of the trajectory are governed by one ODE and
 discretized using a single transcription scheme. We may apply custom constraints and objectives to phases and optimize them by themselves, or
@@ -241,7 +241,7 @@ we will utilize the trivial ODE below as a reference while we discuss the phase 
 </pre></div>
 </div>
 <section id="initialization">
-<h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this heading">#</a></h2>
+<h2>Initialization<a class="headerlink" href="#initialization" title="Link to this heading">#</a></h2>
 <p>Given some ASSET ODE, we can construct a phase object
 using it’s <code class="code docutils literal notranslate"><span class="pre">.phase</span></code> method. At minimum, we must first specify the transcription mode for the phase dynamics as a string.
 Here we have chosen, third order Legendre-Gauss-Lobatto collocation or <code class="code docutils literal notranslate"><span class="pre">'LGL3'</span></code>, which approximates the trajectory as piecewise cubic splines. We can also
@@ -323,12 +323,12 @@ Note that these are not the same as ODE parameters. We can add static parameters
 </div>
 <div class="table-wrapper colwidths-given docutils container" id="id1">
 <table class="docutils align-default" id="id1">
-<caption><span class="caption-text">List of Phase Transcription Options</span><a class="headerlink" href="#id1" title="Permalink to this table">#</a></caption>
+<caption><span class="caption-text">List of Phase Transcription Options</span><a class="headerlink" href="#id1" title="Link to this table">#</a></caption>
 <colgroup>
-<col style="width: 15%" />
-<col style="width: 25%" />
-<col style="width: 20%" />
-<col style="width: 40%" />
+<col style="width: 15.0%" />
+<col style="width: 25.0%" />
+<col style="width: 20.0%" />
+<col style="width: 40.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Name</p></th>
@@ -375,13 +375,13 @@ Two states per segment.</p></td>
 </div>
 </section>
 <section id="constraints-and-objectives">
-<span id="conobj-guide"></span><h2>Constraints and Objectives<a class="headerlink" href="#constraints-and-objectives" title="Permalink to this heading">#</a></h2>
+<span id="conobj-guide"></span><h2>Constraints and Objectives<a class="headerlink" href="#constraints-and-objectives" title="Link to this heading">#</a></h2>
 <p>Before discussing the interface for adding different types of constraints, it is helpful to briefly overview how we represent a phases’s variables
 when formulating an optimization problem. In general we partition a trajectory with <span class="math notranslate nohighlight">\(n\)</span> states into each time-varying portion <span class="math notranslate nohighlight">\(\vec{V}_i\)</span> of the ODE’s inputs followed by the
 ODE parameters, <span class="math notranslate nohighlight">\(\vec{P}\)</span>, and the phase’s static parameters, <span class="math notranslate nohighlight">\(\vec{S}\)</span>, below.</p>
 <div class="math-wrapper docutils container" id="eq-1">
 <span id="equation-eq-1"></span><div class="math notranslate nohighlight" id="eq-1">
-<span id="equation-eq-1"></span><span class="eqno">(1)<a class="headerlink" href="#eq-1" title="Permalink to this equation">#</a></span>\[\begin{split}\vec{x} = \begin{bmatrix}
+<span id="equation-eq-1"></span><span class="eqno">(1)<a class="headerlink" href="#eq-1" title="Link to this equation">#</a></span>\[\begin{split}\vec{x} = \begin{bmatrix}
            \vec{V}_1     \\
            \vec{V}_2     \\
            \vdots        \\
@@ -398,11 +398,11 @@ and provide an interface that is invariant to the number of segments, <code clas
 vector. A complete list of the currently allowed phase regions is listed below and we will discuss how you can use them in the next section.</p>
 <div class="table-wrapper colwidths-given docutils container" id="id2">
 <table class="docutils align-default" id="id2">
-<caption><span class="caption-text">Phase Regions</span><a class="headerlink" href="#id2" title="Permalink to this table">#</a></caption>
+<caption><span class="caption-text">Phase Regions</span><a class="headerlink" href="#id2" title="Link to this table">#</a></caption>
 <colgroup>
-<col style="width: 15%" />
-<col style="width: 50%" />
-<col style="width: 35%" />
+<col style="width: 15.0%" />
+<col style="width: 50.0%" />
+<col style="width: 35.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Phase Region</p></th>
@@ -447,7 +447,7 @@ vector. A complete list of the currently allowed phase regions is listed below a
 </table>
 </div>
 <section id="equality-constraints">
-<h3>Equality Constraints<a class="headerlink" href="#equality-constraints" title="Permalink to this heading">#</a></h3>
+<h3>Equality Constraints<a class="headerlink" href="#equality-constraints" title="Link to this heading">#</a></h3>
 <p>Equality constraints of the form <span class="math notranslate nohighlight">\(\vec{h}(\vec{x}) = \vec{0}\)</span>, can be added to a phase using the <code class="code docutils literal notranslate"><span class="pre">.addEqualCon</span></code> method. First we specify
 the phase region to which the constraint will be applied followed by the equality
 constraint itself (an ASSET vector (or scalar) function). Next, we specify which of the indices of time-varying input variables at the phase region,
@@ -572,7 +572,7 @@ so common that we also provide the <code class="code docutils literal notranslat
 </div>
 </section>
 <section id="inequality-constraints">
-<h3>Inequality Constraints<a class="headerlink" href="#inequality-constraints" title="Permalink to this heading">#</a></h3>
+<h3>Inequality Constraints<a class="headerlink" href="#inequality-constraints" title="Link to this heading">#</a></h3>
 <p>Adding general inequality constraints, using <code class="code docutils literal notranslate"><span class="pre">.addInequalCon</span></code>, works exactly the same as it did for <code class="code docutils literal notranslate"><span class="pre">.addEqualCon</span></code>. The only difference
 is that our functions should be constraints of the form <span class="math notranslate nohighlight">\(\vec{g}(\vec{x}) \leq \vec{0}\)</span>. In other words, we assume that our function is in the feasible region whenever
 its value is negative. For example, if we wanted to add a constraint specifying that all of the initial time-varying input variables, ODE parameters, and the phase’s static
@@ -752,7 +752,7 @@ a phase, we can also place bounds on the changes in variables as shown below.</p
 </div>
 </section>
 <section id="state-objectives">
-<h3>State Objectives<a class="headerlink" href="#state-objectives" title="Permalink to this heading">#</a></h3>
+<h3>State Objectives<a class="headerlink" href="#state-objectives" title="Link to this heading">#</a></h3>
 <p>The simplest type of objective function that we can add to a phase is a state objective. It is a ScalarFunction that we
 wish to directly minimize that takes some or all of the variables at a phase region. Note, if you are trying to maximize something you should
 multiply it’s value by a negative constant, as ASSET interprets all objective values as values to be minimized. Generalized state objectives can be added to a phase using the <code class="code docutils literal notranslate"><span class="pre">.addStateObjective</span></code> function as shown below. The same rules governing
@@ -817,7 +817,7 @@ a scale factor. As before, to maximize the change, make the scale factor negativ
 </div>
 </section>
 <section id="integral-objectives">
-<h3>Integral Objectives<a class="headerlink" href="#integral-objectives" title="Permalink to this heading">#</a></h3>
+<h3>Integral Objectives<a class="headerlink" href="#integral-objectives" title="Link to this heading">#</a></h3>
 <p>The other common type of objective functions that we can add to a <code class="code docutils literal notranslate"><span class="pre">phase</span></code> are integral objectives of the form.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
@@ -848,7 +848,7 @@ indices from the various variable groupings we want to forward to the integrand 
 </div>
 </section>
 <section id="integral-parameter-functions">
-<h3>Integral Parameter Functions<a class="headerlink" href="#integral-parameter-functions" title="Permalink to this heading">#</a></h3>
+<h3>Integral Parameter Functions<a class="headerlink" href="#integral-parameter-functions" title="Link to this heading">#</a></h3>
 <p>The final class of functions that we can add to a phase are what we call “integral parameter functions”. These are used along with static parameters
 to facilitate integral constraints on a <code class="code docutils literal notranslate"><span class="pre">phase</span></code>. An integral parameter function is a special equality constraint of the form.</p>
 <div class="math-wrapper docutils container">
@@ -882,7 +882,7 @@ of the static parameter the integral value will be assigned to as the last argum
 </section>
 </section>
 <section id="solving-and-optimizing">
-<h2>Solving and Optimizing<a class="headerlink" href="#solving-and-optimizing" title="Permalink to this heading">#</a></h2>
+<h2>Solving and Optimizing<a class="headerlink" href="#solving-and-optimizing" title="Link to this heading">#</a></h2>
 <p>After constructing a phase, supplying an initial guess, and adding constraints/objectives, we can now use PSIOPT to solve or optimize
 the trajectory. The settings of the optimizer can be manipulated through a reference to PSIOPT attached to the phase object. However, calls to
 the optimizer are handled through the phase itself as shown below. Both of these topics are handled in more details in the section on <a class="reference internal" href="PSIOPT.html#psiopt-guide"><span class="std std-ref">PSIOPT</span></a>.</p>
@@ -958,9 +958,9 @@ the spacing and number of segments to meet desired error tolerances. See the  <a
 </div>
 </section>
 <section id="miscellaneous-topics">
-<h2>Miscellaneous Topics<a class="headerlink" href="#miscellaneous-topics" title="Permalink to this heading">#</a></h2>
+<h2>Miscellaneous Topics<a class="headerlink" href="#miscellaneous-topics" title="Link to this heading">#</a></h2>
 <section id="shooting-method">
-<h3>Shooting Method<a class="headerlink" href="#shooting-method" title="Permalink to this heading">#</a></h3>
+<h3>Shooting Method<a class="headerlink" href="#shooting-method" title="Link to this heading">#</a></h3>
 <p>When using the Central Shooting transcription, under the hood, a phase uses an integrator for the corresponding ODE to formulate the shooting constraints and its derivatives.
 This <code class="code docutils literal notranslate"><span class="pre">integrator</span></code> is always configured to use the <code class="code docutils literal notranslate"><span class="pre">&quot;DOPRI87&quot;</span></code> integration scheme, but users can modify the tolerances as well as the minimum and
 maximum step sizes of the integrator to improve performance or increase accuracy. Users can access this <code class="code docutils literal notranslate"><span class="pre">integrator</span></code> using the <code class="code docutils literal notranslate"><span class="pre">.integrator</span></code> field of the phase and then
@@ -979,7 +979,7 @@ you should modify this to be something near what you anticipate the real average
 </div>
 </section>
 <section id="control-rate-constraints">
-<h3>Control Rate Constraints<a class="headerlink" href="#control-rate-constraints" title="Permalink to this heading">#</a></h3>
+<h3>Control Rate Constraints<a class="headerlink" href="#control-rate-constraints" title="Link to this heading">#</a></h3>
 <p>You may have noticed from the previous examples, that we do not provide an explicit method for constraining control rates <span class="math notranslate nohighlight">\(\dot{\vec{U}}\)</span>.
 However, this can be accomplished manually by using a custom constraint with phase region <code class="code docutils literal notranslate"><span class="pre">'PairWisePath'</span></code>.
 For example, if we wanted to bound the rates of the control variables (<code class="code docutils literal notranslate"><span class="pre">[7,8,9]</span></code> in this example) to be between -1 and 1, we could do so with the following code.
@@ -1008,7 +1008,7 @@ that is over constrained and structurally singular. Finally, if you need more ac
 to state variables and their rates become the new controls.</p>
 </section>
 <section id="what-happens-if-i-over-constrain-my-problem">
-<h3>What happens if I over constrain my problem?<a class="headerlink" href="#what-happens-if-i-over-constrain-my-problem" title="Permalink to this heading">#</a></h3>
+<h3>What happens if I over constrain my problem?<a class="headerlink" href="#what-happens-if-i-over-constrain-my-problem" title="Link to this heading">#</a></h3>
 <p>We do check that the total number of equality constraints added to a problem (dynamics, mesh-spacing, and user equality constraints) is less than
 the total number of variables. However, most cases of over constraining are much more subtle than this and happen when you have added redundant or conflicting
 constraints. We do not explicitly check for this at the moment. An example of what we mean by this is illustrated below. Let’s say we needed to constrain the duration
@@ -1035,11 +1035,11 @@ poor or erratic performance by the optimizer. Sometimes the optimizer’s pivoti
 diverge immediately. In conclusion, don’t over constrain your problems…</p>
 </section>
 <section id="what-happens-if-i-add-multiple-objectives">
-<h3>What happens if I add multiple objectives?<a class="headerlink" href="#what-happens-if-i-add-multiple-objectives" title="Permalink to this heading">#</a></h3>
+<h3>What happens if I add multiple objectives?<a class="headerlink" href="#what-happens-if-i-add-multiple-objectives" title="Link to this heading">#</a></h3>
 <p>A phase has no restriction of the number of objectives that may be added. If multiple objectives are added, the optimizer will implicitly sum all of their values.</p>
 </section>
 <section id="bad-initial-guesses">
-<h3>Bad Initial Guesses<a class="headerlink" href="#bad-initial-guesses" title="Permalink to this heading">#</a></h3>
+<h3>Bad Initial Guesses<a class="headerlink" href="#bad-initial-guesses" title="Link to this heading">#</a></h3>
 <p>By default we take whatever the supplied initial guess to a phase is and use the specified transcription scheme’s interpolation method to generate the initial mesh.
 For compressed collocation methods, when the initial guess is very poor, this can induce osculations in the initial interpolated mesh that are not present in the initial guess
 . This can be avoided by instead interpolating the initial mesh linearly from the supplied initial guess. You can specify the method for the initial interpolation of a phase as shown below.
@@ -1056,7 +1056,7 @@ If the user supplied initial guess is linear or constant, we recommend using the
 </div>
 </section>
 <section id="reintegrating-solutions">
-<h3>Reintegrating Solutions<a class="headerlink" href="#reintegrating-solutions" title="Permalink to this heading">#</a></h3>
+<h3>Reintegrating Solutions<a class="headerlink" href="#reintegrating-solutions" title="Link to this heading">#</a></h3>
 <p>Reintegration of a phase’s trajectory can be accomplished using an ODE’s integrator and the tabular
 form of the solution returned by the <code class="code docutils literal notranslate"><span class="pre">phase.returnTrajTable</span></code> method. To do this, supply the <code class="code docutils literal notranslate"><span class="pre">LGLInterpTable</span></code>
 object returned by <code class="code docutils literal notranslate"><span class="pre">returnTrajTable</span></code> to the constructor of the ODE’s integrator type. This will automatically
@@ -1088,7 +1088,7 @@ precisely between each time in the converged trajectory.</p>
 </div>
 </section>
 <section id="referencing-and-removing-constraints">
-<span id="phaseremove-guide"></span><h3>Referencing and Removing Constraints<a class="headerlink" href="#referencing-and-removing-constraints" title="Permalink to this heading">#</a></h3>
+<span id="phaseremove-guide"></span><h3>Referencing and Removing Constraints<a class="headerlink" href="#referencing-and-removing-constraints" title="Link to this heading">#</a></h3>
 <p>When adding any of the 5 types of constraints/objectives covered <a class="reference internal" href="#conobj-guide"><span class="std std-ref">previously</span></a>, an integer identifier or list of integers is returned by the
 method. This identifier can be used to remove a constraint/objective from the problem. This can be quite useful when you
 want to express some homotopic or continuation scheme without having to create a new phase at each step. Given the identifier for
@@ -1141,7 +1141,7 @@ a function of a certain type, it can be removed from the phase using the corresp
 </div>
 </section>
 <section id="retrieving-constraint-violations-and-multipliers">
-<h3>Retrieving Constraint Violations and Multipliers<a class="headerlink" href="#retrieving-constraint-violations-and-multipliers" title="Permalink to this heading">#</a></h3>
+<h3>Retrieving Constraint Violations and Multipliers<a class="headerlink" href="#retrieving-constraint-violations-and-multipliers" title="Link to this heading">#</a></h3>
 <p>Immediately after a call to PSIOPT, users can retrieve the constraint violations and Lagrange multipliers associated with user applied constraints
 as well as the dynamics transcription and control spline constraints. This can be helpful when debugging non-converging problems. For equality and inequality constraints, constraint
 violations and multipliers are retrieved by supplying a constraint functions id to the phase’s <code class="code docutils literal notranslate"><span class="pre">.return####Vals(id)</span></code> and <code class="code docutils literal notranslate"><span class="pre">.return####Lmults(id)</span></code> methods as shown below.
@@ -1279,10 +1279,10 @@ the returned lists will be empty.</p>
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
+</div><script src="../_static/documentation_options.js?v=e259d695"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

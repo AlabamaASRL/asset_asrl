@@ -1,15 +1,15 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="Vector Functions" href="vectorfunctions.html" />
 
-    <!-- Generated with Sphinx 6.2.1 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>ASSET Astro Library - ASSET 0.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -226,7 +226,7 @@
         </div>
         <article role="main">
           <section id="asset-astro-library">
-<h1>ASSET Astro Library<a class="headerlink" href="#asset-astro-library" title="Permalink to this heading">#</a></h1>
+<h1>ASSET Astro Library<a class="headerlink" href="#asset-astro-library" title="Link to this heading">#</a></h1>
 <p>Included with the ASSET install are a subset of dynamical models that are available for use through the Python interface.
 These models include standard two-body, circular restricted three body problem (CR3BP), ephemeris, and low-thrust models.
 The Python implementation of these files can be found in asset/src/asset_asrl/Astro.
@@ -237,7 +237,7 @@ Below we will demonstrate some of the sample models that can be found.</p>
 <strong>While these are available to use, use them at your own risk.</strong></p>
 </div>
 <section id="example-models">
-<h2>Example Models<a class="headerlink" href="#example-models" title="Permalink to this heading">#</a></h2>
+<h2>Example Models<a class="headerlink" href="#example-models" title="Link to this heading">#</a></h2>
 <p>These simply demonstrate how to set setup a given ODE. For more information on how to use these ODEs with ASSET see <a class="reference internal" href="../tutorials/tutorials.html#tutorials"><span class="std std-ref">Tutorials</span></a>.
 All of the constants used are assumed to be meters and seconds. This convention <strong>needs</strong> to be maintained for compatibility with the internals of the models.
 With the given inputs to the frames (<span class="math notranslate nohighlight">\(\mu\)</span> and <span class="math notranslate nohighlight">\(l^*\)</span>, which is the gravity parameter and characteristic length of the system respectively), other characteristic values
@@ -264,7 +264,7 @@ consider effect of  the expenditure of propellant during their course of use. Th
 as demonstrated in <a class="reference internal" href="../tutorials/ODEGuide.html#ode-tutorial"><span class="std std-ref">ODE Tutorial</span></a>.</p>
 </div>
 <section id="two-body-ballistic">
-<h3>Two-Body Ballistic<a class="headerlink" href="#two-body-ballistic" title="Permalink to this heading">#</a></h3>
+<h3>Two-Body Ballistic<a class="headerlink" href="#two-body-ballistic" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.AstroModels</span> <span class="kn">import</span> <span class="n">TwoBody</span>
 <span class="kn">import</span> <span class="nn">asset_asrl.Astro.Constants</span> <span class="k">as</span> <span class="nn">c</span>
@@ -279,7 +279,7 @@ as demonstrated in <a class="reference internal" href="../tutorials/ODEGuide.htm
 </div>
 </section>
 <section id="two-body-low-thrust">
-<h3>Two-Body Low-Thrust<a class="headerlink" href="#two-body-low-thrust" title="Permalink to this heading">#</a></h3>
+<h3>Two-Body Low-Thrust<a class="headerlink" href="#two-body-low-thrust" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.AstroModels</span> <span class="kn">import</span> <span class="n">TwoBody_LT</span>
 <span class="kn">import</span> <span class="nn">asset_asrl.Astro.Constants</span> <span class="k">as</span> <span class="nn">c</span>
@@ -298,7 +298,7 @@ as demonstrated in <a class="reference internal" href="../tutorials/ODEGuide.htm
 </div>
 </section>
 <section id="cr3bp-ballistic">
-<h3>CR3BP Ballistic<a class="headerlink" href="#cr3bp-ballistic" title="Permalink to this heading">#</a></h3>
+<h3>CR3BP Ballistic<a class="headerlink" href="#cr3bp-ballistic" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.AstroModels</span> <span class="kn">import</span> <span class="n">CR3BP</span>
 <span class="kn">import</span> <span class="nn">asset_asrl.Astro.Constants</span> <span class="k">as</span> <span class="nn">c</span>
@@ -314,7 +314,7 @@ as demonstrated in <a class="reference internal" href="../tutorials/ODEGuide.htm
 </div>
 </section>
 <section id="cr3bp-low-thrust">
-<h3>CR3BP Low-Thrust<a class="headerlink" href="#cr3bp-low-thrust" title="Permalink to this heading">#</a></h3>
+<h3>CR3BP Low-Thrust<a class="headerlink" href="#cr3bp-low-thrust" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.AstroModels</span> <span class="kn">import</span> <span class="n">CR3BP_LT</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.Extensions.ThrusterModels</span> <span class="kn">import</span> <span class="n">LowThrustAcc</span>
@@ -337,11 +337,11 @@ as demonstrated in <a class="reference internal" href="../tutorials/ODEGuide.htm
 </section>
 </section>
 <section id="ephemeris-models">
-<h2>Ephemeris Models<a class="headerlink" href="#ephemeris-models" title="Permalink to this heading">#</a></h2>
+<h2>Ephemeris Models<a class="headerlink" href="#ephemeris-models" title="Link to this heading">#</a></h2>
 <p>Below are examples of ephemeris models implemented in the Astro library. You will need to have a working install of spiceypy, as well as Spice ephemeris kernels, along with all necessary items to use spiceypy.
 Your Spice Kernel will need to have information regarding all bodies you wish to add.</p>
 <section id="eppr-ballistic">
-<h3>EPPR Ballistic<a class="headerlink" href="#eppr-ballistic" title="Permalink to this heading">#</a></h3>
+<h3>EPPR Ballistic<a class="headerlink" href="#eppr-ballistic" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.AstroModels</span> <span class="kn">import</span> <span class="n">EPPR</span><span class="p">,</span> <span class="n">EPPRFrame</span>
 <span class="kn">import</span> <span class="nn">asset_asrl.Astro.Constants</span> <span class="k">as</span> <span class="nn">c</span>
@@ -376,7 +376,7 @@ Your Spice Kernel will need to have information regarding all bodies you wish to
 </div>
 </section>
 <section id="eppr-low-thrust">
-<h3>EPPR Low-Thrust<a class="headerlink" href="#eppr-low-thrust" title="Permalink to this heading">#</a></h3>
+<h3>EPPR Low-Thrust<a class="headerlink" href="#eppr-low-thrust" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.AstroModels</span> <span class="kn">import</span> <span class="n">EPPR_LT</span><span class="p">,</span> <span class="n">EPPRFrame</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.Extensions.ThrusterModels</span> <span class="kn">import</span> <span class="n">LowThrustAcc</span>
@@ -417,7 +417,7 @@ Your Spice Kernel will need to have information regarding all bodies you wish to
 </div>
 </section>
 <section id="nbody-ballistic">
-<h3>NBody Ballistic<a class="headerlink" href="#nbody-ballistic" title="Permalink to this heading">#</a></h3>
+<h3>NBody Ballistic<a class="headerlink" href="#nbody-ballistic" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.AstroModels</span> <span class="kn">import</span> <span class="n">NBody</span><span class="p">,</span> <span class="n">NBodyFrame</span>
 <span class="kn">import</span> <span class="nn">asset_asrl.Astro.Constants</span> <span class="k">as</span> <span class="nn">c</span>
@@ -451,7 +451,7 @@ Your Spice Kernel will need to have information regarding all bodies you wish to
 </div>
 </section>
 <section id="nbody-low-thrust">
-<h3>NBody Low-Thrust<a class="headerlink" href="#nbody-low-thrust" title="Permalink to this heading">#</a></h3>
+<h3>NBody Low-Thrust<a class="headerlink" href="#nbody-low-thrust" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.AstroModels</span> <span class="kn">import</span> <span class="n">NBody_LT</span><span class="p">,</span> <span class="n">NBodyFrame</span>
 <span class="kn">from</span> <span class="nn">asset_asrl.Astro.Extensions.ThrusterModels</span> <span class="kn">import</span> <span class="n">LowThrustAcc</span>
@@ -566,10 +566,10 @@ Your Spice Kernel will need to have information regarding all bodies you wish to
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
+</div><script src="../_static/documentation_options.js?v=e259d695"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

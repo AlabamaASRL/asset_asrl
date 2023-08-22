@@ -1,15 +1,15 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Multi-Phase Zermelo’s Problem" href="zermelolink.html" /><link rel="prev" title="Orbit Family Continuation" href="halo.html" />
 
-    <!-- Generated with Sphinx 6.2.1 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>Zermelo’s Problem - ASSET 0.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -226,7 +226,7 @@
         </div>
         <article role="main">
           <section id="zermelo-s-problem">
-<h1>Zermelo’s Problem<a class="headerlink" href="#zermelo-s-problem" title="Permalink to this heading">#</a></h1>
+<h1>Zermelo’s Problem<a class="headerlink" href="#zermelo-s-problem" title="Link to this heading">#</a></h1>
 <p>Ernst Zermelo’s question of optimal navigation is a classic in the field of optimal control.
 In this tutorial, we will demonstrate how ASSET can be used to construct a modular solution approach that allows the user to easily manipulate the conditions of the problem.
 These type of parameter estimation tasks were a core motivation during initial development, and although it requires some intermediate programming techniques, the return on investment is extremely compelling.
@@ -237,7 +237,7 @@ We’ll also be finding trajectories that optimize an objective instead of just 
 </dd>
 </dl>
 <section id="problem-setup">
-<h2>Problem Setup<a class="headerlink" href="#problem-setup" title="Permalink to this heading">#</a></h2>
+<h2>Problem Setup<a class="headerlink" href="#problem-setup" title="Link to this heading">#</a></h2>
 <p>You’re probably familiar with the standard set of import packages.
 Numpy and ASSET are required, and matplotlib is just my preferred graphing library.
 We’ll also go ahead and establish the standard shorthand conventions.</p>
@@ -344,7 +344,7 @@ In order to have a full suite of test functions, let’s define one that has var
 </div>
 </section>
 <section id="solver-function">
-<h2>Solver Function<a class="headerlink" href="#solver-function" title="Permalink to this heading">#</a></h2>
+<h2>Solver Function<a class="headerlink" href="#solver-function" title="Link to this heading">#</a></h2>
 <p>Just like in the periodic orbit example, it’s good practice to package up the solution code into its own function.
 There are four arguments that define this problem: Where you start, where you finish, how fast you go, and the wind conditions.
 Based on those inputs, we need to:</p>
@@ -404,7 +404,7 @@ Since time-optimal control is such a common question, it is built into ASSET dir
 The last item of note is that if we add an objective, we may want to set <code class="code docutils literal notranslate"><span class="pre">KKTtol</span></code>, which defines the satisfactory condition for optimality.</p>
 </section>
 <section id="running-and-plotting">
-<h2>Running and Plotting<a class="headerlink" href="#running-and-plotting" title="Permalink to this heading">#</a></h2>
+<h2>Running and Plotting<a class="headerlink" href="#running-and-plotting" title="Link to this heading">#</a></h2>
 <p>Now for the good stuff.
 The work we put in making things generic will allow us to quickly and concisely explore a large parameter space for this problem.
 We’ll start by comparing wind models.
@@ -470,7 +470,7 @@ That’s your job.
 ASSET just tries to help.</p>
 </section>
 <section id="full-source-listing">
-<h2>Full Source Listing<a class="headerlink" href="#full-source-listing" title="Permalink to this heading">#</a></h2>
+<h2>Full Source Listing<a class="headerlink" href="#full-source-listing" title="Link to this heading">#</a></h2>
 <p>Exercise for the reader: Write a time-varying wind function that incentivizes the optimizer to delay the start time of the trajectory.
 How would the phase boundary conditions need to change?</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
@@ -808,10 +808,10 @@ How would the phase boundary conditions need to change?</p>
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
+</div><script src="../_static/documentation_options.js?v=e259d695"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

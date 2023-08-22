@@ -1,15 +1,15 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="ODE Tutorial" href="ODEGuide.html" /><link rel="prev" title="Installing ASSET" href="Install.html" />
 
-    <!-- Generated with Sphinx 6.2.1 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>Vector Function Tutorial - ASSET 0.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -226,7 +226,7 @@
         </div>
         <article role="main">
           <section id="vector-function-tutorial">
-<span id="vectorfunction-guide"></span><h1>Vector Function Tutorial<a class="headerlink" href="#vector-function-tutorial" title="Permalink to this heading">#</a></h1>
+<span id="vectorfunction-guide"></span><h1>Vector Function Tutorial<a class="headerlink" href="#vector-function-tutorial" title="Link to this heading">#</a></h1>
 <p>One of the goals of ASSET is to provide users the ability to construct functions
 dynamically within Python that are able to be used by ASSET. By doing this we can simplify a user’s work-flow,
 where the benefits of high speed C++ code can be combined with the ease of use Python provides.
@@ -235,7 +235,7 @@ this is simple functional (in the programming sense) domain specific language fo
 mathematical Vector Functions that take a fixed number of inputs
 and produce a fixed number outputs, with both inputs and outputs assumed to be column vectors.</p>
 <section id="arguments">
-<h2>Arguments<a class="headerlink" href="#arguments" title="Permalink to this heading">#</a></h2>
+<h2>Arguments<a class="headerlink" href="#arguments" title="Link to this heading">#</a></h2>
 <p>Let us begin by importing ASSET and the VectorFunctions module which contains all types
 and functions defining the language. From this module, we will then import the Arguments type
 and give it a shorthand name. The <code class="code docutils literal notranslate"><span class="pre">Arguments</span></code> type is the base expression in the VectorFunction system
@@ -405,7 +405,7 @@ using head, tail, segment, etc..</p>
 </div>
 </section>
 <section id="standard-math-operations">
-<h2>Standard Math Operations<a class="headerlink" href="#standard-math-operations" title="Permalink to this heading">#</a></h2>
+<h2>Standard Math Operations<a class="headerlink" href="#standard-math-operations" title="Link to this heading">#</a></h2>
 <p>Having covered most everything related to constructing arguments, and their elements
 and sub-vectors, we can move on the to combining them together into meaningful mathematical functions.
 We should note that the result of any mathematical non-indexing operation will have
@@ -460,7 +460,7 @@ no issue, and may also scale a VectorFunction.</p>
 </div>
 </section>
 <section id="scalar-math-operations">
-<h2>Scalar Math Operations<a class="headerlink" href="#scalar-math-operations" title="Permalink to this heading">#</a></h2>
+<h2>Scalar Math Operations<a class="headerlink" href="#scalar-math-operations" title="Link to this heading">#</a></h2>
 <p>Next, we will move on to describe the standard mathematical functions that can be applied to scalar
 valued functions. These encompass most of the standard functions that can be found in python or C math libraries,
 such as sin, cos, tan, etc. All of these functions are stored inside the VectorFunctions module (which we have imported as <code class="code docutils literal notranslate"><span class="pre">vf</span></code>),
@@ -484,10 +484,10 @@ and can be called as shown below. A complete list of functions is given in the t
 </div>
 <div class="table-wrapper colwidths-given docutils container" id="id5">
 <table class="docutils align-default" id="id5">
-<caption><span class="caption-text">List of Scalar Math Functions</span><a class="headerlink" href="#id5" title="Permalink to this table">#</a></caption>
+<caption><span class="caption-text">List of Scalar Math Functions</span><a class="headerlink" href="#id5" title="Link to this table">#</a></caption>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 80%" />
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Function</p></th>
@@ -551,7 +551,7 @@ and can be called as shown below. A complete list of functions is given in the t
 </div>
 </section>
 <section id="vector-norms-and-normalizations">
-<h2>Vector Norms and Normalizations<a class="headerlink" href="#vector-norms-and-normalizations" title="Permalink to this heading">#</a></h2>
+<h2>Vector Norms and Normalizations<a class="headerlink" href="#vector-norms-and-normalizations" title="Link to this heading">#</a></h2>
 <p>For Vector valued functions, we also provide member functions that will compute various
 useful norms and transformations on vectors. While most of these could be computed using the math operations
 we have already covered, users should always use one of these methods if applicable, as the resulting expressions
@@ -582,11 +582,11 @@ and a complete list of such functions is given in the table below.</p>
 </div>
 <div class="table-wrapper colwidths-given docutils container" id="id6">
 <table class="docutils align-default" id="id6">
-<caption><span class="caption-text">List of Vector Norms and Normalizations</span><a class="headerlink" href="#id6" title="Permalink to this table">#</a></caption>
+<caption><span class="caption-text">List of Vector Norms and Normalizations</span><a class="headerlink" href="#id6" title="Link to this table">#</a></caption>
 <colgroup>
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 50%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 50.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Function</p></th>
@@ -644,7 +644,7 @@ and a complete list of such functions is given in the table below.</p>
 </div>
 </section>
 <section id="vector-products">
-<h2>Vector Products<a class="headerlink" href="#vector-products" title="Permalink to this heading">#</a></h2>
+<h2>Vector Products<a class="headerlink" href="#vector-products" title="Link to this heading">#</a></h2>
 <p>In addition to the standard binary math operations supported via operator overloads,
 we also provide member functions and free functions for performing various common vector operations.
 The most commonly used are the dot, cross, quaternion, and coefficient-wise products.
@@ -688,7 +688,7 @@ while the real part is the 4th element(ie: q =[qv,q4]).</p>
 </div>
 </section>
 <section id="stacking-outputs">
-<h2>Stacking Outputs<a class="headerlink" href="#stacking-outputs" title="Permalink to this heading">#</a></h2>
+<h2>Stacking Outputs<a class="headerlink" href="#stacking-outputs" title="Link to this heading">#</a></h2>
 <p>Up to this point, we have looked at partitioning and operating on the outputs
 of other functions, and have not addressed how the outputs of functions may be combined together
 into a larger single function. This can be accomplished using the <strong>VERY IMPORTANT</strong> <code class="code docutils literal notranslate"><span class="pre">vf.stack()</span></code> method.
@@ -721,7 +721,7 @@ for this second signature, you may mix in arbitrary floats and numpy vectors tha
 </div>
 </section>
 <section id="matrix-operations">
-<h2>Matrix Operations<a class="headerlink" href="#matrix-operations" title="Permalink to this heading">#</a></h2>
+<h2>Matrix Operations<a class="headerlink" href="#matrix-operations" title="Link to this heading">#</a></h2>
 <p>While ASSET is and always will be a language for defining functions with vector valued
 inputs and outputs, we do have limited but growing support for interpreting VectorFunctions
 as matrices inside of expressions. This is supported through the <code class="code docutils literal notranslate"><span class="pre">vf.ColMatrix</span></code> and <code class="code docutils literal notranslate"><span class="pre">vf.RowMatrix</span></code> types.
@@ -758,7 +758,7 @@ together if they have the same Row/Col type, though we will support adding diffe
 </div>
 </section>
 <section id="conditional-statement-operations">
-<h2>Conditional Statement/Operations<a class="headerlink" href="#conditional-statement-operations" title="Permalink to this heading">#</a></h2>
+<h2>Conditional Statement/Operations<a class="headerlink" href="#conditional-statement-operations" title="Link to this heading">#</a></h2>
 <p>ASSET’s intended use case is for defining constraints, objectives, and dynamical
 models that will eventually be put to use inside of a second derivative optimizer. As a
 general rule of thumb, it is a bad idea for such functions to contain conditional statements,
@@ -801,7 +801,7 @@ MUST be the same. Conditional statements may also be combined together using the
 </div>
 </section>
 <section id="some-notes-on-input-arguments">
-<h2>Some Notes on Input Arguments<a class="headerlink" href="#some-notes-on-input-arguments" title="Permalink to this heading">#</a></h2>
+<h2>Some Notes on Input Arguments<a class="headerlink" href="#some-notes-on-input-arguments" title="Link to this heading">#</a></h2>
 <p>Before moving on any further, we need to make one very important note about how the VectorFunction type system works. In all of our previous examples, we have created and partitioned
 one set of arguments of a certain size, from which we constructed other functions. You might
 ask, what happens if we try to mix expressions formulated out of arguments of different sizes?
@@ -828,7 +828,7 @@ combine expressions derived from two arguments objects of the same size.</p>
 </div>
 </section>
 <section id="suggested-style-and-organization">
-<span id="vfstyle-guide"></span><h2>Suggested Style and Organization<a class="headerlink" href="#suggested-style-and-organization" title="Permalink to this heading">#</a></h2>
+<span id="vfstyle-guide"></span><h2>Suggested Style and Organization<a class="headerlink" href="#suggested-style-and-organization" title="Link to this heading">#</a></h2>
 <p>At this point we have covered most all of the operations one can and can’t perform with ASSET
 VectorFunctions, with the important exception of function composition
 (which we will cover in the next section). As you might have noticed, in all of
@@ -880,7 +880,7 @@ the one above.</p>
 </div>
 </section>
 <section id="function-composition">
-<h2>Function Composition<a class="headerlink" href="#function-composition" title="Permalink to this heading">#</a></h2>
+<h2>Function Composition<a class="headerlink" href="#function-composition" title="Link to this heading">#</a></h2>
 <p>Now that we have a good understanding of the rules and style for defining
 single VectorFunctions, we can cover how to call them inside of other functions.
 For this final example let us tackle a concrete problem that occurs
@@ -940,7 +940,7 @@ stacked using the same rules governing <code class="code docutils literal notran
 </div>
 </section>
 <section id="repeated-sub-expressions">
-<h2>Repeated Sub Expressions<a class="headerlink" href="#repeated-sub-expressions" title="Permalink to this heading">#</a></h2>
+<h2>Repeated Sub Expressions<a class="headerlink" href="#repeated-sub-expressions" title="Link to this heading">#</a></h2>
 <p>Being a functional programming language, it is important to note that an ASSET
 expression is evaluated everywhere it appears in a statement. There is no notion
 of assigning it to a temporary variable and then reusing it later without recalculating it.
@@ -975,10 +975,10 @@ as above while only ever evaluating <code class="code docutils literal notransla
 </div>
 </section>
 <section id="tabular-data-and-interpolation">
-<h2>Tabular Data and Interpolation<a class="headerlink" href="#tabular-data-and-interpolation" title="Permalink to this heading">#</a></h2>
+<h2>Tabular Data and Interpolation<a class="headerlink" href="#tabular-data-and-interpolation" title="Link to this heading">#</a></h2>
 <p>We also have support for interpreting tabular data as a VectorFunction using differentiable interpolation table objects.</p>
 <section id="d-interpolation">
-<h3>1-D Interpolation<a class="headerlink" href="#d-interpolation" title="Permalink to this heading">#</a></h3>
+<h3>1-D Interpolation<a class="headerlink" href="#d-interpolation" title="Link to this heading">#</a></h3>
 <p>Interpolation of vector or scalar data with one input dimension may be accomplished using <code class="code docutils literal notranslate"><span class="pre">vf.InterpTable1D</span></code>. This
 class is designed to be constructed and behave similarly to scipy’s <code class="code docutils literal notranslate"><span class="pre">interp1D</span></code> class. To construct a table for interpolating
 vector data, we pass a list of sorted coordinate values along with an array whose rows or columns are the vectors of values at
@@ -1032,7 +1032,7 @@ by providing a ScalarFunction argument to the call operator.</p>
 </div>
 </section>
 <section id="id3">
-<h3>2-D Interpolation<a class="headerlink" href="#id3" title="Permalink to this heading">#</a></h3>
+<h3>2-D Interpolation<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
 <p>Similarly, you can also interpret scalar data defined on a 2-D rectilinear grid of coordinates as an ASSET ScalarFunction using the
 <code class="code docutils literal notranslate"><span class="pre">vf.InterpTable2D</span></code> class. The class may be constructed by supplying the grid coordinates as either python lists or numpy
 arrays along with the function values formatted like a numpy meshgrid. The function values MUST be formatted like an xy indexed meshgrid,
@@ -1085,7 +1085,7 @@ the x and y coordinates to the table’s call operator as a singe VectorFunction
 </div>
 </section>
 <section id="id4">
-<h3>3-D Interpolation<a class="headerlink" href="#id4" title="Permalink to this heading">#</a></h3>
+<h3>3-D Interpolation<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
 <p>As of version 0.1.0, we also support interpolating scalar data defined on 3 dimensional rectilinear grids
 with the <code class="code docutils literal notranslate"><span class="pre">vf.InterpTable3D</span></code> class. To construct it, we supply the coordinate values as three python
 lists/numpy vectors along with the function values.</p>
@@ -1154,7 +1154,7 @@ the x, y, and z coordinates to the table’s call operator as a singe VectorFunc
 </section>
 </section>
 <section id="note-on-size-of-vectorfunctions">
-<h2>Note on Size of VectorFunctions<a class="headerlink" href="#note-on-size-of-vectorfunctions" title="Permalink to this heading">#</a></h2>
+<h2>Note on Size of VectorFunctions<a class="headerlink" href="#note-on-size-of-vectorfunctions" title="Link to this heading">#</a></h2>
 <p>The VectorFunction type system has been designed to have good performance for evaluating
 the value and derivatives of dense VectorFunctions with a small number of arguments (&lt;50).
 It will work for larger expressions, but performance will begin to degrade considerably. This may seem
@@ -1170,7 +1170,7 @@ sections.</p>
 </div>
 </section>
 <section id="binding-raw-python-functions-don-t-do-this">
-<h2>Binding Raw Python Functions (DON’T DO THIS)<a class="headerlink" href="#binding-raw-python-functions-don-t-do-this" title="Permalink to this heading">#</a></h2>
+<h2>Binding Raw Python Functions (DON’T DO THIS)<a class="headerlink" href="#binding-raw-python-functions-don-t-do-this" title="Link to this heading">#</a></h2>
 <p>You also have the option, should you need to, to bind raw python functions
 as ASSET VectorFunctions and ScalarFunctions. This can be accomplished using the <code class="code docutils literal notranslate"><span class="pre">vf.PyVectorFunction</span></code>
 and  <code class="code docutils literal notranslate"><span class="pre">vf.PyScalarFunction</span></code> types as shown below. The function must have a signature accepting as the first argument a 1 dimensional numpy array of input arguments
@@ -1293,10 +1293,10 @@ If it’s truly not possible, we will consider adding the missing expression to 
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
+</div><script src="../_static/documentation_options.js?v=e259d695"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

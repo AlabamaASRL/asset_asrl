@@ -1,15 +1,15 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Optimal Control Phase Tutorial" href="PhaseGuide.html" /><link rel="prev" title="ODE Tutorial" href="ODEGuide.html" />
 
-    <!-- Generated with Sphinx 6.2.1 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>Integrator Tutorial - ASSET 0.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -226,7 +226,7 @@
         </div>
         <article role="main">
           <section id="integrator-tutorial">
-<span id="integrator-guide"></span><h1>Integrator Tutorial<a class="headerlink" href="#integrator-tutorial" title="Permalink to this heading">#</a></h1>
+<span id="integrator-guide"></span><h1>Integrator Tutorial<a class="headerlink" href="#integrator-tutorial" title="Link to this heading">#</a></h1>
 <p>In this section, we will describe usage of ASSET’s integrator object. To
 start, we will define an ODE which we want to integrate using what we have learned from the
 previous two sections on <a class="reference internal" href="VectorFunctionGuide.html#vectorfunction-guide"><span class="std std-ref">vector functions</span></a> and <a class="reference internal" href="ODEGuide.html#ode-guide"><span class="std std-ref">ODEs</span></a>.
@@ -262,7 +262,7 @@ For this example, we will be working in canonical units where <span class="math 
 </pre></div>
 </div>
 <section id="initialization">
-<h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this heading">#</a></h2>
+<h2>Initialization<a class="headerlink" href="#initialization" title="Link to this heading">#</a></h2>
 <p>To start, we can create an integrator for our ODE by using the <code class="code docutils literal notranslate"><span class="pre">.integrator</span></code> method of the ODE.
 At initialization we can specify the integration scheme as a string as well as the
 default step size to be used. At the moment we provide the adaptive Dormand Prince
@@ -323,7 +323,7 @@ yourself using the <code class="code docutils literal notranslate"><span class="
 </div>
 </section>
 <section id="integration">
-<h2>Integration<a class="headerlink" href="#integration" title="Permalink to this heading">#</a></h2>
+<h2>Integration<a class="headerlink" href="#integration" title="Link to this heading">#</a></h2>
 <p>Now that we have covered initializing integrators, let’s examine how we actually
 use them. By far the most used methods are <code class="code docutils literal notranslate"><span class="pre">.integrate</span></code> and <code class="code docutils literal notranslate"><span class="pre">integrate_dense</span></code>. Both methods
 take as the first input a full-state vector containing the initial state, time, controls, and
@@ -366,7 +366,7 @@ the maximum local error at any point along the trajectory is typically 2 orders 
 <a class="reference internal image-reference" href="../_images/IntegratorFig1.svg"><img alt="../_images/IntegratorFig1.svg" src="../_images/IntegratorFig1.svg" width="90%" /></a>
 </section>
 <section id="event-detection">
-<h2>Event Detection<a class="headerlink" href="#event-detection" title="Permalink to this heading">#</a></h2>
+<h2>Event Detection<a class="headerlink" href="#event-detection" title="Link to this heading">#</a></h2>
 <p>We can also pass a list of events to be detected during the integration. A single
 event is defined as a tuple consisting of: An ASSET ScalarFunction whose zeros
 determine the locations of the event, a direction indicating whether we want to track ascending, descending or all zeros, and a stop code
@@ -439,7 +439,7 @@ and maximum Newton iterations may be specified by modifying the <code class="cod
 <a class="reference internal image-reference" href="../_images/IntegratorFig2.svg"><img alt="../_images/IntegratorFig2.svg" src="../_images/IntegratorFig2.svg" width="90%" /></a>
 </section>
 <section id="derivatives">
-<h2>Derivatives<a class="headerlink" href="#derivatives" title="Permalink to this heading">#</a></h2>
+<h2>Derivatives<a class="headerlink" href="#derivatives" title="Link to this heading">#</a></h2>
 <p>In ASSET, integrators themselves are VectorFunctions and have analytic first and second
 derivatives. The input arguments for the integrator when used as a VectorFunction consist of
 the full-ODE input to be integrated and the final time <code class="code docutils literal notranslate"><span class="pre">tf,</span></code> and the output is the full-ODE at time <code class="code docutils literal notranslate"><span class="pre">tf</span></code>.
@@ -484,7 +484,7 @@ interface using the <code class="code docutils literal notranslate"><span class=
 </div>
 </section>
 <section id="parrallel-integration">
-<h2>Parrallel Integration<a class="headerlink" href="#parrallel-integration" title="Permalink to this heading">#</a></h2>
+<h2>Parrallel Integration<a class="headerlink" href="#parrallel-integration" title="Link to this heading">#</a></h2>
 <p>Finally, for all previously discussed <code class="code docutils literal notranslate"><span class="pre">.integrate</span></code> methods, we have corresponding multi-threaded <code class="code docutils literal notranslate"><span class="pre">_parallel</span></code>
 versions which will integrate lists of initial conditions and final times in parallel. In each case, rather
 than passing a single initial state and final time, we pass lists of each. The outputs to the call will then be a list
@@ -518,7 +518,7 @@ of length <code class="code docutils literal notranslate"><span class="pre">n</s
 </div>
 </section>
 <section id="local-control-laws">
-<h2>Local Control Laws<a class="headerlink" href="#local-control-laws" title="Permalink to this heading">#</a></h2>
+<h2>Local Control Laws<a class="headerlink" href="#local-control-laws" title="Link to this heading">#</a></h2>
 <p>In the previous examples we only examined how to integrate ODEs with no control
 or constant controls, but oftentimes we need to compute controls as a function
 of the local state or time. We can do this in ASSET by initializing our integrator with
@@ -651,10 +651,10 @@ This control law will now be applied to all of our integrations.</p>
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
+</div><script src="../_static/documentation_options.js?v=e259d695"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

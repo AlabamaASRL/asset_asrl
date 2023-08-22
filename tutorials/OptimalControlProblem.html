@@ -1,15 +1,15 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="PSIOPT" href="PSIOPT.html" /><link rel="prev" title="Optimal Control Phase Tutorial" href="PhaseGuide.html" />
 
-    <!-- Generated with Sphinx 6.2.1 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.2 and Furo 2023.08.19 -->
         <title>Optimal Control Problem Tutorial - ASSET 0.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -226,7 +226,7 @@
         </div>
         <article role="main">
           <section id="optimal-control-problem-tutorial">
-<h1>Optimal Control Problem Tutorial<a class="headerlink" href="#optimal-control-problem-tutorial" title="Permalink to this heading">#</a></h1>
+<h1>Optimal Control Problem Tutorial<a class="headerlink" href="#optimal-control-problem-tutorial" title="Link to this heading">#</a></h1>
 <p>The previous section on <a class="reference internal" href="PhaseGuide.html#phase-guide"><span class="std std-ref">phases</span></a> covers everything you need to know about formulating and solving
 single phase optimal control problems. In this section, we will cover how you can link these
 phases together into a multi phase optimal control problem using the <code class="code docutils literal notranslate"><span class="pre">oc.OptimalControlProblem</span></code> type.</p>
@@ -255,7 +255,7 @@ phases together into a multi phase optimal control problem using the <code class
 </pre></div>
 </div>
 <section id="initialization">
-<h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this heading">#</a></h2>
+<h2>Initialization<a class="headerlink" href="#initialization" title="Link to this heading">#</a></h2>
 <p>To start, we will create 6 phases (2 of each ODE) type, as shown below that we will then link together inside of
 a single optimal control problem. Though not shown here, each phase may be constructed using methods we discussed in the
 previous <a class="reference internal" href="PhaseGuide.html#phase-guide"><span class="std std-ref">section</span></a>.</p>
@@ -327,7 +327,7 @@ Link Objectives.</p>
 </div>
 </section>
 <section id="link-constraints-and-objectives">
-<span id="link-guide"></span><h2>Link Constraints and Objectives<a class="headerlink" href="#link-constraints-and-objectives" title="Permalink to this heading">#</a></h2>
+<span id="link-guide"></span><h2>Link Constraints and Objectives<a class="headerlink" href="#link-constraints-and-objectives" title="Link to this heading">#</a></h2>
 <p>Application of link objectives and constraints in an <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code>, is built upon the concept of phase regions
 and indexing we covered in phase <a class="reference internal" href="PhaseGuide.html#phase-guide"><span class="std std-ref">tutorial</span></a>. The total variables vector, <span class="math notranslate nohighlight">\(\vec{x}\)</span>, consists of those defined for each phase, <span class="math notranslate nohighlight">\(\vec{x}^{j}\)</span>, followed by
 the link parameters, <span class="math notranslate nohighlight">\(\vec{L}\)</span>.</p>
@@ -359,7 +359,7 @@ extra link parameters.</p>
 \[\vec{f}([\vec{V}_{1\lor n}^k,\vec{P}^k,\vec{S}^k,\ldots \vec{L}]) \quad  k \in [1,\ldots m]\]</div>
 </div>
 <section id="link-equality-constraints">
-<h3>Link Equality Constraints<a class="headerlink" href="#link-equality-constraints" title="Permalink to this heading">#</a></h3>
+<h3>Link Equality Constraints<a class="headerlink" href="#link-equality-constraints" title="Link to this heading">#</a></h3>
 <p>A link equality constraint of the form <span class="math notranslate nohighlight">\(\vec{h}(\vec{x}) = \vec{0}\)</span> can be added to the phase using the
 <code class="code docutils literal notranslate"><span class="pre">.addLinkEqualCon</span></code> method. The most general way to link two phases with an equality constraint is shown below. This contrived example is
 enforcing continuity between the last time-varying state variables and in <code class="code docutils literal notranslate"><span class="pre">phase0</span></code> and the first-time varying state variables and parameters in <code class="code docutils literal notranslate"><span class="pre">phase1</span></code>.
@@ -509,7 +509,7 @@ implemented using a combination of <code class="code docutils literal notranslat
 and users should only have to fall back on the more general form in special cases.</p>
 </section>
 <section id="link-inequality-constraints">
-<h3>Link Inequality Constraints<a class="headerlink" href="#link-inequality-constraints" title="Permalink to this heading">#</a></h3>
+<h3>Link Inequality Constraints<a class="headerlink" href="#link-inequality-constraints" title="Link to this heading">#</a></h3>
 <p>A link inequality constraint of the form <span class="math notranslate nohighlight">\(\vec{g}(\vec{x}) \leq \vec{0}\)</span> can be added to the <code class="code docutils literal notranslate"><span class="pre">ocp</span></code> using the
 <code class="code docutils literal notranslate"><span class="pre">.addLinkInequalCon</span></code> method. The interface for two phase and multi-phase linking works exactly the same as <code class="code docutils literal notranslate"><span class="pre">addLinkEqualCon</span></code> in regards
 to order of arguments the different calling signatures.</p>
@@ -571,7 +571,7 @@ to order of arguments the different calling signatures.</p>
 </div>
 </section>
 <section id="link-objectives">
-<h3>Link Objectives<a class="headerlink" href="#link-objectives" title="Permalink to this heading">#</a></h3>
+<h3>Link Objectives<a class="headerlink" href="#link-objectives" title="Link to this heading">#</a></h3>
 <p>You can also add objectives of the form <span class="math notranslate nohighlight">\(f(x)\)</span> using the <code class="code docutils literal notranslate"><span class="pre">addLinkObjective</span></code> method. Once again, the calling signature
 for all methods is identical to <code class="code docutils literal notranslate"><span class="pre">addLinkEqualCon</span></code>. Likewise, objectives involving only the link parameters can be added with
 <code class="code docutils literal notranslate"><span class="pre">addLinkParamObjective</span></code>. Otherwise, the only difference is that the objective must be an ASSET ScalarFunction.
@@ -604,7 +604,7 @@ phase are implicitly summed by the optimizer.</p>
 </section>
 </section>
 <section id="solving-and-optimizing">
-<h2>Solving and Optimizing<a class="headerlink" href="#solving-and-optimizing" title="Permalink to this heading">#</a></h2>
+<h2>Solving and Optimizing<a class="headerlink" href="#solving-and-optimizing" title="Link to this heading">#</a></h2>
 <p>After constructing an <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code> and its constituent phases, we can now use PSIOPT
 to solve or optimize the entire trajectory. As with phase, the settings of the optimizer can be manipulated through a
 reference to PSIOPT attached to the <code class="code docutils literal notranslate"><span class="pre">ocp</span></code> object.
@@ -652,9 +652,9 @@ Both of these topics are handled in more details in the section on <a class="ref
 </div>
 </section>
 <section id="miscellaneous-topics">
-<h2>Miscellaneous Topics<a class="headerlink" href="#miscellaneous-topics" title="Permalink to this heading">#</a></h2>
+<h2>Miscellaneous Topics<a class="headerlink" href="#miscellaneous-topics" title="Link to this heading">#</a></h2>
 <section id="referencing-and-removing-constraints">
-<h3>Referencing and Removing Constraints<a class="headerlink" href="#referencing-and-removing-constraints" title="Permalink to this heading">#</a></h3>
+<h3>Referencing and Removing Constraints<a class="headerlink" href="#referencing-and-removing-constraints" title="Link to this heading">#</a></h3>
 <p>When adding any of the 3 types of constraints/objectives covered <a class="reference internal" href="#link-guide"><span class="std std-ref">previously</span></a>, an integer identifier or list of integers is returned by the
 method. This identifier can be used to remove a constraint/objective from the optimal control problem. This can be quite useful when you
 want to express some homotopic or continuation scheme without having to create a new ocp at each step. Given the identifier for
@@ -690,7 +690,7 @@ a function of a certain type, it can be removed from the phase using the corresp
 </div>
 </section>
 <section id="retrieving-constraint-violations-and-multipliers">
-<h3>Retrieving Constraint Violations and Multipliers<a class="headerlink" href="#retrieving-constraint-violations-and-multipliers" title="Permalink to this heading">#</a></h3>
+<h3>Retrieving Constraint Violations and Multipliers<a class="headerlink" href="#retrieving-constraint-violations-and-multipliers" title="Link to this heading">#</a></h3>
 <p>Immediately after a call to PSIOPT, users can retrieve the constraint violations and Lagrange multipliers associated with user applied link constraints.
 For equality and inequality constraints, constraint violations and multipliers are retrieved by supplying a constraint function’s id to the phase’s <code class="code docutils literal notranslate"><span class="pre">.returnLink####Vals(id)</span></code> and <code class="code docutils literal notranslate"><span class="pre">.returnLink####Lmults(id)</span></code> methods as shown below.
 In all cases, the violations/multipliers are returned as a list of numpy arrays each of which contains the output/multipliers associated with each call to the function inside
@@ -798,10 +798,10 @@ the optimization problem.</p>
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
+</div><script src="../_static/documentation_options.js?v=e259d695"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>
