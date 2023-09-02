@@ -109,6 +109,27 @@ void ASSET::OptimalControlProblem::check_functions() {
         }
       }
     }
+
+    for (int i = 0; i < func.LinkParams.size(); i++) {
+      if (func.LinkParams[i].size() > 0) {
+
+
+      if (func.LinkParams[i].maxCoeff() >= this->numLinkParams || func.LinkParams[i].minCoeff() < 0) {
+
+          fmt::print(fmt::fg(fmt::color::red),
+                     "Transcription Error!!!\n"
+                     "{0:} function link parameter variable indices out of bounds\n"
+                     " Function Storage Index:{1:}\n"
+                     " Function Name:{2:}\n",
+                     type,
+                     func.StorageIndex,
+                     func.Func.name());
+          throw std::invalid_argument("");
+        }
+
+      }
+    
+    }
   };
 
   std::string eq = "Link Equality constraint";
