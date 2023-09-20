@@ -143,6 +143,27 @@ namespace ASSET {
     }
     void setMethod(TranscriptionModes m);
 
+
+    template<class VecType>
+    void checkInput(const std::vector<VecType>& xtudat) {
+
+        double t0 = xtudat.front()[this->axis];
+        double tf = xtudat.back()[this->axis];
+
+        for (int i = 0; i < xtudat.size() - 1; i++) {
+            double ti = xtudat[i][this->axis];
+            double tip1 = xtudat[i+1][this->axis];
+            if (tip1 == ti) {
+              throw std::invalid_argument(fmt::format("Duplicate time coordinates in LGLInterpTable."));
+            }
+
+            if ( ( (tip1 < ti)&& tf>t0) || ( ( (tip1 > ti)&& tf<t0)) ){
+            throw std::invalid_argument(
+                fmt::format("Non monotonic time coordinates in LGLInterpTable."));
+            }  
+        }
+    }
+
     void makePeriodic() {
       this->Periodic = true;
 
@@ -215,6 +236,9 @@ namespace ASSET {
                   << std::endl;
         exit(1);
       }
+
+      checkInput(xtudat);
+
       this->XtUData.resize(this->XtUVars, xtudat.size());
       this->XdotData.resize(this->XVars, xtudat.size());
       this->T0 = xtudat[0][axis];
@@ -243,6 +267,7 @@ namespace ASSET {
                   << std::endl;
         exit(1);
       }
+      checkInput(xtudat);
 
       Eigen::VectorXd myspace = this->Tspacing;
       TranscriptionModes mymeth = this->Method;
@@ -295,6 +320,10 @@ namespace ASSET {
     }
 
     void loadRegularData(int dnum, const std::vector<Eigen::VectorXd>& xtudat) {
+
+
+      checkInput(xtudat);
+
       this->XtUData.resize(this->XtUVars, xtudat.size());
       this->XtUData.setZero();
       this->XdotData.resize(this->XVars, xtudat.size());
@@ -318,6 +347,9 @@ namespace ASSET {
       this->loadEvenData(nxs);
     }
     void loadExactData(const std::vector<Eigen::VectorXd>& xtudat) {
+
+      checkInput(xtudat);
+
       this->XtUData.resize(this->XtUVars, xtudat.size());
       this->XtUData.setZero();
       this->XdotData.resize(this->XVars, xtudat.size());
@@ -340,6 +372,7 @@ namespace ASSET {
     }
     template<class V1, class V2>
     void loadExactData(const std::vector<V1>& xtudat, const std::vector<V2>& xdotdat) {
+      checkInput(xtudat);
       this->XtUData.resize(this->XtUVars, xtudat.size());
       this->XtUData.setZero();
       this->XdotData.resize(this->XVars, xtudat.size());
