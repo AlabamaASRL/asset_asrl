@@ -1901,6 +1901,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   obj.def_readwrite("DetectControlSwitches", &ODEPhaseBase::DetectControlSwitches);
   obj.def_readwrite("RelSwitchTol", &ODEPhaseBase::RelSwitchTol);
   obj.def_readwrite("AbsSwitchTol", &ODEPhaseBase::AbsSwitchTol);
+  obj.def_readwrite("MeshAbortFlag", &ODEPhaseBase::MeshAbortFlag);
 
 
   obj.def_readwrite("NumExtraSegs", &ODEPhaseBase::NumExtraSegs);
