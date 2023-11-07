@@ -162,7 +162,7 @@ namespace ASSET {
         if constexpr (std::is_same<Assignment, DirectAssignment>::value) {
           if constexpr (Is_EigenDiagonalMatrix<
                             typename std::remove_const_reference<decltype(left.derived())>::type>::value) {
-            target.template middleCols<OR>(this->SegStart).diagonal() =
+            target.template middleCols<OR>(this->SegStart, this->ORows()).diagonal() =
                 left.derived().diagonal().cwiseProduct(diag);
           } else {
             if constexpr (Aliased)
@@ -174,9 +174,6 @@ namespace ASSET {
           }
 
         } else if constexpr (std::is_same<Assignment, PlusEqualsAssignment>::value) {
-          // target.template middleCols<OR>(this->SegStart).noalias() +=
-          //     left.derived() * diag;
-
           if constexpr (Is_EigenDiagonalMatrix<
                             typename std::remove_const_reference<decltype(left.derived())>::type>::value) {
             target.template middleCols<OR>(this->SegStart, this->ORows()).diagonal() +=
@@ -195,7 +192,7 @@ namespace ASSET {
 
           if constexpr (Is_EigenDiagonalMatrix<
                             typename std::remove_const_reference<decltype(left.derived())>::type>::value) {
-            target.template middleCols<OR>(this->SegStart).diagonal() -=
+            target.template middleCols<OR>(this->SegStart, this->ORows()).diagonal() -=
                 left.derived().diagonal().cwiseProduct(diag);
           } else {
             if constexpr (Aliased)
