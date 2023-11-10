@@ -1458,6 +1458,11 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
           &ODEPhaseBase::removeIntegralParamFunction,
           ODEPhaseBase_removeIntegralParamFunction);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+  obj.def("addEqualConTest", &ODEPhaseBase::addEqualConTest);
+
+
   obj.def("addEqualCon",
           py::overload_cast<StateConstraint>(&ODEPhaseBase::addEqualCon),
           ODEPhaseBase_addEqualCon1);

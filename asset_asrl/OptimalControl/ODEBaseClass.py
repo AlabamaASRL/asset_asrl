@@ -1,9 +1,10 @@
 import asset as _asset
 import inspect
+import numpy as np
 
 class ODEBase:
  
-    def __init__(self,odefunc,Xvars,Uvars = None,Pvars = None):
+    def __init__(self,odefunc,Xvars,Uvars = None,Pvars = None,Vgroups = None):
 
         mlist = inspect.getmembers(_asset.OptimalControl)
         
@@ -37,8 +38,46 @@ class ODEBase:
             else:
                 self.ode = _asset.OptimalControl.ode_x.ode(odefunc,Xvars)
                 
+        if(Vgroups!=None):
+            self.add_Vgroups(Vgroups)
+                
+    
+    def make_index_set(self,idxs):
         
+        if(hasattr(idxs, 'input_domain') and hasattr(idxs, 'vf') and hasattr(idxs, 'is_linear')):
+            ## Handle Vector Functions
+            input_domain = idxs.input_domain()
+            idxstmp = []
+            for i in range(0,input_domain.shape[1]):
+                start = input_domain[0,i]
+                size = input_domain[1,i]
+                idxstmp+= list(range(start,start+size))
+            return idxstmp
+        elif(isinstance(idxs, (int,np.int32,np.intc))):
+            return [idxs]
+        elif(hasattr(idxs, '__iter__') and not isinstance(idxs, str)):
+            if(len(idxs)==0):
+                raise Exception("Index list is empty")
+            idxtmp = []
+            for idx in idxs:
+                idxtmp+=self.make_index_set(idx)
+            return idxtmp
+        else:
+            raise Exception("Invalid index: {}".format(str(idxs)))
         
+    def add_Vgroups(self,Vgroups):
+        for name in Vgroups:
+            idxs = self.make_index_set(Vgroups[name])
+            if(isinstance(name, str)):
+               self.ode.add_idx(name,idxs)            
+            elif(hasattr(name, '__iter__')):
+                for n in name:
+                    self.ode.add_idx(n,idxs)
+         
+        
+    def idx(self,Vname):
+        return self.ode.idx(Vname)
+    
     def phase(self,*args):
         return self.ode.phase(*args)
     def integrator(self,*args):

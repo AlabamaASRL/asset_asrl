@@ -1539,6 +1539,10 @@ namespace ASSET {
       obj.def("IRows", &Derived::IRows);
       obj.def("ORows", &Derived::ORows);
       obj.def("name", &Derived::name);
+
+      obj.def("input_domain", &Derived::input_domain);
+      obj.def("is_linear", &Derived::is_linear);
+
       obj.def("compute", [](const Derived& func, ConstEigenRef<Input<double>> x) {
         if (x.size() != func.IRows())
           throw std::invalid_argument("Incorrectly sized input to function");
