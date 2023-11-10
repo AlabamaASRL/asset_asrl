@@ -11,6 +11,7 @@
 #include "StateFunction.h"
 #include "VectorFunctions/ASSET_VectorFunctions.h"
 #include "pch.h"
+#include <variant>
 
 namespace ASSET {
 
@@ -240,6 +241,86 @@ namespace ASSET {
       return index;
     }
 
+    using VarIndexType = std::variant<VectorXi,std::string,std::vector<std::string>>;
+
+    template<class FuncType, class FuncHolder>
+    FuncHolder makeFuncImpl(std::string reg,
+                     VectorFunctionalX fun,
+                     VarIndexType XtUPvars_t,
+                     VarIndexType OPvars_t,
+                     VarIndexType SPvars_t) {
+
+        VectorXi XtUPvars;
+        VectorXi OPvars;
+        VectorXi SPvars;
+
+        if (std::holds_alternative<VectorXi>(XtUPvars_t)) {
+            XtUPvars = std::get<VectorXi>(XtUPvars_t);
+        } else if (std::holds_alternative<std::string>(XtUPvars_t)) {
+            XtUPvars = this->idx(std::get<std::string>(XtUPvars_t));
+        } else if (std::holds_alternative<std::vector<std::string>>(XtUPvars_t)) {
+            std::vector<VectorXi> varvec;
+            int size = 0;
+
+            auto tmpvars = std::get<std::vector<std::string>>(XtUPvars_t);
+
+            for (auto tmpv: tmpvars) {
+              varvec.push_back(this->idx(tmpv));
+              size += varvec.back().size();
+            }
+            XtUPvars.resize(size);
+
+            int next = 0;
+            for (auto varv: varvec) {
+              for (int i = 0; i < varv.size(); i++) {
+                XtUPvars[next] = varv[i];
+                next++;
+              }
+            }
+        }
+
+    
+    
+    }
+   
+
+
+    int addEqualConTest(std::string reg, VectorFunctionalX fun, VarIndexType vars_t) {
+        VectorXi vars;
+
+        if (std::holds_alternative<VectorXi>(vars_t)) {
+            vars = std::get<VectorXi>(vars_t);
+        } 
+        else if (std::holds_alternative<std::string>(vars_t)) {
+            vars = this->idx(std::get<std::string>(vars_t));
+        } 
+        else if (std::holds_alternative<std::vector<std::string>>(vars_t)) {
+            std::vector<VectorXi> varvec;
+            int size = 0;
+
+            auto tmpvars = std::get<std::vector<std::string>>(vars_t);
+
+            for (auto tmpv: tmpvars) {
+              varvec.push_back(this->idx(tmpv));
+              size+=varvec.back().size();
+            }
+            vars.resize(size);
+
+            int next = 0;
+            for (auto varv: varvec) {
+              for (int i = 0; i < varv.size();i++) {
+                vars[next] = varv[i];
+                next++;
+              }
+            }
+        
+        }
+
+       auto con = StateConstraint(fun, strto_PhaseRegionFlag(reg), vars);
+       return addFuncImpl(con, this->userEqualities, "Equality Constraint");
+    }
+
+    
 
     /////////////////////////////////////////////////
     int addEqualCon(StateConstraint con) {

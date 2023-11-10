@@ -42,6 +42,8 @@ namespace ASSET {
         : ODEPhaseBase(ode.XVars(), ode.UVars(), ode.PVars()) {
       this->ode = ode;
       this->integrator = Integrator<DODE>(ode, .01);
+      this->set_idxs(this->ode.get_idxs());
+
       this->setTranscriptionMode(Tmode);
     }
     ODEPhase(const DODE& ode, TranscriptionModes Tmode, const std::vector<Eigen::VectorXd>& Traj, int numdef)
