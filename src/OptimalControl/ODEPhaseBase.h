@@ -12,6 +12,7 @@
 #include "VectorFunctions/ASSET_VectorFunctions.h"
 #include "pch.h"
 #include <variant>
+#include "CommonFunctions/IOScaled.h"
 
 namespace ASSET {
 
@@ -79,6 +80,13 @@ namespace ASSET {
     VectorXi NodeSpacingFuncIndices;
     int TranSpacingFuncIndices = 0;
     int ConstraintOrder = 0;
+
+    //////////////////////////
+
+    bool AutoScaling = false;
+    Eigen::VectorXd XtUPUnits;
+    Eigen::VectorXd SPUnits;
+
 
 
     ///////////////////////
@@ -977,6 +985,56 @@ namespace ASSET {
       }
     }
 
+    Eigen::VectorXd get_input_scale(PhaseRegionFlags flag, VectorXi XtUV, VectorXi OPV, VectorXi SPV) {
+
+        int nloops;
+        switch (flag) {
+        case Front:
+        case Back:
+        case Path:
+        case Params:
+        case ODEParams:
+        case StaticParams:
+        case NodalPath: {
+            nloops = 1;
+            break;
+        }
+        case FrontandBack:
+        case BackandFront:
+        case PairWisePath: {
+            nloops = 2;
+            break;
+        }
+        default: {
+            throw std::invalid_argument("Cannot scale this phase region");
+            break;
+        }
+        }
+
+
+        int isize = XtUV.size()*nloops + OPV.size() + SPV.size();
+        VectorXd scales(isize);
+
+        int next = 0;
+        for (int n = 0; n < nloops; n++) {
+            for (int i = 0; i < XtUV.size(); i++) {
+                scales[next] = this->XtUPUnits[XtUV[i]];
+                next++;
+            }
+        }
+        for (int i = 0; i < OPV.size(); i++) {
+            scales[next] = this->XtUPUnits[OPV[i] + this->XtUVars()];
+            next++;
+        }
+        for (int i = 0; i < SPV.size(); i++) {
+            scales[next] = this->SPUnits[SPV[i]];
+            next++;
+        }
+
+        return scales;
+    }
+
+
 
     static void check_lbscale(double lbscale) {
       if (lbscale <= 0.0) {
@@ -1002,10 +1060,38 @@ namespace ASSET {
 
 
     Eigen::VectorXd makeSolverInput() const {
-      return this->indexer.makeSolverInput(this->ActiveTraj, this->ActiveStaticParams);
+
+        if (this->AutoScaling) {
+            auto ActiveTrajTmp = this->ActiveTraj;
+
+            for (auto& T : ActiveTrajTmp) {
+                T = T.cwiseQuotient(this->XtUPUnits);
+            }
+
+            VectorXd StaticParamsTmp;
+            if (this->ActiveStaticParams.size() > 0 && this->SPUnits.size()>0) {
+                StaticParamsTmp = this->ActiveStaticParams.cwiseQuotient(this->SPUnits);
+            }
+            return this->indexer.makeSolverInput(ActiveTrajTmp, StaticParamsTmp);
+
+      
+        } else {
+        return this->indexer.makeSolverInput(this->ActiveTraj, this->ActiveStaticParams);
+        }
     }
     void collectSolverOutput(const VectorXd& Vars) {
       this->indexer.collectSolverOutput(Vars, this->ActiveTraj, this->ActiveStaticParams);
+
+      if (this->AutoScaling) {
+          for (auto& T : this->ActiveTraj) {
+              T = T.cwiseProduct(this->XtUPUnits);
+          }
+          if (this->ActiveStaticParams.size() > 0 && this->SPUnits.size() > 0) {
+              this->ActiveStaticParams = this->ActiveStaticParams.cwiseProduct(this->SPUnits);
+          }
+
+      }
+
     }
     void collectSolverMultipliers(const VectorXd& EM, const VectorXd& IM) {
       this->MultipliersLoaded = true;
