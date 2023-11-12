@@ -736,16 +736,25 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
     ObjectiveInterface obj;
     PhaseRegionFlags PhaseReg = PhaseRegionFlags::PairWisePath;
 
+    auto Func = ob.Func;
+    if (this->AutoScaling) {
+        VectorXd input_scales = this->get_input_scale(ob.RegionFlag, ob.XtUVars, ob.OPVars, ob.SPVars);
+        VectorXd output_scales(Func.ORows());
+        output_scales.setOnes(); // Come Back and Fix this
+        Func = IOScaled<decltype(Func)>(ob.Func, input_scales, output_scales);
+    }
+
+
     if (this->IntegralMode == IntegralModes::BaseIntegral
         && ((this->TranscriptionMode == LGL5) || (this->TranscriptionMode == LGL7))) {
       if (this->TranscriptionMode == LGL5) {
-        obj = SwitchC(3, xp, sop, ob.Func, xp, sop);
+        obj = SwitchC(3, xp, sop, Func, xp, sop);
       } else if (this->TranscriptionMode == LGL7) {
-        obj = SwitchC(4, xp, sop, ob.Func, xp, sop);
+        obj = SwitchC(4, xp, sop, Func, xp, sop);
       }
       PhaseReg = PhaseRegionFlags::DefectPath;
     } else {
-      obj = SwitchC(2, xp, sop, ob.Func, xp, sop);
+      obj = SwitchC(2, xp, sop, Func, xp, sop);
       if (this->TranscriptionMode == LGL3 || this->TranscriptionMode == Trapezoidal
           || this->TranscriptionMode == CentralShooting) {
         PhaseReg = PhaseRegionFlags::DefectPath;
@@ -775,16 +784,25 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
     ObjectiveInterface obj;
     PhaseRegionFlags PhaseReg = PhaseRegionFlags::PairWisePath;
 
+    auto Func = ob.Func;
+    if (this->AutoScaling) {
+        VectorXd input_scales = this->get_input_scale(ob.RegionFlag, ob.XtUVars, ob.OPVars, ob.SPVars);
+        VectorXd output_scales(Func.ORows());
+        output_scales.setOnes(); // Come Back and Fix this
+        Func = IOScaled<decltype(Func)>(ob.Func, input_scales, output_scales);
+    }
+
+
     if (this->IntegralMode == IntegralModes::BaseIntegral
         && ((this->TranscriptionMode == LGL5) || (this->TranscriptionMode == LGL7))) {
       if (this->TranscriptionMode == LGL5) {
-        obj = SwitchC(3, xp, sop, ob.Func, xp, sop);
+        obj = SwitchC(3, xp, sop, Func, xp, sop);
       } else if (this->TranscriptionMode == LGL7) {
-        obj = SwitchC(4, xp, sop, ob.Func, xp, sop);
+        obj = SwitchC(4, xp, sop, Func, xp, sop);
       }
       PhaseReg = PhaseRegionFlags::DefectPath;
     } else {
-      obj = SwitchC(2, xp, sop, ob.Func, xp, sop);
+      obj = SwitchC(2, xp, sop, Func, xp, sop);
       PhaseReg = PhaseRegionFlags::PairWisePath;
     }
 
@@ -807,8 +825,18 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
         eq.Func.thread_safe() ? ThreadingFlags::ByApplication : ThreadingFlags::MainThread;
     if (eq.RegionFlag == PhaseRegionFlags::Path || eq.RegionFlag == PhaseRegionFlags::PairWisePath)
       eq.Func.enable_vectorization(this->EnableVectorization);
+
+
+    auto Func = eq.Func;
+    if (this->AutoScaling) {
+        VectorXd input_scales = this->get_input_scale(eq.RegionFlag, eq.XtUVars, eq.OPVars, eq.SPVars);
+        VectorXd output_scales(Func.ORows());
+        output_scales.setOnes(); // Come Back and Fix this
+        Func = IOScaled<decltype(Func)>(eq.Func, input_scales, output_scales);
+    }
+
     int Gindex =
-        this->indexer.addEquality(eq.Func, eq.RegionFlag, eq.XtUVars, eq.OPVars, eq.SPVars, ThreadMode);
+        this->indexer.addEquality(Func, eq.RegionFlag, eq.XtUVars, eq.OPVars, eq.SPVars, ThreadMode);
 
     int PLindex = Gindex - this->indexer.StartEq;
     eq.GlobalIndex = Gindex;
@@ -822,8 +850,16 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
       iq.Func.enable_vectorization(this->EnableVectorization);
     }
 
+    auto Func = iq.Func;
+    if (this->AutoScaling) {
+        VectorXd input_scales = this->get_input_scale(iq.RegionFlag, iq.XtUVars, iq.OPVars, iq.SPVars);
+        VectorXd output_scales(Func.ORows());
+        output_scales.setOnes(); // Come Back and Fix this
+        Func = IOScaled<decltype(Func)>(iq.Func, input_scales, output_scales);
+    }
+
     int Gindex =
-        this->indexer.addInequality(iq.Func, iq.RegionFlag, iq.XtUVars, iq.OPVars, iq.SPVars, ThreadMode);
+        this->indexer.addInequality(Func, iq.RegionFlag, iq.XtUVars, iq.OPVars, iq.SPVars, ThreadMode);
     int PLindex = Gindex - this->indexer.StartIq;
     iq.GlobalIndex = Gindex;
     iq.PhaseLocalIndex = PLindex;
@@ -833,8 +869,17 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
         ob.Func.thread_safe() ? ThreadingFlags::ByApplication : ThreadingFlags::MainThread;
     if (ob.RegionFlag == PhaseRegionFlags::Path || ob.RegionFlag == PhaseRegionFlags::PairWisePath)
       ob.Func.enable_vectorization(this->EnableVectorization);
+
+    auto Func = ob.Func;
+    if (this->AutoScaling) {
+        VectorXd input_scales = this->get_input_scale(ob.RegionFlag, ob.XtUVars, ob.OPVars, ob.SPVars);
+        VectorXd output_scales(Func.ORows());
+        output_scales.setOnes(); // Come Back and Fix this
+        Func = IOScaled<decltype(Func)>(ob.Func, input_scales, output_scales);
+    }
+
     int Gindex =
-        this->indexer.addObjective(ob.Func, ob.RegionFlag, ob.XtUVars, ob.OPVars, ob.SPVars, ThreadMode);
+        this->indexer.addObjective(Func, ob.RegionFlag, ob.XtUVars, ob.OPVars, ob.SPVars, ThreadMode);
     int PLindex = Gindex - this->indexer.StartObj;
     ob.GlobalIndex = Gindex;
     ob.PhaseLocalIndex = PLindex;

@@ -15,6 +15,9 @@ namespace ASSET {
 
     Eigen::VectorXi EXTVars;  // dirty i know
 
+    Eigen::VectorXd OutputScales;
+    
+
     int StorageIndex = 0;
     int PhaseLocalIndex = 0;
     int GlobalIndex = 0;
