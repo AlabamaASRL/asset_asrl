@@ -171,7 +171,7 @@ namespace ASSET {
                 lgl, PhaseRegionFlags::DefectPath, StateT, OParT, empty, ThreadingFlags::ByApplication);
           } else {
 
-            using BlockedODE = typename Blocked_ODE_Wrapper<decltype(ode_t)>;
+            using BlockedODE =  Blocked_ODE_Wrapper<decltype(ode_t)>;
 
             auto lgl = LGLDefects<BlockedODE, cs.value>(BlockedODE(ode_t));
             lgl.EnableVectorization = this->EnableVectorization;
@@ -197,7 +197,7 @@ namespace ASSET {
                       trap, PhaseRegionFlags::DefectPath, StateT, OParT, empty, ThreadingFlags::ByApplication);
               }
               else {
-                  using BlockedODE = typename Blocked_ODE_Wrapper<decltype(ode_t)>;
+                  using BlockedODE =  Blocked_ODE_Wrapper<decltype(ode_t)>;
 
                   auto trap = TrapezoidalDefects<BlockedODE>(BlockedODE(ode_t));
                   trap.EnableVectorization = this->EnableVectorization;
