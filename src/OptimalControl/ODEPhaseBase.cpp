@@ -1,5 +1,4 @@
 #include "ODEPhaseBase.h"
-
 #include "LGLControlSplines.h"
 #include "LGLIntegrals.h"
 #include "MeshSpacingConstraints.h"
@@ -22,6 +21,20 @@ int ASSET::ODEPhaseBase::calc_threads() {
   };
 
   return 0;
+}
+
+int ASSET::ODEPhaseBase::addBoundaryValue(RegionType reg, VarIndexType args, const std::variant<double, VectorXd>& value_t, ScaleType scale_t)
+{
+    Eigen::VectorXd value;
+    if (std::holds_alternative<double>(value_t)) {
+        value.resize(1);
+        value[0] = std::get<double>(value_t);
+    }
+    else if (std::holds_alternative<VectorXd>(value_t)) {
+        value = std::get<VectorXd>(value_t);
+    }
+    auto Func = Arguments<-1>(value.size()) - value;
+    return this->addEqualCon(reg,Func,args,scale_t);
 }
 
 int ASSET::ODEPhaseBase::addDeltaVarEqualCon(PhaseRegionFlags reg, int var, double value, double scale) {
@@ -81,6 +94,28 @@ int ASSET::ODEPhaseBase::addPeriodicityCon(VectorXi args) {
   auto X = Arguments<-1>(args.size() * 2);
   auto Func = X.head(args.size()) - X.tail(args.size());
   return this->addEqualCon(StateConstraint(Func, PhaseRegionFlags::FrontandBack, args));
+}
+
+int ASSET::ODEPhaseBase::addLUVarBound(RegionType reg, VarIndexType var, double lowerbound, double upperbound, double lbscale, double ubscale, ScaleType scale_t)
+{
+    if (lowerbound > upperbound) {
+        fmt::print(fmt::fg(fmt::color::red),
+            "Transcription Error!!!\n"
+            "Lower-bound({0:.3e}) greater than Upper-bound({1:.3e}) \n",
+            lowerbound,
+            upperbound);
+        throw std::invalid_argument("");
+    }
+    check_lbscale(lbscale);
+    check_ubscale(ubscale);
+
+    auto x = Arguments<1>();
+    auto lowbound = (lowerbound - x) * lbscale;
+    auto ubound = (x - upperbound) * ubscale;
+    auto lubound = StackedOutputs{ lowbound, ubound };
+
+    return this->addInequalCon(reg,lubound, var,scale_t);
+
 }
 
 int ASSET::ODEPhaseBase::addLUVarBound(
@@ -1505,7 +1540,59 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-  obj.def("addEqualConTest", &ODEPhaseBase::addEqualConTest);
+  obj.def("addEqualConNEW",
+      py::overload_cast<RegionType ,
+      VectorFunctionalX ,
+      VarIndexType ,
+      VarIndexType ,
+      VarIndexType ,
+      ScaleType >(&ODEPhaseBase::addEqualCon),
+      py::arg("PhaseRegion"),
+      py::arg("Func"),
+      py::arg("XtUVars"),
+      py::arg("OPVars"),
+      py::arg("SPVars"),
+      py::arg("Scale") = std::string("auto"));
+
+  obj.def("addEqualConNEW",
+      py::overload_cast<RegionType,
+      VectorFunctionalX,
+      VarIndexType,
+      ScaleType>(&ODEPhaseBase::addEqualCon),
+      py::arg("PhaseRegion"),
+      py::arg("Func"),
+      py::arg("InputIndex"),
+      py::arg("Scale")=std::string("auto"));
+
+  obj.def("addBoundaryValueNEW",
+      py::overload_cast<RegionType , 
+      VarIndexType , 
+      const std::variant<double, VectorXd>& , 
+      ScaleType >(&ODEPhaseBase::addBoundaryValue),
+      py::arg("PhaseRegion"),
+      py::arg("Index"),
+      py::arg("Value"),
+      py::arg("Scale") = std::string("auto")
+      );
+
+
+  obj.def("addLUVarBoundNEW",
+      py::overload_cast<RegionType ,
+      VarIndexType , 
+      double , 
+      double , 
+      double , 
+      ScaleType >(&ODEPhaseBase::addLUVarBound),
+      py::arg("PhaseRegion"),
+      py::arg("var"),
+      py::arg("lowerbound"),
+      py::arg("upperbound"),
+      py::arg("scale")=1.0,
+      py::arg("AutoScale") = std::string("auto")
+      );
+
+
+  ///////////////////////////////////////////////////////////////////
 
 
   obj.def("addEqualCon",
