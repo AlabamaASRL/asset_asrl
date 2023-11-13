@@ -249,86 +249,219 @@ namespace ASSET {
       return index;
     }
 
-    using VarIndexType = std::variant<VectorXi,std::string,std::vector<std::string>>;
+    using VarIndexType = std::variant<int,VectorXi,std::string,std::vector<std::string>>;
+    using ScaleType = std::variant<double, VectorXd, std::string>;
+    using RegionType = std::variant<PhaseRegionFlags, std::string>;
 
-    template<class FuncType, class FuncHolder>
-    FuncHolder makeFuncImpl(std::string reg,
-                     VectorFunctionalX fun,
+    template<class FuncHolder, class FuncType>
+    FuncHolder makeFuncImpl(RegionType reg_t,
+                     FuncType fun,
                      VarIndexType XtUPvars_t,
                      VarIndexType OPvars_t,
-                     VarIndexType SPvars_t) {
+                     VarIndexType SPvars_t,
+                     ScaleType scale_t) {
+
+
+        PhaseRegionFlags reg;
+
+        if (std::holds_alternative<PhaseRegionFlags>(reg_t)) {
+            reg = std::get<PhaseRegionFlags>(reg_t);
+        }
+        else if (std::holds_alternative<std::string>(reg_t)) {
+            reg = strto_PhaseRegionFlag(std::get<std::string>(reg_t));
+        }
+
+        FuncHolder func;
+
 
         VectorXi XtUPvars;
         VectorXi OPvars;
         VectorXi SPvars;
-
-        if (std::holds_alternative<VectorXi>(XtUPvars_t)) {
+        /////////////////////////////////////////////////
+        if (std::holds_alternative<int>(XtUPvars_t)) {
+            XtUPvars.resize(1);
+            XtUPvars[0] =  std::get<int>(XtUPvars_t);
+        }
+        else if (std::holds_alternative<VectorXi>(XtUPvars_t)) {
             XtUPvars = std::get<VectorXi>(XtUPvars_t);
         } else if (std::holds_alternative<std::string>(XtUPvars_t)) {
-            XtUPvars = this->idx(std::get<std::string>(XtUPvars_t));
-        } else if (std::holds_alternative<std::vector<std::string>>(XtUPvars_t)) {
-            std::vector<VectorXi> varvec;
-            int size = 0;
 
-            auto tmpvars = std::get<std::vector<std::string>>(XtUPvars_t);
+            if (reg != StaticParams) {
 
-            for (auto tmpv: tmpvars) {
-              varvec.push_back(this->idx(tmpv));
-              size += varvec.back().size();
+                XtUPvars = this->idx(std::get<std::string>(XtUPvars_t));
+
+                if (reg == ODEParams) {
+                    // Convert to 0 based index
+                    for (int i = 0; i < XtUPvars.size(); i++) {
+                        XtUPvars[i] -= this->XtUVars();
+                    }
+                }
+                
             }
-            XtUPvars.resize(size);
+            else {
+                throw std::invalid_argument("No string based indexing for static parameters");
+            }
 
-            int next = 0;
-            for (auto varv: varvec) {
-              for (int i = 0; i < varv.size(); i++) {
-                XtUPvars[next] = varv[i];
-                next++;
-              }
+        } else if (std::holds_alternative<std::vector<std::string>>(XtUPvars_t)) {
+            if (reg != StaticParams) {
+
+                std::vector<VectorXi> varvec;
+                int size = 0;
+
+                auto tmpvars = std::get<std::vector<std::string>>(XtUPvars_t);
+
+                for (auto tmpv : tmpvars) {
+                    varvec.push_back(this->idx(tmpv));
+                    size += varvec.back().size();
+                }
+                XtUPvars.resize(size);
+
+                int next = 0;
+                for (auto varv : varvec) {
+                    for (int i = 0; i < varv.size(); i++) {
+                        XtUPvars[next] = varv[i];
+                        next++;
+                    }
+                }
+
+                if (reg == ODEParams) {
+                    // Convert to 0 based index
+                    for (int i = 0; i < XtUPvars.size(); i++) {
+                        XtUPvars[i] -= this->XtUVars();
+                    }
+                }
+
+            }
+            else {
+                throw std::invalid_argument("No string based indexing for static parameters");
             }
         }
+        /////////////////////////////////////////////////
+        if (reg != ODEParams && reg != StaticParams) {
+            // If region is Params then the indices are held in XtUPvars_t and the others are emtpy
+            if (std::holds_alternative<int>(OPvars_t)) {
+                OPvars.resize(1);
+                OPvars[0] = std::get<int>(OPvars_t);
+            }
+            else if (std::holds_alternative<VectorXi>(OPvars_t)) {
+                OPvars = std::get<VectorXi>(OPvars_t);
+            }
+            else if (std::holds_alternative<std::string>(OPvars_t)) {
+                OPvars = this->idx(std::get<std::string>(OPvars_t));
 
-    
-    
+                for (int i = 0; i < OPvars.size();i++) {
+                    // Convert to 0 based index
+                    OPvars[i] -= this->XtUVars();
+                }
+            }
+            else if (std::holds_alternative<std::vector<std::string>>(OPvars_t)) {
+                std::vector<VectorXi> varvec;
+                int size = 0;
+                auto tmpvars = std::get<std::vector<std::string>>(OPvars_t);
+                for (auto tmpv : tmpvars) {
+                    varvec.push_back(this->idx(tmpv));
+                    size += varvec.back().size();
+                }
+                OPvars.resize(size);
+
+                int next = 0;
+                for (auto varv : varvec) {
+                    for (int i = 0; i < varv.size(); i++) {
+                        // Convert to 0 based index
+                        OPvars[next] = varv[i] - this->XtUVars();
+                        next++;
+                    }
+                }
+            }
+            /////////////////////////////////////////////////
+            if (std::holds_alternative<int>(SPvars_t)) {
+                SPvars.resize(1);
+                SPvars[0] = std::get<int>(SPvars_t);
+            }
+            else if (std::holds_alternative<VectorXi>(SPvars_t)) {
+                SPvars = std::get<VectorXi>(SPvars_t);
+            }
+            else if (std::holds_alternative<std::vector<std::string>>(SPvars_t)) {
+                auto tmpvars = std::get<std::vector<std::string>>(SPvars_t);
+                if (tmpvars.size() != 0) {
+                    throw std::invalid_argument("String indexed static params not implemented");
+                }
+            }
+            else {
+                throw std::invalid_argument("String indexed static params not implemented");
+            }
+        }
+        /////////////////////////////////////////////////
+
+        if (reg != ODEParams && reg != StaticParams) {
+            func = FuncHolder(fun, reg, XtUPvars, OPvars, SPvars);
+        }
+        else {
+            func = FuncHolder(fun, reg, XtUPvars);
+        }
+
+
+        /////////////////////////////////////////////////
+        VectorXd OutputScales(fun.ORows());
+        OutputScales.setOnes();
+        std::string ScaleMode = "auto";
+        bool ScalesSet = false;
+        if (std::holds_alternative < double > (scale_t)) {
+            OutputScales *= std::get<double>(scale_t);
+            ScaleMode = "custom";
+            ScalesSet = true;
+
+        }
+        else if (std::holds_alternative<VectorXd>(scale_t)) {
+            OutputScales = std::get<VectorXd>(scale_t);
+            ScaleMode = "custom";
+            ScalesSet = true;
+
+            if (OutputScales.size() != fun.ORows()) {
+
+                throw std::invalid_argument("Scaling vector size does not match output size of function");
+            }
+        }
+        else if (std::holds_alternative<std::string>(scale_t)) {
+            ScaleMode = std::get<std::string>(scale_t);
+        }
+
+        func.OutputScales = OutputScales;
+        func.ScaleMode = ScaleMode;
+        func.ScalesSet = ScalesSet;
+
+
+        return func;
     }
    
 
 
-    int addEqualConTest(std::string reg, VectorFunctionalX fun, VarIndexType vars_t) {
-        VectorXi vars;
+    
 
-        if (std::holds_alternative<VectorXi>(vars_t)) {
-            vars = std::get<VectorXi>(vars_t);
-        } 
-        else if (std::holds_alternative<std::string>(vars_t)) {
-            vars = this->idx(std::get<std::string>(vars_t));
-        } 
-        else if (std::holds_alternative<std::vector<std::string>>(vars_t)) {
-            std::vector<VectorXi> varvec;
-            int size = 0;
+    int addEqualCon(RegionType reg_t,
+        VectorFunctionalX fun,
+        VarIndexType XtUPvars_t,
+        VarIndexType OPvars_t,
+        VarIndexType SPvars_t,
+        ScaleType scale_t) {
 
-            auto tmpvars = std::get<std::vector<std::string>>(vars_t);
-
-            for (auto tmpv: tmpvars) {
-              varvec.push_back(this->idx(tmpv));
-              size+=varvec.back().size();
-            }
-            vars.resize(size);
-
-            int next = 0;
-            for (auto varv: varvec) {
-              for (int i = 0; i < varv.size();i++) {
-                vars[next] = varv[i];
-                next++;
-              }
-            }
-        
-        }
-
-       auto con = StateConstraint(fun, strto_PhaseRegionFlag(reg), vars);
-       return addFuncImpl(con, this->userEqualities, "Equality Constraint");
+        auto con = makeFuncImpl<StateConstraint, VectorFunctionalX>(reg_t, fun, XtUPvars_t, OPvars_t, SPvars_t, scale_t);
+        return addFuncImpl(con, this->userEqualities, "Equality Constraint");
     }
 
-    
+    int addEqualCon(RegionType reg_t,
+        VectorFunctionalX fun,
+        VarIndexType XtUPvars_t,
+        ScaleType scale_t) {
+
+        VectorXi empty;
+     
+        auto con = makeFuncImpl<StateConstraint, VectorFunctionalX>(reg_t, fun, XtUPvars_t, empty, empty, scale_t);
+        return addFuncImpl(con, this->userEqualities, "Equality Constraint");
+    }
+
+    int addBoundaryValue(RegionType reg, VarIndexType args, const std::variant<double,VectorXd> & value, ScaleType scale_t);
+
 
     /////////////////////////////////////////////////
     int addEqualCon(StateConstraint con) {
@@ -381,6 +514,45 @@ namespace ASSET {
     int addPeriodicityCon(VectorXi args);
     //////////////////////////////////////////////////
     //////////////////////////////////////////////////
+
+    int addInequalCon(RegionType reg_t,
+        VectorFunctionalX fun,
+        VarIndexType XtUPvars_t,
+        VarIndexType OPvars_t,
+        VarIndexType SPvars_t,
+        ScaleType scale_t) {
+
+        auto con = makeFuncImpl<StateConstraint, VectorFunctionalX>(reg_t, fun, XtUPvars_t, OPvars_t, SPvars_t, scale_t);
+        return addFuncImpl(con, this->userInequalities, "Inequality Constraint");
+    }
+
+    int addInequalCon(RegionType reg_t,
+        VectorFunctionalX fun,
+        VarIndexType XtUPvars_t,
+        ScaleType scale_t) {
+
+        VectorXi empty;
+
+        auto con = makeFuncImpl<StateConstraint, VectorFunctionalX>(reg_t, fun, XtUPvars_t, empty, empty, scale_t);
+        return addFuncImpl(con, this->userInequalities, "Inequality Constraint");
+    }
+
+    int addLUVarBound(
+        RegionType reg, VarIndexType var, double lowerbound, double upperbound, double lbscale, double ubscale,
+        ScaleType scale_t);
+
+    int addLUVarBound(
+        RegionType reg, VarIndexType var, double lowerbound, double upperbound, double scale,
+        ScaleType scale_t) {
+        return this->addLUVarBound(reg, var, lowerbound, upperbound, scale, scale, scale_t);
+    }
+    int addLUVarBound(
+        RegionType reg, VarIndexType var, double lowerbound, double upperbound,
+        ScaleType scale_t) {
+        return this->addLUVarBound(reg, var, lowerbound, upperbound, 1.0, 1.0, scale_t);
+    }
+
+    ///////////////////////////////////////////////////////////////
     int addInequalCon(StateConstraint con) {
       return addFuncImpl(con, this->userInequalities, "Inequality Constraint");
     }
@@ -947,6 +1119,7 @@ namespace ASSET {
         case Params:
         case ODEParams:
         case StaticParams:
+        case InnerPath:
         case NodalPath: {
           int isize = func.XtUVars.size() + func.OPVars.size() + func.SPVars.size();
           if (irows != isize) {
@@ -995,6 +1168,7 @@ namespace ASSET {
         case Params:
         case ODEParams:
         case StaticParams:
+        case InnerPath:
         case NodalPath: {
             nloops = 1;
             break;

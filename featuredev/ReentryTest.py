@@ -100,8 +100,22 @@ class ShuttleReentry(oc.ODEBase):
         
     
         ode = vf.stack([hdot,thetadot,vdot,gammadot,psidot])
+        
+        Vgroups = {}
+        Vgroups[('h','altitude')] =  h
+        Vgroups[("v","Velocity")] =  v
+        Vgroups["theta"] =  theta
+        Vgroups["gamma"] =  gamma
+        Vgroups["psi"]   =  psi
+        Vgroups["alpha"] =  alpha
+        Vgroups["beta"]  =  beta
+
+        Vgroups[("t","time")] =  XtU.TVar()
+
+        
+        
         ##############################################################
-        super().__init__(ode,Xvars,Uvars)
+        super().__init__(ode,Xvars,Uvars,Vgroups = Vgroups)
 
 def QFunc():
     h,v,alpha = Args(3).tolist()
@@ -199,22 +213,35 @@ if __name__ == "__main__":
     ################################################################
 
     ode = ShuttleReentry()
+    tstar = 60
+    lstar = 100000
     
     phase = ode.phase("LGL3",TrajIG,40)
-    scales = np.ones((8))
-    scales[0]=100000
-    scales[2]=100000/60
-    scales[5] =60
+    scales = np.ones((8))*2*np.pi
+    scales[0]=lstar
+    scales[2]=lstar/tstar
+    scales[5] =tstar
+    
+    print(scales[2])
     
     phase.setUnits(scales,[])
     phase.AutoScaling = True
     
-    phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
-    phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
-    phase.addLUVarBound("Path",6,np.deg2rad(-90.0),np.deg2rad(90.0),1.0)
-    phase.addLUVarBound("Path",7,np.deg2rad(-90.0),np.deg2rad(1.0) ,1.0)
-    phase.addUpperDeltaTimeBound(tmax,1.0/60)
-    phase.addBoundaryValue("Back" ,[0,2,3],[htf,vtf,gammatf])
+    phase.addBoundaryValueNEW("Front",range(0,6),TrajIG[0][0:6])
+    #phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
+    
+    phase.addLUVarBoundNEW("Path","theta",np.deg2rad(-89.0),np.deg2rad(89.0))
+    phase.addLUVarBoundNEW("Path","gamma",np.deg2rad(-89.0),np.deg2rad(89.0))
+
+    phase.addLUVarBoundNEW("Path","alpha",np.deg2rad(-90.0),np.deg2rad(90.0))
+    phase.addLUVarBoundNEW("Path","beta" ,np.deg2rad(-90.0),np.deg2rad(1.0),AutoScale = "auto")
+    
+    
+    phase.addUpperDeltaTimeBound(tmax,1.0)
+    phase.addBoundaryValueNEW("Back" 
+                              ,["h","v","gamma"]
+                              ,[htf,vtf,gammatf])
+    
     phase.addDeltaVarObjective(1,-1.0)
     phase.setThreads(8,8)
     
@@ -231,7 +258,7 @@ if __name__ == "__main__":
     input("S")
 
     #Refine to more segments and Reoptimize
-    phase.refineTrajManual(300)
+    #phase.refineTrajManual(300)
     phase.optimize()
 
     Traj1 = phase.returnTraj()
