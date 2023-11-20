@@ -96,6 +96,59 @@ namespace ASSET {
 
     }
 
+    virtual Integrator<ScaledODE> make_scaled_reintegrator() const {
+        Integrator<ScaledODE> Integ;
+        if (this->UVars() == 0 || this->ControlMode == BlockConstant) {
+            Integ = Integrator<ScaledODE>{ this->ode_scaled, this->integrator.DefStepSize };
+        }
+        else {
+            Eigen::VectorXi ulocs;
+            ulocs.setLinSpaced(this->UVars(), this->TVar() + 1, this->TVar() + this->UVars());
+
+            Eigen::VectorXi varlocs(1);
+            varlocs[0] = this->TVar();
+
+            double tscale = this->XtUPUnits[this->TVar()];
+            auto tabcon = InterpFunction<-1>(std::make_shared<LGLInterpTable>(this->Table), ulocs).eval(Arguments<1>(1) * tscale);
+            VectorXd Uscales = this->XtUPUnits.segment(this->TVar() + 1, this->UVars()).cwiseInverse();
+            auto ucon = RowScaled<decltype(tabcon)>(tabcon, Uscales);
+            Integ = Integrator<ScaledODE>{
+                this->ode_scaled, this->integrator.DefStepSize, ucon, varlocs };
+        }
+
+        Integ.Adaptive = this->integrator.Adaptive;
+        Integ.FastAdaptiveSTM = this->integrator.FastAdaptiveSTM;
+        Integ.AbsTols = this->integrator.AbsTols;
+        Integ.RelTols = this->integrator.RelTols;
+        Integ.MinStepSize = this->integrator.MinStepSize;
+        Integ.MaxStepSize = this->integrator.MaxStepSize;
+        Integ.EnableVectorization = this->EnableVectorization;
+
+        return Integ;
+    }
+
+    virtual Integrator<DODE> make_reintegrator() const{
+        Integrator<DODE> Integ;
+
+        if (this->UVars() == 0 || this->ControlMode == BlockConstant) {
+            Integ = Integrator<DODE>{ this->ode, this->integrator.DefStepSize };
+        }
+        else {
+            Integ = Integrator<DODE>{
+                this->ode, this->integrator.DefStepSize, std::make_shared<LGLInterpTable>(this->Table) };
+        }
+
+        Integ.Adaptive = this->integrator.Adaptive;
+        Integ.FastAdaptiveSTM = this->integrator.FastAdaptiveSTM;
+        Integ.AbsTols = this->integrator.AbsTols;
+        Integ.RelTols = this->integrator.RelTols;
+        Integ.MinStepSize = this->integrator.MinStepSize;
+        Integ.MaxStepSize = this->integrator.MaxStepSize;
+        Integ.EnableVectorization = this->EnableVectorization;
+
+        return Integ;
+    }
+
 
     virtual void setTranscriptionMode(TranscriptionModes m) {
       this->resetTranscription();
@@ -299,52 +352,50 @@ namespace ASSET {
 
 
     virtual Eigen::VectorXd calc_global_error() const {
-      LGLInterpTable tabtmp = this->Table;
-      tabtmp.loadExactData(this->ActiveTraj);
+      
+        auto CalcError = [&](auto& Integ, const auto& Traj) {
 
-      Integrator<DODE> Integ;
+            ODEState<double> Xin;
+            ODEState<double> Xout;
 
-      if (this->UVars() != 0) {
-        Integ = Integrator<DODE> {
-            this->ode, this->integrator.DefStepSize, std::make_shared<LGLInterpTable>(tabtmp)};
-      } else {
-        Integ = Integrator<DODE> {this->ode, this->integrator.DefStepSize};
+            double T0 = Traj[0][this->TVar()];
+            double TF = Traj.back()[this->TVar()];
+
+            int BlockSize = this->numTranCardStates;
+            int numBlocks = (Traj.size() - 1) / (BlockSize - 1);
+
+
+            Xin =Traj[0];
+
+            for (int i = 0; i < numBlocks; i++) {
+                int start = (BlockSize - 1) * i;
+                int stop = (BlockSize - 1) * (i + 1);
+
+                double tf = Traj[stop][this->TVar()];
+                Xout = Integ.integrate(Xin, tf);
+                Xin = Xout;
+            }
+
+            Eigen::VectorXd gerror = (Traj.back() - Xout).head(this->XVars()).cwiseAbs();
+            return gerror;
+        };
+
+
+      if (this->AutoScaling) {
+          Integrator<ScaledODE> Integ = this->make_scaled_reintegrator();
+          auto ActiveTrajTmp = this->ActiveTraj;
+          for (auto& T : ActiveTrajTmp) {
+              T = T.cwiseQuotient(this->XtUPUnits);
+          }
+          return CalcError(Integ, ActiveTrajTmp);
+
+      }
+      else {
+          Integrator<DODE> Integ = this->make_reintegrator();
+          return CalcError(Integ, this->ActiveTraj);
       }
 
 
-      Integ.Adaptive = this->integrator.Adaptive;
-      Integ.FastAdaptiveSTM = this->integrator.FastAdaptiveSTM;
-      Integ.AbsTols = this->integrator.AbsTols;
-      Integ.RelTols = this->integrator.RelTols;
-      Integ.MinStepSize = this->integrator.MinStepSize;
-      Integ.MaxStepSize = this->integrator.MaxStepSize;
-      Integ.EnableVectorization = this->EnableVectorization;
-
-      ODEState<double> Xin;
-      ODEState<double> Xout;
-
-
-      double T0 = this->ActiveTraj[0][this->TVar()];
-      double TF = this->ActiveTraj.back()[this->TVar()];
-
-
-      int BlockSize = this->numTranCardStates;
-      int numBlocks = (this->ActiveTraj.size() - 1) / (BlockSize - 1);
-      ;
-
-      Xin = this->ActiveTraj[0];
-
-      for (int i = 0; i < numBlocks; i++) {
-        int start = (BlockSize - 1) * i;
-        int stop = (BlockSize - 1) * (i + 1);
-
-        double tf = this->ActiveTraj[stop][this->TVar()];
-        Xout = Integ.integrate(Xin, tf);
-        Xin = Xout;
-      }
-
-      Eigen::VectorXd gerror = (this->ActiveTraj.back() - Xout).head(this->XVars()).cwiseAbs();
-      return gerror;
     }
 
     virtual void get_meshinfo_deboor(Eigen::VectorXd& tsnd,
@@ -501,26 +552,11 @@ namespace ASSET {
                                          Eigen::MatrixXd& mesh_dist) const {
 
 
-      auto Traj = this->ActiveTraj;
 
-
-
-      
-
-
-      
 
       auto CalcError = [&](auto& Integ, const auto& Traj) {
 
-          Integ.Adaptive = this->integrator.Adaptive;
-          Integ.FastAdaptiveSTM = this->integrator.FastAdaptiveSTM;
-          Integ.AbsTols = this->integrator.AbsTols;
-          Integ.RelTols = this->integrator.RelTols;
-          Integ.MinStepSize = this->integrator.MinStepSize;
-          Integ.MaxStepSize = this->integrator.MaxStepSize;
-          Integ.EnableVectorization = this->EnableVectorization;
-
-
+          
           double T0 = Traj[0][this->TVar()];
           double TF = Traj.back()[this->TVar()];
 
@@ -591,52 +627,17 @@ namespace ASSET {
       };
      
       if (this->AutoScaling) {
-          Integrator<ScaledODE> Integ;
-
-          if (this->UVars() == 0 || this->ControlMode == BlockConstant) {
-              Integ = Integrator<ScaledODE>{ this->ode_scaled, this->integrator.DefStepSize };
-          }
-          else {
-
-              Eigen::VectorXi ulocs;
-              ulocs.setLinSpaced(this->UVars(), this->TVar() + 1, this->TVar() + this->UVars());
-
-              Eigen::VectorXi varlocs(1);
-              varlocs[0] = this->TVar();
-
-              double tscale = this->XtUPUnits[this->TVar()];
-
-              auto tabcon = InterpFunction<-1>(std::make_shared<LGLInterpTable>(this->Table), ulocs).eval(Arguments<1>(1)*tscale);
-
-              VectorXd Uscales = this->XtUPUnits.segment(this->TVar() + 1, this->UVars()).cwiseInverse();
-
-              auto ucon = RowScaled<decltype(tabcon)>(tabcon, Uscales);
-
-              Integ = Integrator<ScaledODE>{
-                  this->ode_scaled, this->integrator.DefStepSize, ucon, varlocs };
-          }
-
+          Integrator<ScaledODE> Integ = this->make_scaled_reintegrator();
           auto ActiveTrajTmp = this->ActiveTraj;
-
           for (auto& T : ActiveTrajTmp) {
               T = T.cwiseQuotient(this->XtUPUnits);
           }
-
-          CalcError(Integ, ActiveTrajTmp);
+          return CalcError(Integ, ActiveTrajTmp);
 
       }
       else {
-
-          Integrator<DODE> Integ;
-
-          if (this->UVars() == 0 || this->ControlMode == BlockConstant) {
-              Integ = Integrator<DODE>{ this->ode, this->integrator.DefStepSize };
-          }
-          else {
-              Integ = Integrator<DODE>{
-                  this->ode, this->integrator.DefStepSize, std::make_shared<LGLInterpTable>(this->Table) };
-          }
-          CalcError(Integ, this->ActiveTraj);
+          Integrator<DODE> Integ = this->make_reintegrator();
+          return CalcError(Integ, this->ActiveTraj);
       }
       
     }

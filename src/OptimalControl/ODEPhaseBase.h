@@ -253,15 +253,8 @@ namespace ASSET {
     using ScaleType = std::variant<double, VectorXd, std::string>;
     using RegionType = std::variant<PhaseRegionFlags, std::string>;
 
-    template<class FuncHolder, class FuncType>
-    FuncHolder makeFuncImpl(RegionType reg_t,
-                     FuncType fun,
-                     VarIndexType XtUPvars_t,
-                     VarIndexType OPvars_t,
-                     VarIndexType SPvars_t,
-                     ScaleType scale_t) {
-
-
+    
+    PhaseRegionFlags getRegion(RegionType reg_t) const{
         PhaseRegionFlags reg;
 
         if (std::holds_alternative<PhaseRegionFlags>(reg_t)) {
@@ -270,21 +263,23 @@ namespace ASSET {
         else if (std::holds_alternative<std::string>(reg_t)) {
             reg = strto_PhaseRegionFlag(std::get<std::string>(reg_t));
         }
+        return reg;
+    }
 
-        FuncHolder func;
 
+    VectorXi getXtUPVars(PhaseRegionFlags reg,VarIndexType XtUPvars_t) const {
 
         VectorXi XtUPvars;
-        VectorXi OPvars;
-        VectorXi SPvars;
+        
         /////////////////////////////////////////////////
         if (std::holds_alternative<int>(XtUPvars_t)) {
             XtUPvars.resize(1);
-            XtUPvars[0] =  std::get<int>(XtUPvars_t);
+            XtUPvars[0] = std::get<int>(XtUPvars_t);
         }
         else if (std::holds_alternative<VectorXi>(XtUPvars_t)) {
             XtUPvars = std::get<VectorXi>(XtUPvars_t);
-        } else if (std::holds_alternative<std::string>(XtUPvars_t)) {
+        }
+        else if (std::holds_alternative<std::string>(XtUPvars_t)) {
 
             if (reg != StaticParams) {
 
@@ -296,13 +291,14 @@ namespace ASSET {
                         XtUPvars[i] -= this->XtUVars();
                     }
                 }
-                
+
             }
             else {
                 throw std::invalid_argument("No string based indexing for static parameters");
             }
 
-        } else if (std::holds_alternative<std::vector<std::string>>(XtUPvars_t)) {
+        }
+        else if (std::holds_alternative<std::vector<std::string>>(XtUPvars_t)) {
             if (reg != StaticParams) {
 
                 std::vector<VectorXi> varvec;
@@ -336,70 +332,107 @@ namespace ASSET {
                 throw std::invalid_argument("No string based indexing for static parameters");
             }
         }
-        /////////////////////////////////////////////////
-        if (reg != ODEParams && reg != StaticParams) {
-            // If region is Params then the indices are held in XtUPvars_t and the others are emtpy
-            if (std::holds_alternative<int>(OPvars_t)) {
-                OPvars.resize(1);
-                OPvars[0] = std::get<int>(OPvars_t);
-            }
-            else if (std::holds_alternative<VectorXi>(OPvars_t)) {
-                OPvars = std::get<VectorXi>(OPvars_t);
-            }
-            else if (std::holds_alternative<std::string>(OPvars_t)) {
-                OPvars = this->idx(std::get<std::string>(OPvars_t));
+        return XtUPvars;
+    }
 
-                for (int i = 0; i < OPvars.size();i++) {
+    VectorXi getOPVars(PhaseRegionFlags reg, VarIndexType OPvars_t) const {
+
+        VectorXi OPvars;
+
+        if (std::holds_alternative<int>(OPvars_t)) {
+            OPvars.resize(1);
+            OPvars[0] = std::get<int>(OPvars_t);
+        }
+        else if (std::holds_alternative<VectorXi>(OPvars_t)) {
+            OPvars = std::get<VectorXi>(OPvars_t);
+        }
+        else if (std::holds_alternative<std::string>(OPvars_t)) {
+            OPvars = this->idx(std::get<std::string>(OPvars_t));
+
+            for (int i = 0; i < OPvars.size(); i++) {
+                // Convert to 0 based index
+                OPvars[i] -= this->XtUVars();
+            }
+        }
+        else if (std::holds_alternative<std::vector<std::string>>(OPvars_t)) {
+            std::vector<VectorXi> varvec;
+            int size = 0;
+            auto tmpvars = std::get<std::vector<std::string>>(OPvars_t);
+            for (auto tmpv : tmpvars) {
+                varvec.push_back(this->idx(tmpv));
+                size += varvec.back().size();
+            }
+            OPvars.resize(size);
+
+            int next = 0;
+            for (auto varv : varvec) {
+                for (int i = 0; i < varv.size(); i++) {
                     // Convert to 0 based index
-                    OPvars[i] -= this->XtUVars();
+                    OPvars[next] = varv[i] - this->XtUVars();
+                    next++;
                 }
             }
-            else if (std::holds_alternative<std::vector<std::string>>(OPvars_t)) {
-                std::vector<VectorXi> varvec;
-                int size = 0;
-                auto tmpvars = std::get<std::vector<std::string>>(OPvars_t);
-                for (auto tmpv : tmpvars) {
-                    varvec.push_back(this->idx(tmpv));
-                    size += varvec.back().size();
-                }
-                OPvars.resize(size);
+        }
 
-                int next = 0;
-                for (auto varv : varvec) {
-                    for (int i = 0; i < varv.size(); i++) {
-                        // Convert to 0 based index
-                        OPvars[next] = varv[i] - this->XtUVars();
-                        next++;
-                    }
-                }
-            }
-            /////////////////////////////////////////////////
-            if (std::holds_alternative<int>(SPvars_t)) {
-                SPvars.resize(1);
-                SPvars[0] = std::get<int>(SPvars_t);
-            }
-            else if (std::holds_alternative<VectorXi>(SPvars_t)) {
-                SPvars = std::get<VectorXi>(SPvars_t);
-            }
-            else if (std::holds_alternative<std::vector<std::string>>(SPvars_t)) {
-                auto tmpvars = std::get<std::vector<std::string>>(SPvars_t);
-                if (tmpvars.size() != 0) {
-                    throw std::invalid_argument("String indexed static params not implemented");
-                }
-            }
-            else {
+        return OPvars;
+    }
+
+    VectorXi getSPVars(PhaseRegionFlags reg, VarIndexType SPvars_t) const {
+
+        VectorXi SPvars;
+
+        if (std::holds_alternative<int>(SPvars_t)) {
+            SPvars.resize(1);
+            SPvars[0] = std::get<int>(SPvars_t);
+        }
+        else if (std::holds_alternative<VectorXi>(SPvars_t)) {
+            SPvars = std::get<VectorXi>(SPvars_t);
+        }
+        else if (std::holds_alternative<std::vector<std::string>>(SPvars_t)) {
+            auto tmpvars = std::get<std::vector<std::string>>(SPvars_t);
+            if (tmpvars.size() != 0) {
                 throw std::invalid_argument("String indexed static params not implemented");
             }
         }
-        /////////////////////////////////////////////////
+        else {
+            throw std::invalid_argument("String indexed static params not implemented");
+        }
 
+        return SPvars;
+    }
+
+
+
+    template<class FuncHolder, class FuncType>
+    FuncHolder makeFuncImpl(RegionType reg_t,
+                     FuncType fun,
+                     VarIndexType XtUPvars_t,
+                     VarIndexType OPvars_t,
+                     VarIndexType SPvars_t,
+                     ScaleType scale_t) {
+
+
+        PhaseRegionFlags reg = getRegion(reg_t);
+
+        FuncHolder func;
+
+
+        VectorXi XtUPvars = this->getXtUPVars(reg,XtUPvars_t);
+        VectorXi OPvars;
+        VectorXi SPvars;
+        /////////////////////////////////////////////////
+       
         if (reg != ODEParams && reg != StaticParams) {
+            // If region is Params then the indices are held in XtUPvars_t and the others are emtpy
+            OPvars = this->getOPVars(reg, OPvars_t);
+            SPvars = this->getSPVars(reg, SPvars_t);
             func = FuncHolder(fun, reg, XtUPvars, OPvars, SPvars);
+
         }
         else {
             func = FuncHolder(fun, reg, XtUPvars);
         }
-
+        
 
         /////////////////////////////////////////////////
         VectorXd OutputScales(fun.ORows());
@@ -461,7 +494,13 @@ namespace ASSET {
     }
 
     int addBoundaryValue(RegionType reg, VarIndexType args, const std::variant<double,VectorXd> & value, ScaleType scale_t);
+    int addDeltaVarEqualCon(VarIndexType var, double value, double scale, ScaleType scale_t);
+    int addDeltaTimeEqualCon(double value, double scale, ScaleType scale_t) {
+        return this->addDeltaVarEqualCon(this->TVar(), value, scale, scale_t);
 
+    }
+    int addValueLock(RegionType reg, VarIndexType args, ScaleType scale_t);
+    int addPeriodicityCon(VarIndexType args, ScaleType scale_t);
 
     /////////////////////////////////////////////////
     int addEqualCon(StateConstraint con) {
@@ -537,6 +576,7 @@ namespace ASSET {
         return addFuncImpl(con, this->userInequalities, "Inequality Constraint");
     }
 
+    ////////////////////////
     int addLUVarBound(
         RegionType reg, VarIndexType var, double lowerbound, double upperbound, double lbscale, double ubscale,
         ScaleType scale_t);
@@ -550,6 +590,182 @@ namespace ASSET {
         RegionType reg, VarIndexType var, double lowerbound, double upperbound,
         ScaleType scale_t) {
         return this->addLUVarBound(reg, var, lowerbound, upperbound, 1.0, 1.0, scale_t);
+    }
+
+    int addLowerVarBound(
+        RegionType reg, VarIndexType var, double lowerbound, double lbscale,ScaleType scale_t);
+
+    int addUpperVarBound(
+        RegionType reg, VarIndexType var, double upperbound, double ubscale, ScaleType scale_t);
+
+    int addLUFuncBound(RegionType reg,
+        ScalarFunctionalX func,
+        VarIndexType XtUPvars,
+        VarIndexType OPvars,
+        VarIndexType SPvars,
+        double lowerbound,
+        double upperbound,
+        double lbscale,
+        double ubscale, ScaleType scale_t);
+
+    
+
+    int addLUFuncBound(RegionType reg,
+        ScalarFunctionalX func,
+        VarIndexType XtUPvars,
+        double lowerbound,
+        double upperbound,
+        double lbscale,
+        double ubscale, ScaleType scale_t) {
+
+        VectorXi empty;
+
+        return addLUFuncBound(reg, func, XtUPvars, empty, empty, lowerbound,upperbound, lbscale, ubscale, scale_t);
+    }
+
+    int addLUFuncBound(RegionType reg,
+        ScalarFunctionalX func,
+        VarIndexType XtUPvars,
+        VarIndexType OPvars,
+        VarIndexType SPvars,
+        double lowerbound,
+        double upperbound,
+        double scale,
+        ScaleType scale_t) {
+        return addLUFuncBound(reg, func, XtUPvars, OPvars, SPvars, lowerbound, upperbound, scale, scale, scale_t);
+    }
+
+    int addLUFuncBound(RegionType reg,
+        ScalarFunctionalX func,
+        VarIndexType XtUPvars,
+        double lowerbound,
+        double upperbound,
+        double scale,
+        ScaleType scale_t) {
+        VectorXi empty;
+        return addLUFuncBound(reg, func, XtUPvars, empty, empty, lowerbound, upperbound, scale, scale, scale_t);
+    }
+
+    int addLowerFuncBound(RegionType reg,
+        ScalarFunctionalX func,
+        VarIndexType XtUPvars,
+        VarIndexType OPvars,
+        VarIndexType SPvars,
+        double lowerbound,
+        double lbscale,
+        ScaleType scale_t);
+
+    int addLowerFuncBound(RegionType reg,
+        ScalarFunctionalX func,
+        VarIndexType XtUPvars,
+        double lowerbound,
+        double lbscale,
+        ScaleType scale_t) {
+        VectorXi empty;
+
+        return this->addLowerFuncBound(reg, func, XtUPvars, empty, empty, lowerbound, lbscale, scale_t);
+    }
+
+
+    int addUpperFuncBound(RegionType reg,
+        ScalarFunctionalX func,
+        VarIndexType XtUPvars,
+        VarIndexType OPvars,
+        VarIndexType SPvars,
+        double upperbound,
+        double ubscale,
+        ScaleType scale_t);
+
+    int addUpperFuncBound(RegionType reg,
+        ScalarFunctionalX func,
+        VarIndexType XtUPvars,
+        double upperbound,
+        double ubscale,
+        ScaleType scale_t) {
+        VectorXi empty;
+
+        return this->addUpperFuncBound(reg, func, XtUPvars, empty, empty, upperbound, ubscale, scale_t);
+    }
+
+    int addLUNormBound(RegionType reg,
+        VarIndexType XtUPvars,
+        double lowerbound,
+        double upperbound,
+        double lbscale,
+        double ubscale,
+        ScaleType scale_t);
+
+    int addLUNormBound(RegionType reg,
+        VarIndexType XtUPvars,
+        double lowerbound,
+        double upperbound,
+        double scale,
+        ScaleType scale_t) {
+        return this->addLUNormBound(reg, XtUPvars, lowerbound, upperbound, scale, scale, scale_t);
+    }
+
+    int addLUSquaredNormBound(RegionType reg,
+        VarIndexType XtUPvars,
+        double lowerbound,
+        double upperbound,
+        double lbscale,
+        double ubscale,
+        ScaleType scale_t);
+
+    int addLUSquaredNormBound(RegionType reg,
+        VarIndexType XtUPvars,
+        double lowerbound,
+        double upperbound,
+        double scale,
+        ScaleType scale_t) {
+        return this->addLUSquaredNormBound(reg, XtUPvars, lowerbound, upperbound, scale, scale, scale_t);
+    }
+
+
+    int addLowerNormBound(RegionType reg,
+        VarIndexType XtUPvars,
+        double lowerbound,
+        double lbscale,
+        ScaleType scale_t);
+
+    int addLowerSquaredNormBound(RegionType reg,
+        VarIndexType XtUPvars,
+        double lowerbound,
+        double lbscale,
+        ScaleType scale_t);
+
+    int addUpperNormBound(RegionType reg,
+        VarIndexType XtUPvars,
+        double upperbound,
+        double ubscale,
+        ScaleType scale_t);
+
+    int addUpperSquaredNormBound(RegionType reg,
+        VarIndexType XtUPvars,
+        double upperbound,
+        double ubscale,
+        ScaleType scale_t);
+    //
+    int addLowerDeltaVarBound(RegionType reg, VarIndexType var, double lowerbound, double lbscale,
+        ScaleType scale_t);
+    int addLowerDeltaVarBound(VarIndexType var, double lowerbound, double lbscale,
+        ScaleType scale_t) {
+        return this->addLowerDeltaVarBound(PhaseRegionFlags::FrontandBack, var, lowerbound, lbscale, scale_t);
+    }
+    int addLowerDeltaTimeBound(double lowerbound, double lbscale,
+        ScaleType scale_t) {
+        return this->addLowerDeltaVarBound(this->TVar(), lowerbound, lbscale, scale_t);
+    }
+    ///
+    int addUpperDeltaVarBound(RegionType reg, VarIndexType var, double upperbound, double ubscale,
+        ScaleType scale_t);
+    int addUpperDeltaVarBound(VarIndexType var, double upperbound, double ubscale,
+        ScaleType scale_t) {
+        return this->addUpperDeltaVarBound(PhaseRegionFlags::FrontandBack, var, upperbound, ubscale, scale_t);
+    }
+    int addUpperDeltaTimeBound(double upperbound, double ubscale,
+        ScaleType scale_t) {
+        return this->addUpperDeltaVarBound(this->TVar(), upperbound, ubscale, scale_t);
     }
 
     ///////////////////////////////////////////////////////////////
@@ -857,6 +1073,34 @@ namespace ASSET {
     //////////////////////////////////////////////////
     //////////////////////////////////////////////////
     //////////////////////////////////////////////////
+    int addStateObjective(RegionType reg_t,
+        ScalarFunctionalX fun,
+        VarIndexType XtUPvars_t,
+        VarIndexType OPvars_t,
+        VarIndexType SPvars_t,
+        ScaleType scale_t) {
+
+        auto con = makeFuncImpl<StateObjective, ScalarFunctionalX>(reg_t, fun, XtUPvars_t, OPvars_t, SPvars_t, scale_t);
+        return addFuncImpl(con, this->userStateObjectives, "State Objective");
+    }
+
+    int addStateObjective(RegionType reg_t,
+        ScalarFunctionalX fun,
+        VarIndexType XtUPvars_t,
+        ScaleType scale_t) {
+
+        VectorXi empty;
+
+        auto con = makeFuncImpl<StateObjective, ScalarFunctionalX>(reg_t, fun, XtUPvars_t, empty, empty, scale_t);
+        return addFuncImpl(con, this->userStateObjectives, "State Objective");
+    }
+    int addValueObjective(RegionType reg, VarIndexType var, double scale,ScaleType scale_t);
+    int addDeltaVarObjective(VarIndexType var, double scale, ScaleType scale_t);
+    int addDeltaTimeObjective(double scale, ScaleType scale_t) {
+        return this->addDeltaVarObjective(this->TVar(), scale, scale_t);
+    }
+
+    ///////////////////////////////////////////////
     int addStateObjective(StateObjective obj) {
       return addFuncImpl(obj, this->userStateObjectives, "State Objective");
     }
@@ -887,6 +1131,31 @@ namespace ASSET {
       return this->addDeltaVarObjective(this->TVar(), scale);
     }
     ///////////////////////////////////////////////////
+
+    int addIntegralObjective(
+        ScalarFunctionalX fun,
+        VarIndexType XtUPvars_t,
+        VarIndexType OPvars_t,
+        VarIndexType SPvars_t,
+        ScaleType scale_t) {
+
+        auto con = makeFuncImpl<StateObjective, ScalarFunctionalX>(Path, fun, XtUPvars_t, OPvars_t, SPvars_t, scale_t);
+        return addFuncImpl(con, this->userIntegrands, "Integral Objective");
+    }
+
+    int addIntegralObjective(
+        ScalarFunctionalX fun,
+        VarIndexType XtUPvars_t,
+        ScaleType scale_t) {
+
+        VectorXi empty;
+
+        auto con = makeFuncImpl<StateObjective, ScalarFunctionalX>(Path, fun, XtUPvars_t, empty, empty, scale_t);
+        return addFuncImpl(con, this->userIntegrands, "Integral Objective");
+    }
+
+
+
     int addIntegralObjective(StateObjective obj) {
       return addFuncImpl(obj, this->userIntegrands, "Integral Objective");
     }
@@ -897,6 +1166,36 @@ namespace ASSET {
       return this->addIntegralObjective(StateObjective(fun, Path, XtUvars, OPvars, SPvars));
     }
     ///////////////////////////////////////////////////
+
+    int addIntegralParamFunction(
+        ScalarFunctionalX fun,
+        VarIndexType XtUPvars_t,
+        VarIndexType OPvars_t,
+        VarIndexType SPvars_t,
+        int accum_parm,
+        ScaleType scale_t) {
+
+        VectorXi epv(1);
+        epv[0] = accum_parm;
+
+        auto con = makeFuncImpl<StateObjective, ScalarFunctionalX>(Path, fun, XtUPvars_t, OPvars_t, SPvars_t, scale_t);
+        int index = addFuncImpl(con, this->userParamIntegrands, "Integral Parameter Function");
+        this->userParamIntegrands[index].EXTVars = epv;
+        return index;
+    }
+
+    
+    int addIntegralParamFunction(
+        ScalarFunctionalX fun,
+        VarIndexType XtUPvars_t,
+        int accum_parm,
+        ScaleType scale_t) {
+        VectorXi empty;
+        return addIntegralParamFunction(fun, XtUPvars_t, empty, empty, accum_parm, scale_t);
+    }
+
+
+
     int addIntegralParamFunction(StateObjective con, int pv) {
       VectorXi epv(1);
       epv[0] = pv;
@@ -1158,57 +1457,11 @@ namespace ASSET {
       }
     }
 
-    Eigen::VectorXd get_input_scale(PhaseRegionFlags flag, VectorXi XtUV, VectorXi OPV, VectorXi SPV) {
+    Eigen::VectorXd get_input_scale(PhaseRegionFlags flag, VectorXi XtUV, VectorXi OPV, VectorXi SPV) const;
 
-        int nloops;
-        switch (flag) {
-        case Front:
-        case Back:
-        case Path:
-        case Params:
-        case ODEParams:
-        case StaticParams:
-        case InnerPath:
-        case NodalPath: {
-            nloops = 1;
-            break;
-        }
-        case FrontandBack:
-        case BackandFront:
-        case PairWisePath: {
-            nloops = 2;
-            break;
-        }
-        default: {
-            throw std::invalid_argument("Cannot scale this phase region");
-            break;
-        }
-        }
+    std::vector<Eigen::VectorXd> get_test_inputs(PhaseRegionFlags flag, VectorXi XtUV, VectorXi OPV, VectorXi SPV) const;
 
-
-        int isize = XtUV.size()*nloops + OPV.size() + SPV.size();
-        VectorXd scales(isize);
-
-        int next = 0;
-        for (int n = 0; n < nloops; n++) {
-            for (int i = 0; i < XtUV.size(); i++) {
-                scales[next] = this->XtUPUnits[XtUV[i]];
-                next++;
-            }
-        }
-        for (int i = 0; i < OPV.size(); i++) {
-            scales[next] = this->XtUPUnits[OPV[i] + this->XtUVars()];
-            next++;
-        }
-        for (int i = 0; i < SPV.size(); i++) {
-            scales[next] = this->SPUnits[SPV[i]];
-            next++;
-        }
-
-        return scales;
-    }
-
-
+    void calc_auto_scales();
 
     static void check_lbscale(double lbscale) {
       if (lbscale <= 0.0) {

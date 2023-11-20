@@ -103,13 +103,12 @@ class ShuttleReentry(oc.ODEBase):
         
         Vgroups = {}
         Vgroups[('h','altitude')] =  h
-        Vgroups[("v","Velocity")] =  v
+        Vgroups[("v","velocity")] =  v
         Vgroups["theta"] =  theta
         Vgroups["gamma"] =  gamma
         Vgroups["psi"]   =  psi
-        Vgroups["alpha"] =  alpha
+        Vgroups[("alpha","AoA")] =  alpha
         Vgroups["beta"]  =  beta
-
         Vgroups[("t","time")] =  XtU.TVar()
 
         
@@ -217,32 +216,31 @@ if __name__ == "__main__":
     lstar = 100000
     
     phase = ode.phase("LGL3",TrajIG,40)
-    scales = np.ones((8))*2*np.pi
+    scales = np.ones((8))
     scales[0]=lstar
     scales[2]=lstar/tstar
     scales[5] =tstar
-    
-    print(scales[2])
-    
+        
     phase.setUnits(scales,[])
     phase.AutoScaling = True
     
     phase.addBoundaryValueNEW("Front",range(0,6),TrajIG[0][0:6])
-    #phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
     
     phase.addLUVarBoundNEW("Path","theta",np.deg2rad(-89.0),np.deg2rad(89.0))
     phase.addLUVarBoundNEW("Path","gamma",np.deg2rad(-89.0),np.deg2rad(89.0))
 
-    phase.addLUVarBoundNEW("Path","alpha",np.deg2rad(-90.0),np.deg2rad(90.0))
+    phase.addLUVarBoundNEW("Path","AoA",np.deg2rad(-90.0),np.deg2rad(90.0))
     phase.addLUVarBoundNEW("Path","beta" ,np.deg2rad(-90.0),np.deg2rad(1.0),AutoScale = "auto")
     
     
-    phase.addUpperDeltaTimeBound(tmax,1.0)
+    phase.addUpperDeltaTimeBoundNEW(tmax,1.0)
+    
+    
     phase.addBoundaryValueNEW("Back" 
                               ,["h","v","gamma"]
                               ,[htf,vtf,gammatf])
     
-    phase.addDeltaVarObjective(1,-1.0)
+    phase.addDeltaVarObjectiveNEW(1,-1.0)
     phase.setThreads(8,8)
     
     ## Our IG is bad, so i turn on line search
@@ -251,6 +249,9 @@ if __name__ == "__main__":
     phase.optimizer.set_PrintLevel(1)
     phase.setAdaptiveMesh(True)
     phase.MeshErrorEstimator='integrator'
+    #phase.MeshErrorCriteria = 'endtoend'
+    phase.MeshErrFactor = 10
+    #phase.MeshRedFactor = 1.1
 
     ## IG is bad, solve first before optimize
     phase.solve_optimize()
@@ -264,7 +265,15 @@ if __name__ == "__main__":
     Traj1 = phase.returnTraj()
     
     ## Add in Heating Rate Constraint, scale so rhs is order 1
-    phase.addUpperFuncBound("Path",QFunc(),[0,2,6],Qlimit,1/Qlimit)
+    phase.addUpperFuncBoundNEW("Path",QFunc(),
+                               ["h","v","alpha"],
+                               Qlimit,AutoScale='auto')
+    
+    
+    #phase.addLUFuncBoundNEW("Path",QFunc(),["h","v","alpha"],[],[],
+    #                        -5,Qlimit,1.0,AutoScale='auto')
+
+    
     phase.optimize()
     
     Traj2 = phase.returnTraj()
