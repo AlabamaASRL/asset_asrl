@@ -4,6 +4,7 @@
 #include "MeshSpacingConstraints.h"
 #include "PyDocString/OptimalControl/ODEPhaseBase_doc.h"
 #include "ValueLock.h"
+#include "AutoScalingUtils.h"
 
 int ASSET::ODEPhaseBase::calc_threads() {
   if (this->Threads > 1 && false) {
@@ -36,6 +37,31 @@ int ASSET::ODEPhaseBase::addBoundaryValue(RegionType reg, VarIndexType args, con
     auto Func = Arguments<-1>(value.size()) - value;
     return this->addEqualCon(reg,Func,args,scale_t);
 }
+
+int ASSET::ODEPhaseBase::addDeltaVarEqualCon(VarIndexType var, double value, double scale, ScaleType scale_t)
+{
+    auto args = Arguments<2>();
+    auto x0 = args.coeff<0>();
+    auto x1 = args.coeff<1>();
+    auto func = ((x1 - x0) - value) * scale;
+    return this->addEqualCon(PhaseRegionFlags::FrontandBack, func, var,scale_t);
+}
+
+int ASSET::ODEPhaseBase::addValueLock(RegionType reg, VarIndexType args, ScaleType scale_t)
+{
+    int argsize = this->getXtUPVars(getRegion(reg), args).size();
+    return this->addEqualCon(reg,LockArgs<-1>(argsize), args,scale_t);
+}
+
+int ASSET::ODEPhaseBase::addPeriodicityCon(VarIndexType args, ScaleType scale_t)
+{
+    int argsize = this->getXtUPVars(PhaseRegionFlags::FrontandBack, args).size();
+    auto X = Arguments<-1>(argsize * 2);
+    auto Func = X.head(argsize) - X.tail(argsize);
+    return this->addEqualCon(PhaseRegionFlags::FrontandBack,Func, args,scale_t);
+}
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 
 int ASSET::ODEPhaseBase::addDeltaVarEqualCon(PhaseRegionFlags reg, int var, double value, double scale) {
   auto args = Arguments<2>();
@@ -73,7 +99,7 @@ Eigen::VectorXi ASSET::ODEPhaseBase::addBoundaryValues(PhaseRegionFlags reg,
 
 int ASSET::ODEPhaseBase::addValueLock(PhaseRegionFlags reg, VectorXi args) {
   return this->addEqualCon(StateConstraint(LockArgs<-1>(args.size()), reg, args));
-  ;
+  
 }
 
 int ASSET::ODEPhaseBase::addBoundaryValue(PhaseRegionFlags reg, VectorXi args, const VectorXd& value) {
@@ -118,6 +144,262 @@ int ASSET::ODEPhaseBase::addLUVarBound(RegionType reg, VarIndexType var, double 
 
 }
 
+int ASSET::ODEPhaseBase::addLowerVarBound(RegionType reg, VarIndexType var, double lowerbound, double lbscale, ScaleType scale_t)
+{
+    check_lbscale(lbscale);
+    auto x = Arguments<1>();
+    auto lbound = (lowerbound - x) * lbscale;
+    
+    return this->addInequalCon(reg,lbound, var, scale_t);
+}
+
+int ASSET::ODEPhaseBase::addUpperVarBound(RegionType reg, VarIndexType var, double upperbound, double ubscale, ScaleType scale_t)
+{
+    check_ubscale(ubscale);
+    auto x = Arguments<1>();
+    auto ubound = (x - upperbound) * ubscale;
+    return this->addInequalCon(reg, ubound, var, scale_t);
+}
+
+int ASSET::ODEPhaseBase::addLUFuncBound(RegionType reg, ScalarFunctionalX func, VarIndexType XtUPvars,
+    VarIndexType OPvars,
+    VarIndexType SPvars,
+    double lowerbound, double upperbound, double lbscale, double ubscale, ScaleType scale_t)
+{
+
+    if (lowerbound > upperbound) {
+        fmt::print(fmt::fg(fmt::color::red),
+            "Transcription Error!!!\n"
+            "Lower-bound({0:.3e}) greater than Upper-bound({1:.3e}) \n",
+            lowerbound,
+            upperbound);
+        throw std::invalid_argument("");
+    }
+    check_lbscale(lbscale);
+    check_ubscale(ubscale);
+    auto x = Arguments<1>();
+    auto lubound = StackedOutputs{ (lowerbound - x) * lbscale, (x - upperbound) * ubscale };
+    auto lufun = lubound.eval(func);
+    return this->addInequalCon(reg,lufun, XtUPvars,OPvars,SPvars,scale_t);
+}
+
+int ASSET::ODEPhaseBase::addLowerFuncBound(RegionType reg, ScalarFunctionalX func, 
+    VarIndexType XtUPvars,
+    VarIndexType OPvars, 
+    VarIndexType SPvars, 
+    double lowerbound, double lbscale, ScaleType scale_t)
+{
+    check_lbscale(lbscale);
+
+    Vector1<double> rhs;
+    rhs[0] = lowerbound;
+    auto lbfun = ((-1.0 * func) + rhs) * lbscale;
+
+    return this->addInequalCon(reg, lbfun, XtUPvars, OPvars, SPvars, scale_t);
+}
+
+int ASSET::ODEPhaseBase::addUpperFuncBound(RegionType reg, ScalarFunctionalX func, 
+    VarIndexType XtUPvars, 
+    VarIndexType OPvars, 
+    VarIndexType SPvars, 
+    double upperbound, double ubscale, ScaleType scale_t)
+{
+
+    check_ubscale(ubscale);
+
+    Vector1<double> rhs;
+    rhs[0] = -upperbound;
+    auto ubfun = ((func)+rhs) * ubscale;
+    return this->addInequalCon(reg, ubfun, XtUPvars, OPvars, SPvars, scale_t);
+}
+
+int ASSET::ODEPhaseBase::addLUNormBound(RegionType reg, VarIndexType XtUPvars,
+    double lowerbound, double upperbound, double lbscale, double ubscale, ScaleType scale_t)
+{
+    if (lowerbound > upperbound) {
+        fmt::print(fmt::fg(fmt::color::red),
+            "Transcription Error!!!\n"
+            "Lower-bound({0:.3e}) greater than Upper-bound({1:.3e}) \n",
+            lowerbound,
+            upperbound);
+        throw std::invalid_argument("");
+    }
+    check_lbscale(lbscale);
+    check_ubscale(ubscale);
+
+    int size = this->getXtUPVars(getRegion(reg), XtUPvars).size();
+    
+    auto impl = [&](auto sz) {
+        auto x = Arguments<1>();
+        auto lubound = StackedOutputs{ (lowerbound - x) * lbscale, (x - upperbound) * ubscale };
+        auto normfun = lubound.eval(Arguments<sz.value>(size).norm());
+        return this->addInequalCon(reg,normfun, XtUPvars,scale_t);
+    };
+
+    switch (size) {
+    case 2:
+        return impl(int_const<2>());
+    case 3:
+        return impl(int_const<3>());
+    case 4:
+        return impl(int_const<4>());
+    default:
+        return impl(int_const<-1>());
+    }
+    return 0;
+}
+
+int ASSET::ODEPhaseBase::addLUSquaredNormBound(RegionType reg, VarIndexType XtUPvars,
+    double lowerbound, double upperbound, double lbscale, double ubscale, ScaleType scale_t)
+{
+    if (lowerbound > upperbound) {
+        fmt::print(fmt::fg(fmt::color::red),
+            "Transcription Error!!!\n"
+            "Lower-bound({0:.3e}) greater than Upper-bound({1:.3e}) \n",
+            lowerbound,
+            upperbound);
+        throw std::invalid_argument("");
+    }
+    check_lbscale(lbscale);
+    check_ubscale(ubscale);
+
+    int size = this->getXtUPVars(getRegion(reg), XtUPvars).size();
+
+    auto impl = [&](auto sz) {
+        auto x = Arguments<1>();
+        auto lubound = StackedOutputs{ (lowerbound - x) * lbscale, (x - upperbound) * ubscale };
+        auto normfun = lubound.eval(Arguments<sz.value>(size).squared_norm());
+        return this->addInequalCon(reg, normfun, XtUPvars, scale_t);
+    };
+
+    switch (size) {
+    case 2:
+        return impl(int_const<2>());
+    case 3:
+        return impl(int_const<3>());
+    case 4:
+        return impl(int_const<4>());
+    default:
+        return impl(int_const<-1>());
+    }
+    return 0;
+}
+
+int ASSET::ODEPhaseBase::addLowerNormBound(RegionType reg, VarIndexType XtUPvars, double lowerbound, double lbscale, ScaleType scale_t)
+{
+    check_lbscale(lbscale);
+
+    int size = this->getXtUPVars(getRegion(reg), XtUPvars).size();
+    auto impl = [&](auto sz) {
+        auto x = Arguments<1>();
+        auto normfun = (lowerbound - Arguments<sz.value>(size).norm()) * lbscale;
+        return this->addInequalCon(reg,normfun, XtUPvars,scale_t);
+    };
+    switch (size) {
+    case 2:
+        return impl(int_const<2>());
+    case 3:
+        return impl(int_const<3>());
+    case 4:
+        return impl(int_const<4>());
+    default:
+        return impl(int_const<-1>());
+    }
+}
+
+int ASSET::ODEPhaseBase::addLowerSquaredNormBound(RegionType reg, VarIndexType XtUPvars, double lowerbound, double lbscale, ScaleType scale_t)
+{
+    check_lbscale(lbscale);
+
+    int size = this->getXtUPVars(getRegion(reg), XtUPvars).size();
+    auto impl = [&](auto sz) {
+        auto x = Arguments<1>();
+        auto normfun = (lowerbound - Arguments<sz.value>(size).squared_norm()) * lbscale;
+        return this->addInequalCon(reg, normfun, XtUPvars, scale_t);
+    };
+    switch (size) {
+    case 2:
+        return impl(int_const<2>());
+    case 3:
+        return impl(int_const<3>());
+    case 4:
+        return impl(int_const<4>());
+    default:
+        return impl(int_const<-1>());
+    }
+}
+
+int ASSET::ODEPhaseBase::addUpperNormBound(RegionType reg, VarIndexType XtUPvars, double upperbound, double ubscale, ScaleType scale_t)
+{
+    check_ubscale(ubscale);
+
+    int size = this->getXtUPVars(getRegion(reg), XtUPvars).size();
+    auto impl = [&](auto sz) {
+        auto x = Arguments<1>();
+        auto normfun = (Arguments<sz.value>(size).norm() - upperbound) * ubscale;
+        return this->addInequalCon(reg, normfun, XtUPvars, scale_t);
+    };
+    switch (size) {
+    case 2:
+        return impl(int_const<2>());
+    case 3:
+        return impl(int_const<3>());
+    case 4:
+        return impl(int_const<4>());
+    default:
+        return impl(int_const<-1>());
+    }
+    return 0;
+}
+
+int ASSET::ODEPhaseBase::addUpperSquaredNormBound(RegionType reg, VarIndexType XtUPvars, double upperbound, double ubscale, ScaleType scale_t)
+{
+    check_ubscale(ubscale);
+
+    int size = this->getXtUPVars(getRegion(reg), XtUPvars).size();
+    auto impl = [&](auto sz) {
+        auto x = Arguments<1>();
+        auto normfun = (Arguments<sz.value>(size).squared_norm() - upperbound) * ubscale;
+        return this->addInequalCon(reg, normfun, XtUPvars, scale_t);
+    };
+    switch (size) {
+    case 2:
+        return impl(int_const<2>());
+    case 3:
+        return impl(int_const<3>());
+    case 4:
+        return impl(int_const<4>());
+    default:
+        return impl(int_const<-1>());
+    }
+    return 0;
+}
+
+int ASSET::ODEPhaseBase::addLowerDeltaVarBound(RegionType reg, VarIndexType var, double lowerbound, double lbscale, ScaleType scale_t)
+{
+    check_lbscale(lbscale);
+
+    auto args = Arguments<2>();
+    auto x0 = args.coeff<0>();
+    auto x1 = args.coeff<1>();
+    auto func = (lowerbound - (x1 - x0)) * lbscale;
+   
+    return this->addInequalCon(reg,func,var,scale_t);
+}
+
+int ASSET::ODEPhaseBase::addUpperDeltaVarBound(RegionType reg, VarIndexType var, double upperbound, double ubscale, ScaleType scale_t)
+{
+    check_ubscale(ubscale);
+    auto args = Arguments<2>();
+    auto x0 = args.coeff<0>();
+    auto x1 = args.coeff<1>();
+    auto func = ((x1 - x0) - upperbound) * ubscale;
+    return this->addInequalCon(reg, func, var, scale_t);
+}
+
+
+
+//////////////////////////////
 int ASSET::ODEPhaseBase::addLUVarBound(
     PhaseRegionFlags reg, int var, double lowerbound, double upperbound, double lbscale, double ubscale) {
 
@@ -439,6 +721,22 @@ int ASSET::ODEPhaseBase::addUpperDeltaVarBound(PhaseRegionFlags reg,
   VectorXi v(1);
   v[0] = var;
   return this->addInequalCon(reg, func, v);
+}
+
+int ASSET::ODEPhaseBase::addValueObjective(RegionType reg, VarIndexType var, double scale, ScaleType scale_t)
+{
+    auto obj = Arguments<1>() * scale;
+    return this->addStateObjective(reg, obj, var, scale_t);
+}
+
+int ASSET::ODEPhaseBase::addDeltaVarObjective(VarIndexType var, double scale, ScaleType scale_t)
+{
+    auto args = Arguments<2>();
+    auto x0 = args.coeff<0>();
+    auto x1 = args.coeff<1>();
+    auto func = ((x1 - x0)) * scale;
+    
+    return this->addStateObjective(PhaseRegionFlags::FrontandBack, func, var,scale_t);
 }
 
 int ASSET::ODEPhaseBase::addValueObjective(PhaseRegionFlags reg, int var, double scale) {
@@ -867,6 +1165,7 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
         VectorXd input_scales = this->get_input_scale(eq.RegionFlag, eq.XtUVars, eq.OPVars, eq.SPVars);
         VectorXd output_scales(Func.ORows());
         output_scales.setOnes(); // Come Back and Fix this
+        output_scales = eq.OutputScales;
         Func = IOScaled<decltype(Func)>(eq.Func, input_scales, output_scales);
     }
 
@@ -890,6 +1189,8 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
         VectorXd input_scales = this->get_input_scale(iq.RegionFlag, iq.XtUVars, iq.OPVars, iq.SPVars);
         VectorXd output_scales(Func.ORows());
         output_scales.setOnes(); // Come Back and Fix this
+        output_scales = iq.OutputScales;
+
         Func = IOScaled<decltype(Func)>(iq.Func, input_scales, output_scales);
     }
 
@@ -910,6 +1211,8 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
         VectorXd input_scales = this->get_input_scale(ob.RegionFlag, ob.XtUVars, ob.OPVars, ob.SPVars);
         VectorXd output_scales(Func.ORows());
         output_scales.setOnes(); // Come Back and Fix this
+        output_scales = ob.OutputScales;
+
         Func = IOScaled<decltype(Func)>(ob.Func, input_scales, output_scales);
     }
 
@@ -1102,6 +1405,174 @@ void ASSET::ODEPhaseBase::check_functions(int pnum) {
     CheckFun(sobj, f);
 }
 
+Eigen::VectorXd ASSET::ODEPhaseBase::get_input_scale(PhaseRegionFlags flag, VectorXi XtUV, VectorXi OPV, VectorXi SPV) const
+{
+
+    int nloops;
+    switch (flag) {
+    case Front:
+    case Back:
+    case Path:
+    case Params:
+    case ODEParams:
+    case StaticParams:
+    case InnerPath: {
+        nloops = 1;
+        break;
+    }
+    case FrontandBack:
+    case BackandFront:
+    case PairWisePath: {
+        nloops = 2;
+        break;
+    }
+    default: {
+        throw std::invalid_argument("Cannot scale this phase region");
+        break;
+    }
+    }
+
+
+    int isize = XtUV.size() * nloops + OPV.size() + SPV.size();
+    VectorXd scales(isize);
+
+    int next = 0;
+    for (int n = 0; n < nloops; n++) {
+        for (int i = 0; i < XtUV.size(); i++) {
+            scales[next] = this->XtUPUnits[XtUV[i]];
+            next++;
+        }
+    }
+    for (int i = 0; i < OPV.size(); i++) {
+        scales[next] = this->XtUPUnits[OPV[i] + this->XtUVars()];
+        next++;
+    }
+    for (int i = 0; i < SPV.size(); i++) {
+        scales[next] = this->SPUnits[SPV[i]];
+        next++;
+    }
+
+    return scales;
+}
+
+std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::get_test_inputs(PhaseRegionFlags flag, VectorXi XtUV, VectorXi OPV, VectorXi SPV) const
+{
+
+    std::vector<std::vector<int>> test_states;
+
+    int nloops = 0;
+    switch (flag) {
+    case Front: {
+        test_states.push_back({ 0 });
+        break;
+    }
+    case Back: {
+        test_states.push_back({ int(this->ActiveTraj.size() - 1) });
+        break;
+    }
+    case Params: {
+        test_states.push_back({ 0 });
+        break;
+    }
+    case ODEParams: {
+        test_states.push_back({ 0 });
+        break;
+    }
+    case StaticParams: {
+        test_states.push_back({ 0 });
+        break;
+    }
+    case Path: {
+        for (int i = 0; i < this->ActiveTraj.size(); i++)
+            test_states.push_back({ i });
+        break;
+    }
+    case InnerPath: {
+        for (int i = 1; i < this->ActiveTraj.size() - 1; i++)
+            test_states.push_back({ i });
+        break;
+    }
+    case FrontandBack: {
+        test_states.push_back({ 0, int(this->ActiveTraj.size() - 1) });
+        break;
+    }
+    case BackandFront: {
+        test_states.push_back({ int(this->ActiveTraj.size() - 1),0 });
+        break;
+    }
+    case PairWisePath: {
+        for (int i = 0; i < this->ActiveTraj.size() - 1; i++)
+            test_states.push_back({ i,i + 1 });
+        break;
+    }
+    default: {
+        throw std::invalid_argument("Cannot scale this phase region");
+        break;
+    }
+    }
+
+
+    int isize = XtUV.size() * test_states[0].size() + OPV.size() + SPV.size();
+
+
+
+    std::vector<Eigen::VectorXd> inputs;
+
+    for (int ncalls = 0; ncalls < test_states.size(); ncalls++) {
+
+        VectorXd input(isize);
+
+        int next = 0;
+
+        for (int i = 0; i < test_states[ncalls].size(); i++) {
+            int state = test_states[ncalls][i];
+            for (int j = 0; j < XtUV.size(); j++) {
+                input[next] = this->ActiveTraj[state][XtUV[j]];
+                next++;
+            }
+        }
+        for (int j = 0; j < OPV.size(); j++) {
+            input[next] = this->ActiveTraj[0][OPV[j] + this->XtUVars()];
+            next++;
+        }
+        for (int j = 0; j < SPV.size(); j++) {
+            input[next] = this->ActiveStaticParams[SPV[j]];
+            next++;
+        }
+        inputs.push_back(input);
+    }
+
+    return inputs;
+}
+
+void ASSET::ODEPhaseBase::calc_auto_scales()
+{
+    auto calc_impl = [&](auto& funcmap) {
+        for (auto& [key, func] : funcmap) {
+            if (func.ScaleMode == "auto"||true) {
+                VectorXd input_scales = this->get_input_scale(func.RegionFlag, func.XtUVars, func.OPVars, func.SPVars);
+                std::vector<VectorXd> test_inputs = this->get_test_inputs(func.RegionFlag, func.XtUVars, func.OPVars, func.SPVars);
+                VectorXd output_scales = calc_jacobian_row_scales(func.Func, input_scales, test_inputs, "norm", "mean");
+                func.OutputScales = output_scales;
+                //std::cout << output_scales << std::endl;
+            }
+            else {
+
+
+            }
+
+        }
+    };
+
+    calc_impl(this->userEqualities);
+    calc_impl(this->userInequalities);
+    calc_impl(this->userStateObjectives);
+    calc_impl(this->userIntegrands);
+    calc_impl(this->userParamIntegrands);
+
+
+}
+
 void ASSET::ODEPhaseBase::transcribe_phase(
     int vo, int eqo, int iqo, std::shared_ptr<NonLinearProgram> np, int pnum)
 
@@ -1109,6 +1580,9 @@ void ASSET::ODEPhaseBase::transcribe_phase(
   this->indexer.begin_indexing(np, vo, eqo, iqo);
   this->check_functions(pnum);
 
+  if (this->AutoScaling) {
+      this->calc_auto_scales();
+  }
 
   this->transcribe_dynamics();
   this->transcribe_axis_funcs();
@@ -1539,6 +2013,8 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
           ODEPhaseBase_removeIntegralParamFunction);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  ///////////////////////////////////////////////////////////////////
+  ///// The New interface//////////////////////
 
   obj.def("addEqualConNEW",
       py::overload_cast<RegionType ,
@@ -1574,6 +2050,32 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("Value"),
       py::arg("Scale") = std::string("auto")
       );
+  //////////////////////////////////
+  /////// InequalCons
+  obj.def("addInequalConNEW",
+      py::overload_cast<RegionType,
+      VectorFunctionalX,
+      VarIndexType,
+      VarIndexType,
+      VarIndexType,
+      ScaleType>(&ODEPhaseBase::addInequalCon),
+      py::arg("PhaseRegion"),
+      py::arg("Func"),
+      py::arg("XtUVars"),
+      py::arg("OPVars"),
+      py::arg("SPVars"),
+      py::arg("AutoScale") = std::string("auto"));
+
+  obj.def("addInequalConNEW",
+      py::overload_cast<RegionType,
+      VectorFunctionalX,
+      VarIndexType,
+      ScaleType>(&ODEPhaseBase::addInequalCon),
+      py::arg("PhaseRegion"),
+      py::arg("Func"),
+      py::arg("InputIndex"),
+      py::arg("AutoScale") = std::string("auto"));
+
 
 
   obj.def("addLUVarBoundNEW",
@@ -1590,6 +2092,363 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("scale")=1.0,
       py::arg("AutoScale") = std::string("auto")
       );
+  obj.def("addLowerVarBoundNEW",
+      py::overload_cast<RegionType,
+      VarIndexType,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addLowerVarBound),
+      py::arg("PhaseRegion"),
+      py::arg("var"),
+      py::arg("lowerbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+  obj.def("addUpperVarBoundNEW",
+      py::overload_cast<RegionType,
+      VarIndexType,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addUpperVarBound),
+      py::arg("PhaseRegion"),
+      py::arg("var"),
+      py::arg("upperbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+
+  obj.def("addLUFuncBoundNEW",
+      py::overload_cast<RegionType ,
+      ScalarFunctionalX ,
+      VarIndexType ,
+      VarIndexType ,
+      VarIndexType ,
+      double ,
+      double ,
+      double ,
+      ScaleType >(&ODEPhaseBase::addLUFuncBound),
+      py::arg("PhaseRegion"),
+      py::arg("Func"),
+      py::arg("XtUVars"),
+      py::arg("OPVars"),
+      py::arg("SPVars"),
+      py::arg("lowerbound"),
+      py::arg("upperbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+  obj.def("addLUFuncBoundNEW",
+      py::overload_cast<RegionType,
+      ScalarFunctionalX,
+      VarIndexType,
+      double,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addLUFuncBound),
+      py::arg("PhaseRegion"),
+      py::arg("Func"),
+      py::arg("XtUPVars"),
+      py::arg("lowerbound"),
+      py::arg("upperbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+  //
+  obj.def("addLowerFuncBoundNEW",
+      py::overload_cast<RegionType,
+      ScalarFunctionalX,
+      VarIndexType,
+      VarIndexType,
+      VarIndexType,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addLowerFuncBound),
+      py::arg("PhaseRegion"),
+      py::arg("Func"),
+      py::arg("XtUVars"),
+      py::arg("OPVars"),
+      py::arg("SPVars"),
+      py::arg("lowerbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+  obj.def("addLowerFuncBoundNEW",
+      py::overload_cast<RegionType,
+      ScalarFunctionalX,
+      VarIndexType,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addLowerFuncBound),
+      py::arg("PhaseRegion"),
+      py::arg("Func"),
+      py::arg("XtUPVars"),
+      py::arg("lowerbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+  obj.def("addUpperFuncBoundNEW",
+      py::overload_cast<RegionType,
+      ScalarFunctionalX,
+      VarIndexType,
+      VarIndexType,
+      VarIndexType,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addUpperFuncBound),
+      py::arg("PhaseRegion"),
+      py::arg("Func"),
+      py::arg("XtUVars"),
+      py::arg("OPVars"),
+      py::arg("SPVars"),
+      py::arg("upperbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+  obj.def("addUpperFuncBoundNEW",
+      py::overload_cast<RegionType,
+      ScalarFunctionalX,
+      VarIndexType,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addUpperFuncBound),
+      py::arg("PhaseRegion"),
+      py::arg("Func"),
+      py::arg("XtUPVars"),
+      py::arg("upperbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+  obj.def("addLUNormBoundNEW",
+      py::overload_cast<RegionType,
+      VarIndexType,
+      double,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addLUNormBound),
+      py::arg("PhaseRegion"),
+      py::arg("XtUPVars"),
+      py::arg("lowerbound"),
+      py::arg("upperbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+  obj.def("addLUSquaredNormBoundNEW",
+      py::overload_cast<RegionType,
+      VarIndexType,
+      double,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addLUSquaredNormBound),
+      py::arg("PhaseRegion"),
+      py::arg("XtUPVars"),
+      py::arg("lowerbound"),
+      py::arg("upperbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+  //
+  obj.def("addLowerNormBoundNEW",
+      py::overload_cast<RegionType,
+      VarIndexType,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addLowerNormBound),
+      py::arg("PhaseRegion"),
+      py::arg("XtUPVars"),
+      py::arg("lowerbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+  
+  obj.def("addLowerSquaredNormBoundNEW",
+      py::overload_cast<RegionType,
+      VarIndexType,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addLowerSquaredNormBound),
+      py::arg("PhaseRegion"),
+      py::arg("XtUPVars"),
+      py::arg("lowerbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+  //
+  obj.def("addUpperNormBoundNEW",
+      py::overload_cast<RegionType,
+      VarIndexType,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addUpperNormBound),
+      py::arg("PhaseRegion"),
+      py::arg("XtUPVars"),
+      py::arg("upperbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+  obj.def("addUpperSquaredNormBoundNEW",
+      py::overload_cast<RegionType,
+      VarIndexType,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addUpperSquaredNormBound),
+      py::arg("PhaseRegion"),
+      py::arg("XtUPVars"),
+      py::arg("upperbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+  //
+  obj.def("addLowerDeltaVarBoundNEW",
+      py::overload_cast<VarIndexType , 
+      double ,
+      double ,
+      ScaleType >(&ODEPhaseBase::addLowerDeltaVarBound),
+      py::arg("Var"),
+      py::arg("lowerbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+  obj.def("addLowerDeltaTimeBoundNEW",
+      py::overload_cast<
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addLowerDeltaTimeBound),
+      py::arg("lowerbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+  //
+  obj.def("addUpperDeltaVarBoundNEW",
+      py::overload_cast<VarIndexType,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addUpperDeltaVarBound),
+      py::arg("Var"),
+      py::arg("upperbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+  obj.def("addUpperDeltaTimeBoundNEW",
+      py::overload_cast<
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addUpperDeltaTimeBound),
+      py::arg("upperbound"),
+      py::arg("scale") = 1.0,
+      py::arg("AutoScale") = std::string("auto")
+  );
+  //////////////////////////////////
+  /////// StateObjectives /////////
+  obj.def("addStateObjectiveNEW",
+      py::overload_cast<RegionType,
+      ScalarFunctionalX,
+      VarIndexType,
+      VarIndexType,
+      VarIndexType,
+      ScaleType>(&ODEPhaseBase::addStateObjective),
+      py::arg("PhaseRegion"),
+      py::arg("Func"),
+      py::arg("XtUVars"),
+      py::arg("OPVars"),
+      py::arg("SPVars"),
+      py::arg("AutoScale") = std::string("auto"));
+
+  obj.def("addStateObjectiveNEW",
+      py::overload_cast<RegionType,
+      ScalarFunctionalX,
+      VarIndexType,
+      ScaleType>(&ODEPhaseBase::addStateObjective),
+      py::arg("PhaseRegion"),
+      py::arg("Func"),
+      py::arg("InputIndex"),
+      py::arg("AutoScale") = std::string("auto"));
+
+
+  obj.def("addValueObjectiveNEW",
+      py::overload_cast<
+      RegionType,
+      VarIndexType,
+      double,
+      ScaleType>(&ODEPhaseBase::addValueObjective),
+      py::arg("PhaseRegion"),
+      py::arg("Var"),
+      py::arg("scale"),
+      py::arg("AutoScale") = std::string("auto"));
+
+  obj.def("addDeltaVarObjectiveNEW",
+      py::overload_cast<
+      VarIndexType,
+      double,
+      ScaleType>(&ODEPhaseBase::addDeltaVarObjective),
+      py::arg("Var"),
+      py::arg("scale"),
+      py::arg("AutoScale") = std::string("auto"));
+  obj.def("addDeltaTimeObjectiveNEW",
+      py::overload_cast<
+      double,
+      ScaleType>(&ODEPhaseBase::addDeltaTimeObjective),
+      py::arg("Var"),
+      py::arg("AutoScale") = std::string("auto"));
+  //////////////////////////////////
+  /////// IntegralObjectives /////////
+  obj.def("addIntegralObjectiveNEW",
+      py::overload_cast<
+      ScalarFunctionalX,
+      VarIndexType,
+      VarIndexType,
+      VarIndexType,
+      ScaleType>(&ODEPhaseBase::addIntegralObjective),
+      py::arg("Func"),
+      py::arg("XtUVars"),
+      py::arg("OPVars"),
+      py::arg("SPVars"),
+      py::arg("AutoScale") = std::string("auto"));
+
+  obj.def("addIntegralObjectiveNEW",
+      py::overload_cast<
+      ScalarFunctionalX,
+      VarIndexType,
+      ScaleType>(&ODEPhaseBase::addIntegralObjective),
+      py::arg("Func"),
+      py::arg("InputIndex"),
+      py::arg("AutoScale") = std::string("auto"));
+  //////////////////////////////////
+  /////// IntegralParamFunction /////////
+  obj.def("addIntegralParamFunctionNEW",
+      py::overload_cast<
+      ScalarFunctionalX,
+      VarIndexType,
+      VarIndexType,
+      VarIndexType,
+      int,
+      ScaleType>(&ODEPhaseBase::addIntegralParamFunction),
+      py::arg("Func"),
+      py::arg("XtUVars"),
+      py::arg("OPVars"),
+      py::arg("SPVars"),
+      py::arg("IntParam"),
+      py::arg("AutoScale") = std::string("auto"));
+
+  obj.def("addIntegralParamFunctionNEW",
+      py::overload_cast<
+      ScalarFunctionalX,
+      VarIndexType,
+      int,
+      ScaleType>(&ODEPhaseBase::addIntegralParamFunction),
+      py::arg("Func"),
+      py::arg("InputIndex"),
+      py::arg("IntParam"),
+      py::arg("AutoScale") = std::string("auto"));
 
 
   ///////////////////////////////////////////////////////////////////
@@ -1648,7 +2507,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
 
   obj.def("addBoundaryValues", &ODEPhaseBase::addBoundaryValues, ODEPhaseBase_addBoundaryValues);
 
-  obj.def("addPeriodicityCon", &ODEPhaseBase::addPeriodicityCon);
+  //obj.def("addPeriodicityCon", &ODEPhaseBase::addPeriodicityCon);
   ///////////////////////////////////////////////////////////////////////////////
 
   obj.def("addInequalCon",
@@ -1975,8 +2834,8 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
           ODEPhaseBase_addValueObjective);
 
 
-  obj.def("addDeltaVarObjective", &ODEPhaseBase::addDeltaVarObjective, ODEPhaseBase_addDeltaVarObjective);
-  obj.def("addDeltaTimeObjective", &ODEPhaseBase::addDeltaTimeObjective, ODEPhaseBase_addDeltaTimeObjective);
+  //obj.def("addDeltaVarObjective", &ODEPhaseBase::addDeltaVarObjective, ODEPhaseBase_addDeltaVarObjective);
+  //obj.def("addDeltaTimeObjective", &ODEPhaseBase::addDeltaTimeObjective, ODEPhaseBase_addDeltaTimeObjective);
 
   obj.def("addIntegralObjective",
           py::overload_cast<StateObjective>(&ODEPhaseBase::addIntegralObjective),
