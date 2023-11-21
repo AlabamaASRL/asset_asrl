@@ -1,6 +1,117 @@
 #include "OptimalControlProblem.h"
+#include "OptimalControlProblem.h"
+#include "OptimalControlProblem.h"
 
 #include "PyDocString/OptimalControl/OptimalControlProblem_doc.h"
+
+Eigen::VectorXd ASSET::OptimalControlProblem::get_input_scale(LinkFlags lflag, 
+    Eigen::Vector<PhaseRegionFlags, -1> regs,
+    std::vector<VectorXi> phases_to_link, 
+    std::vector<VectorXi> XtUVars, 
+    std::vector<VectorXi> OPVars, 
+    std::vector<VectorXi> SPVars, 
+    std::vector<VectorXi> LVars)
+{
+    
+
+    std::vector<VectorXd> scales;
+    int size = 0;
+
+    if (phases_to_link.size() > 0) {
+
+        for (int i = 0; i < phases_to_link[0].size(); i++) {
+
+            int pnum = phases_to_link[0][i];
+            auto flag = regs[i];
+            auto XtUV = XtUVars[i];
+            auto OPV = OPVars[i];
+            auto SPV = SPVars[i];
+
+            VectorXd scale = this->phases[pnum]->get_input_scale(flag, XtUV, OPV, SPV);
+            scales.push_back(scale);
+            size += scale.size();
+        }
+    }
+
+    if (LVars.size() > 0) {
+
+        VectorXd lscales(LVars[0].size());
+        for (int i = 0; i < LVars[0].size(); i++) {
+            lscales[i] = this->LPUnits[LVars[0][i]];
+            size++;
+        }
+        scales.push_back(lscales);
+    }
+
+    VectorXd input_scales(size);
+
+    int start = 0;
+
+    for (int i = 0; i < scales.size(); i++) {
+        size = scales[i].size();
+        input_scales.segment(start, size) = scales[i];
+        start += size;
+    }
+
+
+
+    return input_scales;
+}
+
+std::vector<Eigen::VectorXd> ASSET::OptimalControlProblem::get_test_inputs(LinkFlags lflag, 
+    Eigen::Vector<PhaseRegionFlags, -1> regs, 
+    std::vector<VectorXi> phases_to_link,
+    std::vector<VectorXi> XtUVars, 
+    std::vector<VectorXi> OPVars, std::vector<VectorXi> SPVars, std::vector<VectorXi> LVars)
+{
+
+    int nappl = std::max(phases_to_link.size(), LVars.size());
+
+    std::vector<Eigen::VectorXd> test_inputs;
+
+
+    for (int j = 0; j < nappl; j++) {
+        int size = 0;
+
+        std::vector<VectorXd> inputs;
+
+
+        for (int i = 0; i < phases_to_link[j].size(); i++) {
+
+            int pnum = phases_to_link[j][i];
+            auto flag = regs[i];
+            auto XtUV = XtUVars[i];
+            auto OPV = OPVars[i];
+            auto SPV = SPVars[i];
+
+            VectorXd input = this->phases[pnum]->get_test_inputs(flag, XtUV, OPV, SPV)[0];
+            inputs.push_back(input);
+            size += input.size();
+        }
+
+        VectorXd linput(LVars[j].size());
+        for (int i = 0; i < LVars[j].size(); i++) {
+            linput[i] = this->ActiveLinkParams[LVars[j][i]];
+            size++;
+        }
+        inputs.push_back(linput);
+
+        VectorXd test_input(size);
+
+        int start = 0;
+
+        for (int i = 0; i < inputs.size(); i++) {
+            size = inputs[i].size();
+            test_input.segment(start, size) = inputs[i];
+            start += size;
+        }
+
+        test_inputs.push_back(test_input);
+    }
+
+
+    return test_inputs;
+}
 
 void ASSET::OptimalControlProblem::transcribe_phases() {
 
@@ -173,6 +284,8 @@ void ASSET::OptimalControlProblem::transcribe_links() {
                                             Eq.LinkParams,
                                             Eq.Func.ORows(),
                                             NextEq);
+
+
     this->nlp->EqualityConstraints.emplace_back(ConstraintFunction(Eq.Func, VC[0], VC[1]));
     Eq.GlobalIndex = this->nlp->EqualityConstraints.size() - 1;
     this->numEqFuns++;
@@ -212,9 +325,18 @@ void ASSET::OptimalControlProblem::transcribe_links() {
   this->numLinkIqCons = NextIq - this->numPhaseIqCons.sum();
 }
 
+void ASSET::OptimalControlProblem::calc_auto_scales()
+{
+}
+
 void ASSET::OptimalControlProblem::transcribe(bool showstats, bool showfuns) {
+
   this->nlp = std::make_shared<NonLinearProgram>(this->Threads);
   check_functions();
+
+  if (this->AutoScaling) {
+      this->calc_auto_scales();
+  }
 
   this->transcribe_phases();
   this->transcribe_links();
@@ -226,6 +348,8 @@ void ASSET::OptimalControlProblem::transcribe(bool showstats, bool showfuns) {
     this->print_stats(showfuns);
   this->nlp->make_NLP(this->numProbVars, this->numProbEqCons, this->numProbIqCons);
   this->optimizer->setNLP(this->nlp);
+
+  //////DO NOT GET RID OF THIS!!!!!!//
   this->doTranscription = false;
 }
 

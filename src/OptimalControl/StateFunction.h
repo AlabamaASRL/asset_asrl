@@ -15,7 +15,7 @@ namespace ASSET {
 
     Eigen::VectorXi EXTVars;  // dirty i know
 
-    std::string ScaleMode ="auto"; // Auto,Custom
+    std::string ScaleMode ="auto"; // auto,custom
     bool ScalesSet = false;
     Eigen::VectorXd OutputScales;
     

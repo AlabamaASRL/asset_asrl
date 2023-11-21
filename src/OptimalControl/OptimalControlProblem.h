@@ -30,6 +30,7 @@ namespace ASSET {
         std::tuple<PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi>;
 
 
+   
     std::vector<PhasePtr> phases;
     std::vector<std::string> phase_names;
 
@@ -248,6 +249,122 @@ namespace ASSET {
     }
 
     /////////////////////////////////////////////////
+    bool AutoScaling = false;
+    Eigen::VectorXd LPUnits;
+
+    /////////////////////////////////////////////////
+
+
+    using VarIndexType = std::variant<int, VectorXi, std::string, std::vector<std::string>>;
+    using ScaleType = std::variant<double, VectorXd, std::string>;
+    using RegionType = std::variant<PhaseRegionFlags, std::string>;
+    using PhaseRefType = std::variant<int, PhasePtr, std::string>;
+
+    using PhasePack = std::tuple<PhaseRefType, RegionType, VarIndexType, VarIndexType, VarIndexType>;
+
+
+    VectorXi getLPVars(VarIndexType LPvars_t) const {
+
+        VectorXi LPvars;
+
+        if (std::holds_alternative<int>(LPvars_t)) {
+            LPvars.resize(1);
+            LPvars[0] = std::get<int>(LPvars_t);
+        }
+        else if (std::holds_alternative<VectorXi>(LPvars_t)) {
+            LPvars = std::get<VectorXi>(LPvars_t);
+        }
+        else if (std::holds_alternative<std::vector<std::string>>(LPvars_t)) {
+            auto tmpvars = std::get<std::vector<std::string>>(LPvars_t);
+            if (tmpvars.size() != 0) {
+                throw std::invalid_argument("String indexed link params not implemented");
+            }
+        }
+        else {
+            throw std::invalid_argument("String indexed link params not implemented");
+        }
+
+        return LPvars;
+    }
+
+
+    template<class FuncHolder, class FuncType>
+    FuncHolder makeFuncImpl(FuncType fun, std::vector<PhasePack> packs, VarIndexType lv, ScaleType scale_t) {
+
+        int npacks = packs.size();
+        std::vector<Eigen::VectorXi> PTL;
+        VectorXi phasenums(npacks);
+        Eigen::Matrix<PhaseRegionFlags, -1, 1> RegFlags(npacks);
+        std::vector<Eigen::VectorXi> xtvs(npacks);
+        std::vector<Eigen::VectorXi> opvs(npacks);
+        std::vector<Eigen::VectorXi> spvs(npacks);
+
+
+        for (int i = 0; i < npacks; i++) {
+
+            auto phase_t = std::get<0>(packs[i]); // Name of phase, either phaseptr,int, or string
+            int phasenum;
+
+            if (std::holds_alternative<int>(phase_t)) {
+                phasenum = std::get<int>(phase_t);
+            }
+            else if (std::holds_alternative<PhasePtr>(phase_t)) {
+                phasenum = this->getPhaseNum(std::get<PhasePtr>(phase_t));
+            }
+            else if (std::holds_alternative<std::string>(phase_t)) {
+                phasenum = this->getPhaseNum(std::get<std::string>(phase_t));
+            }
+
+            phasenums[i] = phasenum;
+
+            RegFlags[i] = this->phases[phasenum]->getRegion(std::get<1>(packs[i]));
+            xtvs[i] = this->phases[phasenum]->getXtUPVars(RegFlags[i],std::get<2>(packs[i]));
+            opvs[i] = this->phases[phasenum]->getOPVars(RegFlags[i], std::get<3>(packs[i]));
+            spvs[i] = this->phases[phasenum]->getSPVars(RegFlags[i], std::get<4>(packs[i]));
+        }
+
+        std::vector<Eigen::VectorXi> lvs;
+        lvs.push_back(getLPVars(lv));
+
+        auto func = FuncHolder(f, RegFlags, PTL, xtvs, opvs, spvs, lvs);
+
+
+        VectorXd OutputScales(fun.ORows());
+        OutputScales.setOnes();
+        std::string ScaleMode = "auto";
+        bool ScalesSet = false;
+        if (std::holds_alternative < double >(scale_t)) {
+            OutputScales *= std::get<double>(scale_t);
+            ScaleMode = "custom";
+            ScalesSet = true;
+
+        }
+        else if (std::holds_alternative<VectorXd>(scale_t)) {
+            OutputScales = std::get<VectorXd>(scale_t);
+            ScaleMode = "custom";
+            ScalesSet = true;
+
+            if (OutputScales.size() != fun.ORows()) {
+
+                throw std::invalid_argument("Scaling vector size does not match output size of function");
+            }
+        }
+        else if (std::holds_alternative<std::string>(scale_t)) {
+            ScaleMode = std::get<std::string>(scale_t);
+        }
+
+        func.OutputScales = OutputScales;
+        func.ScaleMode = ScaleMode;
+        func.ScalesSet = ScalesSet;
+
+
+        return func;
+
+    }
+
+
+    /////////////////////////////////////////////////
+
 
     template<class FuncType, class PackType, class OutType>
     OutType makeLinkFunc(FuncType f, std::vector<PackType> packs, VectorXi lv) {
@@ -1551,6 +1668,25 @@ namespace ASSET {
 
     
     ///////////////////////////////////////////////////
+
+    Eigen::VectorXd get_input_scale(LinkFlags lflag, Eigen::Vector<PhaseRegionFlags, -1> regs,
+        std::vector<VectorXi> phases_to_link,
+        std::vector<VectorXi> XtUVars,
+        std::vector<VectorXi> OPVars,
+        std::vector<VectorXi> SPVars,
+        std::vector<VectorXi> LVars
+    );
+
+    std::vector<Eigen::VectorXd> get_test_inputs(LinkFlags lflag, Eigen::Vector<PhaseRegionFlags, -1> regs,
+        std::vector<VectorXi> phases_to_link,
+        std::vector<VectorXi> XtUVars,
+        std::vector<VectorXi> OPVars,
+        std::vector<VectorXi> SPVars,
+        std::vector<VectorXi> LVars
+    );
+
+
+
     void checkTranscriptions() {
       for (int i = 0; i < this->phases.size(); i++) {
         if (this->phases[i]->doTranscription) {
@@ -1705,6 +1841,8 @@ namespace ASSET {
     }
 
     void transcribe_links();
+
+    void calc_auto_scales();
 
     void transcribe(bool showstats, bool showfuns);
 

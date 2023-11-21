@@ -18,6 +18,11 @@ namespace ASSET {
     std::vector<Eigen::VectorXi> SPVars;
     std::vector<Eigen::VectorXi> LinkParams;
 
+    std::string ScaleMode = "auto"; // auto,custom
+    bool ScalesSet = false;
+    Eigen::VectorXd OutputScales;
+
+
     int StorageIndex = 0;
     int GlobalIndex = 0;
 
