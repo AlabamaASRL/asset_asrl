@@ -24,8 +24,8 @@ sudo apt update
 sudo apt install intel-oneapi-compiler-dpcpp-cpp intel-oneapi-mkl-devel intel-oneapi-mkl intel-oneapi-openmp
 
 #source /opt/intel/oneapi/mkl/latest/env/vars.sh
-#source /opt/intel/oneapi/setvars.sh
-source /opt/intel/oneapi/latest/oneapi-vars.sh
+source /opt/intel/oneapi/setvars.sh
+#source /opt/intel/oneapi/latest/oneapi-vars.sh
 
 
 echo "MKLROOT=$MKLROOT" >>$GITHUB_ENV
