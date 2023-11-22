@@ -1549,7 +1549,7 @@ void ASSET::ODEPhaseBase::calc_auto_scales()
 {
     auto calc_impl = [&](auto& funcmap) {
         for (auto& [key, func] : funcmap) {
-            if (func.ScaleMode == "auto"||true) {
+            if (func.ScaleMode == "auto") {
                 VectorXd input_scales = this->get_input_scale(func.RegionFlag, func.XtUVars, func.OPVars, func.SPVars);
                 std::vector<VectorXd> test_inputs = this->get_test_inputs(func.RegionFlag, func.XtUVars, func.OPVars, func.SPVars);
                 VectorXd output_scales = calc_jacobian_row_scales(func.Func, input_scales, test_inputs, "norm", "mean");

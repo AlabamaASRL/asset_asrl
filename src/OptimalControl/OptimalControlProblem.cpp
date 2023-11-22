@@ -1,6 +1,7 @@
 #include "OptimalControlProblem.h"
 #include "OptimalControlProblem.h"
 #include "OptimalControlProblem.h"
+#include "AutoScalingUtils.h"
 
 #include "PyDocString/OptimalControl/OptimalControlProblem_doc.h"
 
@@ -327,6 +328,38 @@ void ASSET::OptimalControlProblem::transcribe_links() {
 
 void ASSET::OptimalControlProblem::calc_auto_scales()
 {
+    auto calc_impl = [&](auto& funcmap) {
+        for (auto& [key, func] : funcmap) {
+            if (func.ScaleMode == "auto" || true) {
+                VectorXd input_scales = this->get_input_scale(func.LinkFlag,
+                    func.PhaseRegFlags,
+                    func.PhasesTolink,
+                    func.XtUVars,
+                    func.OPVars,
+                    func.SPVars,
+                    func.LinkParams);
+                std::vector<VectorXd> test_inputs = this->get_test_inputs(func.LinkFlag,
+                    func.PhaseRegFlags,
+                    func.PhasesTolink,
+                    func.XtUVars,
+                    func.OPVars,
+                    func.SPVars,
+                    func.LinkParams);
+                VectorXd output_scales = calc_jacobian_row_scales(func.Func, input_scales, test_inputs, "norm", "mean");
+                func.OutputScales = output_scales;
+                //std::cout << output_scales << std::endl;
+            }
+            else {
+
+
+            }
+
+        }
+    };
+    calc_impl(this->LinkEqualities);
+    calc_impl(this->LinkInequalities);
+    calc_impl(this->LinkObjectives);
+
 }
 
 void ASSET::OptimalControlProblem::transcribe(bool showstats, bool showfuns) {
@@ -335,7 +368,7 @@ void ASSET::OptimalControlProblem::transcribe(bool showstats, bool showfuns) {
   check_functions();
 
   if (this->AutoScaling) {
-      this->calc_auto_scales();
+      //this->calc_auto_scales();
   }
 
   this->transcribe_phases();

@@ -1936,7 +1936,12 @@ namespace ASSET {
           Start = this->numPhaseVars.segment(0, i).sum();
         Vars.segment(Start, this->numPhaseVars[i]) = this->phases[i]->makeSolverInput();
       }
-      Vars.tail(this->numLinkParams) = this->ActiveLinkParams;
+      if (this->AutoScaling  && this->LPUnits.size()>0) {
+          Vars.tail(this->numLinkParams) = this->ActiveLinkParams.cwiseQuotient(this->LPUnits);
+      }
+      else {
+          Vars.tail(this->numLinkParams) = this->ActiveLinkParams;
+      }
 
       return Vars;
     }
@@ -1948,7 +1953,12 @@ namespace ASSET {
           Start = this->numPhaseVars.segment(0, i).sum();
         this->phases[i]->collectSolverOutput(Vars.segment(Start, this->numPhaseVars[i]));
       }
-      this->ActiveLinkParams = Vars.tail(this->numLinkParams);
+      if (this->AutoScaling && this->LPUnits.size() > 0) {
+          this->ActiveLinkParams = Vars.tail(this->numLinkParams).cwiseProduct(this->LPUnits);
+      }
+      else {
+          this->ActiveLinkParams = Vars.tail(this->numLinkParams);
+      }
     }
     void collectSolverMultipliers(const VectorXd& EM, const VectorXd& IM) {
       this->MultipliersLoaded = true;
