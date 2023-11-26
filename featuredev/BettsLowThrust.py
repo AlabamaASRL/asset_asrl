@@ -481,37 +481,38 @@ if __name__ == "__main__":
     Units[6] = fstar
     Units[7] = tstar
     
-    phase = ode.phase("LGL5",IG,16)
+    for i in range(0,30):
+        phase = ode.phase("LGL7",IG,32)
+        
+        phase.setUnits(Units,[])
+        phase.AutoScaling=True
+        
+        
+        phase.integrator.setStepSizes(.1,.001,10)
+        phase.addBoundaryValueNEW("Front",["MEEs","w","t"],X0[0:8])
+        phase.addEqualConNEW("Path",Args(3).norm()-1,"U")
+        # Dont use control splines when placing equality path constraints on controls
+        phase.setControlMode("NoSpline")
+        
+        # Not stricly neccesary for this problem but a good idea
+        phase.addLUFuncBoundNEW("Path",RadFunc(mu),"MEEs",Re,10*Re)
     
-    phase.setUnits(Units,[])
-    phase.AutoScaling=True
+        phase.addEqualConNEW("Back",EqBCon(),"MEEs")
+        phase.addInequalConNEW("Back",IqBCon(),"MEEs")
+        phase.addLUVarBoundNEW("ODEParams","tau", -50,0)
+        phase.addLowerVarBoundNEW("Back","w",.05)
+        phase.addValueObjective("Back",6,-1.0)
+        phase.setThreads(8,8)
+        phase.optimizer.PrintLevel = 0
+        phase.optimizer.set_EContol(1.0e-9)
+        
+        phase.setAdaptiveMesh(True)
+        #phase.setMeshErrorEstimator("integrator")
+        phase.setMeshTol(1.0e-9)
+        
+        phase.optimize_solve()
     
-    
-    phase.integrator.setStepSizes(.1,.001,10)
-    phase.addBoundaryValueNEW("Front",["MEEs","w","t"],X0[0:8])
-    phase.addEqualConNEW("Path",Args(3).norm()-1,"U")
-    # Dont use control splines when placing equality path constraints on controls
-    phase.setControlMode("NoSpline")
-    
-    # Not stricly neccesary for this problem but a good idea
-    phase.addLUFuncBoundNEW("Path",RadFunc(mu),"MEEs",Re,10*Re)
-
-    phase.addEqualConNEW("Back",EqBCon(),"MEEs")
-    phase.addInequalConNEW("Back",IqBCon(),"MEEs")
-    phase.addLUVarBoundNEW("ODEParams","tau", -50,0)
-    phase.addLowerVarBoundNEW("Back","w",.05)
-    phase.addValueObjective("Back",6,-1.0)
-    phase.setThreads(8,8)
-    phase.optimizer.PrintLevel = 1
-    phase.optimizer.set_EContol(1.0e-9)
-    
-    phase.setAdaptiveMesh(True)
-    phase.setMeshErrorEstimator("integrator")
-    phase.setMeshTol(1.0e-7)
-    
-    phase.optimize_solve()
-
-    Traj = phase.returnTraj()
+        Traj = phase.returnTrajRangeND(10000,0,1)
     
     FinalWeight = Traj[-1][6]*Fstar
     FinalTime   = Traj[-1][7]*Tstar

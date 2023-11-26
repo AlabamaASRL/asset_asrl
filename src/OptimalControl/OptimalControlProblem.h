@@ -29,6 +29,12 @@ namespace ASSET {
     using PhaseIndexPackPtr =
         std::tuple<PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi>;
 
+    using VarIndexType = std::variant<int, VectorXi, std::string, std::vector<std::string>>;
+    using ScaleType = std::variant<double, VectorXd, std::string>;
+    using RegionType = std::variant<PhaseRegionFlags, std::string>;
+    using PhaseRefType = std::variant<int, PhasePtr, std::string>;
+
+    using PhasePack = std::tuple<PhaseRefType, RegionType, VarIndexType, VarIndexType, VarIndexType>;
 
    
     std::vector<PhasePtr> phases;
@@ -210,6 +216,22 @@ namespace ASSET {
       return int(ptrit - phases.begin());
     }
 
+    int getPhaseNum(PhaseRefType phase_t) {
+        int phasenum;
+
+        if (std::holds_alternative<int>(phase_t)) {
+            phasenum = std::get<int>(phase_t);
+        }
+        else if (std::holds_alternative<PhasePtr>(phase_t)) {
+            phasenum = this->getPhaseNum(std::get<PhasePtr>(phase_t));
+        }
+        else if (std::holds_alternative<std::string>(phase_t)) {
+            phasenum = this->getPhaseNum(std::get<std::string>(phase_t));
+        }
+        return phasenum;
+    }
+
+
     std::vector<VectorXi> ptl_from_phase_names(std::vector<std::vector<std::string>> ptlnamevec) {
       std::vector<VectorXi> ptl;
       for (auto& appl: ptlnamevec) {
@@ -255,13 +277,7 @@ namespace ASSET {
     /////////////////////////////////////////////////
 
 
-    using VarIndexType = std::variant<int, VectorXi, std::string, std::vector<std::string>>;
-    using ScaleType = std::variant<double, VectorXd, std::string>;
-    using RegionType = std::variant<PhaseRegionFlags, std::string>;
-    using PhaseRefType = std::variant<int, PhasePtr, std::string>;
-
-    using PhasePack = std::tuple<PhaseRefType, RegionType, VarIndexType, VarIndexType, VarIndexType>;
-
+   
 
     VectorXi getLPVars(VarIndexType LPvars_t) const {
 
@@ -303,17 +319,12 @@ namespace ASSET {
         for (int i = 0; i < npacks; i++) {
 
             auto phase_t = std::get<0>(packs[i]); // Name of phase, either phaseptr,int, or string
-            int phasenum;
+            int phasenum = getPhaseNum(phase_t);
 
-            if (std::holds_alternative<int>(phase_t)) {
-                phasenum = std::get<int>(phase_t);
+            if (phasenum < 0 || phasenum >= this->phases.size()) {
+                throw std::invalid_argument(fmt::format("Function references non - existent phase : {0:}\n",phasenum));
             }
-            else if (std::holds_alternative<PhasePtr>(phase_t)) {
-                phasenum = this->getPhaseNum(std::get<PhasePtr>(phase_t));
-            }
-            else if (std::holds_alternative<std::string>(phase_t)) {
-                phasenum = this->getPhaseNum(std::get<std::string>(phase_t));
-            }
+
 
             phasenums[i] = phasenum;
 
@@ -325,8 +336,9 @@ namespace ASSET {
 
         std::vector<Eigen::VectorXi> lvs;
         lvs.push_back(getLPVars(lv));
+        PTL.push_back(phasenums);
 
-        auto func = FuncHolder(f, RegFlags, PTL, xtvs, opvs, spvs, lvs);
+        auto func = FuncHolder(fun, RegFlags, PTL, xtvs, opvs, spvs, lvs);
 
 
         VectorXd OutputScales(fun.ORows());
@@ -360,6 +372,93 @@ namespace ASSET {
 
         return func;
 
+    }
+
+
+    template<class FuncHolder, class FuncType>
+    FuncHolder makeFuncImpl(FuncType fun, PhaseRefType p0, RegionType reg0, VarIndexType XtUV0, VarIndexType OPV0, VarIndexType SPV0,
+        PhaseRefType p1, RegionType reg1, VarIndexType XtUV1, VarIndexType OPV1, VarIndexType SPV1,
+        VarIndexType lv, ScaleType scale_t) {
+
+        auto pack0 = PhasePack{ p0,reg0,XtUV0,OPV0,SPV0 };
+        auto pack1 = PhasePack{ p1,reg1,XtUV1,OPV1,SPV1 };
+
+        auto packs = std::vector{ pack0,pack1 };
+        return makeFuncImpl<FuncHolder, FuncType>(fun, packs, lv, scale_t);
+    }
+
+    template<class FuncHolder, class FuncType>
+    FuncHolder makeFuncImpl(FuncType fun, 
+        PhaseRefType p0, RegionType reg0_t, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1_t, VarIndexType v1, 
+        VarIndexType lv, ScaleType scale_t) {
+
+        VarIndexType xtv0, opv0, spv0, xtv1, opv1, spv1;
+
+        xtv0 = VectorXi();
+        opv0 = VectorXi();
+        spv0 = VectorXi();
+
+        xtv1 = VectorXi();
+        opv1 = VectorXi();
+        spv1 = VectorXi();
+
+
+        PhaseRegionFlags reg0,reg1;
+
+
+        if (std::holds_alternative<PhaseRegionFlags>(reg0_t)) {
+            reg0 = std::get<PhaseRegionFlags>(reg0_t);
+        }
+        else if (std::holds_alternative<std::string>(reg0_t)) {
+            reg0 = strto_PhaseRegionFlag(std::get<std::string>(reg0_t));
+        }
+
+        if (std::holds_alternative<PhaseRegionFlags>(reg1_t)) {
+            reg1 = std::get<PhaseRegionFlags>(reg1_t);
+        }
+        else if (std::holds_alternative<std::string>(reg1_t)) {
+            reg1 = strto_PhaseRegionFlag(std::get<std::string>(reg1_t));
+        }
+
+
+        
+
+        if (reg0 == ODEParams)
+            opv0 = v0;
+        else if (reg0 == StaticParams)
+            spv0 = v0;
+        else
+            xtv0 = v0;
+
+        if (reg1 == ODEParams)
+            opv1 = v1;
+        else if (reg1 == StaticParams)
+            spv1 = v1;
+        else
+            xtv1 = v1;
+
+
+        auto pack0 = PhasePack{ p0, reg0, xtv0, opv0, spv0 };
+        auto pack1 = PhasePack{ p1, reg1, xtv1, opv1, spv1 };
+        auto packs = std::vector{ pack0, pack1 };
+
+        return makeFuncImpl<FuncHolder, FuncType>(fun, packs, lv, scale_t);
+    }
+
+
+    template<class FuncHolder, class FuncType>
+    FuncHolder makeFuncImpl(FuncType fun,
+        PhaseRefType p0, RegionType reg0_t, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1_t, VarIndexType v1,
+        ScaleType scale_t) {
+
+        VectorXi empty;
+
+        return makeFuncImpl<FuncHolder, FuncType>(fun,
+            p0, reg0_t, v0,
+            p1, reg1_t, v1,
+            empty, scale_t);
     }
 
 
@@ -543,7 +642,85 @@ namespace ASSET {
 
 
     /////////////// THE NEW EQUALCON INTERFACE//////////////////////////////
+    
 
+    int addLinkEqualCon(VectorFunctionalX lc, std::vector<PhasePack> packs, VarIndexType lv, ScaleType scale_t) {
+        auto Func = this->makeFuncImpl<LinkConstraint, VectorFunctionalX>(lc, packs, lv,scale_t);
+        return addFuncImpl(Func, this->LinkEqualities, "Link Equality Constraint");
+    }
+
+    int addLinkEqualCon(VectorFunctionalX lc, 
+        PhaseRefType p0, RegionType reg0, VarIndexType XtUV0, VarIndexType OPV0, VarIndexType SPV0,
+        PhaseRefType p1, RegionType reg1, VarIndexType XtUV1, VarIndexType OPV1, VarIndexType SPV1,
+        VarIndexType lv, ScaleType scale_t) {
+
+        auto Func = this->makeFuncImpl<LinkConstraint, VectorFunctionalX>(lc,
+             p0,  reg0,  XtUV0,  OPV0,  SPV0,
+             p1,  reg1,  XtUV1,  OPV1,  SPV1,
+             lv,  scale_t);
+        return addFuncImpl(Func, this->LinkEqualities, "Link Equality Constraint");
+    }
+
+    int addLinkEqualCon(VectorFunctionalX lc,
+        PhaseRefType p0, RegionType reg0, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1, VarIndexType v1,
+        VarIndexType lv, ScaleType scale_t) {
+
+        auto Func = this->makeFuncImpl<LinkConstraint, VectorFunctionalX>(lc,
+            p0, reg0, v0, 
+            p1, reg1, v1, 
+            lv, scale_t);
+        return addFuncImpl(Func, this->LinkEqualities, "Link Equality Constraint");
+    }
+    int addLinkEqualCon(VectorFunctionalX lc,
+        PhaseRefType p0, RegionType reg0, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1, VarIndexType v1,
+         ScaleType scale_t) {
+
+        auto Func = this->makeFuncImpl<LinkConstraint, VectorFunctionalX>(lc,
+            p0, reg0, v0,
+            p1, reg1, v1,
+           scale_t);
+        return addFuncImpl(Func, this->LinkEqualities, "Link Equality Constraint");
+    }
+
+    std::vector<int> 
+        addForwardLinkEqualCon(PhaseRefType iphase_t, PhaseRefType fphase_t, VarIndexType vars,
+            ScaleType scale_t) {
+
+        int iphase = getPhaseNum(iphase_t);
+        int fphase = getPhaseNum(fphase_t);
+
+
+
+        if (iphase < 0)
+            iphase = (this->phases.size() + iphase);
+        if (fphase < 0)
+            fphase = (this->phases.size() + fphase);
+
+        if (iphase < 0 || iphase >= this->phases.size()) {
+            throw std::invalid_argument(fmt::format("Link Equality constraint references non-existent phase:{0:}\n",iphase));
+        }
+
+        int vsize = this->phases[iphase]->getXtUPVars(Front, vars).size();
+
+        auto args = Arguments<-1>(2 * vsize);
+        auto func = args.head<-1>(vsize) - args.tail<-1>(vsize);
+
+        std::vector<int> idxs;
+        for (int i = iphase; i < fphase; i++) {
+            
+            int idx = this->addLinkEqualCon(func, i, "Last", vars, i + 1, "First", vars,scale_t);
+
+            idxs.push_back(idx);
+        }
+        
+        return idxs;
+    }
+
+
+
+    ////////////////////////////////////////////////////////////////////////
     int addLinkEqualCon(VectorFunctionalX lc, std::vector<PhaseIndexPack> packs, VectorXi lv) {
       auto Func = this->makeLinkFunc<VectorFunctionalX, PhaseIndexPack, LinkConstraint>(lc, packs, lv);
       return this->addLinkEqualCon(Func);
