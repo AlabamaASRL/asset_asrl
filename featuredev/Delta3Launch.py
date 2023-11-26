@@ -128,8 +128,17 @@ class RocketODE(oc.ODEBase):
         Vdot    =  (-mu)*R.normalized_power3() + (T*u + D)/m
         
         ode = vf.stack(Rdot,Vdot,-mdot)
+        
+        Vgroups = {}
+        
+        Vgroups[("R","Position")]=R
+        Vgroups[("V","Velocity")]=V
+        Vgroups[("U","ThrustVec")]=XtU.UVec()
+        Vgroups[("t","time")]=XtU.TVar()
+        Vgroups[("m","mass")]=m
+
         ####################################################
-        super().__init__(ode,7,3)
+        super().__init__(ode,7,3,Vgroups = Vgroups)
 
 def TargetOrbit(at,et,it, Ot,Wt):
     R,V = Args(6).tolist([(0,3),(3,3)])
@@ -424,7 +433,7 @@ if __name__ == "__main__":
     
     ## ocp controls max mesh iters for problem
     ocp.setMaxMeshIters(10)
-    
+    ocp.AutoScaling = True
     ## Apply non-default mesh settings phases.
     ## Need not be the same for all phases
     
@@ -444,7 +453,19 @@ if __name__ == "__main__":
 
     
     ## All phases continuous in everything but mass (var 6)
-    ocp.addForwardLinkEqualCon(phase1,phase4,[0,1,2,3,4,5, 7])
+    
+    
+    ocp.addForwardLinkEqualConNEW(phase1,phase4,["R","V","t","U"])
+    
+    for i in range(0,0):
+        Func = Args(20).head(10)- Args(20).tail(10)
+        
+        ocp.addLinkEqualConNEW(Func,i,"Last",["R","V","t","U"],
+                            i+10,"First",["R","V","t","U"])
+        
+        
+        
+    
     
     ocp.optimizer.set_OptLSMode("L1")
     ocp.optimizer.set_SoeLSMode("L1")
@@ -453,7 +474,10 @@ if __name__ == "__main__":
 
     ocp.solve_optimize()
     print(phase4.returnEqualConVals(idx))
-
+    ocon = TargetOrbit(at,et,istart,Ot,Wt)
+    
+    print(ocon.jacobian(IG4[-1][0:6]))
+    
 
     for phase in ocp.Phases:
         PhaseMeshErrorPlot(phase,show=False)

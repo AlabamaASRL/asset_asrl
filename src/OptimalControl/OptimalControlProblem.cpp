@@ -287,7 +287,22 @@ void ASSET::OptimalControlProblem::transcribe_links() {
                                             NextEq);
 
 
-    this->nlp->EqualityConstraints.emplace_back(ConstraintFunction(Eq.Func, VC[0], VC[1]));
+    auto Func = Eq.Func;
+
+    if (this->AutoScaling) {
+        VectorXd input_scales = this->get_input_scale(Eq.LinkFlag,
+            Eq.PhaseRegFlags,
+            Eq.PhasesTolink,
+            Eq.XtUVars,
+            Eq.OPVars,
+            Eq.SPVars,
+            Eq.LinkParams);
+        VectorXd output_scales(Func.ORows());
+        output_scales = Eq.OutputScales;
+        Func = IOScaled<decltype(Func)>(Eq.Func, input_scales, output_scales);
+    }
+
+    this->nlp->EqualityConstraints.emplace_back(ConstraintFunction(Func, VC[0], VC[1]));
     Eq.GlobalIndex = this->nlp->EqualityConstraints.size() - 1;
     this->numEqFuns++;
   }
@@ -301,7 +316,24 @@ void ASSET::OptimalControlProblem::transcribe_links() {
                                             Iq.LinkParams,
                                             Iq.Func.ORows(),
                                             NextIq);
-    this->nlp->InequalityConstraints.emplace_back(ConstraintFunction(Iq.Func, VC[0], VC[1]));
+
+    auto Func = Iq.Func;
+
+    if (this->AutoScaling) {
+        VectorXd input_scales = this->get_input_scale(Iq.LinkFlag,
+            Iq.PhaseRegFlags,
+            Iq.PhasesTolink,
+            Iq.XtUVars,
+            Iq.OPVars,
+            Iq.SPVars,
+            Iq.LinkParams);
+        VectorXd output_scales(Func.ORows());
+        output_scales = Iq.OutputScales;
+        Func = IOScaled<decltype(Func)>(Iq.Func, input_scales, output_scales);
+    }
+
+
+    this->nlp->InequalityConstraints.emplace_back(ConstraintFunction(Func, VC[0], VC[1]));
     Iq.GlobalIndex = this->nlp->InequalityConstraints.size() - 1;
     this->numIqFuns++;
   }
@@ -316,7 +348,24 @@ void ASSET::OptimalControlProblem::transcribe_links() {
                                             Ob.LinkParams,
                                             Ob.Func.ORows(),
                                             dummy);
-    this->nlp->Objectives.emplace_back(ObjectiveFunction(Ob.Func, VC[0]));
+
+    auto Func = Ob.Func;
+
+    if (this->AutoScaling) {
+        VectorXd input_scales = this->get_input_scale(Ob.LinkFlag,
+            Ob.PhaseRegFlags,
+            Ob.PhasesTolink,
+            Ob.XtUVars,
+            Ob.OPVars,
+            Ob.SPVars,
+            Ob.LinkParams);
+        VectorXd output_scales(Func.ORows());
+        output_scales = Ob.OutputScales;
+        Func = IOScaled<decltype(Func)>(Ob.Func, input_scales, output_scales);
+    }
+
+
+    this->nlp->Objectives.emplace_back(ObjectiveFunction(Func, VC[0]));
     Ob.GlobalIndex = this->nlp->Objectives.size() - 1;
 
     this->numObjFuns++;
@@ -347,7 +396,8 @@ void ASSET::OptimalControlProblem::calc_auto_scales()
                     func.LinkParams);
                 VectorXd output_scales = calc_jacobian_row_scales(func.Func, input_scales, test_inputs, "norm", "mean");
                 func.OutputScales = output_scales;
-                //std::cout << output_scales << std::endl;
+                fmt::print("##############\n");
+                std::cout << output_scales << std::endl;
             }
             else {
 
@@ -368,7 +418,7 @@ void ASSET::OptimalControlProblem::transcribe(bool showstats, bool showfuns) {
   check_functions();
 
   if (this->AutoScaling) {
-      //this->calc_auto_scales();
+      this->calc_auto_scales();
   }
 
   this->transcribe_phases();
@@ -663,6 +713,41 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
       py::class_<OptimalControlProblem, std::shared_ptr<OptimalControlProblem>, OptimizationProblemBase>(
           m, "OptimalControlProblem");
   obj.def(py::init<>());
+
+
+  ///////////////////// NEW INTERFACE ///////////////////////////
+
+  obj.def("addLinkEqualConNEW",
+      py::overload_cast<
+      VectorFunctionalX ,
+      PhaseRefType , 
+      RegionType , 
+      VarIndexType ,
+      PhaseRefType , 
+      RegionType , 
+      VarIndexType ,
+      ScaleType >(&OptimalControlProblem::addLinkEqualCon),
+      py::arg("func"),
+      py::arg("phase0"),
+      py::arg("reg0"),
+      py::arg("v0"),
+      py::arg("phase1"),
+      py::arg("reg1"),
+      py::arg("v1"),
+      py::arg("AutoScale") = std::string("auto")
+      );
+
+  obj.def("addForwardLinkEqualConNEW",
+      py::overload_cast<
+      PhaseRefType,
+      PhaseRefType,
+      VarIndexType,
+      ScaleType>(&OptimalControlProblem::addForwardLinkEqualCon),
+      py::arg("phase0"),
+      py::arg("phase1"),
+      py::arg("vars"),
+      py::arg("AutoScale") = std::string("auto")
+  );
 
   //////////////////
   obj.def("addLinkEqualCon",
@@ -1477,6 +1562,9 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
 
 
   ///////////////////////
+
+  obj.def_readwrite("AutoScaling", &OptimalControlProblem::AutoScaling);
+
 
   obj.def_readwrite("AdaptiveMesh", &OptimalControlProblem::AdaptiveMesh);
   obj.def_readwrite("PrintMeshInfo", &OptimalControlProblem::PrintMeshInfo);
