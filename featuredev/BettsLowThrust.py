@@ -482,7 +482,7 @@ if __name__ == "__main__":
     Units[7] = tstar
     
     for i in range(0,30):
-        phase = ode.phase("LGL7",IG,32)
+        phase = ode.phase("LGL5",IG,16)
         
         phase.setUnits(Units,[])
         phase.AutoScaling=True
@@ -501,14 +501,14 @@ if __name__ == "__main__":
         phase.addInequalConNEW("Back",IqBCon(),"MEEs")
         phase.addLUVarBoundNEW("ODEParams","tau", -50,0)
         phase.addLowerVarBoundNEW("Back","w",.05)
-        phase.addValueObjective("Back",6,-1.0)
+        phase.addValueObjectiveNEW("Back",6,-1.0)
         phase.setThreads(8,8)
         phase.optimizer.PrintLevel = 0
         phase.optimizer.set_EContol(1.0e-9)
         
         phase.setAdaptiveMesh(True)
         #phase.setMeshErrorEstimator("integrator")
-        phase.setMeshTol(1.0e-9)
+        phase.setMeshTol(1.0e-7)
         
         phase.optimize_solve()
     

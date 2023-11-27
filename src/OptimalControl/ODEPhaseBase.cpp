@@ -2028,7 +2028,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("XtUVars"),
       py::arg("OPVars"),
       py::arg("SPVars"),
-      py::arg("Scale") = std::string("auto"));
+      py::arg("AutoScale") = std::string("auto"));
 
   obj.def("addEqualConNEW",
       py::overload_cast<RegionType,
@@ -2038,7 +2038,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("PhaseRegion"),
       py::arg("Func"),
       py::arg("InputIndex"),
-      py::arg("Scale")=std::string("auto"));
+      py::arg("AutoScale")=std::string("auto"));
 
   obj.def("addBoundaryValueNEW",
       py::overload_cast<RegionType , 
@@ -2048,7 +2048,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("PhaseRegion"),
       py::arg("Index"),
       py::arg("Value"),
-      py::arg("Scale") = std::string("auto")
+      py::arg("AutoScale") = std::string("auto")
       );
   //////////////////////////////////
   /////// InequalCons

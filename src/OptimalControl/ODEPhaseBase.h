@@ -11,8 +11,8 @@
 #include "StateFunction.h"
 #include "VectorFunctions/ASSET_VectorFunctions.h"
 #include "pch.h"
-#include <variant>
 #include "CommonFunctions/IOScaled.h"
+#include "InterfaceTypes.h"
 
 namespace ASSET {
 
@@ -249,9 +249,7 @@ namespace ASSET {
       return index;
     }
 
-    using VarIndexType = std::variant<int,VectorXi,std::string,std::vector<std::string>>;
-    using ScaleType = std::variant<double, VectorXd, std::string>;
-    using RegionType = std::variant<PhaseRegionFlags, std::string>;
+   
 
     
     PhaseRegionFlags getRegion(RegionType reg_t) const{
@@ -426,44 +424,13 @@ namespace ASSET {
             // If region is Params then the indices are held in XtUPvars_t and the others are emtpy
             OPvars = this->getOPVars(reg, OPvars_t);
             SPvars = this->getSPVars(reg, SPvars_t);
-            func = FuncHolder(fun, reg, XtUPvars, OPvars, SPvars);
+            func = FuncHolder(fun, reg, XtUPvars, OPvars, SPvars, scale_t);
 
         }
         else {
-            func = FuncHolder(fun, reg, XtUPvars);
+            func = FuncHolder(fun, reg, XtUPvars, scale_t);
         }
         
-
-        /////////////////////////////////////////////////
-        VectorXd OutputScales(fun.ORows());
-        OutputScales.setOnes();
-        std::string ScaleMode = "auto";
-        bool ScalesSet = false;
-        if (std::holds_alternative < double > (scale_t)) {
-            OutputScales *= std::get<double>(scale_t);
-            ScaleMode = "custom";
-            ScalesSet = true;
-
-        }
-        else if (std::holds_alternative<VectorXd>(scale_t)) {
-            OutputScales = std::get<VectorXd>(scale_t);
-            ScaleMode = "custom";
-            ScalesSet = true;
-
-            if (OutputScales.size() != fun.ORows()) {
-
-                throw std::invalid_argument("Scaling vector size does not match output size of function");
-            }
-        }
-        else if (std::holds_alternative<std::string>(scale_t)) {
-            ScaleMode = std::get<std::string>(scale_t);
-        }
-
-        func.OutputScales = OutputScales;
-        func.ScaleMode = ScaleMode;
-        func.ScalesSet = ScalesSet;
-
-
         return func;
     }
    

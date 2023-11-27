@@ -391,10 +391,10 @@ if __name__ == "__main__":
     phase4 = ode4.phase(tmode,IG4,nsegs4)
     phase4.setControlMode(cmode)
 
-    phase4.addLowerNormBound("Path",[0,1,2],Re)
-    phase4.addLUNormBound("Path",[8,9,10],.5,1.5)
-    phase4.addBoundaryValue("Front",[6], [m0_phase4])
-    phase4.addUpperVarBound("Back",7,tf_phase4,1.0)
+    phase4.addLowerNormBoundNEW("Path","R",Re)
+    phase4.addLUNormBoundNEW("Path","U",.5,1.5)
+    phase4.addBoundaryValueNEW("Front","mass", m0_phase4)
+    phase4.addUpperVarBoundNEW("Back","time",tf_phase4)
     
     Scales = np.ones((5))
     Scales[0]=1/lstar
@@ -446,22 +446,19 @@ if __name__ == "__main__":
         phase.setMeshErrorCriteria('max')
         phase.setMeshErrorEstimator('integrator')  
 
+    Units[0:6]*=1.1
     
+    phase4.setUnits(Units,[])
     # Not every phase has to be adaptive
     #phase2.setAdaptiveMesh(False)
     ###########################################################################
 
     
-    ## All phases continuous in everything but mass (var 6)
-    
+    ## All phases continuous in everything but mass 
     
     ocp.addForwardLinkEqualConNEW(phase1,phase4,["R","V","t","U"])
     
-    for i in range(0,0):
-        Func = Args(20).head(10)- Args(20).tail(10)
-        
-        ocp.addLinkEqualConNEW(Func,i,"Last",["R","V","t","U"],
-                            i+10,"First",["R","V","t","U"])
+    
         
         
         

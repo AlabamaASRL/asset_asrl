@@ -719,12 +719,45 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
 
   obj.def("addLinkEqualConNEW",
       py::overload_cast<
+      VectorFunctionalX,
+      PhaseRefType,
+      RegionType,
+      VarIndexType,
+      VarIndexType,
+      VarIndexType,
+      PhaseRefType,
+      RegionType,
+      VarIndexType,
+      VarIndexType,
+      VarIndexType,
+      VarIndexType,
+      ScaleType>(&OptimalControlProblem::addLinkEqualCon),
+      py::arg("func"),
+      py::arg("phase0"),
+      py::arg("reg0"),
+      py::arg("XtUVars0"),
+      py::arg("OPVars0"),
+      py::arg("SPVars0"),
+      py::arg("phase1"),
+      py::arg("reg1"),
+      py::arg("XtUVars1"),
+      py::arg("OPVars1"),
+      py::arg("SPVars1"),
+      py::arg("linkparams") = VectorXi(),
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+
+
+  obj.def("addLinkEqualConNEW",
+      py::overload_cast<
       VectorFunctionalX ,
       PhaseRefType , 
       RegionType , 
       VarIndexType ,
       PhaseRefType , 
       RegionType , 
+      VarIndexType ,
       VarIndexType ,
       ScaleType >(&OptimalControlProblem::addLinkEqualCon),
       py::arg("func"),
@@ -734,6 +767,7 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
       py::arg("phase1"),
       py::arg("reg1"),
       py::arg("v1"),
+      py::arg("linkparams") = VectorXi(),
       py::arg("AutoScale") = std::string("auto")
       );
 
@@ -748,6 +782,25 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
       py::arg("vars"),
       py::arg("AutoScale") = std::string("auto")
   );
+
+  obj.def("addDirectLinkEqualConNEW",
+      py::overload_cast<
+      PhaseRefType,
+      RegionType,
+      VarIndexType,
+      PhaseRefType,
+      RegionType,
+      VarIndexType,
+      ScaleType>(&OptimalControlProblem::addDirectLinkEqualCon),
+      py::arg("phase0"),
+      py::arg("reg0"),
+      py::arg("v0"),
+      py::arg("phase1"),
+      py::arg("reg1"),
+      py::arg("v1"),
+      py::arg("AutoScale") = std::string("auto")
+  );
+
 
   //////////////////
   obj.def("addLinkEqualCon",

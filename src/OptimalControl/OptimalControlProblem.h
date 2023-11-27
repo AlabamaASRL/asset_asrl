@@ -3,6 +3,7 @@
 #include "LinkFunction.h"
 #include "ODEPhaseBase.h"
 #include "pch.h"
+#include "InterfaceTypes.h"
 
 namespace ASSET {
 
@@ -29,9 +30,7 @@ namespace ASSET {
     using PhaseIndexPackPtr =
         std::tuple<PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi>;
 
-    using VarIndexType = std::variant<int, VectorXi, std::string, std::vector<std::string>>;
-    using ScaleType = std::variant<double, VectorXd, std::string>;
-    using RegionType = std::variant<PhaseRegionFlags, std::string>;
+    
     using PhaseRefType = std::variant<int, PhasePtr, std::string>;
 
     using PhasePack = std::tuple<PhaseRefType, RegionType, VarIndexType, VarIndexType, VarIndexType>;
@@ -341,30 +340,7 @@ namespace ASSET {
         auto func = FuncHolder(fun, RegFlags, PTL, xtvs, opvs, spvs, lvs);
 
 
-        VectorXd OutputScales(fun.ORows());
-        OutputScales.setOnes();
-        std::string ScaleMode = "auto";
-        bool ScalesSet = false;
-        if (std::holds_alternative < double >(scale_t)) {
-            OutputScales *= std::get<double>(scale_t);
-            ScaleMode = "custom";
-            ScalesSet = true;
-
-        }
-        else if (std::holds_alternative<VectorXd>(scale_t)) {
-            OutputScales = std::get<VectorXd>(scale_t);
-            ScaleMode = "custom";
-            ScalesSet = true;
-
-            if (OutputScales.size() != fun.ORows()) {
-
-                throw std::invalid_argument("Scaling vector size does not match output size of function");
-            }
-        }
-        else if (std::holds_alternative<std::string>(scale_t)) {
-            ScaleMode = std::get<std::string>(scale_t);
-        }
-
+        auto [ScaleMode, ScalesSet, OutputScales] = get_scale_info(fun.ORows(), scale_t);
         func.OutputScales = OutputScales;
         func.ScaleMode = ScaleMode;
         func.ScalesSet = ScalesSet;
@@ -718,6 +694,32 @@ namespace ASSET {
         return idxs;
     }
 
+
+    int addDirectLinkEqualCon(PhaseRefType p0, RegionType reg0_t, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1_t, VarIndexType v1,
+        ScaleType scale_t) {
+
+        int phase = getPhaseNum(p0);
+
+        if (phase < 0)
+            phase = (this->phases.size() + phase);
+        
+        if (phase < 0 || phase >= this->phases.size()) {
+            throw std::invalid_argument(fmt::format("Link Equality constraint references non-existent phase:{0:}\n", phase));
+        }
+
+        PhaseRegionFlags reg0 = get_PhaseRegion(reg0_t);
+
+        int vsize = this->phases[phase]->getXtUPVars(reg0, v0).size();
+
+        auto args = Arguments<-1>(2 * vsize);
+        auto func = args.head<-1>(vsize) - args.tail<-1>(vsize);
+
+        return this->addLinkEqualCon(func, p0, reg0_t, v0, p1, reg1_t, v1, scale_t);
+
+    }
+
+    
 
 
     ////////////////////////////////////////////////////////////////////////

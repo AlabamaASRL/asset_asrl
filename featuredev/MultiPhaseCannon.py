@@ -199,7 +199,7 @@ if __name__ == "__main__":
     aphase.addLowerVarBoundNEW("Front",1,0.0,1.0)
     aphase.addBoundaryValueNEW("Front",[2,3,4],[h0,r0,0])
     
-    aphase.addInequalConNEW("Front",EFunc(),[0],[0],[],AutoScale=1)
+    aphase.addInequalConNEW("Front",EFunc(),[0],[0],[],AutoScale=None)
     aphase.addBoundaryValueNEW("Back",[1],[0.0])
         
     dphase = ode.phase(tmode,DescentIG,nsegs)
@@ -220,11 +220,10 @@ if __name__ == "__main__":
     
     F = Args(2)[0]-Args(2)[1]
     
-    ocp.addLinkEqualConNEW(F,
-                       0,"ODEParams",0,
-                        1,"ODEParams",0)
     
     
+    ocp.addLinkEqualConNEW(F,aphase,"ODEParams",0,
+                              dphase,"ODEParams",0,AutoScale=1)
     
     
     ocp.optimizer.set_OptLSMode("L1")
