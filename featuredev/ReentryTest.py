@@ -224,23 +224,23 @@ if __name__ == "__main__":
     phase.setUnits(scales,[])
     phase.AutoScaling = True
     
-    phase.addBoundaryValueNEW("Front",range(0,6),TrajIG[0][0:6])
+    phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
     
-    phase.addLUVarBoundNEW("Path","theta",np.deg2rad(-89.0),np.deg2rad(89.0))
-    phase.addLUVarBoundNEW("Path","gamma",np.deg2rad(-89.0),np.deg2rad(89.0))
+    phase.addLUVarBound("Path","theta",np.deg2rad(-89.0),np.deg2rad(89.0))
+    phase.addLUVarBound("Path","gamma",np.deg2rad(-89.0),np.deg2rad(89.0))
 
-    phase.addLUVarBoundNEW("Path","AoA",np.deg2rad(-90.0),np.deg2rad(90.0))
-    phase.addLUVarBoundNEW("Path","beta" ,np.deg2rad(-90.0),np.deg2rad(1.0),AutoScale = "auto")
+    phase.addLUVarBound("Path","AoA",np.deg2rad(-90.0),np.deg2rad(90.0))
+    phase.addLUVarBound("Path","beta" ,np.deg2rad(-90.0),np.deg2rad(1.0),AutoScale = "auto")
     
     
-    phase.addUpperDeltaTimeBoundNEW(tmax,1.0)
+    phase.addUpperDeltaTimeBound(tmax,1.0)
     
     
-    phase.addBoundaryValueNEW("Back" 
+    phase.addBoundaryValue("Back" 
                               ,["h","v","gamma"]
                               ,[htf,vtf,gammatf])
     
-    phase.addDeltaVarObjectiveNEW(1,-1.0)
+    phase.addDeltaVarObjective(1,-1.0)
     phase.setThreads(8,8)
     
     ## Our IG is bad, so i turn on line search
@@ -265,7 +265,7 @@ if __name__ == "__main__":
     Traj1 = phase.returnTraj()
     
     ## Add in Heating Rate Constraint, scale so rhs is order 1
-    phase.addUpperFuncBoundNEW("Path",QFunc(),
+    phase.addUpperFuncBound("Path",QFunc(),
                                ["h","v","alpha"],
                                Qlimit,AutoScale='auto')
     

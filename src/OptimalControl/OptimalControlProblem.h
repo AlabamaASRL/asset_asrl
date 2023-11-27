@@ -337,15 +337,7 @@ namespace ASSET {
         lvs.push_back(getLPVars(lv));
         PTL.push_back(phasenums);
 
-        auto func = FuncHolder(fun, RegFlags, PTL, xtvs, opvs, spvs, lvs);
-
-
-        auto [ScaleMode, ScalesSet, OutputScales] = get_scale_info(fun.ORows(), scale_t);
-        func.OutputScales = OutputScales;
-        func.ScaleMode = ScaleMode;
-        func.ScalesSet = ScalesSet;
-
-
+        auto func = FuncHolder(fun, RegFlags, PTL, xtvs, opvs, spvs, lvs, scale_t);
         return func;
 
     }
@@ -720,7 +712,16 @@ namespace ASSET {
     }
 
     
-
+    int addLinkParamEqualCon(VectorFunctionalX lc, std::vector<VectorXi> lpvs,ScaleType scale_t) {
+        std::vector<Eigen::VectorXi> empty;
+        return this->addLinkEqualCon(
+            LinkConstraint(lc, LinkFlags::LinkParams, empty, empty, empty, empty, lpvs, scale_t));
+    }
+    int addLinkParamEqualCon(VectorFunctionalX lc, VectorXi lpv, ScaleType scale_t) {
+        std::vector<Eigen::VectorXi> lpvs;
+        lpvs.push_back(lpv);
+        return this->addLinkParamEqualCon(lc, lpvs,scale_t);
+    }
 
     ////////////////////////////////////////////////////////////////////////
     int addLinkEqualCon(VectorFunctionalX lc, std::vector<PhaseIndexPack> packs, VectorXi lv) {

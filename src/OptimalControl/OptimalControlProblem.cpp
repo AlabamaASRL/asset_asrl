@@ -800,7 +800,25 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
       py::arg("v1"),
       py::arg("AutoScale") = std::string("auto")
   );
-
+  obj.def("addLinkParamEqualConNEW",
+      py::overload_cast<
+      VectorFunctionalX, 
+      std::vector<VectorXi>,ScaleType>(
+          &OptimalControlProblem::addLinkParamEqualCon),
+      py::arg("func"),
+      py::arg("LinkParms"),
+      py::arg("AutoScale") = std::string("auto")
+      );
+  obj.def("addLinkParamEqualConNEW",
+      py::overload_cast<
+      VectorFunctionalX,
+      VectorXi, 
+      ScaleType>(
+          &OptimalControlProblem::addLinkParamEqualCon),
+      py::arg("func"),
+      py::arg("LinkParms"),
+      py::arg("AutoScale") = std::string("auto")
+  );
 
   //////////////////
   obj.def("addLinkEqualCon",

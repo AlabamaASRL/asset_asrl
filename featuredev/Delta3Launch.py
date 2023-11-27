@@ -108,13 +108,13 @@ class RocketODE(oc.ODEBase):
         ####################################################
         XtU  = oc.ODEArguments(7,3)
         
-        R = XtU.XVec().head3()
-        V = XtU.XVec().segment3(3)
+        R = XtU.XVec().head(3)
+        V = XtU.XVec().segment(3,3)
         m = XtU.XVar(6)
        
         # We normalize the control direction in the dynamics so it doesnt have
         # to be done as a path constraint
-        u = XtU.UVec().normalized()
+        U = XtU.UVec()
         
         h       = R.norm() - Re
         rho     = RhoAir * vf.exp(-h / h_scale)
@@ -125,7 +125,7 @@ class RocketODE(oc.ODEBase):
         D       = (-0.5*CD*S)*rho*(Vr*Vr.norm())
         
         Rdot    =  V
-        Vdot    =  (-mu)*R.normalized_power3() + (T*u + D)/m
+        Vdot    =  (-mu)*R.normalized_power3() + (T*U.normalized() + D)/m
         
         ode = vf.stack(Rdot,Vdot,-mdot)
         
@@ -133,7 +133,7 @@ class RocketODE(oc.ODEBase):
         
         Vgroups[("R","Position")]=R
         Vgroups[("V","Velocity")]=V
-        Vgroups[("U","ThrustVec")]=XtU.UVec()
+        Vgroups[("U","ThrustVec")]=U
         Vgroups[("t","time")]=XtU.TVar()
         Vgroups[("m","mass")]=m
 
@@ -338,17 +338,15 @@ if __name__ == "__main__":
     tmode = "LGL3"
     cmode = "HighestOrderSpline"
     
-    Units = np.ones((11))
-    Units[0:3]*=lstar
-    Units[3:6]*=lstar/tstar
-    Units[6]*=mstar
-    Units[7]*=tstar
     
-
-    nsegs1 = 10
-    nsegs2 = 10
-    nsegs3 = 10
-    nsegs4 = 10
+    
+    Units = ode1.make_units(R=lstar,V=lstar/tstar,t=tstar,m=mstar)
+    
+    
+    nsegs1 = 16
+    nsegs2 = 16
+    nsegs3 = 16
+    nsegs4 = 32
     
     #########################################
     phase1 = ode1.phase(tmode,IG1,nsegs1)
@@ -357,48 +355,46 @@ if __name__ == "__main__":
     ## Thrust direction is normalized in dynamics, so we dont
     ## have to enforce norm of 1 on controls. For good measure,
     ## we do bound the maginitude to prevent it from becoming too large or small
-    phase1.addLUNormBound("Path",[8,9,10],.5,1.5)
+    phase1.addLUNormBound("Path","U",.5,1.5)
     phase1.addBoundaryValue("Front",range(0,8),IG1[0][0:8])
     
     #Dont want our bound to interfere with initial condition which starts at Re
     #so i relax the Earth radius constraint slightly here
-    phase1.addLowerNormBound("Path",[0,1,2],Re*.999999)
-    phase1.addBoundaryValue("Back",[7],[tf_phase1])
+    phase1.addLowerNormBound("Path","R",Re*.999999)
+    phase1.addBoundaryValue("Back","time",tf_phase1)
     
     #########################################
     phase2 = ode2.phase(tmode,IG2,nsegs2)
     phase2.setControlMode(cmode)
     
-    phase2.addLowerNormBound("Path",[0,1,2],Re)
-    phase2.addLUNormBound("Path",[8,9,10],.5,1.5)
+    phase2.addLowerNormBound("Path","R",Re)
+    phase2.addLUNormBound("Path","U",.5,1.5)
     
     ## Fixing initial mass and final time on first 3 phases.
     ## Since the engine cant be throttled, constraining final mass
     ## as well would be redundant and overconstrained
-    phase2.addBoundaryValue("Front",[6], [m0_phase2])
-    phase2.addBoundaryValue("Back", [7] ,[tf_phase2])
+    phase2.addBoundaryValue("Front","mass", m0_phase2)
+    phase2.addBoundaryValue("Back", "time" ,tf_phase2)
     
     #########################################
     phase3 = ode3.phase(tmode,IG3,nsegs3)
     phase3.setControlMode(cmode)
     
-    phase3.addLowerNormBound("Path",[0,1,2],Re)
-    phase3.addLUNormBound("Path",[8,9,10],.5,1.5)
-    phase3.addBoundaryValue("Front",[6], [m0_phase3])
-    phase3.addBoundaryValue("Back", [7] ,[tf_phase3])
+    phase3.addLowerNormBound("Path","R",Re)
+    phase3.addLUNormBound("Path","U",.5,1.5)
+    phase3.addBoundaryValue("Front","mass", m0_phase3)
+    phase3.addBoundaryValue("Back", "time" ,tf_phase3)
     
     #########################################
     phase4 = ode4.phase(tmode,IG4,nsegs4)
     phase4.setControlMode(cmode)
 
-    phase4.addLowerNormBoundNEW("Path","R",Re)
-    phase4.addLUNormBoundNEW("Path","U",.5,1.5)
-    phase4.addBoundaryValueNEW("Front","mass", m0_phase4)
-    phase4.addUpperVarBoundNEW("Back","time",tf_phase4)
+    phase4.addLowerNormBound("Path","R",Re)
+    phase4.addLUNormBound("Path","U",.5,1.5)
+    phase4.addBoundaryValue("Front","mass", m0_phase4)
+    phase4.addUpperVarBound("Back","time",tf_phase4)
     
-    Scales = np.ones((5))
-    Scales[0]=1/lstar
-    idx = phase4.addEqualConNEW("Back",TargetOrbit(at,et,istart,Ot,Wt),range(0,6),Scale=Scales)
+    phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),range(0,6),AutoScale = None)
     # Maximize final mass
     phase4.addValueObjective("Back",6,-1.0)
     
@@ -441,14 +437,14 @@ if __name__ == "__main__":
 
     for phase in ocp.Phases:
         phase.AutoScaling=True
-        phase.setUnits(Units,[])
+        phase.setUnits(Units)
         phase.setMeshTol(1.0e-7)
         phase.setMeshErrorCriteria('max')
         phase.setMeshErrorEstimator('integrator')  
 
-    Units[0:6]*=1.1
+    Units[0:6]*=1.0
     
-    phase4.setUnits(Units,[])
+    phase4.setUnits(Units)
     # Not every phase has to be adaptive
     #phase2.setAdaptiveMesh(False)
     ###########################################################################
@@ -470,10 +466,10 @@ if __name__ == "__main__":
     ocp.optimizer.set_PrintLevel(0)
 
     ocp.solve_optimize()
-    print(phase4.returnEqualConVals(idx))
+  
     ocon = TargetOrbit(at,et,istart,Ot,Wt)
     
-    print(ocon.jacobian(IG4[-1][0:6]))
+
     
 
     for phase in ocp.Phases:

@@ -1950,7 +1950,8 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
           ODEPhaseBase_refineTrajManual2);
   obj.def("refineTrajEqual", &ODEPhaseBase::refineTrajEqual, ODEPhaseBase_refineTrajEqual);
 
-  obj.def("setStaticParams", &ODEPhaseBase::setStaticParams, ODEPhaseBase_setStaticParams);
+  obj.def("setStaticParams", py::overload_cast<VectorXd,VectorXd>( & ODEPhaseBase::setStaticParams), ODEPhaseBase_setStaticParams);
+  obj.def("setStaticParams", py::overload_cast<VectorXd>(&ODEPhaseBase::setStaticParams), ODEPhaseBase_setStaticParams);
 
 
   obj.def("setControlMode",
@@ -2013,10 +2014,10 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
           ODEPhaseBase_removeIntegralParamFunction);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  ///////////////////////////////////////////////////////////////////
-  ///// The New interface//////////////////////
+  /////////////////////////////////////////////
+  ///// The New interface /////////////////////
 
-  obj.def("addEqualConNEW",
+  obj.def("addEqualCon",
       py::overload_cast<RegionType ,
       VectorFunctionalX ,
       VarIndexType ,
@@ -2030,7 +2031,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("SPVars"),
       py::arg("AutoScale") = std::string("auto"));
 
-  obj.def("addEqualConNEW",
+  obj.def("addEqualCon",
       py::overload_cast<RegionType,
       VectorFunctionalX,
       VarIndexType,
@@ -2040,7 +2041,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("InputIndex"),
       py::arg("AutoScale")=std::string("auto"));
 
-  obj.def("addBoundaryValueNEW",
+  obj.def("addBoundaryValue",
       py::overload_cast<RegionType , 
       VarIndexType , 
       const std::variant<double, VectorXd>& , 
@@ -2050,9 +2051,51 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("Value"),
       py::arg("AutoScale") = std::string("auto")
       );
+
+  obj.def("addDeltaVarEqualCon",
+      py::overload_cast<
+      VarIndexType,
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addDeltaVarEqualCon),
+      py::arg("var"),
+      py::arg("value"),
+      py::arg("scale"),
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+  obj.def("addDeltaTimeEqualCon",
+      py::overload_cast<
+      double,
+      double,
+      ScaleType>(&ODEPhaseBase::addDeltaTimeEqualCon),
+      py::arg("value"),
+      py::arg("scale"),
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+  obj.def("addValueLock",
+      py::overload_cast<
+      RegionType,
+      VarIndexType,
+      ScaleType>(&ODEPhaseBase::addValueLock),
+      py::arg("reg"),
+      py::arg("vars"),
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+  obj.def("addPeriodicityCon",
+      py::overload_cast<
+      VarIndexType,
+      ScaleType>(&ODEPhaseBase::addPeriodicityCon),
+      py::arg("vars"),
+      py::arg("AutoScale") = std::string("auto")
+  );
+
+
   //////////////////////////////////
   /////// InequalCons
-  obj.def("addInequalConNEW",
+  obj.def("addInequalCon",
       py::overload_cast<RegionType,
       VectorFunctionalX,
       VarIndexType,
@@ -2066,7 +2109,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("SPVars"),
       py::arg("AutoScale") = std::string("auto"));
 
-  obj.def("addInequalConNEW",
+  obj.def("addInequalCon",
       py::overload_cast<RegionType,
       VectorFunctionalX,
       VarIndexType,
@@ -2078,7 +2121,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
 
 
 
-  obj.def("addLUVarBoundNEW",
+  obj.def("addLUVarBound",
       py::overload_cast<RegionType ,
       VarIndexType , 
       double , 
@@ -2092,7 +2135,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("scale")=1.0,
       py::arg("AutoScale") = std::string("auto")
       );
-  obj.def("addLowerVarBoundNEW",
+  obj.def("addLowerVarBound",
       py::overload_cast<RegionType,
       VarIndexType,
       double,
@@ -2105,7 +2148,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto")
   );
 
-  obj.def("addUpperVarBoundNEW",
+  obj.def("addUpperVarBound",
       py::overload_cast<RegionType,
       VarIndexType,
       double,
@@ -2119,7 +2162,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   );
 
 
-  obj.def("addLUFuncBoundNEW",
+  obj.def("addLUFuncBound",
       py::overload_cast<RegionType ,
       ScalarFunctionalX ,
       VarIndexType ,
@@ -2140,7 +2183,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto")
   );
 
-  obj.def("addLUFuncBoundNEW",
+  obj.def("addLUFuncBound",
       py::overload_cast<RegionType,
       ScalarFunctionalX,
       VarIndexType,
@@ -2157,7 +2200,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto")
   );
   //
-  obj.def("addLowerFuncBoundNEW",
+  obj.def("addLowerFuncBound",
       py::overload_cast<RegionType,
       ScalarFunctionalX,
       VarIndexType,
@@ -2176,7 +2219,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto")
   );
 
-  obj.def("addLowerFuncBoundNEW",
+  obj.def("addLowerFuncBound",
       py::overload_cast<RegionType,
       ScalarFunctionalX,
       VarIndexType,
@@ -2191,7 +2234,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto")
   );
 
-  obj.def("addUpperFuncBoundNEW",
+  obj.def("addUpperFuncBound",
       py::overload_cast<RegionType,
       ScalarFunctionalX,
       VarIndexType,
@@ -2210,7 +2253,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto")
   );
 
-  obj.def("addUpperFuncBoundNEW",
+  obj.def("addUpperFuncBound",
       py::overload_cast<RegionType,
       ScalarFunctionalX,
       VarIndexType,
@@ -2225,7 +2268,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto")
   );
 
-  obj.def("addLUNormBoundNEW",
+  obj.def("addLUNormBound",
       py::overload_cast<RegionType,
       VarIndexType,
       double,
@@ -2240,7 +2283,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto")
   );
 
-  obj.def("addLUSquaredNormBoundNEW",
+  obj.def("addLUSquaredNormBound",
       py::overload_cast<RegionType,
       VarIndexType,
       double,
@@ -2256,7 +2299,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   );
 
   //
-  obj.def("addLowerNormBoundNEW",
+  obj.def("addLowerNormBound",
       py::overload_cast<RegionType,
       VarIndexType,
       double,
@@ -2269,7 +2312,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto")
   );
   
-  obj.def("addLowerSquaredNormBoundNEW",
+  obj.def("addLowerSquaredNormBound",
       py::overload_cast<RegionType,
       VarIndexType,
       double,
@@ -2282,7 +2325,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto")
   );
   //
-  obj.def("addUpperNormBoundNEW",
+  obj.def("addUpperNormBound",
       py::overload_cast<RegionType,
       VarIndexType,
       double,
@@ -2295,7 +2338,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto")
   );
 
-  obj.def("addUpperSquaredNormBoundNEW",
+  obj.def("addUpperSquaredNormBound",
       py::overload_cast<RegionType,
       VarIndexType,
       double,
@@ -2308,7 +2351,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto")
   );
   //
-  obj.def("addLowerDeltaVarBoundNEW",
+  obj.def("addLowerDeltaVarBound",
       py::overload_cast<VarIndexType , 
       double ,
       double ,
@@ -2318,7 +2361,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("scale") = 1.0,
       py::arg("AutoScale") = std::string("auto")
   );
-  obj.def("addLowerDeltaTimeBoundNEW",
+  obj.def("addLowerDeltaTimeBound",
       py::overload_cast<
       double,
       double,
@@ -2328,7 +2371,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto")
   );
   //
-  obj.def("addUpperDeltaVarBoundNEW",
+  obj.def("addUpperDeltaVarBound",
       py::overload_cast<VarIndexType,
       double,
       double,
@@ -2338,7 +2381,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("scale") = 1.0,
       py::arg("AutoScale") = std::string("auto")
   );
-  obj.def("addUpperDeltaTimeBoundNEW",
+  obj.def("addUpperDeltaTimeBound",
       py::overload_cast<
       double,
       double,
@@ -2349,7 +2392,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   );
   //////////////////////////////////
   /////// StateObjectives /////////
-  obj.def("addStateObjectiveNEW",
+  obj.def("addStateObjective",
       py::overload_cast<RegionType,
       ScalarFunctionalX,
       VarIndexType,
@@ -2363,7 +2406,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("SPVars"),
       py::arg("AutoScale") = std::string("auto"));
 
-  obj.def("addStateObjectiveNEW",
+  obj.def("addStateObjective",
       py::overload_cast<RegionType,
       ScalarFunctionalX,
       VarIndexType,
@@ -2374,7 +2417,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto"));
 
 
-  obj.def("addValueObjectiveNEW",
+  obj.def("addValueObjective",
       py::overload_cast<
       RegionType,
       VarIndexType,
@@ -2385,7 +2428,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("scale"),
       py::arg("AutoScale") = std::string("auto"));
 
-  obj.def("addDeltaVarObjectiveNEW",
+  obj.def("addDeltaVarObjective",
       py::overload_cast<
       VarIndexType,
       double,
@@ -2393,7 +2436,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("Var"),
       py::arg("scale"),
       py::arg("AutoScale") = std::string("auto"));
-  obj.def("addDeltaTimeObjectiveNEW",
+  obj.def("addDeltaTimeObjective",
       py::overload_cast<
       double,
       ScaleType>(&ODEPhaseBase::addDeltaTimeObjective),
@@ -2401,7 +2444,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto"));
   //////////////////////////////////
   /////// IntegralObjectives /////////
-  obj.def("addIntegralObjectiveNEW",
+  obj.def("addIntegralObjective",
       py::overload_cast<
       ScalarFunctionalX,
       VarIndexType,
@@ -2414,7 +2457,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("SPVars"),
       py::arg("AutoScale") = std::string("auto"));
 
-  obj.def("addIntegralObjectiveNEW",
+  obj.def("addIntegralObjective",
       py::overload_cast<
       ScalarFunctionalX,
       VarIndexType,
@@ -2424,7 +2467,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("AutoScale") = std::string("auto"));
   //////////////////////////////////
   /////// IntegralParamFunction /////////
-  obj.def("addIntegralParamFunctionNEW",
+  obj.def("addIntegralParamFunction",
       py::overload_cast<
       ScalarFunctionalX,
       VarIndexType,
@@ -2439,7 +2482,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
       py::arg("IntParam"),
       py::arg("AutoScale") = std::string("auto"));
 
-  obj.def("addIntegralParamFunctionNEW",
+  obj.def("addIntegralParamFunction",
       py::overload_cast<
       ScalarFunctionalX,
       VarIndexType,
@@ -2457,407 +2500,40 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   obj.def("addEqualCon",
           py::overload_cast<StateConstraint>(&ODEPhaseBase::addEqualCon),
           ODEPhaseBase_addEqualCon1);
-  obj.def("addEqualCon",
-          py::overload_cast<PhaseRegionFlags, VectorFunctionalX, VectorXi>(&ODEPhaseBase::addEqualCon),
-          ODEPhaseBase_addEqualCon2);
-  obj.def("addEqualCon",
-          py::overload_cast<PhaseRegionFlags, VectorFunctionalX, VectorXi, VectorXi, VectorXi>(
-              &ODEPhaseBase::addEqualCon),
-          ODEPhaseBase_addEqualCon3);
-
-  obj.def("addEqualCon",
-          py::overload_cast<std::string, VectorFunctionalX, VectorXi>(&ODEPhaseBase::addEqualCon),
-          ODEPhaseBase_addEqualCon2);
-  obj.def("addEqualCon",
-          py::overload_cast<std::string, VectorFunctionalX, VectorXi, VectorXi, VectorXi>(
-              &ODEPhaseBase::addEqualCon),
-          ODEPhaseBase_addEqualCon3);
-
-
-  obj.def("addDeltaVarEqualCon",
-          py::overload_cast<PhaseRegionFlags, int, double, double>(&ODEPhaseBase::addDeltaVarEqualCon),
-          ODEPhaseBase_addDeltaVarEqualCon1);
-  obj.def("addDeltaVarEqualCon",
-          py::overload_cast<int, double, double>(&ODEPhaseBase::addDeltaVarEqualCon),
-          ODEPhaseBase_addDeltaVarEqualCon2);
-  obj.def("addDeltaVarEqualCon",
-          py::overload_cast<int, double>(&ODEPhaseBase::addDeltaVarEqualCon),
-          ODEPhaseBase_addDeltaVarEqualCon3);
-
-  obj.def("addDeltaTimeEqualCon",
-          py::overload_cast<double, double>(&ODEPhaseBase::addDeltaTimeEqualCon),
-          ODEPhaseBase_addDeltaTimeEqualCon1);
-  obj.def("addDeltaTimeEqualCon",
-          py::overload_cast<double>(&ODEPhaseBase::addDeltaTimeEqualCon),
-          ODEPhaseBase_addDeltaTimeEqualCon2);
-
-  obj.def("addBoundaryValue",
-          py::overload_cast<PhaseRegionFlags, VectorXi, const VectorXd&>(&ODEPhaseBase::addBoundaryValue),
-          ODEPhaseBase_addBoundaryValue);
-  obj.def("addBoundaryValue",
-          py::overload_cast<std::string, VectorXi, const VectorXd&>(&ODEPhaseBase::addBoundaryValue),
-          ODEPhaseBase_addBoundaryValue);
-
-  obj.def("addValueLock",
-          py::overload_cast<std::string, VectorXi>(&ODEPhaseBase::addValueLock),
-          ODEPhaseBase_addValueLock);
-  obj.def("addValueLock",
-          py::overload_cast<PhaseRegionFlags, VectorXi>(&ODEPhaseBase::addValueLock),
-          ODEPhaseBase_addValueLock);
-
+  
   obj.def("addBoundaryValues", &ODEPhaseBase::addBoundaryValues, ODEPhaseBase_addBoundaryValues);
 
-  //obj.def("addPeriodicityCon", &ODEPhaseBase::addPeriodicityCon);
   ///////////////////////////////////////////////////////////////////////////////
 
   obj.def("addInequalCon",
           py::overload_cast<StateConstraint>(&ODEPhaseBase::addInequalCon),
           ODEPhaseBase_addInequalCon1);
-  obj.def("addInequalCon",
-          py::overload_cast<PhaseRegionFlags, VectorFunctionalX, VectorXi>(&ODEPhaseBase::addInequalCon),
-          ODEPhaseBase_addInequalCon2);
-  obj.def("addInequalCon",
-          py::overload_cast<PhaseRegionFlags, VectorFunctionalX, VectorXi, VectorXi, VectorXi>(
-              &ODEPhaseBase::addInequalCon),
-          ODEPhaseBase_addInequalCon3);
-
-  obj.def("addInequalCon",
-          py::overload_cast<std::string, VectorFunctionalX, VectorXi>(&ODEPhaseBase::addInequalCon),
-          ODEPhaseBase_addInequalCon2);
-  obj.def("addInequalCon",
-          py::overload_cast<std::string, VectorFunctionalX, VectorXi, VectorXi, VectorXi>(
-              &ODEPhaseBase::addInequalCon),
-          ODEPhaseBase_addInequalCon3);
-
-
-  obj.def("addLUVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double, double>(&ODEPhaseBase::addLUVarBound),
-          ODEPhaseBase_addLUVarBound1);
-  obj.def("addLUVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double, double, double>(&ODEPhaseBase::addLUVarBound),
-          ODEPhaseBase_addLUVarBound2);
-  obj.def(
-      "addLUVarBound",
-      py::overload_cast<PhaseRegionFlags, int, double, double, double, double>(&ODEPhaseBase::addLUVarBound),
-      ODEPhaseBase_addLUVarBound3);
+  ////////////////////////////////////////////////////////////////////////////
   obj.def("addLUVarBounds",
           py::overload_cast<PhaseRegionFlags, Eigen::VectorXi, double, double, double>(
               &ODEPhaseBase::addLUVarBounds),
           ODEPhaseBase_addLUVarBounds);
-
-
-  obj.def("addLUVarBound",
-          py::overload_cast<std::string, int, double, double>(&ODEPhaseBase::addLUVarBound),
-          ODEPhaseBase_addLUVarBound1);
-  obj.def("addLUVarBound",
-          py::overload_cast<std::string, int, double, double, double>(&ODEPhaseBase::addLUVarBound),
-          ODEPhaseBase_addLUVarBound2);
-  obj.def("addLUVarBound",
-          py::overload_cast<std::string, int, double, double, double, double>(&ODEPhaseBase::addLUVarBound),
-          ODEPhaseBase_addLUVarBound3);
-  obj.def(
-      "addLUVarBounds",
-      py::overload_cast<std::string, Eigen::VectorXi, double, double, double>(&ODEPhaseBase::addLUVarBounds),
+  obj.def("addLUVarBounds",
+      py::overload_cast<std::string, Eigen::VectorXi, double, double, double>(
+          &ODEPhaseBase::addLUVarBounds),
       ODEPhaseBase_addLUVarBounds);
-
-
-  obj.def("addLowerVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double, double>(&ODEPhaseBase::addLowerVarBound),
-          ODEPhaseBase_addLowerVarBound1);
-  obj.def("addLowerVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double>(&ODEPhaseBase::addLowerVarBound),
-          ODEPhaseBase_addLowerVarBound2);
-
-  obj.def("addUpperVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double, double>(&ODEPhaseBase::addUpperVarBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addUpperVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double>(&ODEPhaseBase::addUpperVarBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-  obj.def("addLowerVarBound",
-          py::overload_cast<std::string, int, double, double>(&ODEPhaseBase::addLowerVarBound),
-          ODEPhaseBase_addLowerVarBound1);
-  obj.def("addLowerVarBound",
-          py::overload_cast<std::string, int, double>(&ODEPhaseBase::addLowerVarBound),
-          ODEPhaseBase_addLowerVarBound2);
-
-  obj.def("addUpperVarBound",
-          py::overload_cast<std::string, int, double, double>(&ODEPhaseBase::addUpperVarBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addUpperVarBound",
-          py::overload_cast<std::string, int, double>(&ODEPhaseBase::addUpperVarBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-
-  //////////////////////////////////////////////////////////////
-
-  obj.def("addLowerNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double>(&ODEPhaseBase::addLowerNormBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addLowerNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double>(&ODEPhaseBase::addLowerNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-  obj.def("addLowerNormBound",
-          py::overload_cast<std::string, VectorXi, double, double>(&ODEPhaseBase::addLowerNormBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addLowerNormBound",
-          py::overload_cast<std::string, VectorXi, double>(&ODEPhaseBase::addLowerNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-
-  obj.def("addUpperNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double>(&ODEPhaseBase::addUpperNormBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addUpperNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double>(&ODEPhaseBase::addUpperNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-  obj.def("addUpperNormBound",
-          py::overload_cast<std::string, VectorXi, double, double>(&ODEPhaseBase::addUpperNormBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addUpperNormBound",
-          py::overload_cast<std::string, VectorXi, double>(&ODEPhaseBase::addUpperNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-
-  obj.def("addLUNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double, double, double>(
-              &ODEPhaseBase::addLUNormBound),
-          ODEPhaseBase_addLUNormBound1);
-  obj.def(
-      "addLUNormBound",
-      py::overload_cast<PhaseRegionFlags, VectorXi, double, double, double>(&ODEPhaseBase::addLUNormBound),
-      ODEPhaseBase_addLUNormBound2);
-  obj.def("addLUNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double>(&ODEPhaseBase::addLUNormBound),
-          ODEPhaseBase_addLUNormBound3);
-
-  obj.def(
-      "addLUNormBound",
-      py::overload_cast<std::string, VectorXi, double, double, double, double>(&ODEPhaseBase::addLUNormBound),
-      ODEPhaseBase_addLUNormBound1);
-  obj.def("addLUNormBound",
-          py::overload_cast<std::string, VectorXi, double, double, double>(&ODEPhaseBase::addLUNormBound),
-          ODEPhaseBase_addLUNormBound2);
-  obj.def("addLUNormBound",
-          py::overload_cast<std::string, VectorXi, double, double>(&ODEPhaseBase::addLUNormBound),
-          ODEPhaseBase_addLUNormBound3);
-
-  //////////////////////////////////////////////////////////////
-
-  obj.def(
-      "addLowerSquaredNormBound",
-      py::overload_cast<PhaseRegionFlags, VectorXi, double, double>(&ODEPhaseBase::addLowerSquaredNormBound),
-      ODEPhaseBase_addUpperVarBound1);
-  obj.def("addLowerSquaredNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double>(&ODEPhaseBase::addLowerSquaredNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-  obj.def("addLowerSquaredNormBound",
-          py::overload_cast<std::string, VectorXi, double, double>(&ODEPhaseBase::addLowerSquaredNormBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addLowerSquaredNormBound",
-          py::overload_cast<std::string, VectorXi, double>(&ODEPhaseBase::addLowerSquaredNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-
-  obj.def(
-      "addUpperSquaredNormBound",
-      py::overload_cast<PhaseRegionFlags, VectorXi, double, double>(&ODEPhaseBase::addUpperSquaredNormBound),
-      ODEPhaseBase_addUpperVarBound1);
-  obj.def("addUpperSquaredNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double>(&ODEPhaseBase::addUpperSquaredNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-  obj.def("addUpperSquaredNormBound",
-          py::overload_cast<std::string, VectorXi, double, double>(&ODEPhaseBase::addUpperSquaredNormBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addUpperSquaredNormBound",
-          py::overload_cast<std::string, VectorXi, double>(&ODEPhaseBase::addUpperSquaredNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-
-  obj.def("addLUSquaredNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double, double, double>(
-              &ODEPhaseBase::addLUSquaredNormBound),
-          ODEPhaseBase_addLUNormBound1);
-  obj.def("addLUSquaredNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double, double>(
-              &ODEPhaseBase::addLUSquaredNormBound),
-          ODEPhaseBase_addLUNormBound2);
-  obj.def("addLUSquaredNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double>(&ODEPhaseBase::addLUSquaredNormBound),
-          ODEPhaseBase_addLUNormBound3);
-
-  obj.def("addLUSquaredNormBound",
-          py::overload_cast<std::string, VectorXi, double, double, double, double>(
-              &ODEPhaseBase::addLUSquaredNormBound),
-          ODEPhaseBase_addLUNormBound1);
-  obj.def(
-      "addLUSquaredNormBound",
-      py::overload_cast<std::string, VectorXi, double, double, double>(&ODEPhaseBase::addLUSquaredNormBound),
-      ODEPhaseBase_addLUNormBound2);
-  obj.def("addLUSquaredNormBound",
-          py::overload_cast<std::string, VectorXi, double, double>(&ODEPhaseBase::addLUSquaredNormBound),
-          ODEPhaseBase_addLUNormBound3);
-
-
-  //////////////////////////////////////////////////////////////
-
-  obj.def("addLowerFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double, double>(
-              &ODEPhaseBase::addLowerFuncBound),
-          ODEPhaseBase_addLowerFuncBound1);
-  obj.def("addUpperFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double, double>(
-              &ODEPhaseBase::addUpperFuncBound),
-          ODEPhaseBase_addUpperFuncBound2);
-
-  obj.def("addLowerFuncBound",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double, double>(
-              &ODEPhaseBase::addLowerFuncBound),
-          ODEPhaseBase_addLowerFuncBound1);
-  obj.def("addUpperFuncBound",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double, double>(
-              &ODEPhaseBase::addUpperFuncBound),
-          ODEPhaseBase_addUpperFuncBound2);
-
-
-  obj.def("addLowerFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double>(
-              &ODEPhaseBase::addLowerFuncBound),
-          ODEPhaseBase_addLowerFuncBound1);
-  obj.def("addUpperFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double>(
-              &ODEPhaseBase::addUpperFuncBound),
-          ODEPhaseBase_addUpperFuncBound2);
-
-  obj.def(
-      "addLowerFuncBound",
-      py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double>(&ODEPhaseBase::addLowerFuncBound),
-      ODEPhaseBase_addLowerFuncBound1);
-  obj.def(
-      "addUpperFuncBound",
-      py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double>(&ODEPhaseBase::addUpperFuncBound),
-      ODEPhaseBase_addUpperFuncBound2);
-
-
-  obj.def("addLUFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double, double, double, double>(
-              &ODEPhaseBase::addLUFuncBound));
-  obj.def("addLUFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double, double, double>(
-              &ODEPhaseBase::addLUFuncBound));
-  obj.def("addLUFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double, double>(
-              &ODEPhaseBase::addLUFuncBound));
-
-  obj.def("addLUFuncBound",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double, double, double, double>(
-              &ODEPhaseBase::addLUFuncBound));
-  obj.def("addLUFuncBound",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double, double, double>(
-              &ODEPhaseBase::addLUFuncBound));
-  obj.def("addLUFuncBound",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double, double>(
-              &ODEPhaseBase::addLUFuncBound));
-
-
-  //////////////////////////////////////////////////////////////
-
-
-  obj.def("addLowerDeltaVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double, double>(&ODEPhaseBase::addLowerDeltaVarBound),
-          ODEPhaseBase_addLowerDeltaVarBound1);
-  obj.def("addLowerDeltaVarBound",
-          py::overload_cast<int, double, double>(&ODEPhaseBase::addLowerDeltaVarBound),
-          ODEPhaseBase_addLowerDeltaVarBound2);
-  obj.def("addLowerDeltaVarBound",
-          py::overload_cast<int, double>(&ODEPhaseBase::addLowerDeltaVarBound),
-          ODEPhaseBase_addLowerDeltaVarBound3);
-
-  obj.def("addLowerDeltaTimeBound",
-          py::overload_cast<double, double>(&ODEPhaseBase::addLowerDeltaTimeBound),
-          ODEPhaseBase_addLowerDeltaTimeBound1);
-  obj.def("addLowerDeltaTimeBound",
-          py::overload_cast<double>(&ODEPhaseBase::addLowerDeltaTimeBound),
-          ODEPhaseBase_addLowerDeltaTimeBound2);
-
-  obj.def("addUpperDeltaVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double, double>(&ODEPhaseBase::addUpperDeltaVarBound),
-          ODEPhaseBase_addUpperDeltaVarBound1);
-  obj.def("addUpperDeltaVarBound",
-          py::overload_cast<int, double, double>(&ODEPhaseBase::addUpperDeltaVarBound),
-          ODEPhaseBase_addUpperDeltaVarBound2);
-  obj.def("addUpperDeltaVarBound",
-          py::overload_cast<int, double>(&ODEPhaseBase::addUpperDeltaVarBound),
-          ODEPhaseBase_addUpperDeltaVarBound3);
-  obj.def("addUpperDeltaTimeBound",
-          py::overload_cast<double, double>(&ODEPhaseBase::addUpperDeltaTimeBound),
-          ODEPhaseBase_addUpperDeltaTimeBound1);
-  obj.def("addUpperDeltaTimeBound",
-          py::overload_cast<double>(&ODEPhaseBase::addUpperDeltaTimeBound),
-          ODEPhaseBase_addUpperDeltaTimeBound2);
 
   ////////////////////////////////////////////////////////////////////////////
   obj.def("addStateObjective",
           py::overload_cast<StateObjective>(&ODEPhaseBase::addStateObjective),
           ODEPhaseBase_addStateObjective);
 
-  obj.def("addStateObjective",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi>(&ODEPhaseBase::addStateObjective),
-          ODEPhaseBase_addStateObjective);
-
-  obj.def("addStateObjective",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, VectorXi, VectorXi>(
-              &ODEPhaseBase::addStateObjective),
-          ODEPhaseBase_addStateObjective);
-
-  obj.def("addStateObjective",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi>(&ODEPhaseBase::addStateObjective),
-          ODEPhaseBase_addStateObjective);
-
-  obj.def("addStateObjective",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi, VectorXi, VectorXi>(
-              &ODEPhaseBase::addStateObjective),
-          ODEPhaseBase_addStateObjective);
-
-
-  obj.def("addValueObjective",
-          py::overload_cast<PhaseRegionFlags, int, double>(&ODEPhaseBase::addValueObjective),
-          ODEPhaseBase_addValueObjective);
-
-  obj.def("addValueObjective",
-          py::overload_cast<std::string, int, double>(&ODEPhaseBase::addValueObjective),
-          ODEPhaseBase_addValueObjective);
-
-
-  //obj.def("addDeltaVarObjective", &ODEPhaseBase::addDeltaVarObjective, ODEPhaseBase_addDeltaVarObjective);
-  //obj.def("addDeltaTimeObjective", &ODEPhaseBase::addDeltaTimeObjective, ODEPhaseBase_addDeltaTimeObjective);
+  ////////////////////////////////////////////////////////////////////////////
 
   obj.def("addIntegralObjective",
           py::overload_cast<StateObjective>(&ODEPhaseBase::addIntegralObjective),
           ODEPhaseBase_addIntegralObjective1);
-  obj.def("addIntegralObjective",
-          py::overload_cast<ScalarFunctionalX, VectorXi>(&ODEPhaseBase::addIntegralObjective),
-          ODEPhaseBase_addIntegralObjective2);
-  obj.def(
-      "addIntegralObjective",
-      py::overload_cast<ScalarFunctionalX, VectorXi, VectorXi, VectorXi>(&ODEPhaseBase::addIntegralObjective),
-      ODEPhaseBase_addIntegralObjective2);
+  
   ///////////////////////////////////////////////////////////////////////////////
   obj.def("addIntegralParamFunction",
           py::overload_cast<StateObjective, int>(&ODEPhaseBase::addIntegralParamFunction),
           ODEPhaseBase_addIntegralParamFunction1);
-  obj.def("addIntegralParamFunction",
-          py::overload_cast<ScalarFunctionalX, VectorXi, int>(&ODEPhaseBase::addIntegralParamFunction),
-          ODEPhaseBase_addIntegralParamFunction2);
-  obj.def("addIntegralParamFunction",
-          py::overload_cast<ScalarFunctionalX, VectorXi, VectorXi, VectorXi, int>(
-              &ODEPhaseBase::addIntegralParamFunction),
-          ODEPhaseBase_addIntegralParamFunction2);
+  
 
 
   ////////////////////////////////////////////////////
