@@ -2,6 +2,7 @@
 
 #include "OptimalControlFlags.h"
 #include "pch.h"
+#include "InterfaceTypes.h"
 
 namespace ASSET {
 
@@ -94,6 +95,9 @@ namespace ASSET {
       this->OPVars = opv;
       this->SPVars = spv;
       this->LinkParams = lv;
+      this->OutputScales = Eigen::VectorXd::Ones(this->Func.ORows());
+
+
     }
 
     Eigen::Matrix<PhaseRegionFlags, -1, 1> makePhaseRegFlags(LinkFlags Flag) {
@@ -152,6 +156,23 @@ namespace ASSET {
                  std::vector<Eigen::VectorXi> lv) {
       this->init(f, RegFlags, PTL, xtv, opv, spv, lv);
     }
+
+    LinkFunction(FuncType f,
+        Eigen::Matrix<PhaseRegionFlags, -1, 1> RegFlags,
+        std::vector<Eigen::VectorXi> PTL,
+        std::vector<Eigen::VectorXi> xtv,
+        std::vector<Eigen::VectorXi> opv,
+        std::vector<Eigen::VectorXi> spv,
+        std::vector<Eigen::VectorXi> lv,
+        ScaleType scale_t) {
+        this->init(f, RegFlags, PTL, xtv, opv, spv, lv);
+
+        auto [ScaleMode, ScalesSet, OutputScales] = get_scale_info(this->Func.ORows(), scale_t);
+        this->OutputScales = OutputScales;
+        this->ScaleMode = ScaleMode;
+        this->ScalesSet = ScalesSet;
+    }
+
     LinkFunction(FuncType f,
                  LinkFlags Flag,
                  std::vector<Eigen::VectorXi> PTL,
@@ -161,7 +182,20 @@ namespace ASSET {
                  std::vector<Eigen::VectorXi> lv) {
       this->init(f, makePhaseRegFlags(Flag), PTL, xtv, opv, spv, lv);
     }
-
+    LinkFunction(FuncType f,
+        LinkFlags Flag,
+        std::vector<Eigen::VectorXi> PTL,
+        std::vector<Eigen::VectorXi> xtv,
+        std::vector<Eigen::VectorXi> opv,
+        std::vector<Eigen::VectorXi> spv,
+        std::vector<Eigen::VectorXi> lv,
+        ScaleType scale_t) {
+        this->init(f, makePhaseRegFlags(Flag), PTL, xtv, opv, spv, lv);
+        auto [ScaleMode, ScalesSet, OutputScales] = get_scale_info(this->Func.ORows(), scale_t);
+        this->OutputScales = OutputScales;
+        this->ScaleMode = ScaleMode;
+        this->ScalesSet = ScalesSet;
+    }
     LinkFunction(FuncType f,
                  std::vector<std::string> RegFlags,
                  std::vector<Eigen::VectorXi> PTL,

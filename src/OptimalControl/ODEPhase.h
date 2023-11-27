@@ -74,11 +74,8 @@ namespace ASSET {
         : ODEPhase(ode, strto_TranscriptionMode(Tmode), Traj, numdef, LerpIG) {
     }
 
-    void setUnits(const Eigen::VectorXd& XtUPUnits_, const Eigen::VectorXd& SPUnits_) {
-
+    void setUnits(const Eigen::VectorXd& XtUPUnits_) {
         this->XtUPUnits = XtUPUnits_;
-        this->SPUnits = SPUnits_;
-
         VectorXd output_scales = XtUPUnits.head(this->XVars()).cwiseInverse()*this->XtUPUnits[this->XVars()];
         VectorFunctionalX odetemp;
 
@@ -407,8 +404,7 @@ namespace ASSET {
 
       int BlockSize = this->numTranCardStates;
       int numBlocks = (this->ActiveTraj.size() - 1) / (BlockSize - 1);
-      ;
-
+      
 
       mesh_errors.resize(this->XVars(), numBlocks + 1);
       mesh_dist.resize(this->XVars(), numBlocks + 1);

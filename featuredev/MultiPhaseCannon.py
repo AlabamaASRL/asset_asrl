@@ -195,19 +195,19 @@ if __name__ == "__main__":
     aphase = ode.phase(tmode,AscentIG,nsegs)
     aphase.AutoScaling=AutoScaling
     aphase.setUnits(Units,[])
-    aphase.addLowerVarBoundNEW("ODEParams",0,0.0,1)
-    aphase.addLowerVarBoundNEW("Front",1,0.0,1.0)
-    aphase.addBoundaryValueNEW("Front",[2,3,4],[h0,r0,0])
+    aphase.addLowerVarBound("ODEParams",0,0.0,1,AutoScale='auto')
+    aphase.addLowerVarBound("Front",1,0.0,1.0,AutoScale='auto')
+    aphase.addBoundaryValue("Front",[2,3,4],[h0,r0,0],AutoScale='auto')
     
-    aphase.addInequalConNEW("Front",EFunc(),[0],[0],[],AutoScale=None)
-    aphase.addBoundaryValueNEW("Back",[1],[0.0])
+    aphase.addInequalCon("Front",EFunc(),[0],[0],[],AutoScale=None)
+    aphase.addBoundaryValue("Back",[1],[0.0],AutoScale='auto')
         
     dphase = ode.phase(tmode,DescentIG,nsegs)
     dphase.AutoScaling=AutoScaling
     dphase.setUnits(Units,[])
     
-    dphase.addBoundaryValueNEW("Back",[2],[0.0])
-    dphase.addValueObjectiveNEW("Back",3,-1.0)
+    dphase.addBoundaryValue("Back",[2],[0.0],AutoScale='auto')
+    dphase.addValueObjective("Back",3,-1.0,AutoScale='auto')
     
     ocp = oc.OptimalControlProblem()
     ocp.AutoScaling=AutoScaling

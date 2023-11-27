@@ -181,6 +181,9 @@ namespace ASSET {
       this->setXVars(Xv);
       this->setUVars(Uv);
       this->setPVars(Pv);
+
+      this->XtUPUnits = Eigen::VectorXd::Ones(this->XtUPVars());
+
     }
     virtual ~ODEPhaseBase() = default;
 
@@ -437,7 +440,7 @@ namespace ASSET {
 
 
     
-
+    /////////////////////////////////////////////////
     int addEqualCon(RegionType reg_t,
         VectorFunctionalX fun,
         VarIndexType XtUPvars_t,
@@ -1239,18 +1242,27 @@ namespace ASSET {
     void refineTrajAuto();
 
 
-    void setStaticParams(VectorXd parm) {
+    void setStaticParams(VectorXd parm,VectorXd units) {
+      if (units.size() != parm.size()) {
+          throw std::invalid_argument("Size of static parameter vector and scaling units vector must match");
+      }
+
       this->ActiveStaticParams = parm;
       this->numStatParams = parm.size();
       this->resetTranscription();
+      this->SPUnits = units;
     }
+    void setStaticParams(VectorXd parm) {
+        VectorXd units(parm.size());
+        units.setOnes();
+        return this->setStaticParams(parm, units);
+    }
+
     void subStaticParams(VectorXd parm) {
-      this->ActiveStaticParams = parm;
       if (this->numStatParams == parm.size()) {
-        // expected behavior
+          this->ActiveStaticParams = parm;
       } else {
-        this->numStatParams = parm.size();
-        this->resetTranscription();
+          this->setStaticParams(parm);
       }
     }
 

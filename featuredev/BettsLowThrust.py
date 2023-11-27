@@ -481,7 +481,10 @@ if __name__ == "__main__":
     Units[6] = fstar
     Units[7] = tstar
     
-    for i in range(0,30):
+    Units = ode.make_units(p=lstar,w=fstar,t=tstar)
+    
+    
+    for i in range(0,1):
         phase = ode.phase("LGL5",IG,16)
         
         phase.setUnits(Units,[])
@@ -489,19 +492,19 @@ if __name__ == "__main__":
         
         
         phase.integrator.setStepSizes(.1,.001,10)
-        phase.addBoundaryValueNEW("Front",["MEEs","w","t"],X0[0:8])
-        phase.addEqualConNEW("Path",Args(3).norm()-1,"U")
+        phase.addBoundaryValue("Front",["MEEs","w","t"],X0[0:8])
+        phase.addEqualCon("Path",Args(3).norm()-1,"U")
         # Dont use control splines when placing equality path constraints on controls
         phase.setControlMode("NoSpline")
         
         # Not stricly neccesary for this problem but a good idea
-        phase.addLUFuncBoundNEW("Path",RadFunc(mu),"MEEs",Re,10*Re)
+        phase.addLUFuncBound("Path",RadFunc(mu),"MEEs",Re,10*Re)
     
-        phase.addEqualConNEW("Back",EqBCon(),"MEEs")
-        phase.addInequalConNEW("Back",IqBCon(),"MEEs")
-        phase.addLUVarBoundNEW("ODEParams","tau", -50,0)
-        phase.addLowerVarBoundNEW("Back","w",.05)
-        phase.addValueObjectiveNEW("Back",6,-1.0)
+        phase.addEqualCon("Back",EqBCon(),"MEEs")
+        phase.addInequalCon("Back",IqBCon(),"MEEs")
+        phase.addLUVarBound("ODEParams","tau", -50,0)
+        phase.addLowerVarBound("Back","w",.05)
+        phase.addValueObjective("Back",6,-1.0)
         phase.setThreads(8,8)
         phase.optimizer.PrintLevel = 0
         phase.optimizer.set_EContol(1.0e-9)
