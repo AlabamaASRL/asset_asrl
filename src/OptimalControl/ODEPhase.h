@@ -48,8 +48,9 @@ namespace ASSET {
       this->ode = ode;
       this->integrator = Integrator<DODE>(ode, .01);
       this->set_idxs(this->ode.get_idxs());
-
       this->setTranscriptionMode(Tmode);
+      this->setUnits(Eigen::VectorXd::Ones(this->XtUPVars()));
+
     }
     ODEPhase(const DODE& ode, TranscriptionModes Tmode, const std::vector<Eigen::VectorXd>& Traj, int numdef)
         : ODEPhase(ode, Tmode) {
@@ -659,7 +660,6 @@ namespace ASSET {
       phase.def_readwrite("EnableHessianSparsity", &ODEPhase<DODE>::EnableHessianSparsity);
       phase.def_readwrite("OldShootingDefect", &ODEPhase<DODE>::OldShootingDefect);
 
-      phase.def_readwrite("AutoScaling", &ODEPhase<DODE>::AutoScaling);
       phase.def("setUnits", &ODEPhase<DODE>::setUnits);
       phase.def("get_input_scale", &ODEPhase<DODE>::get_input_scale);
 

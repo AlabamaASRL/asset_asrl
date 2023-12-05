@@ -73,8 +73,32 @@ class ODEBase:
             elif(hasattr(name, '__iter__')):
                 for n in name:
                     self.ode.add_idx(n,idxs)
-         
+    
+    def make_units(self,**kwargs):
+        units = np.ones((self.XtUPVars()))
         
+        for key, value in kwargs.items():
+            idx = self.idx(key)
+            
+            if(isinstance(value, (int,np.int32,np.intc,
+                                  float,np.double,np.cdouble))):
+                units_t = np.ones((len(idx)))*value
+            elif(hasattr(value, '__iter__') and not isinstance(value, str)):
+                units_t = value
+            else:
+                raise Exception("Invalid unit: {}".format(str(value)))
+
+                
+            for i in range(0,len(idx)):
+                units[idx[i]] = units_t[i]
+        
+        return units
+
+            
+
+        
+        
+    
     def idx(self,Vname):
         return self.ode.idx(Vname)
     
