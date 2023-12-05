@@ -112,16 +112,12 @@ class RocketODE(oc.ODEBase):
         V = XtU.XVec().segment(3,3)
         m = XtU.XVar(6)
        
-        # We normalize the control direction in the dynamics so it doesnt have
-        # to be done as a path constraint
         U = XtU.UVec()
         
         h       = R.norm() - Re
         rho     = RhoAir * vf.exp(-h / h_scale)
         Vr      = V + R.cross(np.array([0,0,We]))
         
-        ## We cant let let Vr be exactly 0, derivative of norm of 0 vector is NAN
-        ## Will handle this in inititial conditions
         D       = (-0.5*CD*S)*rho*(Vr*Vr.norm())
         
         Rdot    =  V
@@ -130,7 +126,6 @@ class RocketODE(oc.ODEBase):
         ode = vf.stack(Rdot,Vdot,-mdot)
         
         Vgroups = {}
-        
         Vgroups[("R","Position")]=R
         Vgroups[("V","Velocity")]=V
         Vgroups[("U","ThrustVec")]=U
@@ -340,7 +335,6 @@ if __name__ == "__main__":
     
     
     
-    Units = ode1.make_units(R=lstar,V=lstar/tstar,t=tstar,m=mstar)
     
     
     nsegs1 = 16
@@ -352,11 +346,8 @@ if __name__ == "__main__":
     phase1 = ode1.phase(tmode,IG1,nsegs1)
     phase1.setControlMode(cmode)
     
-    ## Thrust direction is normalized in dynamics, so we dont
-    ## have to enforce norm of 1 on controls. For good measure,
-    ## we do bound the maginitude to prevent it from becoming too large or small
     phase1.addLUNormBound("Path","U",.5,1.5)
-    phase1.addBoundaryValue("Front",range(0,8),IG1[0][0:8])
+    phase1.addBoundaryValue("Front",["R","V","m","t"],IG1[0][0:8])
     
     #Dont want our bound to interfere with initial condition which starts at Re
     #so i relax the Earth radius constraint slightly here
@@ -394,7 +385,7 @@ if __name__ == "__main__":
     phase4.addBoundaryValue("Front","mass", m0_phase4)
     phase4.addUpperVarBound("Back","time",tf_phase4)
     
-    phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),range(0,6),AutoScale = None)
+    phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),["R","V"],AutoScale = None)
     # Maximize final mass
     phase4.addValueObjective("Back",6,-1.0)
     
@@ -429,11 +420,14 @@ if __name__ == "__main__":
     
     ## ocp controls max mesh iters for problem
     ocp.setMaxMeshIters(10)
-    ocp.AutoScaling = True
     ## Apply non-default mesh settings phases.
     ## Need not be the same for all phases
     
     
+    Units = ode1.make_units(R=lstar,V=lstar/tstar,t=tstar,m=mstar)
+    ocp.AutoScaling = True
+    
+    ocp.addForwardLinkEqualCon(phase1,phase4,["R","V","t","U"])
 
     for phase in ocp.Phases:
         phase.AutoScaling=True
@@ -442,7 +436,9 @@ if __name__ == "__main__":
         phase.setMeshErrorCriteria('max')
         phase.setMeshErrorEstimator('integrator')  
 
-    Units[0:6]*=1.0
+
+
+    Units[0:6]*=1.2
     
     phase4.setUnits(Units)
     # Not every phase has to be adaptive
@@ -452,7 +448,6 @@ if __name__ == "__main__":
     
     ## All phases continuous in everything but mass 
     
-    ocp.addForwardLinkEqualConNEW(phase1,phase4,["R","V","t","U"])
     
     
         

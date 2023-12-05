@@ -220,9 +220,11 @@ if __name__ == "__main__":
     scales[0]=lstar
     scales[2]=lstar/tstar
     scales[5] =tstar
-        
-    phase.setUnits(scales,[])
+    phase.setUnits(scales)
+
     phase.AutoScaling = True
+
+
     
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
     
