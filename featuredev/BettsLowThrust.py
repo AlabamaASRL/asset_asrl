@@ -487,7 +487,7 @@ if __name__ == "__main__":
     for i in range(0,1):
         phase = ode.phase("LGL5",IG,16)
         
-        phase.setUnits(Units)
+        phase.setUnits(p=lstar,w=fstar,t=tstar)
         phase.AutoScaling=True
         
         

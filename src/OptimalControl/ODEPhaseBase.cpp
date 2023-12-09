@@ -1,4 +1,5 @@
 #include "ODEPhaseBase.h"
+#include "ODEPhaseBase.h"
 #include "LGLControlSplines.h"
 #include "LGLIntegrals.h"
 #include "MeshSpacingConstraints.h"
@@ -22,6 +23,68 @@ int ASSET::ODEPhaseBase::calc_threads() {
   };
 
   return 0;
+}
+
+void ASSET::ODEPhaseBase::setUnits(const py::kwargs& kwargs)
+{
+   
+
+    py::module builtins = py::module::import("builtins");
+    py::object py_int = builtins.attr("int");
+    py::object py_float = builtins.attr("float");
+    py::object py_list = builtins.attr("list");
+    py::object np_array = (py::object)py::module::import("numpy").attr("ndarray");
+    py::object np_float = (py::object)py::module::import("numpy").attr("float64");
+    py::object np_int = (py::object)py::module::import("numpy").attr("int32");
+
+
+    VectorXd Units(this->XtUPVars());
+    Units.setOnes();
+
+
+
+    for (auto & kw : kwargs) {
+        auto name = kw.first.cast<std::string>();
+        auto idxs = this->idx(name);
+        VectorXd units(idxs.size());
+        units.setOnes();
+
+        if (kw.second.get_type().is(py_int)   ||
+            kw.second.get_type().is(py_float) ||
+            kw.second.get_type().is(np_float) ||
+            kw.second.get_type().is(np_int)) {
+            double unit = kw.second.cast<double>();
+            units *= unit;
+        }
+        else if (
+            kw.second.get_type().is(np_array) ||
+            kw.second.get_type().is(py_list)) {
+
+            int lenvec = kw.second.attr("__len__")().cast<int>();
+
+            if (lenvec != idxs.size()) {
+                throw std::invalid_argument(fmt::format("Size of index group {0:} does not match units vector.", name));
+            }
+
+            for (int i = 0; i < lenvec; i++) {
+                auto elem = kw.second.attr("__getitem__")(py::int_(i)).get_type();
+                if (!(elem.is(py_float) || elem.is(py_int) || elem.is(np_int) || elem.is(np_float))) {
+                    py::print(py::str(elem));
+                    throw std::invalid_argument("Vectors and lists must only contain doubles or floats");
+                }
+                units[i]= kw.second.attr("__getitem__")(py::int_(i)).cast<double>();
+            }
+        }
+        else {
+            throw std::invalid_argument("Invalid unit type");
+        }
+
+        for (int i = 0; i < idxs.size(); i++) {
+            Units[idxs[i]] = units[i];
+        }
+    }
+
+    this->setUnits(Units);
 }
 
 int ASSET::ODEPhaseBase::addBoundaryValue(RegionType reg, VarIndexType args, const std::variant<double, VectorXd>& value_t, ScaleType scale_t)
@@ -2186,7 +2249,15 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   obj.def_readwrite("AutoScaling", &ODEPhaseBase::AutoScaling);
 
 
+
+  obj.def("setAutoScaling", &ODEPhaseBase::setAutoScaling, py::arg("AutoScaling") = true);
+
   obj.def("setAdaptiveMesh", &ODEPhaseBase::setAdaptiveMesh, py::arg("AdaptiveMesh") = true);
+
+
+  obj.def("setUnits", py::overload_cast<const py::kwargs&>(&ODEPhaseBase::setUnits));
+  obj.def("setUnits", py::overload_cast<const Eigen::VectorXd&>(&ODEPhaseBase::setUnits));
+
 
   obj.def("setMeshTol", &ODEPhaseBase::setMeshTol);
   obj.def("setMeshRedFactor", &ODEPhaseBase::setMeshRedFactor);

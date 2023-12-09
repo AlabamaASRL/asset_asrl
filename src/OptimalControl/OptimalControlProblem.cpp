@@ -381,7 +381,7 @@ void ASSET::OptimalControlProblem::calc_auto_scales()
 {
     auto calc_impl = [&](auto& funcmap) {
         for (auto& [key, func] : funcmap) {
-            if (func.ScaleMode == "auto" || true) {
+            if (func.ScaleMode == "auto") {
                 VectorXd input_scales = this->get_input_scale(func.LinkFlag,
                     func.PhaseRegFlags,
                     func.PhasesTolink,
@@ -398,8 +398,6 @@ void ASSET::OptimalControlProblem::calc_auto_scales()
                     func.LinkParams);
                 VectorXd output_scales = calc_jacobian_row_scales(func.Func, input_scales, test_inputs, "norm", "mean");
                 func.OutputScales = output_scales;
-                //fmt::print("##############\n");
-                //std::cout << output_scales << std::endl;
             }
             else {
 
@@ -810,6 +808,12 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
           &OptimalControlProblem::setAdaptiveMesh,
           py::arg("AdaptiveMesh") = true,
           py::arg("ApplyToPhases") = true);
+  obj.def("setAutoScaling",
+      &OptimalControlProblem::setAutoScaling,
+      py::arg("AutoScaling") = true,
+      py::arg("ApplyToPhases") = true);
+
+
   obj.def("setMeshTol", &OptimalControlProblem::setMeshTol);
   obj.def("setMeshRedFactor", &OptimalControlProblem::setMeshRedFactor);
   obj.def("setMeshIncFactor", &OptimalControlProblem::setMeshIncFactor);

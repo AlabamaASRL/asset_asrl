@@ -123,6 +123,11 @@ namespace ASSET {
     std::vector<MeshIterateInfo> MeshIters;
 
 
+    void setAutoScaling(bool autoscale) {
+        this->AutoScaling = autoscale;
+    }
+
+
     void setAdaptiveMesh(bool amesh) {
       this->AdaptiveMesh = amesh;
     }
@@ -189,6 +194,11 @@ namespace ASSET {
     virtual ~ODEPhaseBase() = default;
 
     //////////////////////////////////////////////////
+
+    virtual void setUnits(const Eigen::VectorXd& XtUPUnits_) = 0;
+    virtual void setUnits(const py::kwargs&);
+
+
     virtual void setControlMode(ControlModes m) {
       this->resetTranscription();
       this->invalidatePostOptInfo();
