@@ -660,7 +660,7 @@ namespace ASSET {
       phase.def_readwrite("EnableHessianSparsity", &ODEPhase<DODE>::EnableHessianSparsity);
       phase.def_readwrite("OldShootingDefect", &ODEPhase<DODE>::OldShootingDefect);
 
-      phase.def("setUnits", &ODEPhase<DODE>::setUnits);
+
       phase.def("get_input_scale", &ODEPhase<DODE>::get_input_scale);
 
 

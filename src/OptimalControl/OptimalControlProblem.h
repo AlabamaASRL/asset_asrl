@@ -121,6 +121,16 @@ namespace ASSET {
 
     bool MeshConverged = false;
 
+
+    void setAutoScaling(bool autoscale, bool applytophases) {
+        this->AutoScaling = autoscale;
+        if (applytophases) {
+            for (auto phase : this->phases) {
+                phase->setAutoScaling(autoscale);
+            }
+        }
+    }
+
     void setAdaptiveMesh(bool amesh, bool applytophases) {
       this->AdaptiveMesh = amesh;
       if (applytophases) {

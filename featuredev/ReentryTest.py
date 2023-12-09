@@ -215,15 +215,17 @@ if __name__ == "__main__":
     tstar = 60
     lstar = 100000
     
-    phase = ode.phase("LGL3",TrajIG,40)
-    scales = np.ones((8))
-    scales[0]=lstar
-    scales[2]=lstar/tstar
-    scales[5] =tstar
-    phase.setUnits(scales)
+    phase = ode.phase("LGL5",TrajIG,20)
+    
+    
+    
+    phase.setAutoScaling(True)    
+    phase.setUnits(h = lstar,
+                   v = lstar/tstar,
+                   t = tstar)
 
-    phase.AutoScaling = True
 
+    
 
     
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
