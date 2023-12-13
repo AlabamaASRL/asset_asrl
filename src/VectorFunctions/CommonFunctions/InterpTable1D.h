@@ -446,7 +446,7 @@ namespace ASSET {
     
     obj.def("__call__", [](std::shared_ptr<InterpTable1D>& self, const Segment<-1, 1, -1>& t) {
       py::object pyfun;
-      fmt::print("Call\n");
+      
       if (self->vlen == 1) {
         auto f = GenericFunction<-1, 1>(InterpFunction1D<1>(self).eval(t));
         pyfun = py::cast(f);
