@@ -729,8 +729,8 @@ These are types constructed from some VectorFunction and interprets the outputs 
 A <code class="code docutils literal notranslate"><span class="pre">ColMatrix</span></code> will interpret the coefficients of the output as a column major matrix, whereas <code class="code docutils literal notranslate"><span class="pre">RowMatrix</span></code> interprets
 them as a row major matrix. Once constructed you may multiply matrices by any other appropriately sized
 Row/ColMatrix functions in any order, or multiply them on the right by appropriately sized VectorFunctions. The result
-of all matrix on matrix operations are assumed to be <code class="code docutils literal notranslate"><span class="pre">ColMatrix</span></code> type. The result of Matrix*vector operations is <code class="code docutils literal notranslate"><span class="pre">VectorFunction</span></code>.
-Furthermore, square matrices may be inverted resulting in a Matrix type with same row/col type. For now, one may only add matrices
+of all matrix on matrix operations are assumed to be <code class="code docutils literal notranslate"><span class="pre">ColMatrix</span></code> type. The result of Matrix*vector operations is <code class="code docutils literal notranslate"><span class="pre">VectorFunction</span></code>. You may also return
+the transpose of an existing Row/ColMatrix. Furthermore, square matrices may be inverted resulting in a Matrix type with same row/col type. For now, one may only add matrices
 together if they have the same Row/Col type, though we will support adding different Row/Col types in the future.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">R</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">U</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">6</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
 
@@ -750,8 +750,8 @@ together if they have the same Row/Col type, though we will support adding diffe
 <span class="n">U2</span> <span class="o">=</span> <span class="n">RTNmatR</span><span class="o">*</span><span class="n">U</span>
 <span class="n">U3</span> <span class="o">=</span> <span class="n">M2</span><span class="o">*</span><span class="n">U</span>
 
-<span class="n">ZERO</span> <span class="o">=</span> <span class="n">RTNmatR</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span><span class="o">*</span><span class="n">U</span> <span class="o">-</span><span class="n">RTNmatC</span><span class="o">*</span><span class="n">U</span>
-
+<span class="n">Zero</span> <span class="o">=</span> <span class="n">RTNmatR</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span><span class="o">*</span><span class="n">U</span> <span class="o">-</span><span class="n">RTNmatC</span><span class="o">*</span><span class="n">U</span>
+<span class="n">Identity</span> <span class="o">=</span> <span class="n">RTNmatC</span><span class="o">*</span><span class="n">RTNmatC</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
 
 <span class="n">RTNmatC</span> <span class="o">+</span><span class="n">RTNmatC</span>
 </pre></div>
