@@ -507,9 +507,9 @@ These are types constructed from some VectorFunction and interprets the outputs 
 A :code:`ColMatrix` will interpret the coefficients of the output as a column major matrix, whereas :code:`RowMatrix` interprets
 them as a row major matrix. Once constructed you may multiply matrices by any other appropriately sized
 Row/ColMatrix functions in any order, or multiply them on the right by appropriately sized VectorFunctions. The result
-of all matrix on matrix operations are assumed to be :code:`ColMatrix` type. The result of Matrix*vector operations is :code:`VectorFunction`.
-Furthermore, square matrices may be inverted resulting in a Matrix type with same row/col type. For now, one may only add matrices
-together if they have the same Row/Col type, though we will support adding different Row/Col types in the future.
+of all matrix on matrix operations are assumed to be :code:`ColMatrix` type. The result of Matrix*vector operations is :code:`VectorFunction`. You may also return 
+the transpose of an existing Row/ColMatrix. Furthermore, square matrices may be inverted resulting in a Matrix type with same row/col type. For now, one may only add matrices
+together if they have the same Row/Col type, though we will support adding different Row/Col types in the future. 
 
 .. code-block:: python
 
@@ -531,10 +531,12 @@ together if they have the same Row/Col type, though we will support adding diffe
 	U2 = RTNmatR*U
 	U3 = M2*U
 
-	ZERO = RTNmatR.inverse()*U -RTNmatC*U 
-
+	Zero = RTNmatR.inverse()*U -RTNmatC*U 
+	Identity = RTNmatC*RTNmatC.transpose()
 
 	RTNmatC +RTNmatC
+
+
 
 
 Conditional Statement/Operations
