@@ -49,7 +49,7 @@ if __name__ == "__main__":
     phase.addBoundaryValue("Last" ,[0,1],[xtf,tf])
     
     #Objective
-    phase.addIntegralObjective(Args(2).squared_norm()/2,[0,2],AutoScale = 1)
+    phase.addIntegralObjective(Args(2).squared_norm()/2,[0,2],AutoScale = "auto")
     # Some loose bounds on variables
     phase.addLUVarBound("Path",0,-50,50)
     phase.addLUVarBound("Path",2,-50,50)
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     phase.optimizer.set_SoeLSMode("L1")
     ## Neccessary for this problem
     phase.optimizer.set_QPOrderingMode("MINDEG")
-    phase.optimizer.PrintLevel = 2
+    phase.optimizer.PrintLevel = 1
     phase.setThreads(1,1)
 
     
