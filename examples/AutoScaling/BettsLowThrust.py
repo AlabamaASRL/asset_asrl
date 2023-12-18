@@ -458,6 +458,14 @@ if __name__ == "__main__":
     phase = ode.phase("LGL5",IG,16)
     
     phase.setAutoScaling(True)
+    
+    ## If you want to makse units vector manually
+    Units = np.ones((12))  # Size of ODE Input
+    Units[0]=Lstar  
+    Units[6]=Fstar
+    Units[7]=Tstar
+    phase.setUnits(Units)
+    ## Or if you have named variables in your ODE
     phase.setUnits(p=Lstar,w=Fstar,t=Tstar)
     
     phase.addBoundaryValue("Front",["MEEs","w","t"],X0[0:8])
@@ -473,7 +481,7 @@ if __name__ == "__main__":
     phase.addLowerVarBound("Back","w",.05)
     phase.addValueObjective("Back",6,-1.0)
     phase.setThreads(8,8)
-    phase.optimizer.PrintLevel = 0
+    phase.optimizer.PrintLevel = 1
     phase.optimizer.set_EContol(1.0e-9)
     
     

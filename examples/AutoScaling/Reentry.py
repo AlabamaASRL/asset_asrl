@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     ode = ShuttleReentry()
     
-    phase = ode.phase("LGL3",TrajIG,41)
+    phase = ode.phase("LGL5",TrajIG,20)
 
     ############################
     phase.setAutoScaling(True)  
@@ -245,7 +245,7 @@ if __name__ == "__main__":
     ## Add in Heating Rate Constraint
     phase.addUpperFuncBound("Path",QFunc(),
                                ["h","v","alpha"],
-                               Qlimit,1/70, AutoScale=None)
+                               Qlimit,1/70, AutoScale="auto")
     
     
     phase.optimize()

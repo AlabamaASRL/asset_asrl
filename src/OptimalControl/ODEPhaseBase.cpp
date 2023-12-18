@@ -820,12 +820,21 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
     PhaseRegionFlags PhaseReg = PhaseRegionFlags::PairWisePath;
 
     auto Func = ob.Func;
+    double AccScale = 1.0;
+
     if (this->AutoScaling) {
         VectorXd input_scales = this->get_input_scale(ob.RegionFlag, ob.XtUVars, ob.OPVars, ob.SPVars);
         VectorXd output_scales(Func.ORows());
-        output_scales.setOnes(); // Come Back and Fix this
+        output_scales.setOnes(); 
         output_scales = ob.OutputScales;
+
         Func = IOScaled<decltype(Func)>(ob.Func, input_scales, output_scales);
+
+
+        double pscale = this->SPUnits[ob.EXTVars[0]];
+
+        AccScale = pscale*output_scales[0] / (this->XtUPUnits[this->TVar()]);
+
     }
 
 
@@ -845,7 +854,8 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
     ThreadingFlags ThreadMode =
         ob.Func.thread_safe() ? ThreadingFlags::ByApplication : ThreadingFlags::MainThread;
 
-    auto AccFunc = Arguments<1>() * -1.0;
+    auto AccFunc = Arguments<1>() * -AccScale;
+
 
     int Gindex = this->indexer.addAccumulation(
         obj, PhaseReg, xtrap, ob.OPVars, ob.SPVars, AccFunc, ob.EXTVars, ThreadMode);
@@ -1220,6 +1230,8 @@ std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::get_test_inputs(PhaseRegionFla
 
 
     std::vector<Eigen::VectorXd> inputs;
+    VectorXd input_scales = this->get_input_scale(flag, XtUV, OPV, SPV);
+
 
     for (int ncalls = 0; ncalls < test_states.size(); ncalls++) {
 
@@ -1242,6 +1254,8 @@ std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::get_test_inputs(PhaseRegionFla
             input[next] = this->ActiveStaticParams[SPV[j]];
             next++;
         }
+        input = input.cwiseQuotient(input_scales);
+
         inputs.push_back(input);
     }
 
@@ -1257,7 +1271,6 @@ void ASSET::ODEPhaseBase::calc_auto_scales()
                 std::vector<VectorXd> test_inputs = this->get_test_inputs(func.RegionFlag, func.XtUVars, func.OPVars, func.SPVars);
                 VectorXd output_scales = calc_jacobian_row_scales(func.Func, input_scales, test_inputs, "norm", "mean");
                 func.OutputScales = output_scales;
-                //std::cout << output_scales << std::endl;
             }
             else {
 

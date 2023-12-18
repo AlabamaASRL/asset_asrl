@@ -369,7 +369,7 @@ if __name__ == "__main__":
     phase4.addBoundaryValue("Front","mass", m0_phase4)
     phase4.addUpperVarBound("Back","time",tf_phase4)
     
-    phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),["R","V"],AutoScale = None)
+    phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),["R","V"],AutoScale = "auto")
     # Maximize final mass
     phase4.addValueObjective("Back","mass",-1.0)
     
@@ -392,6 +392,11 @@ if __name__ == "__main__":
         phase.setMeshErrorCriteria('max')
         phase.setMeshErrorEstimator('integrator')  
 
+
+    
+
+    ## Each Phase does not have to have the same AutoScale units even if its the same ODE
+    phase4.setUnits(R=2*Lstar,V=Vstar,t=.8*Tstar,m=Mstar)
 
 
     ocp.addForwardLinkEqualCon(phase1,phase4,["R","V","t","U"])

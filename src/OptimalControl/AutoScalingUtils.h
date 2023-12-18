@@ -40,8 +40,11 @@ namespace ASSET {
 
 		for (int j = 0; j < func.ORows(); j++) {
 			double avg = 1.0;
-			if (rownorms.row(j).minCoeff() < 1.0e-12) {
-				// dont scale it
+			if (rownorms.row(j).mean() < 1.0e-12) {
+				
+			}
+			else if (!std::isfinite(rownorms.row(j).mean())) {
+
 			}
 			else if (avgtype == "mean") {
 				avg = rownorms.row(j).mean();
