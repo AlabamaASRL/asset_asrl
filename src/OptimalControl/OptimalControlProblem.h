@@ -1449,8 +1449,15 @@ namespace ASSET {
       return Allvals;
     }
 
-
-
+    Eigen::VectorXd returnLinkEqualConScales(int index) {
+        return this->LinkEqualities.at(index).OutputScales;
+    }
+    Eigen::VectorXd returnLinkInequalConScales(int index) {
+        return this->LinkInequalities.at(index).OutputScales;
+    }
+    Eigen::VectorXd returnLinkObjectiveScales(int index) {
+        return this->LinkObjectives.at(index).OutputScales;
+    }
     
     ///////////////////////////////////////////////////
 

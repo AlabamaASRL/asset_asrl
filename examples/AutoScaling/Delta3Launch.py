@@ -335,7 +335,7 @@ if __name__ == "__main__":
     
     #Dont want our bound to interfere with initial condition which starts at Re
     #so i relax the Earth radius constraint slightly here
-    phase1.addLowerNormBound("Path","R",Re*.999999)
+    radidx = phase1.addLowerNormBound("Path","R",Re*.999999)
     phase1.addBoundaryValue("Back","time",tf_phase1)
     
     #########################################
@@ -369,9 +369,9 @@ if __name__ == "__main__":
     phase4.addBoundaryValue("Front","mass", m0_phase4)
     phase4.addUpperVarBound("Back","time",tf_phase4)
     
-    phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),["R","V"],AutoScale = "auto")
+    orbitidx = phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),["R","V"],AutoScale = "auto")
     # Maximize final mass
-    phase4.addValueObjective("Back","mass",-1.0)
+    objidx = phase4.addValueObjective("Back","mass",-1.0)
     
     #########################################
     
@@ -398,8 +398,8 @@ if __name__ == "__main__":
     ## Each Phase does not have to have the same AutoScale units even if its the same ODE
     phase4.setUnits(R=2*Lstar,V=Vstar,t=.8*Tstar,m=Mstar)
 
-
-    ocp.addForwardLinkEqualCon(phase1,phase4,["R","V","t","U"])
+    
+    linkidxs = ocp.addForwardLinkEqualCon(phase1,phase4,["R","V","t","U"])
 
 
 
@@ -409,8 +409,23 @@ if __name__ == "__main__":
     ocp.optimizer.set_PrintLevel(0)
 
     ocp.solve_optimize()
-  
+
+
+    #### Retrieve output scales for ODE
+    print(phase1.returnODEOutputScales())
+    #### Retrieve output scales for Functions
+    print(phase1.returnInequalConScales(radidx))
+    print(phase4.returnEqualConScales(orbitidx))
+    print(phase4.returnStateObjectiveScales(objidx))
     
+    for linkidx in linkidxs: 
+        print(ocp.returnLinkEqualConScales(linkidx))
+    
+    ### For integral objectives or functions you can retrieve them as below
+    #phase1.returnIntegralObjectiveScales(idx)
+    #phase1.returnIntegralParamFunctionScales(idx)
+
+
     for phase in ocp.Phases:
         PhaseMeshErrorPlot(phase,show=False)
         

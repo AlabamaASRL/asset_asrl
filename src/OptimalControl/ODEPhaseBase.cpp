@@ -1709,13 +1709,23 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
 
   obj.def("returnEqualConLmults", &ODEPhaseBase::returnEqualConLmults, ODEPhaseBase_returnEqualConLmults);
   obj.def("returnEqualConVals", &ODEPhaseBase::returnEqualConVals);
+  obj.def("returnEqualConScales", &ODEPhaseBase::returnEqualConScales);
 
   obj.def(
       "returnInequalConLmults", &ODEPhaseBase::returnInequalConLmults, ODEPhaseBase_returnInequalConLmults);
   obj.def("returnInequalConVals", &ODEPhaseBase::returnInequalConVals);
+  obj.def("returnInequalConScales", &ODEPhaseBase::returnInequalConScales);
+
+  obj.def("returnIntegralObjectiveScales", &ODEPhaseBase::returnIntegralObjectiveScales);
+  obj.def("returnIntegralParamFunctionScales", &ODEPhaseBase::returnIntegralParamFunctionScales);
+  obj.def("returnStateObjectiveScales", &ODEPhaseBase::returnStateObjectiveScales);
+  obj.def("returnODEOutputScales", &ODEPhaseBase::returnODEOutputScales);
 
 
   obj.def("returnStaticParams", &ODEPhaseBase::returnStaticParams, ODEPhaseBase_returnStaticParam);
+
+
+
 
   obj.def("test_threads", &ODEPhaseBase::test_threads);
 
