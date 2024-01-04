@@ -792,6 +792,10 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
   obj.def("returnLinkInequalConVals", &OptimalControlProblem::returnLinkInequalConVals);
   obj.def("returnLinkInequalConLmults", &OptimalControlProblem::returnLinkInequalConLmults);
 
+  obj.def("returnLinkEqualConScales", &OptimalControlProblem::returnLinkEqualConScales);
+  obj.def("returnLinkInequalConScales", &OptimalControlProblem::returnLinkInequalConScales);
+  obj.def("returnLinkObjectiveScales", &OptimalControlProblem::returnLinkObjectiveScales);
+
 
   ///////////////////////
 

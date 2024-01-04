@@ -1012,6 +1012,10 @@ namespace ASSET {
       int Gindex = this->userEqualities.at(index).GlobalIndex;
       return this->indexer.getFuncEqMultipliers(Gindex, this->ActiveEqCons);
     }
+    Eigen::VectorXd returnEqualConScales(int index) const {
+       return this->userEqualities.at(index).OutputScales;
+    }
+
 
     std::vector<Eigen::VectorXd> returnInequalConLmults(int index) const {
       if (!this->PostOptInfoValid) {
@@ -1030,9 +1034,26 @@ namespace ASSET {
       int Gindex = this->userInequalities.at(index).GlobalIndex;
       return this->indexer.getFuncIqMultipliers(Gindex, this->ActiveIqCons);
     }
+    Eigen::VectorXd returnInequalConScales(int index) const {
+        return this->userInequalities.at(index).OutputScales;
+    }
 
     std::vector<Eigen::VectorXd> returnCostateTraj() const;
     std::vector<Eigen::VectorXd> returnTrajError() const;
+
+    Eigen::VectorXd returnIntegralObjectiveScales(int index) const {
+        return this->userIntegrands.at(index).OutputScales;
+    }
+    Eigen::VectorXd returnIntegralParamFunctionScales(int index) const {
+        return this->userParamIntegrands.at(index).OutputScales;
+    }
+    Eigen::VectorXd returnStateObjectiveScales(int index) const {
+        return this->userStateObjectives.at(index).OutputScales;
+    }
+    Eigen::VectorXd returnODEOutputScales() const {
+        VectorXd output_scales = XtUPUnits.head(this->XVars()).cwiseInverse() * this->XtUPUnits[this->XVars()];
+        return output_scales;
+    }
 
     /////////////////////////////////////////////////
    protected:
