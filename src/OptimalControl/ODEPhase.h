@@ -327,25 +327,56 @@ namespace ASSET {
     }
 
     virtual ASSET::ConstraintInterface make_shooter() {
-      auto Integ = Integrator<DODE> {this->ode, this->integrator.DefStepSize};
-      Integ.Adaptive = this->integrator.Adaptive;
-      Integ.FastAdaptiveSTM = this->integrator.FastAdaptiveSTM;
-      Integ.AbsTols = this->integrator.AbsTols;
-      Integ.MinStepSize = this->integrator.MinStepSize;
-      Integ.MaxStepSize = this->integrator.MaxStepSize;
-      Integ.EnableVectorization = this->EnableVectorization;
-      Integ.VectorizeBatchCalls = this->integrator.VectorizeBatchCalls;
 
-      if (OldShootingDefect) {
-        auto shooter = ShootingDefect {this->ode, Integ};
-        shooter.EnableHessianSparsity = this->EnableHessianSparsity;
-        return ASSET::ConstraintInterface(shooter);
-      } else {
-        auto shooter = CentralShootingDefect {this->ode, Integ};
-        shooter.EnableHessianSparsity = this->EnableHessianSparsity;
-        shooter.EnableVectorization = this->EnableVectorization;
-        return ASSET::ConstraintInterface(shooter);
+
+      if (this->AutoScaling) {
+          auto Integ = Integrator<ScaledODE>{ this->ode_scaled, this->integrator.DefStepSize };
+          Integ.Adaptive = this->integrator.Adaptive;
+          Integ.FastAdaptiveSTM = this->integrator.FastAdaptiveSTM;
+          Integ.AbsTols = this->integrator.AbsTols;
+          Integ.MinStepSize = this->integrator.MinStepSize;
+          Integ.MaxStepSize = this->integrator.MaxStepSize;
+          Integ.EnableVectorization = this->EnableVectorization;
+          Integ.VectorizeBatchCalls = this->integrator.VectorizeBatchCalls;
+
+          if (OldShootingDefect) {
+              auto shooter = ShootingDefect{ this->ode_scaled, Integ };
+              shooter.EnableHessianSparsity = this->EnableHessianSparsity;
+              return ASSET::ConstraintInterface(shooter);
+          }
+          else {
+              auto shooter = CentralShootingDefect{ this->ode_scaled, Integ };
+              shooter.EnableHessianSparsity = this->EnableHessianSparsity;
+              shooter.EnableVectorization = this->EnableVectorization;
+              return ASSET::ConstraintInterface(shooter);
+          }
+
+      } {
+
+          auto Integ = Integrator<DODE>{ this->ode, this->integrator.DefStepSize };
+          Integ.Adaptive = this->integrator.Adaptive;
+          Integ.FastAdaptiveSTM = this->integrator.FastAdaptiveSTM;
+          Integ.AbsTols = this->integrator.AbsTols;
+          Integ.MinStepSize = this->integrator.MinStepSize;
+          Integ.MaxStepSize = this->integrator.MaxStepSize;
+          Integ.EnableVectorization = this->EnableVectorization;
+          Integ.VectorizeBatchCalls = this->integrator.VectorizeBatchCalls;
+
+          if (OldShootingDefect) {
+              auto shooter = ShootingDefect{ this->ode, Integ };
+              shooter.EnableHessianSparsity = this->EnableHessianSparsity;
+              return ASSET::ConstraintInterface(shooter);
+          }
+          else {
+              auto shooter = CentralShootingDefect{ this->ode, Integ };
+              shooter.EnableHessianSparsity = this->EnableHessianSparsity;
+              shooter.EnableVectorization = this->EnableVectorization;
+              return ASSET::ConstraintInterface(shooter);
+          }
+
       }
+
+      
     }
 
 
@@ -639,7 +670,40 @@ namespace ASSET {
       
     }
 
+    VectorFunctionalX get_defect() {
+        VectorFunctionalX func;
 
+
+        switch (this->TranscriptionMode) {
+        case TranscriptionModes::LGL7: {
+            return func = LGLDefects<DODE, 4>(this->ode);
+            break;
+        }
+        case TranscriptionModes::LGL5: {
+            return func = LGLDefects<DODE, 3>(this->ode);
+            break;
+        }
+        case TranscriptionModes::LGL3: {
+            return func = LGLDefects<DODE, 2>(this->ode);
+            break;
+        }
+        case TranscriptionModes::Trapezoidal: {
+            return func = LGLDefects<DODE, 2>(this->ode);
+            break;
+        }
+        case TranscriptionModes::CentralShooting: {
+            return func = LGLDefects<DODE, 2>(this->ode);
+            break;
+        }
+        default:
+            throw std::invalid_argument("Invalid Transcription Method");
+        }
+
+        return func;
+    }
+
+
+    
 
     template<class PyClass>
     static void BuildImpl(PyClass& phase) {
@@ -662,6 +726,7 @@ namespace ASSET {
 
 
       phase.def("get_input_scale", &ODEPhase<DODE>::get_input_scale);
+      phase.def("get_defect", &ODEPhase<DODE>::get_defect);
 
 
 
