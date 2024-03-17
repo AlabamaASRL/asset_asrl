@@ -23,29 +23,9 @@
     // numpy meshgrid ij format (x,y,z,w)
     Eigen::Tensor<double, 4> fs;
 
-    // First Directional Derivs
-    Eigen::Tensor<double, 4> fs_dx;
-    Eigen::Tensor<double, 4> fs_dy;
-    Eigen::Tensor<double, 4> fs_dz;
-    Eigen::Tensor<double, 4> fs_dw;
-
-    // Second Cross Derivs
-    Eigen::Tensor<double, 4> fs_dxdy;
-    Eigen::Tensor<double, 4> fs_dxdz;
-    Eigen::Tensor<double, 4> fs_dxdw;
-    Eigen::Tensor<double, 4> fs_dydz;
-    Eigen::Tensor<double, 4> fs_dydw;
-    Eigen::Tensor<double, 4> fs_dzdw;
-
-    // Third Cross Derivs
-    Eigen::Tensor<double, 4> fs_dxdydz;
-    Eigen::Tensor<double, 4> fs_dxdydw;
-    Eigen::Tensor<double, 4> fs_dxdzdw;
-    Eigen::Tensor<double, 4> fs_dydzdw;
-
-    // Fourth Cross Deriv
-    Eigen::Tensor<double, 4> fs_dxdydzdw;
-
+    // Holds f, and all derivatives at each data point contiguaously
+    // Improved runtime by factor of two over holding separately like in the 3d table
+    Eigen::Tensor<Eigen::Matrix<double, 16, 1>, 4> fs_all;
 
     Eigen::Tensor<Eigen::Matrix<double, 256, 1>, 4> alphavecs;
 
@@ -87,7 +67,7 @@
       this->xs = Xs;
       this->ys = Ys;
       this->zs = Zs;
-      this->ws = Zs;
+      this->ws = Ws;
 
       this->fs = Fs;
       this->cache_alpha = cache;
@@ -228,6 +208,30 @@
 
     void calc_derivs() {
 
+
+      // First Directional Derivs
+      Eigen::Tensor<double, 4> fs_dx;
+      Eigen::Tensor<double, 4> fs_dy;
+      Eigen::Tensor<double, 4> fs_dz;
+      Eigen::Tensor<double, 4> fs_dw;
+
+      // Second Cross Derivs
+      Eigen::Tensor<double, 4> fs_dxdy;
+      Eigen::Tensor<double, 4> fs_dxdz;
+      Eigen::Tensor<double, 4> fs_dxdw;
+      Eigen::Tensor<double, 4> fs_dydz;
+      Eigen::Tensor<double, 4> fs_dydw;
+      Eigen::Tensor<double, 4> fs_dzdw;
+
+      // Third Cross Derivs
+      Eigen::Tensor<double, 4> fs_dxdydz;
+      Eigen::Tensor<double, 4> fs_dxdydw;
+      Eigen::Tensor<double, 4> fs_dxdzdw;
+      Eigen::Tensor<double, 4> fs_dydzdw;
+
+      // Fourth Cross Deriv
+      Eigen::Tensor<double, 4> fs_dxdydzdw;
+
       fs_dx.resize(fs.dimension(0), fs.dimension(1), fs.dimension(2), fs.dimension(3));
       fs_dy.resize(fs.dimension(0), fs.dimension(1), fs.dimension(2), fs.dimension(3));
       fs_dz.resize(fs.dimension(0), fs.dimension(1), fs.dimension(2), fs.dimension(3));
@@ -297,30 +301,56 @@
         }
       };
 
-      fdiffimpl(0, this->xeven, this->xs, this->fs, this->fs_dx);
-      fdiffimpl(1, this->yeven, this->ys, this->fs, this->fs_dy);
-      fdiffimpl(2, this->zeven, this->zs, this->fs, this->fs_dz);
-      fdiffimpl(3, this->weven, this->ws, this->fs, this->fs_dw);
+      fdiffimpl(0, this->xeven, this->xs, this->fs, fs_dx);
+      fdiffimpl(1, this->yeven, this->ys, this->fs, fs_dy);
+      fdiffimpl(2, this->zeven, this->zs, this->fs, fs_dz);
+      fdiffimpl(3, this->weven, this->ws, this->fs, fs_dw);
 
 
-      fdiffimpl(1, this->yeven, this->ys, this->fs_dx, this->fs_dxdy);
-      fdiffimpl(2, this->zeven, this->zs, this->fs_dx, this->fs_dxdz);
-      fdiffimpl(3, this->weven, this->ws, this->fs_dx, this->fs_dxdw);
-      fdiffimpl(2, this->zeven, this->zs, this->fs_dy, this->fs_dydz);
-      fdiffimpl(3, this->weven, this->ws, this->fs_dy, this->fs_dydw);
-      fdiffimpl(3, this->weven, this->ws, this->fs_dz, this->fs_dzdw);
+      fdiffimpl(1, this->yeven, this->ys, fs_dx, fs_dxdy);
+      fdiffimpl(2, this->zeven, this->zs, fs_dx, fs_dxdz);
+      fdiffimpl(3, this->weven, this->ws, fs_dx, fs_dxdw);
+      fdiffimpl(2, this->zeven, this->zs, fs_dy, fs_dydz);
+      fdiffimpl(3, this->weven, this->ws, fs_dy, fs_dydw);
+      fdiffimpl(3, this->weven, this->ws, fs_dz, fs_dzdw);
 
-      fdiffimpl(2, this->zeven, this->zs, this->fs_dxdy, this->fs_dxdydz);
-      fdiffimpl(3, this->weven, this->ws, this->fs_dxdy, this->fs_dxdydw);
-      fdiffimpl(3, this->weven, this->ws, this->fs_dxdz, this->fs_dxdzdw);
-      fdiffimpl(3, this->weven, this->ws, this->fs_dydz, this->fs_dydzdw);
+      fdiffimpl(2, this->zeven, this->zs, fs_dxdy, fs_dxdydz);
+      fdiffimpl(3, this->weven, this->ws, fs_dxdy, fs_dxdydw);
+      fdiffimpl(3, this->weven, this->ws, fs_dxdz, fs_dxdzdw);
+      fdiffimpl(3, this->weven, this->ws, fs_dydz, fs_dydzdw);
 
-      fdiffimpl(3, this->weven, this->ws, this->fs_dxdydz, this->fs_dxdydzdw);
+      fdiffimpl(3, this->weven, this->ws, fs_dxdydz, fs_dxdydzdw);
 
+      Eigen::Matrix<double, 16, 1> tmp;
 
+      fs_all.resize(fs.dimension(0), fs.dimension(1), fs.dimension(2), fs.dimension(3));
+
+      for (int i = 0; i < wsize ; i++) {
+          for (int j = 0; j < zsize ; j++) {
+              for (int k = 0; k < ysize ; k++) {
+                  for (int l = 0; l < xsize ; l++) {
+                      tmp[0] = fs(l, k, j, i);
+                      tmp[1] = fs_dx(l, k, j, i);
+                      tmp[2] = fs_dy(l, k, j, i);
+                      tmp[3] = fs_dz(l, k, j, i);
+                      tmp[4] = fs_dw(l, k, j, i);
+                      tmp[5] = fs_dxdy(l, k, j, i);
+                      tmp[6] = fs_dxdz(l, k, j, i);
+                      tmp[7] = fs_dxdw(l, k, j, i);
+                      tmp[8] = fs_dydz(l, k, j, i);
+                      tmp[9] = fs_dydw(l, k, j, i);
+                      tmp[10] = fs_dzdw(l, k, j, i);
+                      tmp[11] = fs_dxdydz(l, k, j, i);
+                      tmp[12] = fs_dxdydw(l, k, j, i);
+                      tmp[13] = fs_dxdzdw(l, k, j, i);
+                      tmp[14] = fs_dydzdw(l, k, j, i);
+                      tmp[15] = fs_dxdydzdw(l, k, j, i);
+                      fs_all(l, k, j, i) = tmp;
+                  }
+              }
+          }
+      }
     }
-
-
 
      Eigen::Matrix<double, 256, 1> calc_alphavec(int xelem, int yelem, int zelem,int welem) const {
 
@@ -330,56 +360,54 @@
       double wstep = ws[welem + 1] - ws[welem];
 
       Eigen::Matrix<double, 256, 1> bvec;
+      Eigen::Matrix<double, 16, 1> tmp;
+      Eigen::Matrix<double, 16, 1> scales;
 
-      auto fillop = [&](auto start, const auto& src,double scale) {
-       
-          
-          bvec[start] = src(xelem, yelem, zelem, welem) * scale;
-          bvec[start + 1] = src(xelem + 1, yelem, zelem, welem) * scale;
-          bvec[start + 2] = src(xelem, yelem + 1, zelem, welem) * scale;
-          bvec[start + 3] = src(xelem + 1, yelem + 1, zelem, welem) * scale;
-          bvec[start + 4] = src(xelem, yelem, zelem + 1, welem) * scale;
-          bvec[start + 5] = src(xelem + 1, yelem, zelem + 1, welem) * scale;
-          bvec[start + 6] = src(xelem, yelem + 1, zelem + 1, welem) * scale;
-          bvec[start + 7] = src(xelem + 1, yelem + 1, zelem + 1, welem) * scale;
+      scales[0] = 1.0;
+      scales[1] = xstep;
+      scales[2] = ystep;
+      scales[3] = zstep;
+      scales[4] = wstep;
+      scales[5] = (xstep * ystep);
+      scales[6] = (xstep * zstep);
+      scales[7] = (xstep * wstep);
+      scales[8] = (ystep * zstep);
+      scales[9] = (ystep * wstep);
+      scales[10] = (zstep * wstep);
+      scales[11] = (xstep * ystep * zstep);
+      scales[12] = (xstep * ystep * wstep);
+      scales[13] = (xstep * zstep * wstep);
+      scales[14] = (ystep * zstep * wstep);
+      scales[15] = (xstep * ystep * zstep * wstep);
 
-          bvec[start + 8] = src(xelem, yelem, zelem, welem+1) * scale;
-          bvec[start + 9] = src(xelem + 1, yelem, zelem, welem + 1) * scale;
-          bvec[start + 10] = src(xelem, yelem + 1, zelem, welem + 1) * scale;
-          bvec[start + 11] = src(xelem + 1, yelem + 1, zelem, welem + 1) * scale;
-          bvec[start + 12] = src(xelem, yelem, zelem + 1, welem + 1) * scale;
-          bvec[start + 13] = src(xelem + 1, yelem, zelem + 1, welem + 1) * scale;
-          bvec[start + 14] = src(xelem, yelem + 1, zelem + 1, welem + 1) * scale;
-          bvec[start + 15] = src(xelem + 1, yelem + 1, zelem + 1, welem + 1) * scale;
-        
+
+      int corner = 0;
+      auto fillop = [&](int xoffs, int yoffs, int zoffs, int woffs) {
+          tmp = this->fs_all(xelem + xoffs, yelem + yoffs, zelem + zoffs, welem + woffs).cwiseProduct(scales);
+          for (int i = 0; i < 16; i++) {
+              bvec[corner + 16 * i] = tmp[i];
+          }
+          corner++;
       };
 
+      fillop(0, 0, 0, 0);
+      fillop(1, 0, 0, 0);
+      fillop(0, 1, 0, 0);
+      fillop(1, 1, 0, 0);
+      fillop(0, 0, 1, 0);
+      fillop(1, 0, 1, 0);
+      fillop(0, 1, 1, 0);
+      fillop(1, 1, 1, 0);
 
-      //
+      fillop(0, 0, 0, 1);
+      fillop(1, 0, 0, 1);
+      fillop(0, 1, 0, 1);
+      fillop(1, 1, 0, 1);
+      fillop(0, 0, 1, 1);
+      fillop(1, 0, 1, 1);
+      fillop(0, 1, 1, 1);
+      fillop(1, 1, 1, 1);
 
-      fillop(0, this->fs,1.0);
-      fillop(16, this->fs_dx,xstep);
-      fillop(32, this->fs_dy,ystep);
-      fillop(48, this->fs_dz,zstep);
-      fillop(64, this->fs_dw,wstep);
-
-      fillop(80, this->fs_dxdy, (xstep * ystep));
-      fillop(96, this->fs_dxdz, (xstep * zstep));
-      fillop(112, this->fs_dxdw, (xstep * wstep));
-
-      fillop(128, this->fs_dydz, (ystep * zstep));
-      fillop(144, this->fs_dydw, (ystep * wstep));
-      fillop(160, this->fs_dzdw, (zstep * wstep));
-
-      fillop(176, this->fs_dxdydz, (xstep * ystep * zstep));
-      fillop(192, this->fs_dxdydw, (xstep * ystep * wstep));
-      fillop(208, this->fs_dxdzdw, (xstep * zstep * wstep));
-
-      fillop(224, this->fs_dydzdw, (ystep * zstep * wstep));
-      fillop(240, this->fs_dxdydzdw, (xstep*ystep * zstep * wstep));
-
-
- 
       return apply_coeefs(bvec);
     }
 
@@ -390,9 +418,6 @@
         return this->calc_alphavec(xelem, yelem, zelem,welem);
       }
     }
-
-
-
 
     void cache_alphavecs() {
       this->alphavecs.resize(
@@ -411,9 +436,6 @@
         }
       }
     }
-
-
-
 
 
     Eigen::Matrix<double, 256, 1> apply_coeefs(const Eigen::Matrix<double, 256, 1>& bvec) const {
@@ -683,8 +705,6 @@
     }
 
 
-
-
     void interp_impl(double x,
                      double y,
                      double z,
@@ -771,6 +791,7 @@
 
         fval = 0;
 
+
         for (int i = 0, start = 0; i < 4; i++) {
           for (int j = 0; j < 4; j++) {
             for (int k = 0; k < 4; k++, start += 4) {
@@ -783,20 +804,186 @@
 
         if (deriv > 0) {
 
+            dfxyzw.setZero();
+
+            Eigen::DiagonalMatrix<double, 4> dmat(1.0 / xstep, 1.0 / ystep, 1.0 / zstep, 1.0 / wstep);
+
+
+            for (int i = 0, start = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    for (int k = 0; k < 4; k++, start += 4) {
+
+                        double xterm = alphavec[start] + xf * alphavec[start + 1] + xf2 * alphavec[start + 2]
+                            + xf3 * alphavec[start + 3];
+                        double dxterm =
+                            alphavec[start + 1] + 2 * xf * alphavec[start + 2] + 3 * xf2 * alphavec[start + 3];
+
+                        dfxyzw[0] += (yfs[k] * zfs[j] * wfs[i]) * dxterm;
+
+                        if (k > 0) {
+                            dfxyzw[1] += (k*yfs[k-1] * zfs[j] * wfs[i]) * xterm;
+                        }
+                        if (j > 0) {
+                            dfxyzw[2] += (yfs[k] * j*zfs[j-1] * wfs[i]) * xterm;
+                        }
+                        if (i > 0) {
+                            dfxyzw[3] += (yfs[k] * zfs[j] * i* wfs[i-1]) * xterm;
+                        }
+
+                    }
+                }
+            }
+            dfxyzw = (dmat*dfxyzw).eval();//QED
+
           if (deriv > 1) {
+
+
+
+              d2fxyzw.setZero();
+
             
+              for (int i = 0, start = 0; i < 4; i++) {
+                  for (int j = 0; j < 4; j++) {
+                      for (int k = 0; k < 4; k++, start += 4) {
+
+                          double xterm = alphavec[start] + xf * alphavec[start + 1] + xf2 * alphavec[start + 2]
+                              + xf3 * alphavec[start + 3];
+                          double dxterm =
+                              alphavec[start + 1] + 2 * xf * alphavec[start + 2] + 3 * xf2 * alphavec[start + 3];
+
+                          // First row of hessian, diffing this term from above
+                          //dfxyzw[0] += (yfs[k] * zfs[j] * wfs[i]) * dxterm;
+                          ////////////////////////////////////////////////////
+                          d2fxyzw(0, 0) += (yfs[k] * zfs[j] * wfs[i]) * (2 * alphavec[start + 2] + 6 * xf * alphavec[start + 3]);
+
+                          if (k > 0) {
+                              d2fxyzw(0, 1) += (k * yfs[k - 1] * zfs[j] * wfs[i]) * dxterm;
+                          }
+                          if (j > 0) {
+                              d2fxyzw(0, 2) += (yfs[k] * j * zfs[j - 1] * wfs[i]) * dxterm;
+                          }
+                          if (i > 0) {
+                              d2fxyzw(0, 3) += (yfs[k] * zfs[j] * i * wfs[i - 1]) * dxterm;
+                          }
+                          ////////////////////////////////////////////////////
+
+                          if (k > 0) {
+                              // Second row of hessian, diffing this term from above
+                              //dfxyzw[1] += (k * yfs[k - 1] * zfs[j] * wfs[i]) * xterm;
+                              if (k > 1) {
+                                  d2fxyzw(1, 1) += (k * (k - 1) * yfs[k - 2] * zfs[j] * wfs[i]) * xterm;
+                              }
+                              if (j > 0) {
+                                  d2fxyzw(1, 2) += (k * yfs[k - 1] * j * zfs[j - 1] * wfs[i]) * xterm;
+                              }
+                              if (i > 0) {
+                                  d2fxyzw(1, 3) += (k * yfs[k - 1] * zfs[j] * i * wfs[i - 1]) * xterm;
+                              }
+                          }
+                          if (j > 0) {
+                              // Third row of hessian, diffing this term from above
+                              //dfxyzw[2] += (yfs[k] * j * zfs[j - 1] * wfs[i]) * xterm;
+                              if (j > 1) {
+                                  d2fxyzw(2, 2) += (yfs[k] * j *(j-1) * zfs[j - 2] * wfs[i]) * xterm;
+                              }
+                              if (i > 0) {
+                                  d2fxyzw(2, 3) += (yfs[k] * j * zfs[j - 1] * i* wfs[i-1]) * xterm;
+                              }
+                          }
+                          if (i > 0) {
+                              // Fourth row of hessian, diffing this term from above
+                              //dfxyzw[3] += (yfs[k] * zfs[j] * i * wfs[i - 1]) * xterm;
+                              if (i > 1) {
+                                  d2fxyzw(3, 3) += (yfs[k] * zfs[j] * i * (i - 1) * wfs[i - 2]) * xterm;
+                              }
+
+                          }
+                      }
+                  }
+              }
+              // First col
+              d2fxyzw(1, 0) = d2fxyzw(0, 1);
+              d2fxyzw(2, 0) = d2fxyzw(0, 2);
+              d2fxyzw(3, 0) = d2fxyzw(0, 3);
+              // Second col
+              d2fxyzw(2, 1) = d2fxyzw(1, 2);
+              d2fxyzw(3, 1) = d2fxyzw(1, 3);
+              //Third col
+              d2fxyzw(3, 2) = d2fxyzw(2, 3);
+
+              d2fxyzw = (dmat * d2fxyzw * dmat).eval();//QED
+
           }
         }
 
-      } else {
+      } else { /// Linear interpolation
         
         fval =0;
+        dfxyzw.setZero();
+        d2fxyzw.setZero();
+
+        Eigen::DiagonalMatrix<double, 4> dmat(1.0 / xstep, 1.0 / ystep, 1.0 / zstep, 1.0 / wstep);
+
+
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++) {
+                for (int k = 0; k < 2; k++) {
+                    for (int l = 0; l < 2; l++) {
+
+                        double fcorner = this->fs(xelem + l, yelem + k, zelem + j, welem + i);
+
+                        double xweight = (l == 0 ? 1 - xf : xf);
+                        double yweight = (k == 0 ? 1 - yf : yf);
+                        double zweight = (j == 0 ? 1 - zf : zf);
+                        double wweight = (i == 0 ? 1 - wf : wf);
+
+                 
+                        fval += fcorner * xweight * yweight * zweight * wweight;
+
+                        if (deriv > 0) {
+                            double dxweight = (l == 0 ? -1 : 1);
+                            double dyweight = (k == 0 ? -1 : 1);
+                            double dzweight = (j == 0 ? -1 : 1);
+                            double dwweight = (i == 0 ? -1 : 1);
+
+                            dfxyzw[0] += fcorner * dxweight * yweight * zweight * wweight;
+                            dfxyzw[1] += fcorner * xweight * dyweight * zweight * wweight;
+                            dfxyzw[2] += fcorner * xweight * yweight * dzweight * wweight;
+                            dfxyzw[3] += fcorner * xweight * yweight * zweight * dwweight;
+
+                            if (deriv > 1) {
+                                d2fxyzw(0, 1) += fcorner * dxweight * dyweight * zweight * wweight;
+                                d2fxyzw(0, 2) += fcorner * dxweight * yweight * dzweight * wweight;
+                                d2fxyzw(0, 3) += fcorner * dxweight * yweight * zweight * dwweight;
+
+                                d2fxyzw(1, 2) += fcorner * xweight * dyweight * dzweight * wweight;
+                                d2fxyzw(1, 3) += fcorner * xweight * dyweight * zweight * dwweight;
+
+                                d2fxyzw(2, 3) += fcorner * xweight * yweight * dzweight * dwweight;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         if (deriv > 0) {
-          
+            dfxyzw = (dmat * dfxyzw).eval();//QED
 
+     
           if (deriv > 1) {
-            
+              // First col
+              d2fxyzw(1, 0) = d2fxyzw(0, 1);
+              d2fxyzw(2, 0) = d2fxyzw(0, 2);
+              d2fxyzw(3, 0) = d2fxyzw(0, 3);
+              // Second col
+              d2fxyzw(2, 1) = d2fxyzw(1, 2);
+              d2fxyzw(3, 1) = d2fxyzw(1, 3);
+              //Third col
+              d2fxyzw(3, 2) = d2fxyzw(2, 3);
+
+              d2fxyzw = (dmat * d2fxyzw * dmat).eval();//QED
           }
         }
       }
@@ -825,8 +1012,6 @@
       interp_impl(x, y, z, w, 2, f, dfxyzw, d2fxyzw);
       return std::tuple {f, dfxyzw, d2fxyzw};
     }
-
-    
 
   };
 

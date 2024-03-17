@@ -51,7 +51,7 @@ namespace ASSET {
 
     bool WarnOutOfBounds = true;
     bool ThrowOutOfBounds = false;
-    bool FastProduct = false;
+    bool FastProduct = true;
 
     InterpTable3D() {
     }
