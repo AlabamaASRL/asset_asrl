@@ -1028,8 +1028,8 @@ will be called a lot.
 	print(Tab4D(0,0,-10,0))        # prints a warning
 	print(Tab4D(0,0,0,-10))        # prints a warning
 
-	Tab3D.ThrowOutOfBounds=True
-	#print(Tab3D(-10,0,0,0))       # throws exception
+	Tab4D.ThrowOutOfBounds=True
+	#print(Tab4D(-10,0,0,0))       # throws exception
 
 Once constructed, :code:`vf.InterpTable4D` can be converted into an ASSET ScalarFunction by supplying
 the x,y,z, and w coordinates to the table's call operator as a singe VectorFunction or four separate ScalarFunctions.
