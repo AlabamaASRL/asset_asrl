@@ -971,24 +971,82 @@ will be called a lot.
 	Tab3D.ThrowOutOfBounds=True
 	#print(Tab3D(-10,0,0))       # throws exception
 
+4-D Interpolation
+-----------------
+As of version 0.4.0, we also support interpolating scalar data defined on 4 dimensional rectilinear grids
+with the :code:`vf.InterpTable4D` class. To construct it, we supply the coordinate values as four python
+lists/numpy vectors along with the function values. 
 
+..  note:: 
 
-Once constructed, :code:`vf.InterpTable3D` can be converted into an ASSET ScalarFunction by supplying
-the x, y, and z coordinates to the table's call operator as a singe VectorFunction or three separate ScalarFunctions.
+	 The function values MUST be formatted like an ij indexed meshgrid. If you are 
+	 using np.meshgrid to generate the function values, take note that it assumes xy indexing by default,
+	 and this should be changed to ij.If you index the values wrong and your coordinate dimensions are the same size, 
+	 we will not be able to detect an error.
+
+As with the previous tables, you can select between linear or cubic interpolation. Cubic interpolation should be 
+preferred for anything that will end up in an optimizer. Additionally, for cubic interpolation you can specify that
+you want to pre-calculate and cache all possible values of the interpolation coefficients in each voxel of the domain.
+This requires the up front calculation of  :code:`(nx-1)*(ny-1)*(nz-1)*(nw-1)` matrix vector products of size (256x256)x(256x1)  and 16 times the storage of the non-cached
+algorithm. However, interpolation will be 5-6 times faster. So use this if the dimensions are small and the interpolator
+will be called a lot.
 
 .. code-block:: python
 
-	xyz,c= Args(4).tolist([(0,3),(3,1)])
-	x,y,z = xyz.tolist()
+	def f(x,y,z,w):return np.cos(x)*np.cos(y)*np.cos(z)*np.cos(w)
+
+	nx = 50
+	ny = 50
+	nz = 50
+	nw = 50
+
+	xlim = np.pi
+	ylim = np.pi
+	zlim = np.pi
+	wlim = np.pi
+
+	xs = np.linspace(-xlim,xlim,nx)
+	ys = np.linspace(-ylim,ylim,ny)
+	zs = np.linspace(-zlim,zlim,nz)
+	ws = np.linspace(-zlim,zlim,nw)
+
+
+	X,Y,Z,W = np.meshgrid(xs,ys,zs,ws,indexing = 'ij')
+	Fs    = f(X,Y,Z,W)    #Scalar data defined on 4-D meshgrid in ij format!!!
+
+	kind = 'cubic' # or 'linear', defaults to 'cubic'
+	cache = False # defaults to False
+	#cache = True # will precalculate and cache all interpolation coeffs
+
+	Tab4D = vf.InterpTable4D(xs,ys,zs,ws,Fs,kind=kind,cache=cache)
+
+	print(Tab4D(0,0,0,0))  #prints 1.0 
+
+	Tab4D.WarnOutOfBounds=True   # By default
+	print(Tab4D(-10,0,0,0))        # prints a warning
+	print(Tab4D(0,-10,0,0))        # prints a warning
+	print(Tab4D(0,0,-10,0))        # prints a warning
+	print(Tab4D(0,0,0,-10))        # prints a warning
+
+	Tab4D.ThrowOutOfBounds=True
+	#print(Tab4D(-10,0,0,0))       # throws exception
+
+Once constructed, :code:`vf.InterpTable4D` can be converted into an ASSET ScalarFunction by supplying
+the x,y,z, and w coordinates to the table's call operator as a singe VectorFunction or four separate ScalarFunctions.
+
+.. code-block:: python
+
+	xyzw,c= Args(5).tolist([(0,4),(4,1)])
+	x,y,z,w = xyzw.tolist()
 
 	# Use it as scalar function inside a statement
-	Tab3sf = Tab3D(xyz)
-	Tab3sf = Tab3D(x,y,z)             # Or
-	Tab3sf = Tab3D(vf.stack([x,y,z])) # Or
+	Tab4sf = Tab4D(xyzw)
+	Tab4sf = Tab4D(x,y,z,w)             # Or
+	Tab4sf = Tab4D(vf.stack([x,y,z,w])) # Or
 
-	Func = Tab3sf + c
+	Func = Tab4sf + c
 
-	print(Func([0,0,0,1]))  # prints [2.0]
+	print(Func([0,0,0,0,1]))  # prints [2.0]
 
 
 

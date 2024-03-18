@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="ODE Tutorial" href="ODEGuide.html" /><link rel="prev" title="Installing ASSET" href="Install.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
-        <title>Vector Function Tutorial - ASSET 0.3.0 documentation</title>
+        <title>Vector Function Tutorial - ASSET 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -125,7 +125,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">ASSET 0.3.0 documentation</div></a>
+      <a href="../index.html"><div class="brand">ASSET 0.4.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -151,7 +151,7 @@
     <img class="sidebar-logo" src="../_static/ASSETLOGO.svg" alt="Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">ASSET 0.3.0 documentation</span>
+  <span class="sidebar-brand-text">ASSET 0.4.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -482,9 +482,9 @@ and can be called as shown below. A complete list of functions is given in the t
 <span class="n">h</span>  <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="o">-</span><span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 </pre></div>
 </div>
-<div class="table-wrapper colwidths-given docutils container" id="id5">
-<table class="docutils align-default" id="id5">
-<caption><span class="caption-text">List of Scalar Math Functions</span><a class="headerlink" href="#id5" title="Link to this table">#</a></caption>
+<div class="table-wrapper colwidths-given docutils container" id="id6">
+<table class="docutils align-default" id="id6">
+<caption><span class="caption-text">List of Scalar Math Functions</span><a class="headerlink" href="#id6" title="Link to this table">#</a></caption>
 <colgroup>
 <col style="width: 20.0%" />
 <col style="width: 80.0%" />
@@ -580,9 +580,9 @@ and a complete list of such functions is given in the table below.</p>
 <span class="n">Grav2</span> <span class="o">=</span> <span class="o">-</span> <span class="n">R</span><span class="o">/</span><span class="n">r3</span>         <span class="c1"># Same as above but slower</span>
 </pre></div>
 </div>
-<div class="table-wrapper colwidths-given docutils container" id="id6">
-<table class="docutils align-default" id="id6">
-<caption><span class="caption-text">List of Vector Norms and Normalizations</span><a class="headerlink" href="#id6" title="Link to this table">#</a></caption>
+<div class="table-wrapper colwidths-given docutils container" id="id7">
+<table class="docutils align-default" id="id7">
+<caption><span class="caption-text">List of Vector Norms and Normalizations</span><a class="headerlink" href="#id7" title="Link to this table">#</a></caption>
 <colgroup>
 <col style="width: 25.0%" />
 <col style="width: 25.0%" />
@@ -1136,19 +1136,77 @@ will be called a lot.</p>
 <span class="c1">#print(Tab3D(-10,0,0))       # throws exception</span>
 </pre></div>
 </div>
-<p>Once constructed, <code class="code docutils literal notranslate"><span class="pre">vf.InterpTable3D</span></code> can be converted into an ASSET ScalarFunction by supplying
-the x, y, and z coordinates to the table’s call operator as a singe VectorFunction or three separate ScalarFunctions.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">xyz</span><span class="p">,</span><span class="n">c</span><span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)])</span>
-<span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="o">=</span> <span class="n">xyz</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</section>
+<section id="id5">
+<h3>4-D Interpolation<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<p>As of version 0.4.0, we also support interpolating scalar data defined on 4 dimensional rectilinear grids
+with the <code class="code docutils literal notranslate"><span class="pre">vf.InterpTable4D</span></code> class. To construct it, we supply the coordinate values as four python
+lists/numpy vectors along with the function values.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The function values MUST be formatted like an ij indexed meshgrid. If you are
+using np.meshgrid to generate the function values, take note that it assumes xy indexing by default,
+and this should be changed to ij.If you index the values wrong and your coordinate dimensions are the same size,
+we will not be able to detect an error.</p>
+</div>
+<p>As with the previous tables, you can select between linear or cubic interpolation. Cubic interpolation should be
+preferred for anything that will end up in an optimizer. Additionally, for cubic interpolation you can specify that
+you want to pre-calculate and cache all possible values of the interpolation coefficients in each voxel of the domain.
+This requires the up front calculation of  <code class="code docutils literal notranslate"><span class="pre">(nx-1)*(ny-1)*(nz-1)*(nw-1)</span></code> matrix vector products of size (256x256)x(256x1)  and 16 times the storage of the non-cached
+algorithm. However, interpolation will be 5-6 times faster. So use this if the dimensions are small and the interpolator
+will be called a lot.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">w</span><span class="p">):</span><span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+
+<span class="n">nx</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">ny</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">nz</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">nw</span> <span class="o">=</span> <span class="mi">50</span>
+
+<span class="n">xlim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+<span class="n">ylim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+<span class="n">zlim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+<span class="n">wlim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+<span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">xlim</span><span class="p">,</span><span class="n">xlim</span><span class="p">,</span><span class="n">nx</span><span class="p">)</span>
+<span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">ylim</span><span class="p">,</span><span class="n">ylim</span><span class="p">,</span><span class="n">ny</span><span class="p">)</span>
+<span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">zlim</span><span class="p">,</span><span class="n">zlim</span><span class="p">,</span><span class="n">nz</span><span class="p">)</span>
+<span class="n">ws</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">zlim</span><span class="p">,</span><span class="n">zlim</span><span class="p">,</span><span class="n">nw</span><span class="p">)</span>
+
+
+<span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">,</span><span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">zs</span><span class="p">,</span><span class="n">ws</span><span class="p">,</span><span class="n">indexing</span> <span class="o">=</span> <span class="s1">&#39;ij&#39;</span><span class="p">)</span>
+<span class="n">Fs</span>    <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">,</span><span class="n">W</span><span class="p">)</span>    <span class="c1">#Scalar data defined on 4-D meshgrid in ij format!!!</span>
+
+<span class="n">kind</span> <span class="o">=</span> <span class="s1">&#39;cubic&#39;</span> <span class="c1"># or &#39;linear&#39;, defaults to &#39;cubic&#39;</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># defaults to False</span>
+<span class="c1">#cache = True # will precalculate and cache all interpolation coeffs</span>
+
+<span class="n">Tab4D</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">InterpTable4D</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">zs</span><span class="p">,</span><span class="n">ws</span><span class="p">,</span><span class="n">Fs</span><span class="p">,</span><span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span><span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">Tab4D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>  <span class="c1">#prints 1.0</span>
+
+<span class="n">Tab4D</span><span class="o">.</span><span class="n">WarnOutOfBounds</span><span class="o">=</span><span class="kc">True</span>   <span class="c1"># By default</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">Tab4D</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>        <span class="c1"># prints a warning</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">Tab4D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>        <span class="c1"># prints a warning</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">Tab4D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>        <span class="c1"># prints a warning</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">Tab4D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">10</span><span class="p">))</span>        <span class="c1"># prints a warning</span>
+
+<span class="n">Tab4D</span><span class="o">.</span><span class="n">ThrowOutOfBounds</span><span class="o">=</span><span class="kc">True</span>
+<span class="c1">#print(Tab4D(-10,0,0,0))       # throws exception</span>
+</pre></div>
+</div>
+<p>Once constructed, <code class="code docutils literal notranslate"><span class="pre">vf.InterpTable4D</span></code> can be converted into an ASSET ScalarFunction by supplying
+the x,y,z, and w coordinates to the table’s call operator as a singe VectorFunction or four separate ScalarFunctions.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">xyzw</span><span class="p">,</span><span class="n">c</span><span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">),(</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">)])</span>
+<span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">w</span> <span class="o">=</span> <span class="n">xyzw</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
 <span class="c1"># Use it as scalar function inside a statement</span>
-<span class="n">Tab3sf</span> <span class="o">=</span> <span class="n">Tab3D</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
-<span class="n">Tab3sf</span> <span class="o">=</span> <span class="n">Tab3D</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">)</span>             <span class="c1"># Or</span>
-<span class="n">Tab3sf</span> <span class="o">=</span> <span class="n">Tab3D</span><span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">]))</span> <span class="c1"># Or</span>
+<span class="n">Tab4sf</span> <span class="o">=</span> <span class="n">Tab4D</span><span class="p">(</span><span class="n">xyzw</span><span class="p">)</span>
+<span class="n">Tab4sf</span> <span class="o">=</span> <span class="n">Tab4D</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>             <span class="c1"># Or</span>
+<span class="n">Tab4sf</span> <span class="o">=</span> <span class="n">Tab4D</span><span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">w</span><span class="p">]))</span> <span class="c1"># Or</span>
 
-<span class="n">Func</span> <span class="o">=</span> <span class="n">Tab3sf</span> <span class="o">+</span> <span class="n">c</span>
+<span class="n">Func</span> <span class="o">=</span> <span class="n">Tab4sf</span> <span class="o">+</span> <span class="n">c</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">Func</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span>  <span class="c1"># prints [2.0]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">Func</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span>  <span class="c1"># prints [2.0]</span>
 </pre></div>
 </div>
 </section>
@@ -1278,6 +1336,7 @@ If it’s truly not possible, we will consider adding the missing expression to 
 <li><a class="reference internal" href="#d-interpolation">1-D Interpolation</a></li>
 <li><a class="reference internal" href="#id3">2-D Interpolation</a></li>
 <li><a class="reference internal" href="#id4">3-D Interpolation</a></li>
+<li><a class="reference internal" href="#id5">4-D Interpolation</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#note-on-size-of-vectorfunctions">Note on Size of VectorFunctions</a></li>
@@ -1293,7 +1352,7 @@ If it’s truly not possible, we will consider adding the missing expression to 
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=e259d695"></script>
+</div><script src="../_static/documentation_options.js?v=6c02275b"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
