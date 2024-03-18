@@ -23,7 +23,7 @@
     // numpy meshgrid ij format (x,y,z,w)
     Eigen::Tensor<double, 4> fs;
 
-    // Holds f, and all derivatives at each data point contiguaously
+    // Holds f, and all derivatives at each data point contiguously
     // Improved runtime by factor of two over holding separately like in the 3d table
     Eigen::Tensor<Eigen::Matrix<double, 16, 1>, 4> fs_all;
 
@@ -47,7 +47,6 @@
     double wtotal;
 
     bool cache_alpha = false;
-    int cache_threads = 1;
 
     bool WarnOutOfBounds = true;
     bool ThrowOutOfBounds = false;

@@ -15,7 +15,7 @@ from asset_asrl.VectorFunctions.Extensions.DerivChecker import FDDerivChecker
 
 
 def f(x,y,z,w):
-    return np.cos(x)*np.cos(y)*np.cos(z)*np.cos(w) 
+    return np.cos(x)*np.cos(y)*np.cos(z)*np.cos(w) + w**4 + 1/(1+ x**2 + y**2 + z**2 + w**2)
 
 
 
@@ -28,10 +28,10 @@ Args      = vf.Arguments
 
 if __name__ == "__main__":
 
-    nx =50//2
-    ny =60//2
-    nz =64//2
-    nw =56//2
+    nx =30
+    ny =30
+    nz =30
+    nw =30
 
     lim = np.pi
     
@@ -49,9 +49,8 @@ if __name__ == "__main__":
     
     
     print("Here")
-    Tab1 = vf.InterpTable4D(xs,ys,zs,ws,Fs,kind='cubic',cache = True)
-    #Tab1.CompactLayout = True
-    Tab2 = RegularGridInterpolator((xs,ys,zs,ws),Fs,method='linear')
+    Tab1 = vf.InterpTable4D(xs,ys,zs,ws,Fs,kind='cubic',cache = False)
+    Tab2 = RegularGridInterpolator((xs,ys,zs,ws),Fs,method='cubic')
     
     FDDerivChecker(Tab1.sf(),[1.,.5,-.6,.3])
     

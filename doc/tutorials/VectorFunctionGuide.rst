@@ -1037,7 +1037,7 @@ the x,y,z, and w coordinates to the table's call operator as a singe VectorFunct
 .. code-block:: python
 
 	xyzw,c= Args(5).tolist([(0,4),(4,1)])
-	x,y,z,w = xyz.tolist()
+	x,y,z,w = xyzw.tolist()
 
 	# Use it as scalar function inside a statement
 	Tab4sf = Tab4D(xyzw)
