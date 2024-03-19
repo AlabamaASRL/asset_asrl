@@ -23,7 +23,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   message(FATAL_ERROR "You cannot build ASSET with the Microsoft Compiler. Please use Clang or GCC and try again.")
 endif()
 
-if(NOT WIN32)
+if(MINGW OR NOT WIN32)
   if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
       set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld")
   endif()
@@ -39,7 +39,7 @@ set(LINK_TIME_OPT FALSE)          ### DO LTO - Recommended for full release
 set(CLANG_MAX_INLINE_DEPTH 225)
 #set(BUILD_ASSET_WHEEL TRUE)      ### CI Build for generic wheels
 #set(BUILD_SPHINX_DOCS TRUE)      
-
+#set(DYNAMIC_LINK_MKL_LIBS TRUE)
 
 ################################################################################
 ##########################  Set Compiler Flags  ################################
@@ -73,7 +73,7 @@ else()
 endif()
 
 
-if(WIN32)
+if(WIN32 AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" AND NOT MINGW)
      list(APPEND RELEASE_FLAGS "/MD")
      list(APPEND RELEASE_FLAGS "/DNDEBUG")
      list(APPEND RELEASE_FLAGS "/O2")
@@ -133,12 +133,15 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND FALSE)
 endif()
 
 
-if(NOT WIN32)
+if(MINGW OR NOT WIN32)
   list(APPEND RELEASE_FLAGS "-fomit-frame-pointer")
   list(APPEND RELEASE_FLAGS "-fno-stack-protector")
   list(APPEND RELEASE_FLAGS "-fno-stack-clash-protection")
   list(APPEND RELEASE_FLAGS "-fcf-protection=none")
+  #if(NOT MINGW)
   list(APPEND RELEASE_FLAGS "-fno-asynchronous-unwind-tables")
+  #endif()
+
   list(APPEND RELEASE_FLAGS "-ffast-math")
 endif()
  
@@ -147,6 +150,12 @@ if(APPLE)
   list(APPEND COMMON_FLAGS "-Xlinker dynamic_lookup")
 endif()
 
+if(MINGW)
+    #Must dynamically link mkl
+  set(DYNAMIC_LINK_MKL_LIBS TRUE)
+# MINGW Assembler needs extra flag for large obj files
+  list(APPEND RELEASE_FLAGS "-Wa,-mbig-obj")
+endif()
 
 
 # Combine Flags
@@ -199,7 +208,7 @@ set(PYBIND11_CPP_STANDARD -std=c++17)
 # Set up external dependencies
 find_package(Threads REQUIRED)
 
-if(UNIX AND NOT APPLE)
+if(MINGW OR UNIX AND NOT APPLE)
   # find_package(OpenMP REQUIRED)
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     list(APPEND COMPILE_FLAGS "-fopenmp=libiomp5")
@@ -239,7 +248,7 @@ find_package(Python ${PYVERSION_EXACT} REQUIRED COMPONENTS Interpreter Developme
 # Set dependency variables
 set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${MKL_INCLUDE_DIRS})
 set(LINK_LIBS ${PYTHON_LIBRARIES} ${MKL_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS})
-if(UNIX)
+if(UNIX OR MINGW)
   list(APPEND LINK_LIBS m)
 endif()
 
@@ -250,9 +259,11 @@ endif()
 if(BUILD_SHARED_LIBS AND NOT APPLE AND NOT WIN32)  # Windows and Linux Dynamic Linking
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
 elseif(UNIX AND NOT APPLE)  # Linux Static Linking
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl,--end-group")
+  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
+elseif(MINGW)  # MinGW Dynamic Linking
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -static-libgcc")
+  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl,--end-group ")
 elseif(APPLE)  # Apple Dynamic and Static Linking
-
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Xlinker -undefined -Xlinker dynamic_lookup")
 else()  # Windows Static Linking
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS}")
@@ -283,6 +294,8 @@ message(STATUS "CMAKE DIR LOC" ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS ${OpenMP_CXX_FLAGS})
 message(STATUS ${OpenMP_CXX_LIBRARIES})
 message(STATUS ${PYTHON_EXECUTABLE})
+message(STATUS ${MKL_LIBRARIES_LIST})
+message(STATUS ${LINKER_FLAGS})
 
 ################################################################################
 # Code Directories

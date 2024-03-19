@@ -152,7 +152,7 @@ target_include_directories(asset PRIVATE ${INCLUDE_DIRS})
 target_link_libraries(asset PRIVATE ${LINK_LIBS})
 #set_target_properties(asset PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
-if(UNIX)
+if(UNIX OR MINGW)
     set_target_properties(asset PROPERTIES LINK_FLAGS ${LINKER_FLAGS})
 endif()
 
