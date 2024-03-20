@@ -138,9 +138,10 @@ if(MINGW OR NOT WIN32)
   list(APPEND RELEASE_FLAGS "-fno-stack-protector")
   list(APPEND RELEASE_FLAGS "-fno-stack-clash-protection")
   list(APPEND RELEASE_FLAGS "-fcf-protection=none")
-  #if(NOT MINGW)
-  list(APPEND RELEASE_FLAGS "-fno-asynchronous-unwind-tables")
-  #endif()
+
+  if(NOT MINGW) ## THIS FLAG WAS CAUSING LINKING ERRORS
+    list(APPEND RELEASE_FLAGS "-fno-asynchronous-unwind-tables")
+  endif()
 
   list(APPEND RELEASE_FLAGS "-ffast-math")
 endif()
@@ -261,6 +262,8 @@ if(BUILD_SHARED_LIBS AND NOT APPLE AND NOT WIN32)  # Windows and Linux Dynamic L
 elseif(UNIX AND NOT APPLE)  # Linux Static Linking
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
 elseif(MINGW)  # MinGW Dynamic Linking
+
+  # THIS MAY CAUSE ISSUES,BUT GOT IT TO COMPILE
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -static-libgcc")
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl,--end-group ")
 elseif(APPLE)  # Apple Dynamic and Static Linking
@@ -296,6 +299,7 @@ message(STATUS ${OpenMP_CXX_LIBRARIES})
 message(STATUS ${PYTHON_EXECUTABLE})
 message(STATUS ${MKL_LIBRARIES_LIST})
 message(STATUS ${LINKER_FLAGS})
+message(STATUS ${LINK_LIBS})
 
 ################################################################################
 # Code Directories
