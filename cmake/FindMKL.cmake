@@ -160,6 +160,7 @@ if(MKL_USE_SEQUENTIAL)
         $ENV{MKLROOT}/lib/intel64
         $ENV{INTEL}/mkl/lib/intel64
         $ENV{MKLROOT}/lib/intel64_win
+        $ENV{ONEAPI_ROOT}/mkl/latest/lib
         $ENV{INTEL}/mkl/lib/intel64_win)
 elseif(WIN32 AND MKL_USE_TBB)
   find_library(MKL_SEQTHR_LIBRARY
@@ -168,6 +169,7 @@ elseif(WIN32 AND MKL_USE_TBB)
         $ENV{MKLROOT}/lib/intel64
         $ENV{INTEL}/mkl/lib/intel64
         $ENV{MKLROOT}/lib/intel64_win
+        $ENV{ONEAPI_ROOT}/mkl/latest/lib
         $ENV{INTEL}/mkl/lib/intel64_win)
 
   find_library(MKL_TBB_LIBRARY
@@ -182,6 +184,7 @@ else()
         $ENV{MKLROOT}/lib/intel64
         $ENV{INTEL}/mkl/lib/intel64
         $ENV{MKLROOT}/lib/intel64_win
+        $ENV{ONEAPI_ROOT}/mkl/latest/lib
         $ENV{ONEAPI_ROOT}/mkl/latest/lib/intel64
         $ENV{INTEL}/mkl/lib/intel64_win)
 endif()
