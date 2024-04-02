@@ -1,8 +1,4 @@
 #include "OptimalControlProblem.h"
-#include "OptimalControlProblem.h"
-#include "OptimalControlProblem.h"
-#include "OptimalControlProblem.h"
-#include "OptimalControlProblem.h"
 #include "AutoScalingUtils.h"
 
 #include "PyDocString/OptimalControl/OptimalControlProblem_doc.h"
@@ -159,6 +155,18 @@ void ASSET::OptimalControlProblem::transcribe_phases() {
 }
 
 void ASSET::OptimalControlProblem::check_functions() {
+    /*
+    Loops through all user defined functions and checks that they do not
+    reference non-existent variables. Should be run prior to any transcribing any
+    problem functions. First checks each phase, then all link functions.
+    */
+
+
+   for (int i = 0; i < this->phases.size(); i++) {
+        this->phases[i]->check_functions(i);
+   }
+
+
   auto CheckFunc = [&](std::string type, auto& func) {
     for (int i = 0; i < func.PhasesTolink.size(); i++) {
       for (int j = 0; j < func.PhasesTolink[i].size(); j++) {
@@ -250,13 +258,14 @@ void ASSET::OptimalControlProblem::check_functions() {
   std::string iq = "Link Inequality constraint";
   std::string obj = "Link Objective";
 
-
   for (auto& [key,f]: this->LinkEqualities)
     CheckFunc(eq, f);
   for (auto& [key, f]: this->LinkInequalities)
     CheckFunc(iq, f);
   for (auto& [key, f]: this->LinkObjectives)
     CheckFunc(obj, f);
+
+
 }
 
 void ASSET::OptimalControlProblem::transcribe_links() {
@@ -379,6 +388,10 @@ void ASSET::OptimalControlProblem::transcribe_links() {
 
 void ASSET::OptimalControlProblem::calc_auto_scales()
 {
+    for (int i = 0; i < this->phases.size(); i++) {
+        this->phases[i]->calc_auto_scales();
+    }
+
     auto calc_impl = [&](auto& funcmap) {
         for (auto& [key, func] : funcmap) {
             if (func.ScaleMode == "auto") {
@@ -406,19 +419,62 @@ void ASSET::OptimalControlProblem::calc_auto_scales()
 
         }
     };
+
+
     calc_impl(this->LinkEqualities);
     calc_impl(this->LinkInequalities);
     calc_impl(this->LinkObjectives);
 
 }
 
+std::vector<double> ASSET::OptimalControlProblem::get_objective_scales()
+{
+    std::vector<double> scales;
+    for (auto& [key, obj] : this->LinkObjectives) {
+        if (obj.ScaleMode == "auto") {
+            scales.push_back(obj.OutputScales[0]);
+        }
+    }
+    for (auto phase : this->phases) {
+        auto pscales = phase->get_objective_scales();
+
+        for (auto s : pscales) { 
+            scales.push_back(s); 
+        }
+        
+    }
+    return scales;
+}
+
+void ASSET::OptimalControlProblem::update_objective_scales(double scale)
+{
+    for (auto& [key, obj] : this->LinkObjectives) {
+        if (obj.ScaleMode == "auto") {
+            obj.OutputScales[0] = scale;
+        }
+    }
+    for (auto phase : this->phases) {
+        phase->update_objective_scales(scale);
+        
+    }
+}
+
 void ASSET::OptimalControlProblem::transcribe(bool showstats, bool showfuns) {
 
   this->nlp = std::make_shared<NonLinearProgram>(this->Threads);
-  check_functions();
 
+  check_functions();
   if (this->AutoScaling) {
       this->calc_auto_scales();
+      if (this->SyncObjectiveScales) {
+          // Ensure that all objectives have same scale factor to preserve meaning of un-scaled problem
+          // Common scale is mean of all separate scale factors
+          auto objscales = this->get_objective_scales();
+          if (objscales.size() > 0) {
+              double meanobjscale = std::accumulate(objscales.begin(), objscales.end(), 0.0) / double(objscales.size());
+              this->update_objective_scales(meanobjscale);
+          }
+      }
   }
 
   this->transcribe_phases();
@@ -800,6 +856,7 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
   ///////////////////////
 
   obj.def_readwrite("AutoScaling", &OptimalControlProblem::AutoScaling);
+  obj.def_readwrite("SyncObjectiveScales", &OptimalControlProblem::SyncObjectiveScales);
 
 
   obj.def_readwrite("AdaptiveMesh", &OptimalControlProblem::AdaptiveMesh);
@@ -807,6 +864,9 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
   obj.def_readwrite("MaxMeshIters", &OptimalControlProblem::MaxMeshIters);
   obj.def_readonly("MeshConverged", &OptimalControlProblem::MeshConverged);
   obj.def_readwrite("SolveOnlyFirst", &OptimalControlProblem::SolveOnlyFirst);
+
+  obj.def_readwrite("MeshAbortFlag", &OptimalControlProblem::MeshAbortFlag);
+
 
   obj.def("setAdaptiveMesh",
           &OptimalControlProblem::setAdaptiveMesh,
@@ -934,6 +994,21 @@ void ASSET::OptimalControlProblem::BuildNewLinkIterface(py::class_<OptimalContro
             py::arg("vars"),
             py::arg("AutoScale") = std::string("auto")
         );
+
+        obj.def("addParamLinkEqualCon",
+            py::overload_cast<
+            PhaseRefType,
+            PhaseRefType,
+            RegionType,
+            VarIndexType,
+            ScaleType>(&OptimalControlProblem::addParamLinkEqualCon),
+            py::arg("phase0"),
+            py::arg("phase1"),
+            py::arg("reg0"),
+            py::arg("vars"),
+            py::arg("AutoScale") = std::string("auto")
+        );
+
 
         obj.def("addDirectLinkEqualCon",
             py::overload_cast<

@@ -91,6 +91,7 @@ namespace ASSET {
     ///////////////////////
    public:
     bool AutoScaling = false;
+    bool SyncObjectiveScales = true;
 
     bool AdaptiveMesh = false;
     bool PrintMeshInfo = true;
@@ -874,6 +875,8 @@ namespace ASSET {
                          Eigen::VectorXi DPB,
                          bool LerpTraj);
 
+    void setTraj(const std::vector<Eigen::VectorXd>& mesh);
+
     void setTraj(const std::vector<Eigen::VectorXd>& mesh, Eigen::VectorXd DBS, Eigen::VectorXi DPB) {
       this->setTraj(mesh, DBS, DPB, false);
     }
@@ -1065,10 +1068,8 @@ namespace ASSET {
 
     void initIndexing() {
       this->indexer = PhaseIndexer(this->XVars(), this->UVars(), this->PVars(), this->numStatParams);
-      bool blockcon = false;
-      if (this->ControlMode == ControlModes::BlockConstant)
-        blockcon = true;
-      this->indexer.set_dimensions(this->numTranCardStates, this->numDefects, blockcon);
+      this->indexer.set_dimensions(this->numTranCardStates, this->numDefects, 
+          this->ControlMode == ControlModes::BlockConstant);
     }
     void check_functions(int pnum);
 
@@ -1126,6 +1127,11 @@ namespace ASSET {
     std::vector<Eigen::VectorXd> get_test_inputs(PhaseRegionFlags flag, VectorXi XtUV, VectorXi OPV, VectorXi SPV) const;
 
     void calc_auto_scales();
+
+    std::vector<double> get_objective_scales();
+    void update_objective_scales(double scale);
+    
+
 
     static void check_lbscale(double lbscale) {
       if (lbscale <= 0.0) {
