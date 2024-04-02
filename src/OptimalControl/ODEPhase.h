@@ -64,11 +64,20 @@ namespace ASSET {
         : ODEPhase(ode, Tmode) {
       this->setTraj(Traj, numdef, LerpIG);
     }
+    ODEPhase(const DODE& ode,
+        TranscriptionModes Tmode,
+        const std::vector<Eigen::VectorXd>& Traj)
+        : ODEPhase(ode, Tmode) {
+        this->setTraj(Traj);
+    }
 
     ODEPhase(const DODE& ode, std::string Tmode) : ODEPhase(ode, strto_TranscriptionMode(Tmode)) {
     }
     ODEPhase(const DODE& ode, std::string Tmode, const std::vector<Eigen::VectorXd>& Traj, int numdef)
         : ODEPhase(ode, strto_TranscriptionMode(Tmode), Traj, numdef) {
+    }
+    ODEPhase(const DODE& ode, std::string Tmode, const std::vector<Eigen::VectorXd>& Traj)
+        : ODEPhase(ode, strto_TranscriptionMode(Tmode), Traj) {
     }
     ODEPhase(
         const DODE& ode, std::string Tmode, const std::vector<Eigen::VectorXd>& Traj, int numdef, bool LerpIG)
@@ -76,6 +85,11 @@ namespace ASSET {
     }
 
     void setUnits(const Eigen::VectorXd& XtUPUnits_) {
+
+        if (XtUPUnits_.size() != this->XtUPVars()) {
+            throw std::invalid_argument("Incorrect size for input units vector");
+        }
+
         this->XtUPUnits = XtUPUnits_;
         VectorXd output_scales = XtUPUnits.head(this->XVars()).cwiseInverse()*this->XtUPUnits[this->XVars()];
         VectorFunctionalX odetemp;
@@ -712,6 +726,8 @@ namespace ASSET {
       phase.def(py::init<DODE, TranscriptionModes, const std::vector<Eigen::VectorXd>&, int, bool>());
 
       phase.def(py::init<DODE, std::string>());
+      phase.def(py::init<DODE, std::string, const std::vector<Eigen::VectorXd>&>());
+
       phase.def(py::init<DODE, std::string, const std::vector<Eigen::VectorXd>&, int>());
       phase.def(py::init<DODE, std::string, const std::vector<Eigen::VectorXd>&, int, bool>());
     }

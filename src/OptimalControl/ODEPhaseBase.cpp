@@ -1,5 +1,4 @@
 #include "ODEPhaseBase.h"
-#include "ODEPhaseBase.h"
 #include "LGLControlSplines.h"
 #include "LGLIntegrals.h"
 #include "MeshSpacingConstraints.h"
@@ -124,15 +123,6 @@ int ASSET::ODEPhaseBase::addPeriodicityCon(VarIndexType args, ScaleType scale_t)
     return this->addEqualCon(PhaseRegionFlags::FrontandBack,Func, args,scale_t);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
 
 int ASSET::ODEPhaseBase::addLUVarBound(RegionType reg, VarIndexType var, double lowerbound, double upperbound, double lbscale, double ubscale, ScaleType scale_t)
 {
@@ -646,6 +636,56 @@ void ASSET::ODEPhaseBase::setTraj(const std::vector<Eigen::VectorXd>& mesh,
   this->invalidatePostOptInfo();
 }
 
+void ASSET::ODEPhaseBase::setTraj(const std::vector<Eigen::VectorXd>& mesh)
+{
+    /// Sets phase to have same number of defects and spacing as input trajectory
+
+    int numdefects = (mesh.size() - 1) / (this->numTranCardStates - 1);
+    int numrem = (mesh.size() - 1) % (this->numTranCardStates - 1);
+
+    if (numrem != 0) {
+        throw std::invalid_argument("Number of states in mesh inconsistent with transcription type.");
+    }
+    if (mesh.size() == 0) {
+        throw std::invalid_argument("Input trajectory is empty");
+    }
+    int msize = mesh[0].size();
+    if (msize != this->Table.XtUVars) {
+        std::cout << "User Input Error in function setInitTraj for ODE:" << this->Table.ode.name() << std::endl;
+        std::cout << " Dimension of Input States(" << msize << ") does not match expected dimensions of the ODE("
+            << this->Table.XtUVars << ")" << std::endl;
+        throw std::invalid_argument("");
+    }
+    for (auto& X : mesh) {
+        if (X.hasNaN()) {
+            throw std::invalid_argument("NaN detected in State Vector in ODEPhaseBase::setTraj");
+        }
+    }
+
+    Eigen::VectorXd DBS;
+
+
+    DBS.resize(numdefects + 1);
+    DBS[0] = 0;
+
+    double t0 = mesh.front()[this->TVar()];
+    double tf = mesh.back()[this->TVar()];
+
+
+    for (int i = 0; i < numdefects; i++) {
+        int elem = (this->numTranCardStates - 1) * (i + 1);
+        double ti = mesh[elem][this->TVar()];
+        DBS[i + 1] = (ti - t0) / (tf - t0);
+    }
+
+    Eigen::VectorXi DPB;
+
+    DPB.resize(numdefects);
+    DPB.setOnes();
+
+    this->setTraj(mesh, DBS, DPB, false);
+}
+
 
 void ASSET::ODEPhaseBase::refineTrajManual(VectorXd DBS, VectorXi DPB) {
   if ((DBS.size() - 1) != DPB.size()) {
@@ -1038,6 +1078,13 @@ void ASSET::ODEPhaseBase::transcribe_control_funcs() {
 }
 
 void ASSET::ODEPhaseBase::check_functions(int pnum) {
+
+    /*
+   Loops through all user defined functions and checks that they do not
+   reference non-existent variables. Should be run prior to any transcribing any
+   problem functions.
+   */
+
   auto CheckFun = [&](const std::string& type, auto& func) {
     if (func.XtUVars.size() > 0) {
       if (func.XtUVars.maxCoeff() >= this->XtUPVars() || func.XtUVars.minCoeff() < 0) {
@@ -1289,16 +1336,45 @@ void ASSET::ODEPhaseBase::calc_auto_scales()
 
 }
 
+std::vector<double> ASSET::ODEPhaseBase::get_objective_scales()
+{
+    std::vector<double> scales;
+    for (auto& [key, obj] : this->userStateObjectives) {
+        if (obj.ScaleMode == "auto") {
+            scales.push_back(obj.OutputScales[0]);
+        }
+    }
+    for (auto& [key, obj] : this->userIntegrands) {
+        if (obj.ScaleMode == "auto") {
+            // Scale by tstar, since this function is the integrand not the total integral
+            scales.push_back(obj.OutputScales[0]*this->XtUPUnits[this->TVar()]);
+        }
+    }
+
+    return scales;
+}
+
+void ASSET::ODEPhaseBase::update_objective_scales(double scale)
+{
+    for (auto& [key, obj] : this->userStateObjectives) {
+        if (obj.ScaleMode == "auto") {
+            obj.OutputScales[0] = scale;
+        }
+    }
+    for (auto& [key, obj] : this->userIntegrands) {
+        if (obj.ScaleMode == "auto") {
+            // Divide by tstar, since this function is the integrand not the total integral
+            obj.OutputScales[0] = scale/this->XtUPUnits[this->TVar()];
+        }
+    }
+}
+
 void ASSET::ODEPhaseBase::transcribe_phase(
     int vo, int eqo, int iqo, std::shared_ptr<NonLinearProgram> np, int pnum)
 
 {
   this->indexer.begin_indexing(np, vo, eqo, iqo);
-  this->check_functions(pnum);
-
-  if (this->AutoScaling) {
-      this->calc_auto_scales();
-  }
+  
 
   this->transcribe_dynamics();
   this->transcribe_axis_funcs();
@@ -1316,6 +1392,21 @@ void ASSET::ODEPhaseBase::transcribe(bool showstats, bool showfuns) {
   this->nlp = std::make_shared<NonLinearProgram>(this->Threads);
 
   this->initIndexing();
+
+  this->check_functions(0);
+  if (this->AutoScaling) {
+      this->calc_auto_scales();
+      if (this->SyncObjectiveScales) {
+          // Ensure that all objectives have same scale factor to preserve meaning of un-scaled problem
+          // Common scale is mean of all separate scale factors
+          auto objscales = this->get_objective_scales();
+          if (objscales.size() > 0) {
+              double meanobjscale = std::accumulate(objscales.begin(), objscales.end(), 0.0) / double(objscales.size());
+              this->update_objective_scales(meanobjscale);
+          }
+      }
+  }
+
   this->transcribe_phase(0, 0, 0, this->nlp, 0);
   if (showstats)
     this->indexer.print_stats(showfuns);
@@ -1638,6 +1729,9 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
 
   obj.def("setTraj",
           py::overload_cast<const std::vector<Eigen::VectorXd>&, int, bool>(&ODEPhaseBase::setTraj));
+
+  obj.def("setTraj",
+      py::overload_cast<const std::vector<Eigen::VectorXd>&>(&ODEPhaseBase::setTraj));
 
 
   obj.def("switchTranscriptionMode",
@@ -2270,6 +2364,7 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
 
   obj.def_readwrite("AdaptiveMesh", &ODEPhaseBase::AdaptiveMesh);
   obj.def_readwrite("AutoScaling", &ODEPhaseBase::AutoScaling);
+  obj.def_readwrite("SyncObjectiveScales", &ODEPhaseBase::SyncObjectiveScales);
 
 
 

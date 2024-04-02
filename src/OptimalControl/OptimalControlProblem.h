@@ -52,6 +52,7 @@ namespace ASSET {
     VectorXd ActiveLinkParams;
     Eigen::VectorXd LPUnits;
     bool AutoScaling = false;
+    bool SyncObjectiveScales = true;
 
     void setLinkParams(VectorXd parm, VectorXd units) {
         if (units.size() != parm.size()) {
@@ -590,6 +591,38 @@ namespace ASSET {
         auto func = args.head<-1>(vsize) - args.tail<-1>(vsize);
 
         return this->addLinkEqualCon(func, p0, reg0_t, v0, p1, reg1_t, v1, scale_t);
+
+    }
+
+    std::vector<int> addParamLinkEqualCon(PhaseRefType iphase_t, PhaseRefType fphase_t, RegionType reg0_t, VarIndexType vars, ScaleType scale_t) {
+
+        PhaseRegionFlags reg0 = get_PhaseRegion(reg0_t);
+
+        if (reg0 != ODEParams && reg0 != StaticParams) {
+            throw std::invalid_argument("Phase Region must be ODEParams or StaticParams");
+        }
+
+        int iphase = getPhaseNum(iphase_t);
+        int fphase = getPhaseNum(fphase_t);
+
+        if (iphase < 0)
+            iphase = (this->phases.size() + iphase);
+        if (fphase < 0)
+            fphase = (this->phases.size() + fphase);
+
+        if (iphase < 0 || iphase >= this->phases.size()) {
+            throw std::invalid_argument(fmt::format("Link Equality constraint references non-existent phase:{0:}\n", iphase));
+        }
+
+        std::vector<int> idxs;
+        for (int i = iphase; i < fphase; i++) {
+
+            int idx = this->addDirectLinkEqualCon(i, reg0, vars, i + 1, reg0, vars, scale_t);
+
+            idxs.push_back(idx);
+        }
+
+        return idxs;
 
     }
 
@@ -1635,6 +1668,10 @@ namespace ASSET {
     void transcribe_links();
 
     void calc_auto_scales();
+
+    std::vector<double> get_objective_scales();
+    void update_objective_scales(double scale);
+
 
     void transcribe(bool showstats, bool showfuns);
 
