@@ -24,10 +24,10 @@ in the LICENSE file in ASSET's top level directory.
 */
 #pragma once
 
-#include "VectorFunctions/FunctionalFlags.h"
-#include "VectorFunctions/IndexingData.h"
-#include "VectorFunctions/VectorFunctionTypeErasure/SolverInterfaceSpecs.h"
-#include "pch.h"
+#include <ASSET/VectorFunctions/FunctionalFlags.h>
+#include <ASSET/VectorFunctions/IndexingData.h>
+#include <ASSET/VectorFunctions/VectorFunctionTypeErasure/SolverInterfaceSpecs.h>
+#include <ASSET/pch.h>
 
 namespace ASSET {
 

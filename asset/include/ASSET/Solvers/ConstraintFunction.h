@@ -20,11 +20,11 @@ in the LICENSE file in ASSET's top level directory.
 
 */
 
-
 #pragma once
 
+#include <ASSET/pch.h>
+
 #include "SolverFunctionBase.h"
-#include "pch.h"
 
 namespace ASSET {
 
@@ -70,7 +70,6 @@ namespace ASSET {
       this->function.constraints(X, FX, this->index_data);
     }
 
-
     /*
     Interface for calling the underlying type erased function's .constraints_adjointgradient method.
     Passes the arguments from PSIOPT and NonLinearProgram as well as the indexing data struct to the
@@ -82,7 +81,6 @@ namespace ASSET {
                                      EigenRef<Eigen::VectorXd> AGX) const {
       this->function.constraints_adjointgradient(X, L, FX, AGX, this->index_data);
     }
-
 
     /*
     Interface for calling the underlying type erased function's .constraints_jacobian method.
@@ -98,7 +96,6 @@ namespace ASSET {
       this->function.constraints_jacobian(
           X, FX, KKTmat, KKTLocations, KKTClashes, KKTLocks, this->index_data);
     }
-
 
     /*
     Interface for calling the underlying type erased function's .constraints_jacobian_adjointgradient method.

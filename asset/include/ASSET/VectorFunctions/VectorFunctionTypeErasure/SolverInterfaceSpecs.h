@@ -23,12 +23,11 @@ in the LICENSE file in ASSET's top level directory.
 
 #pragma once
 
-#include "DeepCopySpecs.h"
-#include "IndexingData.h"
-#include "SizingSpecs.h"
-#include "VectorFunctions/CommonFunctions/ExpressionFwdDeclarations.h"
-#include "pch.h"
-
+#include <ASSET/VectorFunctions/CommonFunctions/ExpressionFwdDeclarations.h>
+#include <ASSET/VectorFunctions/IndexingData.h>
+#include <ASSET/VectorFunctions/VectorFunctionTypeErasure/DeepCopySpecs.h>
+#include <ASSET/VectorFunctions/VectorFunctionTypeErasure/SizingSpecs.h>
+#include <ASSET/pch.h>
 
 namespace ASSET {
 
@@ -168,7 +167,6 @@ namespace ASSET {
     struct ExternalInterface : public Container {
       using Container_ = Container;
       using Container_::Container_;
-
 
       // Defines Basic Interface to PSIOPT Solver for VectorFunction Constraints.
 
@@ -310,7 +308,6 @@ namespace ASSET {
     };
     //////////////////////////////////////////////////////////////////////////////
 
-
     template<class Container>
     struct ExternalInterface : public Container {
       using Container_ = Container;
@@ -369,7 +366,6 @@ namespace ASSET {
   struct ConstraintInterface;
   struct ObjectiveInterface;
 
-
   /*
   * ConstraintInterface.
     Combines SolverConstraintSpec,SizableSpec and the ability to deep copy into itself.
@@ -389,7 +385,6 @@ namespace ASSET {
     ConstraintInterface() {
     }
   };
-
 
   /*
   * ObjectiveInterface.
@@ -418,6 +413,5 @@ namespace ASSET {
     ObjectiveInterface() {
     }
   };
-
 
 }  // namespace ASSET

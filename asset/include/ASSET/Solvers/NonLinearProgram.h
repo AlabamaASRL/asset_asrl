@@ -23,10 +23,12 @@ in the LICENSE file in ASSET's top level directory.
 */
 
 #pragma once
+
+#include <ASSET/Utils/BenchUtils.h>
+#include <ASSET/pch.h>
+
 #include "ConstraintFunction.h"
 #include "ObjectiveFunction.h"
-#include "Utils/BenchUtils.h"
-#include "pch.h"
 
 namespace ASSET {
 
@@ -71,19 +73,16 @@ namespace ASSET {
     /// </summary>
     std::vector<std::vector<ConstraintFunction>> ThrIq;
 
-
     int PrimalVars = 0;   // Number of deisgn variables
     int SlackVars = 0;    // Number of slack variables appended to problem. One for every inequalcon
     int EqualCons = 0;    // Number of equality constraints,
     int InequalCons = 0;  // Number of inequality constraints
     int KKTdim = 0;       // Edge dimension of KKT matrix: = PrimalVars+ EqualCons + 2*InequalCons
 
-
     VectorXi KKTcoeffRows;  // matched row indices
     VectorXi KKTcoeffCols;  // matched col indices
     VectorXi KKTcoeffThrIds;
     VectorXi KKTLocations;
-
 
     int numUserKKTElems = 0;
     int numSolverKKTElems = 0;
@@ -476,7 +475,6 @@ namespace ASSET {
                  EigenRef<VectorXd> FXE,
                  EigenRef<VectorXd> FXI,
                  Eigen::SparseMatrix<double, Eigen::RowMajor>& KKTmat);
-
 
     static void NLPTest(const Eigen::VectorXd& x,
                         int n,

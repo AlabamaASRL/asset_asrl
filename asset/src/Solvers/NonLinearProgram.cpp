@@ -19,8 +19,7 @@ in the LICENSE file in ASSET's top level directory.
 
 */
 
-
-#include "NonLinearProgram.h"
+#include <ASSET/Solvers/NonLinearProgram.h>
 
 void ASSET::NonLinearProgram::make_NLP(int PV, int EQ, int IQ) {
   this->PrimalVars = PV;
@@ -278,7 +277,6 @@ void ASSET::NonLinearProgram::analyzeSparsity(Eigen::SparseMatrix<double, Eigen:
   KKTmat.resize(this->KKTdim, this->KKTdim);
   std::vector<Eigen::Triplet<double>> kktvec(this->numKKTElems, Eigen::Triplet<double>(0, 0, 0.0));
 
-
   auto TripFillOP = [&](int id, int start, int stop) {
     for (int i = start; i < stop; i++) {
       int row = this->KKTcoeffRows[i];
@@ -342,7 +340,6 @@ void ASSET::NonLinearProgram::analyzeSparsity(Eigen::SparseMatrix<double, Eigen:
   // this->make_compressed();
   /////////////////////////////////////////////////////////////
 }
-
 
 void ASSET::NonLinearProgram::evalRHS(double ObjScale,
                                       ConstEigenRef<VectorXd> X,
@@ -468,7 +465,6 @@ void ASSET::NonLinearProgram::evalOBJ(double ObjScale, ConstEigenRef<VectorXd> X
   for (int i = 0; i < this->Threads; i++)
     val += Vals[i];
 }
-
 
 void ASSET::NonLinearProgram::evalKKT(double ObjScale,
                                       ConstEigenRef<VectorXd> X,
@@ -682,7 +678,6 @@ void ASSET::NonLinearProgram::evalAUG(double ObjScale,
   fill.get();
 }
 
-
 void ASSET::NonLinearProgram::NLPTest(const Eigen::VectorXd& x,
                                       int n,
                                       std::shared_ptr<NonLinearProgram> nlp1,
@@ -775,7 +770,6 @@ void ASSET::NonLinearProgram::NLPTest(const Eigen::VectorXd& x,
       int agx_err_idx = 0;
       double AGXIrr = (AGX1 - AGX2).cwiseAbs().maxCoeff(&agx_err_idx);
 
-
       std::cout << "KKTmat Diff:" << maxval << " row: " << maxrow << "  col:" << maxcol << endl;
       std::cout << "FXE Diff:" << FXErr << " row: " << e_err_idx << endl;
       std::cout << "FXI Diff:" << FXIrr << " row: " << i_err_idx << endl;
@@ -810,7 +804,6 @@ void ASSET::NonLinearProgram::NLPTest(const Eigen::VectorXd& x,
   double t2t = double(t2.count<std::chrono::microseconds>()) / 1000.0;
   double t3t = double(t3.count<std::chrono::microseconds>()) / 1000.0;
   double t4t = double(t4.count<std::chrono::microseconds>()) / 1000.0;
-
 
   cout << t1t / double(n) << " ms" << endl;
   cout << t2t / double(n) << " ms" << endl;

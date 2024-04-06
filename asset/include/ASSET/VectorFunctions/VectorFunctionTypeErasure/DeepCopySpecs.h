@@ -28,7 +28,7 @@ in the LICENSE file in ASSET's top level directory.
 
 #pragma once
 
-#include "pch.h"
+#include <ASSET/pch.h>
 
 namespace ASSET {
 

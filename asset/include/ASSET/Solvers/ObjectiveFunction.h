@@ -20,11 +20,11 @@ in the LICENSE file in ASSET's top level directory.
 
 */
 
-
 #pragma once
 
+#include <ASSET/pch.h>
+
 #include "SolverFunctionBase.h"
-#include "pch.h"
 
 namespace ASSET {
 

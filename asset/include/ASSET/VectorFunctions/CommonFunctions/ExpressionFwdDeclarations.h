@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Utils/SizingHelpers.h"
-#include "pch.h"
+#include <ASSET/Utils/SizingHelpers.h>
+#include <ASSET/pch.h>
 
 namespace ASSET {
 
@@ -130,7 +130,6 @@ namespace ASSET {
   template<class Func, int Rows, int Cols>
   struct MatrixFunction;
 
-
   template<class Func, int MRows, int MCols, int MMajor>
   struct MatrixFunctionView;
   template<class MatFunc1, class MatFunc2>
@@ -138,7 +137,6 @@ namespace ASSET {
 
   template<int Size, int Major>
   struct MatrixInverse;
-
 
   ///////////////////////////////////////////////////////////////////////////////////////
   template<class Func>
@@ -149,7 +147,6 @@ namespace ASSET {
 
   template<class Func, int MRows>
   struct MatrixScaled;
-
 
   template<class Func, class Value>
   struct StaticScaled;
@@ -203,7 +200,6 @@ namespace ASSET {
   template<class Func>
   struct CwiseTanH;
 
-
   template<class Func>
   struct CwiseArcSinH;
 
@@ -216,16 +212,13 @@ namespace ASSET {
   template<class Func>
   struct CwiseAbs;
 
-
   struct ArcTan2Op;
 
   template<class YFunc, class XFunc>
   struct ArcTan2;
 
-
   template<class Func>
   struct SignFunction;
-
 
   ///////////////////////////////////////////////////////////////////////////////////////
 

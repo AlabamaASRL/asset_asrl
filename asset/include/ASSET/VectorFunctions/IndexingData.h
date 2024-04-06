@@ -22,8 +22,10 @@ in the LICENSE file in ASSET's top level directory.
 */
 
 #pragma once
+
+#include <ASSET/pch.h>
+
 #include "FunctionalFlags.h"
-#include "pch.h"
 
 namespace ASSET {
 
@@ -80,7 +82,6 @@ namespace ASSET {
     /// where the derivatives of the ith call to a function should be summed into the global KKT matrix.
     /// </summary>
     VectorXi InnerKKTStarts;
-
 
     SolverIndexingData() {
     }
