@@ -1,10 +1,8 @@
 #pragma once
 
-
 namespace ASSET {
 
   struct IterateInfo {
-
 
     int iter = 0;
 

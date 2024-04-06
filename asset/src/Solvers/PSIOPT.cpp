@@ -1,8 +1,5 @@
-#include "PSIOPT.h"
-
+#include <ASSET/Solvers/PSIOPT.h>
 #include <mkl.h>
-
-#include "PyDocString/Solvers/PSIOPT_doc.h"
 
 void ASSET::PSIOPT::setNLP(std::shared_ptr<NonLinearProgram> np) {
   this->nlp = np;
@@ -13,7 +10,6 @@ void ASSET::PSIOPT::setNLP(std::shared_ptr<NonLinearProgram> np) {
   this->KKTdim = this->nlp->KKTdim;
   this->setQPParams();
   mkl_set_num_threads(QPThreads);
-
 
   this->nlp->analyzeSparsity(this->KKTSol.getMatrix());
   if (storespmat)
@@ -65,7 +61,6 @@ void ASSET::PSIOPT::fill_iter_info(Eigen::Ref<Eigen::VectorXd> XSL,
                                    double bobj,
                                    double mu,
                                    IterateInfo& iter) const {
-
 
   iter.PrimObj = pobj;
   iter.BarrObj = bobj;
@@ -139,7 +134,6 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::PSIOPT::convergeCheck(std::vector<Iterate
   bool EConDiv = (last.EConInf > this->DivEContol) || !std::isfinite(last.EConInf);
   bool IConDiv = (last.IConInf > this->DivIContol) || !std::isfinite(last.IConInf);
   bool BarDiv = (last.BarrInf > this->DivBartol) || !std::isfinite(last.BarrInf);
-
 
   if (KKTDiv || EConDiv || IConDiv || BarDiv) {
     Flag = ConvergenceFlags::DIVERGING;
@@ -231,8 +225,6 @@ void ASSET::PSIOPT::print_stats() {
       "{:.6f}%\n",
       100.0 * double(this->KKTSol.getMatrix().nonZeros()) / (double(this->KKTdim) * double(this->KKTdim)));
   fmt::print("\n");
-
-  
 }
 
 void ASSET::PSIOPT::print_last_iterate(const std::vector<IterateInfo>& iters) {
@@ -252,14 +244,12 @@ void ASSET::PSIOPT::print_last_iterate(const std::vector<IterateInfo>& iters) {
     auto tst = "|Iter|Mu Val | Prim Obj |KKT Inf |ECon Inf|ICon Inf|AlphaM |LS|PPS|HF| HPert |\n";
   }
 
-
   fmt::text_style PHashcol = fmt::text_style();
   fmt::text_style EHashcol = fmt::text_style();
   fmt::text_style IHashcol = fmt::text_style();
   fmt::text_style KHashcol = fmt::text_style();
   fmt::text_style BHashcol = fmt::text_style();
   fmt::text_style BOHashcol = fmt::text_style();
-
 
   fmt::text_style Kcol = calculate_color(last.KKTInf, this->KKTtol, this->AccKKTtol);
   fmt::text_style Bcol = calculate_color(last.BarrInf, this->Bartol, this->AccBartol);
@@ -278,7 +268,6 @@ void ASSET::PSIOPT::print_last_iterate(const std::vector<IterateInfo>& iters) {
     IHashcol = (iters.back().IConInf <= iters[iters.size() - 2].IConInf) ? GCol : BCol;
     KHashcol = (iters.back().KKTInf <= iters[iters.size() - 2].KKTInf) ? GCol : BCol;
   }
-
 
   auto hash = []() { fmt::print("|"); };
   auto chash = [](fmt::text_style c) { fmt::print(c, "|"); };
@@ -349,7 +338,6 @@ void ASSET::PSIOPT::print_ExitStats(ConvergenceFlags ExitCode,
   fmt::text_style Bcol = calculate_color(last.BarrInf, this->Bartol, this->AccBartol);
   fmt::text_style Ecol = calculate_color(last.EConInf, this->EContol, this->AccEContol);
   fmt::text_style Icol = calculate_color(last.IConInf, this->IContol, this->AccIContol);
-
 
   int iternum = int(iters.size());
   double printtime = tottime - nlptime - qptime;
@@ -453,11 +441,12 @@ int ASSET::PSIOPT::factor_impl(
     IncEigs = Inertia();
     finalpert = p;
 
-
     if (IncEigs <= 0)
       return i + 1;
-    if (i == 0) p *= incpurt0;
-    else p *= incpurt;
+    if (i == 0)
+      p *= incpurt0;
+    else
+      p *= incpurt;
     p -= finalpert;
   }
   return this->MaxRefac;
@@ -513,10 +502,6 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
     /////////////////////////////////////////////////////////////
 
     this->evalNLP(algmode, ObjScale, XSL, PrimObj, PGX, RHS, this->KKTSol.getMatrix());
-
-
-    
-
 
     if (this->InequalCons > 0) {
       this->apply_reset_slacks(this->getSlacks(XSL), this->getIqCons(RHS));
@@ -609,8 +594,6 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
       Citer.Hfacs = -1;
     }
 
-
-
     //////////////////////////////////////////////////////////////////////
     Funtimer.stop();
 
@@ -630,15 +613,13 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
     ExitCode = this->convergeCheck(iters);
     if (!GoodStep)
       ExitCode = ConvergenceFlags::DIVERGING;
-      
+
     if (this->PrintLevel == 0) {
       this->print_last_iterate(iters);
     }
 
-    if (ExitCode == ConvergenceFlags::CONVERGED 
-        || ExitCode == ConvergenceFlags::ACCEPTABLE
-        || ExitCode == ConvergenceFlags::DIVERGING 
-        || i == (this->MaxIters - 1) ) {
+    if (ExitCode == ConvergenceFlags::CONVERGED || ExitCode == ConvergenceFlags::ACCEPTABLE
+        || ExitCode == ConvergenceFlags::DIVERGING || i == (this->MaxIters - 1)) {
 
       this->ConvergeFlag = ExitCode;
       break;
@@ -658,17 +639,14 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
     Funtimer.stop();
   }
 
-
   if (this->EqualCons > 0) {
     this->LastEqCons = this->getEqCons(RHS);
     this->LastEqLmults = this->getEqLmults(XSL);
-
   }
   if (this->InequalCons > 0) {
     this->LastIqCons = this->getIqCons(RHS) - this->getSlacks(XSL);
     this->LastIqLmults = this->getIqLmults(XSL);
   }
-
 
   Runtimer.stop();
   this->LastIterNum += iters.size();
@@ -688,7 +666,6 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
 }
 
 Eigen::VectorXd ASSET::PSIOPT::init_impl(const Eigen::VectorXd& x, double Mu, bool docompute) {
-
 
   Utils::Timer kktt;
   kktt.start();
@@ -769,7 +746,6 @@ Eigen::VectorXd ASSET::PSIOPT::init_impl(const Eigen::VectorXd& x, double Mu, bo
   return XSL;
 }
 
-
 double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
                               double ObjScale,
                               double Mu,
@@ -783,12 +759,10 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
                               IterateInfo& Citer,
                               const std::vector<IterateInfo>& iters) {
 
-
   // Do not modify RHS,XSL,DXSL. EigenRef<VectorXd> doesnt like to be explicitly const in this instance,
   // I will fix this later in refactor
 
   double alpha = 1.0;
-
 
   if (lsmode == LineSearchModes::LANG) {
     double LangInit = PrimObj + BarrObj + this->getLmults(XSL).dot(this->getAllCons(RHS));
@@ -848,8 +822,7 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
       LangTest += TestL1Pen + TestL2Pen * sc;
 
       Citer.MeritVal = LangTest;
-      if (LangTest < LangInit 
-          || (ptest < PrimObj) && (TestL2Pen < InitL2Pen)
+      if (LangTest < LangInit || (ptest < PrimObj) && (TestL2Pen < InitL2Pen)
           || (ptest < PrimObj) && (TestLinfPenalty < InitLinfPenalty)) {
         Citer.LSiters = j;
         break;
@@ -859,7 +832,6 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
       }
     }
   } else if (lsmode == LineSearchModes::AUGLANG) {
-
 
     double vv = this->getPrimDualGrad(RHS).dot(this->getPrimalsSlacks(DXSL));
     double cv = this->getLmults(DXSL).dot(this->getAllCons(RHS));
@@ -911,7 +883,6 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
         }
       }
 
-
       double TestL2Pen = this->getAllCons(RHS2).squaredNorm();
       double TestLinfPenalty = this->getAllCons(RHS2).lpNorm<Eigen::Infinity>();
 
@@ -934,13 +905,10 @@ double ASSET::PSIOPT::ls_impl(LineSearchModes lsmode,
   } else
     Citer.LSiters = 0;
 
-
   return alpha;
 }
 
-
 Eigen::VectorXd ASSET::PSIOPT::optimize(const Eigen::VectorXd& x) {
-
 
   this->zero_timing_stats();
 
@@ -966,8 +934,6 @@ Eigen::VectorXd ASSET::PSIOPT::optimize(const Eigen::VectorXd& x) {
   if (this->PrintLevel < 2) {
     print_Finished("Optimization Algorithm ");
   }
-
- 
 
   t.stop();
   double tottime = double(t.count<std::chrono::microseconds>()) / 1000.0;
@@ -1031,7 +997,6 @@ Eigen::VectorXd ASSET::PSIOPT::solve_optimize(const Eigen::VectorXd& x) {
     print_Header();
   }
 
-  
   return this->getPrimals(XSLans);
 }
 
@@ -1099,7 +1064,6 @@ Eigen::VectorXd ASSET::PSIOPT::solve_optimize_solve(const Eigen::VectorXd& x) {
     print_Header();
   }
 
- 
   return this->getPrimals(XSLans);
 }
 
@@ -1157,7 +1121,6 @@ Eigen::VectorXd ASSET::PSIOPT::optimize_solve(const Eigen::VectorXd& x) {
     print_Header();
   }
 
-  
   return this->getPrimals(XSLans);
 }
 
@@ -1195,219 +1158,6 @@ Eigen::VectorXd ASSET::PSIOPT::solve(const Eigen::VectorXd& x) {
     print_Finished("PSIOPT ");
     print_Header();
   }
-  
 
   return this->getPrimals(XSLans);
-}
-
-void ASSET::PSIOPT::Build(py::module& m) {
-  using namespace doc;
-  auto obj = py::class_<PSIOPT, std::shared_ptr<PSIOPT>>(m, "PSIOPT");
-  obj.def(py::init<std::shared_ptr<NonLinearProgram>>());
-  obj.def(py::init<>());
-
-  obj.def("optimize", &PSIOPT::optimize, PSIOPT_optimize);
-  obj.def("solve_optimize", &PSIOPT::solve_optimize, PSIOPT_solve_optimize);
-  obj.def("solve", &PSIOPT::solve, PSIOPT_solve);
-  obj.def("setQPParams", &PSIOPT::setQPParams);
-
-  obj.def_readwrite("MaxIters", &PSIOPT::MaxIters, PSIOPT_MaxIters);
-  obj.def_readwrite("MaxAccIters", &PSIOPT::MaxAccIters, PSIOPT_MaxAccIters);
-  obj.def_readwrite("MaxLSIters", &PSIOPT::MaxLSIters, PSIOPT_MaxLSIters);
-
-  obj.def("set_MaxIters", &PSIOPT::set_MaxIters);
-  obj.def("set_MaxAccIters", &PSIOPT::set_MaxAccIters);
-  obj.def("set_MaxLSIters", &PSIOPT::set_MaxLSIters);
-
-
-  obj.def_readwrite("alphaRed", &PSIOPT::alphaRed, PSIOPT_alphaRed);
-  obj.def("set_alphaRed", &PSIOPT::set_alphaRed);
-
-
-  obj.def_readwrite("WideConsole", &PSIOPT::WideConsole);
-
-
-  obj.def_readwrite("FastFactorAlg", &PSIOPT::FastFactorAlg, PSIOPT_FastFactorAlg);
-
-
-  obj.def_readwrite("LastTotalTime", &PSIOPT::LastTotalTime, PSIOPT_LastUserTime);
-  obj.def_readwrite("LastPreTime", &PSIOPT::LastPreTime, PSIOPT_LastUserTime);
-  obj.def_readwrite("LastFuncTime", &PSIOPT::LastFuncTime, PSIOPT_LastUserTime);
-  obj.def_readwrite("LastKKTTime", &PSIOPT::LastKKTTime, PSIOPT_LastQPTime);
-  obj.def_readwrite("LastMiscTime", &PSIOPT::LastMiscTime, PSIOPT_LastQPTime);
-  obj.def_readwrite("LastIterNum", &PSIOPT::LastIterNum, PSIOPT_LastIterNum);
-  obj.def_readwrite("LastObjVal", &PSIOPT::LastObjVal);
-
-
-  obj.def_readwrite("ObjScale", &PSIOPT::ObjScale, PSIOPT_ObjScale);
-  obj.def_readwrite("PrintLevel", &PSIOPT::PrintLevel, PSIOPT_PrintLevel);
-  obj.def("set_PrintLevel", &PSIOPT::set_PrintLevel);
-
-
-  obj.def_readwrite("ConvergeFlag", &PSIOPT::ConvergeFlag);
-
-  obj.def("get_ConvergenceFlag", &PSIOPT::get_ConvergenceFlag);
-
-
-  obj.def_readwrite("KKTtol", &PSIOPT::KKTtol, PSIOPT_KKTtol);
-  obj.def_readwrite("Bartol", &PSIOPT::Bartol, PSIOPT_Bartol);
-  obj.def_readwrite("EContol", &PSIOPT::EContol, PSIOPT_EContol);
-  obj.def_readwrite("IContol", &PSIOPT::IContol, PSIOPT_IContol);
-
-  obj.def("set_KKTtol", &PSIOPT::set_KKTtol);
-  obj.def("set_Bartol", &PSIOPT::set_Bartol);
-  obj.def("set_EContol", &PSIOPT::set_EContol);
-  obj.def("set_IContol", &PSIOPT::set_IContol);
-
-  obj.def("set_tols",
-          &PSIOPT::set_tols,
-          py::arg("KKTtol") = 1.0e-6,
-          py::arg("EContol") = 1.0e-6,
-          py::arg("IContol") = 1.0e-6,
-          py::arg("Bartol") = 1.0e-6);
-
-
-  obj.def_readwrite("AccKKTtol", &PSIOPT::AccKKTtol, PSIOPT_AccKKTtol);
-  obj.def_readwrite("AccBartol", &PSIOPT::AccBartol, PSIOPT_AccBartol);
-  obj.def_readwrite("AccEContol", &PSIOPT::AccEContol, PSIOPT_AccEContol);
-  obj.def_readwrite("AccIContol", &PSIOPT::AccIContol, PSIOPT_AccIContol);
-
-  obj.def("set_AccKKTtol", &PSIOPT::set_AccKKTtol);
-  obj.def("set_AccBartol", &PSIOPT::set_AccBartol);
-  obj.def("set_AccEContol", &PSIOPT::set_AccEContol);
-  obj.def("set_AccIContol", &PSIOPT::set_AccIContol);
-
-
-  obj.def("set_Acctols",
-          &PSIOPT::set_Acctols,
-          py::arg("AccKKTtol") = 1.0e-2,
-          py::arg("AccEContol") = 1.0e-3,
-          py::arg("AccIContol") = 1.0e-3,
-          py::arg("AccBartol") = 1.0e-3);
-
-
-  obj.def_readwrite("DivKKTtol", &PSIOPT::DivKKTtol, PSIOPT_DivKKTtol);
-  obj.def_readwrite("DivBartol", &PSIOPT::DivBartol, PSIOPT_DivBartol);
-  obj.def_readwrite("DivEContol", &PSIOPT::DivEContol, PSIOPT_DivEContol);
-  obj.def_readwrite("DivIContol", &PSIOPT::DivIContol, PSIOPT_DivIContol);
-
-  obj.def("set_DivKKTtol", &PSIOPT::set_DivKKTtol);
-  obj.def("set_DivBartol", &PSIOPT::set_DivBartol);
-  obj.def("set_DivEContol", &PSIOPT::set_DivEContol);
-  obj.def("set_DivIContol", &PSIOPT::set_DivIContol);
-
-
-  obj.def_readwrite("NegSlackReset", &PSIOPT::NegSlackReset, PSIOPT_NegSlackReset);
-
-  obj.def_readwrite("BoundFraction", &PSIOPT::BoundFraction, PSIOPT_BoundFraction);
-  obj.def("set_BoundFraction", &PSIOPT::set_BoundFraction);
-
-  obj.def_readwrite("BoundPush", &PSIOPT::BoundPush, PSIOPT_BoundPush);
-
-  /////////////////////////////////////////////////////////////
-
-  obj.def_readwrite("deltaH", &PSIOPT::deltaH, PSIOPT_deltaH);
-  obj.def_readwrite("incrH", &PSIOPT::incrH, PSIOPT_incrH);
-  obj.def_readwrite("decrH", &PSIOPT::decrH, PSIOPT_decrH);
-
-  obj.def("set_deltaH", &PSIOPT::set_deltaH);
-  obj.def("set_incrH", &PSIOPT::set_incrH);
-  obj.def("set_decrH", &PSIOPT::set_decrH);
-
-  obj.def("set_HpertParams", &PSIOPT::set_HpertParams, py::arg("deltaH"), py::arg("incrH"), py::arg("decrH"));
-
-
-  /////////////////////////////////////////////////////////////
-  obj.def_readwrite("initMu", &PSIOPT::initMu, PSIOPT_initMu);
-  obj.def_readwrite("MinMu", &PSIOPT::MinMu, PSIOPT_MinMu);
-  obj.def_readwrite("MaxMu", &PSIOPT::MaxMu, PSIOPT_MaxMu);
-
-  obj.def_readwrite("MaxSOC", &PSIOPT::MaxSOC, PSIOPT_MaxSOC);
-
-
-  obj.def_readwrite("PDStepStrategy", &PSIOPT::PDStepStrategy, PSIOPT_PDStepStrategy);
-  obj.def_readwrite("SOEboundRelax", &PSIOPT::SOEboundRelax, PSIOPT_SOEboundRelax);
-  obj.def_readwrite("QPParSolve", &PSIOPT::QPParSolve, PSIOPT_QPParSolve);
-
-  obj.def_readwrite("SoeMode", &PSIOPT::SoeMode, PSIOPT_SoeMode);
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
-  obj.def_readwrite("OptBarMode", &PSIOPT::OptBarMode, PSIOPT_OptBarMode);
-  obj.def_readwrite("SoeBarMode", &PSIOPT::SoeBarMode, PSIOPT_SoeBarMode);
-
-  obj.def("set_OptBarMode", py::overload_cast<BarrierModes>(&PSIOPT::set_OptBarMode));
-  obj.def("set_OptBarMode", py::overload_cast<const std::string&>(&PSIOPT::set_OptBarMode));
-  obj.def("set_SoeBarMode", py::overload_cast<BarrierModes>(&PSIOPT::set_SoeBarMode));
-  obj.def("set_SoeBarMode", py::overload_cast<const std::string&>(&PSIOPT::set_SoeBarMode));
-
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  obj.def_readwrite("OptLSMode", &PSIOPT::OptLSMode, PSIOPT_OptLSMode);
-  obj.def_readwrite("SoeLSMode", &PSIOPT::SoeLSMode, PSIOPT_SoeLSMode);
-
-  obj.def("set_OptLSMode", py::overload_cast<LineSearchModes>(&PSIOPT::set_OptLSMode));
-  obj.def("set_OptLSMode", py::overload_cast<const std::string&>(&PSIOPT::set_OptLSMode));
-  obj.def("set_SoeLSMode", py::overload_cast<LineSearchModes>(&PSIOPT::set_SoeLSMode));
-  obj.def("set_SoeLSMode", py::overload_cast<const std::string&>(&PSIOPT::set_SoeLSMode));
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
-  obj.def_readwrite("ForceQPanalysis", &PSIOPT::ForceQPanalysis, PSIOPT_ForceQPanalysis);
-  obj.def_readwrite("QPRefSteps", &PSIOPT::QPRefSteps, PSIOPT_QPRefSteps);
-
-  obj.def_readwrite("QPPivotPerturb", &PSIOPT::QPPivotPerturb, PSIOPT_QPPivotPerturb);
-  obj.def_readwrite("QPThreads", &PSIOPT::QPThreads, PSIOPT_QPThreads);
-  obj.def_readwrite("QPPivotStrategy", &PSIOPT::QPPivotStrategy, PSIOPT_QPPivotStrategy);
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  obj.def_readwrite("QPOrderingMode", &PSIOPT::QPOrd, PSIOPT_QPOrd);
-
-  obj.def("set_QPOrderingMode", py::overload_cast<QPOrderingModes>(&PSIOPT::set_QPOrderingMode));
-  obj.def("set_QPOrderingMode", py::overload_cast<const std::string&>(&PSIOPT::set_QPOrderingMode));
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  obj.def_readwrite("QPPrint", &PSIOPT::QPPrint);
-
-  obj.def_readwrite("Diagnostic", &PSIOPT::Diagnostic);
-
-
-  obj.def_readwrite("storespmat", &PSIOPT::storespmat, PSIOPT_storespmat);
-  obj.def("getSPmat", &PSIOPT::getSPmat, PSIOPT_getSPmat);
-  obj.def("getSPmat2", &PSIOPT::getSPmat2, PSIOPT_getSPmat2);
-
-  obj.def_readwrite("CNRMode", &PSIOPT::CNRMode, PSIOPT_CNRMode);
-
-
-  py::enum_<BarrierModes>(m, "BarrierModes")
-      .value("PROBE", BarrierModes::PROBE)
-      .value("LOQO", BarrierModes::LOQO);
-  py::enum_<LineSearchModes>(m, "LineSearchModes")
-      .value("AUGLANG", LineSearchModes::AUGLANG)
-      .value("LANG", LineSearchModes::LANG)
-      .value("L1", LineSearchModes::L1)
-      .value("NOLS", LineSearchModes::NOLS);
-  py::enum_<QPPivotModes>(m, "QPPivotModes")
-      .value("OneByOne", QPPivotModes::OneByOne)
-      .value("TwoByTwo", QPPivotModes::TwoByTwo);
-  py::enum_<PDStepStrategies>(m, "PDStepStrategies")
-      .value("PrimSlackEq_Iq", PDStepStrategies::PrimSlackEq_Iq)
-      .value("AllMinimum", PDStepStrategies::AllMinimum)
-      .value("PrimSlack_EqIq", PDStepStrategies::PrimSlack_EqIq)
-      .value("MaxEq", PDStepStrategies::MaxEq);
-  py::enum_<ConvergenceFlags>(m, "ConvergenceFlags", py::arithmetic())
-      .value("CONVERGED", ConvergenceFlags::CONVERGED)
-      .value("ACCEPTABLE", ConvergenceFlags::ACCEPTABLE)
-      .value("NOTCONVERGED", ConvergenceFlags::NOTCONVERGED)
-      .value("DIVERGING", ConvergenceFlags::DIVERGING);
-  py::enum_<AlgorithmModes>(m, "AlgorithmModes")
-      .value("OPT", AlgorithmModes::OPT)
-      .value("OPTNO", AlgorithmModes::OPTNO)
-      .value("SOE", AlgorithmModes::SOE)
-      .value("INIT", AlgorithmModes::INIT);
-
-  py::enum_<QPOrderingModes>(m, "QPOrderingModes")
-      .value("MINDEG", QPOrderingModes::MINDEG)
-      .value("METIS", QPOrderingModes::METIS)
-      .value("PARMETIS", QPOrderingModes::PARMETIS);
 }

@@ -1,17 +1,17 @@
-
 #pragma once
+
+#include <ASSET/Utils/ColorText.h>
+#include <ASSET/pch.h>
+
 #include "IterateInfo.h"
 #include "NonLinearProgram.h"
 #include "PardisoInterface.h"
-#include "Utils/ColorText.h"
-#include "pch.h"
 
 namespace ASSET {
 
   struct IterateInfo;
 
   struct PSIOPT {
-
 
     enum BarrierModes {
       PROBE,
@@ -65,7 +65,6 @@ namespace ASSET {
       MaxEq
     };
 
-
     static QPOrderingModes strto_OrderingMode(const std::string& str) {
 
       if (str.compare("MINDEG") == 0)
@@ -115,7 +114,6 @@ namespace ASSET {
       }
     }
 
-
     using VectorXd = Eigen::VectorXd;
     std::shared_ptr<NonLinearProgram> nlp;
 
@@ -139,7 +137,6 @@ namespace ASSET {
       this->QPOrd = strto_OrderingMode(str);
     }
 
-
     int QPMatching = 1;
     int QPScaling = 0;
     int QPPivotPerturb = 8;
@@ -149,7 +146,6 @@ namespace ASSET {
     bool ForceQPanalysis = false;
     bool Diagnostic = false;
     int QPParSolve = 0;
-
 
     /////////////////////////////////////////////////////////////////////
     int MaxIters = 500;
@@ -179,7 +175,6 @@ namespace ASSET {
       set_MaxAccIters(m2);
     }
 
-
     int MaxRefac = 15;
 
     int MaxSOC = 1;
@@ -203,7 +198,6 @@ namespace ASSET {
       this->SoeBarMode = strto_BarrierMode(str);
     }
 
-
     LineSearchModes OptLSMode = LineSearchModes::AUGLANG;
     LineSearchModes SoeLSMode = LineSearchModes::NOLS;
 
@@ -219,7 +213,6 @@ namespace ASSET {
     void set_SoeLSMode(const std::string& str) {
       this->SoeLSMode = strto_LineSearchMode(str);
     }
-
 
     double MaxCPUtime = 1200;
     double ObjScale = 1.0;
@@ -309,11 +302,9 @@ namespace ASSET {
       this->set_DivBartol(DivBartol);
     }
 
-
     /////////////////////////////////////////////////////////////////////////
 
     double ExObjVal = -1.0e20;
-
 
     double BoundFraction = 0.99;
 
@@ -379,7 +370,6 @@ namespace ASSET {
       return this->ConvergeFlag;
     }
 
-
     double initMu = 0.001;
     double MaxMu = 100.0;
     double MinMu = 1.0e-12;
@@ -412,7 +402,6 @@ namespace ASSET {
       this->LastIterNum = 0;
     }
 
-
     bool WideConsole = false;
     int FactorMem = 0;
     int FactorFlops = 0;
@@ -421,8 +410,6 @@ namespace ASSET {
 
     Eigen::VectorXd LastEqCons;
     Eigen::VectorXd LastIqCons;
-
-
 
     /////////////////////////////////////////////////////////////////////
 
@@ -461,7 +448,6 @@ namespace ASSET {
       this->LastEqLmults.resize(0);
       this->LastIqLmults.resize(0);
     }
-
 
     void setNLP(std::shared_ptr<NonLinearProgram> np);
     Eigen::MatrixXd getSPmat() {
@@ -786,9 +772,7 @@ namespace ASSET {
                              double MuI,
                              Eigen::Ref<Eigen::VectorXd> xsl);
 
-
     Eigen::VectorXd init_impl(const Eigen::VectorXd& x, double Mu, bool docompute);
-
 
     double ls_impl(LineSearchModes lsmode,
                    double ObjScale,
@@ -803,7 +787,6 @@ namespace ASSET {
                    IterateInfo& Citer,
                    const std::vector<IterateInfo>& iters);
 
-
     Eigen::VectorXd optimize(const Eigen::VectorXd& x);
 
     Eigen::VectorXd solve_optimize(const Eigen::VectorXd& x);
@@ -812,10 +795,7 @@ namespace ASSET {
 
     Eigen::VectorXd optimize_solve(const Eigen::VectorXd& x);
 
-
     Eigen::VectorXd solve(const Eigen::VectorXd& x);
-
-    static void Build(py::module& m);
   };
 
 }  // namespace ASSET

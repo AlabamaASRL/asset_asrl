@@ -24,3 +24,4 @@ target_include_directories(bind-pch PUBLIC
 )
 
 add_subdirectory(Utils)
+add_subdirectory(Solvers)
