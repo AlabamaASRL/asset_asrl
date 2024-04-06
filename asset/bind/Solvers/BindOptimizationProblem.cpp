@@ -1,6 +1,6 @@
 #include <bind/Solvers/BindOptimizationProblem.h>
 
-static void ASSET::BindOptimizationProblem(py::module& m) {
+void ASSET::BindOptimizationProblem(py::module& m) {
   using VectorFunctionalX = GenericFunction<-1, -1>;
   using ScalarFunctionalX = GenericFunction<-1, 1>;
   using VectorXi = Eigen::VectorXi;

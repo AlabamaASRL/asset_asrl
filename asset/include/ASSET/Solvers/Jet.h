@@ -4,9 +4,7 @@
 
 namespace ASSET {
 
-
   struct Jet {
-
 
     static void print_beginning() {
       std::string jestr("          __  ______  ______\n"
@@ -14,7 +12,6 @@ namespace ASSET {
                         "    __  / / / __/     / /   \n"
                         "   / /_/ / / /___    / /    \n"
                         "   \\____/ /_____/   /_/     \n\n");
-
 
       fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 79);
       fmt::print(fmt::fg(fmt::color::crimson), jestr);
@@ -33,7 +30,6 @@ namespace ASSET {
       auto cyan = fmt::fg(fmt::color::cyan);
       auto green = fmt::fg(fmt::color::green);
 
-
       auto sminhrs = [cyan](double ts) {
         if (ts < 60.0) {
           fmt::print(cyan, "{0:>10.2f} s     \n", ts);
@@ -45,7 +41,6 @@ namespace ASSET {
       };
 
       fmt::print("\n");
-
 
       fmt::print(" Remaining Time : ");
       sminhrs(remtime);
@@ -77,14 +72,12 @@ namespace ASSET {
 
     static void print_finished() {
 
-
       fmt::print(fmt::fg(fmt::color::dim_gray), "Finished ");
       fmt::print(": ");
       fmt::print(fmt::fg(fmt::color::royal_blue), "Jet");
       fmt::print("\n");
       fmt::print(fmt::fg(fmt::color::white), "{0:=^{1}}\n", "", 79);
     }
-
 
     ////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////// Map///////////////////////////////////////////////////
@@ -96,7 +89,6 @@ namespace ASSET {
         const Eigen::VectorXi& genfidxes,
         int nt,
         bool verbose) {
-
 
       int NumJobs = args.size();
       int NumConv = 0;
@@ -113,6 +105,7 @@ namespace ASSET {
         mkl_set_num_threads_local(1);
 
         int gfidx = genfidxes[i];
+        // TODO(wgl): How to extract py::args? Can all of Jet go in the bind directory?
         if constexpr (std::is_same_v<Args2, py::args>) {
           optprobs[i] = genfuncs[gfidx](*args[i]);
         } else {
@@ -150,7 +143,6 @@ namespace ASSET {
       return optprobs;
     }
 
-
     template<class T, class Args1, class Args2>
     static std::vector<std::shared_ptr<T>> map(std::function<std::shared_ptr<T>(Args1)> genfunc,
                                                const std::vector<Args2>& args,
@@ -171,51 +163,12 @@ namespace ASSET {
                                                int nt,
                                                bool verbose) {
 
-
       std::function<std::shared_ptr<T>(std::shared_ptr<T>)> genfunc = [](std::shared_ptr<T> optprob) {
         return optprob;
       };
 
-
       return Jet::map(genfunc, optprobs, nt, verbose);
     }
-    ////////////////////////////////////////////////////////////////////////////////////
-
-    static void Build(py::module& m) {
-
-      auto obj = py::class_<Jet>(m, "Jet");
-
-      obj.def_static(
-          "map",
-          [](const std::vector<std::shared_ptr<OptimizationProblemBase>>& optprobs, int nt) {
-            return Jet::map(optprobs, nt, true);
-          },
-          py::call_guard<py::gil_scoped_release>());
-
-      obj.def_static(
-          "map",
-          [](std::function<std::shared_ptr<OptimizationProblemBase>(py::detail::args_proxy)> genfun,
-             const std::vector<py::args>& args,
-             int nt) { return Jet::map(genfun, args, nt, true); },
-          py::call_guard<py::gil_scoped_release>());
-
-
-      obj.def_static(
-          "map",
-          [](const std::vector<std::shared_ptr<OptimizationProblemBase>>& optprobs, int nt, bool v) {
-            return Jet::map(optprobs, nt, v);
-          },
-          py::call_guard<py::gil_scoped_release>());
-
-      obj.def_static(
-          "map",
-          [](std::function<std::shared_ptr<OptimizationProblemBase>(py::detail::args_proxy)> genfun,
-             const std::vector<py::args>& args,
-             int nt,
-             bool v) { return Jet::map(genfun, args, nt, v); },
-          py::call_guard<py::gil_scoped_release>());
-    }
   };
-
 
 }  // namespace ASSET

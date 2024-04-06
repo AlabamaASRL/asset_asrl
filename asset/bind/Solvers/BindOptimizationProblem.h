@@ -5,6 +5,6 @@
 
 namespace ASSET {
 
-  static void BindOptimizationProblem(py::module&);
+  void BindOptimizationProblem(py::module&);
 
 }

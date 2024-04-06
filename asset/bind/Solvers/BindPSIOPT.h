@@ -5,6 +5,6 @@
 
 namespace ASSET {
 
-  static void BindPSIOPT(py::module&);
+  void BindPSIOPT(py::module&);
 
 }

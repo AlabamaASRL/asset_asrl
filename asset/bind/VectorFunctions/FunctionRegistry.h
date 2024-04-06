@@ -1,7 +1,7 @@
 #pragma once
 
-#include "VectorFunctionTypeErasure/GenericFunction.h"
-#include "pch.h"
+#include <ASSET/VectorFunctions/VectorFunctionTypeErasure/GenericFunction.h>
+#include <bind/pch.h>
 
 namespace ASSET {
 
@@ -15,7 +15,7 @@ namespace ASSET {
 
   struct FunctionRegistry {
     using VectorFunctionalX = GenericFunction<-1, -1>;
-    using ScalarFunctionalX = GenericFunction<-1,  1>;
+    using ScalarFunctionalX = GenericFunction<-1, 1>;
 
     py::module& mod;
     py::module vfmod;
