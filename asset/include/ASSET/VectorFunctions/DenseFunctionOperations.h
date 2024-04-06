@@ -1,7 +1,8 @@
 #pragma once
 
+#include <ASSET/pch.h>
+
 #include "AssigmentTypes.h"
-#include "pch.h"
 
 namespace ASSET {
 
@@ -200,7 +201,6 @@ namespace ASSET {
         int start = SubDomains(0, i);
         int size = SubDomains(1, i);
 
-
         ASSET::symetric_jacobian_product_impl(target_ref.block(start, start, size, size),
                                               left,
                                               right_ref.middleCols(start, size),
@@ -303,7 +303,6 @@ namespace ASSET {
       ASSET::accumulate_impl(target_ref.block(Start2, Start2, Size2, Size2),
                              right_ref.block(Start2, Start2, Size2, Size2),
                              assign);
-
 
     } else {
 

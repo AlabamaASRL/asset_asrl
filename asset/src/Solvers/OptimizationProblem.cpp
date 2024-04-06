@@ -1,4 +1,4 @@
-#include "OptimizationProblem.h"
+#include <ASSET/Solvers/OptimizationProblem.h>
 
 void ASSET::OptimizationProblem::transcribe() {
   this->nlp = std::make_shared<NonLinearProgram>(this->Threads);
@@ -12,10 +12,8 @@ void ASSET::OptimizationProblem::transcribe() {
     throw std::invalid_argument("");
   }
 
-
   int numEqCons = 0;
   int numIqCons = 0;
-
 
   for (auto& func: this->userEqualities) {
     int irows = func.func.IRows();
@@ -70,7 +68,6 @@ void ASSET::OptimizationProblem::transcribe() {
       }
     }
 
-
     this->nlp->InequalityConstraints.emplace_back(ConstraintFunction(func.func, vindex, cindex));
 
     ThreadingFlags ThreadMode =
@@ -105,51 +102,10 @@ void ASSET::OptimizationProblem::transcribe() {
     this->nlp->Objectives.back().ThreadMode = ThreadMode;
   }
 
-
   this->nlp->make_NLP(numVars, numEqCons, numIqCons);
   this->optimizer->setNLP(this->nlp);
 
   //////DO NOT GET RID OF THIS!!!!!!//
   this->doTranscription = false;
   ////////////////////////////////////
-}
-
-void ASSET::OptimizationProblem::Build(py::module& m) {
-
-  auto obj = py::class_<OptimizationProblem, std::shared_ptr<OptimizationProblem>, OptimizationProblemBase>(
-      m, "OptimizationProblem");
-
-  obj.def(py::init<>());
-
-  obj.def("setVars", &OptimizationProblem::setVars);
-  obj.def("returnVars", &OptimizationProblem::returnVars);
-
-
-  obj.def(
-      "addEqualCon",
-      py::overload_cast<VectorFunctionalX, const std::vector<VectorXi>&>(&OptimizationProblem::addEqualCon));
-
-  obj.def("addEqualCon", py::overload_cast<VectorFunctionalX, VectorXi>(&OptimizationProblem::addEqualCon));
-
-
-  obj.def("addInequalCon",
-          py::overload_cast<VectorFunctionalX, const std::vector<VectorXi>&>(
-              &OptimizationProblem::addInequalCon));
-
-  obj.def("addInequalCon",
-          py::overload_cast<VectorFunctionalX, VectorXi>(&OptimizationProblem::addInequalCon));
-
-  obj.def(
-      "addObjective",
-      py::overload_cast<ScalarFunctionalX, const std::vector<VectorXi>&>(&OptimizationProblem::addObjective));
-
-  obj.def("addObjective", py::overload_cast<ScalarFunctionalX, VectorXi>(&OptimizationProblem::addObjective));
-
-
-  /*obj.def("solve", &OptimizationProblem::solve,
-      py::call_guard<py::gil_scoped_release>());
-  obj.def("optimize", &OptimizationProblem::optimize,
-      py::call_guard<py::gil_scoped_release>());
-  obj.def("solve_optimize", &OptimizationProblem::solve_optimize,
-      py::call_guard<py::gil_scoped_release>());*/
 }

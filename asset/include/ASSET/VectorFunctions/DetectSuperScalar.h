@@ -1,5 +1,7 @@
 #pragma once
-#include "pch.h"
+
+#include <ASSET/pch.h>
+
 namespace ASSET {
 
   template<class T>

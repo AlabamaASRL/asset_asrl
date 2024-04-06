@@ -1,14 +1,14 @@
 #pragma once
+
+#include <ASSET/VectorFunctions/VectorFunctionTypeErasure/GenericFunction.h>
+
 #include "NonLinearProgram.h"
 #include "OptimizationProblemBase.h"
 #include "PSIOPT.h"
-#include "VectorFunctions/ASSET_VectorFunctions.h"
-
 
 namespace ASSET {
 
   struct OptimizationProblem : OptimizationProblemBase {
-
 
     using VectorXi = Eigen::VectorXi;
     using MatrixXi = Eigen::MatrixXi;
@@ -35,7 +35,6 @@ namespace ASSET {
     };
     bool EnableVectorization = true;
 
-
     VectorXd ActiveVariables;
     bool MultipliersLoaded = false;
 
@@ -45,7 +44,6 @@ namespace ASSET {
     std::vector<FuncIndexHolder<ConstraintInterface>> userEqualities;
     std::vector<FuncIndexHolder<ConstraintInterface>> userInequalities;
     std::vector<FuncIndexHolder<ObjectiveInterface>> userObjectives;
-
 
     OptimizationProblem() {
       this->setThreads(1, 1);
@@ -72,7 +70,6 @@ namespace ASSET {
         }
       }
     }
-
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +115,6 @@ namespace ASSET {
     ///////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-
     int addObjective(ScalarFunctionalX fun, const std::vector<VectorXi>& indices) {
       this->resetTranscription();
       int index = int(this->userObjectives.size());
@@ -136,7 +132,6 @@ namespace ASSET {
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     void transcribe();
-
 
     void jet_initialize() {
       this->setThreads(1, 1);
@@ -195,9 +190,6 @@ namespace ASSET {
       this->ActiveIqLmults = this->optimizer->LastIqLmults;
       return this->optimizer->ConvergeFlag;
     }
-
-    static void Build(py::module& m);
   };
-
 
 }  // namespace ASSET

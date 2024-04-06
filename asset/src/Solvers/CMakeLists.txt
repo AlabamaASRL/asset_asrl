@@ -11,3 +11,8 @@ target_link_libraries(asset-psiopt PUBLIC
   ${MKL_LIBRARIES}
 )
 target_precompile_headers(asset-psiopt REUSE_FROM asset-pch)
+
+# OptimizationProblem ##########################################################
+add_library(asset-optprob STATIC OptimizationProblem.cpp)
+target_link_libraries(asset-optprob PUBLIC asset-psiopt)
+target_precompile_headers(asset-optprob REUSE_FROM asset-pch)

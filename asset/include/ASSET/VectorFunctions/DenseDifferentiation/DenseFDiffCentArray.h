@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DenseDerivatives.h"
+#include <ASSET/VectorFunctions/DenseDerivatives.h>
 
 namespace ASSET {
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pch.h"
+#include <ASSET/pch.h>
 
 namespace ASSET {
 
@@ -82,7 +82,6 @@ namespace ASSET {
     // CompositeDomain() = default;
   };
 
-
   template<class T, class... Ts>
   struct CompositeDomain<-1, T, Ts...> {
 
@@ -94,7 +93,6 @@ namespace ASSET {
     // CompositeDomain(int ir, T b, Ts... a) {}
     // CompositeDomain() = default;
   };
-
 
   template<int IR>
   struct DomainHolder {

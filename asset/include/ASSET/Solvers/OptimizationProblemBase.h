@@ -1,14 +1,12 @@
 #pragma once
-#include "Solvers/NonLinearProgram.h"
-#include "Solvers/PSIOPT.h"
-#include "pch.h"
 
+#include <ASSET/Solvers/NonLinearProgram.h>
+#include <ASSET/Solvers/PSIOPT.h>
+#include <ASSET/pch.h>
 
 namespace ASSET {
 
-
   struct OptimizationProblemBase {
-
 
     enum JetJobModes {
       NotSet,
@@ -26,7 +24,6 @@ namespace ASSET {
     std::shared_ptr<NonLinearProgram> nlp;
     std::shared_ptr<PSIOPT> optimizer;
 
-
     virtual ~OptimizationProblemBase() = default;
 
     OptimizationProblemBase() {
@@ -39,7 +36,6 @@ namespace ASSET {
     virtual PSIOPT::ConvergenceFlags solve_optimize() = 0;
     virtual PSIOPT::ConvergenceFlags solve_optimize_solve() = 0;
     virtual PSIOPT::ConvergenceFlags optimize_solve() = 0;
-
 
     virtual void initThreads() {
       this->Threads = std::min(ASSET_DEFAULT_FUNC_THREADS, int(std::thread::hardware_concurrency()));
@@ -103,7 +99,6 @@ namespace ASSET {
       return flag;
     }
 
-
     static JetJobModes strto_JetJobMode(const std::string& str) {
 
       if (str == "solve" || str == "Solve")
@@ -131,9 +126,6 @@ namespace ASSET {
     void setJetJobMode(const std::string& str) {
       this->setJetJobMode(strto_JetJobMode(str));
     }
-
-    static void Build(py::module& m);
   };
-
 
 }  // namespace ASSET

@@ -24,9 +24,10 @@ in the LICENSE file in ASSET's top level directory.
 */
 #pragma once
 
-#include "AssigmentTypes.h"
-#include "DetectSuperScalar.h"
-#include "pch.h"
+#include <ASSET/VectorFunctions/AssigmentTypes.h>
+#include <ASSET/VectorFunctions/DetectSuperScalar.h>
+#include <ASSET/pch.h>
+
 namespace ASSET {
 
   template<int IR, int OR>
@@ -53,7 +54,6 @@ namespace ASSET {
 
     template<class Scalar>
     using MatrixBaseRef = Eigen::MatrixBase<Scalar>&;
-
 
     using InType = Eigen::Ref<const Input<double>>;
     using OutType = Eigen::Ref<Output<double>>;
@@ -85,7 +85,6 @@ namespace ASSET {
 
     using SuperLeftJacMatrix = Eigen::Ref<const Eigen::Matrix<ASSET::DefaultSuperScalar, -1, OR>>;
     using SuperRightJacTarget = Eigen::Ref<Eigen::Matrix<ASSET::DefaultSuperScalar, -1, IR>>;
-
 
     struct Concept {  // abstract base class for model.
       virtual ~Concept() = default;
@@ -411,7 +410,6 @@ namespace ASSET {
     struct ExternalInterface : public Container {
       using Container_ = Container;
       using Container_::Container_;
-
 
       /*
       Retemplating and then explicitly casting inputs to Eigen Ref Types. This

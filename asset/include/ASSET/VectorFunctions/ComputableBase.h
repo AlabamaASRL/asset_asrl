@@ -37,20 +37,20 @@ in the LICENSE file in ASSET's top level directory.
 
 */
 
-
 #pragma once
+
+#include <ASSET/Utils/CRTPBase.h>
+#include <ASSET/Utils/SizingHelpers.h>
+#include <ASSET/pch.h>
+
 #include "DetectSuperScalar.h"
 #include "FunctionalFlags.h"
 #include "IndexingData.h"
 #include "InputOuputSize.h"
-#include "Utils/CRTPBase.h"
-#include "Utils/SizingHelpers.h"
-#include "pch.h"
 
 #if defined(ASSET_MEMORYMAN)
-  #include "Utils/MemoryManagement.h"
+  #include <ASSET/Utils/MemoryManagement.h>
 #endif
-
 
 namespace ASSET {
 
@@ -232,7 +232,6 @@ namespace ASSET {
       return adjgrad;
     }
 
-
     //////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////
     /*
@@ -249,7 +248,6 @@ namespace ASSET {
 
       Input<double> x(this->IRows());
       Eigen::Map<Output<double>> fx(NULL, this->ORows());
-
 
       const int IRR = this->IRows();
       const int ORR = this->ORows();
@@ -336,7 +334,6 @@ namespace ASSET {
 
     ///////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////
-
 
    protected:
     /*

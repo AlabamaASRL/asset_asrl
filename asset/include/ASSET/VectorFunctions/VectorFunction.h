@@ -1,10 +1,11 @@
 #pragma once
 
+#include <ASSET/Utils/FunctionReturnType.h>
+
 #include "DenseDerivatives.h"
 #include "DenseDifferentiation/DenseFDiffCentArray.h"
 #include "DenseDifferentiation/DenseFDiffFwd.h"
-//#include "DenseDifferentiation/DenseAutodiffFwd.h"
-#include "Utils/FunctionReturnType.h"
+// #include "DenseDifferentiation/DenseAutodiffFwd.h"
 
 namespace ASSET {
 
@@ -27,11 +28,6 @@ namespace ASSET {
     }
     VectorExpression() {};
 
-    static void Build(py::module& m, const char* name) {
-      auto obj = py::class_<Derived>(m, name).def(py::init<Ts...>());
-      Base::DenseBaseBuild(obj);
-    }
-
     /////////////////////////////////////
     void InitExpression(Ts... ts) {
       *this = Base(ExprImpl::Definition(ts...));
@@ -45,11 +41,6 @@ namespace ASSET {
 
     using Base::Base;
     VectorExpression() : Base(ExprImpl::Definition()) {
-    }
-
-    static void Build(py::module& m, const char* name) {
-      auto obj = py::class_<Derived>(m, name).def(py::init<>());
-      Base::DenseBaseBuild(obj);
     }
 
     /////////////////////////////////////

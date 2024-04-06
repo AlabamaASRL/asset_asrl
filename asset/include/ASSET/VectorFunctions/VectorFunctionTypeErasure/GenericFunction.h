@@ -26,16 +26,17 @@ in the LICENSE file in ASSET's top level directory.
 
 #pragma once
 
+// #include <ASSET/VectorFunctions/CommonFunctions/CommonFunctions.h>
+#include <ASSET/VectorFunctions/DenseFunctionBase.h>
+#include <ASSET/VectorFunctions/DetectDiagonal.h>
+#include <ASSET/VectorFunctions/VectorFunction.h>
+
 #include "DeepCopySpecs.h"
-#include "DenseFunctionBase.h"
 #include "DenseFunctionSpecs.h"
 #include "SizingSpecs.h"
 #include "SolverInterfaceSpecs.h"
-#include "VectorFunctions/CommonFunctions/CommonFunctions.h"
-
 
 namespace ASSET {
-
 
   namespace detail {
 
@@ -59,13 +60,11 @@ namespace ASSET {
       using type = DeepCopySpecs<GFTE<-1, -1>, ConstraintInterface>;
     };
 
-
     template<int IR, int OR>
     using GenTE = rubber_types::TypeErasure<typename GFDeepCopySelector<IR, OR>::type,
                                             DenseFunctionSpec<IR, OR>,
                                             SizableSpec,
                                             typename SolverInterfaceSelector<IR, OR>::type>;
-
 
     /*
      * Final Type
@@ -80,15 +79,12 @@ namespace ASSET {
       }
     };
 
-
   }  // namespace detail
-
 
   template<int IR, int OR>
   struct GenericFunction : VectorFunction<GenericFunction<IR, OR>, IR, OR> {
     using Base = VectorFunction<GenericFunction<IR, OR>, IR, OR>;
     DENSE_FUNCTION_BASE_TYPES(Base);
-
 
     static const bool IsGenericFunction = true;
     static const bool IsVectorizable = true;
@@ -238,7 +234,6 @@ namespace ASSET {
       }
     }
 
-
     template<class AdjHessType, class Scalar>
     void scale_hessian(ConstMatrixBaseRef<AdjHessType> target_, Scalar s) const {
       if (!this->is_linear())
@@ -302,7 +297,6 @@ namespace ASSET {
       std::cout << "SuperScalar: " << t2.total() * 1000.0 << std::endl;
     }
 
-
     void SpeedTest(const Input<double>& xt, int n) {
       Input<double> x = xt;
       Output<double> fx(this->ORows());
@@ -326,9 +320,7 @@ namespace ASSET {
       jx.setZero();
       hx.setZero();
 
-
       MemoryManager::resize(64, 64);
-
 
       double dummy = 0;
       t1.start();
@@ -377,33 +369,6 @@ namespace ASSET {
 
       MemoryManager::resize(64, 64);
     }
-
-
-    template<class PYClass>
-    static void GenericBuild(PYClass& obj) {
-      using Gen = GenericFunction<-1, -1>;
-      using GenS = GenericFunction<-1, 1>;
-      using BinGen = typename std::conditional<OR == 1, GenS, Gen>::type;
-
-      using SEG = Segment<-1, -1, -1>;
-      using SEG2 = Segment<-1, 2, -1>;
-      using SEG3 = Segment<-1, 3, -1>;
-      using SEG4 = Segment<-1, 4, -1>;
-      using ELEM = Segment<-1, 1, -1>;
-
-      obj.def(py::init<const GenericFunction<IR, OR>&>());
-      if constexpr (OR == -1 && IR == -1) {
-        obj.def(py::init(&Derived::PyCopy<GenericFunction<IR, 1>>));
-      }
-
-      obj.def("input_domain", &Derived::input_domain);
-      obj.def("is_linear", &Derived::is_linear);
-      obj.def("SuperTest", &Derived::SuperTest);
-      obj.def("SpeedTest", &Derived::SpeedTest);
-
-      Base::DenseBaseBuild(obj);
-    }
   };
-
 
 }  // namespace ASSET
