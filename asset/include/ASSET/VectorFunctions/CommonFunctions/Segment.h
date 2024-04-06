@@ -1,9 +1,10 @@
 #pragma once
 
+#include <ASSET/VectorFunctions/DetectDiagonal.h>
+#include <ASSET/VectorFunctions/VectorFunction.h>
+
 #include "Conditional.h"
 #include "Constant.h"
-#include "DetectDiagonal.h"
-#include "VectorFunction.h"
 
 namespace ASSET {
 
@@ -16,33 +17,12 @@ namespace ASSET {
     using Base::Base;
     Arguments(int iror) : Base(iror, iror, 0) {
     }
-
-    static void Build(py::module& m, const char* name) {
-      auto obj = py::class_<Arguments<IR_OR>>(m, name);
-      obj.def(py::init<int>());
-      obj.def("Constant", [](const Arguments<IR_OR>& a, Eigen::VectorXd v) {
-        return GenericFunction<-1, -1>(Constant<-1, -1>(a.IRows(), v));
-      });
-      obj.def("Constant", [](const Arguments<IR_OR>& a, double v) {
-        Eigen::Matrix<double, 1, 1> vv;
-        vv[0] = v;
-        return GenericFunction<-1, 1>(Constant<-1, 1>(a.IRows(), vv));
-      });
-      Base::DenseBaseBuild(obj);
-      Base::SegBuild(obj);
-    }
   };
+
   template<int IR, int OR, int ST>
   struct Segment : Segment_Impl<Segment<IR, OR, ST>, IR, OR, ST> {
     using Base = Segment_Impl<Segment<IR, OR, ST>, IR, OR, ST>;
     using Base::Base;
-
-    static void Build(py::module& m, const char* name) {
-      auto obj = py::class_<Segment<IR, OR, ST>>(m, name);
-      obj.def(py::init<int, int, int>());
-      Base::DenseBaseBuild(obj);
-      Base::SegBuild(obj);
-    }
   };
 
   template<class T>
@@ -97,7 +77,6 @@ namespace ASSET {
         throw std::invalid_argument("Segment/Element Index Out of Bounds");
       }
     }
-
 
     static const bool IsLinearFunction = true;
     static const bool IsVectorizable = true;
@@ -189,7 +168,6 @@ namespace ASSET {
 
         } else if constexpr (std::is_same<Assignment, MinusEqualsAssignment>::value) {
 
-
           if constexpr (Is_EigenDiagonalMatrix<
                             typename std::remove_const_reference<decltype(left.derived())>::type>::value) {
             target.template middleCols<OR>(this->SegStart, this->ORows()).diagonal() -=
@@ -214,7 +192,6 @@ namespace ASSET {
                     << std::endl;
         }
       };
-
 
       const int orows = this->ORows();
       MemoryManager::allocate_run(orows, Impl, TempSpec<Output<Scalar>>(orows, 1));
@@ -308,72 +285,6 @@ namespace ASSET {
     template<class Func, int FuncIRC>
     decltype(auto) rearged(const DenseFunctionBase<Func, FuncIRC, IR>& f) const {
       return Base::template EVALOP<Func>::make_nested(this->derived(), f.derived());
-    }
-
-
-    template<class PyClass>
-    static void SegBuild(PyClass& obj) {
-      using Gen = GenericFunction<-1, -1>;
-      using GenS = GenericFunction<-1, 1>;
-
-
-      Base::DoubleMathBuild(obj);
-      Base::UnaryMathBuild(obj);
-      Base::BinaryMathBuild(obj);
-      Base::BinaryOperatorsBuild(obj);
-      Base::FunctionIndexingBuild(obj);
-      Base::ConditionalOperatorsBuild(obj);
-
-      obj.def("tolist", [](const Derived& func) {
-        using ELEM = Segment<-1, 1, -1>;
-        std::vector<ELEM> elems;
-        for (int i = 0; i < func.ORows(); i++) {
-          elems.push_back(func.coeff(i));
-        }
-        return elems;
-      });
-
-
-      obj.def("tolist", [](const Derived& func, std::vector<int> coeffs) {
-        using ELEM = Segment<-1, 1, -1>;
-        std::vector<ELEM> elems;
-        for (const auto& coeff: coeffs) {
-          elems.push_back(func.coeff(coeff));
-        }
-        return elems;
-      });
-
-      obj.def("tolist", [](const Derived& func, std::vector<std::tuple<int, int>> seglist) {
-        using ELEM = Segment<-1, 1, -1>;
-        using SEG2 = Segment<-1, 2, -1>;
-        using SEG3 = Segment<-1, 3, -1>;
-        using SEG = Segment<-1, -1, -1>;
-
-        std::vector<py::object> segs;
-        for (const auto& seg: seglist) {
-
-          int start = std::get<0>(seg);
-          int size = std::get<1>(seg);
-          py::object pyfun;
-          if (size == 1) {
-            auto f = func.coeff(start);
-            pyfun = py::cast(f);
-          } else if (size == 2) {
-            auto f = func.template segment<2>(start);
-            pyfun = py::cast(f);
-          } else if (size == 3) {
-            auto f = func.template segment<3>(start);
-            pyfun = py::cast(f);
-          } else {
-            auto f = func.segment(start, size);
-            pyfun = py::cast(f);
-          }
-
-
-          segs.push_back(pyfun);
-        }
-        return segs;
-      });
     }
   };
 

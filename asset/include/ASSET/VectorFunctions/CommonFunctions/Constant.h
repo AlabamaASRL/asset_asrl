@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VectorFunction.h"
+#include <ASSET/VectorFunctions/VectorFunction.h>
 
 namespace ASSET {
 
@@ -8,7 +8,6 @@ namespace ASSET {
   struct Constant : VectorFunction<Constant<IR, OR>, IR, OR> {
     using Base = VectorFunction<Constant<IR, OR>, IR, OR>;
     DENSE_FUNCTION_BASE_TYPES(Base)
-
 
     static const bool IsLinearFunction = true;
     static const bool IsVectorizable = true;
@@ -25,14 +24,7 @@ namespace ASSET {
       this->set_input_domain(this->IRows(), {dmn});
     }
 
-    Constant() {
-    }
-
-    static void Build(py::module& m, const char* name) {
-      auto obj = py::class_<Constant<IR, OR>>(m, name);
-      obj.def(py::init<int, Output<double>>());
-      Base::DenseBaseBuild(obj);
-    }
+    Constant() {};
 
     template<class InType, class OutType>
     inline void compute_impl(ConstVectorBaseRef<InType> x, ConstVectorBaseRef<OutType> fx_) const {

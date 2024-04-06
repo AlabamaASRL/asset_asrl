@@ -1,6 +1,7 @@
 #pragma once
 
-#include "VectorFunction.h"
+#include <ASSET/VectorFunctions/DetectDiagonal.h>
+#include <ASSET/VectorFunctions/VectorFunction.h>
 
 namespace ASSET {
 
@@ -36,12 +37,10 @@ namespace ASSET {
     using Base::Base;
   };
 
-
   template<class Func1, class Func2, class... Funcs>
   StackedOutputs<Func1, Func2, Funcs...> stack(Func1 f1, Func2 f2, Funcs... fs) {
     return StackedOutputs<Func1, Func2, Funcs...>(f1, f2, fs...);
   }
-
 
   template<class RetType, class FuncType>
   RetType make_dynamic_stack(const std::vector<FuncType>& funcs) {
@@ -222,7 +221,6 @@ namespace ASSET {
         }
       };
 
-
       const int irows = this->func2.IRows();
       MemoryManager::allocate_run(irows,
                                   Impl,
@@ -305,7 +303,6 @@ namespace ASSET {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   };
 
-
   template<class Func>
   struct DynamicStackedOutputs : VectorFunction<DynamicStackedOutputs<Func>, Func::IRC, -1> {
     using Base = VectorFunction<DynamicStackedOutputs<Func>, Func::IRC, -1>;
@@ -324,7 +321,6 @@ namespace ASSET {
     DynamicStackedOutputs() {
     }
     DynamicStackedOutputs(const std::vector<Func>& funcs) : funcs(funcs) {
-
 
       if (this->funcs.size() == 0) {
         throw std::invalid_argument("Empty List passed to Dynamic Stack");
@@ -353,7 +349,6 @@ namespace ASSET {
       this->set_input_domain(this->IRows(), dmn);
     }
 
-
     bool is_linear() const {
       return this->_linear;
     }
@@ -377,7 +372,6 @@ namespace ASSET {
       // typedef typename InType::Scalar Scalar;
       VectorBaseRef<OutType> fx = fx_.const_cast_derived();
       MatrixBaseRef<JacType> jx = jx_.const_cast_derived();
-
 
       int start = 0;
       for (auto& func: this->funcs) {
@@ -438,7 +432,6 @@ namespace ASSET {
         }
       };
 
-
       const int irows = this->IRows();
       MemoryManager::allocate_run(irows,
                                   Impl,
@@ -446,9 +439,7 @@ namespace ASSET {
                                   TempSpec<Func_hessian<Scalar>>(irows, irows));
     }
 
-
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   };
-
 
 }  // namespace ASSET

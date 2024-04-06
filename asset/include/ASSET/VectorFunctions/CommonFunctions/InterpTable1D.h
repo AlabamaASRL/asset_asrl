@@ -1,18 +1,15 @@
 #pragma once
-#include "VectorFunction.h"
 
+#include <ASSET/VectorFunctions/VectorFunction.h>
 
 namespace ASSET {
 
-
-  
   struct InterpTable1D {
 
     enum class InterpType {
       cubic_interp,
       linear_interp
     };
-
 
     using MatType = Eigen::Matrix<double, -1, -1>;
 
@@ -31,7 +28,6 @@ namespace ASSET {
 
     InterpTable1D() {
     }
-
 
     InterpTable1D(const Eigen::VectorXd& Ts, const MatType& Vs, int axis, std::string kind) {
       set_data(Ts, Vs, axis, kind);
@@ -99,7 +95,6 @@ namespace ASSET {
         throw std::invalid_argument("Unrecognized interpolation type");
       }
 
-
       tsize = ts.size();
       vlen = vs.rows();
       ttotal = ts[tsize - 1] - ts[0];
@@ -125,11 +120,9 @@ namespace ASSET {
         this->teven = false;
       }
 
-
       if (this->interp_kind == InterpType::cubic_interp)
         calc_derivs();
     }
-
 
     void calc_derivs() {
 
@@ -226,10 +219,8 @@ namespace ASSET {
         double p1 = (-2.0 * tnd3 + 3.0 * tnd2);
         double m1 = (tnd3 - tnd2) * tstep;
 
-
         v = vs.col(telem) * p0 + vs.col(telem + 1) * p1 + dvs_dts.col(telem) * m0
             + dvs_dts.col(telem + 1) * m1;
-
 
         if (deriv > 0) {
 
@@ -238,10 +229,8 @@ namespace ASSET {
           double p1_dt = (-6.0 * tnd2 + 6.0 * tnd) / tstep;
           double m1_dt = (3.0 * tnd2 - 2.0 * tnd);
 
-
           dv_dt = vs.col(telem) * p0_dt + vs.col(telem + 1) * p1_dt + dvs_dts.col(telem) * m0_dt
                   + dvs_dts.col(telem + 1) * m1_dt;
-
 
           if (deriv > 1) {
 
@@ -287,7 +276,6 @@ namespace ASSET {
         v.setZero();
       }
 
-
       return vs;
     }
 
@@ -312,7 +300,6 @@ namespace ASSET {
       Eigen::VectorXd dv2_dt2;
       dv2_dt2.resize(vlen);
 
-
       interp_impl(t, 2, v, dv_dt, dv2_dt2);
 
       return std::tuple {v, dv_dt, dv2_dt2};
@@ -326,13 +313,11 @@ namespace ASSET {
 
     std::shared_ptr<InterpTable1D> tab;
 
-
     InterpFunction1D() {
     }
     InterpFunction1D(std::shared_ptr<InterpTable1D> tab) : tab(tab) {
       this->setIORows(1, tab->vlen);
     }
-
 
     template<class InType, class OutType>
     inline void compute_impl(ConstVectorBaseRef<InType> x, ConstVectorBaseRef<OutType> fx_) const {
@@ -399,85 +384,5 @@ namespace ASSET {
                                          TempSpec<Output<Scalar>>(this->ORows(), 1));
     }
   };
-
-
-  static void InterpTable1DBuild(py::module& m) {
-
-    using MatType = InterpTable1D::MatType;
-    auto obj = py::class_<InterpTable1D, std::shared_ptr<InterpTable1D>>(m, "InterpTable1D");
-
-    obj.def(py::init<const Eigen::VectorXd&, const Eigen::VectorXd&, int, std::string>(),
-            py::arg("ts"),
-            py::arg("Vs"),
-            py::arg("axis") = 0,
-            py::arg("kind") = std::string("cubic"));
-
-    obj.def(py::init<const Eigen::VectorXd&, const MatType&, int, std::string>(),
-            py::arg("ts"),
-            py::arg("Vs"),
-            py::arg("axis") = 0,
-            py::arg("kind") = std::string("cubic"));
-
-    obj.def(py::init<const std::vector<Eigen::VectorXd>&, int, std::string>(),
-            py::arg("Vts"),
-            py::arg("tvar") = -1,
-            py::arg("kind") = std::string("cubic"));
-
-    obj.def("interp", py::overload_cast<double>(&InterpTable1D::interp, py::const_));
-    obj.def("interp", py::overload_cast<const Eigen::VectorXd&>(&InterpTable1D::interp, py::const_));
-
-    obj.def("__call__", py::overload_cast<double>(&InterpTable1D::interp, py::const_), py::is_operator());
-    obj.def("__call__",
-            py::overload_cast<const Eigen::VectorXd&>(&InterpTable1D::interp, py::const_),
-            py::is_operator());
-
-    obj.def("__call__", [](std::shared_ptr<InterpTable1D> & self, const GenericFunction<-1, 1>& t) {
-      py::object pyfun;
-      if (self->vlen == 1) {
-        auto f = GenericFunction<-1, 1>(InterpFunction1D<1>(self).eval(t));
-        pyfun = py::cast(f);
-      } else {
-        auto f = GenericFunction<-1, -1>(InterpFunction1D<-1>(self).eval(t));
-        pyfun = py::cast(f);
-      }
-      return pyfun;
-    });
-
-    
-    obj.def("__call__", [](std::shared_ptr<InterpTable1D>& self, const Segment<-1, 1, -1>& t) {
-      py::object pyfun;
-      
-      if (self->vlen == 1) {
-        auto f = GenericFunction<-1, 1>(InterpFunction1D<1>(self).eval(t));
-        pyfun = py::cast(f);
-      } else {
-        auto f = GenericFunction<-1, -1>(InterpFunction1D<-1>(self).eval(t));
-        pyfun = py::cast(f);
-      }
-      return pyfun;
-    });
-
-    
-
-
-    obj.def("interp_deriv1", &InterpTable1D::interp_deriv1);
-    obj.def("interp_deriv2", &InterpTable1D::interp_deriv2);
-
-    obj.def_readwrite("WarnOutOfBounds", &InterpTable1D::WarnOutOfBounds);
-    obj.def_readwrite("ThrowOutOfBounds", &InterpTable1D::ThrowOutOfBounds);
-
-
-    obj.def("sf", [](std::shared_ptr<InterpTable1D>& self) {
-      if (self->vlen != 1) {
-        throw std::invalid_argument(
-            "InterpTable1D storing Vector data cannot be converted to Scalar Function.");
-      }
-      return GenericFunction<-1, 1>(InterpFunction1D<1>(self));
-    });
-    obj.def("vf", [](std::shared_ptr<InterpTable1D>& self) {
-      return GenericFunction<-1, -1>(InterpFunction1D<-1>(self));
-    });
-  }
-
 
 }  // namespace ASSET

@@ -1,9 +1,9 @@
 #pragma once
-#include <pybind11/eigen/tensor.h>
+
+#include <ASSET/VectorFunctions/VectorFunction.h>
 
 #include <unsupported/Eigen/CXX11/Tensor>
 
-#include "VectorFunction.h"
 namespace ASSET {
 
   struct InterpTable3D {
@@ -31,7 +31,6 @@ namespace ASSET {
     Eigen::Tensor<double, 3> fs_dxdydz;
 
     Eigen::Tensor<Eigen::Matrix<double, 64, 1>, 3> alphavecs;
-
 
     InterpType interp_kind = InterpType::linear_interp;
 
@@ -78,7 +77,6 @@ namespace ASSET {
         throw std::invalid_argument("Unrecognized interpolation type");
       }
 
-
       xsize = xs.size();
       ysize = ys.size();
       zsize = zs.size();
@@ -93,7 +91,6 @@ namespace ASSET {
         throw std::invalid_argument("Z  coordinates must be larger than 4");
       }
 
-
       if (xsize != fs.dimension(0)) {
         throw std::invalid_argument("X coordinates must be first dimension of value tensor");
       }
@@ -103,7 +100,6 @@ namespace ASSET {
       if (zsize != fs.dimension(2)) {
         throw std::invalid_argument("Z coordinates must be third dimension of value tensor");
       }
-
 
       for (int i = 0; i < xsize - 1; i++) {
         if (xs[i + 1] < xs[i]) {
@@ -124,7 +120,6 @@ namespace ASSET {
       xtotal = xs[xsize - 1] - xs[0];
       ytotal = ys[ysize - 1] - ys[0];
       ztotal = zs[zsize - 1] - zs[0];
-
 
       Eigen::VectorXd testx;
       testx.setLinSpaced(xsize, xs[0], xs[xsize - 1]);
@@ -155,8 +150,6 @@ namespace ASSET {
       }
     }
 
-
-
     void calc_derivs() {
 
       fs_dx.resize(fs.dimension(0), fs.dimension(1), fs.dimension(2));
@@ -166,7 +159,6 @@ namespace ASSET {
       fs_dxdz.resize(fs.dimension(0), fs.dimension(1), fs.dimension(2));
       fs_dydz.resize(fs.dimension(0), fs.dimension(1), fs.dimension(2));
       fs_dxdydz.resize(fs.dimension(0), fs.dimension(1), fs.dimension(2));
-
 
       auto fdiffimpl = [&](int dir, bool even, const auto& ts, const auto& src, auto& dest) {
         Eigen::Matrix<double, 5, 5> stens;
@@ -228,7 +220,6 @@ namespace ASSET {
       fdiffimpl(2, this->zeven, this->zs, this->fs_dxdy, this->fs_dxdydz);
     }
 
-
     void cache_alphavecs() {
       this->alphavecs.resize(fs.dimension(0) - 1, fs.dimension(1) - 1, fs.dimension(2) - 1);
       for (int i = 0; i < zsize - 1; i++) {
@@ -275,19 +266,16 @@ namespace ASSET {
       Eigen::Matrix<double, 64, 1> bvec;
       Eigen::Matrix<double, 64, 1> alphavec;
 
-
       auto fillop = [&](auto start, const auto& src) {
-        
-          bvec[start] = src(xelem, yelem, zelem);
-          bvec[start + 1] = src(xelem + 1, yelem, zelem);
-          bvec[start + 2] = src(xelem, yelem + 1, zelem);
-          bvec[start + 3] = src(xelem + 1, yelem + 1, zelem);
+        bvec[start] = src(xelem, yelem, zelem);
+        bvec[start + 1] = src(xelem + 1, yelem, zelem);
+        bvec[start + 2] = src(xelem, yelem + 1, zelem);
+        bvec[start + 3] = src(xelem + 1, yelem + 1, zelem);
 
-          bvec[start + 4] = src(xelem, yelem, zelem + 1);
-          bvec[start + 5] = src(xelem + 1, yelem, zelem + 1);
-          bvec[start + 6] = src(xelem, yelem + 1, zelem + 1);
-          bvec[start + 7] = src(xelem + 1, yelem + 1, zelem + 1);
-        
+        bvec[start + 4] = src(xelem, yelem, zelem + 1);
+        bvec[start + 5] = src(xelem + 1, yelem, zelem + 1);
+        bvec[start + 6] = src(xelem, yelem + 1, zelem + 1);
+        bvec[start + 7] = src(xelem + 1, yelem + 1, zelem + 1);
       };
 
       fillop(0, this->fs);
@@ -310,77 +298,208 @@ namespace ASSET {
       return this->apply_coeefs(bvec);
     }
 
-
     Eigen::Matrix<double, 64, 1> apply_coeefs(const Eigen::Matrix<double, 64, 1>& bvec) const {
 
-        Eigen::Matrix<double, 64, 1> alphavec;
+      Eigen::Matrix<double, 64, 1> alphavec;
 
-        alphavec[0] = +1 * bvec[0];
-        alphavec[1] = +1 * bvec[8];
-        alphavec[2] = -3 * bvec[0] + 3 * bvec[1] - 2 * bvec[8] - 1 * bvec[9];
-        alphavec[3] = +2 * bvec[0] - 2 * bvec[1] + 1 * bvec[8] + 1 * bvec[9];
-        alphavec[4] = +1 * bvec[16];
-        alphavec[5] = +1 * bvec[32];
-        alphavec[6] = -3 * bvec[16] + 3 * bvec[17] - 2 * bvec[32] - 1 * bvec[33];
-        alphavec[7] = +2 * bvec[16] - 2 * bvec[17] + 1 * bvec[32] + 1 * bvec[33];
-        alphavec[8] = -3 * bvec[0] + 3 * bvec[2] - 2 * bvec[16] - 1 * bvec[18];
-        alphavec[9] = -3 * bvec[8] + 3 * bvec[10] - 2 * bvec[32] - 1 * bvec[34];
-        alphavec[10] = +9 * bvec[0] - 9 * bvec[1] - 9 * bvec[2] + 9 * bvec[3] + 6 * bvec[8] + 3 * bvec[9] - 6 * bvec[10] - 3 * bvec[11] + 6 * bvec[16] - 6 * bvec[17] + 3 * bvec[18] - 3 * bvec[19] + 4 * bvec[32] + 2 * bvec[33] + 2 * bvec[34] + 1 * bvec[35];
-        alphavec[11] = -6 * bvec[0] + 6 * bvec[1] + 6 * bvec[2] - 6 * bvec[3] - 3 * bvec[8] - 3 * bvec[9] + 3 * bvec[10] + 3 * bvec[11] - 4 * bvec[16] + 4 * bvec[17] - 2 * bvec[18] + 2 * bvec[19] - 2 * bvec[32] - 2 * bvec[33] - 1 * bvec[34] - 1 * bvec[35];
-        alphavec[12] = +2 * bvec[0] - 2 * bvec[2] + 1 * bvec[16] + 1 * bvec[18];
-        alphavec[13] = +2 * bvec[8] - 2 * bvec[10] + 1 * bvec[32] + 1 * bvec[34];
-        alphavec[14] = -6 * bvec[0] + 6 * bvec[1] + 6 * bvec[2] - 6 * bvec[3] - 4 * bvec[8] - 2 * bvec[9] + 4 * bvec[10] + 2 * bvec[11] - 3 * bvec[16] + 3 * bvec[17] - 3 * bvec[18] + 3 * bvec[19] - 2 * bvec[32] - 1 * bvec[33] - 2 * bvec[34] - 1 * bvec[35];
-        alphavec[15] = +4 * bvec[0] - 4 * bvec[1] - 4 * bvec[2] + 4 * bvec[3] + 2 * bvec[8] + 2 * bvec[9] - 2 * bvec[10] - 2 * bvec[11] + 2 * bvec[16] - 2 * bvec[17] + 2 * bvec[18] - 2 * bvec[19] + 1 * bvec[32] + 1 * bvec[33] + 1 * bvec[34] + 1 * bvec[35];
-        alphavec[16] = +1 * bvec[24];
-        alphavec[17] = +1 * bvec[40];
-        alphavec[18] = -3 * bvec[24] + 3 * bvec[25] - 2 * bvec[40] - 1 * bvec[41];
-        alphavec[19] = +2 * bvec[24] - 2 * bvec[25] + 1 * bvec[40] + 1 * bvec[41];
-        alphavec[20] = +1 * bvec[48];
-        alphavec[21] = +1 * bvec[56];
-        alphavec[22] = -3 * bvec[48] + 3 * bvec[49] - 2 * bvec[56] - 1 * bvec[57];
-        alphavec[23] = +2 * bvec[48] - 2 * bvec[49] + 1 * bvec[56] + 1 * bvec[57];
-        alphavec[24] = -3 * bvec[24] + 3 * bvec[26] - 2 * bvec[48] - 1 * bvec[50];
-        alphavec[25] = -3 * bvec[40] + 3 * bvec[42] - 2 * bvec[56] - 1 * bvec[58];
-        alphavec[26] = +9 * bvec[24] - 9 * bvec[25] - 9 * bvec[26] + 9 * bvec[27] + 6 * bvec[40] + 3 * bvec[41] - 6 * bvec[42] - 3 * bvec[43] + 6 * bvec[48] - 6 * bvec[49] + 3 * bvec[50] - 3 * bvec[51] + 4 * bvec[56] + 2 * bvec[57] + 2 * bvec[58] + 1 * bvec[59];
-        alphavec[27] = -6 * bvec[24] + 6 * bvec[25] + 6 * bvec[26] - 6 * bvec[27] - 3 * bvec[40] - 3 * bvec[41] + 3 * bvec[42] + 3 * bvec[43] - 4 * bvec[48] + 4 * bvec[49] - 2 * bvec[50] + 2 * bvec[51] - 2 * bvec[56] - 2 * bvec[57] - 1 * bvec[58] - 1 * bvec[59];
-        alphavec[28] = +2 * bvec[24] - 2 * bvec[26] + 1 * bvec[48] + 1 * bvec[50];
-        alphavec[29] = +2 * bvec[40] - 2 * bvec[42] + 1 * bvec[56] + 1 * bvec[58];
-        alphavec[30] = -6 * bvec[24] + 6 * bvec[25] + 6 * bvec[26] - 6 * bvec[27] - 4 * bvec[40] - 2 * bvec[41] + 4 * bvec[42] + 2 * bvec[43] - 3 * bvec[48] + 3 * bvec[49] - 3 * bvec[50] + 3 * bvec[51] - 2 * bvec[56] - 1 * bvec[57] - 2 * bvec[58] - 1 * bvec[59];
-        alphavec[31] = +4 * bvec[24] - 4 * bvec[25] - 4 * bvec[26] + 4 * bvec[27] + 2 * bvec[40] + 2 * bvec[41] - 2 * bvec[42] - 2 * bvec[43] + 2 * bvec[48] - 2 * bvec[49] + 2 * bvec[50] - 2 * bvec[51] + 1 * bvec[56] + 1 * bvec[57] + 1 * bvec[58] + 1 * bvec[59];
-        alphavec[32] = -3 * bvec[0] + 3 * bvec[4] - 2 * bvec[24] - 1 * bvec[28];
-        alphavec[33] = -3 * bvec[8] + 3 * bvec[12] - 2 * bvec[40] - 1 * bvec[44];
-        alphavec[34] = +9 * bvec[0] - 9 * bvec[1] - 9 * bvec[4] + 9 * bvec[5] + 6 * bvec[8] + 3 * bvec[9] - 6 * bvec[12] - 3 * bvec[13] + 6 * bvec[24] - 6 * bvec[25] + 3 * bvec[28] - 3 * bvec[29] + 4 * bvec[40] + 2 * bvec[41] + 2 * bvec[44] + 1 * bvec[45];
-        alphavec[35] = -6 * bvec[0] + 6 * bvec[1] + 6 * bvec[4] - 6 * bvec[5] - 3 * bvec[8] - 3 * bvec[9] + 3 * bvec[12] + 3 * bvec[13] - 4 * bvec[24] + 4 * bvec[25] - 2 * bvec[28] + 2 * bvec[29] - 2 * bvec[40] - 2 * bvec[41] - 1 * bvec[44] - 1 * bvec[45];
-        alphavec[36] = -3 * bvec[16] + 3 * bvec[20] - 2 * bvec[48] - 1 * bvec[52];
-        alphavec[37] = -3 * bvec[32] + 3 * bvec[36] - 2 * bvec[56] - 1 * bvec[60];
-        alphavec[38] = +9 * bvec[16] - 9 * bvec[17] - 9 * bvec[20] + 9 * bvec[21] + 6 * bvec[32] + 3 * bvec[33] - 6 * bvec[36] - 3 * bvec[37] + 6 * bvec[48] - 6 * bvec[49] + 3 * bvec[52] - 3 * bvec[53] + 4 * bvec[56] + 2 * bvec[57] + 2 * bvec[60] + 1 * bvec[61];
-        alphavec[39] = -6 * bvec[16] + 6 * bvec[17] + 6 * bvec[20] - 6 * bvec[21] - 3 * bvec[32] - 3 * bvec[33] + 3 * bvec[36] + 3 * bvec[37] - 4 * bvec[48] + 4 * bvec[49] - 2 * bvec[52] + 2 * bvec[53] - 2 * bvec[56] - 2 * bvec[57] - 1 * bvec[60] - 1 * bvec[61];
-        alphavec[40] = +9 * bvec[0] - 9 * bvec[2] - 9 * bvec[4] + 9 * bvec[6] + 6 * bvec[16] + 3 * bvec[18] - 6 * bvec[20] - 3 * bvec[22] + 6 * bvec[24] - 6 * bvec[26] + 3 * bvec[28] - 3 * bvec[30] + 4 * bvec[48] + 2 * bvec[50] + 2 * bvec[52] + 1 * bvec[54];
-        alphavec[41] = +9 * bvec[8] - 9 * bvec[10] - 9 * bvec[12] + 9 * bvec[14] + 6 * bvec[32] + 3 * bvec[34] - 6 * bvec[36] - 3 * bvec[38] + 6 * bvec[40] - 6 * bvec[42] + 3 * bvec[44] - 3 * bvec[46] + 4 * bvec[56] + 2 * bvec[58] + 2 * bvec[60] + 1 * bvec[62];
-        alphavec[42] = -27 * bvec[0] + 27 * bvec[1] + 27 * bvec[2] - 27 * bvec[3] + 27 * bvec[4] - 27 * bvec[5] - 27 * bvec[6] + 27 * bvec[7] - 18 * bvec[8] - 9 * bvec[9] + 18 * bvec[10] + 9 * bvec[11] + 18 * bvec[12] + 9 * bvec[13] - 18 * bvec[14] - 9 * bvec[15] - 18 * bvec[16] + 18 * bvec[17] - 9 * bvec[18] + 9 * bvec[19] + 18 * bvec[20] - 18 * bvec[21] + 9 * bvec[22] - 9 * bvec[23] - 18 * bvec[24] + 18 * bvec[25] + 18 * bvec[26] - 18 * bvec[27] - 9 * bvec[28] + 9 * bvec[29] + 9 * bvec[30] - 9 * bvec[31] - 12 * bvec[32] - 6 * bvec[33] - 6 * bvec[34] - 3 * bvec[35] + 12 * bvec[36] + 6 * bvec[37] + 6 * bvec[38] + 3 * bvec[39] - 12 * bvec[40] - 6 * bvec[41] + 12 * bvec[42] + 6 * bvec[43] - 6 * bvec[44] - 3 * bvec[45] + 6 * bvec[46] + 3 * bvec[47] - 12 * bvec[48] + 12 * bvec[49] - 6 * bvec[50] + 6 * bvec[51] - 6 * bvec[52] + 6 * bvec[53] - 3 * bvec[54] + 3 * bvec[55] - 8 * bvec[56] - 4 * bvec[57] - 4 * bvec[58] - 2 * bvec[59] - 4 * bvec[60] - 2 * bvec[61] - 2 * bvec[62] - 1 * bvec[63];
-        alphavec[43] = +18 * bvec[0] - 18 * bvec[1] - 18 * bvec[2] + 18 * bvec[3] - 18 * bvec[4] + 18 * bvec[5] + 18 * bvec[6] - 18 * bvec[7] + 9 * bvec[8] + 9 * bvec[9] - 9 * bvec[10] - 9 * bvec[11] - 9 * bvec[12] - 9 * bvec[13] + 9 * bvec[14] + 9 * bvec[15] + 12 * bvec[16] - 12 * bvec[17] + 6 * bvec[18] - 6 * bvec[19] - 12 * bvec[20] + 12 * bvec[21] - 6 * bvec[22] + 6 * bvec[23] + 12 * bvec[24] - 12 * bvec[25] - 12 * bvec[26] + 12 * bvec[27] + 6 * bvec[28] - 6 * bvec[29] - 6 * bvec[30] + 6 * bvec[31] + 6 * bvec[32] + 6 * bvec[33] + 3 * bvec[34] + 3 * bvec[35] - 6 * bvec[36] - 6 * bvec[37] - 3 * bvec[38] - 3 * bvec[39] + 6 * bvec[40] + 6 * bvec[41] - 6 * bvec[42] - 6 * bvec[43] + 3 * bvec[44] + 3 * bvec[45] - 3 * bvec[46] - 3 * bvec[47] + 8 * bvec[48] - 8 * bvec[49] + 4 * bvec[50] - 4 * bvec[51] + 4 * bvec[52] - 4 * bvec[53] + 2 * bvec[54] - 2 * bvec[55] + 4 * bvec[56] + 4 * bvec[57] + 2 * bvec[58] + 2 * bvec[59] + 2 * bvec[60] + 2 * bvec[61] + 1 * bvec[62] + 1 * bvec[63];
-        alphavec[44] = -6 * bvec[0] + 6 * bvec[2] + 6 * bvec[4] - 6 * bvec[6] - 3 * bvec[16] - 3 * bvec[18] + 3 * bvec[20] + 3 * bvec[22] - 4 * bvec[24] + 4 * bvec[26] - 2 * bvec[28] + 2 * bvec[30] - 2 * bvec[48] - 2 * bvec[50] - 1 * bvec[52] - 1 * bvec[54];
-        alphavec[45] = -6 * bvec[8] + 6 * bvec[10] + 6 * bvec[12] - 6 * bvec[14] - 3 * bvec[32] - 3 * bvec[34] + 3 * bvec[36] + 3 * bvec[38] - 4 * bvec[40] + 4 * bvec[42] - 2 * bvec[44] + 2 * bvec[46] - 2 * bvec[56] - 2 * bvec[58] - 1 * bvec[60] - 1 * bvec[62];
-        alphavec[46] = +18 * bvec[0] - 18 * bvec[1] - 18 * bvec[2] + 18 * bvec[3] - 18 * bvec[4] + 18 * bvec[5] + 18 * bvec[6] - 18 * bvec[7] + 12 * bvec[8] + 6 * bvec[9] - 12 * bvec[10] - 6 * bvec[11] - 12 * bvec[12] - 6 * bvec[13] + 12 * bvec[14] + 6 * bvec[15] + 9 * bvec[16] - 9 * bvec[17] + 9 * bvec[18] - 9 * bvec[19] - 9 * bvec[20] + 9 * bvec[21] - 9 * bvec[22] + 9 * bvec[23] + 12 * bvec[24] - 12 * bvec[25] - 12 * bvec[26] + 12 * bvec[27] + 6 * bvec[28] - 6 * bvec[29] - 6 * bvec[30] + 6 * bvec[31] + 6 * bvec[32] + 3 * bvec[33] + 6 * bvec[34] + 3 * bvec[35] - 6 * bvec[36] - 3 * bvec[37] - 6 * bvec[38] - 3 * bvec[39] + 8 * bvec[40] + 4 * bvec[41] - 8 * bvec[42] - 4 * bvec[43] + 4 * bvec[44] + 2 * bvec[45] - 4 * bvec[46] - 2 * bvec[47] + 6 * bvec[48] - 6 * bvec[49] + 6 * bvec[50] - 6 * bvec[51] + 3 * bvec[52] - 3 * bvec[53] + 3 * bvec[54] - 3 * bvec[55] + 4 * bvec[56] + 2 * bvec[57] + 4 * bvec[58] + 2 * bvec[59] + 2 * bvec[60] + 1 * bvec[61] + 2 * bvec[62] + 1 * bvec[63];
-        alphavec[47] = -12 * bvec[0] + 12 * bvec[1] + 12 * bvec[2] - 12 * bvec[3] + 12 * bvec[4] - 12 * bvec[5] - 12 * bvec[6] + 12 * bvec[7] - 6 * bvec[8] - 6 * bvec[9] + 6 * bvec[10] + 6 * bvec[11] + 6 * bvec[12] + 6 * bvec[13] - 6 * bvec[14] - 6 * bvec[15] - 6 * bvec[16] + 6 * bvec[17] - 6 * bvec[18] + 6 * bvec[19] + 6 * bvec[20] - 6 * bvec[21] + 6 * bvec[22] - 6 * bvec[23] - 8 * bvec[24] + 8 * bvec[25] + 8 * bvec[26] - 8 * bvec[27] - 4 * bvec[28] + 4 * bvec[29] + 4 * bvec[30] - 4 * bvec[31] - 3 * bvec[32] - 3 * bvec[33] - 3 * bvec[34] - 3 * bvec[35] + 3 * bvec[36] + 3 * bvec[37] + 3 * bvec[38] + 3 * bvec[39] - 4 * bvec[40] - 4 * bvec[41] + 4 * bvec[42] + 4 * bvec[43] - 2 * bvec[44] - 2 * bvec[45] + 2 * bvec[46] + 2 * bvec[47] - 4 * bvec[48] + 4 * bvec[49] - 4 * bvec[50] + 4 * bvec[51] - 2 * bvec[52] + 2 * bvec[53] - 2 * bvec[54] + 2 * bvec[55] - 2 * bvec[56] - 2 * bvec[57] - 2 * bvec[58] - 2 * bvec[59] - 1 * bvec[60] - 1 * bvec[61] - 1 * bvec[62] - 1 * bvec[63];
-        alphavec[48] = +2 * bvec[0] - 2 * bvec[4] + 1 * bvec[24] + 1 * bvec[28];
-        alphavec[49] = +2 * bvec[8] - 2 * bvec[12] + 1 * bvec[40] + 1 * bvec[44];
-        alphavec[50] = -6 * bvec[0] + 6 * bvec[1] + 6 * bvec[4] - 6 * bvec[5] - 4 * bvec[8] - 2 * bvec[9] + 4 * bvec[12] + 2 * bvec[13] - 3 * bvec[24] + 3 * bvec[25] - 3 * bvec[28] + 3 * bvec[29] - 2 * bvec[40] - 1 * bvec[41] - 2 * bvec[44] - 1 * bvec[45];
-        alphavec[51] = +4 * bvec[0] - 4 * bvec[1] - 4 * bvec[4] + 4 * bvec[5] + 2 * bvec[8] + 2 * bvec[9] - 2 * bvec[12] - 2 * bvec[13] + 2 * bvec[24] - 2 * bvec[25] + 2 * bvec[28] - 2 * bvec[29] + 1 * bvec[40] + 1 * bvec[41] + 1 * bvec[44] + 1 * bvec[45];
-        alphavec[52] = +2 * bvec[16] - 2 * bvec[20] + 1 * bvec[48] + 1 * bvec[52];
-        alphavec[53] = +2 * bvec[32] - 2 * bvec[36] + 1 * bvec[56] + 1 * bvec[60];
-        alphavec[54] = -6 * bvec[16] + 6 * bvec[17] + 6 * bvec[20] - 6 * bvec[21] - 4 * bvec[32] - 2 * bvec[33] + 4 * bvec[36] + 2 * bvec[37] - 3 * bvec[48] + 3 * bvec[49] - 3 * bvec[52] + 3 * bvec[53] - 2 * bvec[56] - 1 * bvec[57] - 2 * bvec[60] - 1 * bvec[61];
-        alphavec[55] = +4 * bvec[16] - 4 * bvec[17] - 4 * bvec[20] + 4 * bvec[21] + 2 * bvec[32] + 2 * bvec[33] - 2 * bvec[36] - 2 * bvec[37] + 2 * bvec[48] - 2 * bvec[49] + 2 * bvec[52] - 2 * bvec[53] + 1 * bvec[56] + 1 * bvec[57] + 1 * bvec[60] + 1 * bvec[61];
-        alphavec[56] = -6 * bvec[0] + 6 * bvec[2] + 6 * bvec[4] - 6 * bvec[6] - 4 * bvec[16] - 2 * bvec[18] + 4 * bvec[20] + 2 * bvec[22] - 3 * bvec[24] + 3 * bvec[26] - 3 * bvec[28] + 3 * bvec[30] - 2 * bvec[48] - 1 * bvec[50] - 2 * bvec[52] - 1 * bvec[54];
-        alphavec[57] = -6 * bvec[8] + 6 * bvec[10] + 6 * bvec[12] - 6 * bvec[14] - 4 * bvec[32] - 2 * bvec[34] + 4 * bvec[36] + 2 * bvec[38] - 3 * bvec[40] + 3 * bvec[42] - 3 * bvec[44] + 3 * bvec[46] - 2 * bvec[56] - 1 * bvec[58] - 2 * bvec[60] - 1 * bvec[62];
-        alphavec[58] = +18 * bvec[0] - 18 * bvec[1] - 18 * bvec[2] + 18 * bvec[3] - 18 * bvec[4] + 18 * bvec[5] + 18 * bvec[6] - 18 * bvec[7] + 12 * bvec[8] + 6 * bvec[9] - 12 * bvec[10] - 6 * bvec[11] - 12 * bvec[12] - 6 * bvec[13] + 12 * bvec[14] + 6 * bvec[15] + 12 * bvec[16] - 12 * bvec[17] + 6 * bvec[18] - 6 * bvec[19] - 12 * bvec[20] + 12 * bvec[21] - 6 * bvec[22] + 6 * bvec[23] + 9 * bvec[24] - 9 * bvec[25] - 9 * bvec[26] + 9 * bvec[27] + 9 * bvec[28] - 9 * bvec[29] - 9 * bvec[30] + 9 * bvec[31] + 8 * bvec[32] + 4 * bvec[33] + 4 * bvec[34] + 2 * bvec[35] - 8 * bvec[36] - 4 * bvec[37] - 4 * bvec[38] - 2 * bvec[39] + 6 * bvec[40] + 3 * bvec[41] - 6 * bvec[42] - 3 * bvec[43] + 6 * bvec[44] + 3 * bvec[45] - 6 * bvec[46] - 3 * bvec[47] + 6 * bvec[48] - 6 * bvec[49] + 3 * bvec[50] - 3 * bvec[51] + 6 * bvec[52] - 6 * bvec[53] + 3 * bvec[54] - 3 * bvec[55] + 4 * bvec[56] + 2 * bvec[57] + 2 * bvec[58] + 1 * bvec[59] + 4 * bvec[60] + 2 * bvec[61] + 2 * bvec[62] + 1 * bvec[63];
-        alphavec[59] = -12 * bvec[0] + 12 * bvec[1] + 12 * bvec[2] - 12 * bvec[3] + 12 * bvec[4] - 12 * bvec[5] - 12 * bvec[6] + 12 * bvec[7] - 6 * bvec[8] - 6 * bvec[9] + 6 * bvec[10] + 6 * bvec[11] + 6 * bvec[12] + 6 * bvec[13] - 6 * bvec[14] - 6 * bvec[15] - 8 * bvec[16] + 8 * bvec[17] - 4 * bvec[18] + 4 * bvec[19] + 8 * bvec[20] - 8 * bvec[21] + 4 * bvec[22] - 4 * bvec[23] - 6 * bvec[24] + 6 * bvec[25] + 6 * bvec[26] - 6 * bvec[27] - 6 * bvec[28] + 6 * bvec[29] + 6 * bvec[30] - 6 * bvec[31] - 4 * bvec[32] - 4 * bvec[33] - 2 * bvec[34] - 2 * bvec[35] + 4 * bvec[36] + 4 * bvec[37] + 2 * bvec[38] + 2 * bvec[39] - 3 * bvec[40] - 3 * bvec[41] + 3 * bvec[42] + 3 * bvec[43] - 3 * bvec[44] - 3 * bvec[45] + 3 * bvec[46] + 3 * bvec[47] - 4 * bvec[48] + 4 * bvec[49] - 2 * bvec[50] + 2 * bvec[51] - 4 * bvec[52] + 4 * bvec[53] - 2 * bvec[54] + 2 * bvec[55] - 2 * bvec[56] - 2 * bvec[57] - 1 * bvec[58] - 1 * bvec[59] - 2 * bvec[60] - 2 * bvec[61] - 1 * bvec[62] - 1 * bvec[63];
-        alphavec[60] = +4 * bvec[0] - 4 * bvec[2] - 4 * bvec[4] + 4 * bvec[6] + 2 * bvec[16] + 2 * bvec[18] - 2 * bvec[20] - 2 * bvec[22] + 2 * bvec[24] - 2 * bvec[26] + 2 * bvec[28] - 2 * bvec[30] + 1 * bvec[48] + 1 * bvec[50] + 1 * bvec[52] + 1 * bvec[54];
-        alphavec[61] = +4 * bvec[8] - 4 * bvec[10] - 4 * bvec[12] + 4 * bvec[14] + 2 * bvec[32] + 2 * bvec[34] - 2 * bvec[36] - 2 * bvec[38] + 2 * bvec[40] - 2 * bvec[42] + 2 * bvec[44] - 2 * bvec[46] + 1 * bvec[56] + 1 * bvec[58] + 1 * bvec[60] + 1 * bvec[62];
-        alphavec[62] = -12 * bvec[0] + 12 * bvec[1] + 12 * bvec[2] - 12 * bvec[3] + 12 * bvec[4] - 12 * bvec[5] - 12 * bvec[6] + 12 * bvec[7] - 8 * bvec[8] - 4 * bvec[9] + 8 * bvec[10] + 4 * bvec[11] + 8 * bvec[12] + 4 * bvec[13] - 8 * bvec[14] - 4 * bvec[15] - 6 * bvec[16] + 6 * bvec[17] - 6 * bvec[18] + 6 * bvec[19] + 6 * bvec[20] - 6 * bvec[21] + 6 * bvec[22] - 6 * bvec[23] - 6 * bvec[24] + 6 * bvec[25] + 6 * bvec[26] - 6 * bvec[27] - 6 * bvec[28] + 6 * bvec[29] + 6 * bvec[30] - 6 * bvec[31] - 4 * bvec[32] - 2 * bvec[33] - 4 * bvec[34] - 2 * bvec[35] + 4 * bvec[36] + 2 * bvec[37] + 4 * bvec[38] + 2 * bvec[39] - 4 * bvec[40] - 2 * bvec[41] + 4 * bvec[42] + 2 * bvec[43] - 4 * bvec[44] - 2 * bvec[45] + 4 * bvec[46] + 2 * bvec[47] - 3 * bvec[48] + 3 * bvec[49] - 3 * bvec[50] + 3 * bvec[51] - 3 * bvec[52] + 3 * bvec[53] - 3 * bvec[54] + 3 * bvec[55] - 2 * bvec[56] - 1 * bvec[57] - 2 * bvec[58] - 1 * bvec[59] - 2 * bvec[60] - 1 * bvec[61] - 2 * bvec[62] - 1 * bvec[63];
-        alphavec[63] = +8 * bvec[0] - 8 * bvec[1] - 8 * bvec[2] + 8 * bvec[3] - 8 * bvec[4] + 8 * bvec[5] + 8 * bvec[6] - 8 * bvec[7] + 4 * bvec[8] + 4 * bvec[9] - 4 * bvec[10] - 4 * bvec[11] - 4 * bvec[12] - 4 * bvec[13] + 4 * bvec[14] + 4 * bvec[15] + 4 * bvec[16] - 4 * bvec[17] + 4 * bvec[18] - 4 * bvec[19] - 4 * bvec[20] + 4 * bvec[21] - 4 * bvec[22] + 4 * bvec[23] + 4 * bvec[24] - 4 * bvec[25] - 4 * bvec[26] + 4 * bvec[27] + 4 * bvec[28] - 4 * bvec[29] - 4 * bvec[30] + 4 * bvec[31] + 2 * bvec[32] + 2 * bvec[33] + 2 * bvec[34] + 2 * bvec[35] - 2 * bvec[36] - 2 * bvec[37] - 2 * bvec[38] - 2 * bvec[39] + 2 * bvec[40] + 2 * bvec[41] - 2 * bvec[42] - 2 * bvec[43] + 2 * bvec[44] + 2 * bvec[45] - 2 * bvec[46] - 2 * bvec[47] + 2 * bvec[48] - 2 * bvec[49] + 2 * bvec[50] - 2 * bvec[51] + 2 * bvec[52] - 2 * bvec[53] + 2 * bvec[54] - 2 * bvec[55] + 1 * bvec[56] + 1 * bvec[57] + 1 * bvec[58] + 1 * bvec[59] + 1 * bvec[60] + 1 * bvec[61] + 1 * bvec[62] + 1 * bvec[63];
+      alphavec[0] = +1 * bvec[0];
+      alphavec[1] = +1 * bvec[8];
+      alphavec[2] = -3 * bvec[0] + 3 * bvec[1] - 2 * bvec[8] - 1 * bvec[9];
+      alphavec[3] = +2 * bvec[0] - 2 * bvec[1] + 1 * bvec[8] + 1 * bvec[9];
+      alphavec[4] = +1 * bvec[16];
+      alphavec[5] = +1 * bvec[32];
+      alphavec[6] = -3 * bvec[16] + 3 * bvec[17] - 2 * bvec[32] - 1 * bvec[33];
+      alphavec[7] = +2 * bvec[16] - 2 * bvec[17] + 1 * bvec[32] + 1 * bvec[33];
+      alphavec[8] = -3 * bvec[0] + 3 * bvec[2] - 2 * bvec[16] - 1 * bvec[18];
+      alphavec[9] = -3 * bvec[8] + 3 * bvec[10] - 2 * bvec[32] - 1 * bvec[34];
+      alphavec[10] = +9 * bvec[0] - 9 * bvec[1] - 9 * bvec[2] + 9 * bvec[3] + 6 * bvec[8] + 3 * bvec[9]
+                     - 6 * bvec[10] - 3 * bvec[11] + 6 * bvec[16] - 6 * bvec[17] + 3 * bvec[18] - 3 * bvec[19]
+                     + 4 * bvec[32] + 2 * bvec[33] + 2 * bvec[34] + 1 * bvec[35];
+      alphavec[11] = -6 * bvec[0] + 6 * bvec[1] + 6 * bvec[2] - 6 * bvec[3] - 3 * bvec[8] - 3 * bvec[9]
+                     + 3 * bvec[10] + 3 * bvec[11] - 4 * bvec[16] + 4 * bvec[17] - 2 * bvec[18] + 2 * bvec[19]
+                     - 2 * bvec[32] - 2 * bvec[33] - 1 * bvec[34] - 1 * bvec[35];
+      alphavec[12] = +2 * bvec[0] - 2 * bvec[2] + 1 * bvec[16] + 1 * bvec[18];
+      alphavec[13] = +2 * bvec[8] - 2 * bvec[10] + 1 * bvec[32] + 1 * bvec[34];
+      alphavec[14] = -6 * bvec[0] + 6 * bvec[1] + 6 * bvec[2] - 6 * bvec[3] - 4 * bvec[8] - 2 * bvec[9]
+                     + 4 * bvec[10] + 2 * bvec[11] - 3 * bvec[16] + 3 * bvec[17] - 3 * bvec[18] + 3 * bvec[19]
+                     - 2 * bvec[32] - 1 * bvec[33] - 2 * bvec[34] - 1 * bvec[35];
+      alphavec[15] = +4 * bvec[0] - 4 * bvec[1] - 4 * bvec[2] + 4 * bvec[3] + 2 * bvec[8] + 2 * bvec[9]
+                     - 2 * bvec[10] - 2 * bvec[11] + 2 * bvec[16] - 2 * bvec[17] + 2 * bvec[18] - 2 * bvec[19]
+                     + 1 * bvec[32] + 1 * bvec[33] + 1 * bvec[34] + 1 * bvec[35];
+      alphavec[16] = +1 * bvec[24];
+      alphavec[17] = +1 * bvec[40];
+      alphavec[18] = -3 * bvec[24] + 3 * bvec[25] - 2 * bvec[40] - 1 * bvec[41];
+      alphavec[19] = +2 * bvec[24] - 2 * bvec[25] + 1 * bvec[40] + 1 * bvec[41];
+      alphavec[20] = +1 * bvec[48];
+      alphavec[21] = +1 * bvec[56];
+      alphavec[22] = -3 * bvec[48] + 3 * bvec[49] - 2 * bvec[56] - 1 * bvec[57];
+      alphavec[23] = +2 * bvec[48] - 2 * bvec[49] + 1 * bvec[56] + 1 * bvec[57];
+      alphavec[24] = -3 * bvec[24] + 3 * bvec[26] - 2 * bvec[48] - 1 * bvec[50];
+      alphavec[25] = -3 * bvec[40] + 3 * bvec[42] - 2 * bvec[56] - 1 * bvec[58];
+      alphavec[26] = +9 * bvec[24] - 9 * bvec[25] - 9 * bvec[26] + 9 * bvec[27] + 6 * bvec[40] + 3 * bvec[41]
+                     - 6 * bvec[42] - 3 * bvec[43] + 6 * bvec[48] - 6 * bvec[49] + 3 * bvec[50] - 3 * bvec[51]
+                     + 4 * bvec[56] + 2 * bvec[57] + 2 * bvec[58] + 1 * bvec[59];
+      alphavec[27] = -6 * bvec[24] + 6 * bvec[25] + 6 * bvec[26] - 6 * bvec[27] - 3 * bvec[40] - 3 * bvec[41]
+                     + 3 * bvec[42] + 3 * bvec[43] - 4 * bvec[48] + 4 * bvec[49] - 2 * bvec[50] + 2 * bvec[51]
+                     - 2 * bvec[56] - 2 * bvec[57] - 1 * bvec[58] - 1 * bvec[59];
+      alphavec[28] = +2 * bvec[24] - 2 * bvec[26] + 1 * bvec[48] + 1 * bvec[50];
+      alphavec[29] = +2 * bvec[40] - 2 * bvec[42] + 1 * bvec[56] + 1 * bvec[58];
+      alphavec[30] = -6 * bvec[24] + 6 * bvec[25] + 6 * bvec[26] - 6 * bvec[27] - 4 * bvec[40] - 2 * bvec[41]
+                     + 4 * bvec[42] + 2 * bvec[43] - 3 * bvec[48] + 3 * bvec[49] - 3 * bvec[50] + 3 * bvec[51]
+                     - 2 * bvec[56] - 1 * bvec[57] - 2 * bvec[58] - 1 * bvec[59];
+      alphavec[31] = +4 * bvec[24] - 4 * bvec[25] - 4 * bvec[26] + 4 * bvec[27] + 2 * bvec[40] + 2 * bvec[41]
+                     - 2 * bvec[42] - 2 * bvec[43] + 2 * bvec[48] - 2 * bvec[49] + 2 * bvec[50] - 2 * bvec[51]
+                     + 1 * bvec[56] + 1 * bvec[57] + 1 * bvec[58] + 1 * bvec[59];
+      alphavec[32] = -3 * bvec[0] + 3 * bvec[4] - 2 * bvec[24] - 1 * bvec[28];
+      alphavec[33] = -3 * bvec[8] + 3 * bvec[12] - 2 * bvec[40] - 1 * bvec[44];
+      alphavec[34] = +9 * bvec[0] - 9 * bvec[1] - 9 * bvec[4] + 9 * bvec[5] + 6 * bvec[8] + 3 * bvec[9]
+                     - 6 * bvec[12] - 3 * bvec[13] + 6 * bvec[24] - 6 * bvec[25] + 3 * bvec[28] - 3 * bvec[29]
+                     + 4 * bvec[40] + 2 * bvec[41] + 2 * bvec[44] + 1 * bvec[45];
+      alphavec[35] = -6 * bvec[0] + 6 * bvec[1] + 6 * bvec[4] - 6 * bvec[5] - 3 * bvec[8] - 3 * bvec[9]
+                     + 3 * bvec[12] + 3 * bvec[13] - 4 * bvec[24] + 4 * bvec[25] - 2 * bvec[28] + 2 * bvec[29]
+                     - 2 * bvec[40] - 2 * bvec[41] - 1 * bvec[44] - 1 * bvec[45];
+      alphavec[36] = -3 * bvec[16] + 3 * bvec[20] - 2 * bvec[48] - 1 * bvec[52];
+      alphavec[37] = -3 * bvec[32] + 3 * bvec[36] - 2 * bvec[56] - 1 * bvec[60];
+      alphavec[38] = +9 * bvec[16] - 9 * bvec[17] - 9 * bvec[20] + 9 * bvec[21] + 6 * bvec[32] + 3 * bvec[33]
+                     - 6 * bvec[36] - 3 * bvec[37] + 6 * bvec[48] - 6 * bvec[49] + 3 * bvec[52] - 3 * bvec[53]
+                     + 4 * bvec[56] + 2 * bvec[57] + 2 * bvec[60] + 1 * bvec[61];
+      alphavec[39] = -6 * bvec[16] + 6 * bvec[17] + 6 * bvec[20] - 6 * bvec[21] - 3 * bvec[32] - 3 * bvec[33]
+                     + 3 * bvec[36] + 3 * bvec[37] - 4 * bvec[48] + 4 * bvec[49] - 2 * bvec[52] + 2 * bvec[53]
+                     - 2 * bvec[56] - 2 * bvec[57] - 1 * bvec[60] - 1 * bvec[61];
+      alphavec[40] = +9 * bvec[0] - 9 * bvec[2] - 9 * bvec[4] + 9 * bvec[6] + 6 * bvec[16] + 3 * bvec[18]
+                     - 6 * bvec[20] - 3 * bvec[22] + 6 * bvec[24] - 6 * bvec[26] + 3 * bvec[28] - 3 * bvec[30]
+                     + 4 * bvec[48] + 2 * bvec[50] + 2 * bvec[52] + 1 * bvec[54];
+      alphavec[41] = +9 * bvec[8] - 9 * bvec[10] - 9 * bvec[12] + 9 * bvec[14] + 6 * bvec[32] + 3 * bvec[34]
+                     - 6 * bvec[36] - 3 * bvec[38] + 6 * bvec[40] - 6 * bvec[42] + 3 * bvec[44] - 3 * bvec[46]
+                     + 4 * bvec[56] + 2 * bvec[58] + 2 * bvec[60] + 1 * bvec[62];
+      alphavec[42] =
+          -27 * bvec[0] + 27 * bvec[1] + 27 * bvec[2] - 27 * bvec[3] + 27 * bvec[4] - 27 * bvec[5]
+          - 27 * bvec[6] + 27 * bvec[7] - 18 * bvec[8] - 9 * bvec[9] + 18 * bvec[10] + 9 * bvec[11]
+          + 18 * bvec[12] + 9 * bvec[13] - 18 * bvec[14] - 9 * bvec[15] - 18 * bvec[16] + 18 * bvec[17]
+          - 9 * bvec[18] + 9 * bvec[19] + 18 * bvec[20] - 18 * bvec[21] + 9 * bvec[22] - 9 * bvec[23]
+          - 18 * bvec[24] + 18 * bvec[25] + 18 * bvec[26] - 18 * bvec[27] - 9 * bvec[28] + 9 * bvec[29]
+          + 9 * bvec[30] - 9 * bvec[31] - 12 * bvec[32] - 6 * bvec[33] - 6 * bvec[34] - 3 * bvec[35]
+          + 12 * bvec[36] + 6 * bvec[37] + 6 * bvec[38] + 3 * bvec[39] - 12 * bvec[40] - 6 * bvec[41]
+          + 12 * bvec[42] + 6 * bvec[43] - 6 * bvec[44] - 3 * bvec[45] + 6 * bvec[46] + 3 * bvec[47]
+          - 12 * bvec[48] + 12 * bvec[49] - 6 * bvec[50] + 6 * bvec[51] - 6 * bvec[52] + 6 * bvec[53]
+          - 3 * bvec[54] + 3 * bvec[55] - 8 * bvec[56] - 4 * bvec[57] - 4 * bvec[58] - 2 * bvec[59]
+          - 4 * bvec[60] - 2 * bvec[61] - 2 * bvec[62] - 1 * bvec[63];
+      alphavec[43] = +18 * bvec[0] - 18 * bvec[1] - 18 * bvec[2] + 18 * bvec[3] - 18 * bvec[4] + 18 * bvec[5]
+                     + 18 * bvec[6] - 18 * bvec[7] + 9 * bvec[8] + 9 * bvec[9] - 9 * bvec[10] - 9 * bvec[11]
+                     - 9 * bvec[12] - 9 * bvec[13] + 9 * bvec[14] + 9 * bvec[15] + 12 * bvec[16]
+                     - 12 * bvec[17] + 6 * bvec[18] - 6 * bvec[19] - 12 * bvec[20] + 12 * bvec[21]
+                     - 6 * bvec[22] + 6 * bvec[23] + 12 * bvec[24] - 12 * bvec[25] - 12 * bvec[26]
+                     + 12 * bvec[27] + 6 * bvec[28] - 6 * bvec[29] - 6 * bvec[30] + 6 * bvec[31]
+                     + 6 * bvec[32] + 6 * bvec[33] + 3 * bvec[34] + 3 * bvec[35] - 6 * bvec[36] - 6 * bvec[37]
+                     - 3 * bvec[38] - 3 * bvec[39] + 6 * bvec[40] + 6 * bvec[41] - 6 * bvec[42] - 6 * bvec[43]
+                     + 3 * bvec[44] + 3 * bvec[45] - 3 * bvec[46] - 3 * bvec[47] + 8 * bvec[48] - 8 * bvec[49]
+                     + 4 * bvec[50] - 4 * bvec[51] + 4 * bvec[52] - 4 * bvec[53] + 2 * bvec[54] - 2 * bvec[55]
+                     + 4 * bvec[56] + 4 * bvec[57] + 2 * bvec[58] + 2 * bvec[59] + 2 * bvec[60] + 2 * bvec[61]
+                     + 1 * bvec[62] + 1 * bvec[63];
+      alphavec[44] = -6 * bvec[0] + 6 * bvec[2] + 6 * bvec[4] - 6 * bvec[6] - 3 * bvec[16] - 3 * bvec[18]
+                     + 3 * bvec[20] + 3 * bvec[22] - 4 * bvec[24] + 4 * bvec[26] - 2 * bvec[28] + 2 * bvec[30]
+                     - 2 * bvec[48] - 2 * bvec[50] - 1 * bvec[52] - 1 * bvec[54];
+      alphavec[45] = -6 * bvec[8] + 6 * bvec[10] + 6 * bvec[12] - 6 * bvec[14] - 3 * bvec[32] - 3 * bvec[34]
+                     + 3 * bvec[36] + 3 * bvec[38] - 4 * bvec[40] + 4 * bvec[42] - 2 * bvec[44] + 2 * bvec[46]
+                     - 2 * bvec[56] - 2 * bvec[58] - 1 * bvec[60] - 1 * bvec[62];
+      alphavec[46] = +18 * bvec[0] - 18 * bvec[1] - 18 * bvec[2] + 18 * bvec[3] - 18 * bvec[4] + 18 * bvec[5]
+                     + 18 * bvec[6] - 18 * bvec[7] + 12 * bvec[8] + 6 * bvec[9] - 12 * bvec[10] - 6 * bvec[11]
+                     - 12 * bvec[12] - 6 * bvec[13] + 12 * bvec[14] + 6 * bvec[15] + 9 * bvec[16]
+                     - 9 * bvec[17] + 9 * bvec[18] - 9 * bvec[19] - 9 * bvec[20] + 9 * bvec[21] - 9 * bvec[22]
+                     + 9 * bvec[23] + 12 * bvec[24] - 12 * bvec[25] - 12 * bvec[26] + 12 * bvec[27]
+                     + 6 * bvec[28] - 6 * bvec[29] - 6 * bvec[30] + 6 * bvec[31] + 6 * bvec[32] + 3 * bvec[33]
+                     + 6 * bvec[34] + 3 * bvec[35] - 6 * bvec[36] - 3 * bvec[37] - 6 * bvec[38] - 3 * bvec[39]
+                     + 8 * bvec[40] + 4 * bvec[41] - 8 * bvec[42] - 4 * bvec[43] + 4 * bvec[44] + 2 * bvec[45]
+                     - 4 * bvec[46] - 2 * bvec[47] + 6 * bvec[48] - 6 * bvec[49] + 6 * bvec[50] - 6 * bvec[51]
+                     + 3 * bvec[52] - 3 * bvec[53] + 3 * bvec[54] - 3 * bvec[55] + 4 * bvec[56] + 2 * bvec[57]
+                     + 4 * bvec[58] + 2 * bvec[59] + 2 * bvec[60] + 1 * bvec[61] + 2 * bvec[62]
+                     + 1 * bvec[63];
+      alphavec[47] = -12 * bvec[0] + 12 * bvec[1] + 12 * bvec[2] - 12 * bvec[3] + 12 * bvec[4] - 12 * bvec[5]
+                     - 12 * bvec[6] + 12 * bvec[7] - 6 * bvec[8] - 6 * bvec[9] + 6 * bvec[10] + 6 * bvec[11]
+                     + 6 * bvec[12] + 6 * bvec[13] - 6 * bvec[14] - 6 * bvec[15] - 6 * bvec[16] + 6 * bvec[17]
+                     - 6 * bvec[18] + 6 * bvec[19] + 6 * bvec[20] - 6 * bvec[21] + 6 * bvec[22] - 6 * bvec[23]
+                     - 8 * bvec[24] + 8 * bvec[25] + 8 * bvec[26] - 8 * bvec[27] - 4 * bvec[28] + 4 * bvec[29]
+                     + 4 * bvec[30] - 4 * bvec[31] - 3 * bvec[32] - 3 * bvec[33] - 3 * bvec[34] - 3 * bvec[35]
+                     + 3 * bvec[36] + 3 * bvec[37] + 3 * bvec[38] + 3 * bvec[39] - 4 * bvec[40] - 4 * bvec[41]
+                     + 4 * bvec[42] + 4 * bvec[43] - 2 * bvec[44] - 2 * bvec[45] + 2 * bvec[46] + 2 * bvec[47]
+                     - 4 * bvec[48] + 4 * bvec[49] - 4 * bvec[50] + 4 * bvec[51] - 2 * bvec[52] + 2 * bvec[53]
+                     - 2 * bvec[54] + 2 * bvec[55] - 2 * bvec[56] - 2 * bvec[57] - 2 * bvec[58] - 2 * bvec[59]
+                     - 1 * bvec[60] - 1 * bvec[61] - 1 * bvec[62] - 1 * bvec[63];
+      alphavec[48] = +2 * bvec[0] - 2 * bvec[4] + 1 * bvec[24] + 1 * bvec[28];
+      alphavec[49] = +2 * bvec[8] - 2 * bvec[12] + 1 * bvec[40] + 1 * bvec[44];
+      alphavec[50] = -6 * bvec[0] + 6 * bvec[1] + 6 * bvec[4] - 6 * bvec[5] - 4 * bvec[8] - 2 * bvec[9]
+                     + 4 * bvec[12] + 2 * bvec[13] - 3 * bvec[24] + 3 * bvec[25] - 3 * bvec[28] + 3 * bvec[29]
+                     - 2 * bvec[40] - 1 * bvec[41] - 2 * bvec[44] - 1 * bvec[45];
+      alphavec[51] = +4 * bvec[0] - 4 * bvec[1] - 4 * bvec[4] + 4 * bvec[5] + 2 * bvec[8] + 2 * bvec[9]
+                     - 2 * bvec[12] - 2 * bvec[13] + 2 * bvec[24] - 2 * bvec[25] + 2 * bvec[28] - 2 * bvec[29]
+                     + 1 * bvec[40] + 1 * bvec[41] + 1 * bvec[44] + 1 * bvec[45];
+      alphavec[52] = +2 * bvec[16] - 2 * bvec[20] + 1 * bvec[48] + 1 * bvec[52];
+      alphavec[53] = +2 * bvec[32] - 2 * bvec[36] + 1 * bvec[56] + 1 * bvec[60];
+      alphavec[54] = -6 * bvec[16] + 6 * bvec[17] + 6 * bvec[20] - 6 * bvec[21] - 4 * bvec[32] - 2 * bvec[33]
+                     + 4 * bvec[36] + 2 * bvec[37] - 3 * bvec[48] + 3 * bvec[49] - 3 * bvec[52] + 3 * bvec[53]
+                     - 2 * bvec[56] - 1 * bvec[57] - 2 * bvec[60] - 1 * bvec[61];
+      alphavec[55] = +4 * bvec[16] - 4 * bvec[17] - 4 * bvec[20] + 4 * bvec[21] + 2 * bvec[32] + 2 * bvec[33]
+                     - 2 * bvec[36] - 2 * bvec[37] + 2 * bvec[48] - 2 * bvec[49] + 2 * bvec[52] - 2 * bvec[53]
+                     + 1 * bvec[56] + 1 * bvec[57] + 1 * bvec[60] + 1 * bvec[61];
+      alphavec[56] = -6 * bvec[0] + 6 * bvec[2] + 6 * bvec[4] - 6 * bvec[6] - 4 * bvec[16] - 2 * bvec[18]
+                     + 4 * bvec[20] + 2 * bvec[22] - 3 * bvec[24] + 3 * bvec[26] - 3 * bvec[28] + 3 * bvec[30]
+                     - 2 * bvec[48] - 1 * bvec[50] - 2 * bvec[52] - 1 * bvec[54];
+      alphavec[57] = -6 * bvec[8] + 6 * bvec[10] + 6 * bvec[12] - 6 * bvec[14] - 4 * bvec[32] - 2 * bvec[34]
+                     + 4 * bvec[36] + 2 * bvec[38] - 3 * bvec[40] + 3 * bvec[42] - 3 * bvec[44] + 3 * bvec[46]
+                     - 2 * bvec[56] - 1 * bvec[58] - 2 * bvec[60] - 1 * bvec[62];
+      alphavec[58] = +18 * bvec[0] - 18 * bvec[1] - 18 * bvec[2] + 18 * bvec[3] - 18 * bvec[4] + 18 * bvec[5]
+                     + 18 * bvec[6] - 18 * bvec[7] + 12 * bvec[8] + 6 * bvec[9] - 12 * bvec[10] - 6 * bvec[11]
+                     - 12 * bvec[12] - 6 * bvec[13] + 12 * bvec[14] + 6 * bvec[15] + 12 * bvec[16]
+                     - 12 * bvec[17] + 6 * bvec[18] - 6 * bvec[19] - 12 * bvec[20] + 12 * bvec[21]
+                     - 6 * bvec[22] + 6 * bvec[23] + 9 * bvec[24] - 9 * bvec[25] - 9 * bvec[26] + 9 * bvec[27]
+                     + 9 * bvec[28] - 9 * bvec[29] - 9 * bvec[30] + 9 * bvec[31] + 8 * bvec[32] + 4 * bvec[33]
+                     + 4 * bvec[34] + 2 * bvec[35] - 8 * bvec[36] - 4 * bvec[37] - 4 * bvec[38] - 2 * bvec[39]
+                     + 6 * bvec[40] + 3 * bvec[41] - 6 * bvec[42] - 3 * bvec[43] + 6 * bvec[44] + 3 * bvec[45]
+                     - 6 * bvec[46] - 3 * bvec[47] + 6 * bvec[48] - 6 * bvec[49] + 3 * bvec[50] - 3 * bvec[51]
+                     + 6 * bvec[52] - 6 * bvec[53] + 3 * bvec[54] - 3 * bvec[55] + 4 * bvec[56] + 2 * bvec[57]
+                     + 2 * bvec[58] + 1 * bvec[59] + 4 * bvec[60] + 2 * bvec[61] + 2 * bvec[62]
+                     + 1 * bvec[63];
+      alphavec[59] = -12 * bvec[0] + 12 * bvec[1] + 12 * bvec[2] - 12 * bvec[3] + 12 * bvec[4] - 12 * bvec[5]
+                     - 12 * bvec[6] + 12 * bvec[7] - 6 * bvec[8] - 6 * bvec[9] + 6 * bvec[10] + 6 * bvec[11]
+                     + 6 * bvec[12] + 6 * bvec[13] - 6 * bvec[14] - 6 * bvec[15] - 8 * bvec[16] + 8 * bvec[17]
+                     - 4 * bvec[18] + 4 * bvec[19] + 8 * bvec[20] - 8 * bvec[21] + 4 * bvec[22] - 4 * bvec[23]
+                     - 6 * bvec[24] + 6 * bvec[25] + 6 * bvec[26] - 6 * bvec[27] - 6 * bvec[28] + 6 * bvec[29]
+                     + 6 * bvec[30] - 6 * bvec[31] - 4 * bvec[32] - 4 * bvec[33] - 2 * bvec[34] - 2 * bvec[35]
+                     + 4 * bvec[36] + 4 * bvec[37] + 2 * bvec[38] + 2 * bvec[39] - 3 * bvec[40] - 3 * bvec[41]
+                     + 3 * bvec[42] + 3 * bvec[43] - 3 * bvec[44] - 3 * bvec[45] + 3 * bvec[46] + 3 * bvec[47]
+                     - 4 * bvec[48] + 4 * bvec[49] - 2 * bvec[50] + 2 * bvec[51] - 4 * bvec[52] + 4 * bvec[53]
+                     - 2 * bvec[54] + 2 * bvec[55] - 2 * bvec[56] - 2 * bvec[57] - 1 * bvec[58] - 1 * bvec[59]
+                     - 2 * bvec[60] - 2 * bvec[61] - 1 * bvec[62] - 1 * bvec[63];
+      alphavec[60] = +4 * bvec[0] - 4 * bvec[2] - 4 * bvec[4] + 4 * bvec[6] + 2 * bvec[16] + 2 * bvec[18]
+                     - 2 * bvec[20] - 2 * bvec[22] + 2 * bvec[24] - 2 * bvec[26] + 2 * bvec[28] - 2 * bvec[30]
+                     + 1 * bvec[48] + 1 * bvec[50] + 1 * bvec[52] + 1 * bvec[54];
+      alphavec[61] = +4 * bvec[8] - 4 * bvec[10] - 4 * bvec[12] + 4 * bvec[14] + 2 * bvec[32] + 2 * bvec[34]
+                     - 2 * bvec[36] - 2 * bvec[38] + 2 * bvec[40] - 2 * bvec[42] + 2 * bvec[44] - 2 * bvec[46]
+                     + 1 * bvec[56] + 1 * bvec[58] + 1 * bvec[60] + 1 * bvec[62];
+      alphavec[62] = -12 * bvec[0] + 12 * bvec[1] + 12 * bvec[2] - 12 * bvec[3] + 12 * bvec[4] - 12 * bvec[5]
+                     - 12 * bvec[6] + 12 * bvec[7] - 8 * bvec[8] - 4 * bvec[9] + 8 * bvec[10] + 4 * bvec[11]
+                     + 8 * bvec[12] + 4 * bvec[13] - 8 * bvec[14] - 4 * bvec[15] - 6 * bvec[16] + 6 * bvec[17]
+                     - 6 * bvec[18] + 6 * bvec[19] + 6 * bvec[20] - 6 * bvec[21] + 6 * bvec[22] - 6 * bvec[23]
+                     - 6 * bvec[24] + 6 * bvec[25] + 6 * bvec[26] - 6 * bvec[27] - 6 * bvec[28] + 6 * bvec[29]
+                     + 6 * bvec[30] - 6 * bvec[31] - 4 * bvec[32] - 2 * bvec[33] - 4 * bvec[34] - 2 * bvec[35]
+                     + 4 * bvec[36] + 2 * bvec[37] + 4 * bvec[38] + 2 * bvec[39] - 4 * bvec[40] - 2 * bvec[41]
+                     + 4 * bvec[42] + 2 * bvec[43] - 4 * bvec[44] - 2 * bvec[45] + 4 * bvec[46] + 2 * bvec[47]
+                     - 3 * bvec[48] + 3 * bvec[49] - 3 * bvec[50] + 3 * bvec[51] - 3 * bvec[52] + 3 * bvec[53]
+                     - 3 * bvec[54] + 3 * bvec[55] - 2 * bvec[56] - 1 * bvec[57] - 2 * bvec[58] - 1 * bvec[59]
+                     - 2 * bvec[60] - 1 * bvec[61] - 2 * bvec[62] - 1 * bvec[63];
+      alphavec[63] = +8 * bvec[0] - 8 * bvec[1] - 8 * bvec[2] + 8 * bvec[3] - 8 * bvec[4] + 8 * bvec[5]
+                     + 8 * bvec[6] - 8 * bvec[7] + 4 * bvec[8] + 4 * bvec[9] - 4 * bvec[10] - 4 * bvec[11]
+                     - 4 * bvec[12] - 4 * bvec[13] + 4 * bvec[14] + 4 * bvec[15] + 4 * bvec[16] - 4 * bvec[17]
+                     + 4 * bvec[18] - 4 * bvec[19] - 4 * bvec[20] + 4 * bvec[21] - 4 * bvec[22] + 4 * bvec[23]
+                     + 4 * bvec[24] - 4 * bvec[25] - 4 * bvec[26] + 4 * bvec[27] + 4 * bvec[28] - 4 * bvec[29]
+                     - 4 * bvec[30] + 4 * bvec[31] + 2 * bvec[32] + 2 * bvec[33] + 2 * bvec[34] + 2 * bvec[35]
+                     - 2 * bvec[36] - 2 * bvec[37] - 2 * bvec[38] - 2 * bvec[39] + 2 * bvec[40] + 2 * bvec[41]
+                     - 2 * bvec[42] - 2 * bvec[43] + 2 * bvec[44] + 2 * bvec[45] - 2 * bvec[46] - 2 * bvec[47]
+                     + 2 * bvec[48] - 2 * bvec[49] + 2 * bvec[50] - 2 * bvec[51] + 2 * bvec[52] - 2 * bvec[53]
+                     + 2 * bvec[54] - 2 * bvec[55] + 1 * bvec[56] + 1 * bvec[57] + 1 * bvec[58] + 1 * bvec[59]
+                     + 1 * bvec[60] + 1 * bvec[61] + 1 * bvec[62] + 1 * bvec[63];
 
-        return alphavec;
+      return alphavec;
     }
 
     Eigen::Matrix<double, 64, 1> get_alphavec(int xelem, int yelem, int zelem) const {
@@ -390,7 +509,6 @@ namespace ASSET {
         return this->calc_alphavec(xelem, yelem, zelem);
       }
     }
-
 
     void interp_impl(double x,
                      double y,
@@ -431,13 +549,11 @@ namespace ASSET {
         }
       }
 
-
       auto [xelem, yelem, zelem] = get_xyzelems(x, y, z);
 
       double xstep = xs[xelem + 1] - xs[xelem];
       double ystep = ys[yelem + 1] - ys[yelem];
       double zstep = zs[zelem + 1] - zs[zelem];
-
 
       double xf = (x - xs[xelem]) / xstep;
       double yf = (y - ys[yelem]) / ystep;
@@ -458,7 +574,6 @@ namespace ASSET {
         Eigen::Vector4d yfs {1, yf, yf2, yf3};
         Eigen::Vector4d zfs {1, zf, zf2, zf3};
 
-
         fval = 0;
 
         for (int i = 0, start = 0; i < 4; i++) {
@@ -471,11 +586,9 @@ namespace ASSET {
 
         if (deriv > 0) {
 
-
           dfxyz[0] = 0;
           dfxyz[1] = 0;
           dfxyz[2] = 0;
-
 
           for (int i = 0, start = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++, start += 4) {
@@ -496,7 +609,6 @@ namespace ASSET {
           dfxyz[0] /= xstep;
           dfxyz[1] /= ystep;
           dfxyz[2] /= zstep;
-
 
           if (deriv > 1) {
             Eigen::DiagonalMatrix<double, 3> dmat(1.0 / xstep, 1.0 / ystep, 1.0 / zstep);
@@ -551,7 +663,6 @@ namespace ASSET {
             d2fxyz(2, 0) = d2fxyz(0, 2);
             d2fxyz(2, 1) = d2fxyz(1, 2);
 
-
             d2fxyz = (dmat * d2fxyz * dmat).eval();
           }
         }
@@ -580,7 +691,6 @@ namespace ASSET {
 
         double scale = -1.0 / (xstep * ystep * zstep);
 
-
         double a0 = (-c000 * x1 * y1 * z1 + c001 * x1 * y1 * z0 + c010 * x1 * y0 * z1 - c011 * x1 * y0 * z0
                      + c100 * x0 * y1 * z1 - c101 * x0 * y1 * z0 - c110 * x0 * y0 * z1 + c111 * x0 * y0 * z0)
                     * scale;
@@ -596,7 +706,6 @@ namespace ASSET {
         double a3 = (c000 * x1 * y1 - c001 * x1 * y1 - c010 * x1 * y0 + c011 * x1 * y0 - c100 * x0 * y1
                      + c101 * x0 * y1 + c110 * x0 * y0 - c111 * x0 * y0)
                     * scale;
-
 
         double a4 =
             (-c000 * z1 + c001 * z0 + c010 * z1 - c011 * z0 + c100 * z1 - c101 * z0 - c110 * z1 + c111 * z0)
@@ -656,20 +765,17 @@ namespace ASSET {
     }
   };
 
-
   struct InterpFunction3D : VectorFunction<InterpFunction3D, 3, 1, Analytic, Analytic> {
     using Base = VectorFunction<InterpFunction3D, 3, 1, Analytic, Analytic>;
     DENSE_FUNCTION_BASE_TYPES(Base);
 
     std::shared_ptr<InterpTable3D> tab;
 
-
     InterpFunction3D() {
     }
     InterpFunction3D(std::shared_ptr<InterpTable3D> tab) : tab(tab) {
       this->setIORows(3, 1);
     }
-
 
     template<class InType, class OutType>
     inline void compute_impl(ConstVectorBaseRef<InType> x, ConstVectorBaseRef<OutType> fx_) const {
@@ -715,138 +821,5 @@ namespace ASSET {
       adjhess = adjvars[0] * d2zdx;
     }
   };
-
-
-  static void InterpTable3DBuild(py::module& m) {
-
-    auto obj = py::class_<InterpTable3D, std::shared_ptr<InterpTable3D>>(m, "InterpTable3D");
-
-    obj.def(py::init<const Eigen::VectorXd&,
-                     const Eigen::VectorXd&,
-                     const Eigen::VectorXd&,
-                     const Eigen::Tensor<double, 3>&,
-                     std::string,
-                     bool>(),
-            py::arg("xs"),
-            py::arg("ys"),
-            py::arg("zs"),
-            py::arg("fs"),
-            py::arg("kind") = std::string("cubic"),
-            py::arg("cache") = false);
-
-
-    obj.def("interp", py::overload_cast<double, double, double>(&InterpTable3D::interp, py::const_));
-    obj.def("interp_deriv1",
-            py::overload_cast<double, double, double>(&InterpTable3D::interp_deriv1, py::const_));
-    obj.def("interp_deriv2",
-            py::overload_cast<double, double, double>(&InterpTable3D::interp_deriv2, py::const_));
-
-    obj.def_readwrite("WarnOutOfBounds" , &InterpTable3D::WarnOutOfBounds);
-    obj.def_readwrite("ThrowOutOfBounds", &InterpTable3D::ThrowOutOfBounds);
-
-    obj.def("__call__",
-            py::overload_cast<double, double, double>(&InterpTable3D::interp, py::const_),
-            py::is_operator());
-
-    obj.def("__call__",
-            [](std::shared_ptr<InterpTable3D>& self,
-               const GenericFunction<-1, 1>& x,
-               const GenericFunction<-1, 1>& y,
-               const GenericFunction<-1, 1>& z) {
-              return GenericFunction<-1, 1>(
-                  InterpFunction3D(self).eval(stack(x, y, z)));
-            });
-
-    obj.def("__call__",
-            [](std::shared_ptr<InterpTable3D>& self,
-               const Segment<-1, 1, -1>& x,
-               const Segment<-1, 1, -1>& y,
-               const Segment<-1, 1, -1>& z) {
-              return GenericFunction<-1, 1>(
-                  InterpFunction3D(self).eval(stack(x, y, z)));
-            });
-
-    obj.def("__call__", [](std::shared_ptr<InterpTable3D>& self, const Segment<-1, 3, -1>& xyz) {
-      return GenericFunction<-1, 1>(InterpFunction3D(self).eval(xyz));
-    });
-
-    obj.def("__call__", [](std::shared_ptr<InterpTable3D>& self, const GenericFunction<-1, -1>& xyz) {
-      return GenericFunction<-1, 1>(InterpFunction3D(self).eval(xyz));
-    });
-
-    obj.def("sf", [](std::shared_ptr<InterpTable3D>& self) {
-      return GenericFunction<-1, 1>(InterpFunction3D(self));
-    });
-    obj.def("vf", [](std::shared_ptr<InterpTable3D>& self) {
-      return GenericFunction<-1, -1>(InterpFunction3D(self));
-    });
-
-
-    m.def("InterpTable3DSpeedTest",
-          [](const GenericFunction<-1, 1>& tabf,
-             double xl,
-             double xu,
-             double yl,
-             double yu,
-             double zl,
-             double zu,
-             int nsamps,
-             bool lin) {
-            Eigen::ArrayXd xsamps;
-            xsamps.setRandom(nsamps);
-            xsamps += 1;
-            xsamps /= 2;
-            xsamps *= (xu - xl);
-            xsamps += xl;
-
-            Eigen::ArrayXd ysamps;
-            ysamps.setRandom(nsamps);
-            ysamps += 1;
-            ysamps /= 2;
-            ysamps *= (yu - yl);
-            ysamps += yl;
-
-            Eigen::ArrayXd zsamps;
-            zsamps.setRandom(nsamps);
-            zsamps += 1;
-            zsamps /= 2;
-            zsamps *= (zu - zl);
-            zsamps += zl;
-
-
-            if (lin) {
-              xsamps.setLinSpaced(xl, xu);
-              ysamps.setLinSpaced(yl, yu);
-              zsamps.setLinSpaced(zl, zu);
-            }
-
-
-            Eigen::VectorXd xyz(3);
-            Vector1<double> f;
-            f.setZero();
-
-            Utils::Timer Runtimer;
-            Runtimer.start();
-
-            double tmp = 0;
-            for (int i = 0; i < nsamps; i++) {
-
-              xyz[0] = xsamps[i];
-              xyz[1] = ysamps[i];
-              xyz[2] = zsamps[i];
-
-              tabf.compute(xyz, f);
-              tmp += f[0] / double(i + 3);
-
-              f.setZero();
-            }
-            Runtimer.stop();
-            double tseconds = double(Runtimer.count<std::chrono::microseconds>()) / 1000000;
-            fmt::print("Total Time: {0:} ms \n", tseconds * 1000);
-
-
-            return tmp;
-          });
-  }
 
 }  // namespace ASSET

@@ -1,7 +1,8 @@
 #pragma once
 
+#include <ASSET/VectorFunctions/VectorFunction.h>
+
 #include "Segment.h"
-#include "VectorFunction.h"
 
 namespace ASSET {
 
@@ -13,13 +14,6 @@ namespace ASSET {
     using Base = NestedFunction_Impl<NestedFunction<OuterFunc, InnerFunc>, OuterFunc, InnerFunc>;
     DENSE_FUNCTION_BASE_TYPES(Base);
     using Base::Base;
-
-    static void Build(py::module& m, const char* name) {
-      auto obj = py::class_<NestedFunction<OuterFunc, InnerFunc>>(m, name);
-      obj.def(py::init<>());
-      obj.def(py::init<OuterFunc, InnerFunc>());
-      Base::DenseBaseBuild(obj);
-    }
   };
 
   //////////////////////////////////////////////////////////////////////
@@ -37,7 +31,6 @@ namespace ASSET {
     using INPUT_DOMAIN = typename InnerFunc::INPUT_DOMAIN;
     static const bool IsLinearFunction = OuterFunc::IsLinearFunction && InnerFunc::IsLinearFunction;
     static const bool IsVectorizable = OuterFunc::IsVectorizable && InnerFunc::IsVectorizable;
-
 
     NestedFunction_Impl() {
     }
@@ -64,7 +57,6 @@ namespace ASSET {
     inline void compute_impl(ConstVectorBaseRef<InType> x, ConstVectorBaseRef<OutType> fx_) const {
       typedef typename InType::Scalar Scalar;
       VectorBaseRef<OutType> fx = fx_.const_cast_derived();
-
 
       auto Impl = [&](auto& fx_inner) {
         if constexpr (Is_Segment<OuterFunc>::value) {
@@ -120,7 +112,6 @@ namespace ASSET {
               jx_, jx_outer, jx_inner, DirectAssignment(), std::bool_constant<false>());
         };
 
-
         const int inner_OR = this->inner_func.ORows();
         const int inner_IR = this->inner_func.IRows();
         const int outer_OR = this->outer_func.ORows();
@@ -156,7 +147,6 @@ namespace ASSET {
       // VectorBaseRef<AdjGradType> adjgrad = adjgrad_.const_cast_derived();
       MatrixBaseRef<AdjHessType> adjhess = adjhess_.const_cast_derived();
 
-
       if constexpr (Is_Segment<OuterFunc>::value) {
         auto Impl = [&](auto& fx_inner, auto& jx_inner, auto& gx_outer) {
           gx_outer.template segment<OuterFunc::ORC>(this->outer_func.SegStart, this->ORows()) = adjvars;
@@ -169,7 +159,6 @@ namespace ASSET {
               jx_inner.template middleRows<OuterFunc::ORC>(this->outer_func.SegStart, this->ORows()),
               PlusEqualsAssignment());
         };
-
 
         const int inner_OR = this->inner_func.ORows();
         const int inner_IR = this->inner_func.IRows();
@@ -205,7 +194,6 @@ namespace ASSET {
               jx_, jx_outer, jx_inner, DirectAssignment(), std::bool_constant<false>());
 
           if constexpr (!OuterFunc::IsLinearFunction) {
-
 
             this->inner_func.right_jacobian_product(
                 Ht, hx_outer, jx_inner, DirectAssignment(), std::bool_constant<false>());
@@ -244,7 +232,6 @@ namespace ASSET {
             }
           }
         };
-
 
         const int inner_OR = this->inner_func.ORows();
         const int inner_IR = this->inner_func.IRows();
@@ -307,7 +294,6 @@ namespace ASSET {
                    this->outer_func.IRows());
         throw std::invalid_argument("");
       }
-
 
       this->setIORows(ifunc.IRows(), this->outer_func.ORows());
       this->set_input_domain(this->IRows(), {ifunc.input_domain()});
@@ -406,7 +392,6 @@ namespace ASSET {
       }
     }
   };
-
 
   ////////////////////////////////////////////////////////////////////////
 }  // namespace ASSET

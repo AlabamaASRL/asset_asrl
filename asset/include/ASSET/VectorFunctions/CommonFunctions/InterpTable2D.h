@@ -1,6 +1,7 @@
 #pragma once
-#include "Utils/Timer.h"
-#include "VectorFunction.h"
+
+#include <ASSET/Utils/Timer.h>
+#include <ASSET/VectorFunctions/VectorFunction.h>
 
 namespace ASSET {
 
@@ -23,7 +24,6 @@ namespace ASSET {
 
     Eigen::Matrix<Eigen::Array4d, -1, -1, Eigen::RowMajor> all_dat;
 
-
     bool WarnOutOfBounds = true;
     bool ThrowOutOfBounds = false;
 
@@ -42,9 +42,7 @@ namespace ASSET {
       set_data(Xs, Ys, Zs, kind);
     }
 
-
     void set_data(const Eigen::VectorXd& Xs, const Eigen::VectorXd& Ys, const MatType& Zs, std::string kind) {
-
 
       if (kind == "cubic" || kind == "Cubic") {
         this->interp_kind = InterpType::cubic_interp;
@@ -57,7 +55,6 @@ namespace ASSET {
       this->xs = Xs;
       this->ys = Ys;
       this->zs = Zs;
-
 
       xsize = xs.size();
       ysize = ys.size();
@@ -90,7 +87,6 @@ namespace ASSET {
       xtotal = xs[xsize - 1] - xs[0];
       ytotal = ys[ysize - 1] - ys[0];
 
-
       Eigen::VectorXd testx;
       testx.setLinSpaced(xs.size(), xs[0], xs[xs.size() - 1]);
       Eigen::VectorXd testy;
@@ -110,13 +106,11 @@ namespace ASSET {
         calc_derivs();
     }
 
-
     void calc_derivs() {
       dzxs.resize(ysize, xsize);
       dzys.resize(ysize, xsize);
       dzys_dxs.resize(ysize, xsize);
       all_dat.resize(ysize, xsize);
-
 
       Eigen::Matrix<double, 5, 5> stens;
       stens.row(0).setOnes();
@@ -124,7 +118,6 @@ namespace ASSET {
       rhs << 0, 1, 0, 0, 0;
       Eigen::Matrix<double, 5, 1> times;
       Eigen::Matrix<double, 5, 1> coeffs;
-
 
       bool hitcent = false;
       for (int i = 0; i < this->ysize; i++) {
@@ -159,7 +152,6 @@ namespace ASSET {
         }
         dzys.row(i) = (coeffs / ystep).transpose() * this->zs.middleRows(start, 5);
       }
-
 
       hitcent = false;
       for (int i = 0; i < this->xsize; i++) {
@@ -197,7 +189,6 @@ namespace ASSET {
         dzys_dxs.col(i) = this->dzys.middleCols(start, 5) * (coeffs / xstep);
       }
     }
-
 
     int find_elem(const Eigen::VectorXd& vs, double v) const {
       int center = int(vs.size() / 2);
@@ -249,7 +240,6 @@ namespace ASSET {
 
       Eigen::Matrix4<double> Z;
 
-
       double z00 = zs(yelem, xelem);
       double z10 = zs(yelem, xelem + 1);
       double z01 = zs(yelem + 1, xelem);
@@ -260,22 +250,18 @@ namespace ASSET {
       double dz01_x = dzxs(yelem + 1, xelem) * xstep;
       double dz11_x = dzxs(yelem + 1, xelem + 1) * xstep;
 
-
       double dz00_y = dzys(yelem, xelem) * ystep;
       double dz10_y = dzys(yelem, xelem + 1) * ystep;
       double dz01_y = dzys(yelem + 1, xelem) * ystep;
       double dz11_y = dzys(yelem + 1, xelem + 1) * ystep;
-
 
       double dz00_xy = dzys_dxs(yelem, xelem) * xstep * ystep;
       double dz10_xy = dzys_dxs(yelem, xelem + 1) * xstep * ystep;
       double dz01_xy = dzys_dxs(yelem + 1, xelem) * xstep * ystep;
       double dz11_xy = dzys_dxs(yelem + 1, xelem + 1) * xstep * ystep;
 
-
       Z << z00, z01, dz00_y, dz01_y, z10, z11, dz10_y, dz11_y, dz00_x, dz01_x, dz00_xy, dz01_xy, dz10_x,
           dz11_x, dz10_xy, dz11_xy;
-
 
       a = L * Z * R;
       return a;
@@ -309,7 +295,6 @@ namespace ASSET {
           }
         }
       }
-
 
       auto [xelem, yelem] = get_xyelems(x, y);
 
@@ -428,20 +413,17 @@ namespace ASSET {
     }
   };
 
-
   struct InterpFunction2D : VectorFunction<InterpFunction2D, 2, 1, Analytic, Analytic> {
     using Base = VectorFunction<InterpFunction2D, 2, 1, Analytic, Analytic>;
     DENSE_FUNCTION_BASE_TYPES(Base);
 
     std::shared_ptr<InterpTable2D> tab;
 
-
     InterpFunction2D() {
     }
     InterpFunction2D(std::shared_ptr<InterpTable2D> tab) : tab(tab) {
       this->setIORows(2, 1);
     }
-
 
     template<class InType, class OutType>
     inline void compute_impl(ConstVectorBaseRef<InType> x, ConstVectorBaseRef<OutType> fx_) const {
@@ -487,129 +469,5 @@ namespace ASSET {
       adjhess = adjvars[0] * d2zdx;
     }
   };
-
-
-  static void InterpTable2DBuild(py::module& m) {
-    using MatType = InterpTable2D::MatType;
-    auto obj = py::class_<InterpTable2D, std::shared_ptr<InterpTable2D>>(m, "InterpTable2D");
-
-    obj.def(py::init<const Eigen::VectorXd&,
-                     const Eigen::VectorXd&,
-                     const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>&,
-                     std::string>(),
-            py::arg("xs"),
-            py::arg("ys"),
-            py::arg("Z"),
-            py::arg("kind") = std::string("cubic"));
-
-    obj.def("interp", py::overload_cast<double, double>(&InterpTable2D::interp, py::const_));
-    obj.def("interp", py::overload_cast<const MatType&, const MatType&>(&InterpTable2D::interp, py::const_));
-
-    obj.def_readwrite("WarnOutOfBounds", &InterpTable2D::WarnOutOfBounds);
-    obj.def_readwrite("ThrowOutOfBounds", &InterpTable2D::ThrowOutOfBounds);
-
-
-    obj.def("interp_deriv1", &InterpTable2D::interp_deriv1);
-    obj.def("interp_deriv2", &InterpTable2D::interp_deriv2);
-
-    obj.def("find_elem", &InterpTable2D::find_elem);
-
-    obj.def(
-        "__call__", py::overload_cast<double, double>(&InterpTable2D::interp, py::const_), py::is_operator());
-    obj.def("__call__",
-            py::overload_cast<const MatType&, const MatType&>(&InterpTable2D::interp, py::const_),
-            py::is_operator());
-
-
-    obj.def("__call__",
-            [](std::shared_ptr<InterpTable2D>& self,
-               const GenericFunction<-1, 1>& x,
-               const GenericFunction<-1, 1>& y) {
-              return GenericFunction<-1, 1>(
-                  InterpFunction2D(self).eval(stack(x, y)));
-            });
-
-    obj.def("__call__",
-            [](std::shared_ptr<InterpTable2D> & self, const Segment<-1, 1, -1>& x, const Segment<-1, 1, -1>& y) {
-              return GenericFunction<-1, 1>(
-                  InterpFunction2D(self).eval(stack(x, y)));
-            });
-
-    obj.def("__call__", [](std::shared_ptr<InterpTable2D>& self, const Segment<-1, 2, -1>& xy) {
-      return GenericFunction<-1, 1>(InterpFunction2D(self).eval(xy));
-    });
-
-    obj.def("__call__", [](std::shared_ptr<InterpTable2D>& self, const GenericFunction<-1, -1>& xy) {
-      return GenericFunction<-1, 1>(InterpFunction2D(self).eval(xy));
-    });
-
-
-    obj.def("sf", [](std::shared_ptr<InterpTable2D>& self) {
-      return GenericFunction<-1, 1>(InterpFunction2D(self));
-    });
-    obj.def("vf", [](std::shared_ptr<InterpTable2D>& self) {
-      return GenericFunction<-1, -1>(InterpFunction2D(self));
-    });
-
-
-    m.def("InterpTable2DSpeedTest",
-          [](const GenericFunction<-1, 1>& tabf,
-             double xl,
-             double xu,
-             double yl,
-             double yu,
-             int nsamps,
-             bool lin) {
-            Eigen::ArrayXd xsamps;
-            xsamps.setRandom(nsamps);
-            xsamps += 1;
-            xsamps /= 2;
-            xsamps *= (xu - xl);
-            xsamps += xl;
-
-            Eigen::ArrayXd ysamps;
-            ysamps.setRandom(nsamps);
-            ysamps += 1;
-            ysamps /= 2;
-            ysamps *= (yu - yl);
-            ysamps += yl;
-
-            if (lin) {
-              xsamps.setLinSpaced(xl, xu);
-              ysamps.setLinSpaced(yl, yu);
-            }
-
-
-            Eigen::VectorXd xy(2);
-            Vector1<double> f;
-            f.setZero();
-
-            Utils::Timer Runtimer;
-            Runtimer.start();
-
-            double tmp = 0;
-            for (int i = 0; i < nsamps; i++) {
-
-
-              xy[0] = xsamps[i];
-              xy[1] = ysamps[i];
-
-              tabf.compute(xy, f);
-              tmp += f[0] / double(i + 3);
-
-              // fmt::print("{0:} \n",f[0]);
-
-
-              f.setZero();
-            }
-            Runtimer.stop();
-            double tseconds = double(Runtimer.count<std::chrono::microseconds>()) / 1000000;
-            fmt::print("Total Time: {0:} ms \n", tseconds * 1000);
-
-
-            return tmp;
-          });
-  }
-
 
 }  // namespace ASSET

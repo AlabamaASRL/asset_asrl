@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VectorFunction.h"
+#include <ASSET/VectorFunctions/VectorFunction.h>
 
 namespace ASSET {
 
@@ -13,7 +13,6 @@ namespace ASSET {
     ANDFlag,
     ORFlag,
   };
-
 
   template<class LHS, class RHS>
   struct ConditionalStatement {
@@ -98,7 +97,6 @@ namespace ASSET {
       }
     }
 
-
     int IRows() const {
       return this->InputRows;
     }
@@ -113,7 +111,6 @@ namespace ASSET {
     std::string name_;
     int InputRows = 0;
   };
-
 
   struct ConstantConditional {
     template<class Scalar>
@@ -146,7 +143,6 @@ namespace ASSET {
     std::string name_;
   };
 
-
   template<class TestFunc, class TrueFunc, class FalseFunc>
   struct IfElseFunction : VectorFunction<IfElseFunction<TestFunc, TrueFunc, FalseFunc>,
                                          SZ_MAX<TrueFunc::IRC, FalseFunc::IRC>::value,
@@ -159,7 +155,6 @@ namespace ASSET {
 
     DENSE_FUNCTION_BASE_TYPES(Base);
     static const bool IsVectorizable = false;
-
 
     TestFunc test_func;
     TrueFunc true_func;
