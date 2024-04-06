@@ -1,7 +1,7 @@
 #pragma once
+
 #include <Eigen/Core>
 #include <vector>
-
 
 namespace ASSET {
 
@@ -24,6 +24,5 @@ namespace ASSET {
     }
     return eigvec;
   }
-
 
 }  // namespace ASSET

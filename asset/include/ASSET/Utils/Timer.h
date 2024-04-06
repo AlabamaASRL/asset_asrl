@@ -1,7 +1,9 @@
 #pragma once
+
 #include <chrono>
+
 /*
-Copyright (c) 2017 André L. Maravilha
+Copyright (c) 2017 Andrï¿½ L. Maravilha
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -41,7 +43,6 @@ namespace ASSET {
           this->start();
         }
       }
-
 
       /**
        * Start/resume the timer.
@@ -113,7 +114,6 @@ namespace ASSET {
       std::chrono::steady_clock::time_point reference_;
       std::chrono::duration<long double> accumulated_;
     };
-
 
   }  // namespace Utils
 }  // namespace ASSET

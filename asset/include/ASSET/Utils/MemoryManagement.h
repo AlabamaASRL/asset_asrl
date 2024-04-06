@@ -19,13 +19,13 @@ in the LICENSE file in ASSET's top level directory.
 
 */
 
-
 #pragma once
+
+#include <ASSET/pch.h>
+
 #include <algorithm>
 #include <tuple>
 #include <utility>
-
-#include "pch.h"
 
 namespace ASSET {
 
@@ -100,7 +100,6 @@ namespace ASSET {
       int NextDataSize = 0;  // What size to resize Data too whenever we return top of stack
     };
 
-
     template<int... JS>
     struct NJumpTable {
       using sequence = std::tuple<std::integral_constant<int, JS>...>;
@@ -119,10 +118,8 @@ namespace ASSET {
       }
     };
 
-
     using OldDefaultJumpTable = NJumpTable<4, 8, 16>;
     using NewDefaultJumpTable = NJumpTable<8, 16, 64, 256, 384, 512, 1024, 2048>;
-
 
     template<int R, int C>
     struct RCBase {
@@ -153,7 +150,6 @@ namespace ASSET {
       }
     };
 
-
     /// <summary>
     /// This holder type was neccessary to stop a slow constructor in std::tuple
     /// I dont know why it was slow  or why this class stops it since they are doing the same thing
@@ -175,14 +171,12 @@ namespace ASSET {
       }
     };
 
-
     template<class... TempSpecs>
     struct ExactTempPack {
       std::tuple<typename std::remove_const_reference<TempSpecs>::type::ExactTempType...> data;
       ExactTempPack() {
       }
     };
-
 
   }  // namespace detail
 
@@ -213,7 +207,6 @@ namespace ASSET {
                                       0,
                                       (RowsAtCompileTime == -1) ? value : RowsAtCompileTime,
                                       (ColsAtCompileTime == -1) ? value : ColsAtCompileTime>;
-
 
     TempSpec(int rows, int cols) : Base(rows, cols) {
     }
@@ -264,7 +257,6 @@ namespace ASSET {
     TupleOfTempSpecs(std::tuple<TempSpec<T>...> tsp) : tspecs(tsp) {
     }
   };
-
 
   struct MemoryManager {
     using ScalarStackType = detail::TempStack<double>;
@@ -330,14 +322,10 @@ namespace ASSET {
       return MemoryManager::SuperScalarStack.size();
     }
 
-
-    static void Build(py::module& m);
-
    private:
     static thread_local ScalarStackType ScalarStack;
     static thread_local SuperScalarStackType SuperScalarStack;
     static bool UseArena;
-
 
     static const bool OnlyOldTables = false;
     static const bool OnlyNewTables = false;
@@ -363,7 +351,6 @@ namespace ASSET {
       }
     }
 
-
     template<class... TempSpecs>
     inline static int count_blocksize(const TempSpecs&... tspecs) {
       int blksize = 0;
@@ -384,7 +371,6 @@ namespace ASSET {
       (CountSpace(tspecs), ...);
       return blksize;
     }
-
 
     template<class Scalar, class... TempSpecs>
     inline static auto make_temps(Scalar* data, const TempSpecs&... tspecs) {
@@ -418,7 +404,6 @@ namespace ASSET {
 
       return std::tuple {make_temp(tspecs)...};
     }
-
 
     template<class Func, class... TempSpecs>
     inline static void run_arena_impl(Func&& f, const TempSpecs&... tspecs) {
@@ -459,7 +444,6 @@ namespace ASSET {
       using Scalar =
           typename std::remove_const_reference<decltype(std::get<0>(std::tuple {tspecs...}))>::type::Scalar;
 
-
       int blksize = MemoryManager::count_blocksize(tspecs...);
 
       auto MaxImpl = [&](auto maxsize) {
@@ -496,6 +480,5 @@ namespace ASSET {
       return make_map_array_helper(f, std::make_index_sequence<N> {});
     }
   };
-
 
 }  // namespace ASSET

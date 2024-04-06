@@ -1,4 +1,5 @@
-#include "ColorText.h"
+#include <ASSET/Utils/ColorText.h>
+
 #ifdef _WIN32
   #define WIN32_LEAN_AND_MEAN
   #define VC_EXTRALEAN
@@ -20,7 +21,6 @@
   // From MSDN about BOOL SetConsoleMode(HANDLE, DWORD).
   #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif  // not ENABLE_VIRTUAL_TERMINAL_PROCESSING
-
 
 void ASSET::enable_color_console() {
 

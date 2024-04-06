@@ -1,4 +1,4 @@
-#include "GetCoreCount.h"
+#include <ASSET/Utils/GetCoreCount.h>
 
 #include <algorithm>
 #include <cctype>
@@ -17,7 +17,6 @@
   #include <stdio.h>
   #include <tchar.h>
 #endif  // _WIN32
-
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
   #include <sys/sysctl.h>
@@ -45,7 +44,6 @@ static inline void rtrim(std::string &s) {
 //     rtrim(s);
 // }
 
-
 int ASSET::get_core_count() {
 
   int tcount = std::thread::hardware_concurrency();
@@ -65,7 +63,6 @@ int ASSET::get_core_count() {
       if (GetLogicalProcessorInformation(&buffer.front(), &size) == FALSE)
         return 0;
 
-
       for (size_t i = 0; i < Elements; ++i) {
         if (buffer[i].Relationship == RelationProcessorCore)
           ++cores;
@@ -83,7 +80,6 @@ int ASSET::get_core_count() {
     /// I took this from boost threads and modified it to work without boost
     /// https://github.com/boostorg/thread/blob/develop/src/pthread/thread.cpp
     /// boost::thread::physical_concurrency
-
 
     auto trim = [](std::string &s) {
       s.erase(s.begin(),
@@ -133,7 +129,6 @@ int ASSET::get_core_count() {
       return tcount;
     }
   };
-
 
 #elif defined(__APPLE__)
   auto Run = [tcount]() {
