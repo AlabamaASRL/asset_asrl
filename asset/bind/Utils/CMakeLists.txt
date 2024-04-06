@@ -1,4 +1,7 @@
-add_library(bind-utils STATIC BindMemoryManagement.cpp)
+add_library(bind-utils SHARED
+  BindMemoryManagement.cpp
+  BindUtils.cpp
+)
 target_link_libraries(bind-utils PUBLIC
   bind-pch
   asset-utils
