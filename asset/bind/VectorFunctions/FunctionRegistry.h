@@ -3,6 +3,8 @@
 #include <ASSET/VectorFunctions/VectorFunctionTypeErasure/GenericFunction.h>
 #include <bind/pch.h>
 
+#include "FunctionBinder.h"
+
 namespace ASSET {
 
   template<class T>
@@ -71,19 +73,20 @@ namespace ASSET {
     void Register() {
       RegSelector<Derived::IRC, Derived::ORC>::template Register<Derived>(this);
     }
-    template<class Derived>
-    void Build_Register(py::module& m) {
-      Derived::Build(m);
-      RegSelector<Derived::IRC, Derived::ORC>::template Register<Derived>(this);
-    }
+    // TODO(wgl): Recommend deprecate
+    // template<class Derived>
+    // void Build_Register(py::module& m) {
+    //   Derived::Build(m);
+    //   RegSelector<Derived::IRC, Derived::ORC>::template Register<Derived>(this);
+    // }
     template<class Derived>
     void Build_Register(const char* name) {
-      Derived::Build(this->mod, name);
+      FunctionBinder<Derived>::Bind(this->mod, name);
       RegSelector<Derived::IRC, Derived::ORC>::template Register<Derived>(this);
     }
     template<class Derived>
     void Build_Register(py::module& m, const char* name) {
-      Derived::Build(m, name);
+      FunctionBinder<Derived>::Bind(m, name);
       RegSelector<Derived::IRC, Derived::ORC>::template Register<Derived>(this);
     }
   };

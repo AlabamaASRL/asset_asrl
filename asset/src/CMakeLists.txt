@@ -4,3 +4,4 @@ target_link_libraries(asset-pch PUBLIC asset-headers)
 
 add_subdirectory(Solvers)
 add_subdirectory(Utils)
+add_subdirectory(VectorFunctions)

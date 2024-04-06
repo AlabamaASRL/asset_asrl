@@ -239,9 +239,8 @@ namespace ASSET {
       if (!this->is_linear())
         Base::scale_hessian(target_, s);
     }
-    ////////////////////////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////////////////////////
+    // TODO(wgl): Can we rename this to something not associated with python?
     template<class T>
     static GenericFunction<IR, OR> PyCopy(const T& obj) {
       return GenericFunction<IR, OR>(obj);

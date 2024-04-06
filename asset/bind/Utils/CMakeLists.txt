@@ -1,4 +1,4 @@
-add_library(bind-utils SHARED
+add_library(bind-utils STATIC
   BindMemoryManagement.cpp
   BindUtils.cpp
 )
