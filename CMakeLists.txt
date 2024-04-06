@@ -26,7 +26,7 @@ list(APPEND COMMON_FLAGS "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-mllvm>")
 list(APPEND COMMON_FLAGS "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-inline-threshold=${CLANG_MAX_INLINE_DEPTH}>")
 
 # User Settings ################################################################
-option(ASSET_PYTHON "Build the ASSET Python bindings" OFF)
+option(ASSET_PYTHON "Build the ASSET Python bindings" ON)
 option(BUILD_ASSET_WHEEL "CI Build for generic wheels" OFF)
 option(BUILD_SPHINX_DOCS "ASSET Documentation" OFF)
 
