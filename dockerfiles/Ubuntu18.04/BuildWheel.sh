@@ -23,7 +23,7 @@ fi
 
 cd ~/asset_asrl
 
-git checkout branch
+git checkout $branch
 
 ############################################
 PyVer=$1
