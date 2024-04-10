@@ -15,7 +15,7 @@ done
 for pyver in ${PythonVersions[@]}
  do
         echo "Building Python $pyver wheel"
-        bash ~/BuildWheel.sh -j$ncores -b$branch $pyver
+        bash ~/BuildWheel.sh -j $ncores -b $branch $pyver
         echo "Finished building Python $pyver wheel"
 
  done
