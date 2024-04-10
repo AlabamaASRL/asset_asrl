@@ -1,12 +1,14 @@
 
 ncores=10
 branch=master
+PyVer=3.10
 
-while getopts j:b: flag
+while getopts j:b:p: flag
 do
     case "${flag}" in
         j) ncores=${OPTARG};;
         b) branch=${OPTARG};;
+        p) PyVer=${OPTARG};;
     esac
 done
 
@@ -26,8 +28,7 @@ cd ~/asset_asrl
 git checkout $branch
 
 ############################################
-PyVer=$1
-BuildEnv=__build$1
+BuildEnv=__build$PyVer
 
 if conda info --envs | grep -q $BuildEnv; then echo "$BuildEnv already exists";else conda create -y -n $BuildEnv python=$PyVer; fi
 
