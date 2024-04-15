@@ -57,10 +57,10 @@ void ASSET::VectorFunctionBuild(FunctionRegistry& reg, py::module& m) {
   InterpTable4DBuild(mod);
 
   mod.def("ScalarDynamicStackTest", [](const std::vector<GenericFunction<-1, 1>>& funcs) {
-    return GenericFunction<-1, -1>(DynamicStackedOutputs {funcs});
+    return GenericFunction<-1, -1>(DynamicStackedOutputs<GenericFunction<-1, 1>> {funcs});
   });
 
   mod.def("DynamicStackTest", [](const std::vector<GenericFunction<-1, -1>>& funcs) {
-    return GenericFunction<-1, -1>(DynamicStackedOutputs {funcs});
+    return GenericFunction<-1, -1>(DynamicStackedOutputs<GenericFunction<-1, -1>> {funcs});
   });
 }
