@@ -41,11 +41,11 @@ pip install patchelf auditwheel
 
 rm -rf build
 
-/usr/local/bin/cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_ASSET_WHEEL=True -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+/usr/local/bin/cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_ASSET_WHEEL=True -DCMAKE_C_COMPILER=clang-12 -DCMAKE_CXX_COMPILER=clang++-12
 /usr/local/bin/cmake --build build --target asset pypiwheel --config Release -- -j$ncores 
 
-auditwheel show build/pypiwheel/asset_asrl/dist/*.whl  ## manylinux_2_27_x86_64 
-auditwheel repair --plat manylinux_2_27_x86_64 build/pypiwheel/asset_asrl/dist/*.whl
+auditwheel show build/pypiwheel/asset_asrl/dist/*.whl  ## manylinux_2_31_x86_64 
+auditwheel repair --plat manylinux_2_31_x86_64 build/pypiwheel/asset_asrl/dist/*.whl
 
 conda activate base
 
