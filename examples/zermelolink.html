@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Multi-Spacecraft Optimization" href="MultiTarg.html" /><link rel="prev" title="Zermelo’s Problem" href="zermelo.html" />
 
-    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
+    <!-- Generated with Sphinx 7.3.7 and Furo 2024.01.29 -->
         <title>Multi-Phase Zermelo’s Problem - ASSET 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
@@ -226,7 +226,7 @@
         </div>
         <article role="main">
           <section id="multi-phase-zermelo-s-problem">
-<h1>Multi-Phase Zermelo’s Problem<a class="headerlink" href="#multi-phase-zermelo-s-problem" title="Link to this heading">#</a></h1>
+<h1>Multi-Phase Zermelo’s Problem<a class="headerlink" href="#multi-phase-zermelo-s-problem" title="Link to this heading">¶</a></h1>
 <p>If you haven’t explored <a class="reference internal" href="zermelo.html#zermelo-s-problem"><span class="std std-ref">Zermelo’s Problem</span></a>, it is highly recommended that you do so before going much further.
 It provides much needed background information about the problem, as well as the initial code that we will be modifying.</p>
 <p>The previous example showed Zermelo’s problem as a single phase problem. We were only trying to get from point A to B, with some constraints and objectives along
@@ -234,7 +234,7 @@ that single phase. What if instead we wanted travel from A to any arbitrary numb
 where each phase can have varying constraints and objectives to solve in the pursuit of our final target. In this example, we will expand the single phase Zermelo’s problem into multiple phases, which is a very
 useful tool to have for trajectory optimization.</p>
 <section id="link-constraints">
-<h2>Link Constraints:<a class="headerlink" href="#link-constraints" title="Link to this heading">#</a></h2>
+<h2>Link Constraints:<a class="headerlink" href="#link-constraints" title="Link to this heading">¶</a></h2>
 <p>Link Constraints are the way that ASSET handles multi-phase problems. A link constraint enforces that state variables must be equal across phases. That is to say that the final state of phase 1 must be equal to the first state of phase 2.
 To do this to the previous problem, we only have to make a few additions to the code from <a class="reference internal" href="zermelo.html#zermelo-s-problem"><span class="std std-ref">Zermelo’s Problem</span></a>. The primary changes occur in the <code class="code docutils literal notranslate"><span class="pre">navigate</span></code> function.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">navigate</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">vM</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">uniformWind</span><span class="p">):</span>
@@ -338,7 +338,7 @@ We defined the initial points such that the boat maneuvers back to the initial s
 </figure>
 </section>
 <section id="full-code">
-<h2>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">#</a></h2>
+<h2>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
@@ -714,7 +714,7 @@ We defined the initial points such that the boat maneuvers back to the initial s
     </aside>
   </div>
 </div><script src="../_static/documentation_options.js?v=6c02275b"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     </body>

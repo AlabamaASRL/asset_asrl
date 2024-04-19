@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Adaptive Mesh Refinement Tutorial" href="AutoMeshGuide.html" /><link rel="prev" title="Optimal Control Problem Tutorial" href="OptimalControlProblem.html" />
 
-    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
+    <!-- Generated with Sphinx 7.3.7 and Furo 2024.01.29 -->
         <title>PSIOPT - ASSET 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
@@ -226,7 +226,7 @@
         </div>
         <article role="main">
           <section id="psiopt">
-<span id="psiopt-guide"></span><h1>PSIOPT<a class="headerlink" href="#psiopt" title="Link to this heading">#</a></h1>
+<span id="psiopt-guide"></span><h1>PSIOPT<a class="headerlink" href="#psiopt" title="Link to this heading">¶</a></h1>
 <p>Having an efficient method of solving sparse non-linear optimization problems is critical to the success of any trajectory optimization software.
 While several excellent optimization software packages exist, they all require either commercial products (KNITRO, SNOPT) or are reliant
 on other commercial and restrictively licensed products for optimum performance (IPOPT).
@@ -234,14 +234,14 @@ Therefore, in order to keep ASSET completely open source, the Parallel Sparse In
 PSIOPT is built to solve non-linear programs (NLP) expressed in standard form as shown in <a class="reference internal" href="PhaseGuide.html#eq-1"><span class="std std-ref">Eq.(1)</span></a>.</p>
 <div class="math-wrapper docutils container" id="eq-1">
 <span id="equation-eq-1"></span><div class="math notranslate nohighlight" id="eq-1">
-<span id="equation-eq-1"></span><span class="eqno">(1)<a class="headerlink" href="#eq-1" title="Link to this equation">#</a></span>\[ \begin{align}\begin{aligned}min:f(\vec{x})\\\vec{h}(\vec{x})=\vec{0}\\\vec{g}(\vec{x})&lt;\vec{0}{}\end{aligned}\end{align} \]</div>
+<span id="equation-eq-1"></span><span class="eqno">(1)<a class="headerlink" href="#eq-1" title="Link to this equation">¶</a></span>\[ \begin{align}\begin{aligned}min:f(\vec{x})\\\vec{h}(\vec{x})=\vec{0}\\\vec{g}(\vec{x})&lt;\vec{0}{}\end{aligned}\end{align} \]</div>
 </div>
 <p>In short, it seeks to minimize a scalar valued objective function <span class="math notranslate nohighlight">\(f(\vec{x})\)</span> of design variables, <span class="math notranslate nohighlight">\(\vec{x}\)</span>, subject to equality, <span class="math notranslate nohighlight">\(\vec{h}(\vec{x})\)</span>,
 and an inequality, <span class="math notranslate nohighlight">\(\vec{g}(\vec{x})\)</span>, constraints on those variables. PSIOPT adopts a primal-dual-interior-point approach to convert the problem into
 an equivalent bound constrained saddle-point optimization problem of the Lagrangian function defined in <a class="reference internal" href="#eq-2"><span class="std std-ref">Eq.(2)</span></a>.</p>
 <div class="math-wrapper docutils container" id="eq-2">
 <span id="equation-eq-2"></span><div class="math notranslate nohighlight" id="eq-2">
-<span id="equation-eq-2"></span><span class="eqno">(2)<a class="headerlink" href="#eq-2" title="Link to this equation">#</a></span>\[ \begin{align}\begin{aligned}L(\vec{x},\vec{s},\vec{\nu},\vec{\lambda}) = f(\vec{x}) - \mu \sum \ln (s_i) + \vec{h}(\vec{x})\cdot\vec{\nu} + (\vec{g}(\vec{x}) + \vec{s})\cdot\vec{\lambda}\\\vec{s}&gt;\vec{0}\quad\quad\quad\quad \vec{\lambda}&gt;\vec{0}\quad\quad\quad\quad \mu&gt;0\quad\quad\quad\quad\end{aligned}\end{align} \]</div>
+<span id="equation-eq-2"></span><span class="eqno">(2)<a class="headerlink" href="#eq-2" title="Link to this equation">¶</a></span>\[ \begin{align}\begin{aligned}L(\vec{x},\vec{s},\vec{\nu},\vec{\lambda}) = f(\vec{x}) - \mu \sum \ln (s_i) + \vec{h}(\vec{x})\cdot\vec{\nu} + (\vec{g}(\vec{x}) + \vec{s})\cdot\vec{\lambda}\\\vec{s}&gt;\vec{0}\quad\quad\quad\quad \vec{\lambda}&gt;\vec{0}\quad\quad\quad\quad \mu&gt;0\quad\quad\quad\quad\end{aligned}\end{align} \]</div>
 </div>
 <p>Additional non-negative slack variables, <span class="math notranslate nohighlight">\(\vec{s}\)</span>, are added to each inequality constraint to capture the distance from the constraint boundary.
 An additional term, the barrier objective, is then added that penalizes solutions near the edge of the feasible region by taking the negative log of each slack variable.
@@ -252,7 +252,7 @@ to IPOPT, a positive multiple of the identity matrix is added to the Hessian of 
 will update <span class="math notranslate nohighlight">\(\delta\)</span> every iteration to keep this perturbation as small as possible.</p>
 <div class="math-wrapper docutils container" id="eq-3">
 <span id="equation-eq-3"></span><div class="math notranslate nohighlight" id="eq-3">
-<span id="equation-eq-3"></span><span class="eqno">(3)<a class="headerlink" href="#eq-3" title="Link to this equation">#</a></span>\[ \begin{align}\begin{aligned}\begin{split}\begin{bmatrix}
+<span id="equation-eq-3"></span><span class="eqno">(3)<a class="headerlink" href="#eq-3" title="Link to this equation">¶</a></span>\[ \begin{align}\begin{aligned}\begin{split}\begin{bmatrix}
 H &amp; 0 &amp; \nabla_x h  &amp; \nabla_x g  \\
 0 &amp; \frac{\lambda}{s} &amp; 0 &amp; I\\
 \nabla_x h^T &amp; 0 &amp; 0 &amp; 0\\
@@ -273,7 +273,7 @@ H = \nabla_{_{xx}}f + \nabla_{_{xx}}h\cdot\nu + \nabla_{_{xx}}g\cdot\lambda + \d
 Since computation of first and second derivatives is a computationally expensive task, the solver automatically detects independent functions and evaluate them in parallel on multi-core CPUs.
 To solve the resulting linear-system, the software leverages the state of the art sparse-symmetric-indefinite solver MKL PARDISO.</p>
 <section id="psiopt-usage">
-<h2>PSIOPT Usage<a class="headerlink" href="#psiopt-usage" title="Link to this heading">#</a></h2>
+<h2>PSIOPT Usage<a class="headerlink" href="#psiopt-usage" title="Link to this heading">¶</a></h2>
 <p>Each interface for defining optimization problems in ASSET (ex: <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code>, <code class="code docutils literal notranslate"><span class="pre">ode.phase</span></code> )
 has as its own instance of PSIOPT attached as a member variable of the class.
 Formulation and solution of the optimization problem is always handled through the respective interface,
@@ -298,7 +298,7 @@ where <code class="code docutils literal notranslate"><span class="pre">XXX</spa
 </div>
 <div class="table-wrapper colwidths-given docutils container" id="id1">
 <table class="docutils align-default" id="id1" style="width: 100%">
-<caption><span class="caption-text">PSIOPT SETTINGS</span><a class="headerlink" href="#id1" title="Link to this table">#</a></caption>
+<caption><span class="caption-text">PSIOPT SETTINGS</span><a class="headerlink" href="#id1" title="Link to this table">¶</a></caption>
 <colgroup>
 <col style="width: 16.7%" />
 <col style="width: 50.0%" />
@@ -452,7 +452,7 @@ use the flags in your code, it is recommended to compare flags to their enumerat
 </div>
 <div class="table-wrapper colwidths-given docutils container" id="id2">
 <table class="docutils align-default" id="id2" style="width: 100%">
-<caption><span class="caption-text">PSIOPT CONVERGENCE FLAGS</span><a class="headerlink" href="#id2" title="Link to this table">#</a></caption>
+<caption><span class="caption-text">PSIOPT CONVERGENCE FLAGS</span><a class="headerlink" href="#id2" title="Link to this table">¶</a></caption>
 <colgroup>
 <col style="width: 20.0%" />
 <col style="width: 65.0%" />
@@ -487,7 +487,7 @@ constraints or gradient</p></td>
 </table>
 </div>
 <section id="threading">
-<h3>Threading<a class="headerlink" href="#threading" title="Link to this heading">#</a></h3>
+<h3>Threading<a class="headerlink" href="#threading" title="Link to this heading">¶</a></h3>
 <p>By default, PSIOPT will set the number of threads used to parallelize function evaluations to be equal to the number of hardware threads
 on your machine up to a maximum of 16. So if your computer has 10 cores and 20 threads (ex: i9-10900k), only 16 threads will be used for function evaluations by default.
 Likewise by default, PSIOPT will set the number of threads used to factor KKT matrices to be equal to the number of physical cores on your machine up to a maximum of 8.
@@ -508,7 +508,7 @@ you should almost always set the optimizer to run-serially to prevent over-subsc
 </div>
 </section>
 <section id="output">
-<h3>Output<a class="headerlink" href="#output" title="Link to this heading">#</a></h3>
+<h3>Output<a class="headerlink" href="#output" title="Link to this heading">¶</a></h3>
 <p>When invoking one of PSIOPT’s algorithms with a <code class="code docutils literal notranslate"><span class="pre">PrintLevel</span></code> of 0, the solver will produce the console output scroll shown in the figure below. The current objective
 and constraint/optimality errors as well as other relevant algorithm parameters are displayed at each iterate. The meaning of each column is given in the table below.
 The constraint and optimality feasibilities are color coded according to their value. The color scheme progresses from dark red to orange, to yellow, to green as the
@@ -517,10 +517,11 @@ Additionally, the right hash mark of ‘Prim Obj’,’Barr Obj’,’KKT Inf’
 The full console is 119 characters wide, which will fit in a standard console on Windows. However, most Linux terminals are not wide enough by default, so you should widen your terminal if you want to be able to
 make sense of the output. While the console is (in its author’s opinion) quite nice to look at, it has non-negligible cost to print, so you should probably suppress output if throughput and performance are of concern.
 You can suppress some or all of the output by setting <code class="code docutils literal notranslate"><span class="pre">PrintLevel</span></code> to a value greater than 1.</p>
-<a class="reference internal image-reference" href="../_images/PSIOPTOUT.PNG"><img alt="../_images/PSIOPTOUT.PNG" src="../_images/PSIOPTOUT.PNG" style="width: 100%;" /></a>
+<a class="reference internal image-reference" href="../_images/PSIOPTOUT.PNG"><img alt="../_images/PSIOPTOUT.PNG" src="../_images/PSIOPTOUT.PNG" style="width: 100%;" />
+</a>
 <div class="table-wrapper colwidths-given docutils container" id="id3">
 <table class="docutils align-default" id="id3" style="width: 100%">
-<caption><span class="caption-text">PSIOPT Print Output</span><a class="headerlink" href="#id3" title="Link to this table">#</a></caption>
+<caption><span class="caption-text">PSIOPT Print Output</span><a class="headerlink" href="#id3" title="Link to this table">¶</a></caption>
 <colgroup>
 <col style="width: 10.0%" />
 <col style="width: 90.0%" />
@@ -576,7 +577,7 @@ You can suppress some or all of the output by setting <code class="code docutils
 </section>
 </section>
 <section id="jet">
-<h2>Jet<a class="headerlink" href="#jet" title="Link to this heading">#</a></h2>
+<h2>Jet<a class="headerlink" href="#jet" title="Link to this heading">¶</a></h2>
 <p>In addition to calling PSIOPT to solve or optimize a single problem at a time, we provide the capability to optimize multiple different problems in parallel using
 the <code class="code docutils literal notranslate"><span class="pre">Jet</span></code> tool. This can allow you to more efficiently tackle throughput oriented workloads from within a single python process,
 without having to resort to multiprocessing libraries. There are two ways to do this. In the first method, demonstrated below, we construct a python list
@@ -683,7 +684,8 @@ and expensive preprocessing that cannot be parallelized.</p>
 </pre></div>
 </div>
 <p>For both methods, if console printing is enabled, Jet will dynamically print out its progress, and alert of the convergence rate of each problem and the estimated remaining run-time.</p>
-<a class="reference internal image-reference" href="../_images/JetGif4.gif"><img alt="../_images/JetGif4.gif" src="../_images/JetGif4.gif" style="width: 100%;" /></a>
+<a class="reference internal image-reference" href="../_images/JetGif4.gif"><img alt="../_images/JetGif4.gif" src="../_images/JetGif4.gif" style="width: 100%;" />
+</a>
 <p>We should make a few notes about the performance. First, best performance is usually seen by using a number of threads equal to or slightly greater than the number
 of physical cores on your machine, anymore can lead to over-subscription of the CPU.
 Second, you should limit the maximum number of problems solved in a single Jet run to somewhere between 2000 and 10000.
@@ -766,7 +768,7 @@ the size of each optimization problem, but you can generally identify when it ha
     </aside>
   </div>
 </div><script src="../_static/documentation_options.js?v=6c02275b"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>

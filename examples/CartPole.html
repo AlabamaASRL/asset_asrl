@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Hyper-Sensitive Optimal Control Problem" href="HyperSensitive.html" /><link rel="prev" title="Space Shuttle Reentry" href="ReentryExample.html" />
 
-    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
+    <!-- Generated with Sphinx 7.3.7 and Furo 2024.01.29 -->
         <title>Cart-Pole Swing Up - ASSET 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
@@ -226,7 +226,7 @@
         </div>
         <article role="main">
           <section id="cart-pole-swing-up">
-<h1>Cart-Pole Swing Up<a class="headerlink" href="#cart-pole-swing-up" title="Link to this heading">#</a></h1>
+<h1>Cart-Pole Swing Up<a class="headerlink" href="#cart-pole-swing-up" title="Link to this heading">¶</a></h1>
 <p>In this example, derived from Kelly’s excellent intro to collocation methods [1], we will compute the minimum effort trajectory to swing a cart-pole system to a vertical orientation.
 The cart with mass, <span class="math notranslate nohighlight">\(m_1\)</span>, is free to move along a horizontal track in the <span class="math notranslate nohighlight">\(x\)</span> direction subject to an applied force, <span class="math notranslate nohighlight">\(F\)</span>.
 The angular position, <span class="math notranslate nohighlight">\(\theta\)</span>, of the attached pole with length, <span class="math notranslate nohighlight">\(l\)</span>, and mass, <span class="math notranslate nohighlight">\(m_2\)</span>, is measured from the <span class="math notranslate nohighlight">\(-y\)</span> direction.
@@ -349,15 +349,16 @@ and do not need any non-dimensionalization. Furthermore, it is sufficient to ini
 <p>On a 6 core i7-9750H laptop, with 64 LGL5 segments, this problem converges in 12 iterations of the optimize algorithm taking only 28 milliseconds.
 The final objective value is 58.80819. A plot and animation of the converged trajectory can be seen below.</p>
 <a class="reference internal image-reference" href="../_images/CartPoleFig.svg"><img alt="../_images/CartPoleFig.svg" src="../_images/CartPoleFig.svg" width="100%" /></a>
-<a class="reference internal image-reference" href="../_images/CartPoleGif2.gif"><img alt="../_images/CartPoleGif2.gif" src="../_images/CartPoleGif2.gif" style="width: 100%;" /></a>
+<a class="reference internal image-reference" href="../_images/CartPoleGif2.gif"><img alt="../_images/CartPoleGif2.gif" src="../_images/CartPoleGif2.gif" style="width: 100%;" />
+</a>
 <section id="references">
-<h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>Kelly, M., 2017. An introduction to trajectory optimization: How to do your own direct collocation. SIAM Review, 59(4), pp.849-904.</p></li>
 </ol>
 </section>
 <section id="full-code">
-<h2>Full-Code<a class="headerlink" href="#full-code" title="Link to this heading">#</a></h2>
+<h2>Full-Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -653,7 +654,7 @@ The final objective value is 58.80819. A plot and animation of the converged tra
     </aside>
   </div>
 </div><script src="../_static/documentation_options.js?v=6c02275b"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>

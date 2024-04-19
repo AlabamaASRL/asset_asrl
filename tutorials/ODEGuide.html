@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Integrator Tutorial" href="IntegratorGuide.html" /><link rel="prev" title="Vector Function Tutorial" href="VectorFunctionGuide.html" />
 
-    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
+    <!-- Generated with Sphinx 7.3.7 and Furo 2024.01.29 -->
         <title>ODE Tutorial - ASSET 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
@@ -226,7 +226,7 @@
         </div>
         <article role="main">
           <section id="ode-tutorial">
-<span id="ode-guide"></span><h1>ODE Tutorial<a class="headerlink" href="#ode-tutorial" title="Link to this heading">#</a></h1>
+<span id="ode-guide"></span><h1>ODE Tutorial<a class="headerlink" href="#ode-tutorial" title="Link to this heading">¶</a></h1>
 <p>One of ASSET’s primary goals is facilitating optimal control and integration of dynamical systems governed by ordinary differential equations (ODEs).
 In ASSET, an ODE is simply a VectorFunction adhering to the state-space formalism shown below.
 That is, it is a VectorFunction that takes as arguments the state of the system, <span class="math notranslate nohighlight">\(\vec{X}\)</span>, the current time,
@@ -274,7 +274,7 @@ the time derivatives of position and velocity in the same order we assumed in th
 </pre></div>
 </div>
 <section id="odearguments">
-<h2>ODEArguments<a class="headerlink" href="#odearguments" title="Link to this heading">#</a></h2>
+<h2>ODEArguments<a class="headerlink" href="#odearguments" title="Link to this heading">¶</a></h2>
 <p>To simplify the process of defining VectorFunctions adhering to the state space
 formalism, we provide the <code class="code docutils literal notranslate"><span class="pre">ODEArguments</span></code> class inside of the <code class="code docutils literal notranslate"><span class="pre">OptimalControl</span></code> module.
 This class is a thin wrapper around the <code class="code docutils literal notranslate"><span class="pre">Arguments</span></code> class that allows you to index relevant
@@ -336,7 +336,7 @@ specific elements of each of these sub-vectors using the <code class="code docut
 </div>
 </section>
 <section id="defining-ode-classes">
-<h2>Defining ODE Classes<a class="headerlink" href="#defining-ode-classes" title="Link to this heading">#</a></h2>
+<h2>Defining ODE Classes<a class="headerlink" href="#defining-ode-classes" title="Link to this heading">¶</a></h2>
 <p>If you were to inspect the type of the result of the function above, it would
 be <code class="code docutils literal notranslate"><span class="pre">VectorFunction</span></code>, and at this point ASSET has no idea that it is an ODE.
 For ASSET to recognize our function as an ODE and allow us to use it directly with
@@ -453,7 +453,7 @@ objects. We will discuss usage of these in the next sections.</p>
     </aside>
   </div>
 </div><script src="../_static/documentation_options.js?v=6c02275b"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>

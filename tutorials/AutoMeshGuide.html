@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Optimal Control Utilities" href="OptimalControlUtilites.html" /><link rel="prev" title="PSIOPT" href="PSIOPT.html" />
 
-    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
+    <!-- Generated with Sphinx 7.3.7 and Furo 2024.01.29 -->
         <title>Adaptive Mesh Refinement Tutorial - ASSET 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
@@ -226,7 +226,7 @@
         </div>
         <article role="main">
           <section id="adaptive-mesh-refinement-tutorial">
-<span id="mesh-guide"></span><h1>Adaptive Mesh Refinement Tutorial<a class="headerlink" href="#adaptive-mesh-refinement-tutorial" title="Link to this heading">#</a></h1>
+<span id="mesh-guide"></span><h1>Adaptive Mesh Refinement Tutorial<a class="headerlink" href="#adaptive-mesh-refinement-tutorial" title="Link to this heading">¶</a></h1>
 <p>In version 0.1.0, we have added significantly improved capabilities for automatic mesh refinement for problems
 defined through the phase and OptimalControlProblem interfaces.</p>
 <div class="admonition note">
@@ -234,7 +234,7 @@ defined through the phase and OptimalControlProblem interfaces.</p>
 <p>These new features are entirely opt-in, and any old code “should” work exactly as it did before.</p>
 </div>
 <section id="mathematical-background">
-<h2>Mathematical Background<a class="headerlink" href="#mathematical-background" title="Link to this heading">#</a></h2>
+<h2>Mathematical Background<a class="headerlink" href="#mathematical-background" title="Link to this heading">¶</a></h2>
 <p>Given a mesh with <span class="math notranslate nohighlight">\(N\)</span> LGL segments of order <span class="math notranslate nohighlight">\(p\)</span>, the algorithm first estimates the maximum error <span class="math notranslate nohighlight">\(e_i\)</span> in the ith segment spanning the time interval <span class="math notranslate nohighlight">\([t_i,t_{i+1}]\)</span>.
 We have implemented two methods to obtain these error estimates.</p>
 <div class="math-wrapper docutils container">
@@ -286,7 +286,7 @@ is reduced below <span class="math notranslate nohighlight">\(\epsilon\)</span>.
 </div>
 </section>
 <section id="phase">
-<h2>Phase<a class="headerlink" href="#phase" title="Link to this heading">#</a></h2>
+<h2>Phase<a class="headerlink" href="#phase" title="Link to this heading">¶</a></h2>
 <p>To enable the new adaptive mesh algorithm on a phase you need to call the object’s <code class="code docutils literal notranslate"><span class="pre">.setAdaptiveMesh</span></code> method prior to invoking the optimizer.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">phase</span><span class="o">.</span><span class="n">setAdaptiveMesh</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>  <span class="c1">#Enable Adaptive mesh for all following solve/optimize calls</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">setAdaptiveMesh</span><span class="p">()</span>      <span class="c1">#Equivalent to above</span>
@@ -376,10 +376,11 @@ tolerances. That is checked by reading the read-only <code class="code docutils 
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Try Again&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<a class="reference internal image-reference" href="../_images/PhaseMeshPrint.PNG"><img alt="../_images/PhaseMeshPrint.PNG" src="../_images/PhaseMeshPrint.PNG" style="width: 60%;" /></a>
+<a class="reference internal image-reference" href="../_images/PhaseMeshPrint.PNG"><img alt="../_images/PhaseMeshPrint.PNG" src="../_images/PhaseMeshPrint.PNG" style="width: 60%;" />
+</a>
 </section>
 <section id="optimal-control-problem">
-<h2>Optimal Control Problem<a class="headerlink" href="#optimal-control-problem" title="Link to this heading">#</a></h2>
+<h2>Optimal Control Problem<a class="headerlink" href="#optimal-control-problem" title="Link to this heading">¶</a></h2>
 <p>Adaptive mesh refinement can also be enabled for multi-phase <code class="code docutils literal notranslate"><span class="pre">OptimalControlProblem</span></code> objects as well.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ocp</span>  <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">OptimalControlProblem</span><span class="p">()</span>
 
@@ -455,9 +456,10 @@ you can also query the convergence status of the individual phases themselves.</
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Phase </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> Converged??:&quot;</span><span class="p">,</span><span class="n">phase</span><span class="o">.</span><span class="n">MeshConverged</span><span class="p">)</span>
 </pre></div>
 </div>
-<a class="reference internal image-reference" href="../_images/OcpMeshPrint.PNG"><img alt="../_images/OcpMeshPrint.PNG" src="../_images/OcpMeshPrint.PNG" style="width: 60%;" /></a>
+<a class="reference internal image-reference" href="../_images/OcpMeshPrint.PNG"><img alt="../_images/OcpMeshPrint.PNG" src="../_images/OcpMeshPrint.PNG" style="width: 60%;" />
+</a>
 <section id="references">
-<h3>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h3>
+<h3>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>de Boor, C. (1973). Good approximation by splines with variable knots. In Spline Functions and Approximation Theory: Proceedings of the Symposium held at the University of Alberta, Edmonton May 29 to June 1, 1972 (pp. 57-72). Birkhauser Basel.</p></li>
 <li><p>Russell, R. D., &amp; Christiansen, J. (1978). Adaptive mesh selection strategies for solving boundary value problems. SIAM Journal on Numerical Analysis, 15(1), 59-80.</p></li>
@@ -541,7 +543,7 @@ you can also query the convergence status of the individual phases themselves.</
     </aside>
   </div>
 </div><script src="../_static/documentation_options.js?v=6c02275b"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
