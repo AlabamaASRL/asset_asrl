@@ -423,6 +423,9 @@ namespace ASSET {
     Eigen::VectorXd LastIqCons;
 
 
+    bool ReturnBest = false;
+    std::string BestCriteria = "ECons";// "ICons,Obj,KKT"
+
 
     /////////////////////////////////////////////////////////////////////
 
@@ -758,7 +761,8 @@ namespace ASSET {
     void print_Beginning(std::string msg) const;
     void print_Finished(std::string msg) const;
     void print_ExitStats(ConvergenceFlags ExitCode,
-                         const std::vector<IterateInfo>& iters,
+                         const IterateInfo & last,
+                         int iternum,
                          double tottime,
                          double nlptime,
                          double qptime);

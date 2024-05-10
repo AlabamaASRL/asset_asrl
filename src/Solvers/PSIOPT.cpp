@@ -340,18 +340,17 @@ void ASSET::PSIOPT::print_Finished(std::string msg) const {
 }
 
 void ASSET::PSIOPT::print_ExitStats(ConvergenceFlags ExitCode,
-                                    const std::vector<IterateInfo>& iters,
+                                    const IterateInfo& last,
+                                    int iternum,
                                     double tottime,
                                     double nlptime,
                                     double qptime) {
-  auto last = iters.back();
   fmt::text_style Kcol = calculate_color(last.KKTInf, this->KKTtol, this->AccKKTtol);
   fmt::text_style Bcol = calculate_color(last.BarrInf, this->Bartol, this->AccBartol);
   fmt::text_style Ecol = calculate_color(last.EConInf, this->EContol, this->AccEContol);
   fmt::text_style Icol = calculate_color(last.IConInf, this->IContol, this->AccIContol);
 
 
-  int iternum = int(iters.size());
   double printtime = tottime - nlptime - qptime;
   auto TColor = fmt::fg(fmt::color::cyan);
   auto Printtime = [&](const char* msg, double t1) {
@@ -477,6 +476,12 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
 
   Eigen::VectorXd Temp(this->KKTdim);
   Eigen::VectorXd Err;
+
+  Eigen::VectorXd BestXSL;
+  Eigen::VectorXd BestRHS;
+  double BestCriteriaVal=1.0e10;
+  int BestIter = 0;
+
 
   double Mu = MuI;
 
@@ -621,6 +626,32 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
     this->fill_iter_info(XSL, RHS, PrimObj, BarrObj, Mu, Citer);
     iters.push_back(Citer);
 
+    if (this->ReturnBest) {
+        double critval;
+        if (this->BestCriteria == "ECons" || this->BestCriteria == "ECon") {
+            critval = iters.back().EConInf;
+        }
+        else if (this->BestCriteria == "ICons" || this->BestCriteria == "ICon") {
+            critval = iters.back().IConInf;
+        }
+        else if (this->BestCriteria == "KKT") {
+            critval = iters.back().KKTInf;
+        }
+        else if (this->BestCriteria == "Obj" || this->BestCriteria == "Prim Obj") {
+            critval = iters.back().PrimObj;
+        }
+        else{
+            throw std::invalid_argument(fmt::format("Unrecognized criteria, {0:}, for selecting best solution to return.", this->BestCriteria));
+        }
+        if (critval <= BestCriteriaVal || i==0) {
+            BestCriteriaVal = critval;
+            BestXSL = XSL;
+            BestRHS = RHS;
+            BestIter = i;
+        }
+    }
+
+
     if (this->LateCallBackEnabled) {
       CBtimer.start();
       this->LateCallBack(iters.back(), XSL, RHS);
@@ -639,6 +670,12 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
         || ExitCode == ConvergenceFlags::ACCEPTABLE
         || ExitCode == ConvergenceFlags::DIVERGING 
         || i == (this->MaxIters - 1) ) {
+
+
+        if (ExitCode != ConvergenceFlags::CONVERGED && this->ReturnBest) {
+            XSL = BestXSL;
+            RHS = BestRHS;
+        }
 
       this->ConvergeFlag = ExitCode;
       break;
@@ -681,7 +718,8 @@ Eigen::VectorXd ASSET::PSIOPT::alg_impl(AlgorithmModes algmode,
 
   ///////////////////////////////////////////////////////////////////////////
 
-  print_ExitStats(ExitCode, iters, tottime * 1000, nlptime * 1000, qptime * 1000);
+  int retiter = (this->ReturnBest ? BestIter: iters.size() - 1);
+  print_ExitStats(ExitCode, iters[retiter], iters.size(), tottime * 1000, nlptime * 1000, qptime * 1000);
   ////////////////////////////////////////////////////////////////////////////
 
   return XSL;
@@ -1370,6 +1408,11 @@ void ASSET::PSIOPT::Build(py::module& m) {
   obj.def_readwrite("QPPrint", &PSIOPT::QPPrint);
 
   obj.def_readwrite("Diagnostic", &PSIOPT::Diagnostic);
+
+
+  obj.def_readwrite("ReturnBest", &PSIOPT::ReturnBest);
+  obj.def_readwrite("BestCriteria", &PSIOPT::BestCriteria);
+
 
 
   obj.def_readwrite("storespmat", &PSIOPT::storespmat, PSIOPT_storespmat);
