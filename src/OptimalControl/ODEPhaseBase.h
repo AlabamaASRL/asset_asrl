@@ -428,15 +428,28 @@ namespace ASSET {
 
 
         PhaseRegionFlags reg = getRegion(reg_t);
-
         FuncHolder func;
 
+        if (std::holds_alternative<std::string>(XtUPvars_t)) {
+            std::string vars = std::get<std::string>(XtUPvars_t);
+            if (vars == "All" || vars == "all" ||vars=="XtUP") {
+                // Default case where the function has same inputs and order as ODE
+                VectorXi XtUPvars;
+                VectorXi OPvars;
+                VectorXi SPvars;
+                XtUPvars.setLinSpaced(this->XtUVars(), 0, this->XtUVars() - 1);
+                if (this->PVars() > 0) {
+                    OPvars.setLinSpaced(this->PVars(), 0, this->PVars() - 1);
+                }
+                func = FuncHolder(fun, reg, XtUPvars, OPvars, SPvars, scale_t);
+                return func; // return early
+            }
+        }
 
         VectorXi XtUPvars = this->getXtUPVars(reg,XtUPvars_t);
         VectorXi OPvars;
         VectorXi SPvars;
         /////////////////////////////////////////////////
-       
         if (reg != ODEParams && reg != StaticParams) {
             // If region is Params then the indices are held in XtUPvars_t and the others are emtpy
             OPvars = this->getOPVars(reg, OPvars_t);
