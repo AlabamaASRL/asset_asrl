@@ -86,6 +86,7 @@ namespace ASSET {
     Eigen::VectorXd XtUPUnits;
     Eigen::VectorXd SPUnits;
 
+    std::map<std::string, Eigen::VectorXi> SPidxs;
 
 
     ///////////////////////
@@ -240,6 +241,33 @@ namespace ASSET {
     }
 
 
+    ///////////////////////////////////////////////////
+
+    void setStaticParamVgroups(std::map<std::string, Eigen::VectorXi> spidxs) {
+        this->SPidxs = spidxs;
+    }
+    void addStaticParamVgroups(std::map<std::string, Eigen::VectorXi> spidxs) {
+      for(auto& [key, value] : spidxs) {
+		this->SPidxs[key] = value;
+	  }
+    }
+    void addStaticParamVgroup(Eigen::VectorXi idx, std::string key) {
+        this->SPidxs[key] = idx;
+    }
+    void addStaticParamVgroup(int idx, std::string key) {
+        VectorXi tmp(1);
+        tmp << idx;
+        this->SPidxs[key] = tmp;
+    }
+
+    VectorXi getSPidx(std::string key) const {
+        if (SPidxs.count(key) == 0) {
+            throw std::invalid_argument(
+                fmt::format("No StaticParam variable index group with name: {0:} exists.", key));
+        }
+		return this->SPidxs.at(key);
+	}
+
     /////////////////////////////////////////////////
     template<class FuncMap>
     void removeFuncImpl(FuncMap& map, int index, const std::string& funcstr) {
@@ -295,57 +323,54 @@ namespace ASSET {
             XtUPvars = std::get<VectorXi>(XtUPvars_t);
         }
         else if (std::holds_alternative<std::string>(XtUPvars_t)) {
-
             if (reg != StaticParams) {
-
                 XtUPvars = this->idx(std::get<std::string>(XtUPvars_t));
-
-                if (reg == ODEParams) {
-                    // Convert to 0 based index
-                    for (int i = 0; i < XtUPvars.size(); i++) {
-                        XtUPvars[i] -= this->XtUVars();
-                    }
-                }
-
             }
             else {
-                throw std::invalid_argument("No string based indexing for static parameters");
+                XtUPvars = this->getSPidx(std::get<std::string>(XtUPvars_t));
             }
-
+            if (reg == ODEParams) {
+                // Convert to 0 based index
+                for (int i = 0; i < XtUPvars.size(); i++) {
+                    XtUPvars[i] -= this->XtUVars();
+                }
+            }
         }
         else if (std::holds_alternative<std::vector<std::string>>(XtUPvars_t)) {
-            if (reg != StaticParams) {
 
-                std::vector<VectorXi> varvec;
-                int size = 0;
+            std::vector<VectorXi> varvec;
+            int size = 0;
 
-                auto tmpvars = std::get<std::vector<std::string>>(XtUPvars_t);
+            auto tmpvars = std::get<std::vector<std::string>>(XtUPvars_t);
 
-                for (auto tmpv : tmpvars) {
+            for (auto tmpv : tmpvars) {
+                if (reg != StaticParams) {
                     varvec.push_back(this->idx(tmpv));
-                    size += varvec.back().size();
                 }
-                XtUPvars.resize(size);
-
-                int next = 0;
-                for (auto varv : varvec) {
-                    for (int i = 0; i < varv.size(); i++) {
-                        XtUPvars[next] = varv[i];
-                        next++;
-                    }
+                else {
+                    varvec.push_back(this->getSPidx(tmpv));
                 }
 
-                if (reg == ODEParams) {
-                    // Convert to 0 based index
-                    for (int i = 0; i < XtUPvars.size(); i++) {
-                        XtUPvars[i] -= this->XtUVars();
-                    }
-                }
-
+                size += varvec.back().size();
             }
-            else {
-                throw std::invalid_argument("No string based indexing for static parameters");
+            XtUPvars.resize(size);
+
+            int next = 0;
+            for (auto varv : varvec) {
+                for (int i = 0; i < varv.size(); i++) {
+                    XtUPvars[next] = varv[i];
+                    next++;
+                }
             }
+
+            if (reg == ODEParams) {
+                // Convert to 0 based index
+                for (int i = 0; i < XtUPvars.size(); i++) {
+                    XtUPvars[i] -= this->XtUVars();
+                }
+            }
+
+            
         }
         return XtUPvars;
     }
@@ -403,15 +428,27 @@ namespace ASSET {
         else if (std::holds_alternative<VectorXi>(SPvars_t)) {
             SPvars = std::get<VectorXi>(SPvars_t);
         }
+        else if (std::holds_alternative<std::string>(SPvars_t)) {
+            SPvars = this->getSPidx(std::get<std::string>(SPvars_t));
+        }
         else if (std::holds_alternative<std::vector<std::string>>(SPvars_t)) {
+            std::vector<VectorXi> varvec;
+            int size = 0;
             auto tmpvars = std::get<std::vector<std::string>>(SPvars_t);
-            if (tmpvars.size() != 0) {
-                throw std::invalid_argument("String indexed static params not implemented");
+            for (auto tmpv : tmpvars) {
+                varvec.push_back(this->getSPidx(tmpv));
+                size += varvec.back().size();
+            }
+            SPvars.resize(size);
+            int next = 0;
+            for (auto varv : varvec) {
+                for (int i = 0; i < varv.size(); i++) {
+                    SPvars[next] = varv[i];
+                    next++;
+                }
             }
         }
-        else {
-            throw std::invalid_argument("String indexed static params not implemented");
-        }
+        
 
         return SPvars;
     }
@@ -937,6 +974,24 @@ namespace ASSET {
         units.setOnes();
         return this->setStaticParams(parm, units);
     }
+
+    void addStaticParams(VectorXd parm, VectorXd units) {
+	  if (this->numStatParams == 0) {
+		this->setStaticParams(parm,units);
+	  } else {
+          VectorXd parmstmp(this->ActiveStaticParams.size()+ parm.size());
+          parmstmp << this->ActiveStaticParams, parm;
+          VectorXd unitstmp(this->SPUnits.size() + units.size());
+          unitstmp << this->SPUnits, units;
+          this->setStaticParams(parmstmp,unitstmp);
+	  }
+	}
+	void addStaticParams(VectorXd parm) {
+		VectorXd units(parm.size());
+		units.setOnes();
+		return this->addStaticParams(parm, units);
+	}
+
 
     void subStaticParams(VectorXd parm) {
       if (this->numStatParams == parm.size()) {

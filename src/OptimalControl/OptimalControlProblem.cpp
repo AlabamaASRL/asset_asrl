@@ -829,6 +829,15 @@ void ASSET::OptimalControlProblem::Build(py::module& m) {
   obj.def("setLinkParams", py::overload_cast<VectorXd, VectorXd>(&OptimalControlProblem::setLinkParams));
   obj.def("setLinkParams", py::overload_cast<VectorXd>(&OptimalControlProblem::setLinkParams), OptimalControlProblem_setLinkParams);
 
+  obj.def("addLinkParamVgroups",
+      py::overload_cast<std::map<std::string, Eigen::VectorXi>>(&OptimalControlProblem::addLinkParamVgroups));
+  obj.def("setLinkParamVgroups",
+      py::overload_cast<std::map<std::string, Eigen::VectorXi>>(&OptimalControlProblem::setLinkParamVgroups));
+  obj.def("addLinkParamVgroup",
+      py::overload_cast<Eigen::VectorXi, std::string>(&OptimalControlProblem::addLinkParamVgroup));
+  obj.def("addLinkParamVgroup",
+      py::overload_cast<int, std::string>(&OptimalControlProblem::addLinkParamVgroup));
+
 
   obj.def(
       "returnLinkParams", &OptimalControlProblem::returnLinkParams, OptimalControlProblem_returnLinkParams);
