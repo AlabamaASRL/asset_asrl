@@ -54,6 +54,9 @@ namespace ASSET {
     bool AutoScaling = false;
     bool SyncObjectiveScales = true;
 
+    std::map<std::string, Eigen::VectorXi> LPidxs;
+
+
     void setLinkParams(VectorXd parm, VectorXd units) {
         if (units.size() != parm.size()) {
             throw std::invalid_argument("Size of link parameter vector and scaling units vector must match");
@@ -68,6 +71,31 @@ namespace ASSET {
         VectorXd units(parm.size());
         units.setOnes();
         return this->setLinkParams(parm, units);
+    }
+
+
+    void setLinkParamVgroups(std::map<std::string, Eigen::VectorXi> lpidxs) {
+        this->LPidxs = lpidxs;
+    }
+    void addLinkParamVgroups(std::map<std::string, Eigen::VectorXi> lpidxs) {
+        for (auto& [key, value] : lpidxs) {
+            this->LPidxs[key] = value;
+        }
+    }
+    void addLinkParamVgroup(Eigen::VectorXi idx, std::string key) {
+        this->LPidxs[key] = idx;
+    }
+    void addLinkParamVgroup(int idx, std::string key) {
+        VectorXi tmp(1);
+        tmp << idx;
+        this->LPidxs[key] = tmp;
+    }
+    VectorXi getLPidx(std::string key) const {
+        if (LPidxs.count(key) == 0) {
+            throw std::invalid_argument(
+                fmt::format("No LinkParam variable index group with name: {0:} exists.", key));
+        }
+        return this->LPidxs.at(key);
     }
 
 
@@ -312,14 +340,25 @@ namespace ASSET {
         else if (std::holds_alternative<VectorXi>(LPvars_t)) {
             LPvars = std::get<VectorXi>(LPvars_t);
         }
-        else if (std::holds_alternative<std::vector<std::string>>(LPvars_t)) {
-            auto tmpvars = std::get<std::vector<std::string>>(LPvars_t);
-            if (tmpvars.size() != 0) {
-                throw std::invalid_argument("String indexed link params not implemented");
-            }
+        else if (std::holds_alternative<std::string>(LPvars_t)) {
+            LPvars = this->getLPidx(std::get<std::string>(LPvars_t));
         }
-        else {
-            throw std::invalid_argument("String indexed link params not implemented");
+        else if (std::holds_alternative<std::vector<std::string>>(LPvars_t)) {
+            std::vector<VectorXi> varvec;
+            int size = 0;
+            auto tmpvars = std::get<std::vector<std::string>>(LPvars_t);
+            for (auto tmpv : tmpvars) {
+                varvec.push_back(this->getLPidx(tmpv));
+                size += varvec.back().size();
+            }
+            LPvars.resize(size);
+            int next = 0;
+            for (auto varv : varvec) {
+                for (int i = 0; i < varv.size(); i++) {
+                    LPvars[next] = varv[i];
+                    next++;
+                }
+            }
         }
 
         return LPvars;

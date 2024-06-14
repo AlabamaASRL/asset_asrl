@@ -1764,6 +1764,20 @@ void ASSET::ODEPhaseBase::Build(py::module& m) {
   obj.def("setStaticParams", py::overload_cast<VectorXd>(&ODEPhaseBase::setStaticParams), ODEPhaseBase_setStaticParams);
 
 
+  obj.def("addStaticParams",
+		  py::overload_cast<VectorXd, VectorXd>(&ODEPhaseBase::addStaticParams));
+  obj.def("addStaticParams",
+      py::overload_cast<VectorXd>(&ODEPhaseBase::addStaticParams));
+  obj.def("addStaticParamVgroups",
+	  py::overload_cast<std::map<std::string, Eigen::VectorXi>>(&ODEPhaseBase::addStaticParamVgroups));
+  obj.def("setStaticParamVgroups",
+      py::overload_cast<std::map<std::string, Eigen::VectorXi>>(&ODEPhaseBase::setStaticParamVgroups));
+  obj.def("addStaticParamVgroup",
+      py::overload_cast< Eigen::VectorXi,std::string>(&ODEPhaseBase::addStaticParamVgroup));
+  obj.def("addStaticParamVgroup",
+      py::overload_cast<int, std::string>(&ODEPhaseBase::addStaticParamVgroup));
+
+
   obj.def("setControlMode",
           py::overload_cast<ControlModes>(&ODEPhaseBase::setControlMode),
           ODEPhaseBase_setControlMode);
