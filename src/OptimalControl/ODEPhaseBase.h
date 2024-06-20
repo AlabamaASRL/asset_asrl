@@ -36,7 +36,6 @@ namespace ASSET {
 
     friend OptimalControlProblem;
 
-    int calc_threads();
 
    protected:
     PhaseIndexer indexer;
@@ -127,6 +126,8 @@ namespace ASSET {
 
     void setAutoScaling(bool autoscale) {
         this->AutoScaling = autoscale;
+        this->resetTranscription();
+        this->invalidatePostOptInfo();
     }
 
 

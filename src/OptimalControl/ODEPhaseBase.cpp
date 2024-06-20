@@ -6,23 +6,6 @@
 #include "ValueLock.h"
 #include "AutoScalingUtils.h"
 
-int ASSET::ODEPhaseBase::calc_threads() {
-  if (this->Threads > 1 && false) {
-    return this->Threads;
-  }
-
-  auto Cost = [](int N, int T, int Tmax, int V) {
-    int N_t = N / T;
-    int Nmt = N_t % V;
-    int NN = N % T;
-    int NN_t = NN / T;
-    int NNmt = NN_t % V;
-
-    double tscale = double(T) / double(std::min(T, Tmax));
-  };
-
-  return 0;
-}
 
 void ASSET::ODEPhaseBase::setUnits(const py::kwargs& kwargs)
 {
@@ -1320,7 +1303,7 @@ void ASSET::ODEPhaseBase::calc_auto_scales()
                 func.OutputScales = output_scales;
             }
             else {
-
+				
 
             }
 
@@ -1338,16 +1321,23 @@ void ASSET::ODEPhaseBase::calc_auto_scales()
 
 std::vector<double> ASSET::ODEPhaseBase::get_objective_scales()
 {
+    // If we have mixed integral and state objectives, we assume that they have the same units
+    // since the output scales are computed for the integrands we need to divide by tstar 
+    // before averaging to make the units consistent
+
     std::vector<double> scales;
     for (auto& [key, obj] : this->userStateObjectives) {
         if (obj.ScaleMode == "auto") {
+            // OutputScales units 1/obj
             scales.push_back(obj.OutputScales[0]);
         }
     }
     for (auto& [key, obj] : this->userIntegrands) {
         if (obj.ScaleMode == "auto") {
-            // Scale by tstar, since this function is the integrand not the total integral
-            scales.push_back(obj.OutputScales[0]*this->XtUPUnits[this->TVar()]);
+            // OutputScales units tstar/obj
+            // Divide by tstar, since this function is the integrand not the total integral
+            scales.push_back(obj.OutputScales[0]/this->XtUPUnits[this->TVar()]);
+
         }
     }
 
@@ -1363,8 +1353,8 @@ void ASSET::ODEPhaseBase::update_objective_scales(double scale)
     }
     for (auto& [key, obj] : this->userIntegrands) {
         if (obj.ScaleMode == "auto") {
-            // Divide by tstar, since this function is the integrand not the total integral
-            obj.OutputScales[0] = scale/this->XtUPUnits[this->TVar()];
+            // Multiply by tstar, since this function is the integrand not the total integral
+            obj.OutputScales[0] = scale*this->XtUPUnits[this->TVar()];
         }
     }
 }

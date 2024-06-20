@@ -158,6 +158,8 @@ namespace ASSET {
                 phase->setAutoScaling(autoscale);
             }
         }
+        this->resetTranscription();
+        this->invalidatePostOptInfo();
     }
 
     void setAdaptiveMesh(bool amesh, bool applytophases) {
