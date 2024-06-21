@@ -201,7 +201,7 @@ if __name__ == "__main__":
     tstar = 60
     lstar = 100000
     
-    phase = ode.phase("LGL5",TrajIG,30)
+    phase = ode.phase("LGL5",TrajIG,80)
     
     
     
@@ -219,7 +219,7 @@ if __name__ == "__main__":
     phase.addLUVarBound("Path","theta",np.deg2rad(-89.0),np.deg2rad(89.0))
     phase.addLUVarBound("Path","gamma",np.deg2rad(-89.0),np.deg2rad(89.0))
 
-    phase.addLUVarBound("Path","AoA",np.deg2rad(-90.0),np.deg2rad(90.0))
+    phase.addLUVarBound("Path","AoA",np.deg2rad(-90.0),np.deg2rad(80.0))
     phase.addLUVarBound("Path","beta" ,np.deg2rad(-90.0),np.deg2rad(1.0))
     
     
@@ -238,27 +238,32 @@ if __name__ == "__main__":
     
     
 
-    ## Anything from 100000 to 1.0e-5 works, approx 100-.01 works best
-    phase.setStaticParams([100],[.01])  # eventually works
     
     
     ## Anything 1.0e-6 or smaller hangs at 1.0 KKT inf
-    #phase.setStaticParams([100],[1.0e-6])   
-    #phase.setStaticParams([100],[1.0e-7])   
-    #phase.setStaticParams([100],[1.0e-8])   
-
     phase.optimizer.deltaH = 1.0e-5  # reducing this helps, but is not a fix
 
+    
 
+    phase.addStaticParams([100],[10])  
+    
+
+
+    phase.addStaticParamVgroup(0,"Qupper")
+    phase.addStaticParamVgroups({"Qupper":[0]})
+
+    ## Bounding the heat rate with static param
     phase.addInequalCon("Path",QFunc()(Args(4).head(3))-Args(4)[3],
                                ["h","v","alpha"],[],
-                               [0],
+                               "Qupper",
                                AutoScale="auto")
     
-    phase.addValueObjective("StaticParams",0,1.0)
+    
+    ## Minimize it
+    phase.addValueObjective("StaticParams","Qupper",1.0)
     
     
-    phase.addLowerDeltaTimeBound(1900,1.0)
+    phase.addLowerDeltaTimeBound(1000,1.0)
     phase.solve_optimize()
     
     

@@ -185,7 +185,7 @@ if __name__ == "__main__":
     for t in ts:
         X = np.zeros((8))
         X[0] = ht0*(1-t/tf) + htf*t/tf
-        X[1] = 0
+        X[1] = np.deg2rad(10.0)*(1-t/tf)
         X[2] = vt0*(1-t/tf) + vtf*t/tf
         X[3] = gammat0*(1-t/tf) + gammatf*t/tf
         X[4] = psit0
@@ -201,17 +201,19 @@ if __name__ == "__main__":
     tstar = 60
     lstar = 100000
     
-    phase = ode.phase("LGL5",TrajIG,30)
+    phase = ode.phase("LGL3",TrajIG,50)
     
-    
-    
+    phase.addStaticParamVgroup(0,"Qupper")
+    phase.addStaticParamVgroups({"Qupper":[0]})
+
+    phase.setAdaptiveMesh(True)
+
     phase.setAutoScaling(True)    
     phase.setUnits(h = lstar,
                    v = lstar/tstar,
                    t = tstar)
 
 
-    
 
     
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
@@ -219,8 +221,8 @@ if __name__ == "__main__":
     phase.addLUVarBound("Path","theta",np.deg2rad(-89.0),np.deg2rad(89.0))
     phase.addLUVarBound("Path","gamma",np.deg2rad(-89.0),np.deg2rad(89.0))
 
-    phase.addLUVarBound("Path","AoA",np.deg2rad(-90.0),np.deg2rad(90.0))
-    phase.addLUVarBound("Path","beta" ,np.deg2rad(-90.0),np.deg2rad(1.0))
+    phase.addLUVarBound("Path","AoA",np.deg2rad(-70.0),np.deg2rad(70.0))
+    phase.addLUVarBound("Path","beta" ,np.deg2rad(-60.0),np.deg2rad(60.0))
     
     
     phase.addUpperDeltaTimeBound(tmax,1.0)
@@ -229,37 +231,54 @@ if __name__ == "__main__":
                               ,["h","v","gamma"]
                               ,[htf,vtf,gammatf])
     
+    phase.addBoundaryValue("Back","theta",np.deg2rad(15.0))
+
+    
+    
+    ## Bounding the heat rate with static param
+    phase.addInequalCon("Path",QFunc()(Args(4).head(3))-Args(4)[3],
+                               ["h","v","alpha"],[],
+                               "Qupper",
+                               AutoScale="auto")
+    
+    
+    ## Minimize it
+    
+    Qscale = 1
+    Iscale = 1/tstar
+    
+    phase.addStaticParams([100,50*tf],[1,(tstar*50)])  
+
+    phase.addIntegralParamFunction(QFunc(),["h","v","alpha"],1,AutoScale="auto")
+
+    '''
+    s1=phase.addValueObjective("StaticParams","Qupper",Qscale,AutoScale="auto")
+    s2=phase.addValueObjective("StaticParams",1,Iscale,AutoScale="auto")
+    '''
+    def ObjT():
+        s1,s2 = Args(2).tolist()
+        return s1*Qscale + s2*Iscale
+    
+    s1=phase.addStateObjective("StaticParams",ObjT(),[0,1])
+    s2=s1
+    
+    #phase.SyncObjectiveScales=False
+    phase.addLowerDeltaTimeBound(1900,1.0)
+    
+
+    
+
     phase.setThreads(8,8)
     
     phase.optimizer.set_SoeLSMode("L1")
     phase.optimizer.set_OptLSMode("L1")
     phase.optimizer.set_PrintLevel(0)
-    phase.optimizer.MaxLSIters =2
+    phase.optimizer.MaxLSIters =1
+    phase.optimize()
     
-    
-
-    ## Anything from 100000 to 1.0e-5 works, approx 100-.01 works best
-    phase.setStaticParams([100],[.01])  # eventually works
-    
-    
-    ## Anything 1.0e-6 or smaller hangs at 1.0 KKT inf
-    #phase.setStaticParams([100],[1.0e-6])   
-    #phase.setStaticParams([100],[1.0e-7])   
-    #phase.setStaticParams([100],[1.0e-8])   
-
-    phase.optimizer.deltaH = 1.0e-5  # reducing this helps, but is not a fix
-
-
-    phase.addInequalCon("Path",QFunc()(Args(4).head(3))-Args(4)[3],
-                               ["h","v","alpha"],[],
-                               [0],
-                               AutoScale="auto")
-    
-    phase.addValueObjective("StaticParams",0,1.0)
-    
-    
-    phase.addLowerDeltaTimeBound(1900,1.0)
-    phase.solve_optimize()
+    print(phase.returnStaticParams())
+    print(phase.returnStateObjectiveScales(s1))
+    print(phase.returnStateObjectiveScales(s2))
     
     
     
@@ -267,14 +286,6 @@ if __name__ == "__main__":
     
    
     Plot(Traj)
-
-
-    
-    
-
-
- 
-
 
 
 

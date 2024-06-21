@@ -225,7 +225,7 @@ if __name__ == "__main__":
     # Non-dimensionalizing the heatload by Tstar as well as Qlimit
     # I noticed that Qlimit normalization, while not neccessary,
     # helped convergenace alot
-    IQlimit = IQlimitDim/(Tstar*Qlimit)
+    IQlimit = IQlimitDim/(Tstar)
     
     ode = ShuttleReentry()
     
@@ -239,11 +239,11 @@ if __name__ == "__main__":
     phase.setAutoScaling(True)
     phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
     phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
-    phase.addLUVarBound("Path",6,np.deg2rad(-90.0),np.deg2rad(90.0),1.0)
+    phase.addLUVarBound("Path",6,np.deg2rad(-50.0),np.deg2rad(50.0),1.0)
     phase.addLUVarBound("Path",7,np.deg2rad(-90.0),np.deg2rad(1.0) ,1.0)
     phase.addUpperDeltaTimeBound(tmax,1.0)
     phase.addBoundaryValue("Back" ,[0,2,3],[htf,vtf,gammatf])
-    phase.addDeltaVarObjective(1,-1.0)
+    oidx = phase.addDeltaVarObjective(1,-1.0)
     phase.setThreads(8,8)
     
     phase.optimizer.set_SoeLSMode("L1")
@@ -259,18 +259,22 @@ if __name__ == "__main__":
     
     Traj1 = phase.returnTraj()
     
-    
+
 
     ## Add in Heating Rate Constraint, scale so rhs is order 1
     phase.addUpperFuncBound("Path",QFunc(),[0,2,6],Qlimit,1/Qlimit,AutoScale = "auto")
     # Non-dimensionalizing the integrand by Qlimit to be conststent with IQlimit
-    phase.addIntegralParamFunction(QFunc()/Qlimit,[0,2,6],0,AutoScale = "auto")
-    
+    phase.addIntegralParamFunction(QFunc(),[0,2,6],0,AutoScale = "auto")
     ## Set the static parameter and its scale fatcor
-    phase.setStaticParams([1800.0],[0.5]) # Roughly guess the value of integral
-    
-
+    phase.setStaticParams([IQlimit],[Qlimit]) # Roughly guess the value of integral
     phase.addUpperVarBound("StaticParams",0,IQlimit)
+    
+    #phase.removeStateObjective(oidx)
+    #phase.addValueObjective("StaticParams",0,1.0)
+    phase.addLowerDeltaTimeBound(1900)
+    
+    
+    print(IQlimit)
     
     phase.optimize()
     
@@ -309,12 +313,12 @@ if __name__ == "__main__":
     phase1.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
     phase1.addLUVarBound("Path",6,np.deg2rad(-90.0),np.deg2rad(90.0),1.0)
     phase1.addLUVarBound("Path",7,np.deg2rad(-90.0),np.deg2rad(1.0) ,1.0)    
-    phase1.addUpperFuncBound("Path",QFunc(),[0,2,6],Qlimit,1/Qlimit,AutoScale = None)
+    phase1.addUpperFuncBound("Path",QFunc(),[0,2,6],Qlimit,1/Qlimit,AutoScale = True)
     phase1.addDeltaVarObjective(1,-1.0)
 
     #Integrals on each phase always start from 0
-    phase1.addIntegralParamFunction(QFunc()/Qlimit,[0,2,6],0,AutoScale = None)
-    phase1.setStaticParams([QLoad/2])
+    phase1.addIntegralParamFunction(QFunc(),[0,2,6],0,AutoScale = 1/Qlimit)
+    phase1.setStaticParams([QLoad/2],[1/Qlimit])
 
     phase2 = ode.phase("LGL3",Traj2[150:-1],150)
     phase2.setUnits(units)
@@ -328,8 +332,10 @@ if __name__ == "__main__":
     phase2.addDeltaVarObjective(1,-1.0)
     
     #Integrals on each phase always start from 0
-    phase2.addIntegralParamFunction(QFunc()/Qlimit,[0,2,6],0,AutoScale = None)
-    phase2.setStaticParams([QLoad/2])
+    phase2.addIntegralParamFunction(QFunc(),[0,2,6],0,AutoScale = True)
+    phase2.setStaticParams([QLoad/2],[1/Qlimit])
+    
+    phase2.addUpperVarBound("Back","t",2500)
 
 
 
@@ -366,8 +372,8 @@ if __name__ == "__main__":
 
     
     
-    print("Single Phase Total Qload:",QLoad*(Qlimit),"BTU/ft^2")
-    print("Two Phase Total Qload:", (QLoad1+QLoad2)*(Qlimit),"BTU/ft^2")
+    print("Single Phase Total Qload:",(QLoad),"BTU/ft^2")
+    print("Two Phase Total Qload:", (QLoad1+QLoad2),"BTU/ft^2")
     
 
     

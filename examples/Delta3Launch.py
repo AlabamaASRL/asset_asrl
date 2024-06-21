@@ -105,7 +105,7 @@ class RocketODE(oc.ODEBase):
        
         # We normalize the control direction in the dynamics so it doesnt have
         # to be done as a path constraint
-        U = XtU.UVec().normalized()
+        u = XtU.UVec().normalized()
         
         h       = R.norm() - Re
         rho     = RhoAir * vf.exp(-h / h_scale)
@@ -116,58 +116,11 @@ class RocketODE(oc.ODEBase):
         D       = (-0.5*CD*S)*rho*(Vr*Vr.norm())
         
         Rdot    =  V
-        Vdot    =  (-mu)*R.normalized_power3() + (T*U + D)/m
-        
-        
-        
-        
+        Vdot    =  (-mu)*R.normalized_power3() + (T*u + D)/m
         
         ode = vf.stack(Rdot,Vdot,-mdot)
-        
-        Vgroups = {}
-        Vgroups[(r'R',"Position")] =  R
-        Vgroups[("V","Velocity")] =  V
-        Vgroups[("t","time")] =  XtU.TVar()
-
-        Vgroups["RV"] = [R,V]
-        Vgroups[r"U"]  = U
-        Vgroups[("m","mass")]  = m
-
-        
         ####################################################
-        super().__init__(ode,7,3, Vgroups = Vgroups)
-
-def make_state(ode,**kwargs):
-    
-    X = np.zeros((ode.vf().IRows()))
-    
-    for name in kwargs:
-        idxs = ode.idx(name)
-        Vals = kwargs[name]
-        if(len(idxs)>1):
-            for i in range(0,len(idxs)):
-                X[idxs[i]] = Vals[i]
-        else:
-             X[idxs[0]] = Vals
-
-    return X
-        
-        
-def get_state(ode,Xin,*args):
-    Xout = []
-    for name in args:
-        idxs = ode.idx(name)
-        
-        for i in range(0,len(idxs)):
-            Xout.append(Xin[idxs[i]])  
-       
-
-    return Xout
-    
-    
-    
-    
-
+        super().__init__(ode,7,3)
 
 def TargetOrbit(at,et,it, Ot,Wt):
     R,V = Args(6).tolist([(0,3),(3,3)])
@@ -318,15 +271,7 @@ if __name__ == "__main__":
     y0[3:6] =-np.cross(y0[0:3],np.array([0,0,We]))
     y0[3]  += 0.00001/Vstar  # cant be exactly zero,our drag equation's derivative would NAN !!!
     
-    #print(y0[3:6])
-    
-    odet = RocketODE(T_phase1,mdot_phase1)
-    
-    x  = make_state(odet,RV = y0,t = 0, U = [1,0,0])
-    x2 = get_state(odet,x,"R")
-    
-    print(x2)
-    #input("S")
+    print(y0[3:6])
     
     ## MF is the only magic number in the script, just trying to find
     ## a mean anomaly such that the terminal state on the orbit is downrange
@@ -372,8 +317,6 @@ if __name__ == "__main__":
     ode3 = RocketODE(T_phase3,mdot_phase3)
     ode4 = RocketODE(T_phase4,mdot_phase4)
     
-    print(ode1.idx("R"))
-    
     tmode = "LGL3"
     cmode = "HighestOrderSpline"
     
@@ -389,12 +332,12 @@ if __name__ == "__main__":
     ## Thrust direction is normalized in dynamics, so we dont
     ## have to enforce norm of 1 on controls. For good measure,
     ## we do bound the maginitude to prevent it from becoming too large or small
-    phase1.addLUNormBound("Path",ode1.idx("U"),.5,1.5)
+    phase1.addLUNormBound("Path",[8,9,10],.5,1.5)
     phase1.addBoundaryValue("Front",range(0,8),IG1[0][0:8])
     
     #Dont want our bound to interfere with initial condition which starts at Re
     #so i relax the Earth radius constraint slightly here
-    phase1.addLowerNormBound("Path",ode1.idx("Position"),Re*.999999)
+    phase1.addLowerNormBound("Path",[0,1,2],Re*.999999)
     phase1.addBoundaryValue("Back",[7],[tf_phase1])
     
     #########################################
@@ -427,10 +370,7 @@ if __name__ == "__main__":
     phase4.addLUNormBound("Path",[8,9,10],.5,1.5)
     phase4.addBoundaryValue("Front",[6], [m0_phase4])
     phase4.addUpperVarBound("Back",7,tf_phase4,1.0)
-    #phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),range(0,6))
-    
-    phase4.addEqualConTest("Back",TargetOrbit(at,et,istart,Ot,Wt),["R","V"])
-    
+    phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),range(0,6))
     # Maximize final mass
     phase4.addValueObjective("Back",6,-1.0)
     

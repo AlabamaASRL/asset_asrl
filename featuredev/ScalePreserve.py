@@ -57,12 +57,14 @@ if __name__ == "__main__":
     
     
     
-    phase = ode.phase("LGL5",TrajIG,nsegs)
+    phase = ode.phase("CentralShooting",TrajIG,nsegs)
+    phase.setControlMode("BlockConstant")
     phase.setUnits([xstar,tstar,ustar])
     phase.addBoundaryValue("Front",[0,1],[x0,t0])
     phase.addBoundaryValue("Back", [1],  [tf])
     phase.addIntegralObjective(ODE.obj()*iscale,[0,2])
     phase.addValueObjective("Back",0,vscale)
+    phase.optimizer.set_QPOrderingMode("MINDEG")
     phase.optimize()
     
     Traj1 = phase.returnTraj()
