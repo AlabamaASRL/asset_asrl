@@ -1,22 +1,19 @@
 import numpy as np
 import asset_asrl as ast
+import asset_asrl.VectorFunctions as vf
+import asset_asrl.OptimalControl as oc
+from asset_asrl.VectorFunctions import Arguments as Args
+
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap ## PIP INSTALL Basemap if you dont have it
-from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
 
-vf        = ast.VectorFunctions
-oc        = ast.OptimalControl
-Args      = vf.Arguments
+
 
 ############################################################################
-
-
 Lstar   =  6378145           ## m   Radius of Earth
 Tstar   =  961.0             ## sec Engine Burn Time
 Mstar   =  301454.0          ## kgs Inital Mass of Rocket
 Vstar   = Lstar/Tstar
-
-
 #############################################################################
 
 g0      =  9.80665 
@@ -114,11 +111,15 @@ class RocketODE(oc.ODEBase):
         ode = vf.stack(Rdot,Vdot,-mdot)
         
         Vgroups = {}
+        ## Multiple names allowed, just index with tuple of names
         Vgroups[("R","Position")]=R
         Vgroups[("V","Velocity")]=V
-        Vgroups[("U","ThrustVec")]=U
+        Vgroups["U"]=U
         Vgroups[("t","time")]=XtU.TVar()
         Vgroups[("m","mass")]=m
+        
+        Vgroups["RV"] =[R,V]
+
 
         ####################################################
         super().__init__(ode,7,3,Vgroups = Vgroups)
@@ -272,7 +273,6 @@ if __name__ == "__main__":
     y0[3:6] =-np.cross(y0[0:3],np.array([0,0,We]))
     y0[3]  += 0.00001  # cant be exactly zero,our drag equation's derivative would NAN !!!
     
-    print(y0[3:6])
     
     ## MF is the only magic number in the script, just trying to find
     ## a mean anomaly such that the terminal state on the orbit is downrange
@@ -288,35 +288,36 @@ if __name__ == "__main__":
     IG3 =[]
     IG4 =[] 
     
-    
-    for t in ts:
-        X = np.zeros((11))
-        X[0:6]= y0 + (yf-y0)*(t/ts[-1])
-        X[7]  = t
-        X[8:11]= np.array([0,1,0])
-        if(t<tf_phase1):
-            m= m0_phase1 + (mf_phase1-m0_phase1)*(t/tf_phase1)
-            X[6]=m
-            IG1.append(X)
-        elif(t<tf_phase2):
-            m= m0_phase2 + (mf_phase2-m0_phase2)*(( t-tf_phase1) / (tf_phase2 - tf_phase1))
-            X[6]=m
-            IG2.append(X)
-        elif(t<tf_phase3):
-            m= m0_phase3 + (mf_phase3-m0_phase3)*(( t-tf_phase2) / (tf_phase3 - tf_phase2))
-            X[6]=m
-            IG3.append(X)
-        elif(t<tf_phase4):
-            m= m0_phase4 + (mf_phase4-m0_phase4)*(( t-tf_phase3) / (tf_phase4 - tf_phase3))
-            X[6]=m
-            IG4.append(X)
-        
-    
-    
     ode1 = RocketODE(T_phase1,mdot_phase1)
     ode2 = RocketODE(T_phase2,mdot_phase2)
     ode3 = RocketODE(T_phase3,mdot_phase3)
     ode4 = RocketODE(T_phase4,mdot_phase4)
+    
+    for t in ts:
+        RVi= y0 + (yf-y0)*(t/ts[-1])
+        Ui = np.array([0,1,0])
+        
+        if(t<tf_phase1):
+            m= m0_phase1 + (mf_phase1-m0_phase1)*(t/tf_phase1)
+            ## Create ODEinputs w/ named variable groups, 0 if unspecified
+            X = ode1.make_input(RV=RVi,t=t,m=m,U=Ui)
+            IG1.append(X)
+        elif(t<tf_phase2):
+            m= m0_phase2 + (mf_phase2-m0_phase2)*(( t-tf_phase1) / (tf_phase2 - tf_phase1))
+            X = ode2.make_input(RV=RVi,t=t,m=m,U=Ui)
+            IG2.append(X)
+        elif(t<tf_phase3):
+            m= m0_phase3 + (mf_phase3-m0_phase3)*(( t-tf_phase2) / (tf_phase3 - tf_phase2))
+            X = ode3.make_input(RV=RVi,t=t,m=m,U=Ui)
+            IG3.append(X)
+        elif(t<tf_phase4):
+            m= m0_phase4 + (mf_phase4-m0_phase4)*(( t-tf_phase3) / (tf_phase4 - tf_phase3))
+            X = ode4.make_input(RV=RVi,t=t,m=m,U=Ui)
+            IG4.append(X)
+        
+    
+    
+    
     
     tmode = "LGL3"
     cmode = "HighestOrderSpline"
@@ -335,7 +336,8 @@ if __name__ == "__main__":
     
     #Dont want our bound to interfere with initial condition which starts at Re
     #so i relax the Earth radius constraint slightly here
-    radidx = phase1.addLowerNormBound("Path","R",Re*.999999)
+    phase1.addLowerNormBound("Path","R",Re*.999999)
+    
     phase1.addBoundaryValue("Back","time",tf_phase1)
     
     #########################################
@@ -371,8 +373,9 @@ if __name__ == "__main__":
     
     orbitidx = phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),["R","V"],AutoScale = "auto")
     # Maximize final mass
-    objidx = phase4.addValueObjective("Back","mass",-1.0)
+    phase4.addValueObjective("Back","mass",-1.0)
     
+
     #########################################
     
     ocp = oc.OptimalControlProblem()
@@ -393,44 +396,19 @@ if __name__ == "__main__":
         phase.setMeshErrorEstimator('integrator')  
 
 
-    
-
     ## Each Phase does not have to have the same AutoScale units even if its the same ODE
     phase4.setUnits(R=2*Lstar,V=Vstar,t=.8*Tstar,m=Mstar)
 
-    
-    linkidxs = ocp.addForwardLinkEqualCon(phase1,phase4,["R","V","t","U"])
-
+    ## Everything but mass
+    ocp.addForwardLinkEqualCon(phase1,phase4,["R","V","t","U"])
 
 
     ocp.optimizer.set_OptLSMode("L1")
     ocp.optimizer.set_SoeLSMode("L1")
     ocp.optimizer.set_MaxLSIters(2)
     ocp.optimizer.set_PrintLevel(0)
-
     ocp.solve_optimize()
 
-
-    #### Retrieve output scales for ODE
-    print(phase1.returnODEOutputScales())
-    #### Retrieve output scales for Functions
-    print(phase1.returnInequalConScales(radidx))
-    print(phase4.returnEqualConScales(orbitidx))
-    print(phase4.returnStateObjectiveScales(objidx))
-    
-    for linkidx in linkidxs: 
-        print(ocp.returnLinkEqualConScales(linkidx))
-    
-    ### For integral objectives or functions you can retrieve them as below
-    #phase1.returnIntegralObjectiveScales(idx)
-    #phase1.returnIntegralParamFunctionScales(idx)
-
-
-    for phase in ocp.Phases:
-        PhaseMeshErrorPlot(phase,show=False)
-        
-        
-    plt.show()
     
     Phase1Traj = phase1.returnTraj()  # or ocp.Phase(i).returnTraj()
     Phase2Traj = phase2.returnTraj()
@@ -438,9 +416,40 @@ if __name__ == "__main__":
     Phase4Traj = phase4.returnTraj()
     
     
-    print("Final Mass = ",Phase4Traj[-1][6],' kg')
+    ## retrieve vars from vectors or trajs by name using ode.get_vars
+    mf = ode4.get_vars("mass", Phase4Traj[-1],retscalar=True)
+    print("Final Mass = ",mf,' kg')
+
+    
 
     Plot(Phase1Traj,Phase2Traj,Phase3Traj,Phase4Traj)
+    
+    
+    
+    TotalTraj = Phase1Traj + Phase2Traj + Phase3Traj + Phase4Traj
+    
+    ## ode.get_vars alse works on full trajectories
+    ts,rx,ry,rz,vx,vy,vz = ode4.get_vars(["t","R","V"],TotalTraj).T
+    
+    plt.plot(ts,rx,label="rx")
+    plt.plot(ts,ry,label="ry")
+    plt.plot(ts,rz,label="rz")
+    plt.xlabel("t")
+    plt.ylabel("R (m)")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+    
+    plt.plot(ts,vx,label="vx")
+    plt.plot(ts,vy,label="vy")
+    plt.plot(ts,vz,label="vz")
+    plt.xlabel("t")
+    plt.ylabel("V (m/s)")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+    
+    
     #########################################
 
 

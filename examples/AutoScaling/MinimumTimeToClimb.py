@@ -163,19 +163,21 @@ if __name__ == "__main__":
     massmin  = 16500
     alphamin = -np.pi/4 
     alphamax = np.pi/4
-    #########################
     tfig = 200
-    XtU0 = np.array([ht0,vt0,fpat0,mass0,0,0])
-    XtUf = np.array([htf,vtf,fpatf,mass0,tfig,0])    
+    #########################
+    ode = AirPlane()
+
+    XtU0 = ode.make_input(h=ht0,v=vt0,fpa=fpat0,mass=mass0)
+    XtUf = ode.make_input(h=htf,v=vtf,fpa=fpatf,mass=mass0,t=tfig)
+    
     Traj = [ XtU0*(1-t) +  XtUf*t for t in np.linspace(0,1,100) ]
     #########################
     
-    ode = AirPlane()
 
-    phase = ode.phase("LGL5",Traj,50)
+    phase = ode.phase("LGL3",Traj,50)
     phase.setAutoScaling(True)
     phase.setUnits(h = Lstar,
-                   v =Vstar,
+                   v = Vstar,
                    mass = Mstar,
                    t = Tstar)
 
@@ -195,6 +197,7 @@ if __name__ == "__main__":
     
     ## All error estimates and tolerances are in reference to the scaled ODE system
     phase.setAdaptiveMesh(True)
+    phase.setMeshErrorEstimator("integrator")
     phase.setMeshTol(1.0e-7)
     phase.optimize()
     
