@@ -1336,7 +1336,8 @@ std::vector<double> ASSET::ODEPhaseBase::get_objective_scales()
         if (obj.ScaleMode == "auto") {
             // OutputScales units tstar/obj
             // Divide by tstar, since this function is the integrand not the total integral
-            scales.push_back(obj.OutputScales[0]/this->XtUPUnits[this->TVar()]);
+		     scales.push_back(obj.OutputScales[0]/this->XtUPUnits[this->TVar()]);
+			
 
         }
     }
@@ -1354,7 +1355,8 @@ void ASSET::ODEPhaseBase::update_objective_scales(double scale)
     for (auto& [key, obj] : this->userIntegrands) {
         if (obj.ScaleMode == "auto") {
             // Multiply by tstar, since this function is the integrand not the total integral
-            obj.OutputScales[0] = scale*this->XtUPUnits[this->TVar()];
+            obj.OutputScales[0] = scale * this->XtUPUnits[this->TVar()];
+            
         }
     }
 }

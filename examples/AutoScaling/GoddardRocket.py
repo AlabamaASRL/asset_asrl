@@ -85,16 +85,11 @@ if __name__ == "__main__":
         
     ode = GoddardRocket(sigma,c,h_ref,Tmag, g)
     
-    Units = ode.make_units(h=Lstar,v = Vstar,m = Mstar,t = Tstar)
+    units = ode.make_units(h=Lstar,v = Vstar,m = Mstar,t = Tstar)
     
-    integ = ode.integrator(.01,Ulaw(),[2])
+    integ = ode.integrator(.01,Ulaw(),"m")
     
-    X0 = np.zeros((5))
-    X0[0]=0
-    X0[1]=0
-    X0[2]=m0
-    X0[4]=1
-    
+    X0 = ode.make_input(h=0,v=0,m=m0,u=1)
     TrajIG = integ.integrate_dense(X0,60,1000,StopFunc)
     
     '''
@@ -104,7 +99,7 @@ if __name__ == "__main__":
     ##############################################################################
     phase = ode.phase("LGL3",TrajIG,128)
     phase.setAutoScaling(True)
-    phase.setUnits(Units)
+    phase.setUnits(units)
     
     phase.addBoundaryValue("Front",["h","v","m","t"],TrajIG[0][0:4])
     phase.addLUVarBound("Path","u",0.0,1.0,1.0)
@@ -133,7 +128,7 @@ if __name__ == "__main__":
     # PathCon makse Control splines redundant for LGL>3
     phase2.setControlMode("NoSpline") 
     phase2.addLUVarBound("Path","u",0.0,1.0,1.0)
-    phase2.addEqualCon("Path",PathCon(sigma,c,h_ref,Tmag, g),["h","v","m","u"],AutoScale = "auto")
+    phase2.addEqualCon("Path",PathCon(sigma,c,h_ref,Tmag, g),["h","v","m","u"])
     
     phase3 = ode.phase("LGL3",TrajIG3,32)
     phase3.addBoundaryValue("Path","u",0)
@@ -153,9 +148,9 @@ if __name__ == "__main__":
     
     
     ## Set each phase's units
-    phase1.setUnits(Units)
-    phase2.setUnits(Units)
-    phase3.setUnits(Units)
+    phase1.setUnits(units)
+    phase2.setUnits(units)
+    phase3.setUnits(units)
     
     # Enable autoscaling for ocp and all constituent phases
     ocp.setAutoScaling(True,True)

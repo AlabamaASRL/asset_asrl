@@ -1,5 +1,9 @@
 import numpy as np
 import asset_asrl as ast
+import asset_asrl.VectorFunctions as vf
+import asset_asrl.OptimalControl as oc
+from asset_asrl.VectorFunctions import Arguments as Args
+
 import matplotlib.pyplot as plt
 from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
 import time
@@ -8,9 +12,7 @@ import seaborn as sns    # pip install seaborn if you dont have it
 from matplotlib import ticker
 
 
-vf        = ast.VectorFunctions
-oc        = ast.OptimalControl
-Args      = vf.Arguments
+
 
 '''
 Low-Thrust Orbit Transfer taken from example 6 on page 265 of
@@ -36,6 +38,7 @@ J4 = -1.608e-6
 
 pt0 = 21837080.052835
 ptf = 40007346.015232
+ht0 = -0.25396764647494
 
 Lstar = 20925662.73     ## feet
 Tstar = Lstar/np.sqrt(mu/Lstar)
@@ -324,6 +327,12 @@ def MEEDynamics(mu):
     
     return vf.stack([pdot,fdot,gdot,hkdot,Ldot])*sqp
 
+def MEEProgradeUlaw():
+    MEEs = Args(6).vf()
+    RV = MEECartFunc(mu)(MEEs)
+    RTNBasis = RTNBasisFunc()(RV)
+    U = vf.RowMatrix(RTNBasis,3,3)*RV.tail(3).normalized() 
+    return U
 
 def MEEDynamics2(mu):
     
@@ -407,6 +416,8 @@ class LTModel(oc.ODEBase):
         #############################################################
         super().__init__(ode, 7,3,1,Vgroups=Vgroups)
 
+
+
 def EqBCon():
     ## Boundary constraint eq 6.52-6.55 from reference
     X = Args(6)
@@ -429,25 +440,26 @@ def IqBCon():
 
 if __name__ == "__main__":
     
-    X0 = np.zeros((12))
-
-    X0[0] =pt0
-    X0[3] =-0.25396764647494
-    X0[5] = np.pi
-    X0[6] =1
-    X0[8:11]= [0,1,0]
-    X0[11]  =-25
+    
+    
     
     ode = LTModel(mu,Thrust,gs,Isp,Re,J2)
+    
+    
+    X0 = ode.make_input(p = pt0,
+                        h=ht0,
+                        L=np.pi,
+                        w=1.0,
+                        U=[0.0,1.0,0.0],
+                        tau = -25.0)
+    
     tfig = 90000
+    integ = ode.integrator(1,MEEProgradeUlaw(),"MEEs")
+    ## Same as above
+    #integ = ode.integrator(1,MEEProgradeUlaw(),["p","f","g","h","k","L"])
+    #integ = ode.integrator(1,MEEProgradeUlaw(),range(0,6))
 
-    def Prograde():
-        RV = MEECartFunc(mu)
-        RTNBasis = RTNBasisFunc()(RV)
-        U = vf.RowMatrix(RTNBasis,3,3)*RV.tail(3).normalized() 
-        return U
-        
-    integ = ode.integrator(1,Prograde(),range(0,6))
+
     integ.setAbsTol(1.0e-12)
     integ.setRelTol(1.0e-5)
     
@@ -455,18 +467,21 @@ if __name__ == "__main__":
     
     #############################################
     
-    phase = ode.phase("LGL5",IG,16)
     
+    phase = ode.phase("LGL5",IG,16)
     phase.setAutoScaling(True)
     
-    ## If you want to makse units vector manually
+    ## If you need to make units vector manually
     Units = np.ones((12))  # Size of ODE Input
     Units[0]=Lstar  
     Units[6]=Fstar
     Units[7]=Tstar
-    phase.setUnits(Units)
+    phase.setUnits(Units)    
+    ## Same as above
+    # Units = ode.make_units(p=Lstar,w=Fstar,t=Tstar)
+    # phase.setUnits(Units)    
     ## Or if you have named variables in your ODE
-    phase.setUnits(p=Lstar,w=Fstar,t=Tstar)
+    # phase.setUnits(p=Lstar,w=Fstar,t=Tstar)
     
     phase.addBoundaryValue("Front",["MEEs","w","t"],X0[0:8])
     phase.addEqualCon("Path",Args(3).norm()-1,"U")
@@ -481,7 +496,7 @@ if __name__ == "__main__":
     phase.addLowerVarBound("Back","w",.05)
     phase.addValueObjective("Back",6,-1.0)
     phase.setThreads(8,8)
-    phase.optimizer.PrintLevel = 1
+    phase.optimizer.PrintLevel = 2
     phase.optimizer.set_EContol(1.0e-9)
     
     

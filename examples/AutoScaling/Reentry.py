@@ -165,6 +165,11 @@ def Plot(Traj1,Traj2):
 
 if __name__ == "__main__":
     ##########################################################################
+    
+    ode = ShuttleReentry()
+
+    
+
     tf  = 2000
 
     ht0  = 260000
@@ -172,33 +177,20 @@ if __name__ == "__main__":
     vt0  = 25600
     vtf  = 2500 
 
-    
     gammat0 = np.deg2rad(-1.0)
     gammatf = np.deg2rad(-5.0)
     psit0   = np.deg2rad(90.0)
+    
+    
+    ## Construct state,time,control vector using names with ode.make_input
+    X0 = ode.make_input(h=ht0,v=vt0,gamma=gammat0,psi=psit0)
+    Xf = ode.make_input(h=htf,v=vtf,gamma=gammatf,psi=psit0,t=tf)
+    # Lerp IG
+    TrajIG = [X0*(1.0-t) + Xf*t for t in np.linspace(0.,1.,200)]
 
-
-    ts = np.linspace(0,tf,200)
-
-    TrajIG = []
-    for t in ts:
-        X = np.zeros((8))
-        X[0] = ht0*(1-t/tf) + htf*t/tf
-        X[1] = 0
-        X[2] = vt0*(1-t/tf) + vtf*t/tf
-        X[3] = gammat0*(1-t/tf) + gammatf*t/tf
-        X[4] = psit0
-        X[5] = t
-        X[6] =.00
-        X[7] =.00
-        TrajIG.append(np.copy(X))
-        
-        
     ################################################################
 
-    ode = ShuttleReentry()
-    
-    phase = ode.phase("LGL5",TrajIG,20)
+    phase = ode.phase("LGL5",TrajIG,40)
 
     ############################
     phase.setAutoScaling(True)  
@@ -226,6 +218,7 @@ if __name__ == "__main__":
                               ,[htf,vtf,gammatf])
     
     phase.addDeltaVarObjective("theta",-1.0)
+    
     phase.setThreads(8,8)
     
     phase.optimizer.set_SoeLSMode("L1")
@@ -243,10 +236,7 @@ if __name__ == "__main__":
     Traj1 = phase.returnTraj()
     
     ## Add in Heating Rate Constraint
-    phase.addUpperFuncBound("Path",QFunc(),
-                               ["h","v","alpha"],
-                               Qlimit,1/70, AutoScale="auto")
-    
+    phase.addUpperFuncBound("Path",QFunc(),["h","v","alpha"],Qlimit)
     
     phase.optimize()
     
