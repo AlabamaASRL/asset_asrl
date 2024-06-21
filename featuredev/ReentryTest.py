@@ -15,16 +15,10 @@ Betts, J.T. Practical methods for Optimal Control and Estimation Using Nonlinear
 g0 = 32.2 
 W  = 203000
 
-Lstar = 100000.0     ## feet
-Tstar = 60.0         ## sec
-Mstar = W/g0         ## slugs
 
 Lstar = 1.0     ## feet
 Tstar = 1.0         ## sec
 Mstar = 1         ## slugs
-
-
-
 
 Vstar   = Lstar/Tstar
 Fstar   = Mstar*Lstar/(Tstar**2)
@@ -32,6 +26,8 @@ Astar   = Lstar/(Tstar**2)
 Rhostar = Mstar/(Lstar**3)
 BTUstar = 778.0*Lstar*Fstar
 Mustar  = (Lstar**3)/(Tstar**2)
+
+print(BTUstar)
 
 tmax = 2500            /Tstar
 Re = 20902900          /Lstar
@@ -117,52 +113,42 @@ class ShuttleReentry(oc.ODEBase):
         super().__init__(ode,Xvars,Uvars,Vgroups = Vgroups)
 
 def QFunc():
+    
     h,v,alpha = Args(3).tolist()
     alphadeg = (180.0/np.pi)*alpha
     rhodim = rho0*vf.exp(-h/h_ref)*Rhostar
     vdim = v*Vstar
-    
     qr = 17700*vf.sqrt(rhodim)*((.0001*vdim)**3.07)
     qa = c0 + c1*alphadeg + c2*(alphadeg**2)+ c3*(alphadeg**3)
-    
     return qa*qr
  
 #############################################################################
 
-def Plot(Traj1,Traj2):
+def Plot(Traj1):
     TT1 = np.array(Traj1).T
-    TT2 = np.array(Traj2).T
 
     fig, axs = plt.subplots(4,1)
 
-    axs[0].plot(TT1[5]*Tstar/60.0,TT1[0]*Lstar/5280,label='No Q limit',color='r')
-    axs[0].plot(TT2[5]*Tstar/60.0,TT2[0]*Lstar/5280,label='Q limited',color='b')
+    axs[0].plot(TT1[5]*Tstar/60.0,TT1[0]*Lstar/5280,color='k')
     axs[0].set_ylabel("Altitude (Miles)")
 
 
-    axs[1].plot(TT1[5]*Tstar/60.0,TT1[2]*Vstar,label='No Q limit',color='r')
-    axs[1].plot(TT2[5]*Tstar/60.0,TT2[2]*Vstar,label='Q limited',color='b')
+    axs[1].plot(TT1[5]*Tstar/60.0,TT1[2]*Vstar,color='k')
 
     axs[1].set_ylabel(r"Velocity $\frac{ft}{s}$")
 
 
-    axs[2].plot(TT1[5]*Tstar/60.0,np.rad2deg(TT1[6]),label='Angle of Attack No Q limit',color='r')
-    axs[2].plot(TT1[5]*Tstar/60.0,np.rad2deg(TT1[7]),label='Bank Angle No Q limit',color='r',linestyle='dotted')
-    axs[2].plot(TT2[5]*Tstar/60.0,np.rad2deg(TT2[6]),label='Angle of Attack  Q limited',color='b')
-    axs[2].plot(TT2[5]*Tstar/60.0,np.rad2deg(TT2[7]),label='Bank Angle  Q limited',color='b',linestyle='dotted')
-
+    axs[2].plot(TT1[5]*Tstar/60.0,np.rad2deg(TT1[6]),color='k')
+    axs[2].plot(TT1[5]*Tstar/60.0,np.rad2deg(TT1[7]),color='k',linestyle='dotted')
+    
     axs[2].set_ylabel("Angle(deg)")
 
     qfunc = QFunc().eval(8,[0,2,6])
 
     qs1 = [qfunc(T)[0] for T in Traj1]
-    qs2 = [qfunc(T)[0] for T in Traj2]
 
-    axs[3].plot(TT1[5]*Tstar/60.0,qs1,label='No Q limit',color='r')
-    axs[3].plot(TT2[5]*Tstar/60.0,qs2,label='Q limited',color='b')
-    axs[3].set_ylabel(r"Q $(\frac{BTU}{ft^2 *s})$")
-
-    axs[3].plot(TT2[5]*Tstar/60.0,np.ones_like(TT2[5])*70,label=r'Q = 70 $\frac{BTU}{ft^2 *s}$',color='k',linestyle='dashed')
+    axs[3].plot(TT1[5]*Tstar/60.0,qs1,color='k')
+    axs[3].set_ylabel(r"Qdot $(\frac{BTU}{ft^2 *s})$")
 
 
     for i in range(0,4):
@@ -180,7 +166,7 @@ def Plot(Traj1,Traj2):
 
 if __name__ == "__main__":
     ##########################################################################
-    tf  = 1000/Tstar
+    tf  = 2000/Tstar
 
     ht0  = 260000/Lstar
     htf  = 80000 /Lstar
@@ -215,7 +201,7 @@ if __name__ == "__main__":
     tstar = 60
     lstar = 100000
     
-    phase = ode.phase("LGL5",TrajIG,20)
+    phase = ode.phase("LGL5",TrajIG,30)
     
     
     
@@ -234,59 +220,53 @@ if __name__ == "__main__":
     phase.addLUVarBound("Path","gamma",np.deg2rad(-89.0),np.deg2rad(89.0))
 
     phase.addLUVarBound("Path","AoA",np.deg2rad(-90.0),np.deg2rad(90.0))
-    phase.addLUVarBound("Path","beta" ,np.deg2rad(-90.0),np.deg2rad(1.0),AutoScale = "auto")
+    phase.addLUVarBound("Path","beta" ,np.deg2rad(-90.0),np.deg2rad(1.0))
     
     
     phase.addUpperDeltaTimeBound(tmax,1.0)
-    
     
     phase.addBoundaryValue("Back" 
                               ,["h","v","gamma"]
                               ,[htf,vtf,gammatf])
     
-    phase.addDeltaVarObjective(1,-1.0)
     phase.setThreads(8,8)
     
-    ## Our IG is bad, so i turn on line search
     phase.optimizer.set_SoeLSMode("L1")
     phase.optimizer.set_OptLSMode("L1")
-    phase.optimizer.set_PrintLevel(1)
-    phase.setAdaptiveMesh(True)
-    phase.MeshErrorEstimator='integrator'
-    #phase.MeshErrorCriteria = 'endtoend'
-    phase.MeshErrFactor = 10
-    #phase.MeshRedFactor = 1.1
+    phase.optimizer.set_PrintLevel(0)
+    phase.optimizer.MaxLSIters =2
+    
+    
 
-    ## IG is bad, solve first before optimize
+    ## Anything from 100000 to 1.0e-5 works, approx 100-.01 works best
+    phase.setStaticParams([100],[.01])  # eventually works
+    
+    
+    ## Anything 1.0e-6 or smaller hangs at 1.0 KKT inf
+    #phase.setStaticParams([100],[1.0e-6])   
+    #phase.setStaticParams([100],[1.0e-7])   
+    #phase.setStaticParams([100],[1.0e-8])   
+
+    phase.optimizer.deltaH = 1.0e-5  # reducing this helps, but is not a fix
+
+
+    phase.addInequalCon("Path",QFunc()(Args(4).head(3))-Args(4)[3],
+                               ["h","v","alpha"],[],
+                               [0],
+                               AutoScale="auto")
+    
+    phase.addValueObjective("StaticParams",0,1.0)
+    
+    
+    phase.addLowerDeltaTimeBound(1900,1.0)
     phase.solve_optimize()
-
-    input("S")
-
-    #Refine to more segments and Reoptimize
-    #phase.refineTrajManual(300)
-    phase.optimize()
-
-    Traj1 = phase.returnTraj()
-    
-    ## Add in Heating Rate Constraint, scale so rhs is order 1
-    phase.addUpperFuncBound("Path",QFunc(),
-                               ["h","v","alpha"],
-                               Qlimit,AutoScale='auto')
     
     
-    #phase.addLUFuncBoundNEW("Path",QFunc(),["h","v","alpha"],[],[],
-    #                        -5,Qlimit,1.0,AutoScale='auto')
-
     
-    phase.optimize()
+    Traj = phase.returnTraj()
     
-    Traj2 = phase.returnTraj()
-    
-    print("Final Time:",Traj1[-1][5]*Tstar,"(s) , Final Cross Range:",Traj1[-1][1]*180/np.pi, " deg")
-    print("Final Time:",Traj2[-1][5]*Tstar,"(s) , Final Cross Range:",Traj2[-1][1]*180/np.pi, " deg")
    
-
-    Plot(Traj1,Traj2)
+    Plot(Traj)
 
 
     

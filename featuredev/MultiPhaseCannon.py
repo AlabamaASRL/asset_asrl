@@ -194,7 +194,7 @@ if __name__ == "__main__":
     
     aphase = ode.phase(tmode,AscentIG,nsegs)
     aphase.AutoScaling=AutoScaling
-    aphase.setUnits(Units,[])
+    aphase.setUnits(Units)
     aphase.addLowerVarBound("ODEParams",0,0.0,1,AutoScale='auto')
     aphase.addLowerVarBound("Front",1,0.0,1.0,AutoScale='auto')
     aphase.addBoundaryValue("Front",[2,3,4],[h0,r0,0],AutoScale='auto')
@@ -204,7 +204,7 @@ if __name__ == "__main__":
         
     dphase = ode.phase(tmode,DescentIG,nsegs)
     dphase.AutoScaling=AutoScaling
-    dphase.setUnits(Units,[])
+    dphase.setUnits(Units)
     
     dphase.addBoundaryValue("Back",[2],[0.0],AutoScale='auto')
     dphase.addValueObjective("Back",3,-1.0,AutoScale='auto')
@@ -216,13 +216,13 @@ if __name__ == "__main__":
     
     
     # Enforce continuatiy in time dependent vars
-    ocp.addForwardLinkEqualConNEW(aphase,dphase,[0,1,2,3,4])
+    ocp.addForwardLinkEqualCon(aphase,dphase,[0,1,2,3,4])
     
     F = Args(2)[0]-Args(2)[1]
     
     
     
-    ocp.addLinkEqualConNEW(F,aphase,"ODEParams",0,
+    ocp.addLinkEqualCon(F,aphase,"ODEParams",0,
                               dphase,"ODEParams",0,AutoScale=1)
     
     
