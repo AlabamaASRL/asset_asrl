@@ -80,7 +80,7 @@ if(BUILD_ASSET_WHEEL)
         list(APPEND RELEASE_FLAGS "-mtune=skylake")
     endif()
     set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
-    set(CLANG_MAX_INLINE_DEPTH 300)
+    set(CLANG_MAX_INLINE_DEPTH 400)
     
 else()
     list(APPEND RELEASE_FLAGS "-march=native")
@@ -116,6 +116,7 @@ if(LINK_TIME_OPT)
         if(BUILD_ASSET_WHEEL)
             ## Do full LTO for CI builds since it is single threaded anyway
             list(APPEND RELEASE_FLAGS "-flto=full")
+            list(APPEND RELEASE_FLAGS "/opt:lldltojobs=1")
         else()
             list(APPEND RELEASE_FLAGS "-flto=thin")
             list(APPEND RELEASE_FLAGS "/opt:lldltojobs=8")
