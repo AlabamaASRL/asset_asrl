@@ -1,3 +1,8 @@
+The file src/Solvers/PardisioInterface.h is based on the PardisoInterface.h file from the Eigen library (https://eigen.tuxfamily.org/). 
+The Eigen library is licensed under the Mozilla Public License Version 2.0 (https://www.mozilla.org/en-US/MPL/2.0/). The text of the Mozilla Public License Version 2.0 is included below.
+Note that the MPL2 license is only applied to src/Solvers/PardisioInterface.h and not the rest of the project. Changes include the addition of several member functions to access  internal PARDISO parameters, and additional
+methods to perform phases of the factorization without making unnecessary copies of the input matrix.
+
 Mozilla Public License Version 2.0
 ==================================
 

@@ -94,8 +94,7 @@ class ODEBase:
         for key, value in kwargs.items():
             idx = self.idx(key)
             
-            if(isinstance(value, (int,np.int32,np.intc,
-                                  float,np.double,np.cdouble))):
+            if(isinstance(value, numbers.Number)):
                 units_t = np.ones((len(idx)))*value
             elif(hasattr(value, '__iter__') and not isinstance(value, str)):
                 units_t = value
@@ -128,8 +127,7 @@ class ODEBase:
         for key, value in kwargs.items():
             idx = self.idx(key)
             
-            if(isinstance(value, (int,np.int32,np.intc,
-                                  float,np.double,np.cdouble))):
+            if(isinstance(value, numbers.Number)):
                 state_t = np.ones((len(idx)))*value
             elif(hasattr(value, '__iter__') and not isinstance(value, str)):
                 state_t = value
@@ -141,24 +139,6 @@ class ODEBase:
         return state
     
     
-    
-    def _get_var_idx(self,names,source):
-        
-        idxs = []
-        if(hasattr(names, '__iter__') and not isinstance(names, str)):
-            for name in names:
-                if(isinstance(name, str)): 
-                    idxs+= list(self.idx(name))
-                elif(isinstance(name, (int,np.int32,np.intc))):
-                    idxs.append(name)
-                else:
-                    raise Exception("Invalid name specifier: {}".format(str(name)))
-        elif(isinstance(names, str)):
-            idxs+=list(self.idx(names))
-        else:
-            raise Exception("Invalid name specifier: {}".format(str(names)))
-            
-        return idxs
     
     def get_vars(self,names,source,retscalar = False):
         """

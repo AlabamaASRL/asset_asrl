@@ -1,13 +1,23 @@
 Installing ASSET
 ================
 
-This tutorial will guide you through the complete setup process for installing and building ASSET from scratch on:
+In most cases we suggest simply installing ASSET via pip, which is as simple as running the following command in the console:
+
+.. code-block:: console
+
+	pip install asset-asrl
+
+We currently host Windows and Linux binaries for python 3.7-3.12 on PyPi.   
+
+
+If you are interested in building ASSET from source, please see the following sections for a step-by-step guide on how to do so on:
+
 * Windows
 * Linux
-* Docker
+* Docker (Linux)
 
-Windows Installation
---------------------
+Build from Source on Windows
+----------------------------
 
 In order to build ASSET on Windows the following dependencies are required:
 
@@ -136,8 +146,8 @@ Step-By-Step Guide
 
 
 
-Linux Installation
-------------------
+Build from Source on Linux
+--------------------------
 The dependencies for Linux installations are similar to that of Windows; however, we'll be using Visual Studio Code for our IDE:
 
 * `Visual Studio Code <https://code.visualstudio.com/download>`_
@@ -253,16 +263,35 @@ If it is desired to use an IDE other than Visual Studio Code, it is still requir
 Docker
 ------
 
-Want to skip installing all of the dependencies? ASSET can be installed through a Docker image. There's also great integrations of Docker and VS Code.
+The `dockerfiles <https://github.com/AlabamaASRL/asset_asrl/tree/master/dockerfiles>`_ folder in the repo contains docker files and supporting scripts for building asset_asrl .whl files for pip installation on linux systems.
+Two images are provided based on Ubuntu 18.04 and 20.04. Build wheels on 18.04 for better compatibility with older linux distros or 20.04 for better performance.
 
-Download the Docker/VS Code project template here and get to coding!
 
-https://github.com/jasonmeverett/asset-example-project
+To use, cd to the desired image's folder and build the image. You may optionally set the number of cores used building the image with the
+CMakeBuildJobs build argument.
 
-Developing Docker Images 
-^^^^^^^^^^^^^^^^^^^^^^^^
+.. code-block:: console
 
-Interested in contributing to Docker/ASSET development? Check in-depth details in `Dockerfile` and `Dockerfile-dev` in the repository.
+	cd Ubuntu18.04
+
+	docker build -t assetbuild . --build-arg CMakeBuildJobs=12
+	
+After building the image, start up a new container.
+
+.. code-block:: console
+
+	docker run -it assetbuild /bin/bash
+
+Once inside the container, run the BuildWheel.sh script to build a .whl file for a particular python version (-p), repo branch (-b).
+You may also set the number of jobs used when compiling with the -j argument. 
+
+.. code-block:: console
+
+	bash ~/BuildWheel.sh -b master -j 12 -p 3.10
+
+After the build has completed, the packaged wheel file will be available in ~/asset_asrl/wheelhouse. You can then copy this file out of the container
+for installation on other systems.
+
 
 
 

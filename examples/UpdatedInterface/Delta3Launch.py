@@ -118,7 +118,7 @@ class RocketODE(oc.ODEBase):
         Vgroups[("t","time")]=XtU.TVar()
         Vgroups[("m","mass")]=m
         
-        Vgroups["RV"] =[R,V]
+        Vgroups["RV"] =[0,1,2,3,4,5]
 
 
         ####################################################
@@ -331,6 +331,21 @@ if __name__ == "__main__":
     phase1 = ode1.phase(tmode,IG1,nsegs1)
     phase1.setControlMode(cmode)
     
+    ## Enable AutoScaling, off by default
+    phase1.setAutoScaling(True)
+    
+    units = np.ones((11))
+    units[0:3]=Lstar
+    units[3:6]=Vstar
+    units[6]=Mstar
+    units[7]=Tstar
+    ## All others are one,i.e no auto-scaling
+    
+    phase1.setUnits(units)  # As a single vector
+    # Or
+    phase1.setUnits(R=Lstar,V=Vstar,t=Tstar,m=Mstar) 
+
+    
     phase1.addLUNormBound("Path","U",.5,1.5)
     phase1.addBoundaryValue("Front",["R","V","m","t"],IG1[0][0:8])
     
@@ -366,12 +381,17 @@ if __name__ == "__main__":
     phase4 = ode4.phase(tmode,IG4,nsegs4)
     phase4.setControlMode(cmode)
 
-    phase4.addLowerNormBound("Path","R",Re)
-    phase4.addLUNormBound("Path","U",.5,1.5)
+
+    ## AutoScale = "auto" if not specified
     phase4.addBoundaryValue("Front","mass", m0_phase4)
     phase4.addUpperVarBound("Back","time",tf_phase4)
+    # AutoScale=None, will turn it off for this constraint
+    phase4.addLUNormBound("Path","U",.5,1.5,AutoScale=None)
     
-    orbitidx = phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),["R","V"],AutoScale = "auto")
+    phase4.addLowerNormBound("Path","R",Re,AutoScale=1/Lstar)
+    
+    phase4.addEqualCon("Back",TargetOrbit(at,et,istart,Ot,Wt),["RV"],AutoScale = [1/Lstar,1.0,1.0,1.0,1.0])
+    
     # Maximize final mass
     phase4.addValueObjective("Back","mass",-1.0)
     
@@ -389,7 +409,6 @@ if __name__ == "__main__":
     
     
     for phase in ocp.Phases:
-        phase.AutoScaling=True
         phase.setUnits(R=Lstar,V=Vstar,t=Tstar,m=Mstar)
         phase.setMeshTol(1.0e-6)
         phase.setMeshErrorCriteria('max')
@@ -400,7 +419,7 @@ if __name__ == "__main__":
     phase4.setUnits(R=2*Lstar,V=Vstar,t=.8*Tstar,m=Mstar)
 
     ## Everything but mass
-    ocp.addForwardLinkEqualCon(phase1,phase4,["R","V","t","U"])
+    ocp.addForwardLinkEqualCon(phase1,phase4,["R","V","t","U"],AutoScale="auto")
 
 
     ocp.optimizer.set_OptLSMode("L1")

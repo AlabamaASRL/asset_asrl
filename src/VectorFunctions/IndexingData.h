@@ -46,19 +46,19 @@ namespace ASSET {
     MatrixXi Vindex;
 
     /// <summary>
-    /// Matrix whose columns containt the ordered constraint output indices for the correspoding
+    /// Matrix whose columns constraint the ordered constraint output indices for the corresponding
     /// column in Vindex. This matrix is empy for objective functions.
     /// </summary>
     MatrixXi Cindex;
 
     /// <summary>
-    /// Each element indicates whether the correspoding indices in Vindex are sorted
+    /// Each element indicates whether the corresponding indices in Vindex are sorted
     /// and contigous (ie: 10,11,12...)
     /// </summary>
     Eigen::Matrix<ParsedIOFlags, -1, 1> VindexContinuity;
 
     /// <summary>
-    /// Each element indicates whether the correspoding indices in Cindex are sorted
+    /// Each element indicates whether the corresponding indices in Cindex are sorted
     /// and contigous (ie: 10,11,12...)
     /// </summary>
     Eigen::Matrix<ParsedIOFlags, -1, 1> CindexContinuity;
