@@ -3,6 +3,11 @@ import asset_asrl as ast
 import matplotlib.pyplot as plt
 import seaborn as sns    # pip install seaborn if you dont have it
 import matplotlib.animation as animation
+import psutil, os
+p = psutil.Process( os.getpid() )
+for dll in p.memory_maps():
+  print(dll.path)
+
 
 vf = ast.VectorFunctions
 oc = ast.OptimalControl

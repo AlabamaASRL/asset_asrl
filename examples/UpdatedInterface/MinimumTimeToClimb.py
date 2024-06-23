@@ -189,7 +189,9 @@ if __name__ == "__main__":
     phase.addLUVarBound("Path","fpa",fpamin,fpamax)
     phase.addLowerVarBound("Last","mass",massmin)
     phase.addLUVarBound("Path","alpha",alphamin,alphamax)
-    phase.addBoundaryValue("Last",["h","v","fpa"],[htf,vtf,fpatf])
+    phase.addBoundaryValue("Last",
+                           ["h","v","fpa"],
+                           [htf,vtf,fpatf])
     phase.addDeltaTimeObjective(1.0)
     
     phase.optimizer.PrintLevel=1

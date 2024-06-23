@@ -1,5 +1,9 @@
 import numpy as np
 import asset_asrl as ast
+import asset_asrl.VectorFunctions as vf
+import asset_asrl.OptimalControl as oc
+from asset_asrl.VectorFunctions import Arguments as Args
+
 import matplotlib.pyplot as plt
 from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
 import time
@@ -8,9 +12,7 @@ import seaborn as sns    # pip install seaborn if you dont have it
 from matplotlib import ticker
 
 
-vf        = ast.VectorFunctions
-oc        = ast.OptimalControl
-Args      = vf.Arguments
+
 
 '''
 Low-Thrust Orbit Transfer taken from example 6 on page 265 of
@@ -19,53 +21,34 @@ Betts, J.T. Practical methods for Optimal Control and Estimation Using Nonlinear
 Optimizes a low thrust tranfer from LEO to MEO with MEE dynamics and Zonal Harmonics
 '''
 
-################### Non Dimensionalize ##################################
 g0 = 32.174 
 W  = 1  #lb
 mu_e = 1.407645794e16
 
 
-Lstar = 20925662.73     ## feet
-Tstar = Lstar/np.sqrt(mu_e/Lstar)
-Mstar = W/g0         ## slugs
-
-
-Lstar = 1     ## feet
-Tstar = 1
-Mstar = 1         ## slugs
-
-
-
-
-lstar = 20925662.73     ## feet
-tstar = lstar/np.sqrt(mu_e/lstar)
-mstar = W/g0         ## slugs
-fstar   = mstar*lstar/(tstar**2)
-
-
-
-Vstar   = Lstar/Tstar
-Fstar   = Mstar*Lstar/(Tstar**2)
-Astar   = Lstar/(Tstar**2)
-Mustar  = (Lstar**3)/(Tstar**2)
-
-Re     = 20925662.73             /Lstar
-mdot   = (4.446618e-3/(450*g0))  /(Mstar/Tstar)
-mu     = (mu_e)                  /Mustar
-Thrust = 4.446618e-3             /Fstar
-Isp = 450                        /Tstar
-
-gs = g0/Astar
-
-
+Re     = 20925662.73             
+mdot   = (4.446618e-3/(450*g0))  
+mu     = 1.407645794e16                 
+Thrust = 4.446618e-3             
+Isp = 450                        
+gs = g0
 J2 = 1082.639e-6
 J3 = -2.565e-6
 J4 = -1.608e-6
 
-pt0 = 21837080.052835/Lstar
-ptf = 40007346.015232/Lstar
+pt0 = 21837080.052835
+ptf = 40007346.015232
+ht0 = -0.25396764647494
 
-#######################Helper functions form plotting ,ignore #################
+Lstar = 20925662.73     ## feet
+Tstar = Lstar/np.sqrt(mu/Lstar)
+Mstar = W/g0         ## slugs
+Fstar   = Mstar*Lstar/(Tstar**2)
+
+
+
+
+#######################Helper functions for plotting ,ignore #################
 def normalize(x): return np.copy(x)/np.linalg.norm(x)
 
 
@@ -154,11 +137,11 @@ def Plot(Traj):
             ZNs = tmp
         
         for ZP in ZPs:
-            T = np.array(ZP).T*Lstar*.3048
+            T = np.array(ZP).T*.3048
             axs[i].plot(T[views2[i][0]]+rs,T[views2[i][1]]+rs,zorder=10,color=color)
             
         for ZP in ZNs:
-            T = np.array(ZP).T*Lstar*.3048
+            T = np.array(ZP).T*.3048
             axs[i].plot(T[views2[i][0]]+rs,T[views2[i][1]]+rs,zorder=2,color=color)
             
         axs[i].xaxis.set_major_formatter(major_formatter)
@@ -193,9 +176,9 @@ def Plot(Traj):
     
     T = np.array(Traj).T
     
-    axu.plot(T[7]*Tstar/3600,T[8],label=r'$u_r$')
-    axu.plot(T[7]*Tstar/3600,T[9],label=r'$u_t$')
-    axu.plot(T[7]*Tstar/3600,T[10],label=r'$u_n$')
+    axu.plot(T[7]/3600,T[8],label=r'$u_r$')
+    axu.plot(T[7]/3600,T[9],label=r'$u_t$')
+    axu.plot(T[7]/3600,T[10],label=r'$u_n$')
     axu.grid(True)
     
     axu.set_ylabel(r"$\mathbf{u}$")
@@ -321,8 +304,6 @@ def ZonalGrav(mu,Re,J2,J3,J4):
     
     
    
-        
-
 def MEEDynamics(mu):
     # MEE equations of motion with perturbing accellerations in RTN frame
     X = Args(9)
@@ -345,6 +326,7 @@ def MEEDynamics(mu):
     Ldot  = mu*(w/p)*(w/p) + (1.0/w)*(h*sinL -k*cosL)*un
     
     return vf.stack([pdot,fdot,gdot,hkdot,Ldot])*sqp
+
 
 
 def MEEDynamics2(mu):
@@ -384,7 +366,7 @@ def MEEDynamics2(mu):
     
 
 class LTModel(oc.ODEBase):
-     def __init__(self, mu,T,gs,Isp,Re,J2= False):
+     def __init__(self, mu,T,gs,Isp):
         
         ############################################################
         XtUP = oc.ODEArguments(7,3,1)
@@ -429,6 +411,13 @@ class LTModel(oc.ODEBase):
         #############################################################
         super().__init__(ode, 7,3,1,Vgroups=Vgroups)
 
+def MEEProgradeUlaw():
+    MEEs = Args(6).vf()
+    RV = MEECartFunc(mu)(MEEs)
+    RTNBasis = RTNBasisFunc()(RV)
+    U = vf.RowMatrix(RTNBasis,3,3)*RV.tail(3).normalized() 
+    return U
+
 def EqBCon():
     ## Boundary constraint eq 6.52-6.55 from reference
     X = Args(6)
@@ -442,7 +431,6 @@ def EqBCon():
 
 def IqBCon():
     ## Boundary constraint eq 6.56 from reference
-
     X = Args(6)
     p,f,g,h,k,L = X.tolist()
     return g*h - k*f
@@ -452,78 +440,80 @@ def IqBCon():
 
 if __name__ == "__main__":
     
-    X0 = np.zeros((12))
-
-    X0[0] =pt0
-    X0[3] =-0.25396764647494
-    X0[5] = np.pi
-    X0[6] =1/Fstar
-    X0[8:11]= [0,1,0]
-    X0[11]  =-25
     
-    ode = LTModel(mu,Thrust,gs,Isp,Re,J2)
-    tfig = 90000/Tstar
+    
+    
+    ode = LTModel(mu,Thrust,gs,Isp)
+    
+    
+    X0 = ode.make_input(p = pt0,
+                        h=ht0,
+                        L=np.pi,
+                        w=1.0,
+                        U=[0.0,1.0,0.0],
+                        tau = -25.0)
+    
+    tfig = 90000
+    integ = ode.integrator(1,MEEProgradeUlaw(),"MEEs")
+    ## Same as above
+    #integ = ode.integrator(1,MEEProgradeUlaw(),["p","f","g","h","k","L"])
+    #integ = ode.integrator(1,MEEProgradeUlaw(),range(0,6))
 
-    def Prograde():
-        RV = MEECartFunc(mu)
-        RTNBasis = RTNBasisFunc()(RV)
-        U = vf.RowMatrix(RTNBasis,3,3)*RV.tail(3).normalized() 
-        return U
-        
-    integ = ode.integrator(1,Prograde(),range(0,6))
+
     integ.setAbsTol(1.0e-12)
     integ.setRelTol(1.0e-5)
     
     IG = integ.integrate_dense(X0,tfig)
     
-    Units = np.ones((12))
-    Units[0] = lstar
-    Units[6] = fstar
-    Units[7] = tstar
-    
-    Units = ode.make_units(p=lstar,w=fstar,t=tstar)
+    #############################################
     
     
-    for i in range(0,1):
-        phase = ode.phase("LGL5",IG,16)
-        
-        phase.setUnits(p=lstar,w=fstar,t=tstar)
-        phase.AutoScaling=True
-        
-        
-        phase.integrator.setStepSizes(.1,.001,10)
-        phase.addBoundaryValue("Front",["MEEs","w","t"],X0[0:8])
-        phase.addEqualCon("Path",Args(3).norm()-1,"U")
-        # Dont use control splines when placing equality path constraints on controls
-        phase.setControlMode("NoSpline")
-        
-        # Not stricly neccesary for this problem but a good idea
-        phase.addLUFuncBound("Path",RadFunc(mu),"MEEs",Re,10*Re)
+    phase = ode.phase("LGL5",IG,16)
+    phase.setAutoScaling(True)
     
-        phase.addEqualCon("Back",EqBCon(),"MEEs")
-        phase.addInequalCon("Back",IqBCon(),"MEEs")
-        phase.addLUVarBound("ODEParams","tau", -50,0)
-        phase.addLowerVarBound("Back","w",.05)
-        phase.addValueObjective("Back",6,-1.0)
-        phase.setThreads(8,8)
-        phase.optimizer.PrintLevel = 0
-        phase.optimizer.set_EContol(1.0e-9)
-        
-        phase.setAdaptiveMesh(True)
-        #phase.setMeshErrorEstimator("integrator")
-        phase.setMeshTol(1.0e-7)
-        
-        phase.optimize_solve()
+    ## If you need to make units vector manually
+    Units = np.ones((12))  # Size of ODE Input
+    Units[0]=Lstar  
+    Units[6]=Fstar
+    Units[7]=Tstar
+    phase.setUnits(Units)    
+    ## Same as above
+    # Units = ode.make_units(p=Lstar,w=Fstar,t=Tstar)
+    # phase.setUnits(Units)    
+    ## Or if you have named variables in your ODE
+    # phase.setUnits(p=Lstar,w=Fstar,t=Tstar)
     
-        Traj = phase.returnTrajRangeND(10000,0,1)
+    phase.addBoundaryValue("Front",["MEEs","w","t"],X0[0:8])
+    phase.addEqualCon("Path",Args(3).norm()-1,"U")
+    # Dont use control splines when placing equality path constraints on controls
+    phase.setControlMode("NoSpline")
+    phase.addLUFuncBound("Path",RadFunc(mu),"MEEs",Re,10*Re)
+
+    phase.addEqualCon("Back",EqBCon(),"MEEs")
+    phase.addInequalCon("Back",IqBCon(),"MEEs")
     
-    FinalWeight = Traj[-1][6]*Fstar
-    FinalTime   = Traj[-1][7]*Tstar
-    ThrottleParam = Traj[-1][-1]
+    phase.addLUVarBound("ODEParams","tau", -50,0)
+    phase.addLowerVarBound("Back","w",.05)
+    phase.addValueObjective("Back",6,-1.0)
+    phase.setThreads(8,8)
+    phase.optimizer.PrintLevel = 2
+    phase.optimizer.set_EContol(1.0e-9)
     
-    print(f"Final Weight:{FinalWeight} lb")
-    print(f"Final Time:{FinalTime} s")
-    print(f"Throttle Parameter:{ThrottleParam} ")
+    
+    ## All error estimates and tolerances are in reference to the scaled ODE system
+    phase.setAdaptiveMesh(True)
+    phase.setMeshErrorEstimator("integrator")
+    phase.setMeshTol(1.0e-7)
+    
+    phase.optimize_solve()
+
+    Traj = phase.returnTraj()
+    
+    wf,tf,tauf = ode.get_vars(["w","t","tau"],Traj[-1]) 
+    
+    print(f"Final Weight:{wf} lb")
+    print(f"Final Time:{tf} s")
+    print(f"Throttle Parameter:{tauf} ")
 
     PhaseMeshErrorPlot(phase,show=False)
     Plot(MEEToCart(Traj))

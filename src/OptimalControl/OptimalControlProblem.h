@@ -1893,7 +1893,6 @@ namespace ASSET {
 
 
     static void Build(py::module& m);
-
     static void BuildNewLinkIterface(py::class_<OptimalControlProblem, std::shared_ptr<OptimalControlProblem>, OptimizationProblemBase>&);
     static void BuildOldLinkIterface(py::class_<OptimalControlProblem, std::shared_ptr<OptimalControlProblem>, OptimizationProblemBase>&);
 

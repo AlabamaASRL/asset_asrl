@@ -1,28 +1,28 @@
 .. _scale-guide
 
-=================================
-Auto Scaling and Component Naming
-=================================
+======================
+Interface Enhancements
+======================
 Beginning in version 0.5.0, we have made significant improvements to the ODE, phase and OCP interfaces
 in order to simplify the definition of more complex optimal control problems. Note that these changes are backwards
 compatible and the previous tutorials and any existing code will continue to work as is. We will be updating all existing
-tutorials to reflect the new changes, at a later date, but for now we will provide a brief overview of the new features. A subset of
-the existing examples have been updated to reflect the new interface and can be found in the examples/NewInterface folder on the repo.
+tutorials to reflect the new changes at a later date, but for now we will provide a brief overview of the new features. A subset of
+the existing examples have been updated to reflect the new interface and can be found in the examples/UpdatedInterface folder on the repo.
 
 
-Component Naming
-================
+ODE Component Naming
+####################
 
 The first major improvement is the ability to give string name aliases to the input arguments of an ODE in the constructor.
 These names may then be used in place of integer indexes when applying constraints and objectives to phases
 and optimal control problems. As an example, lets take a look at how this works for the ODE defined for the Delta-III
 launch example.
 
-Here, we define the ODE exactly as we normally would in terms of ODEArguments. We can then add the different components of
+Here, we define the ODE exactly as we normally would in terms of :code:`ODEArguments`. We can then add the different components of
 the arguments to a dictionary indexed by the name or names that we want to use as aliases. Multiple aliases for the same variable
 grouping can be used by indexing the dictionary with a tuple of string names. The variables of the alias can be specified with
 the list integer indices,the actual segment or element, or a list of segments and/or elements. After populating the dictionary,we pass it 
-to the Vgroups (Variable groups) argument of ODEBase's constructor.
+to the :code:`Vgroups` (Variable groups) argument of :code:`ODEBase`'s constructor.
 
 .. code:: python
     
@@ -71,9 +71,9 @@ to the Vgroups (Variable groups) argument of ODEBase's constructor.
 
 Having defined the variable groups for our ODE we can now the string names themselves or lists of string names
 anywhere where we could previously use integer indices or lists of indices. As an example, lets take a look at how this would modify the
-definition of the delta-III launch vehicle optimal control problem below. For example, we can now simply use the alias "U" which we have
-defined to be our thrust vector when placing an LUNorm bound on our control. Similarly, we can replace the range(0,8) in the boundary value specification,
-with a list of string names specifying the different components of the states or with the combined alias "Xt" of those same variables. Note that when specifying multiple names,
+definition of the delta-III launch vehicle optimal control problem below. For example, we can now simply use the alias :code:`"U"` which we have
+defined to be our thrust vector when placing an LUNorm bound on our control. Similarly, we can replace the :code:`range(0,8)` in the boundary value specification,
+with a list of string names specifying the different components of the states or with the combined alias :code:`"Xt"` of those same variables. Note that when specifying multiple names,
 the combined index vector is just the concatenation of sub index vectors, so the order matters.
 
 .. code:: python
@@ -136,12 +136,12 @@ the combined index vector is just the concatenation of sub index vectors, so the
 
     #########################################
 
-We can also now use these same string names when applying any link constraints and objectives to OptimalControlProblem objects as well.
-So for the delta 3 example, we can modifiy the ForwardLinkEqualCon as shown below. Note that you will need to define the string aliases in the ODE
+We can also now use these same string names when applying any link constraints and objectives to :code:`OptimalControlProblem` objects as well.
+So for the delta 3 example, we can modify the :code:`addForwardLinkEqualCon` as shown below. Note that you will need to define the string aliases in the ODE
 associated with each phase. Note however that the indices specified by a string name do not have to be the same in every phase/ODE linked
-(though they are in this case). This makes it much easier to enforce continuity between variables in each phase/ODE even if they
+(though they are in this case). This makes it much easier to enforce continuity between variables in each phase even if they
 have different indices. For example, in the old interface, models with different numbers of state variables would have time with a different index.
-Now, so long as the user names time say "t" in both model definitions, then the call below will enforce continuity correctly. 
+Now, so long as the user names time say :code:`"t"` in both model definitions, then the call below will enforce continuity correctly. 
 
 .. code:: python
 
@@ -164,7 +164,7 @@ Finally, the new string names or lists of names can also be used when applying s
 
 .. code:: python
 
-	    ode = RocketODE(T_phase1,mdot_phase1)
+        ode = RocketODE(T_phase1,mdot_phase1)
 
         integ = ode.integrator(1.0,Args(3).normalized(),"V")
 
@@ -173,7 +173,7 @@ Finally, the new string names or lists of names can also be used when applying s
 
 
 Auto-Scaling
-============
+############
 
 The second major addition to the interface is automatic problem scaling from user defined canonical units. In the
 Delta-III and Shuttle tutorials we emphasized the importance of defining problems in non-dimensional units. This is typically
@@ -224,8 +224,8 @@ to a problem that was non-dimensionalized by hand.
 However, since we don't track the physical units of functions, this is not possible for all other constraints and objectives added to phase.
 By default for all non-dynamics constraints and objectives, we compute a set of output scales that normalizes each row of
 the functions Jacobian at the initial guess for the problem. Alternatively, the user can override these scales manually. 
-All of this is controlled an optional "AutoScale" argument that has been,
-added to all phase and ocp .add### methods. As an example, lets take a look at a portion of the definition of the Delta-III problem again below.
+All of this is controlled an optional :code:`AutoScale`` argument that has been,
+added to all :code:`phase`` and :code:`OptimalControlProblem` :code:`.add###`` methods. As an example, lets take a look at a portion of the definition of the Delta-III problem again below.
 
 
 .. code:: python
@@ -245,16 +245,16 @@ added to all phase and ocp .add### methods. As an example, lets take a look at a
 
 
 
-By default AutoScale is set to "auto" for all constraints and objectives. This will work well in most cases, but can be overridden when the user can specify a better scale factor.
+By default :code:`AutoScale` is set to :code:`"auto"` for all constraints and objectives. This will work well in most cases, but can be overridden when the user can specify a better scale factor.
 Manual scales specified by a assigning a scalar or vector of scales to the AutoScaling parameter. These will multiply the output of the function whenever AutoScaling is enabled.
-For example, for the bound on "R", we know that the units of the output will have dimensions of length, so it is reasonable to set the AutoScale variable 1/Lstar.
-Similarly, for the TargetOrbit constraint, we know that the first component of the output(semi-major axis) has dimensions of length and all others already non-dimensional.
+For example, for the bound on :code:`"R"`, we know that the units of the output will have dimensions of length, so it is reasonable to set the AutoScale variable :code:`1/Lstar`.
+Similarly, for the :code:`TargetOrbit` constraint, we know that the first component of the output(semi-major axis) has dimensions of length and all others already non-dimensional.
 In that case, we can manually specify the output of the first component and then leaves the others set to 1.0.
 
 
-When adding multiple phases to an OCP we should also enable AutoScaling for the OCP object as well. This will enable auto-scaling
-on all linked constraints and objectives between phases. It should also be noted that units do not have to be the same for all phases in an OCP.
-As with phases, the optional AutoScale parameter on all link constraints and objectives can be overridden
+When adding multiple phases to an :code:`OptimalControlProblem` we should also enable AutoScaling for the :code:`ocp` object as well. This will enable auto-scaling
+on all link constraints and objectives between phases. It should also be noted that units do not have to be the same for all phases in an :code:`ocp`.
+As with phases, the optional :code:`AutoScale` parameter on all link constraints and objectives can be overridden
 with custom scales if necessary.  
 
 .. code:: python
