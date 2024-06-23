@@ -61,7 +61,7 @@ jobs:
          -DCMAKE_LINKER:FILEPATH="C:/Program Files/LLVM/bin/lld-link.exe"
 
       - name: "Build Project"
-        run: cmake --build build --target asset pypiwheel --config Release -- -j2
+        run: cmake --build build --target asset pypiwheel --config Release -- -j3
 
       - name: 'Upload Wheels'
         uses: actions/upload-artifact@v3
