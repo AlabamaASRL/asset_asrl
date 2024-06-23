@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(ASSET VERSION 0.4.0 LANGUAGES CXX)
+project(ASSET VERSION 0.5.0 LANGUAGES CXX)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 set( CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
@@ -78,9 +78,9 @@ if(BUILD_ASSET_WHEEL)
     # Windows runs out of ram with LINK_TIME_OPT on gh-actions
     if(NOT WIN32)
         list(APPEND RELEASE_FLAGS "-mtune=skylake")
-        set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
-        set(CLANG_MAX_INLINE_DEPTH 300)
     endif()
+    set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
+    set(CLANG_MAX_INLINE_DEPTH 300)
     
 else()
     list(APPEND RELEASE_FLAGS "-march=native")
