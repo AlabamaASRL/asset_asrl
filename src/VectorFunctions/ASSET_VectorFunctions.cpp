@@ -6,6 +6,8 @@
 #include "CommonFunctions/InterpTable4D.h"
 
 #include "Utils/fmtlib.h"
+#include "CommonFunctions/IOScaled.h"
+
 
 namespace ASSET {}  // namespace ASSET
 
@@ -44,6 +46,9 @@ void ASSET::VectorFunctionBuild(FunctionRegistry& reg, py::module& m) {
 
   reg.Build_Register<Constant<-1, -1>>(mod, "ConstantVector");
   reg.Build_Register<Constant<-1, 1>>(mod, "ConstantScalar");
+
+
+  reg.Build_Register<IOScaled<Gen>>(mod, "IOScaled");
 
 
   InterpTable1DBuild(mod);

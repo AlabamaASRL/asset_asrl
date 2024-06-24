@@ -396,8 +396,7 @@ namespace ASSET {
         obj.def(py::init(&Derived::PyCopy<GenericFunction<IR, 1>>));
       }
 
-      obj.def("input_domain", &Derived::input_domain);
-      obj.def("is_linear", &Derived::is_linear);
+     
       obj.def("SuperTest", &Derived::SuperTest);
       obj.def("SpeedTest", &Derived::SpeedTest);
 

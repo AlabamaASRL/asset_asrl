@@ -5,8 +5,17 @@
 
   #include <Eigen/src/Core/util/DisableStupidWarnings.h>
   #include <mkl_pardiso.h>
-
   #include <Eigen/SparseCore>
+
+/*
+The classes in this file are directly based on the PardisoSupport module from Eigen 3.4 and 
+are subject to Eigen's MPL2 license, which can be found in the notices folder of the GitHub repository.
+Changes include the addition of several member functions to access internal PARDISO parameters, and additional
+methods to perform phases of the factorization without making unnecessary copies of the input matrix.
+Note that the MPL2 license is only applied to this particular file and not the rest of the project,
+as per the MPL2 license.
+ 
+*/
 
 namespace Eigen {
 
