@@ -61,7 +61,7 @@ jobs:
          -DCMAKE_LINKER:FILEPATH="C:/Program Files/LLVM/bin/lld-link.exe"
 
       - name: "Build Project"
-        run: cmake --build build --target asset pypiwheel --config Release -- -j1
+        run: cmake --build build --target asset pypiwheel --config Release -- -j3
 
       - name: 'Upload Wheels'
         uses: actions/upload-artifact@v3
@@ -105,7 +105,7 @@ jobs:
             run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_ASSET_WHEEL=True
 
           - name: "Build Project"
-            run: cmake --build build --target asset pypiwheel --config Release -- -j1
+            run: cmake --build build --target asset pypiwheel --config Release -- -j2
 
           - name: Audit Wheel Test
             run:  auditwheel show build/pypiwheel/asset_asrl/dist/*.whl
@@ -154,7 +154,7 @@ jobs:
             run: cmake -S . -B build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_ASSET_WHEEL=True
 
           - name: "Build Project"
-            run: cmake --build build --target asset pypiwheel --config Release -- -j1
+            run: cmake --build build --target asset pypiwheel --config Release -- -j2
 
           - name: Audit Wheel Test
             run:  auditwheel show build/pypiwheel/asset_asrl/dist/*.whl

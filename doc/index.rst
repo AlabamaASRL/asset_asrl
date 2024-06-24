@@ -38,7 +38,13 @@ Cite the following `paper <https://www.researchgate.net/publication/357567956_AS
 
 
 
-If you have questions, please email any of:
+If you have questions, please email any of the following or post an issue on the GitHub:
+
+    ajhouin@crimson.ua.edu
+
+    cgsandel@crimson.ua.edu
+
+    rsood@eng.ua.edu
 
     jbpezent@crimson.ua.edu
 
@@ -54,7 +60,7 @@ Open source development and distribution of ASSET is funded by NASA under Grant 
 
 Copyright, Licensing, and Legal Notices
 #######################################
-ASSET is provided under the permissive Apache 2.0 license that can be found in the `LICENSE <https://github.com/AlabamaASRL/asset_asrl/blob/master/LICENSE.txt>`_ file on the Github repo.
+ASSET is distributed under the permissive Apache 2.0 license that can be found in the `LICENSE <https://github.com/AlabamaASRL/asset_asrl/blob/master/LICENSE.txt>`_ file on the Github repo.
 
 The license and copyright notices of ASSET's source and redistributable dependencies are shown below. The full text for each respective license can be found in the 
 `notices <https://github.com/AlabamaASRL/asset_asrl/tree/master/notices>`_ folder on the Github repo.
@@ -71,6 +77,9 @@ The license and copyright notices of ASSET's source and redistributable dependen
 
     rubber_types - MIT License : Copyright (C) 2014 Andreas J. Herrmann
 
+    kepler propagator - MIT License : Copyright (C) 2014 Darin Koblick
+
+    lambert solver - MIT License : Copyright (C) 2018 Rody Oldenhuis
 
 ..
     cpp/cpp_root.rst

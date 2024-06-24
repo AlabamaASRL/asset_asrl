@@ -1,427 +1,433 @@
 #include "ODEPhaseBase.h"
-
 #include "LGLControlSplines.h"
 #include "LGLIntegrals.h"
 #include "MeshSpacingConstraints.h"
 #include "PyDocString/OptimalControl/ODEPhaseBase_doc.h"
 #include "ValueLock.h"
+#include "AutoScalingUtils.h"
 
-int ASSET::ODEPhaseBase::calc_threads() {
-  if (this->Threads > 1 && false) {
-    return this->Threads;
-  }
 
-  auto Cost = [](int N, int T, int Tmax, int V) {
-    int N_t = N / T;
-    int Nmt = N_t % V;
-    int NN = N % T;
-    int NN_t = NN / T;
-    int NNmt = NN_t % V;
+void ASSET::ODEPhaseBase::setUnits(const py::kwargs& kwargs)
+{
+   
 
-    double tscale = double(T) / double(std::min(T, Tmax));
-  };
+    py::module builtins = py::module::import("builtins");
+    py::object py_int = builtins.attr("int");
+    py::object py_float = builtins.attr("float");
+    py::object py_list = builtins.attr("list");
+    py::object np_array = (py::object)py::module::import("numpy").attr("ndarray");
+    py::object np_float = (py::object)py::module::import("numpy").attr("float64");
+    py::object np_int = (py::object)py::module::import("numpy").attr("int32");
 
-  return 0;
+
+    VectorXd Units(this->XtUPVars());
+    Units.setOnes();
+
+
+
+    for (auto & kw : kwargs) {
+        auto name = kw.first.cast<std::string>();
+        auto idxs = this->idx(name);
+        VectorXd units(idxs.size());
+        units.setOnes();
+
+        if (kw.second.get_type().is(py_int)   ||
+            kw.second.get_type().is(py_float) ||
+            kw.second.get_type().is(np_float) ||
+            kw.second.get_type().is(np_int)) {
+            double unit = kw.second.cast<double>();
+            units *= unit;
+        }
+        else if (
+            kw.second.get_type().is(np_array) ||
+            kw.second.get_type().is(py_list)) {
+
+            int lenvec = kw.second.attr("__len__")().cast<int>();
+
+            if (lenvec != idxs.size()) {
+                throw std::invalid_argument(fmt::format("Size of index group {0:} does not match units vector.", name));
+            }
+
+            for (int i = 0; i < lenvec; i++) {
+                auto elem = kw.second.attr("__getitem__")(py::int_(i)).get_type();
+                if (!(elem.is(py_float) || elem.is(py_int) || elem.is(np_int) || elem.is(np_float))) {
+                    py::print(py::str(elem));
+                    throw std::invalid_argument("Vectors and lists must only contain doubles or floats");
+                }
+                units[i]= kw.second.attr("__getitem__")(py::int_(i)).cast<double>();
+            }
+        }
+        else {
+            throw std::invalid_argument("Invalid unit type");
+        }
+
+        for (int i = 0; i < idxs.size(); i++) {
+            Units[idxs[i]] = units[i];
+        }
+    }
+
+    this->setUnits(Units);
 }
 
-int ASSET::ODEPhaseBase::addDeltaVarEqualCon(PhaseRegionFlags reg, int var, double value, double scale) {
-  auto args = Arguments<2>();
-  auto x0 = args.coeff<0>();
-  auto x1 = args.coeff<1>();
-
-  auto func = ((x1 - x0) - value) * scale;
-  VectorXi v(1);
-  v[0] = var;
-  return this->addEqualCon(reg, func, v);
+int ASSET::ODEPhaseBase::addBoundaryValue(RegionType reg, VarIndexType args, const std::variant<double, VectorXd>& value_t, ScaleType scale_t)
+{
+    Eigen::VectorXd value;
+    if (std::holds_alternative<double>(value_t)) {
+        value.resize(1);
+        value[0] = std::get<double>(value_t);
+    }
+    else if (std::holds_alternative<VectorXd>(value_t)) {
+        value = std::get<VectorXd>(value_t);
+    }
+    auto Func = Arguments<-1>(value.size()) - value;
+    return this->addEqualCon(reg,Func,args,scale_t);
 }
 
-Eigen::VectorXi ASSET::ODEPhaseBase::addBoundaryValues(PhaseRegionFlags reg,
-                                                       VectorXi args,
-                                                       const VectorXd& value) {
-  if (args.size() != value.size()) {
-    fmt::print(
-        fmt::fg(fmt::color::red),
-        "Transcription Error!!!\n"
-        "Size of boundary value arguments({0:}) and size of boundary value vector({1:}) do not match\n",
-        args.size(),
-        value.size());
-    throw std::invalid_argument("");
-  }
-  auto Args = Arguments<1>();
-  VectorXi fnums(args.size());
-  for (int i = 0; i < args.size(); i++) {
-    VectorXi atemp(1);
-    atemp[0] = args[i];
-    auto bv = Args - value[i];
-    fnums[i] = this->addEqualCon(StateConstraint(bv, reg, atemp));
-  }
-  return fnums;
+int ASSET::ODEPhaseBase::addDeltaVarEqualCon(VarIndexType var, double value, double scale, ScaleType scale_t)
+{
+    auto args = Arguments<2>();
+    auto x0 = args.coeff<0>();
+    auto x1 = args.coeff<1>();
+    auto func = ((x1 - x0) - value) * scale;
+    return this->addEqualCon(PhaseRegionFlags::FrontandBack, func, var,scale_t);
 }
 
-int ASSET::ODEPhaseBase::addValueLock(PhaseRegionFlags reg, VectorXi args) {
-  return this->addEqualCon(StateConstraint(LockArgs<-1>(args.size()), reg, args));
-  ;
+int ASSET::ODEPhaseBase::addValueLock(RegionType reg, VarIndexType args, ScaleType scale_t)
+{
+    int argsize = this->getXtUPVars(getRegion(reg), args).size();
+    return this->addEqualCon(reg,LockArgs<-1>(argsize), args,scale_t);
 }
 
-int ASSET::ODEPhaseBase::addBoundaryValue(PhaseRegionFlags reg, VectorXi args, const VectorXd& value) {
-  if (args.size() != value.size()) {
-    fmt::print(
-        fmt::fg(fmt::color::red),
-        "Transcription Error!!!\n"
-        "Size of boundary value arguments({0:}) and size of boundary value vector({1:}) do not match\n",
-        args.size(),
-        value.size());
-    throw std::invalid_argument("");
-  }
-  auto Func = Arguments<-1>(args.size()) - value;
-  return this->addEqualCon(StateConstraint(Func, reg, args));
+int ASSET::ODEPhaseBase::addPeriodicityCon(VarIndexType args, ScaleType scale_t)
+{
+    int argsize = this->getXtUPVars(PhaseRegionFlags::FrontandBack, args).size();
+    auto X = Arguments<-1>(argsize * 2);
+    auto Func = X.head(argsize) - X.tail(argsize);
+    return this->addEqualCon(PhaseRegionFlags::FrontandBack,Func, args,scale_t);
 }
+/////////////////////////////////////////////////////////////////////////////////////////////
 
-int ASSET::ODEPhaseBase::addPeriodicityCon(VectorXi args) {
-  auto X = Arguments<-1>(args.size() * 2);
-  auto Func = X.head(args.size()) - X.tail(args.size());
-  return this->addEqualCon(StateConstraint(Func, PhaseRegionFlags::FrontandBack, args));
+int ASSET::ODEPhaseBase::addLUVarBound(RegionType reg, VarIndexType var, double lowerbound, double upperbound, double lbscale, double ubscale, ScaleType scale_t)
+{
+    if (lowerbound > upperbound) {
+        fmt::print(fmt::fg(fmt::color::red),
+            "Transcription Error!!!\n"
+            "Lower-bound({0:.3e}) greater than Upper-bound({1:.3e}) \n",
+            lowerbound,
+            upperbound);
+        throw std::invalid_argument("");
+    }
+    check_lbscale(lbscale);
+    check_ubscale(ubscale);
+
+    auto x = Arguments<1>();
+    auto lowbound = (lowerbound - x) * lbscale;
+    auto ubound = (x - upperbound) * ubscale;
+    auto lubound = StackedOutputs{ lowbound, ubound };
+
+    return this->addInequalCon(reg,lubound, var,scale_t);
+
 }
-
 int ASSET::ODEPhaseBase::addLUVarBound(
     PhaseRegionFlags reg, int var, double lowerbound, double upperbound, double lbscale, double ubscale) {
 
 
-  if (lowerbound > upperbound) {
-    fmt::print(fmt::fg(fmt::color::red),
-               "Transcription Error!!!\n"
-               "Lower-bound({0:.3e}) greater than Upper-bound({1:.3e}) \n",
-               lowerbound,
-               upperbound);
-    throw std::invalid_argument("");
-  }
-  check_lbscale(lbscale);
-  check_ubscale(ubscale);
+    if (lowerbound > upperbound) {
+        fmt::print(fmt::fg(fmt::color::red),
+            "Transcription Error!!!\n"
+            "Lower-bound({0:.3e}) greater than Upper-bound({1:.3e}) \n",
+            lowerbound,
+            upperbound);
+        throw std::invalid_argument("");
+    }
+    check_lbscale(lbscale);
+    check_ubscale(ubscale);
 
-  auto x = Arguments<1>();
-  auto lowbound = (lowerbound - x) * lbscale;
-  auto ubound = (x - upperbound) * ubscale;
-
-  auto lubound = StackedOutputs {lowbound, ubound};
-  VectorXi v(1);
-  v[0] = var;
-  return this->addInequalCon(StateConstraint(lubound, reg, v));
-}
-
-int ASSET::ODEPhaseBase::addLowerVarBound(PhaseRegionFlags reg, int var, double lowerbound, double lbscale) {
-
-
-  check_lbscale(lbscale);
-
-  auto x = Arguments<1>();
-  auto lbound = (lowerbound - x) * lbscale;
-  VectorXi v(1);
-  v[0] = var;
-
-  return this->addInequalCon(StateConstraint(lbound, reg, v));
-}
-
-int ASSET::ODEPhaseBase::addUpperVarBound(PhaseRegionFlags reg, int var, double upperbound, double ubscale) {
-
-
-  check_ubscale(ubscale);
-
-
-  auto x = Arguments<1>();
-  auto ubound = (x - upperbound) * ubscale;
-  VectorXi v(1);
-  v[0] = var;
-  return this->addInequalCon(StateConstraint(ubound, reg, v));
-}
-
-int ASSET::ODEPhaseBase::addLUNormBound(PhaseRegionFlags reg,
-                                        VectorXi vars,
-                                        double lowerbound,
-                                        double upperbound,
-                                        double lbscale,
-                                        double ubscale) {
-
-
-  if (lowerbound > upperbound) {
-    fmt::print(fmt::fg(fmt::color::red),
-               "Transcription Error!!!\n"
-               "Lower-bound({0:.3e}) greater than Upper-bound({1:.3e}) \n",
-               lowerbound,
-               upperbound);
-    throw std::invalid_argument("");
-  }
-  check_lbscale(lbscale);
-  check_ubscale(ubscale);
-
-  int size = vars.size();
-  auto impl = [&](auto sz) {
     auto x = Arguments<1>();
-    auto lubound = StackedOutputs {(lowerbound - x) * lbscale, (x - upperbound) * ubscale};
-    auto normfun = lubound.eval(Arguments<sz.value>(size).norm());
-    return this->addInequalCon(StateConstraint(normfun, reg, vars));
-  };
+    auto lowbound = (lowerbound - x) * lbscale;
+    auto ubound = (x - upperbound) * ubscale;
 
-  switch (size) {
-
-    case 2:
-      return impl(int_const<2>());
-    case 3:
-      return impl(int_const<3>());
-    case 4:
-      return impl(int_const<4>());
-    default:
-      return impl(int_const<-1>());
-  }
-  return 0;
+    auto lubound = StackedOutputs{ lowbound, ubound };
+    VectorXi v(1);
+    v[0] = var;
+    return this->addInequalCon(StateConstraint(lubound, reg, v));
 }
 
-int ASSET::ODEPhaseBase::addLowerNormBound(PhaseRegionFlags reg,
-                                           VectorXi vars,
-                                           double lowerbound,
-                                           double lbscale) {
 
-
-  check_lbscale(lbscale);
-
-  int size = vars.size();
-  auto impl = [&](auto sz) {
+int ASSET::ODEPhaseBase::addLowerVarBound(RegionType reg, VarIndexType var, double lowerbound, double lbscale, ScaleType scale_t)
+{
+    check_lbscale(lbscale);
     auto x = Arguments<1>();
-    auto normfun = (lowerbound - Arguments<sz.value>(size).norm()) * lbscale;
-    return this->addInequalCon(StateConstraint(normfun, reg, vars));
-  };
-  switch (size) {
-    case 2:
-      return impl(int_const<2>());
-    case 3:
-      return impl(int_const<3>());
-    case 4:
-      return impl(int_const<4>());
-    default:
-      return impl(int_const<-1>());
-  }
+    auto lbound = (lowerbound - x) * lbscale;
+    
+    return this->addInequalCon(reg,lbound, var, scale_t);
 }
 
-int ASSET::ODEPhaseBase::addUpperNormBound(PhaseRegionFlags reg,
-                                           VectorXi vars,
-                                           double upperbound,
-                                           double ubscale) {
-
-
-  check_ubscale(ubscale);
-
-
-  int size = vars.size();
-  auto impl = [&](auto sz) {
+int ASSET::ODEPhaseBase::addUpperVarBound(RegionType reg, VarIndexType var, double upperbound, double ubscale, ScaleType scale_t)
+{
+    check_ubscale(ubscale);
     auto x = Arguments<1>();
-    auto normfun = (Arguments<sz.value>(size).norm() - upperbound) * ubscale;
-    return this->addInequalCon(StateConstraint(normfun, reg, vars));
-  };
-  switch (size) {
-    case 2:
-      return impl(int_const<2>());
-    case 3:
-      return impl(int_const<3>());
-    case 4:
-      return impl(int_const<4>());
-    default:
-      return impl(int_const<-1>());
-  }
+    auto ubound = (x - upperbound) * ubscale;
+    return this->addInequalCon(reg, ubound, var, scale_t);
 }
 
+int ASSET::ODEPhaseBase::addLUFuncBound(RegionType reg, ScalarFunctionalX func, VarIndexType XtUPvars,
+    VarIndexType OPvars,
+    VarIndexType SPvars,
+    double lowerbound, double upperbound, double lbscale, double ubscale, ScaleType scale_t)
+{
 
-int ASSET::ODEPhaseBase::addLUSquaredNormBound(PhaseRegionFlags reg,
-                                               VectorXi vars,
-                                               double lowerbound,
-                                               double upperbound,
-                                               double lbscale,
-                                               double ubscale) {
-
-
-  if (lowerbound > upperbound) {
-    fmt::print(fmt::fg(fmt::color::red),
-               "Transcription Error!!!\n"
-               "Lower-bound({0:.3e}) greater than Upper-bound({1:.3e}) \n",
-               lowerbound,
-               upperbound);
-    throw std::invalid_argument("");
-  }
-  check_lbscale(lbscale);
-  check_ubscale(ubscale);
-
-  int size = vars.size();
-  auto impl = [&](auto sz) {
+    if (lowerbound > upperbound) {
+        fmt::print(fmt::fg(fmt::color::red),
+            "Transcription Error!!!\n"
+            "Lower-bound({0:.3e}) greater than Upper-bound({1:.3e}) \n",
+            lowerbound,
+            upperbound);
+        throw std::invalid_argument("");
+    }
+    check_lbscale(lbscale);
+    check_ubscale(ubscale);
     auto x = Arguments<1>();
-    auto lubound = StackedOutputs {(lowerbound - x) * lbscale, (x - upperbound) * ubscale};
-    auto normfun = lubound.eval(Arguments<sz.value>(size).squared_norm());
-    return this->addInequalCon(StateConstraint(normfun, reg, vars));
-  };
+    auto lubound = StackedOutputs{ (lowerbound - x) * lbscale, (x - upperbound) * ubscale };
+    auto lufun = lubound.eval(func);
+    return this->addInequalCon(reg,lufun, XtUPvars,OPvars,SPvars,scale_t);
+}
 
-  switch (size) {
+int ASSET::ODEPhaseBase::addLowerFuncBound(RegionType reg, ScalarFunctionalX func, 
+    VarIndexType XtUPvars,
+    VarIndexType OPvars, 
+    VarIndexType SPvars, 
+    double lowerbound, double lbscale, ScaleType scale_t)
+{
+    check_lbscale(lbscale);
 
+    Vector1<double> rhs;
+    rhs[0] = lowerbound;
+    auto lbfun = ((-1.0 * func) + rhs) * lbscale;
+
+    return this->addInequalCon(reg, lbfun, XtUPvars, OPvars, SPvars, scale_t);
+}
+
+int ASSET::ODEPhaseBase::addUpperFuncBound(RegionType reg, ScalarFunctionalX func, 
+    VarIndexType XtUPvars, 
+    VarIndexType OPvars, 
+    VarIndexType SPvars, 
+    double upperbound, double ubscale, ScaleType scale_t)
+{
+
+    check_ubscale(ubscale);
+
+    Vector1<double> rhs;
+    rhs[0] = -upperbound;
+    auto ubfun = ((func)+rhs) * ubscale;
+    return this->addInequalCon(reg, ubfun, XtUPvars, OPvars, SPvars, scale_t);
+}
+
+int ASSET::ODEPhaseBase::addLUNormBound(RegionType reg, VarIndexType XtUPvars,
+    double lowerbound, double upperbound, double lbscale, double ubscale, ScaleType scale_t)
+{
+    if (lowerbound > upperbound) {
+        fmt::print(fmt::fg(fmt::color::red),
+            "Transcription Error!!!\n"
+            "Lower-bound({0:.3e}) greater than Upper-bound({1:.3e}) \n",
+            lowerbound,
+            upperbound);
+        throw std::invalid_argument("");
+    }
+    check_lbscale(lbscale);
+    check_ubscale(ubscale);
+
+    int size = this->getXtUPVars(getRegion(reg), XtUPvars).size();
+    
+    auto impl = [&](auto sz) {
+        auto x = Arguments<1>();
+        auto lubound = StackedOutputs{ (lowerbound - x) * lbscale, (x - upperbound) * ubscale };
+        auto normfun = lubound.eval(Arguments<sz.value>(size).norm());
+        return this->addInequalCon(reg,normfun, XtUPvars,scale_t);
+    };
+
+    switch (size) {
     case 2:
-      return impl(int_const<2>());
+        return impl(int_const<2>());
     case 3:
-      return impl(int_const<3>());
+        return impl(int_const<3>());
     case 4:
-      return impl(int_const<4>());
+        return impl(int_const<4>());
     default:
-      return impl(int_const<-1>());
-  }
-  return 0;
+        return impl(int_const<-1>());
+    }
+    return 0;
 }
 
-int ASSET::ODEPhaseBase::addLowerSquaredNormBound(PhaseRegionFlags reg,
-                                                  VectorXi vars,
-                                                  double lowerbound,
-                                                  double lbscale) {
+int ASSET::ODEPhaseBase::addLUSquaredNormBound(RegionType reg, VarIndexType XtUPvars,
+    double lowerbound, double upperbound, double lbscale, double ubscale, ScaleType scale_t)
+{
+    if (lowerbound > upperbound) {
+        fmt::print(fmt::fg(fmt::color::red),
+            "Transcription Error!!!\n"
+            "Lower-bound({0:.3e}) greater than Upper-bound({1:.3e}) \n",
+            lowerbound,
+            upperbound);
+        throw std::invalid_argument("");
+    }
+    check_lbscale(lbscale);
+    check_ubscale(ubscale);
 
+    int size = this->getXtUPVars(getRegion(reg), XtUPvars).size();
 
-  check_lbscale(lbscale);
+    auto impl = [&](auto sz) {
+        auto x = Arguments<1>();
+        auto lubound = StackedOutputs{ (lowerbound - x) * lbscale, (x - upperbound) * ubscale };
+        auto normfun = lubound.eval(Arguments<sz.value>(size).squared_norm());
+        return this->addInequalCon(reg, normfun, XtUPvars, scale_t);
+    };
 
-  int size = vars.size();
-  auto impl = [&](auto sz) {
-    auto x = Arguments<1>();
-    auto normfun = (lowerbound - Arguments<sz.value>(size).squared_norm()) * lbscale;
-    return this->addInequalCon(StateConstraint(normfun, reg, vars));
-  };
-  switch (size) {
+    switch (size) {
     case 2:
-      return impl(int_const<2>());
+        return impl(int_const<2>());
     case 3:
-      return impl(int_const<3>());
+        return impl(int_const<3>());
     case 4:
-      return impl(int_const<4>());
+        return impl(int_const<4>());
     default:
-      return impl(int_const<-1>());
-  }
-  return 0;
+        return impl(int_const<-1>());
+    }
+    return 0;
 }
 
-int ASSET::ODEPhaseBase::addUpperSquaredNormBound(PhaseRegionFlags reg,
-                                                  VectorXi vars,
-                                                  double upperbound,
-                                                  double ubscale) {
+int ASSET::ODEPhaseBase::addLowerNormBound(RegionType reg, VarIndexType XtUPvars, double lowerbound, double lbscale, ScaleType scale_t)
+{
+    check_lbscale(lbscale);
 
-
-  check_ubscale(ubscale);
-
-
-  int size = vars.size();
-  auto impl = [&](auto sz) {
-    auto x = Arguments<1>();
-    auto normfun = (Arguments<sz.value>(size).squared_norm() - upperbound) * ubscale;
-    return this->addInequalCon(StateConstraint(normfun, reg, vars));
-  };
-  switch (size) {
+    int size = this->getXtUPVars(getRegion(reg), XtUPvars).size();
+    auto impl = [&](auto sz) {
+        auto x = Arguments<1>();
+        auto normfun = (lowerbound - Arguments<sz.value>(size).norm()) * lbscale;
+        return this->addInequalCon(reg,normfun, XtUPvars,scale_t);
+    };
+    switch (size) {
     case 2:
-      return impl(int_const<2>());
+        return impl(int_const<2>());
     case 3:
-      return impl(int_const<3>());
+        return impl(int_const<3>());
     case 4:
-      return impl(int_const<4>());
+        return impl(int_const<4>());
     default:
-      return impl(int_const<-1>());
-  }
-  return 0;
+        return impl(int_const<-1>());
+    }
+}
+
+int ASSET::ODEPhaseBase::addLowerSquaredNormBound(RegionType reg, VarIndexType XtUPvars, double lowerbound, double lbscale, ScaleType scale_t)
+{
+    check_lbscale(lbscale);
+
+    int size = this->getXtUPVars(getRegion(reg), XtUPvars).size();
+    auto impl = [&](auto sz) {
+        auto x = Arguments<1>();
+        auto normfun = (lowerbound - Arguments<sz.value>(size).squared_norm()) * lbscale;
+        return this->addInequalCon(reg, normfun, XtUPvars, scale_t);
+    };
+    switch (size) {
+    case 2:
+        return impl(int_const<2>());
+    case 3:
+        return impl(int_const<3>());
+    case 4:
+        return impl(int_const<4>());
+    default:
+        return impl(int_const<-1>());
+    }
+}
+
+int ASSET::ODEPhaseBase::addUpperNormBound(RegionType reg, VarIndexType XtUPvars, double upperbound, double ubscale, ScaleType scale_t)
+{
+    check_ubscale(ubscale);
+
+    int size = this->getXtUPVars(getRegion(reg), XtUPvars).size();
+    auto impl = [&](auto sz) {
+        auto x = Arguments<1>();
+        auto normfun = (Arguments<sz.value>(size).norm() - upperbound) * ubscale;
+        return this->addInequalCon(reg, normfun, XtUPvars, scale_t);
+    };
+    switch (size) {
+    case 2:
+        return impl(int_const<2>());
+    case 3:
+        return impl(int_const<3>());
+    case 4:
+        return impl(int_const<4>());
+    default:
+        return impl(int_const<-1>());
+    }
+    return 0;
+}
+
+int ASSET::ODEPhaseBase::addUpperSquaredNormBound(RegionType reg, VarIndexType XtUPvars, double upperbound, double ubscale, ScaleType scale_t)
+{
+    check_ubscale(ubscale);
+
+    int size = this->getXtUPVars(getRegion(reg), XtUPvars).size();
+    auto impl = [&](auto sz) {
+        auto x = Arguments<1>();
+        auto normfun = (Arguments<sz.value>(size).squared_norm() - upperbound) * ubscale;
+        return this->addInequalCon(reg, normfun, XtUPvars, scale_t);
+    };
+    switch (size) {
+    case 2:
+        return impl(int_const<2>());
+    case 3:
+        return impl(int_const<3>());
+    case 4:
+        return impl(int_const<4>());
+    default:
+        return impl(int_const<-1>());
+    }
+    return 0;
+}
+
+int ASSET::ODEPhaseBase::addLowerDeltaVarBound(RegionType reg, VarIndexType var, double lowerbound, double lbscale, ScaleType scale_t)
+{
+    check_lbscale(lbscale);
+
+    auto args = Arguments<2>();
+    auto x0 = args.coeff<0>();
+    auto x1 = args.coeff<1>();
+    auto func = (lowerbound - (x1 - x0)) * lbscale;
+   
+    return this->addInequalCon(reg,func,var,scale_t);
+}
+
+int ASSET::ODEPhaseBase::addUpperDeltaVarBound(RegionType reg, VarIndexType var, double upperbound, double ubscale, ScaleType scale_t)
+{
+    check_ubscale(ubscale);
+    auto args = Arguments<2>();
+    auto x0 = args.coeff<0>();
+    auto x1 = args.coeff<1>();
+    auto func = ((x1 - x0) - upperbound) * ubscale;
+    return this->addInequalCon(reg, func, var, scale_t);
 }
 
 
-int ASSET::ODEPhaseBase::addLowerFuncBound(
-    PhaseRegionFlags reg, ScalarFunctionalX func, VectorXi vars, double lowerbound, double lbscale) {
 
-  check_lbscale(lbscale);
+//////////////////////////////
 
-  Vector1<double> rhs;
-  rhs[0] = lowerbound;
-  auto lbfun = ((-1.0 * func) + rhs) * lbscale;
-  return this->addInequalCon(StateConstraint(lbfun, reg, vars));
-}
-int ASSET::ODEPhaseBase::addUpperFuncBound(
-    PhaseRegionFlags reg, ScalarFunctionalX func, VectorXi vars, double upperbound, double ubscale) {
-
-
-  check_ubscale(ubscale);
-
-
-  Vector1<double> rhs;
-  rhs[0] = -upperbound;
-  auto lbfun = ((func) + rhs) * ubscale;
-
-  return this->addInequalCon(StateConstraint(lbfun, reg, vars));
-}
-int ASSET::ODEPhaseBase::addLUFuncBound(PhaseRegionFlags reg,
-                                        ScalarFunctionalX func,
-                                        VectorXi vars,
-                                        double lowerbound,
-                                        double upperbound,
-                                        double lbscale,
-                                        double ubscale) {
-  if (lowerbound > upperbound) {
-    fmt::print(fmt::fg(fmt::color::red),
-               "Transcription Error!!!\n"
-               "Lower-bound({0:.3e}) greater than Upper-bound({1:.3e}) \n",
-               lowerbound,
-               upperbound);
-    throw std::invalid_argument("");
-  }
-  check_lbscale(lbscale);
-  check_ubscale(ubscale);
-  auto x = Arguments<1>();
-  auto lubound = StackedOutputs {(lowerbound - x) * lbscale, (x - upperbound) * ubscale};
-  auto lufun = lubound.eval(func);
-  return this->addInequalCon(StateConstraint(lufun, reg, vars));
-}
-////////////////////////////////////////////////////////////
-int ASSET::ODEPhaseBase::addLowerDeltaVarBound(PhaseRegionFlags reg,
-                                               int var,
-                                               double lowerbound,
-                                               double lbscale) {
-
-  check_lbscale(lbscale);
-
-
-  auto args = Arguments<2>();
-  auto x0 = args.coeff<0>();
-  auto x1 = args.coeff<1>();
-  auto func = (lowerbound - (x1 - x0)) * lbscale;
-  VectorXi v(1);
-  v[0] = var;
-  return this->addInequalCon(reg, func, v);
+int ASSET::ODEPhaseBase::addValueObjective(RegionType reg, VarIndexType var, double scale, ScaleType scale_t)
+{
+    auto obj = Arguments<1>() * scale;
+    return this->addStateObjective(reg, obj, var, scale_t);
 }
 
-int ASSET::ODEPhaseBase::addUpperDeltaVarBound(PhaseRegionFlags reg,
-                                               int var,
-                                               double upperbound,
-                                               double ubscale) {
-
-
-  check_ubscale(ubscale);
-
-  auto args = Arguments<2>();
-  auto x0 = args.coeff<0>();
-  auto x1 = args.coeff<1>();
-  auto func = ((x1 - x0) - upperbound) * ubscale;
-  VectorXi v(1);
-  v[0] = var;
-  return this->addInequalCon(reg, func, v);
+int ASSET::ODEPhaseBase::addDeltaVarObjective(VarIndexType var, double scale, ScaleType scale_t)
+{
+    auto args = Arguments<2>();
+    auto x0 = args.coeff<0>();
+    auto x1 = args.coeff<1>();
+    auto func = ((x1 - x0)) * scale;
+    
+    return this->addStateObjective(PhaseRegionFlags::FrontandBack, func, var,scale_t);
 }
 
-int ASSET::ODEPhaseBase::addValueObjective(PhaseRegionFlags reg, int var, double scale) {
-  auto obj = Arguments<1>() * scale;
-  VectorXi v(1);
-  v[0] = var;
-  return this->addStateObjective(StateObjective(obj, reg, v));
-}
 
-int ASSET::ODEPhaseBase::addDeltaVarObjective(int var, double scale) {
-  auto args = Arguments<2>();
-  auto x0 = args.coeff<0>();
-  auto x1 = args.coeff<1>();
-  auto func = ((x1 - x0)) * scale;
-  VectorXi v(1);
-  v[0] = var;
-  return this->addStateObjective(PhaseRegionFlags::FrontandBack, func, v);
-}
 
 std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::returnCostateTraj() const {
   if (!this->PostOptInfoValid) {
@@ -613,6 +619,56 @@ void ASSET::ODEPhaseBase::setTraj(const std::vector<Eigen::VectorXd>& mesh,
   this->invalidatePostOptInfo();
 }
 
+void ASSET::ODEPhaseBase::setTraj(const std::vector<Eigen::VectorXd>& mesh)
+{
+    /// Sets phase to have same number of defects and spacing as input trajectory
+
+    int numdefects = (mesh.size() - 1) / (this->numTranCardStates - 1);
+    int numrem = (mesh.size() - 1) % (this->numTranCardStates - 1);
+
+    if (numrem != 0) {
+        throw std::invalid_argument("Number of states in mesh inconsistent with transcription type.");
+    }
+    if (mesh.size() == 0) {
+        throw std::invalid_argument("Input trajectory is empty");
+    }
+    int msize = mesh[0].size();
+    if (msize != this->Table.XtUVars) {
+        std::cout << "User Input Error in function setInitTraj for ODE:" << this->Table.ode.name() << std::endl;
+        std::cout << " Dimension of Input States(" << msize << ") does not match expected dimensions of the ODE("
+            << this->Table.XtUVars << ")" << std::endl;
+        throw std::invalid_argument("");
+    }
+    for (auto& X : mesh) {
+        if (X.hasNaN()) {
+            throw std::invalid_argument("NaN detected in State Vector in ODEPhaseBase::setTraj");
+        }
+    }
+
+    Eigen::VectorXd DBS;
+
+
+    DBS.resize(numdefects + 1);
+    DBS[0] = 0;
+
+    double t0 = mesh.front()[this->TVar()];
+    double tf = mesh.back()[this->TVar()];
+
+
+    for (int i = 0; i < numdefects; i++) {
+        int elem = (this->numTranCardStates - 1) * (i + 1);
+        double ti = mesh[elem][this->TVar()];
+        DBS[i + 1] = (ti - t0) / (tf - t0);
+    }
+
+    Eigen::VectorXi DPB;
+
+    DPB.resize(numdefects);
+    DPB.setOnes();
+
+    this->setTraj(mesh, DBS, DPB, false);
+}
+
 
 void ASSET::ODEPhaseBase::refineTrajManual(VectorXd DBS, VectorXi DPB) {
   if ((DBS.size() - 1) != DPB.size()) {
@@ -736,16 +792,27 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
     ObjectiveInterface obj;
     PhaseRegionFlags PhaseReg = PhaseRegionFlags::PairWisePath;
 
+    auto Func = ob.Func;
+    if (this->AutoScaling) {
+        VectorXd input_scales = this->get_input_scale(ob.RegionFlag, ob.XtUVars, ob.OPVars, ob.SPVars);
+        VectorXd output_scales(Func.ORows());
+        output_scales.setOnes(); 
+        output_scales = ob.OutputScales;
+
+        Func = IOScaled<decltype(Func)>(ob.Func, input_scales, output_scales);
+    }
+
+
     if (this->IntegralMode == IntegralModes::BaseIntegral
         && ((this->TranscriptionMode == LGL5) || (this->TranscriptionMode == LGL7))) {
       if (this->TranscriptionMode == LGL5) {
-        obj = SwitchC(3, xp, sop, ob.Func, xp, sop);
+        obj = SwitchC(3, xp, sop, Func, xp, sop);
       } else if (this->TranscriptionMode == LGL7) {
-        obj = SwitchC(4, xp, sop, ob.Func, xp, sop);
+        obj = SwitchC(4, xp, sop, Func, xp, sop);
       }
       PhaseReg = PhaseRegionFlags::DefectPath;
     } else {
-      obj = SwitchC(2, xp, sop, ob.Func, xp, sop);
+      obj = SwitchC(2, xp, sop, Func, xp, sop);
       if (this->TranscriptionMode == LGL3 || this->TranscriptionMode == Trapezoidal
           || this->TranscriptionMode == CentralShooting) {
         PhaseReg = PhaseRegionFlags::DefectPath;
@@ -775,23 +842,43 @@ void ASSET::ODEPhaseBase::transcribe_integrals() {
     ObjectiveInterface obj;
     PhaseRegionFlags PhaseReg = PhaseRegionFlags::PairWisePath;
 
+    auto Func = ob.Func;
+    double AccScale = 1.0;
+
+    if (this->AutoScaling) {
+        VectorXd input_scales = this->get_input_scale(ob.RegionFlag, ob.XtUVars, ob.OPVars, ob.SPVars);
+        VectorXd output_scales(Func.ORows());
+        output_scales.setOnes(); 
+        output_scales = ob.OutputScales;
+
+        Func = IOScaled<decltype(Func)>(ob.Func, input_scales, output_scales);
+
+
+        double pscale = this->SPUnits[ob.EXTVars[0]];
+
+        AccScale = pscale*output_scales[0] / (this->XtUPUnits[this->TVar()]);
+
+    }
+
+
     if (this->IntegralMode == IntegralModes::BaseIntegral
         && ((this->TranscriptionMode == LGL5) || (this->TranscriptionMode == LGL7))) {
       if (this->TranscriptionMode == LGL5) {
-        obj = SwitchC(3, xp, sop, ob.Func, xp, sop);
+        obj = SwitchC(3, xp, sop, Func, xp, sop);
       } else if (this->TranscriptionMode == LGL7) {
-        obj = SwitchC(4, xp, sop, ob.Func, xp, sop);
+        obj = SwitchC(4, xp, sop, Func, xp, sop);
       }
       PhaseReg = PhaseRegionFlags::DefectPath;
     } else {
-      obj = SwitchC(2, xp, sop, ob.Func, xp, sop);
+      obj = SwitchC(2, xp, sop, Func, xp, sop);
       PhaseReg = PhaseRegionFlags::PairWisePath;
     }
 
     ThreadingFlags ThreadMode =
         ob.Func.thread_safe() ? ThreadingFlags::ByApplication : ThreadingFlags::MainThread;
 
-    auto AccFunc = Arguments<1>() * -1.0;
+    auto AccFunc = Arguments<1>() * -AccScale;
+
 
     int Gindex = this->indexer.addAccumulation(
         obj, PhaseReg, xtrap, ob.OPVars, ob.SPVars, AccFunc, ob.EXTVars, ThreadMode);
@@ -807,8 +894,19 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
         eq.Func.thread_safe() ? ThreadingFlags::ByApplication : ThreadingFlags::MainThread;
     if (eq.RegionFlag == PhaseRegionFlags::Path || eq.RegionFlag == PhaseRegionFlags::PairWisePath)
       eq.Func.enable_vectorization(this->EnableVectorization);
+
+
+    auto Func = eq.Func;
+    if (this->AutoScaling) {
+        VectorXd input_scales = this->get_input_scale(eq.RegionFlag, eq.XtUVars, eq.OPVars, eq.SPVars);
+        VectorXd output_scales(Func.ORows());
+        output_scales.setOnes(); 
+        output_scales = eq.OutputScales;
+        Func = IOScaled<decltype(Func)>(eq.Func, input_scales, output_scales);
+    }
+
     int Gindex =
-        this->indexer.addEquality(eq.Func, eq.RegionFlag, eq.XtUVars, eq.OPVars, eq.SPVars, ThreadMode);
+        this->indexer.addEquality(Func, eq.RegionFlag, eq.XtUVars, eq.OPVars, eq.SPVars, ThreadMode);
 
     int PLindex = Gindex - this->indexer.StartEq;
     eq.GlobalIndex = Gindex;
@@ -822,8 +920,18 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
       iq.Func.enable_vectorization(this->EnableVectorization);
     }
 
+    auto Func = iq.Func;
+    if (this->AutoScaling) {
+        VectorXd input_scales = this->get_input_scale(iq.RegionFlag, iq.XtUVars, iq.OPVars, iq.SPVars);
+        VectorXd output_scales(Func.ORows());
+        output_scales.setOnes(); 
+        output_scales = iq.OutputScales;
+
+        Func = IOScaled<decltype(Func)>(iq.Func, input_scales, output_scales);
+    }
+
     int Gindex =
-        this->indexer.addInequality(iq.Func, iq.RegionFlag, iq.XtUVars, iq.OPVars, iq.SPVars, ThreadMode);
+        this->indexer.addInequality(Func, iq.RegionFlag, iq.XtUVars, iq.OPVars, iq.SPVars, ThreadMode);
     int PLindex = Gindex - this->indexer.StartIq;
     iq.GlobalIndex = Gindex;
     iq.PhaseLocalIndex = PLindex;
@@ -833,8 +941,19 @@ void ASSET::ODEPhaseBase::transcribe_basic_funcs() {
         ob.Func.thread_safe() ? ThreadingFlags::ByApplication : ThreadingFlags::MainThread;
     if (ob.RegionFlag == PhaseRegionFlags::Path || ob.RegionFlag == PhaseRegionFlags::PairWisePath)
       ob.Func.enable_vectorization(this->EnableVectorization);
+
+    auto Func = ob.Func;
+    if (this->AutoScaling) {
+        VectorXd input_scales = this->get_input_scale(ob.RegionFlag, ob.XtUVars, ob.OPVars, ob.SPVars);
+        VectorXd output_scales(Func.ORows());
+        output_scales.setOnes(); 
+        output_scales = ob.OutputScales;
+
+        Func = IOScaled<decltype(Func)>(ob.Func, input_scales, output_scales);
+    }
+
     int Gindex =
-        this->indexer.addObjective(ob.Func, ob.RegionFlag, ob.XtUVars, ob.OPVars, ob.SPVars, ThreadMode);
+        this->indexer.addObjective(Func, ob.RegionFlag, ob.XtUVars, ob.OPVars, ob.SPVars, ThreadMode);
     int PLindex = Gindex - this->indexer.StartObj;
     ob.GlobalIndex = Gindex;
     ob.PhaseLocalIndex = PLindex;
@@ -942,6 +1061,13 @@ void ASSET::ODEPhaseBase::transcribe_control_funcs() {
 }
 
 void ASSET::ODEPhaseBase::check_functions(int pnum) {
+
+    /*
+   Loops through all user defined functions and checks that they do not
+   reference non-existent variables. Should be run prior to any transcribing any
+   problem functions.
+   */
+
   auto CheckFun = [&](const std::string& type, auto& func) {
     if (func.XtUVars.size() > 0) {
       if (func.XtUVars.maxCoeff() >= this->XtUPVars() || func.XtUVars.minCoeff() < 0) {
@@ -1022,13 +1148,225 @@ void ASSET::ODEPhaseBase::check_functions(int pnum) {
     CheckFun(sobj, f);
 }
 
+Eigen::VectorXd ASSET::ODEPhaseBase::get_input_scale(PhaseRegionFlags flag, VectorXi XtUV, VectorXi OPV, VectorXi SPV) const
+{
+
+    int nloops;
+    switch (flag) {
+    case Front:
+    case Back:
+    case Path:
+    case Params:
+    case ODEParams:
+    case StaticParams:
+    case InnerPath: {
+        nloops = 1;
+        break;
+    }
+    case FrontandBack:
+    case BackandFront:
+    case PairWisePath: {
+        nloops = 2;
+        break;
+    }
+    default: {
+        throw std::invalid_argument("Cannot scale this phase region");
+        break;
+    }
+    }
+
+
+    int isize = XtUV.size() * nloops + OPV.size() + SPV.size();
+    VectorXd scales(isize);
+
+    int next = 0;
+    for (int n = 0; n < nloops; n++) {
+        for (int i = 0; i < XtUV.size(); i++) {
+            scales[next] = this->XtUPUnits[XtUV[i]];
+            next++;
+        }
+    }
+    for (int i = 0; i < OPV.size(); i++) {
+        scales[next] = this->XtUPUnits[OPV[i] + this->XtUVars()];
+        next++;
+    }
+    for (int i = 0; i < SPV.size(); i++) {
+        scales[next] = this->SPUnits[SPV[i]];
+        next++;
+    }
+
+    return scales;
+}
+
+std::vector<Eigen::VectorXd> ASSET::ODEPhaseBase::get_test_inputs(PhaseRegionFlags flag, VectorXi XtUV, VectorXi OPV, VectorXi SPV) const
+{
+
+    std::vector<std::vector<int>> test_states;
+
+    int nloops = 0;
+    switch (flag) {
+    case Front: {
+        test_states.push_back({ 0 });
+        break;
+    }
+    case Back: {
+        test_states.push_back({ int(this->ActiveTraj.size() - 1) });
+        break;
+    }
+    case Params: {
+        test_states.push_back({ 0 });
+        break;
+    }
+    case ODEParams: {
+        test_states.push_back({ 0 });
+        break;
+    }
+    case StaticParams: {
+        test_states.push_back({ 0 });
+        break;
+    }
+    case Path: {
+        for (int i = 0; i < this->ActiveTraj.size(); i++)
+            test_states.push_back({ i });
+        break;
+    }
+    case InnerPath: {
+        for (int i = 1; i < this->ActiveTraj.size() - 1; i++)
+            test_states.push_back({ i });
+        break;
+    }
+    case FrontandBack: {
+        test_states.push_back({ 0, int(this->ActiveTraj.size() - 1) });
+        break;
+    }
+    case BackandFront: {
+        test_states.push_back({ int(this->ActiveTraj.size() - 1),0 });
+        break;
+    }
+    case PairWisePath: {
+        for (int i = 0; i < this->ActiveTraj.size() - 1; i++)
+            test_states.push_back({ i,i + 1 });
+        break;
+    }
+    default: {
+        throw std::invalid_argument("Cannot scale this phase region");
+        break;
+    }
+    }
+
+
+    int isize = XtUV.size() * test_states[0].size() + OPV.size() + SPV.size();
+
+
+
+    std::vector<Eigen::VectorXd> inputs;
+    VectorXd input_scales = this->get_input_scale(flag, XtUV, OPV, SPV);
+
+
+    for (int ncalls = 0; ncalls < test_states.size(); ncalls++) {
+
+        VectorXd input(isize);
+
+        int next = 0;
+
+        for (int i = 0; i < test_states[ncalls].size(); i++) {
+            int state = test_states[ncalls][i];
+            for (int j = 0; j < XtUV.size(); j++) {
+                input[next] = this->ActiveTraj[state][XtUV[j]];
+                next++;
+            }
+        }
+        for (int j = 0; j < OPV.size(); j++) {
+            input[next] = this->ActiveTraj[0][OPV[j] + this->XtUVars()];
+            next++;
+        }
+        for (int j = 0; j < SPV.size(); j++) {
+            input[next] = this->ActiveStaticParams[SPV[j]];
+            next++;
+        }
+        input = input.cwiseQuotient(input_scales);
+
+        inputs.push_back(input);
+    }
+
+    return inputs;
+}
+
+void ASSET::ODEPhaseBase::calc_auto_scales()
+{
+    auto calc_impl = [&](auto& funcmap) {
+        for (auto& [key, func] : funcmap) {
+            if (func.ScaleMode == "auto") {
+                VectorXd input_scales = this->get_input_scale(func.RegionFlag, func.XtUVars, func.OPVars, func.SPVars);
+                std::vector<VectorXd> test_inputs = this->get_test_inputs(func.RegionFlag, func.XtUVars, func.OPVars, func.SPVars);
+                VectorXd output_scales = calc_jacobian_row_scales(func.Func, input_scales, test_inputs, "norm", "mean");
+                func.OutputScales = output_scales;
+            }
+            else {
+				
+
+            }
+
+        }
+    };
+
+    calc_impl(this->userEqualities);
+    calc_impl(this->userInequalities);
+    calc_impl(this->userStateObjectives);
+    calc_impl(this->userIntegrands);
+    calc_impl(this->userParamIntegrands);
+
+
+}
+
+std::vector<double> ASSET::ODEPhaseBase::get_objective_scales()
+{
+    // If we have mixed integral and state objectives, we assume that they have the same units
+    // since the output scales are computed for the integrands we need to divide by tstar 
+    // before averaging to make the units consistent
+
+    std::vector<double> scales;
+    for (auto& [key, obj] : this->userStateObjectives) {
+        if (obj.ScaleMode == "auto") {
+            // OutputScales units 1/obj
+            scales.push_back(obj.OutputScales[0]);
+        }
+    }
+    for (auto& [key, obj] : this->userIntegrands) {
+        if (obj.ScaleMode == "auto") {
+            // OutputScales units tstar/obj
+            // Divide by tstar, since this function is the integrand not the total integral
+		     scales.push_back(obj.OutputScales[0]/this->XtUPUnits[this->TVar()]);
+			
+
+        }
+    }
+
+    return scales;
+}
+
+void ASSET::ODEPhaseBase::update_objective_scales(double scale)
+{
+    for (auto& [key, obj] : this->userStateObjectives) {
+        if (obj.ScaleMode == "auto") {
+            obj.OutputScales[0] = scale;
+        }
+    }
+    for (auto& [key, obj] : this->userIntegrands) {
+        if (obj.ScaleMode == "auto") {
+            // Multiply by tstar, since this function is the integrand not the total integral
+            obj.OutputScales[0] = scale * this->XtUPUnits[this->TVar()];
+            
+        }
+    }
+}
+
 void ASSET::ODEPhaseBase::transcribe_phase(
     int vo, int eqo, int iqo, std::shared_ptr<NonLinearProgram> np, int pnum)
 
 {
   this->indexer.begin_indexing(np, vo, eqo, iqo);
-  this->check_functions(pnum);
-
+  
 
   this->transcribe_dynamics();
   this->transcribe_axis_funcs();
@@ -1046,6 +1384,21 @@ void ASSET::ODEPhaseBase::transcribe(bool showstats, bool showfuns) {
   this->nlp = std::make_shared<NonLinearProgram>(this->Threads);
 
   this->initIndexing();
+
+  this->check_functions(0);
+  if (this->AutoScaling) {
+      this->calc_auto_scales();
+      if (this->SyncObjectiveScales) {
+          // Ensure that all objectives have same scale factor to preserve meaning of un-scaled problem
+          // Common scale is mean of all separate scale factors
+          auto objscales = this->get_objective_scales();
+          if (objscales.size() > 0) {
+              double meanobjscale = std::accumulate(objscales.begin(), objscales.end(), 0.0) / double(objscales.size());
+              this->update_objective_scales(meanobjscale);
+          }
+      }
+  }
+
   this->transcribe_phase(0, 0, 0, this->nlp, 0);
   if (showstats)
     this->indexer.print_stats(showfuns);
@@ -1344,569 +1697,3 @@ ASSET::PSIOPT::ConvergenceFlags ASSET::ODEPhaseBase::phase_call_impl(std::string
   return flag;
 }
 
-void ASSET::ODEPhaseBase::Build(py::module& m) {
-  using namespace pybind11::literals;
-  using namespace doc;
-  auto obj =
-      py::class_<ODEPhaseBase, std::shared_ptr<ODEPhaseBase>, OptimizationProblemBase>(m, "PhaseInterface");
-  obj.doc() = "Base Class for All Optimal Control Phases";
-
-  obj.def("enable_vectorization", &ODEPhaseBase::enable_vectorization);
-
-  obj.def("setTraj",
-          py::overload_cast<const std::vector<Eigen::VectorXd>&, Eigen::VectorXd, Eigen::VectorXi>(
-              &ODEPhaseBase::setTraj),
-          ODEPhaseBase_setTraj1);
-
-  obj.def("setTraj",
-          py::overload_cast<const std::vector<Eigen::VectorXd>&, Eigen::VectorXd, Eigen::VectorXi, bool>(
-              &ODEPhaseBase::setTraj));
-
-  obj.def("setTraj",
-          py::overload_cast<const std::vector<Eigen::VectorXd>&, int>(&ODEPhaseBase::setTraj),
-          ODEPhaseBase_setTraj2);
-
-  obj.def("setTraj",
-          py::overload_cast<const std::vector<Eigen::VectorXd>&, int, bool>(&ODEPhaseBase::setTraj));
-
-
-  obj.def("switchTranscriptionMode",
-          py::overload_cast<TranscriptionModes, VectorXd, VectorXi>(&ODEPhaseBase::switchTranscriptionMode),
-          ODEPhaseBase_switchTranscriptionMode1);
-  obj.def("switchTranscriptionMode",
-          py::overload_cast<TranscriptionModes>(&ODEPhaseBase::switchTranscriptionMode),
-          ODEPhaseBase_switchTranscriptionMode2);
-
-
-  obj.def("switchTranscriptionMode",
-          py::overload_cast<std::string, VectorXd, VectorXi>(&ODEPhaseBase::switchTranscriptionMode),
-          ODEPhaseBase_switchTranscriptionMode1);
-  obj.def("switchTranscriptionMode",
-          py::overload_cast<std::string>(&ODEPhaseBase::switchTranscriptionMode),
-          ODEPhaseBase_switchTranscriptionMode2);
-
-
-  obj.def("transcribe", py::overload_cast<bool, bool>(&ODEPhaseBase::transcribe), ODEPhaseBase_transcribe);
-
-  obj.def("refineTrajManual",
-          py::overload_cast<int>(&ODEPhaseBase::refineTrajManual),
-          ODEPhaseBase_refineTrajManual1);
-  obj.def("refineTrajManual",
-          py::overload_cast<VectorXd, VectorXi>(&ODEPhaseBase::refineTrajManual),
-          ODEPhaseBase_refineTrajManual2);
-  obj.def("refineTrajEqual", &ODEPhaseBase::refineTrajEqual, ODEPhaseBase_refineTrajEqual);
-
-  obj.def("setStaticParams", &ODEPhaseBase::setStaticParams, ODEPhaseBase_setStaticParams);
-
-
-  obj.def("setControlMode",
-          py::overload_cast<ControlModes>(&ODEPhaseBase::setControlMode),
-          ODEPhaseBase_setControlMode);
-  obj.def("setControlMode",
-          py::overload_cast<std::string>(&ODEPhaseBase::setControlMode),
-          ODEPhaseBase_setControlMode);
-
-  obj.def("setIntegralMode", &ODEPhaseBase::setIntegralMode, ODEPhaseBase_setIntegralMode);
-
-  obj.def("subStaticParams", &ODEPhaseBase::subStaticParams, ODEPhaseBase_subStaticParams);
-
-  obj.def("subVariables",
-          py::overload_cast<PhaseRegionFlags, VectorXi, VectorXd>(&ODEPhaseBase::subVariables),
-          ODEPhaseBase_subVariables);
-  obj.def("subVariable",
-          py::overload_cast<PhaseRegionFlags, int, double>(&ODEPhaseBase::subVariable),
-          ODEPhaseBase_subVariable);
-
-  obj.def("subVariables",
-          py::overload_cast<std::string, VectorXi, VectorXd>(&ODEPhaseBase::subVariables),
-          ODEPhaseBase_subVariables);
-  obj.def("subVariable",
-          py::overload_cast<std::string, int, double>(&ODEPhaseBase::subVariable),
-          ODEPhaseBase_subVariable);
-
-  obj.def("returnTraj", &ODEPhaseBase::returnTraj, ODEPhaseBase_returnTraj);
-  obj.def("returnTrajRange", &ODEPhaseBase::returnTrajRange, ODEPhaseBase_returnTrajRange);
-  obj.def("returnTrajRangeND", &ODEPhaseBase::returnTrajRangeND, ODEPhaseBase_returnTrajRangeND);
-  obj.def("returnTrajTable", &ODEPhaseBase::returnTrajTable);
-
-  obj.def("returnCostateTraj", &ODEPhaseBase::returnCostateTraj, ODEPhaseBase_returnCostateTraj);
-  obj.def("returnTrajError", &ODEPhaseBase::returnTrajError);
-
-  obj.def("returnUSplineConLmults", &ODEPhaseBase::returnUSplineConLmults);
-  obj.def("returnUSplineConVals", &ODEPhaseBase::returnUSplineConVals);
-
-
-  obj.def("returnEqualConLmults", &ODEPhaseBase::returnEqualConLmults, ODEPhaseBase_returnEqualConLmults);
-  obj.def("returnEqualConVals", &ODEPhaseBase::returnEqualConVals);
-
-  obj.def(
-      "returnInequalConLmults", &ODEPhaseBase::returnInequalConLmults, ODEPhaseBase_returnInequalConLmults);
-  obj.def("returnInequalConVals", &ODEPhaseBase::returnInequalConVals);
-
-
-  obj.def("returnStaticParams", &ODEPhaseBase::returnStaticParams, ODEPhaseBase_returnStaticParam);
-
-  obj.def("test_threads", &ODEPhaseBase::test_threads);
-
-  obj.def("removeEqualCon", &ODEPhaseBase::removeEqualCon, ODEPhaseBase_removeEqualCon);
-  obj.def("removeInequalCon", &ODEPhaseBase::removeInequalCon, ODEPhaseBase_removeInequalCon);
-  obj.def("removeStateObjective", &ODEPhaseBase::removeStateObjective, ODEPhaseBase_removeStateObjective);
-  obj.def("removeIntegralObjective",
-          &ODEPhaseBase::removeIntegralObjective,
-          ODEPhaseBase_removeIntegralObjective);
-  obj.def("removeIntegralParamFunction",
-          &ODEPhaseBase::removeIntegralParamFunction,
-          ODEPhaseBase_removeIntegralParamFunction);
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////
-  obj.def("addEqualCon",
-          py::overload_cast<StateConstraint>(&ODEPhaseBase::addEqualCon),
-          ODEPhaseBase_addEqualCon1);
-  obj.def("addEqualCon",
-          py::overload_cast<PhaseRegionFlags, VectorFunctionalX, VectorXi>(&ODEPhaseBase::addEqualCon),
-          ODEPhaseBase_addEqualCon2);
-  obj.def("addEqualCon",
-          py::overload_cast<PhaseRegionFlags, VectorFunctionalX, VectorXi, VectorXi, VectorXi>(
-              &ODEPhaseBase::addEqualCon),
-          ODEPhaseBase_addEqualCon3);
-
-  obj.def("addEqualCon",
-          py::overload_cast<std::string, VectorFunctionalX, VectorXi>(&ODEPhaseBase::addEqualCon),
-          ODEPhaseBase_addEqualCon2);
-  obj.def("addEqualCon",
-          py::overload_cast<std::string, VectorFunctionalX, VectorXi, VectorXi, VectorXi>(
-              &ODEPhaseBase::addEqualCon),
-          ODEPhaseBase_addEqualCon3);
-
-
-  obj.def("addDeltaVarEqualCon",
-          py::overload_cast<PhaseRegionFlags, int, double, double>(&ODEPhaseBase::addDeltaVarEqualCon),
-          ODEPhaseBase_addDeltaVarEqualCon1);
-  obj.def("addDeltaVarEqualCon",
-          py::overload_cast<int, double, double>(&ODEPhaseBase::addDeltaVarEqualCon),
-          ODEPhaseBase_addDeltaVarEqualCon2);
-  obj.def("addDeltaVarEqualCon",
-          py::overload_cast<int, double>(&ODEPhaseBase::addDeltaVarEqualCon),
-          ODEPhaseBase_addDeltaVarEqualCon3);
-
-  obj.def("addDeltaTimeEqualCon",
-          py::overload_cast<double, double>(&ODEPhaseBase::addDeltaTimeEqualCon),
-          ODEPhaseBase_addDeltaTimeEqualCon1);
-  obj.def("addDeltaTimeEqualCon",
-          py::overload_cast<double>(&ODEPhaseBase::addDeltaTimeEqualCon),
-          ODEPhaseBase_addDeltaTimeEqualCon2);
-
-  obj.def("addBoundaryValue",
-          py::overload_cast<PhaseRegionFlags, VectorXi, const VectorXd&>(&ODEPhaseBase::addBoundaryValue),
-          ODEPhaseBase_addBoundaryValue);
-  obj.def("addBoundaryValue",
-          py::overload_cast<std::string, VectorXi, const VectorXd&>(&ODEPhaseBase::addBoundaryValue),
-          ODEPhaseBase_addBoundaryValue);
-
-  obj.def("addValueLock",
-          py::overload_cast<std::string, VectorXi>(&ODEPhaseBase::addValueLock),
-          ODEPhaseBase_addValueLock);
-  obj.def("addValueLock",
-          py::overload_cast<PhaseRegionFlags, VectorXi>(&ODEPhaseBase::addValueLock),
-          ODEPhaseBase_addValueLock);
-
-  obj.def("addBoundaryValues", &ODEPhaseBase::addBoundaryValues, ODEPhaseBase_addBoundaryValues);
-
-  obj.def("addPeriodicityCon", &ODEPhaseBase::addPeriodicityCon);
-  ///////////////////////////////////////////////////////////////////////////////
-
-  obj.def("addInequalCon",
-          py::overload_cast<StateConstraint>(&ODEPhaseBase::addInequalCon),
-          ODEPhaseBase_addInequalCon1);
-  obj.def("addInequalCon",
-          py::overload_cast<PhaseRegionFlags, VectorFunctionalX, VectorXi>(&ODEPhaseBase::addInequalCon),
-          ODEPhaseBase_addInequalCon2);
-  obj.def("addInequalCon",
-          py::overload_cast<PhaseRegionFlags, VectorFunctionalX, VectorXi, VectorXi, VectorXi>(
-              &ODEPhaseBase::addInequalCon),
-          ODEPhaseBase_addInequalCon3);
-
-  obj.def("addInequalCon",
-          py::overload_cast<std::string, VectorFunctionalX, VectorXi>(&ODEPhaseBase::addInequalCon),
-          ODEPhaseBase_addInequalCon2);
-  obj.def("addInequalCon",
-          py::overload_cast<std::string, VectorFunctionalX, VectorXi, VectorXi, VectorXi>(
-              &ODEPhaseBase::addInequalCon),
-          ODEPhaseBase_addInequalCon3);
-
-
-  obj.def("addLUVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double, double>(&ODEPhaseBase::addLUVarBound),
-          ODEPhaseBase_addLUVarBound1);
-  obj.def("addLUVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double, double, double>(&ODEPhaseBase::addLUVarBound),
-          ODEPhaseBase_addLUVarBound2);
-  obj.def(
-      "addLUVarBound",
-      py::overload_cast<PhaseRegionFlags, int, double, double, double, double>(&ODEPhaseBase::addLUVarBound),
-      ODEPhaseBase_addLUVarBound3);
-  obj.def("addLUVarBounds",
-          py::overload_cast<PhaseRegionFlags, Eigen::VectorXi, double, double, double>(
-              &ODEPhaseBase::addLUVarBounds),
-          ODEPhaseBase_addLUVarBounds);
-
-
-  obj.def("addLUVarBound",
-          py::overload_cast<std::string, int, double, double>(&ODEPhaseBase::addLUVarBound),
-          ODEPhaseBase_addLUVarBound1);
-  obj.def("addLUVarBound",
-          py::overload_cast<std::string, int, double, double, double>(&ODEPhaseBase::addLUVarBound),
-          ODEPhaseBase_addLUVarBound2);
-  obj.def("addLUVarBound",
-          py::overload_cast<std::string, int, double, double, double, double>(&ODEPhaseBase::addLUVarBound),
-          ODEPhaseBase_addLUVarBound3);
-  obj.def(
-      "addLUVarBounds",
-      py::overload_cast<std::string, Eigen::VectorXi, double, double, double>(&ODEPhaseBase::addLUVarBounds),
-      ODEPhaseBase_addLUVarBounds);
-
-
-  obj.def("addLowerVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double, double>(&ODEPhaseBase::addLowerVarBound),
-          ODEPhaseBase_addLowerVarBound1);
-  obj.def("addLowerVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double>(&ODEPhaseBase::addLowerVarBound),
-          ODEPhaseBase_addLowerVarBound2);
-
-  obj.def("addUpperVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double, double>(&ODEPhaseBase::addUpperVarBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addUpperVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double>(&ODEPhaseBase::addUpperVarBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-  obj.def("addLowerVarBound",
-          py::overload_cast<std::string, int, double, double>(&ODEPhaseBase::addLowerVarBound),
-          ODEPhaseBase_addLowerVarBound1);
-  obj.def("addLowerVarBound",
-          py::overload_cast<std::string, int, double>(&ODEPhaseBase::addLowerVarBound),
-          ODEPhaseBase_addLowerVarBound2);
-
-  obj.def("addUpperVarBound",
-          py::overload_cast<std::string, int, double, double>(&ODEPhaseBase::addUpperVarBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addUpperVarBound",
-          py::overload_cast<std::string, int, double>(&ODEPhaseBase::addUpperVarBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-
-  //////////////////////////////////////////////////////////////
-
-  obj.def("addLowerNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double>(&ODEPhaseBase::addLowerNormBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addLowerNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double>(&ODEPhaseBase::addLowerNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-  obj.def("addLowerNormBound",
-          py::overload_cast<std::string, VectorXi, double, double>(&ODEPhaseBase::addLowerNormBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addLowerNormBound",
-          py::overload_cast<std::string, VectorXi, double>(&ODEPhaseBase::addLowerNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-
-  obj.def("addUpperNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double>(&ODEPhaseBase::addUpperNormBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addUpperNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double>(&ODEPhaseBase::addUpperNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-  obj.def("addUpperNormBound",
-          py::overload_cast<std::string, VectorXi, double, double>(&ODEPhaseBase::addUpperNormBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addUpperNormBound",
-          py::overload_cast<std::string, VectorXi, double>(&ODEPhaseBase::addUpperNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-
-  obj.def("addLUNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double, double, double>(
-              &ODEPhaseBase::addLUNormBound),
-          ODEPhaseBase_addLUNormBound1);
-  obj.def(
-      "addLUNormBound",
-      py::overload_cast<PhaseRegionFlags, VectorXi, double, double, double>(&ODEPhaseBase::addLUNormBound),
-      ODEPhaseBase_addLUNormBound2);
-  obj.def("addLUNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double>(&ODEPhaseBase::addLUNormBound),
-          ODEPhaseBase_addLUNormBound3);
-
-  obj.def(
-      "addLUNormBound",
-      py::overload_cast<std::string, VectorXi, double, double, double, double>(&ODEPhaseBase::addLUNormBound),
-      ODEPhaseBase_addLUNormBound1);
-  obj.def("addLUNormBound",
-          py::overload_cast<std::string, VectorXi, double, double, double>(&ODEPhaseBase::addLUNormBound),
-          ODEPhaseBase_addLUNormBound2);
-  obj.def("addLUNormBound",
-          py::overload_cast<std::string, VectorXi, double, double>(&ODEPhaseBase::addLUNormBound),
-          ODEPhaseBase_addLUNormBound3);
-
-  //////////////////////////////////////////////////////////////
-
-  obj.def(
-      "addLowerSquaredNormBound",
-      py::overload_cast<PhaseRegionFlags, VectorXi, double, double>(&ODEPhaseBase::addLowerSquaredNormBound),
-      ODEPhaseBase_addUpperVarBound1);
-  obj.def("addLowerSquaredNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double>(&ODEPhaseBase::addLowerSquaredNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-  obj.def("addLowerSquaredNormBound",
-          py::overload_cast<std::string, VectorXi, double, double>(&ODEPhaseBase::addLowerSquaredNormBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addLowerSquaredNormBound",
-          py::overload_cast<std::string, VectorXi, double>(&ODEPhaseBase::addLowerSquaredNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-
-  obj.def(
-      "addUpperSquaredNormBound",
-      py::overload_cast<PhaseRegionFlags, VectorXi, double, double>(&ODEPhaseBase::addUpperSquaredNormBound),
-      ODEPhaseBase_addUpperVarBound1);
-  obj.def("addUpperSquaredNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double>(&ODEPhaseBase::addUpperSquaredNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-  obj.def("addUpperSquaredNormBound",
-          py::overload_cast<std::string, VectorXi, double, double>(&ODEPhaseBase::addUpperSquaredNormBound),
-          ODEPhaseBase_addUpperVarBound1);
-  obj.def("addUpperSquaredNormBound",
-          py::overload_cast<std::string, VectorXi, double>(&ODEPhaseBase::addUpperSquaredNormBound),
-          ODEPhaseBase_addUpperVarBound2);
-
-
-  obj.def("addLUSquaredNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double, double, double>(
-              &ODEPhaseBase::addLUSquaredNormBound),
-          ODEPhaseBase_addLUNormBound1);
-  obj.def("addLUSquaredNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double, double>(
-              &ODEPhaseBase::addLUSquaredNormBound),
-          ODEPhaseBase_addLUNormBound2);
-  obj.def("addLUSquaredNormBound",
-          py::overload_cast<PhaseRegionFlags, VectorXi, double, double>(&ODEPhaseBase::addLUSquaredNormBound),
-          ODEPhaseBase_addLUNormBound3);
-
-  obj.def("addLUSquaredNormBound",
-          py::overload_cast<std::string, VectorXi, double, double, double, double>(
-              &ODEPhaseBase::addLUSquaredNormBound),
-          ODEPhaseBase_addLUNormBound1);
-  obj.def(
-      "addLUSquaredNormBound",
-      py::overload_cast<std::string, VectorXi, double, double, double>(&ODEPhaseBase::addLUSquaredNormBound),
-      ODEPhaseBase_addLUNormBound2);
-  obj.def("addLUSquaredNormBound",
-          py::overload_cast<std::string, VectorXi, double, double>(&ODEPhaseBase::addLUSquaredNormBound),
-          ODEPhaseBase_addLUNormBound3);
-
-
-  //////////////////////////////////////////////////////////////
-
-  obj.def("addLowerFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double, double>(
-              &ODEPhaseBase::addLowerFuncBound),
-          ODEPhaseBase_addLowerFuncBound1);
-  obj.def("addUpperFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double, double>(
-              &ODEPhaseBase::addUpperFuncBound),
-          ODEPhaseBase_addUpperFuncBound2);
-
-  obj.def("addLowerFuncBound",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double, double>(
-              &ODEPhaseBase::addLowerFuncBound),
-          ODEPhaseBase_addLowerFuncBound1);
-  obj.def("addUpperFuncBound",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double, double>(
-              &ODEPhaseBase::addUpperFuncBound),
-          ODEPhaseBase_addUpperFuncBound2);
-
-
-  obj.def("addLowerFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double>(
-              &ODEPhaseBase::addLowerFuncBound),
-          ODEPhaseBase_addLowerFuncBound1);
-  obj.def("addUpperFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double>(
-              &ODEPhaseBase::addUpperFuncBound),
-          ODEPhaseBase_addUpperFuncBound2);
-
-  obj.def(
-      "addLowerFuncBound",
-      py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double>(&ODEPhaseBase::addLowerFuncBound),
-      ODEPhaseBase_addLowerFuncBound1);
-  obj.def(
-      "addUpperFuncBound",
-      py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double>(&ODEPhaseBase::addUpperFuncBound),
-      ODEPhaseBase_addUpperFuncBound2);
-
-
-  obj.def("addLUFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double, double, double, double>(
-              &ODEPhaseBase::addLUFuncBound));
-  obj.def("addLUFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double, double, double>(
-              &ODEPhaseBase::addLUFuncBound));
-  obj.def("addLUFuncBound",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, double, double>(
-              &ODEPhaseBase::addLUFuncBound));
-
-  obj.def("addLUFuncBound",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double, double, double, double>(
-              &ODEPhaseBase::addLUFuncBound));
-  obj.def("addLUFuncBound",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double, double, double>(
-              &ODEPhaseBase::addLUFuncBound));
-  obj.def("addLUFuncBound",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi, double, double>(
-              &ODEPhaseBase::addLUFuncBound));
-
-
-  //////////////////////////////////////////////////////////////
-
-
-  obj.def("addLowerDeltaVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double, double>(&ODEPhaseBase::addLowerDeltaVarBound),
-          ODEPhaseBase_addLowerDeltaVarBound1);
-  obj.def("addLowerDeltaVarBound",
-          py::overload_cast<int, double, double>(&ODEPhaseBase::addLowerDeltaVarBound),
-          ODEPhaseBase_addLowerDeltaVarBound2);
-  obj.def("addLowerDeltaVarBound",
-          py::overload_cast<int, double>(&ODEPhaseBase::addLowerDeltaVarBound),
-          ODEPhaseBase_addLowerDeltaVarBound3);
-
-  obj.def("addLowerDeltaTimeBound",
-          py::overload_cast<double, double>(&ODEPhaseBase::addLowerDeltaTimeBound),
-          ODEPhaseBase_addLowerDeltaTimeBound1);
-  obj.def("addLowerDeltaTimeBound",
-          py::overload_cast<double>(&ODEPhaseBase::addLowerDeltaTimeBound),
-          ODEPhaseBase_addLowerDeltaTimeBound2);
-
-  obj.def("addUpperDeltaVarBound",
-          py::overload_cast<PhaseRegionFlags, int, double, double>(&ODEPhaseBase::addUpperDeltaVarBound),
-          ODEPhaseBase_addUpperDeltaVarBound1);
-  obj.def("addUpperDeltaVarBound",
-          py::overload_cast<int, double, double>(&ODEPhaseBase::addUpperDeltaVarBound),
-          ODEPhaseBase_addUpperDeltaVarBound2);
-  obj.def("addUpperDeltaVarBound",
-          py::overload_cast<int, double>(&ODEPhaseBase::addUpperDeltaVarBound),
-          ODEPhaseBase_addUpperDeltaVarBound3);
-  obj.def("addUpperDeltaTimeBound",
-          py::overload_cast<double, double>(&ODEPhaseBase::addUpperDeltaTimeBound),
-          ODEPhaseBase_addUpperDeltaTimeBound1);
-  obj.def("addUpperDeltaTimeBound",
-          py::overload_cast<double>(&ODEPhaseBase::addUpperDeltaTimeBound),
-          ODEPhaseBase_addUpperDeltaTimeBound2);
-
-  ////////////////////////////////////////////////////////////////////////////
-  obj.def("addStateObjective",
-          py::overload_cast<StateObjective>(&ODEPhaseBase::addStateObjective),
-          ODEPhaseBase_addStateObjective);
-
-  obj.def("addStateObjective",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi>(&ODEPhaseBase::addStateObjective),
-          ODEPhaseBase_addStateObjective);
-
-  obj.def("addStateObjective",
-          py::overload_cast<PhaseRegionFlags, ScalarFunctionalX, VectorXi, VectorXi, VectorXi>(
-              &ODEPhaseBase::addStateObjective),
-          ODEPhaseBase_addStateObjective);
-
-  obj.def("addStateObjective",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi>(&ODEPhaseBase::addStateObjective),
-          ODEPhaseBase_addStateObjective);
-
-  obj.def("addStateObjective",
-          py::overload_cast<std::string, ScalarFunctionalX, VectorXi, VectorXi, VectorXi>(
-              &ODEPhaseBase::addStateObjective),
-          ODEPhaseBase_addStateObjective);
-
-
-  obj.def("addValueObjective",
-          py::overload_cast<PhaseRegionFlags, int, double>(&ODEPhaseBase::addValueObjective),
-          ODEPhaseBase_addValueObjective);
-
-  obj.def("addValueObjective",
-          py::overload_cast<std::string, int, double>(&ODEPhaseBase::addValueObjective),
-          ODEPhaseBase_addValueObjective);
-
-
-  obj.def("addDeltaVarObjective", &ODEPhaseBase::addDeltaVarObjective, ODEPhaseBase_addDeltaVarObjective);
-  obj.def("addDeltaTimeObjective", &ODEPhaseBase::addDeltaTimeObjective, ODEPhaseBase_addDeltaTimeObjective);
-
-  obj.def("addIntegralObjective",
-          py::overload_cast<StateObjective>(&ODEPhaseBase::addIntegralObjective),
-          ODEPhaseBase_addIntegralObjective1);
-  obj.def("addIntegralObjective",
-          py::overload_cast<ScalarFunctionalX, VectorXi>(&ODEPhaseBase::addIntegralObjective),
-          ODEPhaseBase_addIntegralObjective2);
-  obj.def(
-      "addIntegralObjective",
-      py::overload_cast<ScalarFunctionalX, VectorXi, VectorXi, VectorXi>(&ODEPhaseBase::addIntegralObjective),
-      ODEPhaseBase_addIntegralObjective2);
-  ///////////////////////////////////////////////////////////////////////////////
-  obj.def("addIntegralParamFunction",
-          py::overload_cast<StateObjective, int>(&ODEPhaseBase::addIntegralParamFunction),
-          ODEPhaseBase_addIntegralParamFunction1);
-  obj.def("addIntegralParamFunction",
-          py::overload_cast<ScalarFunctionalX, VectorXi, int>(&ODEPhaseBase::addIntegralParamFunction),
-          ODEPhaseBase_addIntegralParamFunction2);
-  obj.def("addIntegralParamFunction",
-          py::overload_cast<ScalarFunctionalX, VectorXi, VectorXi, VectorXi, int>(
-              &ODEPhaseBase::addIntegralParamFunction),
-          ODEPhaseBase_addIntegralParamFunction2);
-
-
-  ////////////////////////////////////////////////////
-  obj.def("getMeshInfo", &ODEPhaseBase::getMeshInfo);
-  obj.def("refineTrajAuto", &ODEPhaseBase::refineTrajAuto);
-  obj.def("calc_global_error", &ODEPhaseBase::calc_global_error);
-  obj.def("getMeshIters", &ODEPhaseBase::getMeshIters);
-
-
-  obj.def_readwrite("AdaptiveMesh", &ODEPhaseBase::AdaptiveMesh);
-
-  obj.def("setAdaptiveMesh", &ODEPhaseBase::setAdaptiveMesh, py::arg("AdaptiveMesh") = true);
-
-  obj.def("setMeshTol", &ODEPhaseBase::setMeshTol);
-  obj.def("setMeshRedFactor", &ODEPhaseBase::setMeshRedFactor);
-  obj.def("setMeshIncFactor", &ODEPhaseBase::setMeshIncFactor);
-  obj.def("setMeshErrFactor", &ODEPhaseBase::setMeshErrFactor);
-  obj.def("setMaxMeshIters", &ODEPhaseBase::setMaxMeshIters);
-  obj.def("setMinSegments", &ODEPhaseBase::setMinSegments);
-  obj.def("setMaxSegments", &ODEPhaseBase::setMaxSegments);
-  obj.def("setMeshErrorCriteria", &ODEPhaseBase::setMeshErrorCriteria);
-  obj.def("setMeshErrorEstimator", &ODEPhaseBase::setMeshErrorEstimator);
-
-
-  obj.def_readwrite("PrintMeshInfo", &ODEPhaseBase::PrintMeshInfo);
-  obj.def_readwrite("MaxMeshIters", &ODEPhaseBase::MaxMeshIters);
-  obj.def_readwrite("MeshTol", &ODEPhaseBase::MeshTol);
-  obj.def_readwrite("MeshErrorEstimator", &ODEPhaseBase::MeshErrorEstimator);
-  obj.def_readwrite("MeshErrorCriteria", &ODEPhaseBase::MeshErrorCriteria);
-
-
-  obj.def_readwrite("SolveOnlyFirst", &ODEPhaseBase::SolveOnlyFirst);
-  obj.def_readwrite("ForceOneMeshIter", &ODEPhaseBase::ForceOneMeshIter);
-  obj.def_readwrite("NewError", &ODEPhaseBase::NewError);
-
-
-  obj.def_readwrite("DetectControlSwitches", &ODEPhaseBase::DetectControlSwitches);
-  obj.def_readwrite("RelSwitchTol", &ODEPhaseBase::RelSwitchTol);
-  obj.def_readwrite("AbsSwitchTol", &ODEPhaseBase::AbsSwitchTol);
-  obj.def_readwrite("MeshAbortFlag", &ODEPhaseBase::MeshAbortFlag);
-
-
-  obj.def_readwrite("NumExtraSegs", &ODEPhaseBase::NumExtraSegs);
-  obj.def_readwrite("MeshRedFactor", &ODEPhaseBase::MeshRedFactor);
-  obj.def_readwrite("MeshIncFactor", &ODEPhaseBase::MeshIncFactor);
-  obj.def_readwrite("MeshErrFactor", &ODEPhaseBase::MeshErrFactor);
-  obj.def_readonly("MeshConverged", &ODEPhaseBase::MeshConverged);
-}

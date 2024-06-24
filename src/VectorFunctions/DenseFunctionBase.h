@@ -1060,11 +1060,11 @@ namespace ASSET {
 
     /*
      * Counts the number of non-zero elements in the lower triangle of the hessian and
-     * the jacobian of derived and represents the number of elements that will be explicilty scattered
+     * the Jacobian of derived and represents the number of elements that will be explicilty scattered
      * into the KKT matrix of an optimization problem on each function call.
      * For dense functions, in almost all cases they are all non-zero, or are assumed non-zero even if
      * they are not. However, this method will account for explicit non-zeros if the HessianElemIsNonZero ex.
-     * is explicity overloaded by derived. The sum of the non-zeros here is used when interfacing whith the
+     * is explicitly overloaded by derived. The sum of the non-zeros here is used when interfacing whith the
      * optimizer throutght the wrapper classes ConstraintFunction and ObjectiveFunction.
      */
     int numKKTEles(bool dojac, bool dohess) const {
@@ -1088,7 +1088,7 @@ namespace ASSET {
     }
 
     /*
-     * This function is responsibe for determing the target locations of the jacobian and hessian elements
+     * This function is responsible for determining the target locations of the jacobian and hessian elements
      * of derived inside of the KKT matrix of an optimization problem when it is used as a constraint. Meta
      * data containing the locations of the input variables and constraint row for each call of derived are
      * held in the Solver indexing data struct.
@@ -1539,6 +1539,10 @@ namespace ASSET {
       obj.def("IRows", &Derived::IRows);
       obj.def("ORows", &Derived::ORows);
       obj.def("name", &Derived::name);
+
+      obj.def("input_domain", &Derived::input_domain);
+      obj.def("is_linear", &Derived::is_linear);
+
       obj.def("compute", [](const Derived& func, ConstEigenRef<Input<double>> x) {
         if (x.size() != func.IRows())
           throw std::invalid_argument("Incorrectly sized input to function");

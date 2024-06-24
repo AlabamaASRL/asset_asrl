@@ -2,6 +2,7 @@
 
 #include "OptimalControlFlags.h"
 #include "pch.h"
+#include "InterfaceTypes.h"
 
 namespace ASSET {
 
@@ -15,6 +16,11 @@ namespace ASSET {
 
     Eigen::VectorXi EXTVars;  // dirty i know
 
+    std::string ScaleMode ="auto"; // auto,custom,none
+    bool ScalesSet = false;
+    Eigen::VectorXd OutputScales;
+    
+
     int StorageIndex = 0;
     int PhaseLocalIndex = 0;
     int GlobalIndex = 0;
@@ -26,9 +32,23 @@ namespace ASSET {
       this->XtUVars = xtuv;
       this->OPVars = opv;
       this->SPVars = spv;
+      this->OutputScales = Eigen::VectorXd::Ones(this->Func.ORows());
     }
+
+    StateFunction(
+        FuncType f, PhaseRegionFlags Reg, Eigen::VectorXi xtuv, Eigen::VectorXi opv, Eigen::VectorXi spv, ScaleType scale_t):
+        StateFunction(f,Reg,xtuv,opv,spv){
+       
+        auto [ScaleMode, ScalesSet, OutputScales] = get_scale_info(this->Func.ORows(), scale_t);
+        this->OutputScales = OutputScales;
+        this->ScaleMode = ScaleMode;
+        this->ScalesSet = ScalesSet;
+    }
+
+
     StateFunction(FuncType f, PhaseRegionFlags Reg, Eigen::VectorXi xtuv) {
       this->Func = f;
+      this->OutputScales = Eigen::VectorXd::Ones(this->Func.ORows());
 
       switch (Reg) {
         case PhaseRegionFlags::ODEParams: {
@@ -54,11 +74,24 @@ namespace ASSET {
         }
       }
     }
+    StateFunction(FuncType f, PhaseRegionFlags Reg, Eigen::VectorXi xtuv, ScaleType scale_t):
+        StateFunction(f,Reg,xtuv){
+        auto [ScaleMode, ScalesSet, OutputScales] = get_scale_info(this->Func.ORows(), scale_t);
+        this->OutputScales = OutputScales;
+        this->ScaleMode = ScaleMode;
+        this->ScalesSet = ScalesSet;
+    }
+
+
+
+
     StateFunction(
         FuncType f, PhaseRegionFlags Reg, Eigen::VectorXi xtuv, PhaseRegionFlags ParReg, Eigen::VectorXi pv) {
       this->Func = f;
       this->RegionFlag = Reg;
       this->XtUVars = xtuv;
+      this->OutputScales = Eigen::VectorXd::Ones(this->Func.ORows());
+
       switch (ParReg) {
         case PhaseRegionFlags::ODEParams: {
           this->OPVars = pv;

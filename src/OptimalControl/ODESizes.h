@@ -122,29 +122,80 @@ namespace ASSET {
   struct ODESize : ODEXUPVSizes<_XV, _UV, _PV> {
 
 
-    std::vector<int> Xidxs() const {
-      std::vector<int> idxs(this->XVars());
+    std::map<std::string, Eigen::VectorXi> _XtUPidxs;
+
+    void add_default_idxs() {
+       for (int i = 0; i < this->XVars(); i++) {
+           this->add_idx(std::to_string(i), this->Xidxs(i));
+       }
+       this->add_idx("t", this->XVars());
+       for (int i = 0; i < this->UVars(); i++) {
+           this->add_idx(std::to_string(i), this->Uidxs(i));
+       }
+       for (int i = 0; i < this->PVars(); i++) {
+           this->add_idx(std::to_string(i), this->Pidxs(i));
+       }
+    }
+
+    void add_idx(const std::string& name, const Eigen::VectorXi & idx) {
+       if (_XtUPidxs.count(name)) {
+        throw std::invalid_argument(fmt::format("Variable index group with name: {0:} already exists.", name));
+        }
+        if (idx.size() == 0) {
+        throw std::invalid_argument(fmt::format("Variable index group with name: {0:} has no elements.", name));
+        }
+        _XtUPidxs[name] = idx;
+    }
+
+    void add_idx(const std::string& name, int indx) {
+        Eigen::VectorXi idxv(1);
+        idxv[0] = indx;
+        this->add_idx(idxv);
+    }
+
+    Eigen::VectorXi idx(const std::string& name) const {
+        if (_XtUPidxs.count(name) == 0) {
+        throw std::invalid_argument(
+            fmt::format("No variable index group with name: {0:} exists.", name));
+        }
+        return _XtUPidxs.at(name);
+    }
+
+    void set_idxs(const std::map<std::string, Eigen::VectorXi>& idxs) {
+        this->_XtUPidxs = idxs;
+    }
+    std::map<std::string, Eigen::VectorXi> get_idxs() const {
+        return this->_XtUPidxs;
+    }
+
+    Eigen::VectorXi Xidxs() const {
+      Eigen::VectorXi idxs(this->XVars());
       std::iota(idxs.begin(), idxs.end(), 0);
       return idxs;
     }
-    std::vector<int> Xtidxs() const {
-      std::vector<int> idxs(this->XtVars());
+    Eigen::VectorXi Xtidxs() const {
+      Eigen::VectorXi idxs(this->XtVars());
       std::iota(idxs.begin(), idxs.end(), 0);
       return idxs;
     }
-    std::vector<int> XtUidxs() const {
-      std::vector<int> idxs(this->XtUVars());
+    Eigen::VectorXi XtUidxs() const {
+      Eigen::VectorXi idxs(this->XtUVars());
       std::iota(idxs.begin(), idxs.end(), 0);
       return idxs;
     }
-    std::vector<int> Uidxs() const {
-      std::vector<int> idxs(this->UVars());
+    Eigen::VectorXi Uidxs() const {
+      Eigen::VectorXi idxs(this->UVars());
       std::iota(idxs.begin(), idxs.end(), this->XtVars());
       return idxs;
     }
+    Eigen::VectorXi Pidxs() const {
+      Eigen::VectorXi idxs(this->UVars());
+      std::iota(idxs.begin(), idxs.end(), this->XtUVars());
+      return idxs;
+    }
 
 
-    std::vector<int> idxs_impl(const std::vector<int>& zidxs, const std::vector<int>& idxs) const {
+    Eigen::VectorXi idxs_impl(const Eigen::VectorXi& zidxs, const Eigen::VectorXi& idxs) const {
 
       auto minelem = *std::min_element(zidxs.begin(), zidxs.end());
       auto maxelem = *std::max_element(zidxs.begin(), zidxs.end());
@@ -153,27 +204,54 @@ namespace ASSET {
         throw std::invalid_argument("Indexing error in ODESizes idxs");
       }
 
-      std::vector<int> nidxs(zidxs.size());
+      Eigen::VectorXi nidxs(zidxs.size());
 
       for (int i = 0; i < zidxs.size(); i++) {
         nidxs[i] = idxs[zidxs[i]];
       }
 
-
       return nidxs;
     }
 
-    std::vector<int> Xidxs(const std::vector<int>& zidxs) const {
+    Eigen::VectorXi idxs_impl(int zidx, const Eigen::VectorXi& idxs) const {
+      Eigen::VectorXi zidxs(1);
+      zidxs[0] = zidx;
+      return this->idxs_impl(zidxs, idxs);
+    }
+
+
+
+    Eigen::VectorXi Xidxs(const Eigen::VectorXi& zidxs) const {
       return idxs_impl(zidxs, this->Xidxs());
     }
-    std::vector<int> Xtidxs(const std::vector<int>& zidxs) const {
+    Eigen::VectorXi Xtidxs(const Eigen::VectorXi& zidxs) const {
       return idxs_impl(zidxs, this->Xtidxs());
     }
-    std::vector<int> XtUidxs(const std::vector<int>& zidxs) const {
+    Eigen::VectorXi XtUidxs(const Eigen::VectorXi& zidxs) const {
       return idxs_impl(zidxs, this->XtUidxs());
     }
-    std::vector<int> Uidxs(const std::vector<int>& zidxs) const {
+    Eigen::VectorXi Uidxs(const Eigen::VectorXi& zidxs) const {
       return idxs_impl(zidxs, this->Uidxs());
+    }
+    Eigen::VectorXi Pidxs(const Eigen::VectorXi& zidxs) const {
+      return idxs_impl(zidxs, this->Pidxs());
+    }
+
+
+    Eigen::VectorXi Xidxs(int zidxs) const {
+      return idxs_impl(zidxs, this->Xidxs());
+    }
+    Eigen::VectorXi Xtidxs(int zidxs) const {
+      return idxs_impl(zidxs, this->Xtidxs());
+    }
+    Eigen::VectorXi XtUidxs(int zidxs) const {
+      return idxs_impl(zidxs, this->XtUidxs());
+    }
+    Eigen::VectorXi Uidxs(int zidxs) const {
+      return idxs_impl(zidxs, this->Uidxs());
+    }
+    Eigen::VectorXi Pidxs(int zidxs) const {
+      return idxs_impl(zidxs, this->Pidxs());
     }
 
 
@@ -191,17 +269,26 @@ namespace ASSET {
 
 
       obj.def("Xidxs", py::overload_cast<>(&Derived::Xidxs, py::const_));
-      obj.def("Xidxs", py::overload_cast<const std::vector<int>&>(&Derived::Xidxs, py::const_));
+      obj.def("Xidxs", py::overload_cast<const Eigen::VectorXi&>(&Derived::Xidxs, py::const_));
 
       obj.def("Xtidxs", py::overload_cast<>(&Derived::Xtidxs, py::const_));
-      obj.def("Xtidxs", py::overload_cast<const std::vector<int>&>(&Derived::Xtidxs, py::const_));
+      obj.def("Xtidxs", py::overload_cast<const Eigen::VectorXi&>(&Derived::Xtidxs, py::const_));
 
 
       obj.def("XtUidxs", py::overload_cast<>(&Derived::XtUidxs, py::const_));
-      obj.def("XtUidxs", py::overload_cast<const std::vector<int>&>(&Derived::XtUidxs, py::const_));
+      obj.def("XtUidxs", py::overload_cast<const Eigen::VectorXi&>(&Derived::XtUidxs, py::const_));
 
       obj.def("Uidxs", py::overload_cast<>(&Derived::Uidxs, py::const_));
-      obj.def("Uidxs", py::overload_cast<const std::vector<int>&>(&Derived::Uidxs, py::const_));
+      obj.def("Uidxs", py::overload_cast<const Eigen::VectorXi&>(&Derived::Uidxs, py::const_));
+
+      obj.def("add_idx",
+              py::overload_cast<const std::string & , const Eigen::VectorXi&>(&Derived::add_idx));
+      obj.def("get_idxs", &Derived::get_idxs);
+      obj.def("set_idxs", &Derived::set_idxs);
+      obj.def("idx", &Derived::idx);
+
+
+
     }
   };
 
