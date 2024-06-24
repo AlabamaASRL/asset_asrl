@@ -1,4 +1,4 @@
-PythonVersions=("3.7" "3.8" "3.9" "3.10" "3.11")
+PythonVersions=("3.7" "3.8" "3.9" "3.10" "3.11" "3.12")
 ncores=10
 branch=master
 
