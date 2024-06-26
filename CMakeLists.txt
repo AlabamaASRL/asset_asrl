@@ -255,7 +255,7 @@ endif()
 
 find_package(MKL REQUIRED)
 
-find_package(Python ${PYVERSION_EXACT} REQUIRED COMPONENTS Interpreter Development)
+#find_package(Python ${PYVERSION_EXACT} REQUIRED COMPONENTS Interpreter Development)
 
 # Set dependency variables
 set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${MKL_INCLUDE_DIRS})
