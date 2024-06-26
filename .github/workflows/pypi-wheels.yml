@@ -9,7 +9,7 @@ on:
 jobs:
  build_windows:
     env:
-      WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/19078/w_BaseKit_p_2023.0.0.25940_offline.exe
+      WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/e83a8e64-04fc-45df-85c6-c2208d03bdb5/w_BaseKit_p_2024.2.0.635_offline.ex
 
       WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel
       VS_VER: vs2022
