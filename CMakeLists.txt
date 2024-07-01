@@ -199,6 +199,13 @@ add_definitions(-DASSET_OS="${CMAKE_SYSTEM_NAME}")
 add_definitions(-DASSET_OSVERSION="${CMAKE_SYSTEM_VERSION}")
 add_definitions(-DFMT_HEADER_ONLY)
 
+if(WIN32)
+## See : https://developercommunity.visualstudio.com/t/Access-violation-in-_Thrd_yield-after-up/10664660#T-N10669129-N10678728
+add_definitions(-D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
+endif()
+
+
+
 ################################################################################
 ###################### Find and set our dependencies ###########################
 ################################################################################
