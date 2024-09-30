@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(ASSET VERSION 0.5.1 LANGUAGES CXX)
+project(ASSET VERSION 0.5.2 LANGUAGES CXX)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 set( CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
@@ -216,6 +216,7 @@ endif()
 # Set up submodule dependencies
 include_directories(dep/eigen)
 include_directories(dep/fmt/include)
+include_directories(dep/autodiff)
 
 add_subdirectory(dep)
 

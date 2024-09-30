@@ -65,17 +65,21 @@ ASSET is distributed under the permissive Apache 2.0 license that can be found i
 The license and copyright notices of ASSET's source and redistributable dependencies are shown below. The full text for each respective license can be found in the 
 `notices <https://github.com/AlabamaASRL/asset_asrl/tree/master/notices>`_ folder on the Github repo.
 
-    Pybind11     - BSD License : Copyright (c) 2016 Wenzel Jakob <wenzel.jakob@epfl.ch>, All rights reserved.
+    Pybind11      - BSD License : Copyright (c) 2016 Wenzel Jakob <wenzel.jakob@epfl.ch>, All rights reserved.
 
-    Intel MKL    - Intel Simplified Software License : Copyright (c) 2022 Intel Corporation.
+    Intel MKL     - Intel Simplified Software License : Copyright (c) 2022 Intel Corporation.
 
-    Eigen        - MPL-2.0 License : Copyright (c) Eigen Developers
+    Eigen         - MPL-2.0 License : Copyright (c) Eigen Developers
 
-    fmt          - MIT License : Copyright (c) 2012 - present, Victor Zverovich
+    fmt           - MIT License : Copyright (c) 2012 - present, Victor Zverovich
 
-    ctpl         - Apache 2.0 License : Copyright (C) 2014 by Vitaliy Vitsentiy
+    ctpl          - Apache 2.0 License : Copyright (C) 2014 by Vitaliy Vitsentiy
 
-    rubber_types - MIT License : Copyright (C) 2014 Andreas J. Herrmann
+    autodiff      - MIT License : Copyright (c) 2018–2024 Allan Leal
+
+    boost-threads - Boost Software License : Copyright (c) 2003-2022
+
+    rubber_types  - MIT License : Copyright (C) 2014 Andreas J. Herrmann
 
     kepler propagator - MIT License : Copyright (C) 2014 Darin Koblick
 
