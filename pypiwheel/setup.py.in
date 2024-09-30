@@ -48,7 +48,9 @@ def main():
         license = 'Apache 2.0',
         url ='https://github.com/AlabamaASRL/asset_asrl',
         data_files=[
-          ('asset_asrl',['asset_asrl/asset-apache2.txt','asset_asrl/eigen-mpl2.txt','asset_asrl/fmt-mit.txt','asset_asrl/intel-issl.pdf','asset_asrl/pybind11-bsd.txt','asset_asrl/lambert.txt','asset_asrl/keplerprop.txt']),
+          ('asset_asrl',['asset_asrl/asset-apache2.txt','asset_asrl/eigen-mpl2.txt','asset_asrl/fmt-mit.txt','asset_asrl/intel-issl.pdf','asset_asrl/pybind11-bsd.txt'
+          ,'asset_asrl/autodiff-mit.txt','asset_asrl/boost-threads.txt'
+          ,'asset_asrl/lambert.txt','asset_asrl/keplerprop.txt']),
         ],
         ext_modules=[
             Precompiled(
