@@ -1568,6 +1568,21 @@ namespace ASSET {
         func.derived().jacobian(x, jx);
         return jx;
       });
+
+      obj.def("compute_jacobian", [](const Derived& func, ConstEigenRef<Input<double>> x) {
+          if (x.size() != func.IRows())
+              throw std::invalid_argument("Incorrectly sized input to function");
+
+          Output<double> fx(func.ORows());
+          fx.setZero();
+
+          Jacobian<double> jx(func.ORows(), func.IRows());
+          jx.setZero();
+          func.derived().compute_jacobian(x,fx, jx);
+          return std::tuple{ fx, jx };
+          });
+
+
       obj.def("adjointgradient",
               [](const Derived& func, ConstEigenRef<Input<double>> x, ConstEigenRef<Output<double>> lm) {
                 if (x.size() != func.IRows())
