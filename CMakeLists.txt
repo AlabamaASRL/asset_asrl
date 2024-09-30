@@ -216,6 +216,7 @@ endif()
 # Set up submodule dependencies
 include_directories(dep/eigen)
 include_directories(dep/fmt/include)
+include_directories(dep/autodiff)
 
 add_subdirectory(dep)
 
