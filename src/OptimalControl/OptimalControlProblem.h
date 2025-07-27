@@ -3,6 +3,7 @@
 #include "LinkFunction.h"
 #include "ODEPhaseBase.h"
 #include "pch.h"
+#include "InterfaceTypes.h"
 
 namespace ASSET {
 
@@ -29,7 +30,12 @@ namespace ASSET {
     using PhaseIndexPackPtr =
         std::tuple<PhasePtr, std::string, Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXi>;
 
+    
+    using PhaseRefType = std::variant<int, PhasePtr, std::string>;
 
+    using PhasePack = std::tuple<PhaseRefType, RegionType, VarIndexType, VarIndexType, VarIndexType>;
+
+   
     std::vector<PhasePtr> phases;
     std::vector<std::string> phase_names;
 
@@ -44,10 +50,56 @@ namespace ASSET {
     std::map<int, LinkObjective>  LinkObjectives;
 
     VectorXd ActiveLinkParams;
-    void setLinkParams(VectorXd lp) {
-      this->ActiveLinkParams = lp;
-      this->numLinkParams = lp.size();
+    Eigen::VectorXd LPUnits;
+    bool AutoScaling = false;
+    bool SyncObjectiveScales = true;
+
+    std::map<std::string, Eigen::VectorXi> LPidxs;
+
+
+    void setLinkParams(VectorXd parm, VectorXd units) {
+        if (units.size() != parm.size()) {
+            throw std::invalid_argument("Size of link parameter vector and scaling units vector must match");
+        }
+
+        this->ActiveLinkParams = parm;
+        this->numLinkParams = parm.size();
+        this->resetTranscription();
+        this->LPUnits = units;
     }
+    void setLinkParams(VectorXd parm) {
+        VectorXd units(parm.size());
+        units.setOnes();
+        return this->setLinkParams(parm, units);
+    }
+
+
+    void setLinkParamVgroups(std::map<std::string, Eigen::VectorXi> lpidxs) {
+        this->LPidxs = lpidxs;
+    }
+    void addLinkParamVgroups(std::map<std::string, Eigen::VectorXi> lpidxs) {
+        for (auto& [key, value] : lpidxs) {
+            this->LPidxs[key] = value;
+        }
+    }
+    void addLinkParamVgroup(Eigen::VectorXi idx, std::string key) {
+        this->LPidxs[key] = idx;
+    }
+    void addLinkParamVgroup(int idx, std::string key) {
+        VectorXi tmp(1);
+        tmp << idx;
+        this->LPidxs[key] = tmp;
+    }
+    VectorXi getLPidx(std::string key) const {
+        if (LPidxs.count(key) == 0) {
+            throw std::invalid_argument(
+                fmt::format("No LinkParam variable index group with name: {0:} exists.", key));
+        }
+        return this->LPidxs.at(key);
+    }
+
+
+
     VectorXd returnLinkParams() {
       return this->ActiveLinkParams;
     }
@@ -97,6 +149,18 @@ namespace ASSET {
     PSIOPT::ConvergenceFlags MeshAbortFlag = PSIOPT::ConvergenceFlags::DIVERGING;
 
     bool MeshConverged = false;
+
+
+    void setAutoScaling(bool autoscale, bool applytophases) {
+        this->AutoScaling = autoscale;
+        if (applytophases) {
+            for (auto phase : this->phases) {
+                phase->setAutoScaling(autoscale);
+            }
+        }
+        this->resetTranscription();
+        this->invalidatePostOptInfo();
+    }
 
     void setAdaptiveMesh(bool amesh, bool applytophases) {
       this->AdaptiveMesh = amesh;
@@ -209,6 +273,22 @@ namespace ASSET {
       return int(ptrit - phases.begin());
     }
 
+    int getPhaseNum(PhaseRefType phase_t) {
+        int phasenum;
+
+        if (std::holds_alternative<int>(phase_t)) {
+            phasenum = std::get<int>(phase_t);
+        }
+        else if (std::holds_alternative<PhasePtr>(phase_t)) {
+            phasenum = this->getPhaseNum(std::get<PhasePtr>(phase_t));
+        }
+        else if (std::holds_alternative<std::string>(phase_t)) {
+            phasenum = this->getPhaseNum(std::get<std::string>(phase_t));
+        }
+        return phasenum;
+    }
+
+
     std::vector<VectorXi> ptl_from_phase_names(std::vector<std::vector<std::string>> ptlnamevec) {
       std::vector<VectorXi> ptl;
       for (auto& appl: ptlnamevec) {
@@ -247,149 +327,177 @@ namespace ASSET {
       return this->phases[ith];
     }
 
-    /////////////////////////////////////////////////
+    
 
-    template<class FuncType, class PackType, class OutType>
-    OutType makeLinkFunc(FuncType f, std::vector<PackType> packs, VectorXi lv) {
+   
 
-      int npacks = packs.size();
-      std::vector<Eigen::VectorXi> PTL;
-      VectorXi phasenums(npacks);
-      Eigen::Matrix<PhaseRegionFlags, -1, 1> RegFlags(npacks);
-      std::vector<Eigen::VectorXi> xtvs(npacks);
-      std::vector<Eigen::VectorXi> opvs(npacks);
-      std::vector<Eigen::VectorXi> spvs(npacks);
+    VectorXi getLPVars(VarIndexType LPvars_t) const {
 
-      for (int i = 0; i < npacks; i++) {
-        if constexpr (std::is_same<PackType, PhaseIndexPack>::value) {
-          phasenums[i] = std::get<0>(packs[i]);
-        } else {
-          phasenums[i] = this->getPhaseNum(std::get<0>(packs[i]));
+        VectorXi LPvars;
+
+        if (std::holds_alternative<int>(LPvars_t)) {
+            LPvars.resize(1);
+            LPvars[0] = std::get<int>(LPvars_t);
+        }
+        else if (std::holds_alternative<VectorXi>(LPvars_t)) {
+            LPvars = std::get<VectorXi>(LPvars_t);
+        }
+        else if (std::holds_alternative<std::string>(LPvars_t)) {
+            LPvars = this->getLPidx(std::get<std::string>(LPvars_t));
+        }
+        else if (std::holds_alternative<std::vector<std::string>>(LPvars_t)) {
+            std::vector<VectorXi> varvec;
+            int size = 0;
+            auto tmpvars = std::get<std::vector<std::string>>(LPvars_t);
+            for (auto tmpv : tmpvars) {
+                varvec.push_back(this->getLPidx(tmpv));
+                size += varvec.back().size();
+            }
+            LPvars.resize(size);
+            int next = 0;
+            for (auto varv : varvec) {
+                for (int i = 0; i < varv.size(); i++) {
+                    LPvars[next] = varv[i];
+                    next++;
+                }
+            }
         }
 
-        RegFlags[i] = strto_PhaseRegionFlag(std::get<1>(packs[i]));
-        xtvs[i] = std::get<2>(packs[i]);
-        opvs[i] = std::get<3>(packs[i]);
-        spvs[i] = std::get<4>(packs[i]);
-      }
-
-      PTL.push_back(phasenums);
-      std::vector<Eigen::VectorXi> lvs;
-      lvs.push_back(lv);
-      return OutType(f, RegFlags, PTL, xtvs, opvs, spvs, lvs);
-    }
-    template<class FuncType, class PhaseType, class OutType>
-    OutType makeLinkFunc(FuncType f,
-                         PhaseType phase0,
-                         std::string reg0,
-                         Eigen::VectorXi xtv0,
-                         Eigen::VectorXi opv0,
-                         Eigen::VectorXi spv0,
-                         PhaseType phase1,
-                         std::string reg1,
-                         Eigen::VectorXi xtv1,
-                         Eigen::VectorXi opv1,
-                         Eigen::VectorXi spv1,
-                         VectorXi lv) {
-
-      auto pack0 = std::tuple {phase0, reg0, xtv0, opv0, spv0};
-      auto pack1 = std::tuple {phase1, reg1, xtv1, opv1, spv1};
-      auto packs = std::vector {pack0, pack1};
-      return this->makeLinkFunc<FuncType, decltype(pack0), OutType>(f, packs, lv);
+        return LPvars;
     }
 
-    template<class FuncType, class PhaseType, class OutType>
-    OutType makeLinkFunc(FuncType f,
-                         PhaseType phase0,
-                         std::string reg0,
-                         Eigen::VectorXi xtv0,
-                         Eigen::VectorXi opv0,
-                         Eigen::VectorXi spv0,
-                         PhaseType phase1,
-                         std::string reg1,
-                         Eigen::VectorXi xtv1,
-                         Eigen::VectorXi opv1,
-                         Eigen::VectorXi spv1) {
 
-      auto pack0 = std::tuple {phase0, reg0, xtv0, opv0, spv0};
-      auto pack1 = std::tuple {phase1, reg1, xtv1, opv1, spv1};
-      auto packs = std::vector {pack0, pack1};
-      Eigen::VectorXi lv;
-      lv.resize(0);
-      return this->makeLinkFunc<FuncType, decltype(pack0), OutType>(f, packs, lv);
+    template<class FuncHolder, class FuncType>
+    FuncHolder makeFuncImpl(FuncType fun, std::vector<PhasePack> packs, VarIndexType lv, ScaleType scale_t) {
+
+        int npacks = packs.size();
+        std::vector<Eigen::VectorXi> PTL;
+        VectorXi phasenums(npacks);
+        Eigen::Matrix<PhaseRegionFlags, -1, 1> RegFlags(npacks);
+        std::vector<Eigen::VectorXi> xtvs(npacks);
+        std::vector<Eigen::VectorXi> opvs(npacks);
+        std::vector<Eigen::VectorXi> spvs(npacks);
+
+
+        for (int i = 0; i < npacks; i++) {
+
+            auto phase_t = std::get<0>(packs[i]); // Name of phase, either phaseptr,int, or string
+            int phasenum = getPhaseNum(phase_t);
+
+            if (phasenum < 0 || phasenum >= this->phases.size()) {
+                throw std::invalid_argument(fmt::format("Function references non - existent phase : {0:}\n",phasenum));
+            }
+
+
+            phasenums[i] = phasenum;
+
+            RegFlags[i] = this->phases[phasenum]->getRegion(std::get<1>(packs[i]));
+            xtvs[i] = this->phases[phasenum]->getXtUPVars(RegFlags[i],std::get<2>(packs[i]));
+            opvs[i] = this->phases[phasenum]->getOPVars(RegFlags[i], std::get<3>(packs[i]));
+            spvs[i] = this->phases[phasenum]->getSPVars(RegFlags[i], std::get<4>(packs[i]));
+        }
+
+        std::vector<Eigen::VectorXi> lvs;
+        lvs.push_back(getLPVars(lv));
+        PTL.push_back(phasenums);
+
+        auto func = FuncHolder(fun, RegFlags, PTL, xtvs, opvs, spvs, lvs, scale_t);
+        return func;
+
     }
 
-    template<class FuncType, class PhaseType, class OutType>
-    OutType makeLinkFunc(FuncType f,
-                         PhaseType phase0,
-                         std::string reg0,
-                         Eigen::VectorXi v0,
-                         PhaseType phase1,
-                         std::string reg1,
-                         Eigen::VectorXi v1,
-                         Eigen::VectorXi lv) {
 
-      Eigen::VectorXi xtv0, opv0, spv0, xtv1, opv1, spv1;
+    template<class FuncHolder, class FuncType>
+    FuncHolder makeFuncImpl(FuncType fun, PhaseRefType p0, RegionType reg0, VarIndexType XtUV0, VarIndexType OPV0, VarIndexType SPV0,
+        PhaseRefType p1, RegionType reg1, VarIndexType XtUV1, VarIndexType OPV1, VarIndexType SPV1,
+        VarIndexType lv, ScaleType scale_t) {
 
-      strto_PhaseRegionFlag(reg0);
-      strto_PhaseRegionFlag(reg1);
+        auto pack0 = PhasePack{ p0,reg0,XtUV0,OPV0,SPV0 };
+        auto pack1 = PhasePack{ p1,reg1,XtUV1,OPV1,SPV1 };
 
-      if (reg0 == "ODEParams")
-        opv0 = v0;
-      else if (reg0 == "StaticParams")
-        spv0 = v0;
-      else
-        xtv0 = v0;
-
-      if (reg1 == "ODEParams")
-        opv1 = v1;
-      else if (reg1 == "StaticParams")
-        spv1 = v1;
-      else
-        xtv1 = v1;
-
-
-      auto pack0 = std::tuple {phase0, reg0, xtv0, opv0, spv0};
-      auto pack1 = std::tuple {phase1, reg1, xtv1, opv1, spv1};
-      auto packs = std::vector {pack0, pack1};
-      return this->makeLinkFunc<FuncType, decltype(pack0), OutType>(f, packs, lv);
+        auto packs = std::vector{ pack0,pack1 };
+        return makeFuncImpl<FuncHolder, FuncType>(fun, packs, lv, scale_t);
     }
-    template<class FuncType, class PhaseType, class OutType>
-    OutType makeLinkFunc(FuncType f,
-                         PhaseType phase0,
-                         std::string reg0,
-                         Eigen::VectorXi v0,
-                         PhaseType phase1,
-                         std::string reg1,
-                         Eigen::VectorXi v1) {
 
-      Eigen::VectorXi xtv0, opv0, spv0, xtv1, opv1, spv1;
+    template<class FuncHolder, class FuncType>
+    FuncHolder makeFuncImpl(FuncType fun, 
+        PhaseRefType p0, RegionType reg0_t, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1_t, VarIndexType v1, 
+        VarIndexType lv, ScaleType scale_t) {
 
-      strto_PhaseRegionFlag(reg0);
-      strto_PhaseRegionFlag(reg1);
+        VarIndexType xtv0, opv0, spv0, xtv1, opv1, spv1;
 
-      if (reg0 == "ODEParams")
-        opv0 = v0;
-      else if (reg0 == "StaticParams")
-        spv0 = v0;
-      else
-        xtv0 = v0;
+        xtv0 = VectorXi();
+        opv0 = VectorXi();
+        spv0 = VectorXi();
 
-      if (reg1 == "ODEParams")
-        opv1 = v1;
-      else if (reg1 == "StaticParams")
-        spv1 = v1;
-      else
-        xtv1 = v1;
+        xtv1 = VectorXi();
+        opv1 = VectorXi();
+        spv1 = VectorXi();
 
 
-      auto pack0 = std::tuple {phase0, reg0, xtv0, opv0, spv0};
-      auto pack1 = std::tuple {phase1, reg1, xtv1, opv1, spv1};
-      auto packs = std::vector {pack0, pack1};
-      Eigen::VectorXi lv;
-      lv.resize(0);
-      return this->makeLinkFunc<FuncType, decltype(pack0), OutType>(f, packs, lv);
+        PhaseRegionFlags reg0,reg1;
+
+
+        if (std::holds_alternative<PhaseRegionFlags>(reg0_t)) {
+            reg0 = std::get<PhaseRegionFlags>(reg0_t);
+        }
+        else if (std::holds_alternative<std::string>(reg0_t)) {
+            reg0 = strto_PhaseRegionFlag(std::get<std::string>(reg0_t));
+        }
+
+        if (std::holds_alternative<PhaseRegionFlags>(reg1_t)) {
+            reg1 = std::get<PhaseRegionFlags>(reg1_t);
+        }
+        else if (std::holds_alternative<std::string>(reg1_t)) {
+            reg1 = strto_PhaseRegionFlag(std::get<std::string>(reg1_t));
+        }
+
+
+        
+
+        if (reg0 == ODEParams)
+            opv0 = v0;
+        else if (reg0 == StaticParams)
+            spv0 = v0;
+        else
+            xtv0 = v0;
+
+        if (reg1 == ODEParams)
+            opv1 = v1;
+        else if (reg1 == StaticParams)
+            spv1 = v1;
+        else
+            xtv1 = v1;
+
+
+        auto pack0 = PhasePack{ p0, reg0, xtv0, opv0, spv0 };
+        auto pack1 = PhasePack{ p1, reg1, xtv1, opv1, spv1 };
+        auto packs = std::vector{ pack0, pack1 };
+
+        return makeFuncImpl<FuncHolder, FuncType>(fun, packs, lv, scale_t);
     }
+
+
+    template<class FuncHolder, class FuncType>
+    FuncHolder makeFuncImpl(FuncType fun,
+        PhaseRefType p0, RegionType reg0_t, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1_t, VarIndexType v1,
+        ScaleType scale_t) {
+
+        VectorXi empty;
+
+        return makeFuncImpl<FuncHolder, FuncType>(fun,
+            p0, reg0_t, v0,
+            p1, reg1_t, v1,
+            empty, scale_t);
+    }
+
+
+    /////////////////////////////////////////////////
+
+
+    
 
     template<class FuncMap>
     void removeFuncImpl(FuncMap& map, int index, const std::string& funcstr) {
@@ -426,131 +534,152 @@ namespace ASSET {
 
 
     /////////////// THE NEW EQUALCON INTERFACE//////////////////////////////
+    
 
-    int addLinkEqualCon(VectorFunctionalX lc, std::vector<PhaseIndexPack> packs, VectorXi lv) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, PhaseIndexPack, LinkConstraint>(lc, packs, lv);
-      return this->addLinkEqualCon(Func);
-    }
-    int addLinkEqualCon(VectorFunctionalX lc, std::vector<PhaseIndexPackPtr> packs, VectorXi lv) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, PhaseIndexPackPtr, LinkConstraint>(lc, packs, lv);
-      return this->addLinkEqualCon(Func);
+    int addLinkEqualCon(VectorFunctionalX lc, std::vector<PhasePack> packs, VarIndexType lv, ScaleType scale_t) {
+        auto Func = this->makeFuncImpl<LinkConstraint, VectorFunctionalX>(lc, packs, lv,scale_t);
+        return addFuncImpl(Func, this->LinkEqualities, "Link Equality Constraint");
     }
 
+    int addLinkEqualCon(VectorFunctionalX lc, 
+        PhaseRefType p0, RegionType reg0, VarIndexType XtUV0, VarIndexType OPV0, VarIndexType SPV0,
+        PhaseRefType p1, RegionType reg1, VarIndexType XtUV1, VarIndexType OPV1, VarIndexType SPV1,
+        VarIndexType lv, ScaleType scale_t) {
 
-    int addLinkEqualCon(VectorFunctionalX lc,
-                        int phase0,
-                        std::string reg0,
-                        Eigen::VectorXi xtv0,
-                        Eigen::VectorXi opv0,
-                        Eigen::VectorXi spv0,
-                        int phase1,
-                        std::string reg1,
-                        Eigen::VectorXi xtv1,
-                        Eigen::VectorXi opv1,
-                        Eigen::VectorXi spv1,
-                        VectorXi lv) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, int, LinkConstraint>(
-          lc, phase0, reg0, xtv0, opv0, spv0, phase1, reg1, xtv1, opv1, spv1, lv);
-      return this->addLinkEqualCon(Func);
+        auto Func = this->makeFuncImpl<LinkConstraint, VectorFunctionalX>(lc,
+             p0,  reg0,  XtUV0,  OPV0,  SPV0,
+             p1,  reg1,  XtUV1,  OPV1,  SPV1,
+             lv,  scale_t);
+        return addFuncImpl(Func, this->LinkEqualities, "Link Equality Constraint");
     }
-    int addLinkEqualCon(VectorFunctionalX lc,
-                        PhasePtr phase0,
-                        std::string reg0,
-                        Eigen::VectorXi xtv0,
-                        Eigen::VectorXi opv0,
-                        Eigen::VectorXi spv0,
-                        PhasePtr phase1,
-                        std::string reg1,
-                        Eigen::VectorXi xtv1,
-                        Eigen::VectorXi opv1,
-                        Eigen::VectorXi spv1,
-                        VectorXi lv) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, PhasePtr, LinkConstraint>(
-          lc, phase0, reg0, xtv0, opv0, spv0, phase1, reg1, xtv1, opv1, spv1, lv);
-      return this->addLinkEqualCon(Func);
-    }
-
 
     int addLinkEqualCon(VectorFunctionalX lc,
-                        int phase0,
-                        std::string reg0,
-                        Eigen::VectorXi xtv0,
-                        Eigen::VectorXi opv0,
-                        Eigen::VectorXi spv0,
-                        int phase1,
-                        std::string reg1,
-                        Eigen::VectorXi xtv1,
-                        Eigen::VectorXi opv1,
-                        Eigen::VectorXi spv1) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, int, LinkConstraint>(
-          lc, phase0, reg0, xtv0, opv0, spv0, phase1, reg1, xtv1, opv1, spv1);
-      return this->addLinkEqualCon(Func);
+        PhaseRefType p0, RegionType reg0, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1, VarIndexType v1,
+        VarIndexType lv, ScaleType scale_t) {
+
+        auto Func = this->makeFuncImpl<LinkConstraint, VectorFunctionalX>(lc,
+            p0, reg0, v0, 
+            p1, reg1, v1, 
+            lv, scale_t);
+        return addFuncImpl(Func, this->LinkEqualities, "Link Equality Constraint");
     }
     int addLinkEqualCon(VectorFunctionalX lc,
-                        PhasePtr phase0,
-                        std::string reg0,
-                        Eigen::VectorXi xtv0,
-                        Eigen::VectorXi opv0,
-                        Eigen::VectorXi spv0,
-                        PhasePtr phase1,
-                        std::string reg1,
-                        Eigen::VectorXi xtv1,
-                        Eigen::VectorXi opv1,
-                        Eigen::VectorXi spv1) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, PhasePtr, LinkConstraint>(
-          lc, phase0, reg0, xtv0, opv0, spv0, phase1, reg1, xtv1, opv1, spv1);
-      return this->addLinkEqualCon(Func);
+        PhaseRefType p0, RegionType reg0, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1, VarIndexType v1,
+         ScaleType scale_t) {
+
+        auto Func = this->makeFuncImpl<LinkConstraint, VectorFunctionalX>(lc,
+            p0, reg0, v0,
+            p1, reg1, v1,
+           scale_t);
+        return addFuncImpl(Func, this->LinkEqualities, "Link Equality Constraint");
+    }
+
+    std::vector<int> 
+        addForwardLinkEqualCon(PhaseRefType iphase_t, PhaseRefType fphase_t, VarIndexType vars,
+            ScaleType scale_t) {
+
+        int iphase = getPhaseNum(iphase_t);
+        int fphase = getPhaseNum(fphase_t);
+
+
+
+        if (iphase < 0)
+            iphase = (this->phases.size() + iphase);
+        if (fphase < 0)
+            fphase = (this->phases.size() + fphase);
+
+        if (iphase < 0 || iphase >= this->phases.size()) {
+            throw std::invalid_argument(fmt::format("Link Equality constraint references non-existent phase:{0:}\n",iphase));
+        }
+
+        int vsize = this->phases[iphase]->getXtUPVars(Front, vars).size();
+
+        auto args = Arguments<-1>(2 * vsize);
+        auto func = args.head<-1>(vsize) - args.tail<-1>(vsize);
+
+        std::vector<int> idxs;
+        for (int i = iphase; i < fphase; i++) {
+            
+            int idx = this->addLinkEqualCon(func, i, "Last", vars, i + 1, "First", vars,scale_t);
+
+            idxs.push_back(idx);
+        }
+        
+        return idxs;
     }
 
 
-    int addLinkEqualCon(VectorFunctionalX lc,
-                        int phase0,
-                        std::string reg0,
-                        Eigen::VectorXi xtv0,
-                        int phase1,
-                        std::string reg1,
-                        Eigen::VectorXi xtv1,
-                        Eigen::VectorXi lv) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, int, LinkConstraint>(
-          lc, phase0, reg0, xtv0, phase1, reg1, xtv1, lv);
-      return this->addLinkEqualCon(Func);
-    }
-    int addLinkEqualCon(VectorFunctionalX lc,
-                        PhasePtr phase0,
-                        std::string reg0,
-                        Eigen::VectorXi xtv0,
-                        PhasePtr phase1,
-                        std::string reg1,
-                        Eigen::VectorXi xtv1,
-                        Eigen::VectorXi lv) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, PhasePtr, LinkConstraint>(
-          lc, phase0, reg0, xtv0, phase1, reg1, xtv1, lv);
-      return this->addLinkEqualCon(Func);
+    int addDirectLinkEqualCon(PhaseRefType p0, RegionType reg0_t, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1_t, VarIndexType v1,
+        ScaleType scale_t) {
+
+        int phase = getPhaseNum(p0);
+
+        if (phase < 0)
+            phase = (this->phases.size() + phase);
+        
+        if (phase < 0 || phase >= this->phases.size()) {
+            throw std::invalid_argument(fmt::format("Link Equality constraint references non-existent phase:{0:}\n", phase));
+        }
+
+        PhaseRegionFlags reg0 = get_PhaseRegion(reg0_t);
+
+        int vsize = this->phases[phase]->getXtUPVars(reg0, v0).size();
+
+        auto args = Arguments<-1>(2 * vsize);
+        auto func = args.head<-1>(vsize) - args.tail<-1>(vsize);
+
+        return this->addLinkEqualCon(func, p0, reg0_t, v0, p1, reg1_t, v1, scale_t);
+
     }
 
+    std::vector<int> addParamLinkEqualCon(PhaseRefType iphase_t, PhaseRefType fphase_t, RegionType reg0_t, VarIndexType vars, ScaleType scale_t) {
 
-    int addLinkEqualCon(VectorFunctionalX lc,
-                        int phase0,
-                        std::string reg0,
-                        Eigen::VectorXi xtv0,
-                        int phase1,
-                        std::string reg1,
-                        Eigen::VectorXi xtv1) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, int, LinkConstraint>(
-          lc, phase0, reg0, xtv0, phase1, reg1, xtv1);
-      return this->addLinkEqualCon(Func);
+        PhaseRegionFlags reg0 = get_PhaseRegion(reg0_t);
+
+        if (reg0 != ODEParams && reg0 != StaticParams) {
+            throw std::invalid_argument("Phase Region must be ODEParams or StaticParams");
+        }
+
+        int iphase = getPhaseNum(iphase_t);
+        int fphase = getPhaseNum(fphase_t);
+
+        if (iphase < 0)
+            iphase = (this->phases.size() + iphase);
+        if (fphase < 0)
+            fphase = (this->phases.size() + fphase);
+
+        if (iphase < 0 || iphase >= this->phases.size()) {
+            throw std::invalid_argument(fmt::format("Link Equality constraint references non-existent phase:{0:}\n", iphase));
+        }
+
+        std::vector<int> idxs;
+        for (int i = iphase; i < fphase; i++) {
+
+            int idx = this->addDirectLinkEqualCon(i, reg0, vars, i + 1, reg0, vars, scale_t);
+
+            idxs.push_back(idx);
+        }
+
+        return idxs;
+
     }
-    int addLinkEqualCon(VectorFunctionalX lc,
-                        PhasePtr phase0,
-                        std::string reg0,
-                        Eigen::VectorXi xtv0,
-                        PhasePtr phase1,
-                        std::string reg1,
-                        Eigen::VectorXi xtv1) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, PhasePtr, LinkConstraint>(
-          lc, phase0, reg0, xtv0, phase1, reg1, xtv1);
-      return this->addLinkEqualCon(Func);
+
+    
+    int addLinkParamEqualCon(VectorFunctionalX lc, std::vector<VectorXi> lpvs,ScaleType scale_t) {
+        std::vector<Eigen::VectorXi> empty;
+        return this->addLinkEqualCon(
+            LinkConstraint(lc, LinkFlags::LinkParams, empty, empty, empty, empty, lpvs, scale_t));
     }
+    int addLinkParamEqualCon(VectorFunctionalX lc, VectorXi lpv, ScaleType scale_t) {
+        std::vector<Eigen::VectorXi> lpvs;
+        lpvs.push_back(lpv);
+        return this->addLinkParamEqualCon(lc, lpvs,scale_t);
+    }
+
+    //////////////////////////////////////////////////////////////
 
 
     int addLinkEqualCon(VectorFunctionalX lc,
@@ -863,139 +992,60 @@ namespace ASSET {
     ////////////////////////////////////////////////////////////////////
 
     int addLinkInequalCon(LinkConstraint lc) {
-      return addFuncImpl(lc, this->LinkInequalities, "Link Inequality Constrain");
+      return addFuncImpl(lc, this->LinkInequalities, "Link Inequality Constraint");
     }
 
+    int addLinkInequalCon(VectorFunctionalX lc, std::vector<PhasePack> packs, VarIndexType lv, ScaleType scale_t) {
+        auto Func = this->makeFuncImpl<LinkConstraint, VectorFunctionalX>(lc, packs, lv, scale_t);
+        return addFuncImpl(Func, this->LinkInequalities, "Link Inequality Constraint");
+    }
+
+    int addLinkInequalCon(VectorFunctionalX lc,
+        PhaseRefType p0, RegionType reg0, VarIndexType XtUV0, VarIndexType OPV0, VarIndexType SPV0,
+        PhaseRefType p1, RegionType reg1, VarIndexType XtUV1, VarIndexType OPV1, VarIndexType SPV1,
+        VarIndexType lv, ScaleType scale_t) {
+
+        auto Func = this->makeFuncImpl<LinkConstraint, VectorFunctionalX>(lc,
+            p0, reg0, XtUV0, OPV0, SPV0,
+            p1, reg1, XtUV1, OPV1, SPV1,
+            lv, scale_t);
+        return addFuncImpl(Func, this->LinkInequalities, "Link Inequality Constraint");
+    }
+
+    int addLinkInequalCon(VectorFunctionalX lc,
+        PhaseRefType p0, RegionType reg0, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1, VarIndexType v1,
+        VarIndexType lv, ScaleType scale_t) {
+
+        auto Func = this->makeFuncImpl<LinkConstraint, VectorFunctionalX>(lc,
+            p0, reg0, v0,
+            p1, reg1, v1,
+            lv, scale_t);
+        return addFuncImpl(Func, this->LinkInequalities, "Link Inequality Constraint");
+    }
+    int addLinkInequalCon(VectorFunctionalX lc,
+        PhaseRefType p0, RegionType reg0, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1, VarIndexType v1,
+        ScaleType scale_t) {
+
+        auto Func = this->makeFuncImpl<LinkConstraint, VectorFunctionalX>(lc,
+            p0, reg0, v0,
+            p1, reg1, v1,
+            scale_t);
+        return addFuncImpl(Func, this->LinkInequalities, "Link Inequality Constraint");
+    }
+    int addLinkParamInequalCon(VectorFunctionalX lc, std::vector<VectorXi> lpvs, ScaleType scale_t) {
+        std::vector<Eigen::VectorXi> empty;
+        return this->addLinkInequalCon(
+            LinkConstraint(lc, LinkFlags::LinkParams, empty, empty, empty, empty, lpvs, scale_t));
+    }
+    int addLinkParamInequalCon(VectorFunctionalX lc, VectorXi lpv, ScaleType scale_t) {
+        std::vector<Eigen::VectorXi> lpvs;
+        lpvs.push_back(lpv);
+        return this->addLinkParamInequalCon(lc, lpvs, scale_t);
+    }
 
     
-    /////////////// THE NEW INEQUALCON INTERFACE//////////////////////////////
-
-    int addLinkInequalCon(VectorFunctionalX lc, std::vector<PhaseIndexPack> packs, VectorXi lv) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, PhaseIndexPack, LinkConstraint>(lc, packs, lv);
-      return this->addLinkInequalCon(Func);
-    }
-    int addLinkInequalCon(VectorFunctionalX lc, std::vector<PhaseIndexPackPtr> packs, VectorXi lv) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, PhaseIndexPackPtr, LinkConstraint>(lc, packs, lv);
-      return this->addLinkInequalCon(Func);
-    }
-
-
-    int addLinkInequalCon(VectorFunctionalX lc,
-                          int phase0,
-                          std::string reg0,
-                          Eigen::VectorXi xtv0,
-                          Eigen::VectorXi opv0,
-                          Eigen::VectorXi spv0,
-                          int phase1,
-                          std::string reg1,
-                          Eigen::VectorXi xtv1,
-                          Eigen::VectorXi opv1,
-                          Eigen::VectorXi spv1,
-                          VectorXi lv) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, int, LinkConstraint>(
-          lc, phase0, reg0, xtv0, opv0, spv0, phase1, reg1, xtv1, opv1, spv1, lv);
-      return this->addLinkInequalCon(Func);
-    }
-    int addLinkInequalCon(VectorFunctionalX lc,
-                          PhasePtr phase0,
-                          std::string reg0,
-                          Eigen::VectorXi xtv0,
-                          Eigen::VectorXi opv0,
-                          Eigen::VectorXi spv0,
-                          PhasePtr phase1,
-                          std::string reg1,
-                          Eigen::VectorXi xtv1,
-                          Eigen::VectorXi opv1,
-                          Eigen::VectorXi spv1,
-                          VectorXi lv) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, PhasePtr, LinkConstraint>(
-          lc, phase0, reg0, xtv0, opv0, spv0, phase1, reg1, xtv1, opv1, spv1, lv);
-      return this->addLinkInequalCon(Func);
-    }
-
-
-    int addLinkInequalCon(VectorFunctionalX lc,
-                          int phase0,
-                          std::string reg0,
-                          Eigen::VectorXi xtv0,
-                          Eigen::VectorXi opv0,
-                          Eigen::VectorXi spv0,
-                          int phase1,
-                          std::string reg1,
-                          Eigen::VectorXi xtv1,
-                          Eigen::VectorXi opv1,
-                          Eigen::VectorXi spv1) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, int, LinkConstraint>(
-          lc, phase0, reg0, xtv0, opv0, spv0, phase1, reg1, xtv1, opv1, spv1);
-      return this->addLinkInequalCon(Func);
-    }
-    int addLinkInequalCon(VectorFunctionalX lc,
-                          PhasePtr phase0,
-                          std::string reg0,
-                          Eigen::VectorXi xtv0,
-                          Eigen::VectorXi opv0,
-                          Eigen::VectorXi spv0,
-                          PhasePtr phase1,
-                          std::string reg1,
-                          Eigen::VectorXi xtv1,
-                          Eigen::VectorXi opv1,
-                          Eigen::VectorXi spv1) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, PhasePtr, LinkConstraint>(
-          lc, phase0, reg0, xtv0, opv0, spv0, phase1, reg1, xtv1, opv1, spv1);
-      return this->addLinkInequalCon(Func);
-    }
-
-
-    int addLinkInequalCon(VectorFunctionalX lc,
-                          int phase0,
-                          std::string reg0,
-                          Eigen::VectorXi xtv0,
-                          int phase1,
-                          std::string reg1,
-                          Eigen::VectorXi xtv1,
-                          Eigen::VectorXi lv) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, int, LinkConstraint>(
-          lc, phase0, reg0, xtv0, phase1, reg1, xtv1, lv);
-      return this->addLinkInequalCon(Func);
-    }
-    int addLinkInequalCon(VectorFunctionalX lc,
-                          PhasePtr phase0,
-                          std::string reg0,
-                          Eigen::VectorXi xtv0,
-                          PhasePtr phase1,
-                          std::string reg1,
-                          Eigen::VectorXi xtv1,
-                          Eigen::VectorXi lv) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, PhasePtr, LinkConstraint>(
-          lc, phase0, reg0, xtv0, phase1, reg1, xtv1, lv);
-      return this->addLinkInequalCon(Func);
-    }
-
-
-    int addLinkInequalCon(VectorFunctionalX lc,
-                          int phase0,
-                          std::string reg0,
-                          Eigen::VectorXi xtv0,
-                          int phase1,
-                          std::string reg1,
-                          Eigen::VectorXi xtv1) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, int, LinkConstraint>(
-          lc, phase0, reg0, xtv0, phase1, reg1, xtv1);
-      return this->addLinkInequalCon(Func);
-    }
-    int addLinkInequalCon(VectorFunctionalX lc,
-                          PhasePtr phase0,
-                          std::string reg0,
-                          Eigen::VectorXi xtv0,
-                          PhasePtr phase1,
-                          std::string reg1,
-                          Eigen::VectorXi xtv1) {
-      auto Func = this->makeLinkFunc<VectorFunctionalX, PhasePtr, LinkConstraint>(
-          lc, phase0, reg0, xtv0, phase1, reg1, xtv1);
-      return this->addLinkInequalCon(Func);
-    }
-
-
     //////////////////////////
 
 
@@ -1152,131 +1202,57 @@ namespace ASSET {
     int addLinkObjective(LinkObjective lc) {
       return addFuncImpl(lc, this->LinkObjectives, "Link Objective");
     }
-    /////////////// THE NEW INEQUALCON INTERFACE//////////////////////////////
 
-    int addLinkObjective(ScalarFunctionalX lc, std::vector<PhaseIndexPack> packs, VectorXi lv) {
-      auto Func = this->makeLinkFunc<ScalarFunctionalX, PhaseIndexPack, LinkObjective>(lc, packs, lv);
-      return this->addLinkObjective(Func);
-    }
-    int addLinkObjective(ScalarFunctionalX lc, std::vector<PhaseIndexPackPtr> packs, VectorXi lv) {
-      auto Func = this->makeLinkFunc<ScalarFunctionalX, PhaseIndexPackPtr, LinkObjective>(lc, packs, lv);
-      return this->addLinkObjective(Func);
-    }
+    
 
+    int addLinkObjective(ScalarFunctionalX lc, std::vector<PhasePack> packs, VarIndexType lv, ScaleType scale_t) {
+        auto Func = this->makeFuncImpl<LinkObjective, ScalarFunctionalX>(lc, packs, lv, scale_t);
+        return addFuncImpl(Func, this->LinkObjectives, "Link Objective");
+    }
 
     int addLinkObjective(ScalarFunctionalX lc,
-                         int phase0,
-                         std::string reg0,
-                         Eigen::VectorXi xtv0,
-                         Eigen::VectorXi opv0,
-                         Eigen::VectorXi spv0,
-                         int phase1,
-                         std::string reg1,
-                         Eigen::VectorXi xtv1,
-                         Eigen::VectorXi opv1,
-                         Eigen::VectorXi spv1,
-                         VectorXi lv) {
-      auto Func = this->makeLinkFunc<ScalarFunctionalX, int, LinkObjective>(
-          lc, phase0, reg0, xtv0, opv0, spv0, phase1, reg1, xtv1, opv1, spv1, lv);
-      return this->addLinkObjective(Func);
-    }
-    int addLinkObjective(ScalarFunctionalX lc,
-                         PhasePtr phase0,
-                         std::string reg0,
-                         Eigen::VectorXi xtv0,
-                         Eigen::VectorXi opv0,
-                         Eigen::VectorXi spv0,
-                         PhasePtr phase1,
-                         std::string reg1,
-                         Eigen::VectorXi xtv1,
-                         Eigen::VectorXi opv1,
-                         Eigen::VectorXi spv1,
-                         VectorXi lv) {
-      auto Func = this->makeLinkFunc<ScalarFunctionalX, PhasePtr, LinkObjective>(
-          lc, phase0, reg0, xtv0, opv0, spv0, phase1, reg1, xtv1, opv1, spv1, lv);
-      return this->addLinkObjective(Func);
+        PhaseRefType p0, RegionType reg0, VarIndexType XtUV0, VarIndexType OPV0, VarIndexType SPV0,
+        PhaseRefType p1, RegionType reg1, VarIndexType XtUV1, VarIndexType OPV1, VarIndexType SPV1,
+        VarIndexType lv, ScaleType scale_t) {
+
+        auto Func = this->makeFuncImpl<LinkObjective, ScalarFunctionalX>(lc,
+            p0, reg0, XtUV0, OPV0, SPV0,
+            p1, reg1, XtUV1, OPV1, SPV1,
+            lv, scale_t);
+        return addFuncImpl(Func, this->LinkObjectives, "Link Objective");
     }
 
-
     int addLinkObjective(ScalarFunctionalX lc,
-                         int phase0,
-                         std::string reg0,
-                         Eigen::VectorXi xtv0,
-                         Eigen::VectorXi opv0,
-                         Eigen::VectorXi spv0,
-                         int phase1,
-                         std::string reg1,
-                         Eigen::VectorXi xtv1,
-                         Eigen::VectorXi opv1,
-                         Eigen::VectorXi spv1) {
-      auto Func = this->makeLinkFunc<ScalarFunctionalX, int, LinkObjective>(
-          lc, phase0, reg0, xtv0, opv0, spv0, phase1, reg1, xtv1, opv1, spv1);
-      return this->addLinkObjective(Func);
+        PhaseRefType p0, RegionType reg0, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1, VarIndexType v1,
+        VarIndexType lv, ScaleType scale_t) {
+
+        auto Func = this->makeFuncImpl<LinkObjective, ScalarFunctionalX>(lc,
+            p0, reg0, v0,
+            p1, reg1, v1,
+            lv, scale_t);
+        return addFuncImpl(Func, this->LinkObjectives, "Link Objective");
     }
     int addLinkObjective(ScalarFunctionalX lc,
-                         PhasePtr phase0,
-                         std::string reg0,
-                         Eigen::VectorXi xtv0,
-                         Eigen::VectorXi opv0,
-                         Eigen::VectorXi spv0,
-                         PhasePtr phase1,
-                         std::string reg1,
-                         Eigen::VectorXi xtv1,
-                         Eigen::VectorXi opv1,
-                         Eigen::VectorXi spv1) {
-      auto Func = this->makeLinkFunc<ScalarFunctionalX, PhasePtr, LinkObjective>(
-          lc, phase0, reg0, xtv0, opv0, spv0, phase1, reg1, xtv1, opv1, spv1);
-      return this->addLinkObjective(Func);
-    }
+        PhaseRefType p0, RegionType reg0, VarIndexType v0,
+        PhaseRefType p1, RegionType reg1, VarIndexType v1,
+        ScaleType scale_t) {
 
-
-    int addLinkObjective(ScalarFunctionalX lc,
-                         int phase0,
-                         std::string reg0,
-                         Eigen::VectorXi xtv0,
-                         int phase1,
-                         std::string reg1,
-                         Eigen::VectorXi xtv1,
-                         Eigen::VectorXi lv) {
-      auto Func = this->makeLinkFunc<ScalarFunctionalX, int, LinkObjective>(
-          lc, phase0, reg0, xtv0, phase1, reg1, xtv1, lv);
-      return this->addLinkObjective(Func);
+        auto Func = this->makeFuncImpl<LinkObjective, ScalarFunctionalX>(lc,
+            p0, reg0, v0,
+            p1, reg1, v1,
+            scale_t);
+        return addFuncImpl(Func, this->LinkObjectives, "Link Objective");
     }
-    int addLinkObjective(ScalarFunctionalX lc,
-                         PhasePtr phase0,
-                         std::string reg0,
-                         Eigen::VectorXi xtv0,
-                         PhasePtr phase1,
-                         std::string reg1,
-                         Eigen::VectorXi xtv1,
-                         Eigen::VectorXi lv) {
-      auto Func = this->makeLinkFunc<ScalarFunctionalX, PhasePtr, LinkObjective>(
-          lc, phase0, reg0, xtv0, phase1, reg1, xtv1, lv);
-      return this->addLinkObjective(Func);
+    int addLinkParamObjective(ScalarFunctionalX lc, std::vector<VectorXi> lpvs, ScaleType scale_t) {
+        std::vector<Eigen::VectorXi> empty;
+        return this->addLinkObjective(
+            LinkObjective(lc, LinkFlags::LinkParams, empty, empty, empty, empty, lpvs, scale_t));
     }
-
-
-    int addLinkObjective(ScalarFunctionalX lc,
-                         int phase0,
-                         std::string reg0,
-                         Eigen::VectorXi xtv0,
-                         int phase1,
-                         std::string reg1,
-                         Eigen::VectorXi xtv1) {
-      auto Func = this->makeLinkFunc<ScalarFunctionalX, int, LinkObjective>(
-          lc, phase0, reg0, xtv0, phase1, reg1, xtv1);
-      return this->addLinkObjective(Func);
-    }
-    int addLinkObjective(ScalarFunctionalX lc,
-                         PhasePtr phase0,
-                         std::string reg0,
-                         Eigen::VectorXi xtv0,
-                         PhasePtr phase1,
-                         std::string reg1,
-                         Eigen::VectorXi xtv1) {
-      auto Func = this->makeLinkFunc<ScalarFunctionalX, PhasePtr, LinkObjective>(
-          lc, phase0, reg0, xtv0, phase1, reg1, xtv1);
-      return this->addLinkObjective(Func);
+    int addLinkParamObjective(ScalarFunctionalX lc, VectorXi lpv, ScaleType scale_t) {
+        std::vector<Eigen::VectorXi> lpvs;
+        lpvs.push_back(lpv);
+        return this->addLinkParamObjective(lc, lpvs, scale_t);
     }
 
 
@@ -1547,10 +1523,36 @@ namespace ASSET {
       return Allvals;
     }
 
-
-
+    Eigen::VectorXd returnLinkEqualConScales(int index) {
+        return this->LinkEqualities.at(index).OutputScales;
+    }
+    Eigen::VectorXd returnLinkInequalConScales(int index) {
+        return this->LinkInequalities.at(index).OutputScales;
+    }
+    Eigen::VectorXd returnLinkObjectiveScales(int index) {
+        return this->LinkObjectives.at(index).OutputScales;
+    }
     
     ///////////////////////////////////////////////////
+
+    Eigen::VectorXd get_input_scale(LinkFlags lflag, Eigen::Vector<PhaseRegionFlags, -1> regs,
+        std::vector<VectorXi> phases_to_link,
+        std::vector<VectorXi> XtUVars,
+        std::vector<VectorXi> OPVars,
+        std::vector<VectorXi> SPVars,
+        std::vector<VectorXi> LVars
+    );
+
+    std::vector<Eigen::VectorXd> get_test_inputs(LinkFlags lflag, Eigen::Vector<PhaseRegionFlags, -1> regs,
+        std::vector<VectorXi> phases_to_link,
+        std::vector<VectorXi> XtUVars,
+        std::vector<VectorXi> OPVars,
+        std::vector<VectorXi> SPVars,
+        std::vector<VectorXi> LVars
+    );
+
+
+
     void checkTranscriptions() {
       for (int i = 0; i < this->phases.size(); i++) {
         if (this->phases[i]->doTranscription) {
@@ -1706,6 +1708,12 @@ namespace ASSET {
 
     void transcribe_links();
 
+    void calc_auto_scales();
+
+    std::vector<double> get_objective_scales();
+    void update_objective_scales(double scale);
+
+
     void transcribe(bool showstats, bool showfuns);
 
     void transcribe() {
@@ -1798,7 +1806,12 @@ namespace ASSET {
           Start = this->numPhaseVars.segment(0, i).sum();
         Vars.segment(Start, this->numPhaseVars[i]) = this->phases[i]->makeSolverInput();
       }
-      Vars.tail(this->numLinkParams) = this->ActiveLinkParams;
+      if (this->AutoScaling  && this->LPUnits.size()>0) {
+          Vars.tail(this->numLinkParams) = this->ActiveLinkParams.cwiseQuotient(this->LPUnits);
+      }
+      else {
+          Vars.tail(this->numLinkParams) = this->ActiveLinkParams;
+      }
 
       return Vars;
     }
@@ -1810,7 +1823,12 @@ namespace ASSET {
           Start = this->numPhaseVars.segment(0, i).sum();
         this->phases[i]->collectSolverOutput(Vars.segment(Start, this->numPhaseVars[i]));
       }
-      this->ActiveLinkParams = Vars.tail(this->numLinkParams);
+      if (this->AutoScaling && this->LPUnits.size() > 0) {
+          this->ActiveLinkParams = Vars.tail(this->numLinkParams).cwiseProduct(this->LPUnits);
+      }
+      else {
+          this->ActiveLinkParams = Vars.tail(this->numLinkParams);
+      }
     }
     void collectSolverMultipliers(const VectorXd& EM, const VectorXd& IM) {
       this->MultipliersLoaded = true;
@@ -1875,6 +1893,10 @@ namespace ASSET {
 
 
     static void Build(py::module& m);
+    static void BuildNewLinkIterface(py::class_<OptimalControlProblem, std::shared_ptr<OptimalControlProblem>, OptimizationProblemBase>&);
+    static void BuildOldLinkIterface(py::class_<OptimalControlProblem, std::shared_ptr<OptimalControlProblem>, OptimizationProblemBase>&);
+
+
   };
 
 }  // namespace ASSET

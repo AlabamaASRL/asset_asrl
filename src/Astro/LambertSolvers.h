@@ -7,6 +7,43 @@ namespace ASSET {
   void LambertSolversBuild(FunctionRegistry& reg, py::module& m);
 
 
+
+
+  /*
+    Dario Izzo's Lambert algorithm vectorizable with Eigen::Array types. 2x increase in throughput with array size of 4 or 8.
+
+    Implementation based on Rudy OldenHuis's multiple-revolution matlab implementation https://github.com/rodyo/FEX-Lambert.
+    Reproducing his license here.
+
+    Copyright (c) 2018, Rody Oldenhuis
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice, this
+       list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the documentation
+       and/or other materials provided with the distribution.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+    ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+    The views and conclusions contained in the software and documentation are those
+    of the authors and should not be interpreted as representing official policies,
+    either expressed or implied, of this project.The MIT License (MIT)
+   
+  */
+  
   template<class Scalar, class WayBool, class IntType, class BranchBool, class ExitInt>
   void lambert_izzo_impl(const Vector3<Scalar>& R1dim,
                          const Vector3<Scalar>& R2dim,
@@ -20,11 +57,7 @@ namespace ASSET {
                          ExitInt& exint) {
 
 
-    /// <summary>
-    /// An implementation of Dario Izzo's Lambert algorithm vectorized with Eigen::Array types.  2x increase
-    /// in throughput with array size of 4 or 8.
-    /// </summary>
-    /// <returns></returns>
+    
 
     constexpr bool RisScalar = std::is_floating_point<Scalar>::value;
     constexpr bool WayisScalar = std::is_same<WayBool, bool>::value;
@@ -36,8 +69,7 @@ namespace ASSET {
     constexpr int maxiters = 20;
 
 
-    // Using Eigen's array types as scalars causes annoying issues w/ the cross and norm methods, rewriting
-    // here
+    // Using Eigen's array types as scalars causes annoying issues w/ the cross and norm methods, rewriting here
     auto cross = [](const Vector3<Scalar>& x1, const Vector3<Scalar>& x2, Vector3<Scalar>& out) {
       out[0] = (x1[1] * x2[2] - x1[2] * x2[1]);
       out[1] = (x2[0] * x1[2] - x2[2] * x1[0]);
@@ -45,7 +77,6 @@ namespace ASSET {
     };
 
     auto norm = [](const Vector3<Scalar>& x1) { return Scalar(sqrt(x1.dot(x1))); };
-
 
     Scalar lstar = norm(R1dim);
     Scalar vstar = sqrt(Scalar(mu) / lstar);
@@ -99,6 +130,7 @@ namespace ASSET {
 
     Scalar x1, x2, N;
 
+    // pre-calculating the initial guesses to remove log/tan calls, see OldenHuis github for origin
     if constexpr (NisScalar) {
       N = Scalar(double(Nin));
       if (int(Nin) == 0) {
@@ -108,20 +140,20 @@ namespace ASSET {
         // N = std::max(N, Nmax);
         if constexpr (BranchisScalar) {
           if (rightbranch) {
-            x1 = Scalar(tan(.7234 * Pi / 2.0));
-            x2 = Scalar(tan(.5234 * Pi / 2.0));
+            x1 = Scalar(2.154906449673281);
+            x2 = Scalar(1.076354179950629);
           } else {
-            x1 = Scalar(tan(-.5234 * Pi / 2.0));
-            x2 = Scalar(tan(-.2234 * Pi / 2.0));
+            x1 = Scalar(-1.0763541799506295);
+            x2 = Scalar(-0.36606678140737947);
           }
         } else {
           for (int i = 0; i < Scalar::SizeAtCompileTime; i++) {
             if (rightbranch[i]) {
-              x1[i] = tan(.7234 * Pi / 2.0);
-              x2[i] = tan(.5234 * Pi / 2.0);
+              x1[i] = 2.154906449673281;
+              x2[i] = 1.076354179950629;
             } else {
-              x1[i] = tan(-.5234 * Pi / 2.0);
-              x2[i] = tan(-.2234 * Pi / 2.0);
+              x1[i] = -1.0763541799506295;
+              x2[i] = -0.36606678140737947;
             }
           }
         }
@@ -135,19 +167,19 @@ namespace ASSET {
         } else {
           if constexpr (BranchisScalar) {
             if (rightbranch) {
-              x1[i] = tan(.7234 * Pi / 2.0);
-              x2[i] = tan(.5234 * Pi / 2.0);
+              x1[i] = 2.154906449673281;
+              x2[i] = 1.0763541799506295;
             } else {
-              x1[i] = tan(-.5234 * Pi / 2.0);
-              x2[i] = tan(-.2234 * Pi / 2.0);
+              x1[i] = -1.0763541799506295;
+              x2[i] = -0.36606678140737947;
             }
           } else {
             if (rightbranch[i]) {
-              x1[i] = tan(.7234 * Pi / 2.0);
-              x2[i] = tan(.5234 * Pi / 2.0);
+              x1[i] = 2.154906449673281;
+              x2[i] = 1.0763541799506295;
             } else {
-              x1[i] = tan(-.5234 * Pi / 2.0);
-              x2[i] = tan(-.2234 * Pi / 2.0);
+              x1[i] = -1.0763541799506295;
+              x2[i] = -0.36606678140737947;
             }
           }
         }
@@ -281,6 +313,8 @@ namespace ASSET {
       y1 = y2;
       y2 = yn;
       if constexpr (!RisScalar) {
+        // Fuzz y1 when vectorizing to prevent division by zero, not sure if this is the best way to do it
+        // Doesnt seem to hurt convergence or accuracy
         y1 += Scalar(1.0e-15);
       }
 

@@ -172,7 +172,6 @@ class test_InterpTables(unittest.TestCase):
         sf4 = Tab.sf()
         
         sfs = [sf1,sf2,sf3,sf4]
-        sfs = [sf4]
         lm = 2.0
         
         Valtol = 1.0e-6
@@ -209,6 +208,59 @@ class test_InterpTables(unittest.TestCase):
                         
                         self.assertLess(selffxerr, 1.0e-12)
                         self.assertLess(selfjxerr, 1.0e-12)  
+    def Interp4D_test(self,Func,dFunc,d2Func,xstab,ystab,zstab,wstab,xscheck,yscheck,zscheck,wscheck,cache = False,indexing = 'ij'):
+        
+        X,Y,Z,W = np.meshgrid(xstab, ystab,zstab,wstab,indexing='ij')
+        
+        F = Func(X,Y,Z,W)
+                
+        Tab = vf.InterpTable4D(xstab,ystab,zstab,wstab,F,kind='cubic',cache = cache)
+        args = Args(4)
+        
+        sf1 = Tab(args)
+        sf2 = Tab(args[0],args[1],args[2],args[3])
+        sf3 = Tab(args[0]*1,args[1]*1,args[2]*1,args[3]*1)
+        sf4 = Tab.sf()
+        
+        sfs = [sf1,sf2,sf3,sf4]
+        lm = 2.0
+        
+        Valtol = 1.0e-6
+        dValtol = 1.0e-4
+        d2Valtol = 1.0e-2
+        
+        for i,x in enumerate(xscheck):
+            for j,y in enumerate(yscheck):
+                for k,z in enumerate(zscheck):
+                    for l,w in enumerate(wscheck):
+
+                        Val = Func(x,y,z,w)
+                        dVal = dFunc(x,y,z,w)
+                        d2Val = d2Func(x,y,z,w)
+                        
+                        for func in sfs:
+                            xin = [x,y,z,w]
+                            
+                            fx1 = func.compute(xin)
+                            jx1 = func.jacobian(xin)
+                            
+                            fx,jx,gx,hx = func.computeall(xin,[lm])
+                           
+                            fxerr = abs(Val-fx).max()
+                            jxerr= abs(dVal-jx.T).max()
+                            gxerr =abs(dVal*lm-gx).max()
+                            hxerr =abs(d2Val*lm-hx).max()
+                            
+                            selffxerr = abs(fx1-fx).max()
+                            selfjxerr= abs(jx1-jx).max()
+                            
+                            self.assertLess(fxerr, Valtol)
+                            self.assertLess(jxerr, dValtol)
+                            self.assertLess(gxerr, dValtol)
+                            self.assertLess(hxerr, d2Valtol)  
+                            
+                            self.assertLess(selffxerr, 1.0e-12)
+                            self.assertLess(selfjxerr, 1.0e-12)
     
     def test_Interp1D(self):
     
@@ -353,8 +405,84 @@ class test_InterpTables(unittest.TestCase):
         
 
     
+    def test_Interp4D(self):
+        
+        def Func(x,y,z,w):
+            return np.cos(x)*np.cos(y)*np.cos(z)*np.cos(w)
+    
+        def dFunc(x,y,z,w):
+            return - np.array([np.sin(x)*np.cos(y)*np.cos(z)*np.cos(w),
+                               np.cos(x)*np.sin(y)*np.cos(z)*np.cos(w),
+                               np.cos(x)*np.cos(y)*np.sin(z)*np.cos(w),
+                               np.cos(x)*np.cos(y)*np.cos(z)*np.sin(w)])
+    
+        def d2Func(x,y,z,w):
+            return  np.array([
+        [-np.cos(x) * np.cos(y) * np.cos(z) * np.cos(w),  np.sin(x) * np.sin(y) * np.cos(z) * np.cos(w),  np.sin(x) * np.cos(y) * np.sin(z) * np.cos(w),  np.sin(x) * np.cos(y) * np.cos(z) * np.sin(w)],
+        [ np.sin(x) * np.sin(y) * np.cos(z) * np.cos(w), -np.cos(x) * np.cos(y) * np.cos(z) * np.cos(w),  np.cos(x) * np.sin(y) * np.sin(z) * np.cos(w),  np.cos(x) * np.sin(y) * np.cos(z) * np.sin(w)],
+        [ np.sin(x) * np.cos(y) * np.sin(z) * np.cos(w),  np.cos(x) * np.sin(y) * np.sin(z) * np.cos(w), -np.cos(x) * np.cos(y) * np.cos(z) * np.cos(w),  np.cos(x) * np.cos(y) * np.sin(z) * np.sin(w)],
+        [ np.sin(x) * np.cos(y) * np.cos(z) * np.sin(w),  np.cos(x) * np.sin(y) * np.cos(z) * np.sin(w),  np.cos(x) * np.cos(y) * np.sin(z) * np.sin(w), -np.cos(x) * np.cos(y) * np.cos(z) * np.cos(w)]
+    ])
         
         
+        nx = 37
+        ny = 41
+        nz = 36
+        nw = 40
+        
+        
+        xs = np.linspace(-np.pi, np.pi*1.1,nx)/3
+        ys = np.linspace(-1.33*np.pi, np.pi*.9,ny)/3
+        zs = np.linspace(-1.1*np.pi, np.pi*1.06,nz)/3
+        ws = np.linspace(-.94*np.pi, np.pi*1.12,nw)/3
+
+    
+        xsu = list(np.copy(xs))
+        xsu.pop(int(nx/4))
+        xsu.pop(int(nx/2))
+        xsu.pop(int(3*nx/4))
+        
+        
+        ysu = list(np.copy(ys))
+        ysu.pop(int(ny/5))
+        ysu.pop(int(4*ny/5))
+        
+        zsu = list(np.copy(zs))
+        zsu.pop(int(nz/7)+1)
+        zsu.pop(int(3*nz/5))
+        
+        wsu = list(np.copy(ws))
+        wsu.pop(int(nw/6)+1)
+        wsu.pop(int(5*nw/7))
+        
+        
+        
+        
+        xscheck = np.linspace(xs[0],xs[-1],10)
+        yscheck = np.linspace(ys[0],ys[-1],10)
+        zscheck = np.linspace(zs[0],zs[-1],10)
+        wscheck = np.linspace(ws[0],ws[-1],10)
+
+       
+        
+        with self.subTest("Even, Even, Even, Even"):
+            self.Interp4D_test(Func,dFunc,d2Func,xs,ys,zs,ws,xscheck,yscheck,zscheck,wscheck)
+        
+        with self.subTest("Uneven, Uneven, Uneven, Uneven"):
+            self.Interp4D_test(Func,dFunc,d2Func,xsu,ysu,zsu,wsu,xscheck,yscheck,zscheck,wscheck)
+            
+        with self.subTest("Uneven, Uneven, Even, Uneven"):
+            self.Interp4D_test(Func,dFunc,d2Func,xsu,ysu,zs,wsu,xscheck,yscheck,zscheck,wscheck)
+        
+        with self.subTest("Uneven, Uneven, Uneven, Even"):
+            self.Interp4D_test(Func,dFunc,d2Func,xsu,ysu,zsu,ws,xscheck,yscheck,zscheck,wscheck)
+        
+        with self.subTest("Even, Even, Even, Even: Cached"):
+            self.Interp4D_test(Func,dFunc,d2Func,xs,ys,zs,ws,xscheck,yscheck,zscheck,wscheck,cache = True)
+        
+        with self.subTest("Uneven, Uneven, Uneven, Uneven: Cached"):
+            self.Interp4D_test(Func,dFunc,d2Func,xsu,ysu,zsu,wsu,xscheck,yscheck,zscheck,wscheck,cache = True)
+            
 
 
         

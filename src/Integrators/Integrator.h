@@ -60,6 +60,7 @@ namespace ASSET {
     using DenseEventRet = std::tuple<DenseRet, EventLocsType>;
     using STMEventRet = std::tuple<IntegRet, Jacobian<double>, EventLocsType>;
 
+    using ControlIndexType = std::variant<int, Eigen::VectorXi, std::string, std::vector<std::string>>;;
 
     friend CentralShootingDefect<DODE, Integrator>;
 
@@ -97,14 +98,15 @@ namespace ASSET {
                std::string meth,
                double defstep,
                const ControllerType& ucon,
-               const Eigen::VectorXi& varlocs)
+               const ControlIndexType& varlocs_t)
         : Integrator() {
-      this->setMethod(meth, dode, defstep, true, ucon, varlocs);
+
+      this->setMethod(meth, dode, defstep, true, ucon, varlocs_t);
       this->setAbsTol(1.0e-12);  // Must Be called after setMethod!!!
       this->setRelTol(0);        // Must Be called after setMethod!!!
     }
-    Integrator(const DODE& dode, double defstep, const ControllerType& ucon, const Eigen::VectorXi& varlocs)
-        : Integrator(dode, "DOPRI87", defstep, ucon, varlocs) {
+    Integrator(const DODE& dode, double defstep, const ControllerType& ucon, const ControlIndexType& varlocs_t)
+        : Integrator(dode, "DOPRI87", defstep, ucon, varlocs_t) {
     }
     Integrator(const DODE& dode, double defstep, const Eigen::VectorXd& v) : Integrator() {
 
@@ -165,7 +167,7 @@ namespace ASSET {
                    double defstep,
                    bool usecontrol,
                    const GenericFunction<-1, -1>& ucon,
-                   const Eigen::VectorXi& varlocs) {
+                   const ControlIndexType & varlocs_t) {
 
       this->setStepSizes(defstep, defstep / 10000, defstep * 10000);
 
@@ -173,11 +175,11 @@ namespace ASSET {
         this->RKMethod = RKOptions::DOPRI54;
         this->ErrorOrder = 4;
         // Using DOPRI5 rather than DOPRI54 here is not a mistake
-        this->initStepperAndController<RKOptions::DOPRI5>(dode, usecontrol, ucon, varlocs);
+        this->initStepperAndController<RKOptions::DOPRI5>(dode, usecontrol, ucon, varlocs_t);
       } else if (str == "DOPRI87" || str == "DP87") {
         this->RKMethod = RKOptions::DOPRI87;
         this->ErrorOrder = 7;
-        this->initStepperAndController<RKOptions::DOPRI87>(dode, usecontrol, ucon, varlocs);
+        this->initStepperAndController<RKOptions::DOPRI87>(dode, usecontrol, ucon, varlocs_t);
       } else {
         throw std::invalid_argument("Invalid integration method '{0:}'.");
       }
@@ -188,9 +190,10 @@ namespace ASSET {
     void initStepperAndController(const DODE& odet,
                                   bool usecontrol,
                                   const GenericFunction<-1, -1>& ucon,
-                                  const Eigen::VectorXi& varlocs) {
+                                  const ControlIndexType& varlocs_t) {
 
       this->ode = odet;
+      Eigen::VectorXi varlocs = this->getvarlocs(varlocs_t);
       this->setIORows(this->ode.IRows() + 1, this->ode.IRows());
 
       this->usecontroller = usecontrol;
@@ -250,6 +253,45 @@ namespace ASSET {
     GenericFunction<-1, -1> getstepper() {
       return this->stepper;
     }
+
+    Eigen::VectorXi getvarlocs(const ControlIndexType& varlocs_t) {
+
+
+        Eigen::VectorXi varlocs;
+
+        /////////////////////////////////////////////////
+        if (std::holds_alternative<int>(varlocs_t)) {
+            varlocs.resize(1);
+            varlocs[0] = std::get<int>(varlocs_t);
+        }
+        else if (std::holds_alternative<Eigen::VectorXi>(varlocs_t)) {
+            varlocs = std::get<Eigen::VectorXi>(varlocs_t);
+        }
+        else if (std::holds_alternative<std::string>(varlocs_t)) {
+            varlocs = this->ode.idx(std::get<std::string>(varlocs_t));
+        }
+        else if (std::holds_alternative<std::vector<std::string>>(varlocs_t)) {
+
+            std::vector<Eigen::VectorXi> varvec;
+            int size = 0;
+            auto tmpvars = std::get<std::vector<std::string>>(varlocs_t);
+
+            for (auto tmpv : tmpvars) {
+                varvec.push_back(this->ode.idx(tmpv));
+                size += varvec.back().size();
+            }
+            varlocs.resize(size);
+            int next = 0;
+            for (auto varv : varvec) {
+                for (int i = 0; i < varv.size(); i++) {
+                    varlocs[next] = varv[i];
+                    next++;
+                }
+            }
+        }
+        return varlocs;
+
+	}
 
 
     double ErrorOrder = 7.0;
@@ -2202,7 +2244,7 @@ namespace ASSET {
                    std::string meth,
                    double ds,
                    const ControllerType& u,
-                   const Eigen::VectorXi& v) { return Integrator<DODE>(od, meth, ds, u, v); });
+                   const ControlIndexType& v) { return Integrator<DODE>(od, meth, ds, u, v); });
         obj.def("integrator",
                 [](const DODE& od,
                    std::string meth,
@@ -2214,7 +2256,7 @@ namespace ASSET {
                   return Integrator<DODE>(od, meth, ds, u);
                 });
         obj.def("integrator",
-                [](const DODE& od, double ds, const ControllerType& u, const Eigen::VectorXi& v) {
+                [](const DODE& od, double ds, const ControllerType& u, const ControlIndexType& v) {
                   return Integrator<DODE>(od, ds, u, v);
                 });
         obj.def("integrator", [](const DODE& od, double ds, const Eigen::VectorXd& v) {
@@ -2238,8 +2280,8 @@ namespace ASSET {
 
 
       if constexpr (DODE::UV != 0) {
-        obj.def(py::init<const DODE&, std::string, double, const ControllerType&, const Eigen::VectorXi&>());
-        obj.def(py::init<const DODE&, double, const ControllerType&, const Eigen::VectorXi&>());
+        obj.def(py::init<const DODE&, std::string, double, const ControllerType&, const ControlIndexType&>());
+        obj.def(py::init<const DODE&, double, const ControllerType&, const ControlIndexType&>());
         obj.def(py::init<const DODE&, double, const Eigen::VectorXd&>());
 
         obj.def(py::init<const DODE&,

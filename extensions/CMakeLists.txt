@@ -17,7 +17,6 @@ add_dependencies(asset_extensions pch)
 target_include_directories(asset_extensions PRIVATE ${INCLUDE_DIRS})
 
 message(STATUS  ${INCLUDE_DIRS})
-message(STATUS "HERE")
 
 
 target_compile_options(asset_extensions PUBLIC ${COMPILE_FLAGS})

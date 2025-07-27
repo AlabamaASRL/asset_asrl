@@ -3,7 +3,11 @@
 #include "CommonFunctions/InterpTable1D.h"
 #include "CommonFunctions/InterpTable2D.h"
 #include "CommonFunctions/InterpTable3D.h"
+#include "CommonFunctions/InterpTable4D.h"
+
 #include "Utils/fmtlib.h"
+#include "CommonFunctions/IOScaled.h"
+
 
 namespace ASSET {}  // namespace ASSET
 
@@ -44,15 +48,19 @@ void ASSET::VectorFunctionBuild(FunctionRegistry& reg, py::module& m) {
   reg.Build_Register<Constant<-1, 1>>(mod, "ConstantScalar");
 
 
+  reg.Build_Register<IOScaled<Gen>>(mod, "IOScaled");
+
+
   InterpTable1DBuild(mod);
   InterpTable2DBuild(mod);
   InterpTable3DBuild(mod);
+  InterpTable4DBuild(mod);
 
   mod.def("ScalarDynamicStackTest", [](const std::vector<GenericFunction<-1, 1>>& funcs) {
-    return GenericFunction<-1, -1>(DynamicStackedOutputs {funcs});
+    return GenericFunction<-1, -1>(DynamicStackedOutputs<GenericFunction<-1, 1>> {funcs});
   });
 
   mod.def("DynamicStackTest", [](const std::vector<GenericFunction<-1, -1>>& funcs) {
-    return GenericFunction<-1, -1>(DynamicStackedOutputs {funcs});
+    return GenericFunction<-1, -1>(DynamicStackedOutputs<GenericFunction<-1, -1>> {funcs});
   });
 }

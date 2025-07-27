@@ -62,6 +62,7 @@ add_library(optimalcontrol STATIC OptimalControl/ASSET_OptimalControl.h
 OptimalControl/ASSET_OptimalControl.cpp
 OptimalControl/ODEPhaseBase.h
 OptimalControl/ODEPhaseBase.cpp
+OptimalControl/ODEPhaseBaseBind.cpp
 OptimalControl/GenericODESBuildPart1.cpp
 OptimalControl/GenericODESBuildPart2.cpp
 OptimalControl/GenericODESBuildPart3.cpp
@@ -72,6 +73,7 @@ OptimalControl/PhaseIndexer.h
 OptimalControl/PhaseIndexer.cpp
 OptimalControl/OptimalControlProblem.h
 OptimalControl/OptimalControlProblem.cpp
+OptimalControl/OptimalControlProblemBind.cpp
 OptimalControl/LGLInterpTable.h
 OptimalControl/LGLInterpTable.cpp
 )

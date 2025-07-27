@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(ASSET VERSION 0.3.0 LANGUAGES CXX)
+project(ASSET VERSION 0.5.2 LANGUAGES CXX)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 set( CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
@@ -57,13 +57,30 @@ list(APPEND RELEASE_FLAGS "-O2")
 
 ## Generic Binary Flags
 if(BUILD_ASSET_WHEEL)
-    list(APPEND RELEASE_FLAGS "-march=x86-64-v3")
+    #list(APPEND RELEASE_FLAGS "-mcx16;-mpopcnt;-msse3;-msse4.1;-msse4.2;-mssse3;-mavx;-mavx2;-mbmi;-mbmi2;-mf16c;-mfma;-mlzcnt;-mmovbe;-mxsave")
+    # x86-64-v3 flags written out for older compilers
+    list(APPEND RELEASE_FLAGS "-mcx16")
+    list(APPEND RELEASE_FLAGS "-mpopcnt")
+    list(APPEND RELEASE_FLAGS "-msse3")
+    list(APPEND RELEASE_FLAGS "-msse4.1")
+    list(APPEND RELEASE_FLAGS "-msse4.2")
+    list(APPEND RELEASE_FLAGS "-mssse3")
+    list(APPEND RELEASE_FLAGS "-mavx")
+    list(APPEND RELEASE_FLAGS "-mavx2")
+    list(APPEND RELEASE_FLAGS "-mbmi")
+    list(APPEND RELEASE_FLAGS "-mbmi2")
+    list(APPEND RELEASE_FLAGS "-mf16c")
+    list(APPEND RELEASE_FLAGS "-mfma")
+    list(APPEND RELEASE_FLAGS "-mlzcnt")
+    list(APPEND RELEASE_FLAGS "-mmovbe")
+    list(APPEND RELEASE_FLAGS "-mxsave")
+
     # Windows runs out of ram with LINK_TIME_OPT on gh-actions
     if(NOT WIN32)
         list(APPEND RELEASE_FLAGS "-mtune=skylake")
-        set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
-        set(CLANG_MAX_INLINE_DEPTH 300)
     endif()
+    set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
+    set(CLANG_MAX_INLINE_DEPTH 400)
     
 else()
     list(APPEND RELEASE_FLAGS "-march=native")
@@ -99,6 +116,7 @@ if(LINK_TIME_OPT)
         if(BUILD_ASSET_WHEEL)
             ## Do full LTO for CI builds since it is single threaded anyway
             list(APPEND RELEASE_FLAGS "-flto=full")
+            list(APPEND RELEASE_FLAGS "/opt:lldltojobs=1")
         else()
             list(APPEND RELEASE_FLAGS "-flto=thin")
             list(APPEND RELEASE_FLAGS "/opt:lldltojobs=8")
@@ -140,7 +158,7 @@ if(NOT WIN32)
   list(APPEND RELEASE_FLAGS "-fno-asynchronous-unwind-tables")
   list(APPEND RELEASE_FLAGS "-ffast-math")
   if (NOT APPLE)
-    list(APPEND RELEASE_FLAGS "-fno-stack-clash-protection")
+    #list(APPEND RELEASE_FLAGS "-fno-stack-clash-protection")
   endif()
 endif()
  
@@ -177,6 +195,13 @@ add_definitions(-DASSET_OS="${CMAKE_SYSTEM_NAME}")
 add_definitions(-DASSET_OSVERSION="${CMAKE_SYSTEM_VERSION}")
 add_definitions(-DFMT_HEADER_ONLY)
 
+if(WIN32)
+## See : https://developercommunity.visualstudio.com/t/Access-violation-in-_Thrd_yield-after-up/10664660#T-N10669129-N10678728
+add_definitions(-D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
+endif()
+
+
+
 ################################################################################
 ###################### Find and set our dependencies ###########################
 ################################################################################
@@ -188,6 +213,7 @@ add_definitions(-DFMT_HEADER_ONLY)
 # Set up submodule dependencies
 include_directories(dep/eigen)
 include_directories(dep/fmt/include)
+include_directories(dep/autodiff)
 
 find_package(Python ${PYVERSION_EXACT} COMPONENTS Interpreter Development REQUIRED)
 

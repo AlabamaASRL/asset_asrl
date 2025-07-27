@@ -95,6 +95,11 @@ namespace ASSET {
       return colmattype(minv, size, size);
     });
 
+    ColMat.def("transpose", [](const colmattype& m1) {
+        return rowmattype(m1, m1.MatrixCols, m1.MatrixRows);
+     });
+
+
     ColMat.def("vf", [](const colmattype& m) { return GenericFunction<-1, -1>(m); });
 
     //////////////////////////////////////////////////////////////////////////////
@@ -183,6 +188,11 @@ namespace ASSET {
 
       return rowmattype(minv, size, size);
     });
+
+    RowMat.def("transpose", [](const rowmattype& m1) {
+        return colmattype(m1, m1.MatrixCols, m1.MatrixRows);
+        });
+
 
     RowMat.def("vf", [](const rowmattype& m) { return GenericFunction<-1, -1>(m); });
 

@@ -8,3 +8,6 @@
 	path = dep/eigen
 	url = https://gitlab.com/wgledbetter/eigen.git
 	branch = asset-3.4
+[submodule "dep/autodiff"]
+	path = dep/autodiff
+	url = https://github.com/autodiff/autodiff
