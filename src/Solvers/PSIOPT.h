@@ -2,7 +2,13 @@
 #pragma once
 #include "IterateInfo.h"
 #include "NonLinearProgram.h"
+
+#ifdef USE_ACCELERATE_SPARSE
+#include "AccelerateInterface.h"
+#else
 #include "PardisoInterface.h"
+#endif
+
 #include "Utils/ColorText.h"
 #include "pch.h"
 
@@ -125,7 +131,11 @@ namespace ASSET {
     int InequalCons = 0;
     int KKTdim = 0;
 
+#ifdef USE_ACCELERATE_SPARSE
+    Eigen::AccelerateLDLTTPP<Eigen::SparseMatrix<double, Eigen::RowMajor>, Eigen::Upper> KKTSol;
+#else
     Eigen::PardisoLDLT<Eigen::SparseMatrix<double, Eigen::RowMajor>, Eigen::Upper> KKTSol;
+#endif
 
     int QPThreads = ASSET_DEFAULT_QP_THREADS;
     QPAlgModes QPAlg = QPAlgModes::Classic;
@@ -472,6 +482,21 @@ namespace ASSET {
     }
 
     void setQPParams() {
+#ifdef USE_ACCELERATE_SPARSE
+      // Accelerate interface uses different configuration methods
+      switch(QPOrd) {
+        case MINDEG:
+            this->KKTSol.setOrder(SparseOrderAMD);
+            break;
+        case METIS:
+        case PARMETIS:
+            // Note next version of Apple Accelerate will be providing a parallel Metis factorization
+            this->KKTSol.setOrder(SparseOrderMetis);
+      }
+      this->KKTSol.setNumThreads(QPThreads);
+      this->KKTSol.setIterativeRefinement(QPRefSteps > 0);
+      this->KKTSol.setIterativeRefinementIterations(QPRefSteps);
+#else
       this->KKTSol.m_ord = QPOrd;
       this->KKTSol.m_pivotstrat = QPPivotStrategy;
       this->KKTSol.m_pivotpert = QPPivotPerturb;
@@ -484,8 +509,8 @@ namespace ASSET {
       if (this->CNRMode)
         this->KKTSol.m_threads = this->QPThreads;
       this->KKTSol.m_parsolve = this->QPParSolve;
-      // mkl_set_num_threads(QPThreads);
       this->KKTSol.setParams();
+#endif
     }
 
     void set_early_callback(const EarlyCallBackType& f) {

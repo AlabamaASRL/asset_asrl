@@ -152,11 +152,13 @@ target_include_directories(asset PRIVATE ${INCLUDE_DIRS})
 target_link_libraries(asset PRIVATE ${LINK_LIBS})
 #set_target_properties(asset PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
+if(Apple AND OpenMP_CXX_FOUND)
+  target_link_libraries(asset PRIVATE OpenMP::OpenMP_CXX)
+endif()
+
 if(UNIX)
     set_target_properties(asset PROPERTIES LINK_FLAGS ${LINKER_FLAGS})
 endif()
-
-
 
 add_custom_target(pyassetsrc ALL DEPENDS ${CMAKE_SOURCE_DIR}/asset_asrl)
 
