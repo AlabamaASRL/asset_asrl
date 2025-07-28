@@ -57,27 +57,40 @@ list(APPEND RELEASE_FLAGS "-O2")
 
 ## Generic Binary Flags
 if(BUILD_ASSET_WHEEL)
-    #list(APPEND RELEASE_FLAGS "-mcx16;-mpopcnt;-msse3;-msse4.1;-msse4.2;-mssse3;-mavx;-mavx2;-mbmi;-mbmi2;-mf16c;-mfma;-mlzcnt;-mmovbe;-mxsave")
-    # x86-64-v3 flags written out for older compilers
-    list(APPEND RELEASE_FLAGS "-mcx16")
-    list(APPEND RELEASE_FLAGS "-mpopcnt")
-    list(APPEND RELEASE_FLAGS "-msse3")
-    list(APPEND RELEASE_FLAGS "-msse4.1")
-    list(APPEND RELEASE_FLAGS "-msse4.2")
-    list(APPEND RELEASE_FLAGS "-mssse3")
-    list(APPEND RELEASE_FLAGS "-mavx")
-    list(APPEND RELEASE_FLAGS "-mavx2")
-    list(APPEND RELEASE_FLAGS "-mbmi")
-    list(APPEND RELEASE_FLAGS "-mbmi2")
-    list(APPEND RELEASE_FLAGS "-mf16c")
-    list(APPEND RELEASE_FLAGS "-mfma")
-    list(APPEND RELEASE_FLAGS "-mlzcnt")
-    list(APPEND RELEASE_FLAGS "-mmovbe")
-    list(APPEND RELEASE_FLAGS "-mxsave")
+    # Detect architecture for wheel builds
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64|ARM64")
+        # ARM64 (Apple Silicon, ARM servers) - use NEON
+        list(APPEND RELEASE_FLAGS "-march=armv8-a+simd")
+        message(STATUS "Building ARM64 wheel with NEON support")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
+        # x86-64 (Intel/AMD) - use AVX2 (x86-64-v3 flags written out for older compilers)
+        list(APPEND RELEASE_FLAGS "-mcx16")
+        list(APPEND RELEASE_FLAGS "-mpopcnt")
+        list(APPEND RELEASE_FLAGS "-msse3")
+        list(APPEND RELEASE_FLAGS "-msse4.1")
+        list(APPEND RELEASE_FLAGS "-msse4.2")
+        list(APPEND RELEASE_FLAGS "-mssse3")
+        list(APPEND RELEASE_FLAGS "-mavx")
+        list(APPEND RELEASE_FLAGS "-mavx2")
+        list(APPEND RELEASE_FLAGS "-mbmi")
+        list(APPEND RELEASE_FLAGS "-mbmi2")
+        list(APPEND RELEASE_FLAGS "-mf16c")
+        list(APPEND RELEASE_FLAGS "-mfma")
+        list(APPEND RELEASE_FLAGS "-mlzcnt")
+        list(APPEND RELEASE_FLAGS "-mmovbe")
+        list(APPEND RELEASE_FLAGS "-mxsave")
+        message(STATUS "Building x86-64 wheel with AVX2 support")
+    else()
+        # Fallback for other architectures
+        list(APPEND RELEASE_FLAGS "-march=native")
+        message(WARNING "Unknown architecture ${CMAKE_SYSTEM_PROCESSOR}, using -march=native")
+    endif()
 
     # Windows runs out of ram with LINK_TIME_OPT on gh-actions
     if(NOT WIN32)
-        list(APPEND RELEASE_FLAGS "-mtune=skylake")
+        if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
+            list(APPEND RELEASE_FLAGS "-mtune=skylake")
+        endif()
     endif()
     set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
     set(CLANG_MAX_INLINE_DEPTH 400)
@@ -362,4 +375,3 @@ add_subdirectory(pypiwheel)
 
 # Formatting
 include(cmake/clang-format.cmake)
-
