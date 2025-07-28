@@ -11,6 +11,18 @@
 #include <cmath>
 #include <numeric>
 
+/*
+The classes in this file are directly based on the AccelerateSupport module from Eigen 3.4 and 
+are subject to Eigen's MPL2 license, which can be found in the notices folder of the GitHub repository.
+Changes include the addition of several member variables and functions to provide more fine grained 
+control of the Accelerate Sparse solvers, to avoid making unnecessary copies/allocations, to add an 
+iterative refinement implementation (to bring solution accuracy more in line with PARDISO), as well as 
+to more closely align with the methods of the PARDISO interface in PardisoInterface.h (particularly 
+for methods that ASSET employs extensively). Note that the MPL2 license is only applied to this particular 
+file and not the rest of the project, as per the MPL2 license.
+ 
+*/
+
 namespace Eigen {
 
 template <typename MatrixType_, int UpLo_, SparseFactorization_t Solver_, bool EnforceSquare_>

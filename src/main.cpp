@@ -91,7 +91,11 @@ void SoftwareInfo() {
   fmt::print(fmt::fg(fmt::color::white), vecversion);
   fmt::print("\n");
   fmt::print(fmt::fg(fmt::color::royal_blue), " Linear Solver        : ");
+  #ifndef USE_ACCELERATE_SPARSE
   fmt::print(fmt::fg(fmt::color::white), "Intel MKL Pardiso");
+  #else
+  fmt::print(fmt::fg(fmt::color::white), "Apple Accelerate Sparse");
+  #endif
   fmt::print("\n");
 
   fmt::print(fmt::fg(fmt::color::royal_blue), " Compiled With        : ");
