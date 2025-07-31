@@ -23,13 +23,6 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   message(FATAL_ERROR "You cannot build ASSET with the Microsoft Compiler. Please use Clang or GCC and try again.")
 endif()
 
-if(NOT WIN32)
-  if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-      set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld")
-  endif()
-endif()
-
-
 ################################################################################
 ############### Build Settings #################################################
 ################################################################################
@@ -57,27 +50,40 @@ list(APPEND RELEASE_FLAGS "-O2")
 
 ## Generic Binary Flags
 if(BUILD_ASSET_WHEEL)
-    #list(APPEND RELEASE_FLAGS "-mcx16;-mpopcnt;-msse3;-msse4.1;-msse4.2;-mssse3;-mavx;-mavx2;-mbmi;-mbmi2;-mf16c;-mfma;-mlzcnt;-mmovbe;-mxsave")
-    # x86-64-v3 flags written out for older compilers
-    list(APPEND RELEASE_FLAGS "-mcx16")
-    list(APPEND RELEASE_FLAGS "-mpopcnt")
-    list(APPEND RELEASE_FLAGS "-msse3")
-    list(APPEND RELEASE_FLAGS "-msse4.1")
-    list(APPEND RELEASE_FLAGS "-msse4.2")
-    list(APPEND RELEASE_FLAGS "-mssse3")
-    list(APPEND RELEASE_FLAGS "-mavx")
-    list(APPEND RELEASE_FLAGS "-mavx2")
-    list(APPEND RELEASE_FLAGS "-mbmi")
-    list(APPEND RELEASE_FLAGS "-mbmi2")
-    list(APPEND RELEASE_FLAGS "-mf16c")
-    list(APPEND RELEASE_FLAGS "-mfma")
-    list(APPEND RELEASE_FLAGS "-mlzcnt")
-    list(APPEND RELEASE_FLAGS "-mmovbe")
-    list(APPEND RELEASE_FLAGS "-mxsave")
+    # Detect architecture for wheel builds
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64|ARM64")
+        # ARM64 (Apple Silicon, ARM servers) - use NEON
+        list(APPEND RELEASE_FLAGS "-march=armv8-a+simd")
+        message(STATUS "Building ARM64 wheel with NEON support")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
+        # x86-64 (Intel/AMD) - use AVX2 (x86-64-v3 flags written out for older compilers)
+        list(APPEND RELEASE_FLAGS "-mcx16")
+        list(APPEND RELEASE_FLAGS "-mpopcnt")
+        list(APPEND RELEASE_FLAGS "-msse3")
+        list(APPEND RELEASE_FLAGS "-msse4.1")
+        list(APPEND RELEASE_FLAGS "-msse4.2")
+        list(APPEND RELEASE_FLAGS "-mssse3")
+        list(APPEND RELEASE_FLAGS "-mavx")
+        list(APPEND RELEASE_FLAGS "-mavx2")
+        list(APPEND RELEASE_FLAGS "-mbmi")
+        list(APPEND RELEASE_FLAGS "-mbmi2")
+        list(APPEND RELEASE_FLAGS "-mf16c")
+        list(APPEND RELEASE_FLAGS "-mfma")
+        list(APPEND RELEASE_FLAGS "-mlzcnt")
+        list(APPEND RELEASE_FLAGS "-mmovbe")
+        list(APPEND RELEASE_FLAGS "-mxsave")
+        message(STATUS "Building x86-64 wheel with AVX2 support")
+    else()
+        # Fallback for other architectures
+        list(APPEND RELEASE_FLAGS "-march=native")
+        message(WARNING "Unknown architecture ${CMAKE_SYSTEM_PROCESSOR}, using -march=native")
+    endif()
 
     # Windows runs out of ram with LINK_TIME_OPT on gh-actions
     if(NOT WIN32)
-        list(APPEND RELEASE_FLAGS "-mtune=skylake")
+        if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
+            list(APPEND RELEASE_FLAGS "-mtune=skylake")
+        endif()
     endif()
     set(LINK_TIME_OPT TRUE)   ### DO LTO - Recommended for full release
     set(CLANG_MAX_INLINE_DEPTH 400)
@@ -154,18 +160,14 @@ endif()
 if(NOT WIN32)
   list(APPEND RELEASE_FLAGS "-fomit-frame-pointer")
   list(APPEND RELEASE_FLAGS "-fno-stack-protector")
-  #list(APPEND RELEASE_FLAGS "-fno-stack-clash-protection")
   #list(APPEND RELEASE_FLAGS "-fcf-protection=none")
   list(APPEND RELEASE_FLAGS "-fno-asynchronous-unwind-tables")
   list(APPEND RELEASE_FLAGS "-ffast-math")
+  if (NOT APPLE)
+    #list(APPEND RELEASE_FLAGS "-fno-stack-clash-protection")
+  endif()
 endif()
  
-if(APPLE)
-  list(APPEND COMMON_FLAGS "-Xlinker -undefined")
-  list(APPEND COMMON_FLAGS "-Xlinker dynamic_lookup")
-endif()
-
-
 
 # Combine Flags
 set(COMPILE_FLAGS PUBLIC ${COMMON_FLAGS})
@@ -210,17 +212,20 @@ endif()
 ###################### Find and set our dependencies ###########################
 ################################################################################
 
-if(APPLE)
-  include(FindPythonEnv)
-endif()
+#if(APPLE)
+#  include(FindPythonEnv)
+#endif()
+
 # Set up submodule dependencies
 include_directories(dep/eigen)
 include_directories(dep/fmt/include)
 include_directories(dep/autodiff)
 
-add_subdirectory(dep)
+find_package(Python ${PYVERSION_EXACT} COMPONENTS Interpreter Development REQUIRED)
 
 set(PYBIND11_CPP_STANDARD -std=c++17)
+set(PYBIND11_FINDPYTHON ON)
+add_subdirectory(dep)
 
 # Set up external dependencies
 find_package(Threads REQUIRED)
@@ -233,38 +238,70 @@ if(UNIX AND NOT APPLE)
     list(APPEND COMPILE_FLAGS "-fopenmp")
   endif()
 elseif(APPLE)
-  if(FALSE)
-    include_directories("/usr/local/opt/llvm/include")
-    link_directories("/usr/local/opt/llvm/lib")
-    set(CMAKE_LIBRARY_PATH /usr/local/opt/llvm/lib ${CMAKE_LIBRARY_PATH})
-    set(CMAKE_LIBRARY_PATH $ENV{MKLROOT}/lib ${CMAKE_LIBRARY_PATH})
-    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-      set(OpenMP_C "${CMAKE_C_COMPILER}")
-      set(OpenMP_C_FLAGS "-fopenmp=libomp")
-      set(OpenMP_C_LIB_NAMES "libomp")
-      set(OpenMP_libomp_LIBRARY "omp")
-    endif()
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-      set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
-      set(OpenMP_CXX_FLAGS "-fopenmp=libomp")
-      set(OpenMP_CXX_LIB_NAMES "libomp")
-      set(OpenMP_libomp_LIBRARY "omp")
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
+      # fina_package(OpenMP REQUIRED) will fail with AppleClang so 
+      # we need this to point towards the homebrew libomp
+      include_directories("/opt/homebrew/Cellar/libomp/20.1.8/include/")
+      link_directories("/opt/homebrew/Cellar/libomp/20.1.8/lib/")
+      list(APPEND COMPILE_FLAGS "-Xclang")
+      list(APPEND COMPILE_FLAGS "-fopenmp")
+      list(APPEND OpenMP_CXX_FLAGS "-lomp")
+    else()
+      # With homebrew LLVM clang compiler on Mac, this seems to work well for 
+      # finding homebrew OpenMP 
       find_package(OpenMP REQUIRED)
-      list(APPEND COMPILE_FLAGS ${OpenMP_CXX_FLAGS})
-    endif()
 
-    
+      list(APPEND COMPILE_FLAGS "-fopenmp")
+      list(APPEND OpenMP_CXX_FLAGS "-lomp")
+      
+      # Add flags to make LLVM Clang more compatible with Apple SDK headers
+      list(APPEND COMPILE_FLAGS "-Wno-elaborated-enum-base")
+    endif()
   endif()
-  
 endif()
 
-find_package(MKL REQUIRED)
+if(APPLE)
+  find_package(AccelerateSparse REQUIRED)
+  add_compile_definitions(USE_ACCELERATE_SPARSE)
+else()
+  find_package(MKL REQUIRED)
+endif()
 
 find_package(Python ${PYVERSION_EXACT} REQUIRED COMPONENTS Interpreter Development)
 
 # Set dependency variables
-set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${MKL_INCLUDE_DIRS})
-set(LINK_LIBS ${PYTHON_LIBRARIES} ${MKL_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS})
+set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${MKL_INCLUDE_DIRS} ${AccelerateSparse_INCLUDE_DIRS})
+set(LINK_LIBS ${MKL_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS} ${AccelerateSparse_LIBRARIES})
+
+# Handle OpenMP for Apple
+if (APPLE)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
+    list(APPEND LINK_LIBS ${OpenMP_CXX_FLAGS})
+  else()
+    list(APPEND LINK_LIBS OpenMP::OpenMP_CXX)
+  endif()
+endif()
+
+# Handle Python executable variable 
+if (NOT DEFINED PYTHON_EXECUTABLE)
+    set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
+endif()
+if(DEFINED Python_INCLUDE_DIRS)
+    list(APPEND INCLUDE_DIRS ${Python_INCLUDE_DIRS})    
+elseif(DEFINED PYTHON_INCLUDE_DIRS)
+    list(APPEND INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS})
+endif()
+if (NOT APPLE)
+    # Don't directly link with python library on mac and instead rely on -undefined dynamic_lookup 
+    # to bind to the python symbols at runtime from the interpreter
+    if(DEFINED Python_LIBRARIES)
+        list(APPEND LINK_LIBS ${Python_LIBRARIES})
+    elseif(DEFINED PYTHON_LIBRARIES)
+        list(APPEND LINK_LIBS ${PYTHON_LIBRARIES})
+    endif()
+endif()
+
 if(UNIX)
   list(APPEND LINK_LIBS m)
 endif()
@@ -273,13 +310,22 @@ endif()
 
 ################################################################################
 ################ Linker Flags ##################################################
+
+# Set linker for Clang after threading detection is complete
+if(NOT WIN32)
+  if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+      set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld")
+  endif()
+endif()
+
 if(BUILD_SHARED_LIBS AND NOT APPLE AND NOT WIN32)  # Windows and Linux Dynamic Linking
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
 elseif(UNIX AND NOT APPLE)  # Linux Static Linking
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl,--end-group")
 elseif(APPLE)  # Apple Dynamic and Static Linking
-
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Xlinker -undefined -Xlinker dynamic_lookup")
+  list(APPEND LINKER_FLAGS ${OpenMP_CXX_FLAGS})
+  list(APPEND LINKER_FLAGS "-Wl,-bind_at_load")
+  list(APPEND LINKER_FLAGS "-Wl,-undefined,dynamic_lookup")
 else()  # Windows Static Linking
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS}")
 endif()
@@ -328,4 +374,3 @@ add_subdirectory(pypiwheel)
 
 # Formatting
 include(cmake/clang-format.cmake)
-
