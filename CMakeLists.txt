@@ -23,13 +23,6 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   message(FATAL_ERROR "You cannot build ASSET with the Microsoft Compiler. Please use Clang or GCC and try again.")
 endif()
 
-if(NOT WIN32)
-  if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-      set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld")
-  endif()
-endif()
-
-
 ################################################################################
 ############### Build Settings #################################################
 ################################################################################
@@ -247,38 +240,27 @@ if(UNIX AND NOT APPLE)
 elseif(APPLE)
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
-      # NOTE: Links to openmp libraries for Apple Clang can be found 
-      # here: https://mac.r-project.org/openmp/
-      include_directories("/usr/local/include")
-      link_directories("/usr/local/lib")
+      # fina_package(OpenMP REQUIRED) will fail with AppleClang so 
+      # we need this to point towards the homebrew libomp
+      include_directories("/opt/homebrew/Cellar/libomp/20.1.8/include/")
+      link_directories("/opt/homebrew/Cellar/libomp/20.1.8/lib/")
       list(APPEND COMPILE_FLAGS "-Xclang")
       list(APPEND COMPILE_FLAGS "-fopenmp")
       list(APPEND OpenMP_CXX_FLAGS "-lomp")
     else()
-      list(APPEND COMPILE_FLAGS "-fopenmp")
-    endif()
-  endif()
-  if(FALSE)
-    include_directories("/usr/local/opt/llvm/include")
-    link_directories("/usr/local/opt/llvm/lib")
-    set(CMAKE_LIBRARY_PATH /usr/local/opt/llvm/lib ${CMAKE_LIBRARY_PATH})
-    set(CMAKE_LIBRARY_PATH $ENV{MKLROOT}/lib ${CMAKE_LIBRARY_PATH})
-    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-      set(OpenMP_C "${CMAKE_C_COMPILER}")
-      set(OpenMP_C_FLAGS "-fopenmp=libomp")
-      set(OpenMP_C_LIB_NAMES "libomp")
-      set(OpenMP_libomp_LIBRARY "omp")
-    endif()
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-      set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
-      set(OpenMP_CXX_FLAGS "-fopenmp=libomp")
-      set(OpenMP_CXX_LIB_NAMES "libomp")
-      set(OpenMP_libomp_LIBRARY "omp")
+      # With homebrew LLVM clang compiler on Mac, this seems to work well for 
+      # finding homebrew OpenMP 
       find_package(OpenMP REQUIRED)
-      list(APPEND COMPILE_FLAGS ${OpenMP_CXX_FLAGS})
+
+      list(APPEND COMPILE_FLAGS "-fopenmp")
+      list(APPEND OpenMP_CXX_FLAGS "-lomp")
+      
+      # Add flags to make LLVM Clang more compatible with Apple SDK headers
+      list(APPEND COMPILE_FLAGS "-Wno-elaborated-enum-base")
     endif()
   endif()
 endif()
+
 if(APPLE)
   find_package(AccelerateSparse REQUIRED)
   add_compile_definitions(USE_ACCELERATE_SPARSE)
@@ -291,6 +273,15 @@ find_package(Python ${PYVERSION_EXACT} REQUIRED COMPONENTS Interpreter Developme
 # Set dependency variables
 set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${MKL_INCLUDE_DIRS} ${AccelerateSparse_INCLUDE_DIRS})
 set(LINK_LIBS ${MKL_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS} ${AccelerateSparse_LIBRARIES})
+
+# Handle OpenMP for Apple
+if (APPLE)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
+    list(APPEND LINK_LIBS ${OpenMP_CXX_FLAGS})
+  else()
+    list(APPEND LINK_LIBS OpenMP::OpenMP_CXX)
+  endif()
+endif()
 
 # Handle Python executable variable 
 if (NOT DEFINED PYTHON_EXECUTABLE)
@@ -319,6 +310,14 @@ endif()
 
 ################################################################################
 ################ Linker Flags ##################################################
+
+# Set linker for Clang after threading detection is complete
+if(NOT WIN32)
+  if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+      set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld")
+  endif()
+endif()
+
 if(BUILD_SHARED_LIBS AND NOT APPLE AND NOT WIN32)  # Windows and Linux Dynamic Linking
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
 elseif(UNIX AND NOT APPLE)  # Linux Static Linking
