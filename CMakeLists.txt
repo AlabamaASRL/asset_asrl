@@ -242,8 +242,8 @@ elseif(APPLE)
     if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
       # fina_package(OpenMP REQUIRED) will fail with AppleClang so 
       # we need this to point towards the homebrew libomp
-      include_directories("/opt/homebrew/Cellar/libomp/20.1.8/include/")
-      link_directories("/opt/homebrew/Cellar/libomp/20.1.8/lib/")
+      include_directories("/opt/homebrew/Cellar/libomp/21.1.0/include/")
+      link_directories("/opt/homebrew/Cellar/libomp/21.1.0/lib/")
       list(APPEND COMPILE_FLAGS "-Xclang")
       list(APPEND COMPILE_FLAGS "-fopenmp")
       list(APPEND OpenMP_CXX_FLAGS "-lomp")

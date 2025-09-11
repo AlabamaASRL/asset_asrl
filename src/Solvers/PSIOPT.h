@@ -492,9 +492,11 @@ namespace ASSET {
             this->KKTSol.setOrder(SparseOrderAMD);
             break;
         case METIS:
-        case PARMETIS:
             // Note next version of Apple Accelerate will be providing a parallel Metis factorization
             this->KKTSol.setOrder(SparseOrderMetis);
+        case PARMETIS:
+            // Note next version of Apple Accelerate will be providing a parallel Metis factorization
+            this->KKTSol.setOrder(SparseOrderMTMetis);
       }
       this->KKTSol.setNumThreads(QPThreads);
       this->KKTSol.setIterativeRefinement(QPRefSteps > 0);

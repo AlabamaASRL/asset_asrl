@@ -460,8 +460,9 @@ if __name__ == "__main__":
     phase.addLowerVarBound("Back",6,.05)
     phase.addValueObjective("Back",6,-1.0)
     phase.setThreads(8,8)
-    phase.optimizer.PrintLevel = 1
+    phase.optimizer.PrintLevel = 0
     phase.optimizer.set_EContol(1.0e-9)
+    phase.optimizer.set_QPOrderingMode("METIS")
     
     phase.setAdaptiveMesh(True)
     phase.setMeshErrorEstimator("integrator")

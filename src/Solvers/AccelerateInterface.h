@@ -488,8 +488,8 @@ class AccelerateImpl : public SparseSolverBase<AccelerateImpl<MatrixType_, UpLo_
       nopts.scalingMethod = SparseScalingDefault;
       nopts.scaling = nullptr;
       // Default values set by Apple
-      nopts.pivotTolerance = 0.01;                   // Recommended value for difficult matrices in double
-      nopts.zeroTolerance = 1e-4 * __DBL_EPSILON__;  // "A few" orders of magnitude below epsilon.
+      nopts.pivotTolerance = 0.01 ;                  // Recommended value for difficult matrices in double
+      nopts.zeroTolerance = 1e-4 * __FLT_EPSILON__; //1e-8;  // "A few" orders of magnitude below epsilon.
 
       // Get factor and workspace size
       const int factorSize = 
