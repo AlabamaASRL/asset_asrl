@@ -24,12 +24,14 @@
     (void)num_threads;
   }
   
-  // Fallback for dsecnd() - returns elapsed time in seconds
+  // Fallback for dsecnd() - returns CPU/wall-clock time in seconds
+  // MKL's dsecnd returns time in seconds since an arbitrary point (often program start)
+  // This implementation returns seconds since epoch which is compatible for timing purposes
   inline double dsecnd() {
-    static auto start_time = std::chrono::high_resolution_clock::now();
-    auto current_time = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed = current_time - start_time;
-    return elapsed.count();
+    using namespace std::chrono;
+    auto now = high_resolution_clock::now();
+    auto duration = now.time_since_epoch();
+    return duration_cast<duration<double>>(duration).count();
   }
 
 #endif // ASSET_HAS_MKL

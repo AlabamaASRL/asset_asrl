@@ -830,22 +830,36 @@ namespace Eigen {
     
     // Wrapper for Eigen's SparseLU to provide PardisoLU-compatible interface
     template<typename MatrixType>
-    class PardisoLU : public SparseLU<MatrixType> {
-    public:
-      using Base = SparseLU<MatrixType>;
-      using Base::Base;
+    class PardisoLU {
+    private:
+      SparseLU<MatrixType> m_solver;
+      MatrixType m_matrix_copy;
       
-      // Provide stub methods for PARDISO-specific functionality
+    public:
+      PardisoLU() = default;
+      
+      // Provide methods for PARDISO-compatible interface
       void release() { /* No-op for SparseLU */ }
       template<typename T> T getMatrixTwisted(const T& mat) { return mat; }
       void setParams() { /* No-op */ }
-      MatrixType& getMatrix() { return const_cast<MatrixType&>(Base::m_matrix); }
-      void setMatrix(const MatrixType& mat) { 
-        const_cast<MatrixType&>(Base::m_matrix) = mat;
+      MatrixType& getMatrix() { return m_matrix_copy; }
+      void setMatrix(const MatrixType& mat) { m_matrix_copy = mat; }
+      
+      PardisoLU& compute_internal() { 
+        m_solver.compute(m_matrix_copy); 
+        return *this; 
+      }
+      PardisoLU& factorize_internal() { 
+        m_solver.factorize(m_matrix_copy); 
+        return *this; 
       }
       
-      PardisoLU& compute_internal() { Base::compute(getMatrix()); return *this; }
-      PardisoLU& factorize_internal() { Base::factorize(getMatrix()); return *this; }
+      template<typename Rhs>
+      auto solve(const Rhs& rhs) const -> decltype(m_solver.solve(rhs)) {
+        return m_solver.solve(rhs);
+      }
+      
+      ComputationInfo info() const { return m_solver.info(); }
       
       int neigs() const { return 0; }
       int peigs() const { return 0; }
@@ -868,21 +882,35 @@ namespace Eigen {
     
     // Wrapper for Eigen's SimplicialLLT to provide PardisoLLT-compatible interface
     template<typename MatrixType, int Options = Upper>
-    class PardisoLLT : public SimplicialLLT<MatrixType, Options> {
+    class PardisoLLT {
+    private:
+      SimplicialLLT<MatrixType, Options> m_solver;
+      MatrixType m_matrix_copy;
+      
     public:
-      using Base = SimplicialLLT<MatrixType, Options>;
-      using Base::Base;
+      PardisoLLT() = default;
       
       void release() { /* No-op */ }
       template<typename T> T getMatrixTwisted(const T& mat) { return mat; }
       void setParams() { /* No-op */ }
-      MatrixType& getMatrix() { return const_cast<MatrixType&>(Base::m_matrix); }
-      void setMatrix(const MatrixType& mat) { 
-        const_cast<MatrixType&>(Base::m_matrix) = mat;
+      MatrixType& getMatrix() { return m_matrix_copy; }
+      void setMatrix(const MatrixType& mat) { m_matrix_copy = mat; }
+      
+      PardisoLLT& compute_internal() { 
+        m_solver.compute(m_matrix_copy); 
+        return *this; 
+      }
+      PardisoLLT& factorize_internal() { 
+        m_solver.factorize(m_matrix_copy); 
+        return *this; 
       }
       
-      PardisoLLT& compute_internal() { Base::compute(getMatrix()); return *this; }
-      PardisoLLT& factorize_internal() { Base::factorize(getMatrix()); return *this; }
+      template<typename Rhs>
+      auto solve(const Rhs& rhs) const -> decltype(m_solver.solve(rhs)) {
+        return m_solver.solve(rhs);
+      }
+      
+      ComputationInfo info() const { return m_solver.info(); }
       
       int neigs() const { return 0; }
       int peigs() const { return 0; }
@@ -904,21 +932,35 @@ namespace Eigen {
     
     // Wrapper for Eigen's SimplicialLDLT to provide PardisoLDLT-compatible interface
     template<typename MatrixType, int Options = Upper>
-    class PardisoLDLT : public SimplicialLDLT<MatrixType, Options> {
+    class PardisoLDLT {
+    private:
+      SimplicialLDLT<MatrixType, Options> m_solver;
+      MatrixType m_matrix_copy;
+      
     public:
-      using Base = SimplicialLDLT<MatrixType, Options>;
-      using Base::Base;
+      PardisoLDLT() = default;
       
       void release() { /* No-op */ }
       template<typename T> T getMatrixTwisted(const T& mat) { return mat; }
       void setParams() { /* No-op */ }
-      MatrixType& getMatrix() { return const_cast<MatrixType&>(Base::m_matrix); }
-      void setMatrix(const MatrixType& mat) { 
-        const_cast<MatrixType&>(Base::m_matrix) = mat;
+      MatrixType& getMatrix() { return m_matrix_copy; }
+      void setMatrix(const MatrixType& mat) { m_matrix_copy = mat; }
+      
+      PardisoLDLT& compute_internal() { 
+        m_solver.compute(m_matrix_copy); 
+        return *this; 
+      }
+      PardisoLDLT& factorize_internal() { 
+        m_solver.factorize(m_matrix_copy); 
+        return *this; 
       }
       
-      PardisoLDLT& compute_internal() { Base::compute(getMatrix()); return *this; }
-      PardisoLDLT& factorize_internal() { Base::factorize(getMatrix()); return *this; }
+      template<typename Rhs>
+      auto solve(const Rhs& rhs) const -> decltype(m_solver.solve(rhs)) {
+        return m_solver.solve(rhs);
+      }
+      
+      ComputationInfo info() const { return m_solver.info(); }
       
       int neigs() const { return 0; }
       int peigs() const { return 0; }
