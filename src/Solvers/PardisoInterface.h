@@ -828,18 +828,115 @@ namespace Eigen {
   
   namespace Eigen {
     
-    // Type aliases to provide compatible interface when MKL PARDISO is not available
-    // Using Eigen's built-in SparseLU as a fallback for PardisoLU
+    // Wrapper for Eigen's SparseLU to provide PardisoLU-compatible interface
     template<typename MatrixType>
-    using PardisoLU = SparseLU<MatrixType>;
+    class PardisoLU : public SparseLU<MatrixType> {
+    public:
+      using Base = SparseLU<MatrixType>;
+      using Base::Base;
+      
+      // Provide stub methods for PARDISO-specific functionality
+      void release() { /* No-op for SparseLU */ }
+      template<typename T> T getMatrixTwisted(const T& mat) { return mat; }
+      void setParams() { /* No-op */ }
+      MatrixType& getMatrix() { return const_cast<MatrixType&>(Base::m_matrix); }
+      void setMatrix(const MatrixType& mat) { 
+        const_cast<MatrixType&>(Base::m_matrix) = mat;
+      }
+      
+      PardisoLU& compute_internal() { Base::compute(getMatrix()); return *this; }
+      PardisoLU& factorize_internal() { Base::factorize(getMatrix()); return *this; }
+      
+      int neigs() const { return 0; }
+      int peigs() const { return 0; }
+      int ppivs() const { return 0; }
+      
+      // PARDISO-specific parameter stubs (unused)
+      int m_ord = 0;
+      int m_pivotstrat = 0;
+      int m_pivotpert = 0;
+      int m_matching = 0;
+      int m_scaling = 0;
+      int m_iterref = 0;
+      int m_alg = 0;
+      int m_msglvl = 0;
+      int m_threads = 0;
+      int m_parsolve = 0;
+      int m_flops = 0;
+      int m_mem = 0;
+    };
     
-    // Using Eigen's SimplicialLLT as a fallback for PardisoLLT
+    // Wrapper for Eigen's SimplicialLLT to provide PardisoLLT-compatible interface
     template<typename MatrixType, int Options = Upper>
-    using PardisoLLT = SimplicialLLT<MatrixType, Options>;
+    class PardisoLLT : public SimplicialLLT<MatrixType, Options> {
+    public:
+      using Base = SimplicialLLT<MatrixType, Options>;
+      using Base::Base;
+      
+      void release() { /* No-op */ }
+      template<typename T> T getMatrixTwisted(const T& mat) { return mat; }
+      void setParams() { /* No-op */ }
+      MatrixType& getMatrix() { return const_cast<MatrixType&>(Base::m_matrix); }
+      void setMatrix(const MatrixType& mat) { 
+        const_cast<MatrixType&>(Base::m_matrix) = mat;
+      }
+      
+      PardisoLLT& compute_internal() { Base::compute(getMatrix()); return *this; }
+      PardisoLLT& factorize_internal() { Base::factorize(getMatrix()); return *this; }
+      
+      int neigs() const { return 0; }
+      int peigs() const { return 0; }
+      int ppivs() const { return 0; }
+      
+      int m_ord = 0;
+      int m_pivotstrat = 0;
+      int m_pivotpert = 0;
+      int m_matching = 0;
+      int m_scaling = 0;
+      int m_iterref = 0;
+      int m_alg = 0;
+      int m_msglvl = 0;
+      int m_threads = 0;
+      int m_parsolve = 0;
+      int m_flops = 0;
+      int m_mem = 0;
+    };
     
-    // Using Eigen's SimplicialLDLT as a fallback for PardisoLDLT
+    // Wrapper for Eigen's SimplicialLDLT to provide PardisoLDLT-compatible interface
     template<typename MatrixType, int Options = Upper>
-    using PardisoLDLT = SimplicialLDLT<MatrixType, Options>;
+    class PardisoLDLT : public SimplicialLDLT<MatrixType, Options> {
+    public:
+      using Base = SimplicialLDLT<MatrixType, Options>;
+      using Base::Base;
+      
+      void release() { /* No-op */ }
+      template<typename T> T getMatrixTwisted(const T& mat) { return mat; }
+      void setParams() { /* No-op */ }
+      MatrixType& getMatrix() { return const_cast<MatrixType&>(Base::m_matrix); }
+      void setMatrix(const MatrixType& mat) { 
+        const_cast<MatrixType&>(Base::m_matrix) = mat;
+      }
+      
+      PardisoLDLT& compute_internal() { Base::compute(getMatrix()); return *this; }
+      PardisoLDLT& factorize_internal() { Base::factorize(getMatrix()); return *this; }
+      
+      int neigs() const { return 0; }
+      int peigs() const { return 0; }
+      int ppivs() const { return 0; }
+      
+      int m_ord = 0;
+      int m_pivotstrat = 0;
+      int m_pivotpert = 0;
+      int m_matching = 0;
+      int m_scaling = 0;
+      int m_iterref = 0;
+      int m_alg = 0;
+      int m_msglvl = 0;
+      int m_threads = 0;
+      int m_parsolve = 0;
+      int m_flops = 0;
+      int m_mem = 0;
+    };
     
   }  // end namespace Eigen
   
