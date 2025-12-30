@@ -258,13 +258,34 @@ elseif(APPLE)
   
 endif()
 
-find_package(MKL REQUIRED)
+# Detect Windows ARM64 where MKL is not available
+if(WIN32 AND CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64|arm64")
+  set(WINDOWS_ARM64 TRUE)
+  message(STATUS "Detected Windows ARM64 - Building without MKL support")
+else()
+  set(WINDOWS_ARM64 FALSE)
+endif()
+
+# Find MKL only if not on Windows ARM64
+if(NOT WINDOWS_ARM64)
+  find_package(MKL REQUIRED)
+  set(ASSET_HAS_MKL TRUE)
+  add_definitions(-DASSET_HAS_MKL)
+else()
+  set(ASSET_HAS_MKL FALSE)
+  message(WARNING "Building without MKL support on Windows ARM64 - some features may be limited")
+endif()
 
 find_package(Python ${PYVERSION_EXACT} REQUIRED COMPONENTS Interpreter Development)
 
 # Set dependency variables
-set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${MKL_INCLUDE_DIRS})
-set(LINK_LIBS ${PYTHON_LIBRARIES} ${MKL_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS})
+if(ASSET_HAS_MKL)
+  set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${MKL_INCLUDE_DIRS})
+  set(LINK_LIBS ${PYTHON_LIBRARIES} ${MKL_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS})
+else()
+  set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS})
+  set(LINK_LIBS ${PYTHON_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS})
+endif()
 if(UNIX)
   list(APPEND LINK_LIBS m)
 endif()
@@ -273,15 +294,23 @@ endif()
 
 ################################################################################
 ################ Linker Flags ##################################################
-if(BUILD_SHARED_LIBS AND NOT APPLE AND NOT WIN32)  # Windows and Linux Dynamic Linking
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
-elseif(UNIX AND NOT APPLE)  # Linux Static Linking
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl,--end-group")
-elseif(APPLE)  # Apple Dynamic and Static Linking
-
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Xlinker -undefined -Xlinker dynamic_lookup")
-else()  # Windows Static Linking
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS}")
+if(ASSET_HAS_MKL)
+  if(BUILD_SHARED_LIBS AND NOT APPLE AND NOT WIN32)  # Windows and Linux Dynamic Linking
+    list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
+  elseif(UNIX AND NOT APPLE)  # Linux Static Linking
+    list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl,--end-group")
+  elseif(APPLE)  # Apple Dynamic and Static Linking
+    list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Xlinker -undefined -Xlinker dynamic_lookup")
+  else()  # Windows Static Linking with MKL
+    list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS}")
+  endif()
+else()
+  # No MKL available (e.g., Windows ARM64)
+  if(APPLE)
+    list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Xlinker -undefined -Xlinker dynamic_lookup")
+  else()
+    list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS}")
+  endif()
 endif()
 
 ###########################################################

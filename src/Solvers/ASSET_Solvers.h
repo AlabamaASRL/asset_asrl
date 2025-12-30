@@ -7,7 +7,7 @@
 #include "OptimizationProblem.h"
 #include "OptimizationProblemBase.h"
 #include "PSIOPT.h"
-#include "mkl.h"
+#include "MKL_Fallback.h"
 
 namespace ASSET {
 

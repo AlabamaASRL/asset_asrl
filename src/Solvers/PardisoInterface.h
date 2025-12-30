@@ -1,11 +1,13 @@
 #pragma once
 
-#ifndef EIGEN_PARDISOSUPPORT_H
-  #define EIGEN_PARDISOSUPPORT_H
+#ifdef ASSET_HAS_MKL
+  // Use Intel MKL PARDISO when available
+  #ifndef EIGEN_PARDISOSUPPORT_H
+    #define EIGEN_PARDISOSUPPORT_H
 
-  #include <Eigen/src/Core/util/DisableStupidWarnings.h>
-  #include <mkl_pardiso.h>
-  #include <Eigen/SparseCore>
+    #include <Eigen/src/Core/util/DisableStupidWarnings.h>
+    #include <mkl_pardiso.h>
+    #include <Eigen/SparseCore>
 
 /*
 The classes in this file are directly based on the PardisoSupport module from Eigen 3.4 and 
@@ -814,3 +816,33 @@ namespace Eigen {
   #include <Eigen/src/Core/util/ReenableStupidWarnings.h>
 
 #endif  // EIGEN_PARDISOSUPPORT_H
+
+#else  // !ASSET_HAS_MKL
+
+  // When MKL is not available, use Eigen's built-in sparse solvers as alternatives
+  // Note: These are not direct PARDISO equivalents but provide similar functionality
+  
+  #include <Eigen/Sparse>
+  #include <Eigen/SparseLU>
+  #include <Eigen/SparseCholesky>
+  
+  namespace Eigen {
+    
+    // Type aliases to provide compatible interface when MKL PARDISO is not available
+    // Using Eigen's built-in SparseLU as a fallback for PardisoLU
+    template<typename MatrixType>
+    using PardisoLU = SparseLU<MatrixType>;
+    
+    // Using Eigen's SimplicialLLT as a fallback for PardisoLLT
+    template<typename MatrixType, int Options = Upper>
+    using PardisoLLT = SimplicialLLT<MatrixType, Options>;
+    
+    // Using Eigen's SimplicialLDLT as a fallback for PardisoLDLT
+    template<typename MatrixType, int Options = Upper>
+    using PardisoLDLT = SimplicialLDLT<MatrixType, Options>;
+    
+  }  // end namespace Eigen
+  
+  #warning "Building without MKL PARDISO support - using Eigen built-in sparse solvers. Performance may be reduced."
+
+#endif  // ASSET_HAS_MKL

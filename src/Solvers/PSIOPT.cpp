@@ -1,6 +1,6 @@
 #include "PSIOPT.h"
 
-#include <mkl.h>
+#include "MKL_Fallback.h"
 
 #include "PyDocString/Solvers/PSIOPT_doc.h"
 
