@@ -28,10 +28,12 @@
   }
   
   // Fallback for dsecnd() - returns CPU/wall-clock time in seconds
+  // Returns time since first call to match MKL behavior
   inline double dsecnd() {
     using namespace std::chrono;
+    static auto first_call = high_resolution_clock::now();
     auto now = high_resolution_clock::now();
-    auto duration = now.time_since_epoch();
+    auto duration = now - first_call;
     return duration_cast<duration<double>>(duration).count();
   }
   
@@ -54,11 +56,12 @@
   
   // Fallback for dsecnd() - returns CPU/wall-clock time in seconds
   // MKL's dsecnd returns time in seconds since an arbitrary point (often program start)
-  // This implementation returns seconds since epoch which is compatible for timing purposes
+  // Returns time since first call to match MKL behavior
   inline double dsecnd() {
     using namespace std::chrono;
+    static auto first_call = high_resolution_clock::now();
     auto now = high_resolution_clock::now();
-    auto duration = now.time_since_epoch();
+    auto duration = now - first_call;
     return duration_cast<duration<double>>(duration).count();
   }
 
