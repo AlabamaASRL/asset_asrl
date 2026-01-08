@@ -817,9 +817,10 @@ namespace Eigen {
 
 #endif  // EIGEN_PARDISOSUPPORT_H
 
-#else  // !ASSET_HAS_MKL
+#else  // !ASSET_HAS_MKL (includes ASSET_HAS_OPENBLAS)
 
-  // When MKL is not available, use Eigen's built-in sparse solvers as alternatives
+  // When MKL is not available (including OpenBLAS builds), use Eigen's built-in sparse solvers
+  // OpenBLAS provides BLAS/LAPACK but not PARDISO, so we still need Eigen sparse solvers
   // Note: These are not direct PARDISO equivalents but provide similar functionality
   
   #include <Eigen/Sparse>
@@ -982,6 +983,10 @@ namespace Eigen {
     
   }  // end namespace Eigen
   
-  #warning "Building without MKL PARDISO support - using Eigen built-in sparse solvers. Performance may be reduced."
+  #ifdef ASSET_HAS_OPENBLAS
+    #warning "Building with OpenBLAS (no PARDISO) - using Eigen built-in sparse solvers. Performance may be reduced compared to MKL PARDISO."
+  #else
+    #warning "Building without MKL PARDISO support - using Eigen built-in sparse solvers. Performance may be reduced."
+  #endif
 
 #endif  // ASSET_HAS_MKL

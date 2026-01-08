@@ -26,18 +26,33 @@ ASSET supports the following platforms:
 - **Linux** (x86-64): Full support with Intel MKL
 - **macOS** (x86-64 and ARM64): Full support with Intel MKL
 - **Windows** (x86-64): Full support with Intel MKL
-- **Windows ARM64**: Limited support - builds from source without Intel MKL
+- **Windows ARM64**: Support with OpenBLAS (builds from source)
 
 ### Building from Source on Windows ARM64
 
-On Windows ARM64 systems, Intel's oneAPI Math Kernel Library (MKL) is not available. When building from source on these systems, ASSET will automatically use Eigen's built-in sparse solvers as an alternative. While this configuration works, performance may be reduced compared to MKL-enabled builds.
+On Windows ARM64 systems, Intel's oneAPI Math Kernel Library (MKL) is not available. When building from source on these systems, ASSET will automatically use **OpenBLAS** for BLAS/LAPACK operations and **Eigen's built-in sparse solvers** for sparse linear algebra.
 
-To build from source on Windows ARM64:
+**Prerequisites:**
 1. Install LLVM/Clang compiler toolchain
-2. Clone the repository with submodules: `git clone --recursive https://github.com/AlabamaASRL/asset_asrl.git`
-3. Configure and build with CMake (MKL will be automatically skipped)
+2. Install OpenBLAS for Windows ARM64:
+   - Download from: https://github.com/OpenMathLib/OpenBLAS/releases
+   - Or install via vcpkg: `vcpkg install openblas:arm64-windows`
+   - Set `OPENBLAS_ROOT` environment variable to installation path
 
-**Note**: The optimizer (PSIOPT) will use Eigen's SimplicialLDLT solver instead of Intel PARDISO when MKL is not available.
+**Build Steps:**
+```bash
+# Clone the repository with submodules
+git clone --recursive https://github.com/AlabamaASRL/asset_asrl.git
+cd asset_asrl
+
+# Configure with CMake (will detect ARM64 and use OpenBLAS)
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+# Build
+cmake --build build --config Release
+```
+
+**Note**: The optimizer (PSIOPT) will use Eigen's SimplicialLDLT solver instead of Intel PARDISO. OpenBLAS provides BLAS/LAPACK functionality but not PARDISO.
 
 ## Documentation
 -----
