@@ -537,3 +537,6 @@ CMakeSettings
 out
 main6
 main8
+
+# CodeQL artifacts
+_codeql_*
