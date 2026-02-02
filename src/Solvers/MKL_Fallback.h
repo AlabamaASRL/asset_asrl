@@ -33,8 +33,8 @@
     using namespace std::chrono;
     static auto first_call = high_resolution_clock::now();
     auto now = high_resolution_clock::now();
-    auto duration = now - first_call;
-    return duration_cast<duration<double>>(duration).count();
+    auto elapsed = now - first_call;
+    return duration_cast<duration<double>>(elapsed).count();
   }
   
 #else
@@ -61,8 +61,8 @@
     using namespace std::chrono;
     static auto first_call = high_resolution_clock::now();
     auto now = high_resolution_clock::now();
-    auto duration = now - first_call;
-    return duration_cast<duration<double>>(duration).count();
+    auto elapsed = now - first_call;
+    return duration_cast<duration<double>>(elapsed).count();
   }
 
 #endif // ASSET_HAS_MKL / ASSET_HAS_OPENBLAS
