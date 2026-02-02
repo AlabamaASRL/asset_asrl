@@ -290,19 +290,51 @@ else()
   message(STATUS "Note: PARDISO solver not available, using Eigen sparse solvers")
 endif()
 
-find_package(Python ${PYVERSION_EXACT} REQUIRED COMPONENTS Interpreter Development)
+# Find Python with flexible version detection
+# PYVERSION_EXACT can be set to lock to a specific version (e.g., -DPYVERSION_EXACT=3.11)
+# If not set, CMake will find any compatible Python 3.x version
+if(PYVERSION_EXACT)
+  message(STATUS "Looking for Python version: ${PYVERSION_EXACT}")
+  find_package(Python ${PYVERSION_EXACT} EXACT REQUIRED COMPONENTS Interpreter Development)
+else()
+  # Find any Python 3.x version with development headers
+  find_package(Python 3 REQUIRED COMPONENTS Interpreter Development)
+endif()
+
+# Verify Python was found with development headers
+if(NOT Python_FOUND)
+  message(FATAL_ERROR "Python not found. Please install Python with development headers.")
+endif()
+
+if(NOT Python_Development_FOUND)
+  message(FATAL_ERROR 
+    "Python development headers (Python.h) not found.\n"
+    "Solutions:\n"
+    "  1. Install Python development package:\n"
+    "     - Windows: Reinstall Python with 'Include development headers' option\n"
+    "     - Linux: Install python3-dev or python3-devel\n"
+    "     - macOS: Python from python.org includes headers by default\n"
+    "  2. Set Python path explicitly: cmake -DPython_ROOT_DIR=/path/to/python\n"
+    "  3. Set specific version: cmake -DPYVERSION_EXACT=3.11"
+  )
+endif()
+
+message(STATUS "Python found: ${Python_VERSION} at ${Python_EXECUTABLE}")
+message(STATUS "Python include: ${Python_INCLUDE_DIRS}")
+message(STATUS "Python library: ${Python_LIBRARIES}")
 
 # Set dependency variables
+# Note: Using Python_INCLUDE_DIRS and Python_LIBRARIES (modern CMake FindPython module variables)
 if(ASSET_HAS_MKL)
-  set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${MKL_INCLUDE_DIRS})
-  set(LINK_LIBS ${PYTHON_LIBRARIES} ${MKL_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS})
+  set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${Python_INCLUDE_DIRS} ${MKL_INCLUDE_DIRS})
+  set(LINK_LIBS ${Python_LIBRARIES} ${MKL_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS})
 elseif(ASSET_HAS_OPENBLAS)
-  set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${OpenBLAS_INCLUDE_DIRS})
-  set(LINK_LIBS ${PYTHON_LIBRARIES} ${OpenBLAS_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS})
+  set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${Python_INCLUDE_DIRS} ${OpenBLAS_INCLUDE_DIRS})
+  set(LINK_LIBS ${Python_LIBRARIES} ${OpenBLAS_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS})
 else()
   # Fallback (shouldn't reach here)
-  set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS})
-  set(LINK_LIBS ${PYTHON_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS})
+  set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
+  set(LINK_LIBS ${Python_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS})
 endif()
 if(UNIX)
   list(APPEND LINK_LIBS m)
@@ -340,7 +372,7 @@ if(NOT PIP_INSTALL)
     set(PYTHON_LOCAL_INSTALL_DIR ${Python_SITEARCH})
     
   else()
-    execute_process ( COMMAND ${PYTHON_EXECUTABLE} -m site --user-site
+    execute_process ( COMMAND ${Python_EXECUTABLE} -m site --user-site
     OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
     set(PYTHON_LOCAL_INSTALL_DIR ${PYTHON_SITE_PACKAGES})
   endif()
@@ -355,7 +387,7 @@ endif()
 message(STATUS "CMAKE DIR LOC" ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS ${OpenMP_CXX_FLAGS})
 message(STATUS ${OpenMP_CXX_LIBRARIES})
-message(STATUS ${PYTHON_EXECUTABLE})
+message(STATUS "Python executable: ${Python_EXECUTABLE}")
 
 ################################################################################
 # Code Directories
