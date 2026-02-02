@@ -323,6 +323,30 @@ message(STATUS "Python found: ${Python_VERSION} at ${Python_EXECUTABLE}")
 message(STATUS "Python include: ${Python_INCLUDE_DIRS}")
 message(STATUS "Python library: ${Python_LIBRARIES}")
 
+# Verify Python architecture matches target architecture on Windows ARM64
+if(WINDOWS_ARM64)
+  # Check if Python library path contains indication of architecture
+  string(FIND "${Python_LIBRARIES}" "arm64" ARM64_FOUND)
+  string(FIND "${Python_LIBRARIES}" "ARM64" ARM64_FOUND_UPPER)
+  
+  if(ARM64_FOUND EQUAL -1 AND ARM64_FOUND_UPPER EQUAL -1)
+    message(WARNING 
+      "Building for Windows ARM64 but Python libraries may not be ARM64.\n"
+      "Python library: ${Python_LIBRARIES}\n"
+      "\n"
+      "If you get linker errors about architecture mismatch (arm64 vs x64):\n"
+      "  1. Install ARM64 Python from: https://www.python.org/downloads/windows/\n"
+      "     (Look for 'Windows installer (ARM64)' download)\n"
+      "  2. Set Python path to ARM64 installation:\n"
+      "     cmake -DPython_ROOT_DIR=\"C:\\Python311-ARM64\"\n"
+      "  3. Verify with: python -c \"import platform; print(platform.machine())\"\n"
+      "     (Should output 'ARM64')"
+    )
+  else()
+    message(STATUS "Python appears to be ARM64 compatible")
+  endif()
+endif()
+
 # Set dependency variables
 # Note: Using Python_INCLUDE_DIRS and Python_LIBRARIES (modern CMake FindPython module variables)
 if(ASSET_HAS_MKL)

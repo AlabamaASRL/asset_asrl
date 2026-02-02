@@ -33,10 +33,17 @@ ASSET supports the following platforms:
 On Windows ARM64 systems, Intel's oneAPI Math Kernel Library (MKL) is not available. When building from source on these systems, ASSET will automatically use **OpenBLAS** for BLAS/LAPACK operations and **Eigen's built-in sparse solvers** for sparse linear algebra.
 
 **Prerequisites:**
-1. Install LLVM/Clang compiler toolchain
-2. Install OpenBLAS for Windows ARM64:
-   - Download from: https://github.com/OpenMathLib/OpenBLAS/releases
-   - Or install via vcpkg: `vcpkg install openblas:arm64-windows`
+1. **Install ARM64 Python** (Critical - must match architecture):
+   - Download ARM64 Python from: https://www.python.org/downloads/windows/
+   - Look for "Windows installer (ARM64)" download
+   - During installation, check "Include development headers (Python.h)"
+   - Verify: `python -c "import platform; print(platform.machine())"` should output `ARM64`
+
+2. **Install LLVM/Clang compiler toolchain** for ARM64
+
+3. **Install OpenBLAS for Windows ARM64**:
+   - Via vcpkg (recommended): `vcpkg install openblas:arm64-windows`
+   - Or download from: https://github.com/OpenMathLib/OpenBLAS/releases
    - Set `OPENBLAS_ROOT` environment variable to installation path
 
 **Build Steps:**
@@ -46,7 +53,8 @@ git clone --recursive https://github.com/AlabamaASRL/asset_asrl.git
 cd asset_asrl
 
 # Configure with CMake (will detect ARM64 and use OpenBLAS)
-cmake -B build -DCMAKE_BUILD_TYPE=Release
+# Important: If you have multiple Python installations, specify ARM64 Python:
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR="C:\Python311-ARM64"
 
 # Build
 cmake --build build --config Release
