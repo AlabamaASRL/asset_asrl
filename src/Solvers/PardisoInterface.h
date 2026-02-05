@@ -823,6 +823,7 @@ namespace Eigen {
   
   #ifdef ASSET_HAS_SUITESPARSE
     // Use SuiteSparse LDL for ARM64 - provides proper inertia like PARDISO
+    #include <cstdint>
     #include <ldl.h>
     #include <amd.h>
     #include <vector>
@@ -841,11 +842,11 @@ namespace Eigen {
         typedef typename MatrixType::StorageIndex StorageIndex;
         
         MatrixType m_matrix_copy;
-        std::vector<int> m_Lp, m_Li, m_Lnz;
+        std::vector<int32_t> m_Lp, m_Li, m_Lnz;
         std::vector<double> m_Lx, m_D;
-        std::vector<int> m_P, m_Pinv;
+        std::vector<int32_t> m_P, m_Pinv;
         std::vector<double> m_Y;
-        int m_n;
+        int32_t m_n;
         int m_positive_eigs;
         int m_negative_eigs;
         int m_zero_eigs;
@@ -895,6 +896,21 @@ namespace Eigen {
           SparseMatrix<Scalar, ColMajor> upper = m_matrix_copy.template triangularView<Upper>();
           upper.makeCompressed();
           
+          // Convert Eigen indices to int32_t for SuiteSparse
+          int32_t nnz = static_cast<int32_t>(upper.nonZeros());
+          std::vector<int32_t> Ap(m_n + 1);
+          std::vector<int32_t> Ai(nnz);
+          std::vector<double> Ax(nnz);
+          
+          // Copy matrix structure
+          for (int32_t i = 0; i <= m_n; i++) {
+            Ap[i] = static_cast<int32_t>(upper.outerIndexPtr()[i]);
+          }
+          for (int32_t i = 0; i < nnz; i++) {
+            Ai[i] = static_cast<int32_t>(upper.innerIndexPtr()[i]);
+            Ax[i] = static_cast<double>(upper.valuePtr()[i]);
+          }
+          
           // Allocate workspace
           m_Lp.resize(m_n + 1);
           m_P.resize(m_n);
@@ -905,39 +921,35 @@ namespace Eigen {
           std::vector<double> Info(AMD_INFO);
           amd_defaults(&Control[0]);
           
-          int* Ap = const_cast<int*>(upper.outerIndexPtr());
-          int* Ai = const_cast<int*>(upper.innerIndexPtr());
-          
-          int result = amd_order(m_n, Ap, Ai, &m_P[0], &Control[0], &Info[0]);
+          int32_t result = amd_order(m_n, &Ap[0], &Ai[0], &m_P[0], &Control[0], &Info[0]);
           if (result != AMD_OK && result != AMD_OK_BUT_JUMBLED) {
             m_info = NumericalIssue;
             return *this;
           }
           
           // Compute inverse permutation
-          for (int i = 0; i < m_n; i++) {
+          for (int32_t i = 0; i < m_n; i++) {
             m_Pinv[m_P[i]] = i;
           }
           
           // Symbolic factorization
           m_Lnz.resize(m_n);
-          std::vector<int> Parent(m_n);
-          std::vector<int> Flag(m_n);
-          std::vector<int> Pattern(m_n);
+          std::vector<int32_t> Parent(m_n);
+          std::vector<int32_t> Flag(m_n);
+          std::vector<int32_t> Pattern(m_n);
           
-          ldl_symbolic(m_n, Ap, Ai, &m_Lp[0], &Parent[0], &m_Lnz[0], 
+          ldl_symbolic(m_n, &Ap[0], &Ai[0], &m_Lp[0], &Parent[0], &m_Lnz[0], 
                        &Flag[0], &m_P[0], &m_Pinv[0]);
           
           // Allocate L and D
-          int lnz = m_Lp[m_n];
+          int32_t lnz = m_Lp[m_n];
           m_Li.resize(lnz);
           m_Lx.resize(lnz);
           m_D.resize(m_n);
           m_Y.resize(m_n);
           
           // Numeric factorization
-          double* Ax = const_cast<double*>(upper.valuePtr());
-          int d_result = ldl_numeric(m_n, Ap, Ai, Ax, &m_Lp[0], &Parent[0],
+          int32_t d_result = ldl_numeric(m_n, &Ap[0], &Ai[0], &Ax[0], &m_Lp[0], &Parent[0],
                                       &m_Lnz[0], &m_Li[0], &m_Lx[0], &m_D[0],
                                       &m_Y[0], &Pattern[0], &Flag[0], 
                                       &m_P[0], &m_Pinv[0]);
@@ -953,7 +965,7 @@ namespace Eigen {
           m_zero_eigs = 0;
           const double tol = 1e-14;
           
-          for (int i = 0; i < m_n; i++) {
+          for (int32_t i = 0; i < m_n; i++) {
             if (m_D[i] > tol) {
               m_positive_eigs++;
             } else if (m_D[i] < -tol) {
@@ -982,7 +994,7 @@ namespace Eigen {
           std::vector<double> b(m_n);
           
           // Copy and permute rhs
-          for (int i = 0; i < m_n; i++) {
+          for (int32_t i = 0; i < m_n; i++) {
             b[m_P[i]] = x(i);
           }
           
@@ -992,7 +1004,7 @@ namespace Eigen {
           ldl_ltsolve(m_n, &b[0], &m_Lp[0], &m_Li[0], &m_Lx[0]);
           
           // Inverse permute solution
-          for (int i = 0; i < m_n; i++) {
+          for (int32_t i = 0; i < m_n; i++) {
             x(m_Pinv[i]) = b[i];
           }
           
