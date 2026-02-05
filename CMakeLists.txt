@@ -86,9 +86,12 @@ if(BUILD_ASSET_WHEEL)
     set(CLANG_MAX_INLINE_DEPTH 400)
     
 else()
-    list(APPEND RELEASE_FLAGS "-march=native")
-    if(NOT WIN32)
-        list(APPEND RELEASE_FLAGS "-mtune=native")
+    # Only use native march/mtune on x86/x64, not ARM64
+    if(NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64|arm64"))
+        list(APPEND RELEASE_FLAGS "-march=native")
+        if(NOT WIN32)
+            list(APPEND RELEASE_FLAGS "-mtune=native")
+        endif()
     endif()
 endif()
 
