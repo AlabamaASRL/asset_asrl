@@ -24,7 +24,7 @@ endif()
 find_path(SuiteSparse_CONFIG_INCLUDE_DIR
   NAMES SuiteSparse_config.h
   PATHS
-    $ENV{SUITESPARSE_ROOT}/include
+    $ENV{SUITESPARSE_CONFIG_ROOT}/include
     /usr/include/suitesparse
     /usr/local/include/suitesparse
     /usr/include
@@ -36,7 +36,7 @@ find_path(SuiteSparse_CONFIG_INCLUDE_DIR
 find_library(SuiteSparse_CONFIG_LIBRARY
   NAMES suitesparseconfig
   PATHS
-    $ENV{SUITESPARSE_ROOT}/lib
+    $ENV{SUITESPARSE_CONFIG_ROOT}/lib
     /usr/lib
     /usr/local/lib
     /usr/lib/x86_64-linux-gnu
@@ -48,7 +48,7 @@ find_library(SuiteSparse_CONFIG_LIBRARY
 find_path(SuiteSparse_LDL_INCLUDE_DIR
   NAMES ldl.h
   PATHS
-    $ENV{SUITESPARSE_ROOT}/include
+    $ENV{SUITESPARSE_LDL_ROOT}/include
     /usr/include/suitesparse
     /usr/local/include/suitesparse
     /usr/include
@@ -60,7 +60,7 @@ find_path(SuiteSparse_LDL_INCLUDE_DIR
 find_library(SuiteSparse_LDL_LIBRARY
   NAMES ldl
   PATHS
-    $ENV{SUITESPARSE_ROOT}/lib
+    $ENV{SUITESPARSE_LDL_ROOT}/lib
     /usr/lib
     /usr/local/lib
     /usr/lib/x86_64-linux-gnu
@@ -72,7 +72,7 @@ find_library(SuiteSparse_LDL_LIBRARY
 find_path(SuiteSparse_AMD_INCLUDE_DIR
   NAMES amd.h
   PATHS
-    $ENV{SUITESPARSE_ROOT}/include
+    $ENV{SUITESPARSE_AMD_ROOT}/include
     /usr/include/suitesparse
     /usr/local/include/suitesparse
     /usr/include
@@ -84,7 +84,7 @@ find_path(SuiteSparse_AMD_INCLUDE_DIR
 find_library(SuiteSparse_AMD_LIBRARY
   NAMES amd
   PATHS
-    $ENV{SUITESPARSE_ROOT}/lib
+    $ENV{SUITESPARSE_AMD_ROOT}/lib
     /usr/lib
     /usr/local/lib
     /usr/lib/x86_64-linux-gnu
