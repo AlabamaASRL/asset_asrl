@@ -1,0 +1,50 @@
+{
+  "cmake.configureOnOpen": false,
+  "cmake.buildDirectory": "${workspaceFolder}/build",
+  "cmake.installPrefix": "${workspaceFolder}/install",
+  "cmake.generator": "Ninja",
+  "cmake.preferredGenerators": ["Ninja", "Unix Makefiles"],
+  "cmake.additionalKits": [
+    "${workspaceFolder}/.vscode/cmake-kits.json"
+  ],
+  "cmake.defaultVariants": {
+    "buildType": {
+      "default": "Release",
+      "description": "The build type",
+      "choices": {
+        "Debug": {
+          "short": "Debug",
+          "long": "Emit debug information",
+          "buildType": "Debug"
+        },
+        "Release": {
+          "short": "Release",
+          "long": "Optimize generated code",
+          "buildType": "Release"
+        },
+        "RelWithDebInfo": {
+          "short": "RelWithDebInfo",
+          "long": "Release with Debug Info",
+          "buildType": "RelWithDebInfo"
+        }
+      }
+    }
+  },
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "C_Cpp.default.intelliSenseMode": "windows-clang-x64",
+  "C_Cpp.default.cppStandard": "c++17",
+  "files.associations": {
+    "*.h": "cpp",
+    "*.cpp": "cpp"
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/build": true,
+    "**/out": true,
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  },
+  "python.defaultInterpreterPath": "python",
+  "git.ignoreLimitWarning": true
+}

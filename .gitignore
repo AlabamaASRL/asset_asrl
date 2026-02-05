@@ -165,11 +165,13 @@ dmypy.json
 .pyre/
 
 ### VisualStudioCode ###
+# VSCode - Include shared configuration, exclude user-specific files
 .vscode/*
+!.vscode/cmake-kits.json
 !.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
 !.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
 
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
@@ -530,7 +532,6 @@ MigrationBackup/
 # Manual
 /doc/html
 build
-.vscode
 CMakeSettings
 /doc/cpp
 *.h5
@@ -540,3 +541,11 @@ main8
 
 # CodeQL artifacts
 _codeql_*
+
+# VSCode - Include shared configuration, exclude user-specific files
+.vscode/*
+!.vscode/cmake-kits.json
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
