@@ -30,7 +30,7 @@ ASSET supports the following platforms:
 
 ### Building from Source on Windows ARM64
 
-On Windows ARM64 systems, Intel's oneAPI Math Kernel Library (MKL) is not available. When building from source on these systems, ASSET will automatically use **OpenBLAS** for BLAS/LAPACK operations and **Eigen's built-in sparse solvers** for sparse linear algebra.
+On Windows ARM64 systems, Intel's oneAPI Math Kernel Library (MKL) is not available. When building from source on these systems, ASSET will automatically use **OpenBLAS** for BLAS/LAPACK operations and **SuiteSparse LDL** for sparse linear algebra.
 
 **Prerequisites:**
 1. **Install ARM64 Python** (Critical - must match architecture):
@@ -46,13 +46,19 @@ On Windows ARM64 systems, Intel's oneAPI Math Kernel Library (MKL) is not availa
    - Or download from: https://github.com/OpenMathLib/OpenBLAS/releases
    - Set `OPENBLAS_ROOT` environment variable to installation path
 
+4. **Install SuiteSparse for Windows ARM64**:
+   - Via vcpkg (recommended): `vcpkg install suitesparse:arm64-windows`
+   - Or download and build from: https://github.com/DrTimothyAldenDavis/SuiteSparse
+   - Set `SUITESPARSE_ROOT` environment variable if needed
+   - Required components: LDL, AMD, SuiteSparse_config
+
 **Build Steps:**
 ```bash
 # Clone the repository with submodules
 git clone --recursive https://github.com/AlabamaASRL/asset_asrl.git
 cd asset_asrl
 
-# Configure with CMake (will detect ARM64 and use OpenBLAS)
+# Configure with CMake (will detect ARM64 and use OpenBLAS + SuiteSparse)
 # Important: If you have multiple Python installations, specify ARM64 Python:
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR="C:\Python311-ARM64"
 
@@ -60,7 +66,11 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR="C:\Python311-ARM64"
 cmake --build build --config Release
 ```
 
-**Note**: The optimizer (PSIOPT) will use Eigen's SimplicialLDLT solver instead of Intel PARDISO. OpenBLAS provides BLAS/LAPACK functionality but not PARDISO.
+**Note**: 
+- SuiteSparse LDL provides matrix factorization similar to Intel PARDISO
+- LDL computes A = L*D*L^T for symmetric indefinite matrices (KKT systems)
+- Provides proper inertia information critical for interior-point optimization
+- Much more robust than Eigen's sparse solvers for optimization problems
 
 ## Documentation
 -----

@@ -817,15 +817,228 @@ namespace Eigen {
 
 #endif  // EIGEN_PARDISOSUPPORT_H
 
-#else  // !ASSET_HAS_MKL (includes ASSET_HAS_OPENBLAS)
+#else  // !ASSET_HAS_MKL
 
-  // When MKL is not available (including OpenBLAS builds), use Eigen's built-in sparse solvers
-  // OpenBLAS provides BLAS/LAPACK but not PARDISO, so we still need Eigen sparse solvers
-  // Note: These are not direct PARDISO equivalents but provide similar functionality
+  // When MKL is not available, use alternative sparse solvers
   
-  #include <Eigen/Sparse>
-  #include <Eigen/SparseLU>
-  #include <Eigen/SparseCholesky>
+  #ifdef ASSET_HAS_SUITESPARSE
+    // Use SuiteSparse LDL for ARM64 - provides proper inertia like PARDISO
+    #include <ldl.h>
+    #include <amd.h>
+    #include <vector>
+    #include <Eigen/Sparse>
+    
+    namespace Eigen {
+      
+      // Wrapper for SuiteSparse LDL to provide PardisoLDLT-compatible interface
+      // LDL computes A = L*D*L^T factorization for symmetric indefinite matrices
+      // Critical: Provides inertia from diagonal D (unlike Eigen solvers)
+      template<typename MatrixType, int Options = Upper>
+      class PardisoLDLT {
+      private:
+        typedef typename MatrixType::Scalar Scalar;
+        typedef typename MatrixType::RealScalar RealScalar;
+        typedef typename MatrixType::StorageIndex StorageIndex;
+        
+        MatrixType m_matrix_copy;
+        std::vector<int> m_Lp, m_Li, m_Lnz;
+        std::vector<double> m_Lx, m_D;
+        std::vector<int> m_P, m_Pinv;
+        std::vector<double> m_Y;
+        int m_n;
+        int m_positive_eigs;
+        int m_negative_eigs;
+        int m_zero_eigs;
+        ComputationInfo m_info;
+        bool m_isInitialized;
+        
+      public:
+        PardisoLDLT() : m_n(0), m_positive_eigs(0), m_negative_eigs(0), 
+                         m_zero_eigs(0), m_info(Success), m_isInitialized(false) {}
+        
+        void release() { 
+          m_Lp.clear();
+          m_Li.clear();
+          m_Lnz.clear();
+          m_Lx.clear();
+          m_D.clear();
+          m_P.clear();
+          m_Pinv.clear();
+          m_Y.clear();
+          m_isInitialized = false;
+        }
+        
+        template<typename T> 
+        T getMatrixTwisted(const T& mat) { return mat; }
+        
+        void setParams() { /* No-op */ }
+        
+        MatrixType& getMatrix() { return m_matrix_copy; }
+        
+        void setMatrix(const MatrixType& mat) { 
+          m_matrix_copy = mat;
+          m_n = mat.rows();
+        }
+        
+        PardisoLDLT& compute_internal() {
+          if (m_n == 0) {
+            m_info = InvalidInput;
+            return *this;
+          }
+          
+          // Ensure matrix is compressed
+          if (!m_matrix_copy.isCompressed()) {
+            m_matrix_copy.makeCompressed();
+          }
+          
+          // Convert to upper triangular only (LDL expects upper triangle)
+          SparseMatrix<Scalar, ColMajor> upper = m_matrix_copy.template triangularView<Upper>();
+          upper.makeCompressed();
+          
+          // Allocate workspace
+          m_Lp.resize(m_n + 1);
+          m_P.resize(m_n);
+          m_Pinv.resize(m_n);
+          
+          // Compute AMD ordering for sparsity
+          std::vector<double> Control(AMD_CONTROL);
+          std::vector<double> Info(AMD_INFO);
+          amd_defaults(&Control[0]);
+          
+          int* Ap = const_cast<int*>(upper.outerIndexPtr());
+          int* Ai = const_cast<int*>(upper.innerIndexPtr());
+          
+          int result = amd_order(m_n, Ap, Ai, &m_P[0], &Control[0], &Info[0]);
+          if (result != AMD_OK && result != AMD_OK_BUT_JUMBLED) {
+            m_info = NumericalIssue;
+            return *this;
+          }
+          
+          // Compute inverse permutation
+          for (int i = 0; i < m_n; i++) {
+            m_Pinv[m_P[i]] = i;
+          }
+          
+          // Symbolic factorization
+          m_Lnz.resize(m_n);
+          std::vector<int> Parent(m_n);
+          std::vector<int> Flag(m_n);
+          std::vector<int> Pattern(m_n);
+          
+          ldl_symbolic(m_n, Ap, Ai, &m_Lp[0], &Parent[0], &m_Lnz[0], 
+                       &Flag[0], &m_P[0], &m_Pinv[0]);
+          
+          // Allocate L and D
+          int lnz = m_Lp[m_n];
+          m_Li.resize(lnz);
+          m_Lx.resize(lnz);
+          m_D.resize(m_n);
+          m_Y.resize(m_n);
+          
+          // Numeric factorization
+          double* Ax = const_cast<double*>(upper.valuePtr());
+          int d_result = ldl_numeric(m_n, Ap, Ai, Ax, &m_Lp[0], &Parent[0],
+                                      &m_Lnz[0], &m_Li[0], &m_Lx[0], &m_D[0],
+                                      &m_Y[0], &Pattern[0], &Flag[0], 
+                                      &m_P[0], &m_Pinv[0]);
+          
+          if (d_result != m_n) {
+            m_info = NumericalIssue;
+            return *this;
+          }
+          
+          // Compute inertia from diagonal D - CRITICAL FOR OPTIMIZATION
+          m_positive_eigs = 0;
+          m_negative_eigs = 0;
+          m_zero_eigs = 0;
+          const double tol = 1e-14;
+          
+          for (int i = 0; i < m_n; i++) {
+            if (m_D[i] > tol) {
+              m_positive_eigs++;
+            } else if (m_D[i] < -tol) {
+              m_negative_eigs++;
+            } else {
+              m_zero_eigs++;
+            }
+          }
+          
+          m_info = Success;
+          m_isInitialized = true;
+          return *this;
+        }
+        
+        PardisoLDLT& factorize_internal() {
+          return compute_internal();
+        }
+        
+        template<typename Rhs>
+        Matrix<Scalar, Dynamic, 1> solve(const Rhs& rhs) const {
+          if (!m_isInitialized || m_info != Success) {
+            return Matrix<Scalar, Dynamic, 1>::Zero(m_n);
+          }
+          
+          Matrix<Scalar, Dynamic, 1> x = rhs;
+          std::vector<double> b(m_n);
+          
+          // Copy and permute rhs
+          for (int i = 0; i < m_n; i++) {
+            b[m_P[i]] = x(i);
+          }
+          
+          // Solve L*D*L^T * x = b
+          ldl_lsolve(m_n, &b[0], &m_Lp[0], &m_Li[0], &m_Lx[0]);
+          ldl_dsolve(m_n, &b[0], &m_D[0]);
+          ldl_ltsolve(m_n, &b[0], &m_Lp[0], &m_Li[0], &m_Lx[0]);
+          
+          // Inverse permute solution
+          for (int i = 0; i < m_n; i++) {
+            x(m_Pinv[i]) = b[i];
+          }
+          
+          return x;
+        }
+        
+        ComputationInfo info() const { return m_info; }
+        
+        // CRITICAL: Return proper inertia information (fixes "Rank Deficiency" error)
+        int neigs() const { return m_negative_eigs; }
+        int peigs() const { return m_positive_eigs; }
+        int ppivs() const { return m_zero_eigs; }
+        
+        // PARDISO-specific parameter stubs (unused but required for interface)
+        int m_ord = 0;
+        int m_pivotstrat = 0;
+        int m_pivotpert = 0;
+        int m_matching = 0;
+        int m_scaling = 0;
+        int m_iterref = 0;
+        int m_alg = 0;
+        int m_msglvl = 0;
+        int m_threads = 0;
+        int m_parsolve = 0;
+        int m_flops = 0;
+        int m_mem = 0;
+      };
+      
+      // For now, use Eigen's LU and LLT for non-LDLT cases
+      // These are rarely used in ASSET (LDLT is primary for KKT systems)
+      template<typename MatrixType>
+      using PardisoLU = SparseLU<MatrixType>;
+      
+      template<typename MatrixType, int Options = Upper>
+      using PardisoLLT = SimplicialLLT<MatrixType, Options>;
+      
+    }  // end namespace Eigen
+    
+    #warning "Building with SuiteSparse LDL for sparse solver (PARDISO replacement with proper inertia)"
+    
+  #else  // !ASSET_HAS_SUITESPARSE
+  
+    // Fallback to Eigen's built-in sparse solvers (no inertia - will cause issues)
+    #include <Eigen/Sparse>
+    #include <Eigen/SparseLU>
+    #include <Eigen/SparseCholesky>
   
   namespace Eigen {
     
@@ -983,10 +1196,8 @@ namespace Eigen {
     
   }  // end namespace Eigen
   
-  #ifdef ASSET_HAS_OPENBLAS
-    #warning "Building with OpenBLAS (no PARDISO) - using Eigen built-in sparse solvers. Performance may be reduced compared to MKL PARDISO."
-  #else
-    #warning "Building without MKL PARDISO support - using Eigen built-in sparse solvers. Performance may be reduced."
-  #endif
+  #warning "Building without MKL or SuiteSparse - using Eigen sparse solvers. WARNING: No inertia information available!"
+
+  #endif  // ASSET_HAS_SUITESPARSE
 
 #endif  // ASSET_HAS_MKL
