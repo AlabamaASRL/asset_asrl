@@ -172,6 +172,7 @@ dmypy.json
 !.vscode/extensions.json
 !.vscode/launch.json
 !.vscode/tasks.json
+!.vscode/README.md
 
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
@@ -549,3 +550,4 @@ _codeql_*
 !.vscode/extensions.json
 !.vscode/launch.json
 !.vscode/tasks.json
+!.vscode/README.md
