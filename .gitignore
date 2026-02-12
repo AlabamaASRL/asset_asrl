@@ -542,12 +542,3 @@ main8
 
 # CodeQL artifacts
 _codeql_*
-
-# VSCode - Include shared configuration, exclude user-specific files
-.vscode/*
-!.vscode/cmake-kits.json
-!.vscode/settings.json
-!.vscode/extensions.json
-!.vscode/launch.json
-!.vscode/tasks.json
-!.vscode/README.md

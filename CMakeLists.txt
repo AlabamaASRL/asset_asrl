@@ -86,8 +86,9 @@ if(BUILD_ASSET_WHEEL)
     set(CLANG_MAX_INLINE_DEPTH 400)
     
 else()
-    # Only use native march/mtune on x86/x64, not ARM64
-    if(NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64|arm64"))
+    # -march=native and -mtune=native work on Linux/macOS ARM64 (GCC/Clang)
+    # but not on Windows ARM64 with clang-cl (which uses MSVC-style flags)
+    if(NOT (WIN32 AND CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64|arm64"))
         list(APPEND RELEASE_FLAGS "-march=native")
         if(NOT WIN32)
             list(APPEND RELEASE_FLAGS "-mtune=native")
@@ -267,17 +268,31 @@ elseif(APPLE)
   
 endif()
 
-# Detect Windows ARM64 where MKL is not available
-if(WIN32 AND CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64|arm64")
-  set(WINDOWS_ARM64 TRUE)
-  message(STATUS "Detected Windows ARM64 - Using OpenBLAS + SuiteSparse instead of MKL")
+# Detect ARM64 platforms where MKL is not available
+# MKL supports: Linux x86_64, macOS x86_64/ARM64, Windows x86/x64
+# MKL does NOT support: Windows ARM64, Linux ARM64 (aarch64)
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64|arm64")
+  if(NOT APPLE)
+    # Windows ARM64 and Linux ARM64 lack MKL support
+    set(USE_MKL_ALTERNATIVE TRUE)
+    message(STATUS "Detected ${CMAKE_SYSTEM_NAME} ARM64 - Using OpenBLAS + SuiteSparse instead of MKL")
+  else()
+    # macOS ARM64 (Apple Silicon) has MKL support via Rosetta/universal builds
+    set(USE_MKL_ALTERNATIVE FALSE)
+  endif()
 else()
-  set(WINDOWS_ARM64 FALSE)
+  set(USE_MKL_ALTERNATIVE FALSE)
+endif()
+
+# Allow user override: cmake -DFORCE_OPENBLAS=ON to skip MKL even on x86
+if(FORCE_OPENBLAS)
+  set(USE_MKL_ALTERNATIVE TRUE)
+  message(STATUS "FORCE_OPENBLAS=ON - Using OpenBLAS + SuiteSparse instead of MKL")
 endif()
 
 # Find appropriate BLAS library and sparse solver
-if(NOT WINDOWS_ARM64)
-  # Use Intel MKL on x86/x64 platforms
+if(NOT USE_MKL_ALTERNATIVE)
+  # Use Intel MKL on supported platforms
   find_package(MKL REQUIRED)
   set(ASSET_HAS_MKL TRUE)
   set(ASSET_HAS_OPENBLAS FALSE)
@@ -285,7 +300,7 @@ if(NOT WINDOWS_ARM64)
   add_definitions(-DASSET_HAS_MKL)
   message(STATUS "Using Intel MKL for BLAS/LAPACK and PARDISO")
 else()
-  # Use OpenBLAS + SuiteSparse on Windows ARM64 (MKL not available)
+  # Use OpenBLAS + SuiteSparse on platforms without MKL
   find_package(OpenBLAS REQUIRED)
   find_package(SuiteSparse REQUIRED)
   set(ASSET_HAS_MKL FALSE)
@@ -293,7 +308,7 @@ else()
   set(ASSET_HAS_SUITESPARSE TRUE)
   add_definitions(-DASSET_HAS_OPENBLAS)
   add_definitions(-DASSET_HAS_SUITESPARSE)
-  message(STATUS "Using OpenBLAS for BLAS/LAPACK on Windows ARM64")
+  message(STATUS "Using OpenBLAS for BLAS/LAPACK")
   message(STATUS "Using SuiteSparse LDL for sparse solver (PARDISO replacement)")
 endif()
 
@@ -330,8 +345,8 @@ message(STATUS "Python found: ${Python_VERSION} at ${Python_EXECUTABLE}")
 message(STATUS "Python include: ${Python_INCLUDE_DIRS}")
 message(STATUS "Python library: ${Python_LIBRARIES}")
 
-# Verify Python architecture matches target architecture on Windows ARM64
-if(WINDOWS_ARM64)
+# Verify Python architecture matches target architecture on ARM64
+if(USE_MKL_ALTERNATIVE AND WIN32)
   # Check if Python library path contains indication of architecture
   string(FIND "${Python_LIBRARIES}" "arm64" ARM64_FOUND)
   string(FIND "${Python_LIBRARIES}" "ARM64" ARM64_FOUND_UPPER)

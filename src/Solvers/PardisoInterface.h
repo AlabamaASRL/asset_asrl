@@ -839,11 +839,12 @@ namespace Eigen {
         typedef typename MatrixType::Scalar Scalar;
         typedef typename MatrixType::RealScalar RealScalar;
         typedef typename MatrixType::StorageIndex StorageIndex;
-        
+
         MatrixType m_matrix_copy;
         std::vector<int> m_Lp, m_Li, m_Lnz;
         std::vector<double> m_Lx, m_D;
         std::vector<int> m_P, m_Pinv;
+        std::vector<int> m_Parent, m_Flag, m_Pattern;
         std::vector<double> m_Y;
         int m_n;
         int m_positive_eigs;
@@ -851,12 +852,14 @@ namespace Eigen {
         int m_zero_eigs;
         ComputationInfo m_info;
         bool m_isInitialized;
-        
+        bool m_symbolicDone;
+
       public:
-        PardisoLDLT() : m_n(0), m_positive_eigs(0), m_negative_eigs(0), 
-                         m_zero_eigs(0), m_info(Success), m_isInitialized(false) {}
-        
-        void release() { 
+        PardisoLDLT() : m_n(0), m_positive_eigs(0), m_negative_eigs(0),
+                         m_zero_eigs(0), m_info(Success), m_isInitialized(false),
+                         m_symbolicDone(false) {}
+
+        void release() {
           m_Lp.clear();
           m_Li.clear();
           m_Lnz.clear();
@@ -864,44 +867,41 @@ namespace Eigen {
           m_D.clear();
           m_P.clear();
           m_Pinv.clear();
+          m_Parent.clear();
+          m_Flag.clear();
+          m_Pattern.clear();
           m_Y.clear();
           m_isInitialized = false;
+          m_symbolicDone = false;
         }
-        
-        template<typename T> 
+
+        template<typename T>
         T getMatrixTwisted(const T& mat) { return mat; }
-        
-        void setParams() { /* No-op */ }
-        
+
+        void setParams() { /* No-op: PARDISO parameters don't apply to LDL */ }
+
         MatrixType& getMatrix() { return m_matrix_copy; }
-        
-        void setMatrix(const MatrixType& mat) { 
+
+        void setMatrix(const MatrixType& mat) {
           m_matrix_copy = mat;
           m_n = mat.rows();
         }
-        
-        PardisoLDLT& compute_internal() {
-          if (m_n == 0) {
-            m_info = InvalidInput;
-            return *this;
-          }
-          
-          // Ensure matrix is compressed
+
+      private:
+        // Extract upper triangle as CSC and convert indices to int for SuiteSparse
+        void extractUpperCSC(std::vector<int>& Ap, std::vector<int>& Ai, std::vector<double>& Ax) {
           if (!m_matrix_copy.isCompressed()) {
             m_matrix_copy.makeCompressed();
           }
-          
-          // Convert to upper triangular only (LDL expects upper triangle)
+
           SparseMatrix<Scalar, ColMajor> upper = m_matrix_copy.template triangularView<Upper>();
           upper.makeCompressed();
-          
-          // Convert Eigen indices to int for SuiteSparse
+
           int nnz = static_cast<int>(upper.nonZeros());
-          std::vector<int> Ap(m_n + 1);
-          std::vector<int> Ai(nnz);
-          std::vector<double> Ax(nnz);
-          
-          // Copy matrix structure
+          Ap.resize(m_n + 1);
+          Ai.resize(nnz);
+          Ax.resize(nnz);
+
           for (int i = 0; i <= m_n; i++) {
             Ap[i] = static_cast<int>(upper.outerIndexPtr()[i]);
           }
@@ -909,61 +909,15 @@ namespace Eigen {
             Ai[i] = static_cast<int>(upper.innerIndexPtr()[i]);
             Ax[i] = static_cast<double>(upper.valuePtr()[i]);
           }
-          
-          // Allocate workspace
-          m_Lp.resize(m_n + 1);
-          m_P.resize(m_n);
-          m_Pinv.resize(m_n);
-          
-          // Compute AMD ordering for sparsity
-          std::vector<double> Control(AMD_CONTROL);
-          std::vector<double> Info(AMD_INFO);
-          amd_defaults(&Control[0]);
-          
-          int result = amd_order(m_n, &Ap[0], &Ai[0], &m_P[0], &Control[0], &Info[0]);
-          if (result != AMD_OK && result != AMD_OK_BUT_JUMBLED) {
-            m_info = NumericalIssue;
-            return *this;
-          }
-          
-          // Compute inverse permutation
-          for (int i = 0; i < m_n; i++) {
-            m_Pinv[m_P[i]] = i;
-          }
-          
-          // Symbolic factorization
-          m_Lnz.resize(m_n);
-          std::vector<int> Parent(m_n);
-          std::vector<int> Flag(m_n);
-          std::vector<int> Pattern(m_n);
-          
-          ldl_symbolic(m_n, &Ap[0], &Ai[0], &m_Lp[0], &Parent[0], &m_Lnz[0], 
-                       &Flag[0], &m_P[0], &m_Pinv[0]);
-          
-          // Allocate L and D
-          int lnz = m_Lp[m_n];
-          m_Li.resize(lnz);
-          m_Lx.resize(lnz);
-          m_D.resize(m_n);
-          m_Y.resize(m_n);
-          
-          // Numeric factorization
-          int d_result = ldl_numeric(m_n, &Ap[0], &Ai[0], &Ax[0], &m_Lp[0], &Parent[0],
-                                      &m_Lnz[0], &m_Li[0], &m_Lx[0], &m_D[0],
-                                      &m_Y[0], &Pattern[0], &Flag[0], 
-                                      &m_P[0], &m_Pinv[0]);
-          
-          if (d_result != m_n) {
-            m_info = NumericalIssue;
-            return *this;
-          }
-          
-          // Compute inertia from diagonal D - CRITICAL FOR OPTIMIZATION
+        }
+
+        // Compute inertia from diagonal D
+        void computeInertia() {
           m_positive_eigs = 0;
           m_negative_eigs = 0;
           m_zero_eigs = 0;
           const double tol = 1e-14;
-          
+
           for (int i = 0; i < m_n; i++) {
             if (m_D[i] > tol) {
               m_positive_eigs++;
@@ -973,51 +927,145 @@ namespace Eigen {
               m_zero_eigs++;
             }
           }
-          
+        }
+
+      public:
+        // Full symbolic + numeric factorization (like PARDISO phases 11+22)
+        PardisoLDLT& compute_internal() {
+          if (m_n == 0) {
+            m_info = InvalidInput;
+            return *this;
+          }
+
+          // Extract CSC upper triangle
+          std::vector<int> Ap, Ai;
+          std::vector<double> Ax;
+          extractUpperCSC(Ap, Ai, Ax);
+
+          // Allocate workspace for ordering
+          m_Lp.resize(m_n + 1);
+          m_P.resize(m_n);
+          m_Pinv.resize(m_n);
+
+          // Compute AMD ordering for sparsity
+          std::vector<double> Control(AMD_CONTROL);
+          std::vector<double> Info(AMD_INFO);
+          amd_defaults(&Control[0]);
+
+          int result = amd_order(m_n, &Ap[0], &Ai[0], &m_P[0], &Control[0], &Info[0]);
+          if (result != AMD_OK && result != AMD_OK_BUT_JUMBLED) {
+            m_info = NumericalIssue;
+            m_symbolicDone = false;
+            return *this;
+          }
+
+          // Compute inverse permutation
+          for (int i = 0; i < m_n; i++) {
+            m_Pinv[m_P[i]] = i;
+          }
+
+          // Symbolic factorization - cache Parent for reuse in factorize_internal
+          m_Lnz.resize(m_n);
+          m_Parent.resize(m_n);
+          m_Flag.resize(m_n);
+          m_Pattern.resize(m_n);
+
+          ldl_symbolic(m_n, &Ap[0], &Ai[0], &m_Lp[0], &m_Parent[0], &m_Lnz[0],
+                       &m_Flag[0], &m_P[0], &m_Pinv[0]);
+
+          // Allocate L and D
+          int lnz = m_Lp[m_n];
+          m_Li.resize(lnz);
+          m_Lx.resize(lnz);
+          m_D.resize(m_n);
+          m_Y.resize(m_n);
+
+          m_symbolicDone = true;
+
+          // Numeric factorization
+          int d_result = ldl_numeric(m_n, &Ap[0], &Ai[0], &Ax[0], &m_Lp[0], &m_Parent[0],
+                                      &m_Lnz[0], &m_Li[0], &m_Lx[0], &m_D[0],
+                                      &m_Y[0], &m_Pattern[0], &m_Flag[0],
+                                      &m_P[0], &m_Pinv[0]);
+
+          if (d_result != m_n) {
+            m_info = NumericalIssue;
+            return *this;
+          }
+
+          computeInertia();
+
           m_info = Success;
           m_isInitialized = true;
           return *this;
         }
-        
+
+        // Numeric-only factorization reusing cached symbolic analysis
+        // (like PARDISO phase 22 — same sparsity pattern, new values)
         PardisoLDLT& factorize_internal() {
-          return compute_internal();
+          if (!m_symbolicDone) {
+            // No cached symbolic factorization; fall back to full compute
+            return compute_internal();
+          }
+
+          // Extract CSC upper triangle with updated values
+          std::vector<int> Ap, Ai;
+          std::vector<double> Ax;
+          extractUpperCSC(Ap, Ai, Ax);
+
+          // Rerun only the numeric factorization using cached symbolic results
+          int d_result = ldl_numeric(m_n, &Ap[0], &Ai[0], &Ax[0], &m_Lp[0], &m_Parent[0],
+                                      &m_Lnz[0], &m_Li[0], &m_Lx[0], &m_D[0],
+                                      &m_Y[0], &m_Pattern[0], &m_Flag[0],
+                                      &m_P[0], &m_Pinv[0]);
+
+          if (d_result != m_n) {
+            m_info = NumericalIssue;
+            return *this;
+          }
+
+          computeInertia();
+
+          m_info = Success;
+          m_isInitialized = true;
+          return *this;
         }
-        
+
         template<typename Rhs>
         Matrix<Scalar, Dynamic, 1> solve(const Rhs& rhs) const {
           if (!m_isInitialized || m_info != Success) {
             return Matrix<Scalar, Dynamic, 1>::Zero(m_n);
           }
-          
+
           Matrix<Scalar, Dynamic, 1> x = rhs;
           std::vector<double> b(m_n);
-          
+
           // Copy and permute rhs
           for (int i = 0; i < m_n; i++) {
             b[m_P[i]] = x(i);
           }
-          
+
           // Solve L*D*L^T * x = b
           ldl_lsolve(m_n, &b[0], &m_Lp[0], &m_Li[0], &m_Lx[0]);
           ldl_dsolve(m_n, &b[0], &m_D[0]);
           ldl_ltsolve(m_n, &b[0], &m_Lp[0], &m_Li[0], &m_Lx[0]);
-          
+
           // Inverse permute solution
           for (int i = 0; i < m_n; i++) {
             x(m_Pinv[i]) = b[i];
           }
-          
+
           return x;
         }
-        
+
         ComputationInfo info() const { return m_info; }
-        
-        // CRITICAL: Return proper inertia information (fixes "Rank Deficiency" error)
+
+        // Return inertia information from diagonal D
         int neigs() const { return m_negative_eigs; }
         int peigs() const { return m_positive_eigs; }
         int ppivs() const { return m_zero_eigs; }
-        
-        // PARDISO-specific parameter stubs (unused but required for interface)
+
+        // PARDISO-specific parameter stubs (unused but required for interface compatibility)
         int m_ord = 0;
         int m_pivotstrat = 0;
         int m_pivotpert = 0;
@@ -1041,9 +1089,10 @@ namespace Eigen {
       using PardisoLLT = SimplicialLLT<MatrixType, Options>;
       
     }  // end namespace Eigen
-    
-    #warning "Building with SuiteSparse LDL for sparse solver (PARDISO replacement with proper inertia)"
 
+  #else  // !ASSET_HAS_SUITESPARSE
+    #error "No sparse solver backend available. ASSET requires either Intel MKL (PARDISO) or SuiteSparse (LDL). \
+Install MKL (for x86/x64) or OpenBLAS+SuiteSparse (for ARM64), then reconfigure with CMake."
   #endif  // ASSET_HAS_SUITESPARSE
 
 #endif  // ASSET_HAS_MKL
