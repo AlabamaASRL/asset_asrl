@@ -33,7 +33,7 @@ jobs:
         with:
           version: "17.0"
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -46,7 +46,7 @@ jobs:
         run: scripts/windowsoneapi_install.bat $WINDOWS_BASEKIT_URL $WINDOWS_CPP_COMPONENTS
         shell: bash
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -64,7 +64,7 @@ jobs:
         run: cmake --build build --target asset pypiwheel --config Release -- -j3
 
       - name: 'Upload Wheels'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist_${{ matrix.python-version }}_${{ matrix.platform }}
           path: build/pypiwheel/asset_asrl/dist/*.whl
