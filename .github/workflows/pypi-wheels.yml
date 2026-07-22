@@ -9,9 +9,9 @@ on:
 jobs:
  build_windows:
     env:
-      WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/19078/w_BaseKit_p_2023.0.0.25940_offline.exe
+      # WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/19078/w_BaseKit_p_2023.0.0.25940_offline.exe
 
-      WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel
+      # WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel
       VS_VER: vs2022
       ONEAPI_ROOT: C:/Program Files (x86)/Intel/oneAPI/
       CC: clang-cl.exe
@@ -43,8 +43,11 @@ jobs:
           arch: x86_64
 
       - name: Install MKL
-        run: scripts/windowsoneapi_install.bat $WINDOWS_BASEKIT_URL $WINDOWS_CPP_COMPONENTS
-        shell: bash
+        # run: scripts/windowsoneapi_install.bat $WINDOWS_BASEKIT_URL $WINDOWS_CPP_COMPONENTS
+        # shell: bash
+        uses: neelravi/intel-oneapi-github-actions@latest
+        with:
+          components: 'mkl'
 
       - uses: actions/setup-python@v5
         with:
