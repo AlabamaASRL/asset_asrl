@@ -45,9 +45,10 @@ jobs:
       - name: Install MKL
         # run: scripts/windowsoneapi_install.bat $WINDOWS_BASEKIT_URL $WINDOWS_CPP_COMPONENTS
         # shell: bash
-        uses: neelravi/intel-oneapi-github-actions@latest
+        uses: rscohn2/setup-oneapi@v0
         with:
-          components: 'mkl'
+          components: |
+            mkl
 
       - uses: actions/setup-python@v5
         with:
