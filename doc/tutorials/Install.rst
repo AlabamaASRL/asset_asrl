@@ -289,6 +289,14 @@ You may also set the number of jobs used when compiling with the -j argument.
 
 	bash ~/BuildWheel.sh -b master -j 12 -p 3.10
 
+
+The BuildWheel.sh command may throw the error ``CondaToSNonInteractiveError: Terms of Service have not been accepted...`` on first run.  In this case, you must accept the terms of service by executing:
+
+.. code-block:: console
+
+	conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
 After the build has completed, the packaged wheel file will be available in ~/asset_asrl/wheelhouse. You can then copy this file out of the container
 for installation on other systems.
 
