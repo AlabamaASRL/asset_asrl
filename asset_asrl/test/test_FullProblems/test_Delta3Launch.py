@@ -293,15 +293,8 @@ class test_Delta3Launch(unittest.TestCase):
                 with self.subTest(cmode="BlockConstant"):
                     self.problem_impl(tmode,"BlockConstant",nseg)
 
-        
-
-        
-        
-
-###############################################################################
 
 if __name__ == "__main__":
-
     unittest.main(exit=False)    
     
 

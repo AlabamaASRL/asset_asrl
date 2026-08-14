@@ -3,7 +3,6 @@ import asset as ast
 import unittest
 
 import matplotlib.pyplot as plt
-import time
 
 vf = ast.VectorFunctions
 oc = ast.OptimalControl
@@ -500,33 +499,7 @@ class test_Integrators(unittest.TestCase):
                                          "Hessian Integration Error exceeds expected maximum")
                     
 
-            
-            
-        
-    
-
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-from mpl_toolkits.mplot3d import Axes3D
-
 if __name__ == "__main__":
-    
-    
-    
     unittest.main(exit=False)
 
 
