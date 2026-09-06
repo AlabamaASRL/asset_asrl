@@ -1,4 +1,5 @@
-"""Physics regression tests for two-body and CR3BP reference frames.
+"""
+Physics regression tests for two-body and CR3BP reference frames.
 
 This test module validates the physical relationships used to construct the
 ``TwoBodyFrame`` and ``CR3BPFrame`` reference frames. The tests intentionally
@@ -141,6 +142,7 @@ TwoBodyFrame = two_body_module.TwoBodyFrame
 CR3BPFrame = cr3bp_module.CR3BPFrame
 
 
+#%%
 # ===========================================================================
 # Two-body physics regression tests
 # ===========================================================================
@@ -437,40 +439,40 @@ class TwoBodyFramePhysicsTests(unittest.TestCase):
 
     def test_escape_orbit_has_zero_specific_energy(self):
         """
-        Verify escape velocity produces zero specific orbital energy.
-
+        Verify escape velocity produces approximately zero specific energy.
+    
         Escape velocity is defined as the speed at which the total specific
         mechanical energy reaches zero:
-
+    
             v_escape = sqrt(2*mu/r)
-
+    
         Substituting this velocity into:
-
+    
             epsilon = v^2/2 - mu/r
-
-        should produce zero.
-
+    
+        should produce zero within floating-point precision.
+    
         Reference
         ---------
         [1] Bate, Mueller, and White, orbital energy and escape trajectories.
         """
         radius = constants.RadiusEarth
-
+    
         escape_speed = np.sqrt(
             2.0
             * constants.MuEarth
             / radius,
         )
-
+    
         specific_energy = (
             0.5 * escape_speed**2
             - constants.MuEarth / radius
         )
-
+    
         self.assertAlmostEqual(
             specific_energy,
             0.0,
-            places=12,
+            delta=1.0e-8,
         )
 
     def test_characteristic_scales_change_consistently_with_length_scale(self):
@@ -557,36 +559,43 @@ class TwoBodyFramePhysicsTests(unittest.TestCase):
     def test_solar_characteristic_velocity_matches_earth_orbital_speed_scale(self):
         """
         Verify the one-AU solar velocity scale is near Earth's orbital speed.
-
+    
         Earth's average heliocentric orbital speed is approximately:
-
+    
             29.8 km/s
-
+    
+        When the frame constants use SI units, this corresponds to approximately:
+    
+            29,800 m/s
+    
         The characteristic velocity for a Sun-centered frame using one AU as
         the characteristic length should therefore fall near this value.
-
+    
         Reference
         ---------
         [1] Bate, Mueller, and White, circular-orbit velocity.
-
+    
         [4] NASA JPL Solar System Dynamics, Earth heliocentric orbit scale.
         """
         frame = TwoBodyFrame(
             constants.MuSun,
             constants.AU,
         )
-
+    
+        # Constants are expressed in SI units, so velocity is in m/s.
+        earth_orbital_speed_ms = frame.vstar
+    
         self.assertGreater(
-            frame.vstar,
-            29.0,
+            earth_orbital_speed_ms,
+            29_000.0,
         )
-
+    
         self.assertLess(
-            frame.vstar,
-            31.0,
+            earth_orbital_speed_ms,
+            31_000.0,
         )
 
-
+#%%
 # ===========================================================================
 # CR3BP physics regression tests
 # ===========================================================================
