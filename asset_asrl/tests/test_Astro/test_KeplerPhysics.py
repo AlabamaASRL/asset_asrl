@@ -213,8 +213,7 @@ class KeplerPropagatorPhysicsTests(unittest.TestCase):
         np.testing.assert_allclose(
             final_state,
             [0.0, 1.0, 0.0, -1.0, 0.0, 0.0],
-            atol=1.0e-12,
-        )
+            atol=1.0e-12)
 
     def test_two_body_energy_and_angular_momentum_are_conserved(self):
         """
@@ -247,8 +246,7 @@ class KeplerPropagatorPhysicsTests(unittest.TestCase):
 
         np.testing.assert_allclose(
             self.specific_angular_momentum(final_state),
-            self.specific_angular_momentum(initial_state),
-        )
+            self.specific_angular_momentum(initial_state))
 
     def test_forward_then_backward_propagation_recovers_initial_state(self):
         """
