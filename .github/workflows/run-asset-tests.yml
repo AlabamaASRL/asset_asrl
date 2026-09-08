@@ -23,6 +23,7 @@ jobs:
           # If you have a requirements file, use it:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f asset_asrl/requirements.txt ]; then pip install -r asset_asrl/requirements.txt; fi
+          pip install asset-asrl
 
       - name: Run tests
         run: python asset_asrl/tests/run_tests.py
