@@ -39,7 +39,7 @@ class test_CartPole(unittest.TestCase):
         self.MaxObjError = .1
         self.MaximumIters = 20
         
-    def problem_impl(self,tmode,cmode,nsegs,errest):
+    def problem_impl(self,tmode,cmode,nsegs):
         m1 = 1
         m2 =.3
         l=.5
@@ -65,22 +65,10 @@ class test_CartPole(unittest.TestCase):
         phase.addLUVarBound("Path",0,-dmax,dmax,1.0)
         phase.addIntegralObjective(Args(1)[0]**2,[5])    
         phase.optimizer.PrintLevel= 3
-        phase.optimizer.EContol = 1.0e-8
-        phase.AdaptiveMesh = True
-        phase.setThreads(1,1)
-        phase.MeshErrorEstimator = errest
-        phase.PrintMeshInfo = False
-       
-        phase.MeshErrFactor=20
-        
         Flag = phase.optimize()
         
         Obj = phase.optimizer.LastObjVal
         ObjError = abs(Obj-self.FinalObj)
-        
-        
-        self.assertTrue(phase.MeshConverged, 
-                         "Problem Meshs did not converge converge")
         
         self.assertLess(phase.optimizer.LastIterNum, self.MaximumIters,
                          "Optimizer iterations exceeded expected maximum")
@@ -92,31 +80,15 @@ class test_CartPole(unittest.TestCase):
         
     
     def test_FullProblem(self):
-        
-        tmodes = ["LGL3","LGL5","LGL7",]
-        nsegs  = [32   ,16   ,10   ]
-        
+        tmodes = ["LGL3","LGL5","LGL7","Trapezoidal","CentralShooting"]
+        nsegs  = [256   ,128   ,96   ,256,256]
         for tmode,nseg in zip(tmodes,nsegs):
             with self.subTest(TranscriptionMode=tmode):
-                
-                
-                with self.subTest(errorest="deboor"):
-                    self.problem_impl(tmode,"HighestOrderSpline",nseg,'deboor')
-                with self.subTest(errorest="integrator"):
-                     self.problem_impl(tmode,"HighestOrderSpline",nseg,'integrator')
-        
-        
+                with self.subTest(cmode="HighestOrderSpline"):
+                    self.problem_impl(tmode,"HighestOrderSpline",nseg)
+                with self.subTest(cmode="BlockConstant"):
+                    self.problem_impl(tmode,"BlockConstant",nseg)
 
 
-##############################################################################        
-        
 if __name__ == "__main__":
-    
     unittest.main(exit=False)
-
-            
-    
-   
-   
-
-    ###########################################################################

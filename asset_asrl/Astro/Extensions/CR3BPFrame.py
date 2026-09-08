@@ -1,7 +1,6 @@
 import numpy as np
 import asset as ast
-
-
+import math
 
 vf = ast.VectorFunctions
 oc = ast.OptimalControl
@@ -140,9 +139,8 @@ class CR3BPFrame:
         nu = np.sqrt(abs(Ozz));
         
         traj = []
-        dtr = np.pi / 180.0;
-        phi = phideg * dtr;
-        psi = psideg * dtr;
+        phi = math.radians(phideg)
+        psi =  math.radians(psideg)
         
         ynd = xnd*b3
         tt  = nplanrev * pp;
