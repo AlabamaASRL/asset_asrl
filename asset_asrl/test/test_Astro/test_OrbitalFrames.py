@@ -198,22 +198,13 @@ class TwoBodyFramePhysicsTests(unittest.TestCase):
         [1] Bate, Mueller, and White, two-body nondimensionalization and
         Keplerian gravitational scaling.
         """
-        frame = TwoBodyFrame(
-            constants.MuEarth,
-            constants.RadiusEarth,
-        )
+        frame = TwoBodyFrame(constants.MuEarth, constants.RadiusEarth,)
 
         self.assertEqual(frame.mu, 1)
 
-        self.assertAlmostEqual(
-            frame.tstar,
-            np.sqrt(frame.lstar**3 / frame.P1mu),
-        )
+        self.assertAlmostEqual(frame.tstar, np.sqrt(frame.lstar**3 / frame.P1mu))
 
-        self.assertAlmostEqual(
-            frame.vstar,
-            np.sqrt(frame.P1mu / frame.lstar),
-        )
+        self.assertAlmostEqual(frame.vstar, np.sqrt(frame.P1mu / frame.lstar),)
 
         self.assertAlmostEqual(
             frame.astar,
