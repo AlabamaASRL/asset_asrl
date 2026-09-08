@@ -80,7 +80,6 @@ class test_CartPole(unittest.TestCase):
         
     
     def test_FullProblem(self):
-        
         tmodes = ["LGL3","LGL5","LGL7","Trapezoidal","CentralShooting"]
         nsegs  = [256   ,128   ,96   ,256,256]
         for tmode,nseg in zip(tmodes,nsegs):
@@ -91,15 +90,5 @@ class test_CartPole(unittest.TestCase):
                     self.problem_impl(tmode,"BlockConstant",nseg)
 
 
-##############################################################################        
-        
 if __name__ == "__main__":
-    
     unittest.main(exit=False)
-
-            
-    
-   
-   
-
-    ###########################################################################

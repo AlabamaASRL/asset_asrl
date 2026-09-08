@@ -104,19 +104,6 @@ class test_CartPole(unittest.TestCase):
                     self.problem_impl(tmode,"HighestOrderSpline",nseg,'deboor')
                 with self.subTest(errorest="integrator"):
                      self.problem_impl(tmode,"HighestOrderSpline",nseg,'integrator')
-        
-        
-
-
-##############################################################################        
-        
+                
 if __name__ == "__main__":
-    
     unittest.main(exit=False)
-
-            
-    
-   
-   
-
-    ###########################################################################

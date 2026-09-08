@@ -1,6 +1,5 @@
 import numpy as np
 import asset as ast
-import matplotlib.pyplot as plt
 import unittest
 
 vf        = ast.VectorFunctions
