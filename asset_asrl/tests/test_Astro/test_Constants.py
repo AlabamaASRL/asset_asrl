@@ -10,7 +10,6 @@ class PhysicalConstantsTests(unittest.TestCase):
     def test_earth_circular_speed_at_surface(self):
         """Verify v = sqrt(mu / r) for Earth."""
         speed = (constants.MuEarth / constants.RadiusEarth) ** 0.5
-
         self.assertAlmostEqual(speed, 7905.36, delta=5.0)
 
     def test_mass_and_gravitational_parameter_are_consistent(self):
@@ -20,7 +19,6 @@ class PhysicalConstantsTests(unittest.TestCase):
         for body in ("Earth", "Moon", "Mars", "Sun"):
             mu = getattr(constants, f"Mu{body}")
             mass = getattr(constants, f"{body}Mass")
-
             self.assertAlmostEqual(constants.Gcon * mass, mu, delta=mu * 1e-14)
 
     def test_earth_properties_are_exposed_to_spice_consumers(self):
@@ -77,7 +75,6 @@ class PhysicalConstantsTests(unittest.TestCase):
         v_escape = sqrt(2 * mu / r)
         """
         escape_velocity = (2.0 * constants.MuEarth / constants.RadiusEarth) ** 0.5
-
         self.assertAlmostEqual(escape_velocity, 11186.0, delta=20.0)
 
     def test_earth_surface_gravity_is_physically_reasonable(self):
@@ -87,16 +84,13 @@ class PhysicalConstantsTests(unittest.TestCase):
         g = mu / r^2
         """
         gravity = constants.MuEarth / constants.RadiusEarth**2
-
         self.assertAlmostEqual(gravity, 9.798, delta=0.05)
 
     def test_earth_circular_speed_is_less_than_escape_speed(self):
         """Escape velocity should equal sqrt(2) times circular velocity."""
         circular_speed = (constants.MuEarth / constants.RadiusEarth) ** 0.5
         escape_speed = (2.0 * constants.MuEarth / constants.RadiusEarth) ** 0.5
-
         self.assertAlmostEqual(escape_speed / circular_speed, 2.0**0.5, places=12)
-
 
 if __name__ == "__main__":
     unittest.main()

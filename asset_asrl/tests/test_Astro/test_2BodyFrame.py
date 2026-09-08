@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import unittest
-
 import numpy as np
 
 from asset_asrl.Astro import Constants as constants
@@ -61,7 +60,6 @@ class TwoBodyFramePhysicsTests(unittest.TestCase):
             a* = l* / t*^2
         """
         frame = TwoBodyFrame(constants.MuEarth, constants.RadiusEarth)
-
         self.assertAlmostEqual(frame.lstar / frame.tstar, frame.vstar)
         self.assertAlmostEqual(frame.lstar / frame.tstar**2, frame.astar)
 
@@ -75,9 +73,7 @@ class TwoBodyFramePhysicsTests(unittest.TestCase):
             mu_nd = mu * t*^2 / l*^3
         """
         frame = TwoBodyFrame(constants.MuEarth, constants.RadiusEarth)
-
         nondimensional_mu = frame.P1mu * frame.tstar**2 / frame.lstar**3
-
         self.assertAlmostEqual(nondimensional_mu, 1.0)
 
     def test_circular_orbit_has_unit_nondimensional_speed_and_period(self):
@@ -86,12 +82,8 @@ class TwoBodyFramePhysicsTests(unittest.TestCase):
         nondimensional speed and a nondimensional period of 2*pi.
         """
         frame = TwoBodyFrame(constants.MuEarth, constants.RadiusEarth)
-
         circular_speed = np.sqrt(constants.MuEarth / constants.RadiusEarth)
-        circular_period = 2.0 * np.pi * np.sqrt(
-            constants.RadiusEarth**3 / constants.MuEarth
-        )
-
+        circular_period = 2.0 * np.pi * np.sqrt(constants.RadiusEarth**3 / constants.MuEarth)
         self.assertAlmostEqual(circular_speed / frame.vstar, 1.0)
         self.assertAlmostEqual(circular_period / frame.tstar, 2.0 * np.pi)
 
@@ -112,14 +104,8 @@ class TwoBodyFramePhysicsTests(unittest.TestCase):
             v_escape / v_circular = sqrt(2)
         """
         circular_speed = np.sqrt(constants.MuEarth / constants.RadiusEarth)
-        escape_speed = np.sqrt(
-            2.0 * constants.MuEarth / constants.RadiusEarth
-        )
-
-        self.assertAlmostEqual(
-            escape_speed / circular_speed,
-            np.sqrt(2.0),
-        )
+        escape_speed = np.sqrt(2.0 * constants.MuEarth / constants.RadiusEarth)
+        self.assertAlmostEqual(escape_speed / circular_speed,np.sqrt(2.0),)
 
     def test_circular_orbit_specific_energy_matches_keplerian_value(self):
         """
@@ -140,11 +126,9 @@ class TwoBodyFramePhysicsTests(unittest.TestCase):
 
         specific_energy = 0.5 * circular_speed**2 - constants.MuEarth / radius
         expected_energy = -constants.MuEarth / (2.0 * radius)
-
         self.assertAlmostEqual(specific_energy, expected_energy)
 
         nondimensional_energy = specific_energy / frame.vstar**2
-
         self.assertAlmostEqual(nondimensional_energy, -0.5)
 
     def test_escape_orbit_has_zero_specific_energy(self):
@@ -153,9 +137,7 @@ class TwoBodyFramePhysicsTests(unittest.TestCase):
         """
         radius = constants.RadiusEarth
         escape_speed = np.sqrt(2.0 * constants.MuEarth / radius)
-
         specific_energy = 0.5 * escape_speed**2 - constants.MuEarth / radius
-
         self.assertAlmostEqual(specific_energy, 0.0, delta=1.0e-8)
 
     def test_characteristic_scales_change_consistently_with_length_scale(self):
@@ -175,10 +157,7 @@ class TwoBodyFramePhysicsTests(unittest.TestCase):
         frame2 = TwoBodyFrame(constants.MuEarth, 2.0 * constants.RadiusEarth)
 
         self.assertAlmostEqual(frame2.tstar / frame1.tstar, 2.0**1.5)
-        self.assertAlmostEqual(
-            frame2.vstar / frame1.vstar,
-            1.0 / np.sqrt(2.0),
-        )
+        self.assertAlmostEqual(frame2.vstar / frame1.vstar,1.0 / np.sqrt(2.0))
         self.assertAlmostEqual(frame2.astar / frame1.astar, 0.25)
 
     def test_one_au_solar_orbit_has_about_one_year_period(self):
@@ -188,22 +167,18 @@ class TwoBodyFramePhysicsTests(unittest.TestCase):
         The expected orbital period is between 365 and 366 days.
         """
         frame = TwoBodyFrame(constants.MuSun, constants.AU)
-
         orbital_period_days = 2.0 * np.pi * frame.tstar / constants.day
 
         self.assertGreater(orbital_period_days, 365.0)
         self.assertLess(orbital_period_days, 366.0)
 
-    def test_solar_characteristic_velocity_matches_earth_orbital_speed_scale(
-        self,
-    ):
+    def test_solar_characteristic_velocity_matches_earth_orbital_speed_scale(self):
         """
         Verify the one-AU solar velocity scale is near Earth's orbital speed.
 
         Earth's average heliocentric orbital speed is approximately 29.8 km/s.
         """
         frame = TwoBodyFrame(constants.MuSun, constants.AU)
-
         earth_orbital_speed_ms = frame.vstar
 
         self.assertGreater(earth_orbital_speed_ms, 29_000.0)

@@ -232,7 +232,6 @@ class CR3BPFramePhysicsTests(unittest.TestCase):
         frame = self.frame
 
         mean_motion = np.sqrt(frame.mustar / frame.lstar**3)
-
         self.assertAlmostEqual(mean_motion * frame.tstar, 1.0)
 
     def test_cr3bp_velocity_scale_matches_mean_motion_times_length(self):
@@ -250,7 +249,6 @@ class CR3BPFramePhysicsTests(unittest.TestCase):
         frame = self.frame
 
         mean_motion = np.sqrt(frame.mustar / frame.lstar**3)
-
         self.assertAlmostEqual(frame.vstar, mean_motion * frame.lstar)
 
     def test_earth_moon_mass_fraction_is_small_but_nonzero(self):
@@ -281,10 +279,8 @@ class CR3BPFramePhysicsTests(unittest.TestCase):
         def effective_potential(point):
             """Compute the normalized CR3BP effective potential."""
             x, y, z = point
-
             r1 = np.sqrt((x + mu)**2 + y**2 + z**2)
             r2 = np.sqrt((x - 1.0 + mu)**2 + y**2 + z**2)
-
             return 0.5 * (x**2 + y**2) + (1.0 - mu) / r1 + mu / r2
 
         self.assertAlmostEqual(effective_potential(frame.L4), effective_potential(frame.L5), places=14)
@@ -305,10 +301,8 @@ class CR3BPFramePhysicsTests(unittest.TestCase):
         def jacobi_constant(point):
             """Evaluate the zero-velocity normalized Jacobi constant."""
             x, y, z = point
-
             r1 = np.sqrt((x + mu)**2 + y**2 + z**2)
             r2 = np.sqrt((x - 1.0 + mu)**2 + y**2 + z**2)
-
             return x**2 + y**2 + 2.0 * (1.0 - mu) / r1 + 2.0 * mu / r2
 
         c_l4 = jacobi_constant(frame.L4)
@@ -338,10 +332,8 @@ class CR3BPFramePhysicsTests(unittest.TestCase):
         def jacobi_constant(point):
             """Evaluate the zero-velocity normalized Jacobi constant."""
             x, y, z = point
-
             r1 = np.sqrt((x + mu)**2 + y**2 + z**2)
             r2 = np.sqrt((x - 1.0 + mu)**2 + y**2 + z**2)
-
             return x**2 + y**2 + 2.0 * (1.0 - mu) / r1 + 2.0 * mu / r2
 
         self.assertAlmostEqual(jacobi_constant(frame.L4), expected_c, places=12)
