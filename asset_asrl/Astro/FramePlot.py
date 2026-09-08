@@ -1,12 +1,9 @@
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.patches import FancyArrowPatch
 from mpl_toolkits.mplot3d import proj3d
-import matplotlib.patches as mpatches
-import seaborn as sns
-import asset_asrl.Astro.Constants as c
 import numpy as np
 from seaborn import color_palette as colpal
+import math
 
 class Arrow3D(FancyArrowPatch):
     def __init__(self, xs, ys, zs, *args, **kwargs):
@@ -199,8 +196,8 @@ class CRPlot(PlotBase):
         self.BBox["L2"] = [[l2pos-sphoi/2,l2pos+sphoi/2],[-sphoi/2,sphoi/2],[-sphoi/2,sphoi/2]]
 
         pp = np.zeros((3))
-        pp[0]=np.cos(-2.0*c.dtr)
-        pp[1]=np.sin(-2.0*c.dtr)
+        pp[0]=np.cos(math.radians(-2.0))
+        pp[1]=np.sin(math.radians(-2.0))
         self.BBox["2deg"] = [[pp[0]-sphoi,pp[0]+sphoi],[pp[1]-sphoi,pp[1]+sphoi],[-sphoi,sphoi]]
 
         self.BBox["P1P2L5"] = [[0,1],[-1,0],[-.5,.5]]
@@ -236,5 +233,3 @@ class TBPlot(PlotBase):
         self.BBox["Two"] = [twobox,twobox,twobox]
         threebox =[-3.2,3.2]
         self.BBox["Two"] = [threebox,threebox,threebox]
-        
-        

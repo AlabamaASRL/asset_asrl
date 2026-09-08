@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import asset_asrl as ast
 import asset_asrl.VectorFunctions as vf
 import asset_asrl.OptimalControl as oc

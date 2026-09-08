@@ -438,9 +438,9 @@ def timedelta_to_days(td):
     4.5
     
     """
-    seconds_in_day = 24. * 3600.
+    seconds_in_day = 24 * 3600
     
-    days = td.days + (td.seconds + (td.microseconds * 10.e6)) / seconds_in_day
+    days = td.days + (td.seconds + (td.microseconds * 1e-6)) / seconds_in_day
     
     return days
     
@@ -523,8 +523,10 @@ class datetime(dt.datetime):
         
         """
         return jd_to_mjd(self.to_jd())
+    
 def JD_SPJ2000D(JD):
     return (JD - 2451545.0)*24.0*3600
+
 def Date_SPJ2000(day,month,year):
     jdat = date_to_jd(year,month,day)
     return JD_SPJ2000D(jdat)

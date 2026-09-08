@@ -1,8 +1,5 @@
 import asset as ast
 import numpy as np
-import matplotlib.pyplot as plt
-import random as rand
-import time 
 import unittest
 
 vf = ast.VectorFunctions
@@ -28,7 +25,6 @@ class test_RosenBrock(unittest.TestCase):
         
     def problem_impl(self,con,lsmode):
         Ipoint = [-1,-1]
-        
         
         prob = solvs.OptimizationProblem()
         prob.setVars(Ipoint)
@@ -57,10 +53,6 @@ class test_RosenBrock(unittest.TestCase):
             with self.subTest(LineSearchMode = lsmode):
                 self.problem_impl(DiskCon(), lsmode)
             
-        
-        
-        
-
 if __name__ == "__main__":
     unittest.main(exit=False)
     
