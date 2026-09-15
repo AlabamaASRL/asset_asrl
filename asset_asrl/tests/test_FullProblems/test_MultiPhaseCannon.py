@@ -174,11 +174,7 @@ class test_MultiPhaseCannon(unittest.TestCase):
         for tmode,nseg in zip(tmodes,nsegs):
             with self.subTest(TranscriptionMode=tmode):
                 self.problem_impl(tmode,nseg)
-                
-                    
-        
-
-##############################################################################        
+                                    
 if __name__ == "__main__":
     unittest.main(exit=False)
 
