@@ -5,6 +5,7 @@
 #include "KeplerUtils.h"
 #include "LambertSolvers.h"
 #include "MEEDynamics.h"
+#include "PinesGravity.h"
 #include "ThrusterModels.h"
 #include "VectorFunctions/ASSET_VectorFunctions.h"
 #include "pch.h"
