@@ -1,0 +1,91 @@
+name: Build C++ development target
+
+on:
+  push:
+    branches:
+      - kurelowech_pines
+  pull_request:
+    branches:
+      - kurelowech_pines
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: C++ build - Ubuntu 22.04
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install Ubuntu dependencies
+        env:
+          COMPILER: clang-13
+        run: bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
+
+      - name: Install Python build requirements
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install -r requirements.txt
+
+      - name: Configure CMake
+        run: |
+          cmake -S . \
+            -B build \
+            -G "Unix Makefiles" \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DPIP_INSTALL=True \
+            -DPython_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')"
+
+      - name: Build asset target
+        run: |
+          cmake --build build \
+            --target asset \
+            --config RelWithDebInfo \
+            --parallel 2
+
+      - name: Verify expected build artifacts
+        run: |
+          shopt -s nullglob
+          asset_modules=(build/src/asset*.so)
+          if [ "${#asset_modules[@]}" -eq 0 ]; then
+            echo "::error::Expected a built asset module matching build/src/asset*.so"
+            exit 1
+          fi
+
+          for path in \
+            build/src/libvectorfunctions.a \
+            build/src/liboptimalcontrol.a \
+            build/src/libpsiopt.a \
+            build/src/libutils.a \
+            build/src/libastro.a \
+            build/extensions/libasset_extensions.a \
+            build/compile_commands.json; do
+            if [ ! -f "$path" ]; then
+              echo "::error::Missing expected artifact: $path"
+              exit 1
+            fi
+          done
+
+      - name: Upload development artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-asrl-cpp-build-ubuntu-22.04
+          path: |
+            build/src/asset*.so
+            build/src/*.a
+            build/extensions/*.a
+            build/compile_commands.json
+          if-no-files-found: error
+          retention-days: 14
