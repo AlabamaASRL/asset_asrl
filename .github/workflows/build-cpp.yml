@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - kurelowech_pines
-  pull_request:
-    branches:
-      - kurelowech_pines
   workflow_dispatch:
 
 permissions:
