@@ -61,7 +61,7 @@ jobs:
           cmake --build build \
             --target asset \
             --config RelWithDebInfo \
-            --parallel 2
+            --parallel 1
 
       - name: Show compiler cache statistics
         if: always()
