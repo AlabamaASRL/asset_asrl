@@ -186,12 +186,77 @@ jobs:
               return path.resolve()
 
           def infer_target_name(path):
-              match = re.search(r"/CMakeFiles/([^/]+)\\.dir/", str(path))
+              match = re.search(r"/CMakeFiles/([^/]+)\.dir/", str(path))
 
               if match:
                   return match.group(1)
 
               return None
+
+          def iter_pch_paths(cmd, base_dir):
+              def add_candidate(raw_path):
+                  if raw_path:
+                      yield resolve_path(raw_path, base_dir)
+
+              idx = 0
+
+              while idx < len(cmd):
+                  arg = cmd[idx]
+
+                  if arg == "-include-pch" and idx + 1 < len(cmd):
+                      yield from add_candidate(cmd[idx + 1])
+                      idx += 1
+
+                  elif arg.startswith("-include-pch="):
+                      yield from add_candidate(
+                          arg.split("=", 1)[1]
+                      )
+
+                  elif (
+                      arg.startswith("-include-pch")
+                      and arg != "-include-pch"
+                  ):
+                      yield from add_candidate(
+                          arg[len("-include-pch"):]
+                      )
+
+                  elif arg.endswith(".pch"):
+                      yield from add_candidate(arg)
+
+                  elif arg == "-Xclang" and idx + 1 < len(cmd):
+                      xclang_arg = cmd[idx + 1]
+
+                      if xclang_arg == "-include-pch":
+                          if (
+                              idx + 3 < len(cmd)
+                              and cmd[idx + 2] == "-Xclang"
+                          ):
+                              yield from add_candidate(cmd[idx + 3])
+                              idx += 3
+                          elif idx + 2 < len(cmd):
+                              yield from add_candidate(cmd[idx + 2])
+                              idx += 2
+
+                      elif xclang_arg.startswith("-include-pch="):
+                          yield from add_candidate(
+                              xclang_arg.split("=", 1)[1]
+                          )
+                          idx += 1
+
+                      elif (
+                          xclang_arg.startswith("-include-pch")
+                          and xclang_arg != "-include-pch"
+                      ):
+                          yield from add_candidate(
+                              xclang_arg[len("-include-pch"):]
+                          )
+                          idx += 1
+
+                      elif xclang_arg.endswith(".pch"):
+                          yield from add_candidate(xclang_arg)
+                          idx += 1
+
+                  idx += 1
 
           prepared_targets = set()
 
@@ -221,12 +286,7 @@ jobs:
               else:
                   source_path = source_path.resolve()
 
-              for arg in cmd:
-
-                  if not arg.endswith(".pch"):
-                      continue
-
-                  pch_path = resolve_path(arg, workdir)
+              for pch_path in iter_pch_paths(cmd, workdir):
 
                   if pch_path.exists():
                       continue
