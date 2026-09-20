@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - kurelowech_pines
+
   workflow_dispatch:
     inputs:
       base_sha:
@@ -65,28 +66,36 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]] \
-             && git rev-parse --verify "${{ github.event.before }}^{commit}" >/dev/null 2>&1 \
-             && git merge-base --is-ancestor "${{ github.event.before }}" "${{ github.sha }}"; then
-            base_ref="${{ github.event.before }}"
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.base_sha }}" ]] \
-             && git rev-parse --verify "${{ inputs.base_sha }}^{commit}" >/dev/null 2>&1 \
-             && git merge-base --is-ancestor "${{ inputs.base_sha }}" "${{ github.sha }}"; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && \
+                -n "${{ inputs.base_sha }}" ]]; then
+
+            if ! git rev-parse --verify "${{ inputs.base_sha }}^{commit}" >/dev/null 2>&1; then
+              echo "::error::Invalid base_sha: ${{ inputs.base_sha }}"
+              exit 1
+            fi
+
             base_ref="${{ inputs.base_sha }}"
+
           else
             default_branch="${{ github.event.repository.default_branch }}"
-            git fetch --no-tags origin "$default_branch:refs/remotes/origin/$default_branch"
-            if git rev-parse --verify "origin/$default_branch" >/dev/null 2>&1; then
-              base_ref="$(git merge-base HEAD "origin/$default_branch")"
-            elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
-              base_ref="HEAD~1"
-            else
-              base_ref="$(git rev-list --max-parents=0 HEAD)"
+
+            git fetch --no-tags origin \
+              "$default_branch:refs/remotes/origin/$default_branch"
+
+            if ! git rev-parse --verify "origin/$default_branch" >/dev/null 2>&1; then
+              echo "::error::Unable to find origin/$default_branch"
+              exit 1
             fi
+
+            base_ref="$(git merge-base HEAD "origin/$default_branch")"
           fi
 
+          echo "Current commit: ${{ github.sha }}"
+          echo "Base commit:    $base_ref"
+
           mapfile -t changed_cpp < <(
-            git diff --name-only --diff-filter=ACMR "$base_ref" "${{ github.sha }}" \
+            git diff --name-only --diff-filter=ACMR \
+              "$base_ref" "${{ github.sha }}" \
               -- '*.cpp' '*.cc' '*.cxx' \
             | sed '/^[[:space:]]*$/d'
           )
@@ -97,7 +106,11 @@ jobs:
             exit 0
           fi
 
-          printf '%s\n' "${changed_cpp[@]}" | tee build/changed_cpp_files.txt
+          echo "Changed C++ files:"
+          printf '%s\n' "${changed_cpp[@]}"
+
+          printf '%s\n' "${changed_cpp[@]}" > build/changed_cpp_files.txt
+
           echo "has_changes=true" >> "$GITHUB_OUTPUT"
 
       - name: Compile changed C++ files
@@ -116,80 +129,138 @@ jobs:
 
           changed_files = []
           missing = []
-          for line in (build / "changed_cpp_files.txt").read_text().splitlines():
-            line = line.strip()
-            if not line:
-              continue
-            src = (repo / line).resolve()
-            if src.exists():
-              changed_files.append(src)
 
-          compile_db = json.loads((build / "compile_commands.json").read_text())
+          for line in (build / "changed_cpp_files.txt").read_text().splitlines():
+              line = line.strip()
+
+              if not line:
+                  continue
+
+              src = (repo / line).resolve()
+
+              if src.exists():
+                  changed_files.append(src)
+
+          compile_db = json.loads(
+              (build / "compile_commands.json").read_text()
+          )
+
           entry_by_file = {}
+
           for entry in compile_db:
-            file_path = Path(entry["file"])
-            if not file_path.is_absolute():
-              file_path = (Path(entry["directory"]) / file_path).resolve()
-            else:
-              file_path = file_path.resolve()
-            entry_by_file[file_path] = entry
+              file_path = Path(entry["file"])
+
+              if not file_path.is_absolute():
+                  file_path = (
+                      Path(entry["directory"]) / file_path
+                  ).resolve()
+              else:
+                  file_path = file_path.resolve()
+
+              entry_by_file[file_path] = entry
 
           compile_entries = []
+
           for src in changed_files:
-            entry = entry_by_file.get(src)
-            if entry is None:
-              missing.append(str(src.relative_to(repo)))
-            else:
-              compile_entries.append(entry)
+              entry = entry_by_file.get(src)
+
+              if entry is None:
+                  missing.append(str(src.relative_to(repo)))
+              else:
+                  compile_entries.append(entry)
 
           if missing:
-            print("::error::No compile target mapping for changed files: " + ", ".join(missing))
-            raise SystemExit(1)
-
-          for entry in compile_entries:
-            if isinstance(entry.get("arguments"), list):
-              cmd = list(entry["arguments"])
-            elif entry.get("command"):
-              cmd = shlex.split(entry["command"])
-            else:
-              print("::error::Compile database entry is missing both 'arguments' and 'command'.")
+              print(
+                  "::error::No compile target mapping for changed files: "
+                  + ", ".join(missing)
+              )
               raise SystemExit(1)
 
-            workdir = Path(entry["directory"])
-            source_path = Path(entry["file"])
-            if not source_path.is_absolute():
-              source_path = (workdir / source_path).resolve()
-            else:
-              source_path = source_path.resolve()
+          for entry in compile_entries:
 
-            for idx, arg in enumerate(cmd):
-              if arg.startswith("-"):
-                continue
-              candidate = Path(arg)
-              if not candidate.is_absolute():
-                candidate = (workdir / candidate).resolve()
+              if isinstance(entry.get("arguments"), list):
+                  cmd = list(entry["arguments"])
+
+              elif entry.get("command"):
+                  cmd = shlex.split(entry["command"])
+
               else:
-                candidate = candidate.resolve()
-              if candidate == source_path:
-                cmd[idx] = str(source_path)
+                  print(
+                      "::error::Compile database entry is missing "
+                      "both 'arguments' and 'command'."
+                  )
+                  raise SystemExit(1)
 
-            for idx, arg in enumerate(cmd):
-              if arg not in ("-o", "-MF") or idx + 1 >= len(cmd):
-                continue
-              out_path = cmd[idx + 1]
-              if out_path == "-":
-                continue
-              output = Path(out_path)
-              if not output.is_absolute():
-                output = (workdir / output).resolve()
-              output.parent.mkdir(parents=True, exist_ok=True)
+              workdir = Path(entry["directory"])
 
-            print("Compiling:", source_path.relative_to(repo))
-            result = subprocess.run(cmd, cwd=workdir)
-            if result.returncode != 0:
-              raise SystemExit(result.returncode)
+              source_path = Path(entry["file"])
 
-          print(f"Compiled {len(compile_entries)} changed C++ file(s).")
+              if not source_path.is_absolute():
+                  source_path = (
+                      workdir / source_path
+                  ).resolve()
+              else:
+                  source_path = source_path.resolve()
+
+              for idx, arg in enumerate(cmd):
+
+                  if arg.startswith("-"):
+                      continue
+
+                  candidate = Path(arg)
+
+                  if not candidate.is_absolute():
+                      candidate = (
+                          workdir / candidate
+                      ).resolve()
+                  else:
+                      candidate = candidate.resolve()
+
+                  if candidate == source_path:
+                      cmd[idx] = str(source_path)
+
+              for idx, arg in enumerate(cmd):
+
+                  if arg not in ("-o", "-MF"):
+                      continue
+
+                  if idx + 1 >= len(cmd):
+                      continue
+
+                  out_path = cmd[idx + 1]
+
+                  if out_path == "-":
+                      continue
+
+                  output = Path(out_path)
+
+                  if not output.is_absolute():
+                      output = (
+                          workdir / output
+                      ).resolve()
+
+                  output.parent.mkdir(
+                      parents=True,
+                      exist_ok=True
+                  )
+
+              print(
+                  "Compiling:",
+                  source_path.relative_to(repo)
+              )
+
+              result = subprocess.run(
+                  cmd,
+                  cwd=workdir
+              )
+
+              if result.returncode != 0:
+                  raise SystemExit(result.returncode)
+
+          print(
+              f"Compiled {len(compile_entries)} "
+              "changed C++ file(s)."
+          )
           PY
 
       - name: Show compiler cache statistics
