@@ -263,22 +263,65 @@ jobs:
           prepared_targets = set()
 
           def find_pch_paths(command, workdir):
+              """
+              Find PCH paths in both direct and Clang-wrapped forms.
+
+              Supported forms include:
+
+                  -include-pch <path>
+
+                  -Xclang -include-pch -Xclang <path>
+
+                  -include-pch=<path>
+              """
               pch_paths = []
               index = 0
 
               while index < len(command):
                   argument = command[index]
 
+                  # Clang commonly emits:
+                  # -Xclang -include-pch -Xclang <pch-file>
+                  if (
+                      argument == "-Xclang"
+                      and index + 1 < len(command)
+                      and command[index + 1] == "-include-pch"
+                  ):
+                      index += 2
+
+                      while (
+                          index < len(command)
+                          and command[index] == "-Xclang"
+                      ):
+                          index += 1
+
+                      if index >= len(command):
+                          break
+
+                      pch_paths.append(
+                          resolve_path(command[index], workdir)
+                      )
+                      index += 1
+                      continue
+
+                  # Direct form:
+                  # -include-pch <pch-file>
                   if argument == "-include-pch":
-                      if index + 1 < len(command):
+                      index += 1
+
+                      while (
+                          index < len(command)
+                          and command[index] == "-Xclang"
+                      ):
+                          index += 1
+
+                      if index < len(command):
                           pch_paths.append(
-                              resolve_path(
-                                  command[index + 1],
-                                  workdir,
-                              )
+                              resolve_path(command[index], workdir)
                           )
-                          index += 2
-                          continue
+                          index += 1
+
+                      continue
 
                   if argument.startswith("-include-pch="):
                       pch_paths.append(
@@ -287,8 +330,11 @@ jobs:
                               workdir,
                           )
                       )
+                      index += 1
+                      continue
 
-                  elif (
+                  # Some command generators concatenate the option and path.
+                  if (
                       argument.startswith("-include-pch")
                       and argument != "-include-pch"
                   ):
@@ -298,8 +344,10 @@ jobs:
                               workdir,
                           )
                       )
+                      index += 1
+                      continue
 
-                  elif argument.endswith(".pch"):
+                  if argument.endswith(".pch"):
                       pch_paths.append(
                           resolve_path(argument, workdir)
                       )
