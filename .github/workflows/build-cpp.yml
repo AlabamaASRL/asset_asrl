@@ -69,7 +69,9 @@ jobs:
              && git rev-parse --verify "${{ github.event.before }}^{commit}" >/dev/null 2>&1 \
              && git merge-base --is-ancestor "${{ github.event.before }}" "${{ github.sha }}"; then
             base_ref="${{ github.event.before }}"
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.base_sha }}" ]]; then
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.base_sha }}" ]] \
+             && git rev-parse --verify "${{ inputs.base_sha }}^{commit}" >/dev/null 2>&1 \
+             && git merge-base --is-ancestor "${{ inputs.base_sha }}" "${{ github.sha }}"; then
             base_ref="${{ inputs.base_sha }}"
           else
             default_branch="${{ github.event.repository.default_branch }}"
@@ -215,6 +217,7 @@ jobs:
           fi
 
       - name: Upload development artifacts
+        if: steps.cpp_changes.outputs.has_changes == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: asset-asrl-cpp-build-ubuntu-22.04
