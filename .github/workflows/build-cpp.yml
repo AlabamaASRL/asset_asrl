@@ -13,7 +13,7 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -60,7 +60,7 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DPython_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')"
 
-      - name: Detect changed C++ files
+      - name: Detect changed C/C++ files
         id: cpp_changes
         shell: bash
         run: |
@@ -93,27 +93,27 @@ jobs:
           echo "Current commit: ${{ github.sha }}"
           echo "Base commit:    $base_ref"
 
-          mapfile -t changed_cpp < <(
+          mapfile -t changed_files < <(
             git diff --name-only --diff-filter=ACMR \
               "$base_ref" "${{ github.sha }}" \
-              -- '*.cpp' '*.cc' '*.cxx' \
+              -- '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' '*.hxx' \
             | sed '/^[[:space:]]*$/d'
           )
 
-          if [[ "${#changed_cpp[@]}" -eq 0 ]]; then
+          if [[ "${#changed_files[@]}" -eq 0 ]]; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
-            echo "No C++ source changes detected."
+            echo "No C/C++ source or header changes detected."
             exit 0
           fi
 
-          echo "Changed C++ files:"
-          printf '%s\n' "${changed_cpp[@]}"
+          echo "Changed C/C++ files:"
+          printf '%s\n' "${changed_files[@]}"
 
-          printf '%s\n' "${changed_cpp[@]}" > build/changed_cpp_files.txt
-
+          printf '%s\n' "${changed_files[@]}" > build/changed_cxx_files.txt
+          cp build/changed_cxx_files.txt build/changed_cpp_files.txt
           echo "has_changes=true" >> "$GITHUB_OUTPUT"
 
-      - name: Compile changed C++ files
+      - name: Compile changed C/C++ source files and validate changed headers
         id: compile_changed
         if: steps.cpp_changes.outputs.has_changes == 'true'
         shell: bash
@@ -124,74 +124,66 @@ jobs:
           import re
           import shlex
           import subprocess
+          import tempfile
           from pathlib import Path
 
           repo = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
           build = (repo / "build").resolve()
 
           changed_files = []
-          missing = []
-
-          for line in (build / "changed_cpp_files.txt").read_text().splitlines():
+          for line in (build / "changed_cxx_files.txt").read_text().splitlines():
               line = line.strip()
-
               if not line:
                   continue
-
               src = (repo / line).resolve()
-
               if src.exists():
                   changed_files.append(src)
 
-          compile_db = json.loads(
-              (build / "compile_commands.json").read_text()
-          )
+          compile_db = json.loads((build / "compile_commands.json").read_text())
+          source_suffixes = {".c", ".cc", ".cpp", ".cxx"}
 
-          entry_by_file = {}
-
-          for entry in compile_db:
+          def resolve_entry_path(entry):
               file_path = Path(entry["file"])
-
               if not file_path.is_absolute():
-                  file_path = (
-                      Path(entry["directory"]) / file_path
-                  ).resolve()
+                  file_path = (Path(entry["directory"]) / file_path).resolve()
               else:
                   file_path = file_path.resolve()
+              return file_path
 
-              entry_by_file[file_path] = entry
+          entry_by_file = {}
+          for entry in compile_db:
+              entry_by_file[resolve_entry_path(entry)] = entry
 
-          compile_entries = []
+          source_files = []
+          header_files = []
 
           for src in changed_files:
-              entry = entry_by_file.get(src)
+              if src.suffix.lower() in source_suffixes:
+                  source_files.append(src)
+              elif src.suffix.lower() in {".h", ".hh", ".hpp", ".hxx"}:
+                  header_files.append(src)
 
-              if entry is None:
-                  missing.append(str(src.relative_to(repo)))
-              else:
-                  compile_entries.append(entry)
-
-          if missing:
+          def command_from_entry(entry):
+              if isinstance(entry.get("arguments"), list):
+                  return list(entry["arguments"])
+              if entry.get("command"):
+                  return shlex.split(entry["command"])
               print(
-                  "::error::No compile target mapping for changed files: "
-                  + ", ".join(missing)
+                  "::error::Compile database entry is missing both 'arguments' and 'command' for "
+                  f"{entry.get('file', '<unknown>')}"
               )
               raise SystemExit(1)
 
           def resolve_path(path_str, base_dir):
               path = Path(path_str)
-
               if not path.is_absolute():
                   return (base_dir / path).resolve()
-
               return path.resolve()
 
           def infer_target_name(path):
-              match = re.search(r"/CMakeFiles/([^/]+)\.dir/", str(path))
-
+              match = re.search(r"/CMakeFiles/([^/]+)\\.dir/", str(path))
               if match:
                   return match.group(1)
-
               return None
 
           def iter_pch_paths(cmd, base_dir):
@@ -200,7 +192,6 @@ jobs:
                       yield resolve_path(raw_path, base_dir)
 
               idx = 0
-
               while idx < len(cmd):
                   arg = cmd[idx]
 
@@ -209,17 +200,10 @@ jobs:
                       idx += 1
 
                   elif arg.startswith("-include-pch="):
-                      yield from add_candidate(
-                          arg.split("=", 1)[1]
-                      )
+                      yield from add_candidate(arg.split("=", 1)[1])
 
-                  elif (
-                      arg.startswith("-include-pch")
-                      and arg != "-include-pch"
-                  ):
-                      yield from add_candidate(
-                          arg[len("-include-pch"):]
-                      )
+                  elif arg.startswith("-include-pch") and arg != "-include-pch":
+                      yield from add_candidate(arg[len("-include-pch"):])
 
                   elif arg.endswith(".pch"):
                       yield from add_candidate(arg)
@@ -228,10 +212,7 @@ jobs:
                       xclang_arg = cmd[idx + 1]
 
                       if xclang_arg == "-include-pch":
-                          if (
-                              idx + 3 < len(cmd)
-                              and cmd[idx + 2] == "-Xclang"
-                          ):
+                          if idx + 3 < len(cmd) and cmd[idx + 2] == "-Xclang":
                               yield from add_candidate(cmd[idx + 3])
                               idx += 3
                           elif idx + 2 < len(cmd):
@@ -239,18 +220,11 @@ jobs:
                               idx += 2
 
                       elif xclang_arg.startswith("-include-pch="):
-                          yield from add_candidate(
-                              xclang_arg.split("=", 1)[1]
-                          )
+                          yield from add_candidate(xclang_arg.split("=", 1)[1])
                           idx += 1
 
-                      elif (
-                          xclang_arg.startswith("-include-pch")
-                          and xclang_arg != "-include-pch"
-                      ):
-                          yield from add_candidate(
-                              xclang_arg[len("-include-pch"):]
-                          )
+                      elif xclang_arg.startswith("-include-pch") and xclang_arg != "-include-pch":
+                          yield from add_candidate(xclang_arg[len("-include-pch"):])
                           idx += 1
 
                       elif xclang_arg.endswith(".pch"):
@@ -261,164 +235,146 @@ jobs:
 
           prepared_targets = set()
 
-          for entry in compile_entries:
-
-              if isinstance(entry.get("arguments"), list):
-                  cmd = list(entry["arguments"])
-
-              elif entry.get("command"):
-                  cmd = shlex.split(entry["command"])
-
-              else:
-                  print(
-                      "::error::Compile database entry is missing "
-                      "both 'arguments' and 'command'."
-                  )
-                  raise SystemExit(1)
-
-              workdir = Path(entry["directory"])
-
-              source_path = Path(entry["file"])
-
-              if not source_path.is_absolute():
-                  source_path = (
-                      workdir / source_path
-                  ).resolve()
-              else:
-                  source_path = source_path.resolve()
-
+          def ensure_pch_prereqs(cmd, workdir):
               for pch_path in iter_pch_paths(cmd, workdir):
-
                   if pch_path.exists():
                       continue
-
                   target_name = infer_target_name(pch_path)
-
                   if target_name is None:
                       print(
-                          "::error::Unable to infer target for "
-                          f"missing precompiled header: {pch_path}"
+                          "::error::Unable to infer target for missing precompiled header: "
+                          f"{pch_path}"
                       )
                       raise SystemExit(1)
-
                   if target_name in prepared_targets:
                       continue
-
-                  print(
-                      "Building prerequisite target:",
-                      target_name
-                  )
-
+                  print("Building prerequisite target:", target_name)
                   result = subprocess.run(
-                      [
-                          "cmake",
-                          "--build",
-                          str(build),
-                          "--target",
-                          target_name,
-                          "--parallel",
-                          "1",
-                      ],
-                      cwd=repo
+                      ["cmake", "--build", str(build), "--target", target_name, "--parallel", "1"],
+                      cwd=repo,
                   )
-
                   if result.returncode != 0:
                       raise SystemExit(result.returncode)
-
                   prepared_targets.add(target_name)
 
-              for idx, arg in enumerate(cmd):
+          def strip_output_flags(cmd):
+              stripped = []
+              idx = 0
+              while idx < len(cmd):
+                  arg = cmd[idx]
+                  if arg in ("-o", "-MF"):
+                      idx += 2
+                      continue
+                  if arg.startswith("-MF"):
+                      stripped.append(arg)
+                      idx += 1
+                      continue
+                  stripped.append(arg)
+                  idx += 1
+              return stripped
 
-                  if arg.startswith("-"):
+          def replace_source_argument(cmd, old_source, new_source):
+              replaced = False
+              for idx, arg in enumerate(cmd):
+                  if arg == str(old_source):
+                      cmd[idx] = str(new_source)
+                      replaced = True
+                      break
+                  elif Path(arg).exists() and Path(arg).resolve() == old_source:
+                      cmd[idx] = str(new_source)
+                      replaced = True
+                      break
+              if not replaced:
+                  cmd.append(str(new_source))
+              return cmd
+
+          def choose_header_compile_entry(header_path):
+              candidates = []
+              for entry in compile_db:
+                  src_path = resolve_entry_path(entry)
+                  if src_path.suffix.lower() not in source_suffixes:
                       continue
 
-                  candidate = Path(arg)
+                  same_dir = header_path.parent == src_path.parent
+                  try:
+                      rel = header_path.relative_to(src_path.parent)
+                  except ValueError:
+                      rel = None
 
+                  if rel is not None:
+                      dist = len(rel.parts)
+                  else:
+                      dist = 9999
+
+                  candidates.append(((0 if same_dir else 1, dist, str(src_path)), entry))
+
+              if not candidates:
+                  return None
+
+              candidates.sort(key=lambda item: item[0])
+              return candidates[0][1]
+
+          def check_header_with_compile_entry(header_path, entry):
+              cmd = command_from_entry(entry)
+              workdir = Path(entry["directory"]).resolve()
+              source_path = resolve_entry_path(entry)
+              ensure_pch_prereqs(cmd, workdir)
+
+              with tempfile.NamedTemporaryFile(
+                  "w",
+                  suffix=".cpp",
+                  dir=str(header_path.parent),
+                  delete=False,
+                  encoding="utf-8",
+              ) as tmp:
+                  tmp.write(f'#include "{header_path.name}"\n')
+                  wrapper_path = Path(tmp.name).resolve()
+
+              try:
+                  cmd2 = list(cmd)
+                  cmd2 = strip_output_flags(cmd2)
+                  cmd2 = replace_source_argument(cmd2, source_path, wrapper_path)
+                  if not any(arg == "-fsyntax-only" or arg.startswith("-fsyntax-only") for arg in cmd2):
+                      cmd2.append("-fsyntax-only")
+
+                  print("Checking header:", header_path.relative_to(repo))
+                  result = subprocess.run(cmd2, cwd=workdir)
+                  if result.returncode != 0:
+                      raise SystemExit(result.returncode)
+              finally:
+                  try:
+                      wrapper_path.unlink()
+                  except FileNotFoundError:
+                      pass
+
+          missing_sources = []
+          for src in source_files:
+              if src not in entry_by_file:
+                  missing_sources.append(str(src.relative_to(repo)))
+          if missing_sources:
+              print(
+                  "::error::No compile target mapping for changed source files: "
+                  + ", ".join(missing_sources)
+              )
+              raise SystemExit(1)
+
+          for src in source_files:
+              entry = entry_by_file[src]
+              cmd = command_from_entry(entry)
+              workdir = Path(entry["directory"]).resolve()
+              source_path = resolve_entry_path(entry)
+
+              ensure_pch_prereqs(cmd, workdir)
+
+              for idx, arg in enumerate(cmd):
+                  if arg.startswith("-"):
+                      continue
+                  candidate = Path(arg)
                   if not candidate.is_absolute():
-                      candidate = (
-                          workdir / candidate
-                      ).resolve()
+                      candidate = (workdir / candidate).resolve()
                   else:
                       candidate = candidate.resolve()
 
                   if candidate == source_path:
-                      cmd[idx] = str(source_path)
-
-              for idx, arg in enumerate(cmd):
-
-                  if arg not in ("-o", "-MF"):
-                      continue
-
-                  if idx + 1 >= len(cmd):
-                      continue
-
-                  out_path = cmd[idx + 1]
-
-                  if out_path == "-":
-                      continue
-
-                  output = Path(out_path)
-
-                  if not output.is_absolute():
-                      output = (
-                          workdir / output
-                      ).resolve()
-
-                  output.parent.mkdir(
-                      parents=True,
-                      exist_ok=True
-                  )
-
-              print(
-                  "Compiling:",
-                  source_path.relative_to(repo)
-              )
-
-              result = subprocess.run(
-                  cmd,
-                  cwd=workdir
-              )
-
-              if result.returncode != 0:
-                  raise SystemExit(result.returncode)
-
-          print(
-              f"Compiled {len(compile_entries)} "
-              "changed C++ file(s)."
-          )
-          PY
-
-      - name: Show compiler cache statistics
-        if: always()
-        run: ccache --show-stats
-
-      - name: Verify selective build artifacts
-        id: verify_artifacts
-        if: always() && steps.cpp_changes.outcome == 'success' && (steps.compile_changed.outcome == 'success' || steps.cpp_changes.outputs.has_changes != 'true')
-        shell: bash
-        run: |
-          if [[ ! -f build/compile_commands.json ]]; then
-            echo "::error::Missing expected artifact: build/compile_commands.json"
-            exit 1
-          fi
-
-          if [[ "${{ steps.cpp_changes.outputs.has_changes }}" != "true" ]]; then
-            echo "No C++ source changes detected; selective build was skipped."
-            exit 0
-          fi
-
-          if [[ ! -f build/changed_cpp_files.txt ]]; then
-            echo "::error::Missing expected changed file list: build/changed_cpp_files.txt"
-            exit 1
-          fi
-
-      - name: Upload development artifacts
-        if: always() && steps.verify_artifacts.outcome == 'success' && steps.cpp_changes.outputs.has_changes == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: asset-asrl-cpp-build-ubuntu-22.04
-          path: |
-            build/compile_commands.json
-            build/changed_cpp_files.txt
-          if-no-files-found: error
-          retention-days: 14
+                      cmd
+
