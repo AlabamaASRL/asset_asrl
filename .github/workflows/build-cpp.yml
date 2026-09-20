@@ -392,6 +392,7 @@ jobs:
         run: ccache --show-stats
 
       - name: Verify selective build artifacts
+        id: verify_artifacts
         shell: bash
         run: |
           if [[ ! -f build/compile_commands.json ]]; then
