@@ -412,7 +412,7 @@ jobs:
           fi
 
       - name: Upload development artifacts
-        if: steps.cpp_changes.outputs.has_changes == 'true'
+        if: always() && steps.cpp_changes.outputs.has_changes == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: asset-asrl-cpp-build-ubuntu-22.04
