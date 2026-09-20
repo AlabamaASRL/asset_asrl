@@ -66,7 +66,8 @@ jobs:
           set -euo pipefail
 
           if [[ "${{ github.event_name }}" == "push" && "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]] \
-             && git rev-parse --verify "${{ github.event.before }}^{commit}" >/dev/null 2>&1; then
+             && git rev-parse --verify "${{ github.event.before }}^{commit}" >/dev/null 2>&1 \
+             && git merge-base --is-ancestor "${{ github.event.before }}" "${{ github.sha }}"; then
             base_ref="${{ github.event.before }}"
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.base_sha }}" ]]; then
             base_ref="${{ inputs.base_sha }}"
