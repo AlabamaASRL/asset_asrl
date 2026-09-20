@@ -65,7 +65,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]]; then
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]] \
+             && git rev-parse --verify "${{ github.event.before }}^{commit}" >/dev/null 2>&1; then
             base_ref="${{ github.event.before }}"
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.base_sha }}" ]]; then
             base_ref="${{ inputs.base_sha }}"
@@ -125,7 +126,11 @@ jobs:
           compile_db = json.loads((build / "compile_commands.json").read_text())
           entry_by_file = {}
           for entry in compile_db:
-            file_path = Path(entry["file"]).resolve()
+            file_path = Path(entry["file"])
+            if not file_path.is_absolute():
+              file_path = (Path(entry["directory"]) / file_path).resolve()
+            else:
+              file_path = file_path.resolve()
             entry_by_file[file_path] = entry
 
           compile_entries = []
@@ -150,7 +155,11 @@ jobs:
               raise SystemExit(1)
 
             workdir = Path(entry["directory"])
-            source_path = Path(entry["file"]).resolve()
+            source_path = Path(entry["file"])
+            if not source_path.is_absolute():
+              source_path = (workdir / source_path).resolve()
+            else:
+              source_path = source_path.resolve()
 
             for idx, arg in enumerate(cmd):
               if arg.startswith("-"):
