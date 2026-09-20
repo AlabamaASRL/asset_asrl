@@ -69,8 +69,8 @@ jobs:
             base_ref="${{ github.event.before }}"
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.base_sha }}" ]]; then
             base_ref="${{ inputs.base_sha }}"
-          elif git rev-parse --verify "origin/${{ github.ref_name }}~1" >/dev/null 2>&1; then
-            base_ref="origin/${{ github.ref_name }}~1"
+          elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+            base_ref="HEAD~1"
           else
             default_branch="${{ github.event.repository.default_branch }}"
             git fetch --no-tags --depth=1 origin "$default_branch"
@@ -92,7 +92,7 @@ jobs:
           printf '%s\n' "${changed_cpp[@]}" | tee build/changed_cpp_files.txt
           echo "has_changes=true" >> "$GITHUB_OUTPUT"
 
-      - name: Map changed C++ files to build targets
+      - name: Compile changed C++ files
         if: steps.cpp_changes.outputs.has_changes == 'true'
         shell: bash
         run: |
@@ -100,6 +100,7 @@ jobs:
           import json
           import os
           import shlex
+          import subprocess
           from pathlib import Path
 
           repo = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
@@ -118,74 +119,40 @@ jobs:
               missing.append(line)
 
           compile_db = json.loads((build / "compile_commands.json").read_text())
-          output_by_file = {}
-
-          def extract_output(entry):
-            cmd = entry.get("command")
-            if cmd:
-              try:
-                args = shlex.split(cmd)
-              except ValueError:
-                args = []
-              for idx, arg in enumerate(args):
-                if arg == "-o" and idx + 1 < len(args):
-                  return args[idx + 1]
-                if arg.startswith("-o") and len(arg) > 2:
-                  return arg[2:]
-
-            args = entry.get("arguments")
-            if isinstance(args, list):
-              for idx, arg in enumerate(args):
-                if arg == "-o" and idx + 1 < len(args):
-                  return args[idx + 1]
-                if arg.startswith("-o") and len(arg) > 2:
-                  return arg[2:]
-            return None
-
+          entry_by_file = {}
           for entry in compile_db:
             file_path = Path(entry["file"]).resolve()
-            out_raw = extract_output(entry)
-            if not out_raw:
-              continue
-            out = Path(out_raw)
-            if not out.is_absolute():
-              out = (Path(entry["directory"]) / out).resolve()
-            output_by_file[file_path] = out
+            entry_by_file[file_path] = entry
 
-          targets = []
+          compile_entries = []
           for src in changed_files:
-            out = output_by_file.get(src)
-            if out is None:
+            entry = entry_by_file.get(src)
+            if entry is None:
               missing.append(str(src.relative_to(repo)))
-              continue
-            try:
-              targets.append(str(out.relative_to(build)))
-            except ValueError:
-              missing.append(str(src.relative_to(repo)))
-
-          targets = sorted(set(targets))
-          (build / "changed_object_targets.txt").write_text("\n".join(targets) + ("\n" if targets else ""))
+            else:
+              compile_entries.append(entry)
 
           if missing:
             print("::error::No compile target mapping for changed files: " + ", ".join(missing))
             raise SystemExit(1)
-          print(f"Mapped {len(targets)} changed C++ file(s) to object targets.")
+
+          for entry in compile_entries:
+            if isinstance(entry.get("arguments"), list):
+              cmd = entry["arguments"]
+            elif entry.get("command"):
+              cmd = shlex.split(entry["command"])
+            else:
+              print("::error::Compile database entry is missing both 'arguments' and 'command'.")
+              raise SystemExit(1)
+
+            workdir = Path(entry["directory"])
+            print("Compiling:", Path(entry["file"]).resolve().relative_to(repo))
+            result = subprocess.run(cmd, cwd=workdir)
+            if result.returncode != 0:
+              raise SystemExit(result.returncode)
+
+          print(f"Compiled {len(compile_entries)} changed C++ file(s).")
           PY
-
-      - name: Build changed C++ objects
-        if: steps.cpp_changes.outputs.has_changes == 'true'
-        shell: bash
-        run: |
-          mapfile -t object_targets < build/changed_object_targets.txt
-          if [[ "${#object_targets[@]}" -eq 0 ]]; then
-            echo "::error::Changed C++ files were detected, but no build targets were mapped."
-            exit 1
-          fi
-
-          cmake --build build \
-            --config RelWithDebInfo \
-            --parallel 1 \
-            --target "${object_targets[@]}"
 
       - name: Show compiler cache statistics
         if: always()
@@ -204,13 +171,10 @@ jobs:
             exit 0
           fi
 
-          while IFS= read -r target; do
-            [[ -z "$target" ]] && continue
-            if [[ ! -f "build/$target" ]]; then
-              echo "::error::Missing expected object artifact: build/$target"
-              exit 1
-            fi
-          done < build/changed_object_targets.txt
+          if [[ ! -f build/changed_cpp_files.txt ]]; then
+            echo "::error::Missing expected changed file list: build/changed_cpp_files.txt"
+            exit 1
+          fi
 
       - name: Upload development artifacts
         uses: actions/upload-artifact@v4
@@ -219,6 +183,5 @@ jobs:
           path: |
             build/compile_commands.json
             build/changed_cpp_files.txt
-            build/changed_object_targets.txt
           if-no-files-found: error
           retention-days: 14
