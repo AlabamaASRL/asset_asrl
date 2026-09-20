@@ -394,7 +394,7 @@ jobs:
 
       - name: Verify selective build artifacts
         id: verify_artifacts
-        if: always() && steps.cpp_changes.outcome == 'success' && steps.compile_changed.outcome != 'failure'
+        if: always() && steps.cpp_changes.outcome == 'success' && (steps.compile_changed.outcome == 'success' || steps.cpp_changes.outputs.has_changes != 'true')
         shell: bash
         run: |
           if [[ ! -f build/compile_commands.json ]]; then
