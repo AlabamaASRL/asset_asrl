@@ -15,241 +15,222 @@ on:
 permissions:
   contents: write
 
+env:
+  BUILD_TYPE: RelWithDebInfo
+  PYTHON_VERSION: "3.9"
+  PYTHON_TARGET: asset
+  CC: clang-13
+  CXX: clang++-13
+
 jobs:
   build:
     name: C++ build - Ubuntu 22.04
     runs-on: ubuntu-22.04
 
-    env:
-      BUILD_TYPE: RelWithDebInfo
-      PYTHON_VERSION: "3.9"
-      PYTHON_TARGET: asset
-
     steps:
-
-      # ============================================================
-      # SYSTEM INFORMATION
-      # ============================================================
-
-      - name: Print runner information
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "RUNNER INFORMATION"
-          echo "============================================================"
-
-          echo "Date:"
-          date
-
-          echo
-          echo "Hostname:"
-          hostname
-
-          echo
-          echo "OS:"
-          cat /etc/os-release
-
-          echo
-          echo "Kernel:"
-          uname -a
-
-          echo
-          echo "CPU:"
-          nproc
-          lscpu | head -40 || true
-
-          echo
-          echo "Memory:"
-          free -h
-
-          echo
-          echo "Disk:"
-          df -h
-
-          echo
-          echo "============================================================"
-
-      # ============================================================
-      # CHECKOUT
-      # ============================================================
-
+      # ------------------------------------------------------------
+      # Checkout
+      # ------------------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          submodules: recursive
           fetch-depth: 0
-          persist-credentials: true
 
-      - name: Print repository information
+      # ------------------------------------------------------------
+      # System information
+      # ------------------------------------------------------------
+      - name: Print system information
         shell: bash
         run: |
           set -euo pipefail
 
           echo "============================================================"
-          echo "REPOSITORY INFORMATION"
+          echo "System information"
           echo "============================================================"
 
-          echo "Repository:"
-          git remote -v
+          uname -a
+          lscpu | sed -n '1,40p'
+          free -h
+          df -h .
+
+      # ------------------------------------------------------------
+      # Detect changed C/C++ files BEFORE configuring CMake
+      # ------------------------------------------------------------
+      - name: Detect changed C/C++ files
+        id: cpp_changes
+        shell: bash
+        env:
+          BASE_SHA_INPUT: ${{ inputs.base_sha }}
+        run: |
+          set -euo pipefail
+
+          echo "============================================================"
+          echo "Detecting changed C/C++ files"
+          echo "============================================================"
+
+          if [[ -n "${BASE_SHA_INPUT:-}" ]]; then
+            BASE_SHA="${BASE_SHA_INPUT}"
+            echo "Using manually supplied base SHA: ${BASE_SHA}"
+          else
+            BASE_SHA="${{ github.event.before }}"
+
+            if [[ -z "${BASE_SHA}" || "${BASE_SHA}" =~ ^0+$ ]]; then
+              BASE_SHA="$(git rev-parse HEAD^ 2>/dev/null || true)"
+            fi
+
+            echo "Using push base SHA: ${BASE_SHA}"
+          fi
+
+          if [[ -z "${BASE_SHA}" ]]; then
+            echo "Could not determine a base SHA."
+            exit 1
+          fi
+
+          if ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            echo "Base SHA ${BASE_SHA} is not available."
+            echo "Fetching additional history..."
+            git fetch --no-tags --prune --unshallow || true
+          fi
+
+          if ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            echo "ERROR: Base SHA ${BASE_SHA} still cannot be found."
+            exit 1
+          fi
+
+          git diff \
+            --name-only \
+            --diff-filter=ACMR \
+            "${BASE_SHA}" "${GITHUB_SHA}" \
+            -- \
+            '*.c' \
+            '*.cc' \
+            '*.cpp' \
+            '*.cxx' \
+            '*.h' \
+            '*.hh' \
+            '*.hpp' \
+            '*.hxx' \
+            > changed_cxx_files.txt
 
           echo
-          echo "Branch:"
-          git branch --show-current
+          echo "Changed C/C++ files:"
+          if [[ -s changed_cxx_files.txt ]]; then
+            cat changed_cxx_files.txt
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "None"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          fi
 
-          echo
-          echo "Commit:"
-          git rev-parse HEAD
-
-          echo
-          echo "Commit information:"
-          git log -1 --decorate --stat
-
-          echo
-          echo "Git status:"
-          git status --short
-
-      # ============================================================
-      # PYTHON
-      # ============================================================
-
+      # ------------------------------------------------------------
+      # Python
+      # ------------------------------------------------------------
       - name: Set up Python
+        if: steps.cpp_changes.outputs.has_changes == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Print Python information
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "PYTHON INFORMATION"
-          echo "============================================================"
-
-          python --version
-          python -c "import sys; print('Python executable:', sys.executable)"
-          python -c "import sys; print('Python prefix:', sys.prefix)"
-          python -c "import sys; print('Python version:', sys.version)"
-
-          echo
-          echo "pip:"
-          python -m pip --version
-
-      # ============================================================
-      # UBUNTU DEPENDENCIES
-      # ============================================================
-
       - name: Install Ubuntu dependencies
-        env:
-          COMPILER: clang-13
+        if: steps.cpp_changes.outputs.has_changes == 'true'
         shell: bash
         run: |
           set -euo pipefail
 
-          echo "============================================================"
-          echo "INSTALLING UBUNTU DEPENDENCIES"
-          echo "============================================================"
+          sudo apt-get update
 
-          bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
+          sudo apt-get install -y \
+            build-essential \
+            clang-13 \
+            clang++-13 \
+            ccache \
+            ninja-build \
+            pkg-config \
+            libomp-13-dev
 
-      # ============================================================
-      # COMPILER INFORMATION
-      # ============================================================
-
+      # ------------------------------------------------------------
+      # Compiler information
+      #
+      # Do NOT use:
+      #   make --version | head -1
+      #
+      # with pipefail because make can receive SIGPIPE when head exits.
+      # ------------------------------------------------------------
       - name: Print compiler information
+        if: steps.cpp_changes.outputs.has_changes == 'true'
         shell: bash
         run: |
           set -euo pipefail
 
           echo "============================================================"
-          echo "COMPILER INFORMATION"
+          echo "Compiler information"
           echo "============================================================"
-
-          echo "clang:"
-          clang --version || true
 
           echo
-          echo "clang++:"
-          clang++ --version || true
+          echo "clang-13:"
+          clang-13 --version
+
+          echo
+          echo "clang++-13:"
+          clang++-13 --version
 
           echo
           echo "gcc:"
-          gcc --version | head -1 || true
+          gcc --version | sed -n '1p'
 
           echo
           echo "g++:"
-          g++ --version | head -1 || true
-
-          echo
-          echo "cmake:"
-          cmake --version
-
-          echo
-          echo "ninja:"
-          ninja --version || true
+          g++ --version | sed -n '1p'
 
           echo
           echo "make:"
-          make --version | head -1
-
-      # ============================================================
-      # CCACHE
-      # ============================================================
-
-      - name: Set up compiler cache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: ubuntu-22.04-clang-13
-          max-size: 2G
-
-      - name: Print ccache information
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "CCACHE INFORMATION"
-          echo "============================================================"
-
-          ccache --version
-          ccache --show-config || true
-          ccache --show-stats || true
-
-      # ============================================================
-      # PYTHON BUILD REQUIREMENTS
-      # ============================================================
-
-      - name: Install Python build requirements
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "INSTALLING PYTHON REQUIREMENTS"
-          echo "============================================================"
-
-          python -m pip install --upgrade pip wheel setuptools
-
-          python -m pip install -r requirements.txt
+          make --version | sed -n '1p'
 
           echo
-          echo "Installed packages:"
-          python -m pip list
+          echo "cmake:"
+          cmake --version | sed -n '1p'
 
-      # ============================================================
-      # CLEAN BUILD
-      # ============================================================
+          echo
+          echo "python:"
+          python --version
 
-      - name: Clean CMake build directory
+          echo
+          echo "ccache:"
+          ccache --version | sed -n '1p'
+
+      # ------------------------------------------------------------
+      # ccache
+      # ------------------------------------------------------------
+      - name: Set up ccache
+        if: steps.cpp_changes.outputs.has_changes == 'true'
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ubuntu-22.04-clang13-asset
+
+      # ------------------------------------------------------------
+      # Python build dependencies
+      # ------------------------------------------------------------
+      - name: Install Python build dependencies
+        if: steps.cpp_changes.outputs.has_changes == 'true'
         shell: bash
         run: |
           set -euo pipefail
 
-          echo "============================================================"
-          echo "CLEANING BUILD DIRECTORY"
-          echo "============================================================"
+          python -m pip install --upgrade pip
+          python -m pip install \
+            numpy \
+            pybind11 \
+            setuptools \
+            wheel
+
+      # ------------------------------------------------------------
+      # Clean build directory
+      # ------------------------------------------------------------
+      - name: Clean build directory
+        if: steps.cpp_changes.outputs.has_changes == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
 
           rm -rf build
           rm -rf dist
@@ -257,1166 +238,587 @@ jobs:
           mkdir -p build
           mkdir -p dist
 
-          echo
-          echo "Build directory:"
-          ls -la build
-
-          echo
-          echo "Memory:"
-          free -h
-
-      # ============================================================
-      # CMAKE CONFIGURATION
-      # ============================================================
-
+      # ------------------------------------------------------------
+      # Configure CMake
+      # ------------------------------------------------------------
       - name: Configure CMake
+        id: configure
+        if: steps.cpp_changes.outputs.has_changes == 'true'
         shell: bash
+        env:
+          Python_EXECUTABLE: ${{ env.pythonLocation }}/bin/python
         run: |
           set -euo pipefail
 
           echo "============================================================"
-          echo "CONFIGURING CMAKE"
+          echo "Configuring CMake"
           echo "============================================================"
 
-          python_executable="$(
-            python -c 'import sys; print(sys.executable)'
-          )"
-
-          echo "Python executable:"
-          echo "$python_executable"
-
-          echo
-          echo "CMake command:"
-
-          echo \
-            cmake -S . \
-              -B build \
-              -G "Unix Makefiles" \
-              -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
-              -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-              -DPIP_INSTALL=True \
-              -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-              -DPython_EXECUTABLE="$python_executable"
-
-          echo
-          echo "Starting CMake configuration..."
-
-          cmake -S . \
+          cmake \
+            -S . \
             -B build \
             -G "Unix Makefiles" \
             -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+            -DCMAKE_C_COMPILER=clang-13 \
+            -DCMAKE_CXX_COMPILER=clang++-13 \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -DPIP_INSTALL=True \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DPython_EXECUTABLE="$python_executable"
+            -DPIP_INSTALL=True \
+            -DPython_EXECUTABLE="${Python_EXECUTABLE}"
 
-          echo
-          echo "CMake configuration completed."
-
-      # ============================================================
-      # CMAKE CONFIGURATION LOGGING
-      # ============================================================
-
-      - name: Log CMake configuration
+      # ------------------------------------------------------------
+      # CMake configuration diagnostics
+      # ------------------------------------------------------------
+      - name: Print CMake configuration
+        if: steps.configure.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
 
           echo "============================================================"
-          echo "CMAKE CONFIGURATION"
+          echo "CMake configuration"
           echo "============================================================"
 
-          echo "CMake cache:"
-          grep -E \
-            '^(CMAKE_BUILD_TYPE|CMAKE_C_COMPILER|CMAKE_CXX_COMPILER|Python|PIP_INSTALL|CMAKE_GENERATOR)' \
-            build/CMakeCache.txt \
-            | sort \
-            || true
+          cmake -LA -N build
 
           echo
-          echo "CMake generator:"
-          grep '^CMAKE_GENERATOR:' \
-            build/CMakeCache.txt \
-            || true
+          echo "Compile commands:"
+          if [[ -f build/compile_commands.json ]]; then
+            python - <<'PY'
+          import json
 
-          echo
-          echo "Build directory:"
-          du -sh build || true
+          with open("build/compile_commands.json", encoding="utf-8") as f:
+              commands = json.load(f)
 
-          echo
-          echo "Build tree:"
-          find build \
-            -maxdepth 2 \
-            -type f \
-            -print \
-            | sort \
-            | head -300
+          print(f"Number of compile commands: {len(commands)}")
 
-          echo
-          echo "Memory:"
-          free -h
-
-      # ============================================================
-      # DETECT CHANGED C/C++ FILES
-      # ============================================================
-
-      - name: Detect changed C/C++ files
-        id: cpp_changes
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "DETECTING CHANGED C/C++ FILES"
-          echo "============================================================"
-
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" &&
-                -n "${{ inputs.base_sha }}" ]]; then
-
-            echo "Using manually supplied base SHA:"
-            echo "${{ inputs.base_sha }}"
-
-            if ! git rev-parse --verify \
-              "${{ inputs.base_sha }}^{commit}" \
-              >/dev/null 2>&1; then
-
-              echo "::error::Invalid base_sha:"
-              echo "${{ inputs.base_sha }}"
-
-              exit 1
-            fi
-
-            base_ref="${{ inputs.base_sha }}"
-
+          for entry in commands[:10]:
+              print()
+              print(entry["file"])
+              print(entry["command"])
+          PY
           else
-
-            default_branch="${{ github.event.repository.default_branch }}"
-
-            echo "Default branch:"
-            echo "$default_branch"
-
-            git fetch \
-              --no-tags \
-              origin \
-              "$default_branch:refs/remotes/origin/$default_branch"
-
-            base_ref="$(
-              git merge-base \
-                HEAD \
-                "origin/$default_branch"
-            )"
-
+            echo "compile_commands.json does not exist."
           fi
 
-          echo
-          echo "Base commit:"
-          echo "$base_ref"
-
-          echo
-          echo "Current commit:"
-          git rev-parse HEAD
-
-          mapfile -t changed_files < <(
-            git diff \
-              --name-only \
-              --diff-filter=ACMR \
-              "$base_ref" \
-              HEAD \
-              -- \
-              '*.c' \
-              '*.cc' \
-              '*.cpp' \
-              '*.cxx' \
-              '*.h' \
-              '*.hh' \
-              '*.hpp' \
-              '*.hxx' \
-            | sed '/^[[:space:]]*$/d'
-          )
-
-          echo
-          echo "Number of changed C/C++ files:"
-          echo "${#changed_files[@]}"
-
-          if [[ "${#changed_files[@]}" -eq 0 ]]; then
-
-            echo "has_changes=false" \
-              >> "$GITHUB_OUTPUT"
-
-            echo
-            echo "No C/C++ changes detected."
-
-            exit 0
-          fi
-
-          echo
-          echo "Changed C/C++ files:"
-          printf '  %s\n' "${changed_files[@]}"
-
-          printf '%s\n' "${changed_files[@]}" \
-            > build/changed_cxx_files.txt
-
-          echo "has_changes=true" \
-            >> "$GITHUB_OUTPUT"
-
-      # ============================================================
-      # LOG CHANGE DETECTION
-      # ============================================================
-
-      - name: Log changed files
-        if: steps.cpp_changes.outputs.has_changes == 'true'
+      # ------------------------------------------------------------
+      # Build PCH first
+      # ------------------------------------------------------------
+      - name: Build PCH
+        if: steps.configure.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
 
           echo "============================================================"
-          echo "CHANGED C/C++ FILES"
+          echo "Building PCH"
           echo "============================================================"
 
-          nl -ba build/changed_cxx_files.txt
-
-          echo
-          echo "File count:"
-          wc -l build/changed_cxx_files.txt
-
-      # ============================================================
-      # BUILD PCH
-      #
-      # This is intentionally done before the asset target.
-      #
-      # ASSET's C++ compile commands use the generated PCH.
-      # Building the PCH separately avoids the earlier failure where
-      # the compile command referenced a PCH that did not exist yet.
-      # ============================================================
-
-      - name: Build precompiled headers
-        if: steps.cpp_changes.outputs.has_changes == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "BUILDING PRECOMPILED HEADERS"
-          echo "============================================================"
-
-          echo "Memory before PCH:"
-          free -h
-
-          echo
-          echo "Build command:"
-          echo "cmake --build build --target pch --config ${BUILD_TYPE} --parallel 1"
-
-          cmake --build build \
+          cmake \
+            --build build \
             --target pch \
             --config "${BUILD_TYPE}" \
             --parallel 1 \
             --verbose
 
-          echo
-          echo "PCH build completed."
-
-          echo
-          echo "PCH files:"
-          find build \
-            -type f \
-            \( \
-              -name "*.pch" \
-              -o -name "cmake_pch.hxx" \
-              -o -name "cmake_pch.cxx" \
-            \) \
-            -print \
-            | sort \
-            || true
-
-          echo
-          echo "Memory after PCH:"
-          free -h
-
-      # ============================================================
-      # LOG COMPILE DATABASE
-      # ============================================================
-
-      - name: Inspect compile database
-        if: steps.cpp_changes.outputs.has_changes == 'true'
+      # ------------------------------------------------------------
+      # Validate changed C/C++ source files
+      # ------------------------------------------------------------
+      - name: Validate changed C/C++ files
+        if: steps.configure.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
 
           echo "============================================================"
-          echo "COMPILE DATABASE"
+          echo "Validating changed C/C++ files"
           echo "============================================================"
 
-          if [[ ! -f build/compile_commands.json ]]; then
-
-            echo "::error::compile_commands.json does not exist."
-
-            exit 1
+          if [[ ! -s changed_cxx_files.txt ]]; then
+            echo "No changed C/C++ files."
+            exit 0
           fi
-
-          echo "Compile database:"
-          ls -lh build/compile_commands.json
-
-          echo
-          echo "Number of compile commands:"
 
           python - <<'PY'
           import json
+          import os
+          import shlex
+          import subprocess
+          import tempfile
+          from pathlib import Path
 
-          with open("build/compile_commands.json") as f:
-              commands = json.load(f)
+          changed = [
+              Path(line.strip())
+              for line in Path("changed_cxx_files.txt").read_text().splitlines()
+              if line.strip()
+          ]
 
-          print(len(commands))
+          compile_db_path = Path("build/compile_commands.json")
+
+          if not compile_db_path.exists():
+              raise RuntimeError("build/compile_commands.json does not exist")
+
+          compile_db = json.loads(compile_db_path.read_text())
+
+          entries = {}
+          for entry in compile_db:
+              source = Path(entry["file"]).resolve()
+              entries[str(source)] = entry
+
+          source_extensions = {
+              ".c",
+              ".cc",
+              ".cpp",
+              ".cxx",
+          }
+
+          header_extensions = {
+              ".h",
+              ".hh",
+              ".hpp",
+              ".hxx",
+          }
+
+          def get_command(entry):
+              if "arguments" in entry:
+                  return list(entry["arguments"])
+
+              return shlex.split(entry["command"])
+
+          def clean_compile_command(command):
+              cleaned = []
+              i = 0
+
+              while i < len(command):
+                  arg = command[i]
+
+                  if arg in {"-o", "-MF", "-MT"}:
+                      i += 2
+                      continue
+
+                  if arg in {
+                      "-c",
+                      "-MD",
+                      "-MMD",
+                      "-MP",
+                  }:
+                      i += 1
+                      continue
+
+                  cleaned.append(arg)
+                  i += 1
+
+              return cleaned
+
+          for path in changed:
+              path = path.resolve()
+
+              if not path.exists():
+                  print(f"Skipping deleted file: {path}")
+                  continue
+
+              suffix = path.suffix.lower()
+
+              print()
+              print("=" * 70)
+              print(f"Validating: {path}")
+              print("=" * 70)
+
+              if suffix in source_extensions:
+                  entry = entries.get(str(path))
+
+                  if entry is None:
+                      raise RuntimeError(
+                          f"No compile_commands.json entry found for {path}"
+                      )
+
+                  command = clean_compile_command(get_command(entry))
+
+                  command.append("-fsyntax-only")
+                  command.append(str(path))
+
+                  print("Running syntax validation:")
+                  print(" ".join(shlex.quote(x) for x in command))
+
+                  subprocess.run(command, check=True)
+
+              elif suffix in header_extensions:
+                  matching_entry = None
+
+                  for source, entry in entries.items():
+                      source_path = Path(source)
+
+                      if source_path.parent == path.parent:
+                          matching_entry = entry
+                          break
+
+                  if matching_entry is None:
+                      raise RuntimeError(
+                          f"No source compile command found in {path.parent} "
+                          f"for header {path}"
+                      )
+
+                  command = clean_compile_command(
+                      get_command(matching_entry)
+                  )
+
+                  with tempfile.TemporaryDirectory() as temp_dir:
+                      wrapper = Path(temp_dir) / "header_validation.cpp"
+
+                      wrapper.write_text(
+                          f'#include "{path.as_posix()}"\n',
+                          encoding="utf-8",
+                      )
+
+                      command.append("-fsyntax-only")
+                      command.append(str(wrapper))
+
+                      print("Running header validation:")
+                      print(" ".join(shlex.quote(x) for x in command))
+
+                      subprocess.run(command, check=True)
+
+              else:
+                  print(f"Skipping unsupported file type: {path}")
+
+          print()
+          print("All changed C/C++ files passed validation.")
           PY
 
-          echo
-          echo "PCH references:"
-          grep -o \
-            'cmake_pch[^" ]*' \
-            build/compile_commands.json \
-            | sort \
-            | uniq \
-            | head -50 \
-            || true
-
-      # ============================================================
-      # LIST CMAKE TARGETS
-      # ============================================================
-
-      - name: List CMake targets
-        if: steps.cpp_changes.outputs.has_changes == 'true'
+      # ------------------------------------------------------------
+      # Show available CMake targets
+      # ------------------------------------------------------------
+      - name: Verify Python extension target
+        if: steps.configure.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
 
           echo "============================================================"
-          echo "CMAKE TARGETS"
+          echo "CMake targets"
           echo "============================================================"
 
-          cmake --build build \
-            --target help \
-            > build/cmake_targets.txt
-
-          cat build/cmake_targets.txt
+          cmake --build build --target help | tee build/cmake_targets.txt
 
           echo
-          echo "Python target selected by workflow:"
-          echo "  ${PYTHON_TARGET}"
+          echo "Checking for Python extension target: ${PYTHON_TARGET}"
 
-          echo
-          echo "Checking that the Python target exists:"
-
-          if grep -Eq \
-            "^\\.\\.\\. ${PYTHON_TARGET}([[:space:]]|$)" \
-            build/cmake_targets.txt; then
-
-            echo "PASS: ${PYTHON_TARGET} target exists."
-
+          if grep -Eq "\.\.\. ${PYTHON_TARGET}([[:space:]]|$)" build/cmake_targets.txt; then
+            echo "Found target: ${PYTHON_TARGET}"
           else
-
-            echo "::error::Python target '${PYTHON_TARGET}' was not found."
-
             echo
-            echo "Available targets:"
-            cat build/cmake_targets.txt
-
+            echo "ERROR: Python extension target '${PYTHON_TARGET}' was not found."
             exit 1
           fi
 
-          echo
-          echo "Important ASSET targets:"
-
-          grep -E \
-            '^\\.\\.\\. (asset|asset_extensions|astro|pch|psiopt|optimalcontrol|utils|vectorfunctions)' \
-            build/cmake_targets.txt \
-            || true
-
-      # ============================================================
-      # VERIFY CMAKE TARGET RELATIONSHIPS
+      # ------------------------------------------------------------
+      # Build the actual Python extension.
       #
-      # asset is the actual pybind11 Python module.
-      # asset_extensions is only a static library dependency.
-      # ============================================================
-
-      - name: Verify Python target configuration
-        if: steps.cpp_changes.outputs.has_changes == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "VERIFYING PYTHON TARGET CONFIGURATION"
-          echo "============================================================"
-
-          echo "Python target:"
-          echo "  ${PYTHON_TARGET}"
-
-          echo
-          echo "Expected Python module:"
-          echo "  asset"
-
-          echo
-          echo "Expected static extension library:"
-          echo "  asset_extensions"
-
-          echo
-          echo "Checking src/CMakeLists.txt:"
-
-          if grep -n \
-            'pybind11_add_module(asset main.cpp)' \
-            src/CMakeLists.txt; then
-
-            echo
-            echo "PASS: asset is the pybind11 module target."
-
-          else
-
-            echo
-            echo "::error::Expected pybind11 asset target was not found."
-
-            grep -n \
-              'pybind11_add_module' \
-              src/CMakeLists.txt \
-              || true
-
-            exit 1
-          fi
-
-          echo
-          echo "Checking extensions/CMakeLists.txt:"
-
-          if grep -n \
-            'add_library(asset_extensions STATIC' \
-            extensions/CMakeLists.txt; then
-
-            echo
-            echo "PASS: asset_extensions is a static library."
-
-          else
-
-            echo
-            echo "WARNING: Could not verify asset_extensions declaration."
-
-          fi
-
-      # ============================================================
-      # BUILD PYTHON EXTENSION
+      # The pybind11 module in src/main.cpp is:
       #
-      # IMPORTANT:
+      #   PYBIND11_MODULE(asset, m)
       #
-      # The actual Python extension target is "asset".
-      #
-      # Do NOT build asset_extensions as the final target. That target
-      # produces libasset_extensions.a, not the Python .so.
-      #
-      # CMake will automatically build only the dependencies required
-      # by asset. Unrelated development targets are not requested.
-      #
-      # --parallel 1 keeps memory usage bounded.
-      # ============================================================
-
+      # Therefore the correct target is "asset", NOT
+      # "asset_extensions".
+      # ------------------------------------------------------------
       - name: Build Python extension
-        if: steps.cpp_changes.outputs.has_changes == 'true'
+        id: python_build
+        if: steps.configure.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
 
           echo "============================================================"
-          echo "BUILDING PYTHON EXTENSION"
+          echo "Building Python extension: ${PYTHON_TARGET}"
           echo "============================================================"
 
-          echo "Selected target:"
-          echo "  ${PYTHON_TARGET}"
-
-          echo
-          echo "Memory before build:"
-          free -h
-
-          echo
-          echo "Disk before build:"
-          df -h .
-
-          echo
-          echo "Build command:"
-          echo "cmake --build build --target ${PYTHON_TARGET} --config ${BUILD_TYPE} --parallel 1 --verbose"
-
-          echo
-          echo "Starting build..."
-
-          cmake --build build \
+          cmake \
+            --build build \
             --target "${PYTHON_TARGET}" \
             --config "${BUILD_TYPE}" \
             --parallel 1 \
             --verbose
 
-          echo
-          echo "Python extension target completed."
-
-          echo
-          echo "Memory after build:"
-          free -h
-
-          echo
-          echo "Disk after build:"
-          df -h .
-
-      # ============================================================
-      # DEBUG BUILD OUTPUT
-      # ============================================================
-
-      - name: Inspect build outputs
-        if: steps.cpp_changes.outputs.has_changes == 'true'
+      # ------------------------------------------------------------
+      # Inspect build output
+      # ------------------------------------------------------------
+      - name: Inspect build output
+        if: steps.python_build.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
 
           echo "============================================================"
-          echo "BUILD OUTPUT INSPECTION"
+          echo "Build output"
           echo "============================================================"
 
-          echo "Python target:"
-          echo "  ${PYTHON_TARGET}"
-
-          echo
-          echo "All shared libraries:"
-          find build \
+          find build/src \
+            -maxdepth 1 \
             -type f \
             \( \
-              -name "*.so" \
-              -o -name "*.so.*" \
-              -o -name "*.pyd" \
+              -name 'asset*.so' \
+              -o -name 'asset*.pyd' \
+              -o -name 'libasset*.a' \
             \) \
             -print \
-            | sort \
-            || true
+            2>/dev/null || true
 
-          echo
-          echo "All libraries:"
-          find build \
-            -type f \
-            \( \
-              -name "*.a" \
-              -o -name "*.so" \
-              -o -name "*.so.*" \
-              -o -name "*.pyd" \
-            \) \
-            -print \
-            | sort \
-            || true
-
-          echo
-          echo "asset-related files:"
-          find build \
-            -type f \
-            \( \
-              -name "asset*.so" \
-              -o -name "asset*.so.*" \
-              -o -name "asset*.pyd" \
-              -o -name "*asset*.a" \
-            \) \
-            -print \
-            | sort \
-            || true
-
-          echo
-          echo "Recently modified build files:"
-          find build \
-            -type f \
-            -printf '%T@ %p\n' \
-            | sort -nr \
-            | head -200 \
-            || true
-
-          echo
-          echo "Build directory size:"
-          du -sh build
-
-          echo
-          echo "Largest build directories:"
-          du -h \
-            --max-depth=2 \
-            build \
-            | sort -h \
-            | tail -50 \
-            || true
-
-      # ============================================================
-      # PREPARE PYTHON EXTENSION
-      # ============================================================
-
+      # ------------------------------------------------------------
+      # Collect only the actual Python extension
+      # ------------------------------------------------------------
       - name: Prepare Python extension
         id: binaries
-        if: steps.cpp_changes.outputs.has_changes == 'true'
+        if: steps.python_build.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
 
           echo "============================================================"
-          echo "SEARCHING FOR PYTHON EXTENSION"
+          echo "Preparing Python extension"
           echo "============================================================"
 
-          rm -rf dist
           mkdir -p dist
 
-          echo
-          echo "Searching specifically for the asset Python extension:"
-
-          mapfile -t extensions < <(
-            find build \
+          mapfile -t binaries < <(
+            find build/src \
+              -maxdepth 1 \
               -type f \
               \( \
-                -name "asset*.so" \
-                -o -name "asset*.pyd" \
-              \) \
-              -print \
-              | sort \
-              | grep -E \
-                '(^|/)asset[^/]*\.((cpython-[0-9]+[^/]*)|abi3)\.so$|(^|/)asset[^/]*\.pyd$' \
-              || true
-          )
-
-          echo
-          echo "Number of asset Python extension candidates:"
-          echo "${#extensions[@]}"
-
-          if [[ "${#extensions[@]}" -eq 0 ]]; then
-
-            echo
-            echo "::error::No asset Python extension binary was found."
-
-            echo
-            echo "Expected target:"
-            echo "${PYTHON_TARGET}"
-
-            echo
-            echo "Expected output similar to:"
-            echo "  build/src/asset.cpython-39-x86_64-linux-gnu.so"
-
-            echo
-            echo "All shared libraries:"
-            find build \
-              -type f \
-              \( \
-                -name "*.so" \
-                -o -name "*.so.*" \
-                -o -name "*.pyd" \
-              \) \
-              -print \
-              | sort \
-              || true
-
-            echo
-            echo "All libraries:"
-            find build \
-              -type f \
-              \( \
-                -name "*.a" \
-                -o -name "*.so" \
-                -o -name "*.so.*" \
-                -o -name "*.pyd" \
-              \) \
-              -print \
-              | sort \
-              || true
-
-            echo
-            echo "Complete build tree:"
-            find build \
-              -type f \
-              -print \
-              | sort \
-              | head -1000
-
-            exit 1
-          fi
-
-          echo
-          echo "Found Python extension candidates:"
-
-          for extension in "${extensions[@]}"; do
-            echo "  $extension"
-          done
-
-          if [[ "${#extensions[@]}" -gt 1 ]]; then
-
-            echo
-            echo "WARNING: Multiple asset Python extensions were found."
-
-            echo "The workflow will copy all matching extensions."
-
-          fi
-
-          echo
-          echo "Copying extensions to dist/:"
-
-          for extension in "${extensions[@]}"; do
-
-            filename="$(
-              basename "$extension"
-            )"
-
-            echo
-            echo "Source:"
-            echo "  $extension"
-
-            echo "Destination:"
-            echo "  dist/$filename"
-
-            cp -f \
-              "$extension" \
-              "dist/$filename"
-
-          done
-
-          echo
-          echo "Final dist directory:"
-
-          find dist \
-            -type f \
-            -ls
-
-          echo
-          echo "dist size:"
-          du -sh dist
-
-          echo "has_binaries=true" \
-            >> "$GITHUB_OUTPUT"
-
-      # ============================================================
-      # VERIFY PYTHON EXTENSION
-      # ============================================================
-
-      - name: Verify Python extension
-        if: steps.binaries.outputs.has_binaries == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "VERIFYING PYTHON EXTENSION"
-          echo "============================================================"
-
-          echo "Python executable:"
-          python -c "import sys; print(sys.executable)"
-
-          echo
-          echo "Python version:"
-          python --version
-
-          echo
-          echo "dist contents:"
-          find dist \
-            -type f \
-            -ls
-
-          echo
-          echo "Dynamic dependencies:"
-
-          for extension in dist/*.so dist/*.pyd; do
-
-            if [[ ! -f "$extension" ]]; then
-              continue
-            fi
-
-            echo
-            echo "------------------------------------------------------------"
-            echo "ldd: $extension"
-            echo "------------------------------------------------------------"
-
-            ldd "$extension" || true
-
-          done
-
-          echo
-          echo "Testing import of asset..."
-
-          PYTHONPATH="${GITHUB_WORKSPACE}/dist:${PYTHONPATH:-}" \
-            python - <<'PY'
-          import sys
-
-          print("Python executable:")
-          print(sys.executable)
-
-          print()
-          print("Python version:")
-          print(sys.version)
-
-          print()
-          print("Python path:")
-          for path in sys.path:
-              print("  ", path)
-
-          print()
-          print("Importing asset...")
-
-          import asset
-
-          print()
-          print("PASS: import asset")
-
-          print()
-          print("asset module:")
-          print(asset)
-
-          print()
-          print("asset file:")
-          print(asset.__file__)
-
-          print()
-          print("Checking expected symbols:")
-
-          print(
-              "  SoftwareInfo:",
-              hasattr(asset, "SoftwareInfo"),
-          )
-
-          print(
-              "  PyMain:",
-              hasattr(asset, "PyMain"),
-          )
-
-          print()
-          print("asset import verification successful.")
-          PY
-
-      # ============================================================
-      # VERIFY ARTIFACTS
-      # ============================================================
-
-      - name: Verify selective build artifacts
-        id: verify_artifacts
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "FINAL ARTIFACT VERIFICATION"
-          echo "============================================================"
-
-          echo "CMake compile database:"
-          if [[ -f build/compile_commands.json ]]; then
-            echo "  PASS"
-          else
-            echo "  FAIL"
-            exit 1
-          fi
-
-          if [[ "${{ steps.cpp_changes.outputs.has_changes }}" != "true" ]]; then
-
-            echo
-            echo "No C/C++ changes were detected."
-            echo "Nothing else to verify."
-
-            exit 0
-          fi
-
-          echo
-          echo "Changed-file list:"
-          if [[ -f build/changed_cxx_files.txt ]]; then
-            echo "  PASS"
-          else
-            echo "  FAIL"
-            exit 1
-          fi
-
-          echo
-          echo "Python target:"
-          echo "  ${PYTHON_TARGET}"
-
-          echo
-          echo "dist directory:"
-          if [[ -d dist ]]; then
-            echo "  PASS"
-          else
-            echo "  FAIL"
-            exit 1
-          fi
-
-          echo
-          echo "Python extensions:"
-
-          mapfile -t extension_files < <(
-            find dist \
-              -type f \
-              \( \
-                -name "asset*.so" \
-                -o -name "asset*.pyd" \
+                -name 'asset*.so' \
+                -o -name 'asset*.pyd' \
               \) \
               -print
           )
 
-          if [[ "${#extension_files[@]}" -eq 0 ]]; then
-
-            echo "  FAIL"
-            echo "::error::No asset Python extensions found in dist/."
-
+          if [[ "${#binaries[@]}" -eq 0 ]]; then
+            echo "ERROR: No asset Python extension was found."
             echo
-            echo "dist contents:"
-            find dist \
-              -type f \
-              -print \
-              || true
-
+            echo "Files under build:"
+            find build -type f | sort | sed -n '1,200p'
             exit 1
           fi
 
-          for file in "${extension_files[@]}"; do
-            echo "  PASS: $file"
+          if [[ "${#binaries[@]}" -gt 1 ]]; then
+            echo "Found multiple asset extension files:"
+            printf '%s\n' "${binaries[@]}"
+          fi
+
+          for binary in "${binaries[@]}"; do
+            echo "Copying: ${binary}"
+            cp "${binary}" dist/
           done
 
           echo
-          echo "Final artifact sizes:"
-          du -h dist/*
+          echo "dist contents:"
+          ls -lah dist
 
-          echo
-          echo "Artifact verification successful."
+          echo "has_binaries=true" >> "$GITHUB_OUTPUT"
 
-      # ============================================================
-      # CCACHE STATISTICS
-      # ============================================================
-
-      - name: Show compiler cache statistics
-        if: always()
-        shell: bash
-        run: |
-          echo "============================================================"
-          echo "CCACHE STATISTICS"
-          echo "============================================================"
-
-          ccache --show-stats || true
-
-      # ============================================================
-      # FINAL SYSTEM INFORMATION
-      # ============================================================
-
-      - name: Print final resource usage
-        if: always()
-        shell: bash
-        run: |
-          echo "============================================================"
-          echo "FINAL RESOURCE USAGE"
-          echo "============================================================"
-
-          echo "Memory:"
-          free -h
-
-          echo
-          echo "Disk:"
-          df -h
-
-          echo
-          echo "Build size:"
-          du -sh build 2>/dev/null || true
-
-          echo
-          echo "Dist size:"
-          du -sh dist 2>/dev/null || true
-
-      # ============================================================
-      # COMMIT PYTHON EXTENSION
-      # ============================================================
-
-      - name: Commit updated Python extensions
-        if: >
-          steps.binaries.outputs.has_binaries == 'true' &&
-          steps.verify_artifacts.outcome == 'success'
+      # ------------------------------------------------------------
+      # Check dynamic library dependencies
+      # ------------------------------------------------------------
+      - name: Check extension dependencies
+        if: steps.binaries.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
 
           echo "============================================================"
-          echo "COMMITTING PYTHON EXTENSIONS"
+          echo "Checking extension dependencies"
           echo "============================================================"
 
-          git config \
-            user.name \
-            "github-actions[bot]"
+          for binary in dist/asset*.so dist/asset*.pyd; do
+            if [[ -f "${binary}" ]]; then
+              echo
+              echo "------------------------------------------------------------"
+              echo "${binary}"
+              echo "------------------------------------------------------------"
 
-          git config \
-            user.email \
-            "41898282+github-actions[bot]@users.noreply.github.com"
+              if command -v ldd >/dev/null 2>&1; then
+                ldd "${binary}" || true
+              fi
+            fi
+          done
 
-          echo "Current branch:"
-          git branch --show-current
+      # ------------------------------------------------------------
+      # Import test
+      # ------------------------------------------------------------
+      - name: Test Python extension import
+        id: import_test
+        if: steps.binaries.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
 
-          echo
-          echo "Current commit:"
-          git rev-parse HEAD
+          echo "============================================================"
+          echo "Testing Python extension import"
+          echo "============================================================"
 
-          echo
-          echo "Generated extensions:"
-          find dist \
-            -type f \
-            -print \
-            | sort
+          export PYTHONPATH="${GITHUB_WORKSPACE}/dist${PYTHONPATH:+:${PYTHONPATH}}"
 
-          echo
-          echo "Git status before staging:"
-          git status --short
+          python - <<'PY'
+          import asset
 
-          # Only stage the generated Python extension binaries.
-          git add -f \
-            dist/asset*.so \
-            dist/asset*.pyd \
-            2>/dev/null \
-            || true
+          print("Successfully imported asset")
+          print(f"asset.__file__ = {asset.__file__}")
+          PY
 
-          echo
-          echo "Git status after staging:"
-          git status --short
+      # ------------------------------------------------------------
+      # Final artifact verification
+      # ------------------------------------------------------------
+      - name: Verify final artifact
+        if: >
+          steps.cpp_changes.outputs.has_changes == 'true' &&
+          steps.configure.outcome == 'success' &&
+          steps.python_build.outcome == 'success' &&
+          steps.binaries.outcome == 'success' &&
+          steps.import_test.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
 
-          if git diff --cached --quiet; then
+          echo "============================================================"
+          echo "Final artifact verification"
+          echo "============================================================"
 
-            echo
-            echo "No binary changes detected."
-            echo "Nothing to commit."
+          test -f build/compile_commands.json
+          test -d dist
 
-            exit 0
+          shopt -s nullglob
+
+          binaries=(dist/asset*.so dist/asset*.pyd)
+
+          if [[ "${#binaries[@]}" -eq 0 ]]; then
+            echo "ERROR: No Python extension found in dist."
+            exit 1
           fi
 
-          echo
-          echo "Staged changes:"
-          git diff \
-            --cached \
-            --stat
+          for binary in "${binaries[@]}"; do
+            echo
+            echo "Artifact:"
+            ls -lh "${binary}"
+            file "${binary}"
+          done
 
-          echo
-          echo "Creating commit..."
+      # ------------------------------------------------------------
+      # ccache statistics
+      # ------------------------------------------------------------
+      - name: Show ccache statistics
+        if: always()
+        shell: bash
+        run: |
+          set +e
 
-          git commit \
-            -m "chore: update compiled Python extensions [skip ci]"
+          echo "============================================================"
+          echo "ccache statistics"
+          echo "============================================================"
 
-          echo
-          echo "Pushing commit..."
+          ccache --show-stats || true
 
-          git push \
-            origin \
-            "HEAD:${GITHUB_REF_NAME}"
+      # ------------------------------------------------------------
+      # Resource diagnostics
+      # ------------------------------------------------------------
+      - name: Show final resource usage
+        if: always()
+        shell: bash
+        run: |
+          set +e
 
-          echo
-          echo "Python extensions committed successfully."
+          echo "============================================================"
+          echo "Final resource usage"
+          echo "============================================================"
 
-      # ============================================================
-      # FAILURE DIAGNOSTICS
-      # ============================================================
+          free -h
+          df -h .
 
-      - name: Dump failure diagnostics
+      # ------------------------------------------------------------
+      # Failure diagnostics
+      # ------------------------------------------------------------
+      - name: Failure diagnostics
         if: failure()
         shell: bash
         run: |
+          set +e
+
           echo "============================================================"
           echo "FAILURE DIAGNOSTICS"
           echo "============================================================"
 
           echo
-          echo "Git:"
-          git status --short || true
-          git rev-parse HEAD || true
-
-          echo
-          echo "Memory:"
-          free -h || true
-
-          echo
-          echo "Disk:"
-          df -h || true
-
-          echo
-          echo "Build directory:"
-          du -sh build 2>/dev/null || true
-
-          echo
-          echo "Python target:"
-          echo "${PYTHON_TARGET}"
+          echo "Git status:"
+          git status --short
 
           echo
           echo "Changed C/C++ files:"
-          cat build/changed_cxx_files.txt \
-            2>/dev/null \
-            || true
+          if [[ -f changed_cxx_files.txt ]]; then
+            cat changed_cxx_files.txt
+          else
+            echo "changed_cxx_files.txt does not exist."
+          fi
 
           echo
-          echo "CMake targets:"
-          cat build/cmake_targets.txt \
-            2>/dev/null \
-            || true
+          echo "Build directory:"
+          if [[ -d build ]]; then
+            find build -maxdepth 3 -type f | sort | sed -n '1,300p'
+          else
+            echo "build directory does not exist."
+          fi
 
           echo
-          echo "Shared libraries:"
-          find build \
-            -type f \
-            \( \
-              -name "*.so" \
-              -o -name "*.so.*" \
-              -o -name "*.pyd" \
-            \) \
-            -print \
-            | sort \
-            || true
+          echo "dist directory:"
+          if [[ -d dist ]]; then
+            find dist -maxdepth 2 -type f -print
+          else
+            echo "dist directory does not exist."
+          fi
 
           echo
-          echo "Static libraries:"
-          find build \
-            -type f \
-            -name "*.a" \
-            -print \
-            | sort \
-            || true
+          echo "Memory:"
+          free -h
 
           echo
-          echo "asset-related files:"
-          find build \
-            -type f \
-            \( \
-              -name "asset*.so" \
-              -o -name "asset*.so.*" \
-              -o -name "asset*.pyd" \
-              -o -name "*asset*.a" \
-            \) \
-            -print \
-            | sort \
-            || true
+          echo "Disk:"
+          df -h .
 
-          echo
-          echo "PCH files:"
-          find build \
-            -type f \
-            \( \
-              -name "*.pch" \
-              -o -name "cmake_pch.hxx" \
-              -o -name "cmake_pch.cxx" \
-            \) \
-            -print \
-            | sort \
-            || true
+      # ------------------------------------------------------------
+      # Commit the built Python extension
+      # ------------------------------------------------------------
+      - name: Commit Python extension
+        if: >
+          success() &&
+          steps.cpp_changes.outputs.has_changes == 'true' &&
+          steps.import_test.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
 
-          echo
-          echo "Recent build files:"
-          find build \
-            -type f \
-            -printf '%T@ %p\n' \
-            2>/dev/null \
-            | sort -nr \
-            | head -300 \
-            || true
-
-          echo
-          echo "dist:"
-          find dist \
-            -type f \
-            -print \
-            2>/dev/null \
-            || true
-
-          echo
-          echo "ccache:"
-          ccache --show-stats \
-            2>/dev/null \
-            || true
-
-          echo
           echo "============================================================"
-          echo "END FAILURE DIAGNOSTICS"
+          echo "Committing Python extension"
           echo "============================================================"
+
+          shopt -s nullglob
+
+          binaries=(dist/asset*.so dist/asset*.pyd)
+
+          if [[ "${#binaries[@]}" -eq 0 ]]; then
+            echo "ERROR: No Python extension found to commit."
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -f dist/asset*.so dist/asset*.pyd
+
+          if git diff --cached --quiet; then
+            echo "No binary changes to commit."
+            exit 0
+          fi
+
+          git status --short
+
+          git commit \
+            -m "Build C++ Python extension [skip ci]"
+
+          git push origin "HEAD:${GITHUB_REF_NAME}"
