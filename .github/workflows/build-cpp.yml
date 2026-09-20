@@ -65,6 +65,7 @@ jobs:
         run: ccache --show-stats
 
       - name: Verify expected build artifacts
+        shell: bash
         run: |
           shopt -s nullglob
           asset_modules=(build/src/asset*.so)
