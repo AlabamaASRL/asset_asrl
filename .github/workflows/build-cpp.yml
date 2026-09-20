@@ -1,4 +1,4 @@
-name: Build C++ development target
+name: Build C++ Python extensions
 
 on:
   push:
@@ -17,10 +17,15 @@ permissions:
 
 jobs:
   build:
-    name: C++ build - Ubuntu 22.04
+    name: C++ Python extensions - Ubuntu 22.04
     runs-on: ubuntu-22.04
 
     steps:
+
+      # ------------------------------------------------------------
+      # Checkout
+      # ------------------------------------------------------------
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -28,15 +33,27 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
+      # ------------------------------------------------------------
+      # Python
+      # ------------------------------------------------------------
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.9"
 
+      # ------------------------------------------------------------
+      # Ubuntu dependencies
+      # ------------------------------------------------------------
+
       - name: Install Ubuntu dependencies
         env:
           COMPILER: clang-13
         run: bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
+
+      # ------------------------------------------------------------
+      # Compiler cache
+      # ------------------------------------------------------------
 
       - name: Set up compiler cache
         uses: hendrikmuhs/ccache-action@v1
@@ -44,14 +61,19 @@ jobs:
           key: ubuntu-22.04-clang-13
           max-size: 2G
 
+      # ------------------------------------------------------------
+      # Python build dependencies
+      # ------------------------------------------------------------
+
       - name: Install Python build requirements
         run: |
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install -r requirements.txt
 
-      # CMake build directories contain machine-specific cache files,
-      # generated PCH files, object files, and dependency metadata.
-      # They must not be reused between workflow runs.
+      # ------------------------------------------------------------
+      # Clean CMake directory
+      # ------------------------------------------------------------
+
       - name: Clean CMake build directory
         shell: bash
         run: |
@@ -59,6 +81,15 @@ jobs:
 
           rm -rf build
           mkdir -p build
+
+      # ------------------------------------------------------------
+      # Configure CMake
+      #
+      # IMPORTANT:
+      # This only CONFIGURES the project.
+      #
+      # It does NOT build all ASSET development libraries.
+      # ------------------------------------------------------------
 
       - name: Configure CMake
         shell: bash
@@ -75,44 +106,64 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DPython_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')"
 
+      # ------------------------------------------------------------
+      # Detect changed C/C++ files
+      # ------------------------------------------------------------
+
       - name: Detect changed C/C++ files
         id: cpp_changes
         shell: bash
         run: |
           set -euo pipefail
 
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && \
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" &&
                 -n "${{ inputs.base_sha }}" ]]; then
 
-            if ! git rev-parse --verify "${{ inputs.base_sha }}^{commit}" >/dev/null 2>&1; then
+            if ! git rev-parse --verify \
+              "${{ inputs.base_sha }}^{commit}" >/dev/null 2>&1; then
+
               echo "::error::Invalid base_sha: ${{ inputs.base_sha }}"
               exit 1
             fi
 
             base_ref="${{ inputs.base_sha }}"
+
           else
+
             default_branch="${{ github.event.repository.default_branch }}"
 
             git fetch --no-tags origin \
               "$default_branch:refs/remotes/origin/$default_branch"
 
-            if ! git rev-parse --verify "origin/$default_branch" >/dev/null 2>&1; then
+            if ! git rev-parse --verify \
+              "origin/$default_branch" >/dev/null 2>&1; then
+
               echo "::error::Unable to find origin/$default_branch"
               exit 1
             fi
 
             base_ref="$(git merge-base HEAD "origin/$default_branch")"
+
           fi
 
           echo "Current commit: ${{ github.sha }}"
           echo "Base commit:    $base_ref"
 
           mapfile -t changed_files < <(
-            git diff --name-only --diff-filter=ACMR \
-              "$base_ref" "${{ github.sha }}" \
+            git diff \
+              --name-only \
+              --diff-filter=ACMR \
+              "$base_ref" \
+              "${{ github.sha }}" \
               -- \
-              '*.c' '*.cc' '*.cpp' '*.cxx' \
-              '*.h' '*.hh' '*.hpp' '*.hxx' \
+              '*.c' \
+              '*.cc' \
+              '*.cpp' \
+              '*.cxx' \
+              '*.h' \
+              '*.hh' \
+              '*.hpp' \
+              '*.hxx' \
             | sed '/^[[:space:]]*$/d'
           )
 
@@ -128,16 +179,25 @@ jobs:
           printf '%s\n' "${changed_files[@]}" \
             > build/changed_cxx_files.txt
 
-          # Preserve the old filename for compatibility with existing tooling.
-          cp build/changed_cxx_files.txt build/changed_cpp_files.txt
+          cp \
+            build/changed_cxx_files.txt \
+            build/changed_cpp_files.txt
 
           echo "has_changes=true" >> "$GITHUB_OUTPUT"
 
-      - name: Compile changed C/C++ source files and validate headers
+      # ------------------------------------------------------------
+      # Compile changed files and validate headers
+      #
+      # This does NOT build the full ASSET development libraries.
+      # ------------------------------------------------------------
+
+      - name: Compile changed C/C++ files and validate headers
         id: compile_changed
         if: steps.cpp_changes.outputs.has_changes == 'true'
         shell: bash
         run: |
+          set -euo pipefail
+
           python - <<'PY'
           import json
           import os
@@ -165,7 +225,10 @@ jobs:
 
           changed_files = []
 
-          for line in (build / "changed_cxx_files.txt").read_text().splitlines():
+          changed_file_list = build / "changed_cxx_files.txt"
+
+          for line in changed_file_list.read_text().splitlines():
+
               line = line.strip()
 
               if not line:
@@ -176,6 +239,10 @@ jobs:
               if path.exists():
                   changed_files.append(path)
 
+          # --------------------------------------------------------
+          # Compile database
+          # --------------------------------------------------------
+
           compile_db_path = build / "compile_commands.json"
 
           if not compile_db_path.exists():
@@ -185,16 +252,23 @@ jobs:
               )
               raise SystemExit(1)
 
-          compile_db = json.loads(compile_db_path.read_text())
+          compile_db = json.loads(
+              compile_db_path.read_text()
+          )
 
           def resolve_entry_path(entry):
+
               file_path = Path(entry["file"])
 
               if not file_path.is_absolute():
+
                   file_path = (
-                      Path(entry["directory"]) / file_path
+                      Path(entry["directory"]) /
+                      file_path
                   ).resolve()
+
               else:
+
                   file_path = file_path.resolve()
 
               return file_path
@@ -202,22 +276,34 @@ jobs:
           entry_by_file = {}
 
           for entry in compile_db:
+
               entry_by_file[
                   resolve_entry_path(entry)
               ] = entry
+
+          # --------------------------------------------------------
+          # Separate source/header files
+          # --------------------------------------------------------
 
           source_files = []
           header_files = []
 
           for path in changed_files:
+
               suffix = path.suffix.lower()
 
               if suffix in source_suffixes:
                   source_files.append(path)
+
               elif suffix in header_suffixes:
                   header_files.append(path)
 
+          # --------------------------------------------------------
+          # Convert compile database entry to command
+          # --------------------------------------------------------
+
           def command_from_entry(entry):
+
               arguments = entry.get("arguments")
 
               if isinstance(arguments, list):
@@ -229,13 +315,19 @@ jobs:
                   return shlex.split(command)
 
               print(
-                  "::error::Compile database entry is missing both "
+                  "::error::Compile database entry is missing "
                   "'arguments' and 'command' for "
                   f"{entry.get('file', '<unknown>')}"
               )
+
               raise SystemExit(1)
 
+          # --------------------------------------------------------
+          # Resolve command paths
+          # --------------------------------------------------------
+
           def resolve_path(path_string, base_dir):
+
               path = Path(path_string)
 
               if not path.is_absolute():
@@ -243,261 +335,116 @@ jobs:
 
               return path.resolve()
 
-          def infer_target_name(path):
-              parts = path.parts
-
-              for index, part in enumerate(parts):
-                  if part != "CMakeFiles":
-                      continue
-
-                  if index + 1 >= len(parts):
-                      continue
-
-                  target_directory = parts[index + 1]
-
-                  if target_directory.endswith(".dir"):
-                      return target_directory[:-4]
-
-              return None
-
-          prepared_targets = set()
-
-          def find_pch_paths(command, workdir):
-              """
-              Find PCH paths in both direct and Clang-wrapped forms.
-
-              Supported forms include:
-
-                  -include-pch <path>
-
-                  -Xclang -include-pch -Xclang <path>
-
-                  -include-pch=<path>
-              """
-              pch_paths = []
-              index = 0
-
-              while index < len(command):
-                  argument = command[index]
-
-                  # Clang commonly emits:
-                  # -Xclang -include-pch -Xclang <pch-file>
-                  if (
-                      argument == "-Xclang"
-                      and index + 1 < len(command)
-                      and command[index + 1] == "-include-pch"
-                  ):
-                      index += 2
-
-                      while (
-                          index < len(command)
-                          and command[index] == "-Xclang"
-                      ):
-                          index += 1
-
-                      if index >= len(command):
-                          break
-
-                      pch_paths.append(
-                          resolve_path(command[index], workdir)
-                      )
-                      index += 1
-                      continue
-
-                  # Direct form:
-                  # -include-pch <pch-file>
-                  if argument == "-include-pch":
-                      index += 1
-
-                      while (
-                          index < len(command)
-                          and command[index] == "-Xclang"
-                      ):
-                          index += 1
-
-                      if index < len(command):
-                          pch_paths.append(
-                              resolve_path(command[index], workdir)
-                          )
-                          index += 1
-
-                      continue
-
-                  if argument.startswith("-include-pch="):
-                      pch_paths.append(
-                          resolve_path(
-                              argument.split("=", 1)[1],
-                              workdir,
-                          )
-                      )
-                      index += 1
-                      continue
-
-                  # Some command generators concatenate the option and path.
-                  if (
-                      argument.startswith("-include-pch")
-                      and argument != "-include-pch"
-                  ):
-                      pch_paths.append(
-                          resolve_path(
-                              argument[len("-include-pch"):],
-                              workdir,
-                          )
-                      )
-                      index += 1
-                      continue
-
-                  if argument.endswith(".pch"):
-                      pch_paths.append(
-                          resolve_path(argument, workdir)
-                      )
-
-                  index += 1
-
-              return pch_paths
-
-          def ensure_pch_prerequisites(command, workdir):
-              for pch_path in find_pch_paths(command, workdir):
-                  if pch_path.exists():
-                      continue
-
-                  target_name = infer_target_name(pch_path)
-
-                  if target_name is None:
-                      print(
-                          "::error::Unable to infer CMake target for "
-                          f"missing precompiled header: {pch_path}"
-                      )
-                      raise SystemExit(1)
-
-                  if target_name in prepared_targets:
-                      continue
-
-                  print(
-                      "Building prerequisite target:",
-                      target_name,
-                  )
-
-                  result = subprocess.run(
-                      [
-                          "cmake",
-                          "--build",
-                          str(build),
-                          "--target",
-                          target_name,
-                          "--parallel",
-                          "1",
-                      ],
-                      cwd=repo,
-                  )
-
-                  if result.returncode != 0:
-                      raise SystemExit(result.returncode)
-
-                  prepared_targets.add(target_name)
+          # --------------------------------------------------------
+          # Remove compiler output/dependency flags
+          # --------------------------------------------------------
 
           def remove_output_flags(command):
+
               result = []
+
               index = 0
 
               while index < len(command):
+
                   argument = command[index]
 
                   if argument in ("-o", "-MF", "-MT"):
+
                       index += 2
                       continue
 
-                  if argument.startswith("-MF") or argument.startswith("-MT"):
+                  if (
+                      argument.startswith("-MF") or
+                      argument.startswith("-MT")
+                  ):
+
                       index += 1
                       continue
 
                   result.append(argument)
+
                   index += 1
 
               return result
 
-          def replace_source(command, original, replacement, workdir):
+          # --------------------------------------------------------
+          # Replace source in compiler command
+          # --------------------------------------------------------
+
+          def replace_source(
+              command,
+              original,
+              replacement,
+              workdir,
+          ):
+
               original = original.resolve()
 
               for index, argument in enumerate(command):
+
                   if argument.startswith("-"):
                       continue
 
                   candidate = Path(argument)
 
                   if not candidate.is_absolute():
+
                       candidate = (
                           workdir / candidate
                       ).resolve()
+
                   else:
+
                       candidate = candidate.resolve()
 
                   if candidate == original:
+
                       command[index] = str(replacement)
+
                       return
 
               command.append(str(replacement))
 
-          def choose_header_command(header_path):
-              candidates = []
-
-              for entry in compile_db:
-                  source_path = resolve_entry_path(entry)
-
-                  if source_path.suffix.lower() not in source_suffixes:
-                      continue
-
-                  same_directory = (
-                      header_path.parent == source_path.parent
-                  )
-
-                  try:
-                      relative_path = header_path.relative_to(
-                          source_path.parent
-                      )
-                      distance = len(relative_path.parts)
-                  except ValueError:
-                      distance = 9999
-
-                  score = (
-                      0 if same_directory else 1,
-                      distance,
-                      str(source_path),
-                  )
-
-                  candidates.append((score, entry))
-
-              if not candidates:
-                  return None
-
-              candidates.sort(key=lambda item: item[0])
-              return candidates[0][1]
+          # --------------------------------------------------------
+          # Validate changed sources
+          # --------------------------------------------------------
 
           missing_sources = []
 
           for source in source_files:
+
               if source not in entry_by_file:
+
                   missing_sources.append(
                       str(source.relative_to(repo))
                   )
 
           if missing_sources:
+
               print(
-                  "::error::No compile database mapping for changed "
-                  "source files: "
+                  "::error::No compile database mapping for "
+                  "changed source files: "
                   + ", ".join(missing_sources)
               )
+
               raise SystemExit(1)
 
-          # Compile changed source files using their exact compile database
-          # commands. This generates the normal object/dependency outputs.
-          for source in source_files:
-              entry = entry_by_file[source]
-              command = command_from_entry(entry)
-              workdir = Path(entry["directory"]).resolve()
-              source_path = resolve_entry_path(entry)
+          # --------------------------------------------------------
+          # Compile changed source files only
+          # --------------------------------------------------------
 
-              ensure_pch_prerequisites(command, workdir)
+          for source in source_files:
+
+              entry = entry_by_file[source]
+
+              command = command_from_entry(entry)
+
+              workdir = Path(
+                  entry["directory"]
+              ).resolve()
+
+              source_path = resolve_entry_path(entry)
 
               replace_source(
                   command,
@@ -517,25 +464,97 @@ jobs:
               )
 
               if result.returncode != 0:
-                  raise SystemExit(result.returncode)
+                  raise SystemExit(
+                      result.returncode
+                  )
 
-          # Validate changed headers by including each one in a temporary
-          # translation unit and using a nearby source file's compile flags.
+          # --------------------------------------------------------
+          # Validate changed headers
+          # --------------------------------------------------------
+
+          def choose_header_command(header_path):
+
+              candidates = []
+
+              for entry in compile_db:
+
+                  source_path = resolve_entry_path(
+                      entry
+                  )
+
+                  if (
+                      source_path.suffix.lower()
+                      not in source_suffixes
+                  ):
+                      continue
+
+                  same_directory = (
+                      header_path.parent ==
+                      source_path.parent
+                  )
+
+                  try:
+
+                      relative_path = (
+                          header_path.relative_to(
+                              source_path.parent
+                          )
+                      )
+
+                      distance = len(
+                          relative_path.parts
+                      )
+
+                  except ValueError:
+
+                      distance = 9999
+
+                  score = (
+                      0 if same_directory else 1,
+                      distance,
+                      str(source_path),
+                  )
+
+                  candidates.append(
+                      (score, entry)
+                  )
+
+              if not candidates:
+                  return None
+
+              candidates.sort(
+                  key=lambda item: item[0]
+              )
+
+              return candidates[0][1]
+
           for header in header_files:
-              entry = choose_header_command(header)
+
+              entry = choose_header_command(
+                  header
+              )
 
               if entry is None:
+
                   print(
-                      "::error::No suitable compile command found for "
-                      f"changed header: {header.relative_to(repo)}"
+                      "::error::No suitable compile "
+                      "command found for changed header: "
+                      f"{header.relative_to(repo)}"
                   )
+
                   raise SystemExit(1)
 
-              command = command_from_entry(entry)
-              workdir = Path(entry["directory"]).resolve()
-              source_path = resolve_entry_path(entry)
+              command = command_from_entry(
+                  entry
+              )
 
-              ensure_pch_prerequisites(command, workdir)
+              workdir = Path(
+                  entry["directory"]
+              ).resolve()
+
+              source_path = resolve_entry_path(
+                  entry
+              )
 
               with tempfile.NamedTemporaryFile(
                   mode="w",
@@ -544,15 +563,20 @@ jobs:
                   delete=False,
                   encoding="utf-8",
               ) as temporary_file:
+
                   temporary_file.write(
                       f'#include "{header.name}"\n'
                   )
+
                   wrapper = Path(
                       temporary_file.name
                   ).resolve()
 
               try:
-                  header_command = remove_output_flags(command)
+
+                  header_command = (
+                      remove_output_flags(command)
+                  )
 
                   replace_source(
                       header_command,
@@ -562,7 +586,9 @@ jobs:
                   )
 
                   if "-fsyntax-only" not in header_command:
-                      header_command.append("-fsyntax-only")
+                      header_command.append(
+                          "-fsyntax-only"
+                      )
 
                   print(
                       "Checking header:",
@@ -575,36 +601,163 @@ jobs:
                   )
 
                   if result.returncode != 0:
-                      raise SystemExit(result.returncode)
+                      raise SystemExit(
+                          result.returncode
+                      )
+
               finally:
+
                   try:
                       wrapper.unlink()
+
                   except FileNotFoundError:
                       pass
 
           print(
-              f"Compiled {len(source_files)} changed source file(s) "
-              f"and validated {len(header_files)} changed header file(s)."
+              f"Compiled {len(source_files)} changed "
+              "source file(s) and validated "
+              f"{len(header_files)} changed header file(s)."
           )
+
           PY
 
-      # Build all configured targets so final libraries and extension modules
-      # are available for committing.
-      - name: Build development binaries
+      # ------------------------------------------------------------
+      # Find Python extension targets
+      #
+      # We do NOT build every CMake target.
+      #
+      # The target names are inspected first. Targets that look like
+      # Python modules are selected for the targeted build.
+      # ------------------------------------------------------------
+
+      - name: Find Python extension targets
+        id: python_targets
         if: steps.cpp_changes.outputs.has_changes == 'true'
         shell: bash
         run: |
           set -euo pipefail
 
-          cmake --build build \
-            --config RelWithDebInfo \
-            --parallel "$(nproc)"
+          echo "Available CMake targets:"
+          cmake --build build --target help | tee build/cmake_targets.txt
 
-      # Do not commit CMake's build directory. It contains generated cache,
-      # PCH, object, and dependency files that are not portable.
-      - name: Prepare committed binaries
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          text = Path(
+              "build/cmake_targets.txt"
+          ).read_text()
+
+          targets = []
+
+          for line in text.splitlines():
+
+              match = re.search(
+                  r'^\.\.\. ([A-Za-z0-9_.+-]+)',
+                  line
+              )
+
+              if not match:
+                  continue
+
+              target = match.group(1)
+
+              lower = target.lower()
+
+              # Common indicators of Python extension targets.
+              if any(
+                  token in lower
+                  for token in (
+                      "python",
+                      "pybind",
+                      "extension",
+                      "module",
+                  )
+              ):
+                  targets.append(target)
+
+          # Remove duplicates while preserving order.
+          targets = list(dict.fromkeys(targets))
+
+          print("Potential Python extension targets:")
+
+          for target in targets:
+              print(f"  {target}")
+
+          if targets:
+
+              Path(
+                  "build/python_extension_targets.txt"
+              ).write_text(
+                  "\n".join(targets) + "\n"
+              )
+
+              print(
+                  "has_targets=true"
+              )
+
+          else:
+
+              print(
+                  "::warning::No obvious Python extension "
+                  "targets were found."
+              )
+
+              Path(
+                  "build/python_extension_targets.txt"
+              ).write_text("")
+
+          PY
+
+          if [[ -s build/python_extension_targets.txt ]]; then
+            echo "has_targets=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_targets=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ------------------------------------------------------------
+      # Build ONLY Python extension targets
+      #
+      # IMPORTANT:
+      # This is NOT:
+      #
+      #   cmake --build build
+      #
+      # Only explicitly selected extension targets are built.
+      #
+      # Serial build keeps peak GitHub memory usage low.
+      # ------------------------------------------------------------
+
+      - name: Build Python extension targets
+        if: >
+          steps.cpp_changes.outputs.has_changes == 'true' &&
+          steps.python_targets.outputs.has_targets == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          while IFS= read -r target; do
+
+            [[ -z "$target" ]] && continue
+
+            echo "============================================================"
+            echo "Building Python extension target: $target"
+            echo "============================================================"
+
+            cmake --build build \
+              --target "$target" \
+              --config RelWithDebInfo \
+              --parallel 1
+
+          done < build/python_extension_targets.txt
+
+      # ------------------------------------------------------------
+      # Locate actual Python extension modules
+      # ------------------------------------------------------------
+
+      - name: Collect Python extensions
+        id: extensions
         if: steps.cpp_changes.outputs.has_changes == 'true'
-        id: binaries
         shell: bash
         run: |
           set -euo pipefail
@@ -612,51 +765,238 @@ jobs:
           rm -rf dist
           mkdir -p dist
 
-          find build \
-            -type f \
-            \( \
-              -name '*.so' \
-              -o -name '*.so.*' \
-              -o -name '*.a' \
-              -o -name '*.dylib' \
-              -o -name '*.dll' \
-              -o -name '*.exe' \
-            \) \
-            -not -path '*/CMakeFiles/*' \
-            -exec cp -f {} dist/ \;
+          python - <<'PY'
+          import sysconfig
+          from pathlib import Path
+          import shutil
 
-          # Include extensionless native executables, but exclude CMake
-          # metadata and object/dependency files.
-          while IFS= read -r -d '' file; do
-            if file "$file" | grep -Eq \
-              'ELF .* (executable|shared object)|PE32 .* executable'; then
-              cp -f "$file" dist/
-            fi
-          done < <(
-            find build \
-              -type f \
-              -perm /111 \
-              -not -path '*/CMakeFiles/*' \
-              -print0
+          repo = Path.cwd()
+          build = repo / "build"
+          dist = repo / "dist"
+
+          extension_suffixes = set(
+              sysconfig.get_config_var(
+                  "EXT_SUFFIX"
+              ) or []
           )
 
-          find dist -type f -print | sort
+          ext_suffix = sysconfig.get_config_var(
+              "EXT_SUFFIX"
+          )
+
+          if ext_suffix:
+              extension_suffixes.add(
+                  ext_suffix
+              )
+
+          print(
+              "Python extension suffix:",
+              ext_suffix
+          )
+
+          candidates = []
+
+          for path in build.rglob("*"):
+
+              if not path.is_file():
+                  continue
+
+              # Never copy files from CMake metadata
+              # directories.
+              if "CMakeFiles" in path.parts:
+                  continue
+
+              name = path.name
+
+              # Linux CPython extensions normally look like:
+              #
+              #   module.cpython-39-x86_64-linux-gnu.so
+              #
+              # Also accept ordinary .so modules.
+              if (
+                  name.endswith(".so")
+                  or ".cpython-" in name and
+                  name.endswith(".so")
+                  or name.endswith(".pyd")
+              ):
+                  candidates.append(path)
+
+          # Remove duplicates.
+          candidates = list(
+              dict.fromkeys(candidates)
+          )
+
+          print("Candidate Python extensions:")
+
+          for path in candidates:
+              print(
+                  "  ",
+                  path.relative_to(repo)
+              )
+
+          if not candidates:
+
+              print(
+                  "::error::No Python extension modules "
+                  "were produced."
+              )
+
+              raise SystemExit(1)
+
+          for source in candidates:
+
+              destination = dist / source.name
+
+              shutil.copy2(
+                  source,
+                  destination
+              )
+
+          print("Committed extension files:")
+
+          for path in sorted(dist.iterdir()):
+
+              print(
+                  "  ",
+                  path.name
+              )
+
+          PY
 
           if ! find dist -type f -print -quit | grep -q .; then
-            echo "::error::No compiled binaries were found under build/."
+            echo "::error::No Python extension files found."
             exit 1
           fi
 
-          echo "has_binaries=true" >> "$GITHUB_OUTPUT"
+          echo "has_extensions=true" >> "$GITHUB_OUTPUT"
 
-      - name: Commit updated C++ binaries
-        if: steps.binaries.outputs.has_binaries == 'true'
+      # ------------------------------------------------------------
+      # Verify extensions are valid Python modules
+      #
+      # This checks that Python can actually load the generated
+      # extension instead of merely checking that a .so exists.
+      # ------------------------------------------------------------
+
+      - name: Verify Python extensions
+        if: steps.extensions.outputs.has_extensions == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python - <<'PY'
+          import importlib.util
+          import sys
+          from pathlib import Path
+
+          dist = Path("dist")
+
+          extensions = []
+
+          for path in dist.iterdir():
+
+              if not path.is_file():
+                  continue
+
+              if (
+                  path.name.endswith(".so") or
+                  path.name.endswith(".pyd")
+              ):
+                  extensions.append(path)
+
+          if not extensions:
+
+              raise SystemExit(
+                  "No Python extensions found in dist/"
+              )
+
+          print("Testing Python extensions:")
+
+          for extension in extensions:
+
+              name = extension.name.split(
+                  ".cpython-",
+                  1
+              )[0]
+
+              if name.endswith(".so"):
+                  name = name[:-3]
+
+              print(
+                  f"  {extension.name} -> {name}"
+              )
+
+              spec = (
+                  importlib.util.spec_from_file_location(
+                      name,
+                      extension
+                  )
+              )
+
+              if spec is None:
+                  raise SystemExit(
+                      f"Unable to create import spec "
+                      f"for {extension}"
+                  )
+
+              module = (
+                  importlib.util.module_from_spec(
+                      spec
+                  )
+              )
+
+              try:
+
+                  spec.loader.exec_module(
+                      module
+                  )
+
+              except Exception as exc:
+
+                  print(
+                      f"::error::Python failed to load "
+                      f"{extension.name}: {exc}"
+                  )
+
+                  raise
+
+              print(
+                  f"Successfully loaded "
+                  f"{extension.name}"
+              )
+
+          PY
+
+      # ------------------------------------------------------------
+      # Show generated files
+      # ------------------------------------------------------------
+
+      - name: Show generated Python extensions
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "dist/:"
+
+          if [[ -d dist ]]; then
+            find dist -type f -print | sort
+          else
+            echo "dist/ does not exist."
+          fi
+
+      # ------------------------------------------------------------
+      # Commit only Python extensions
+      # ------------------------------------------------------------
+
+      - name: Commit updated Python extensions
+        if: steps.extensions.outputs.has_extensions == 'true'
         shell: bash
         run: |
           set -euo pipefail
 
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add -f dist/
 
@@ -666,13 +1006,23 @@ jobs:
           fi
 
           git commit \
-            -m "chore: update compiled binaries [skip ci]"
+            -m "chore: update compiled Python extensions [skip ci]"
 
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push \
+            origin \
+            "HEAD:${GITHUB_REF_NAME}"
+
+      # ------------------------------------------------------------
+      # Cache statistics
+      # ------------------------------------------------------------
 
       - name: Show compiler cache statistics
         if: always()
         run: ccache --show-stats
+
+      # ------------------------------------------------------------
+      # Verify expected artifacts
+      # ------------------------------------------------------------
 
       - name: Verify selective build artifacts
         id: verify_artifacts
@@ -682,7 +1032,8 @@ jobs:
           set -euo pipefail
 
           if [[ ! -f build/compile_commands.json ]]; then
-            echo "::error::Missing expected artifact: build/compile_commands.json"
+            echo "::error::Missing expected artifact:"
+            echo "build/compile_commands.json"
             exit 1
           fi
 
@@ -692,24 +1043,34 @@ jobs:
           fi
 
           if [[ ! -f build/changed_cxx_files.txt ]]; then
-            echo "::error::Missing changed file list: build/changed_cxx_files.txt"
+            echo "::error::Missing changed file list:"
+            echo "build/changed_cxx_files.txt"
             exit 1
           fi
 
           if [[ ! -d dist ]]; then
-            echo "::error::Missing committed binary directory: dist"
+            echo "::error::Missing Python extension directory:"
+            echo "dist/"
             exit 1
           fi
 
-      - name: Upload development artifacts
-        if: always() && steps.verify_artifacts.outcome == 'success' && steps.cpp_changes.outputs.has_changes == 'true'
+      # ------------------------------------------------------------
+      # Upload small artifacts
+      # ------------------------------------------------------------
+
+      - name: Upload Python extension artifacts
+        if: >
+          always() &&
+          steps.verify_artifacts.outcome == 'success' &&
+          steps.cpp_changes.outputs.has_changes == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: asset-asrl-cpp-build-ubuntu-22.04
+          name: asset-asrl-python-extensions-ubuntu-22.04
           path: |
             build/compile_commands.json
             build/changed_cxx_files.txt
             build/changed_cpp_files.txt
+            build/python_extension_targets.txt
             dist/
           if-no-files-found: error
           retention-days: 14
