@@ -117,11 +117,10 @@ jobs:
         if: steps.cpp_changes.outputs.has_changes == 'true'
         shell: bash
         run: |
-          cmake --build build --target pch --parallel 1
-
           python - <<'PY'
           import json
           import os
+          import re
           import shlex
           import subprocess
           from pathlib import Path
@@ -178,6 +177,24 @@ jobs:
               )
               raise SystemExit(1)
 
+          def resolve_path(path_str, base_dir):
+              path = Path(path_str)
+
+              if not path.is_absolute():
+                  return (base_dir / path).resolve()
+
+              return path.resolve()
+
+          def infer_target_name(path):
+              match = re.search(r"/CMakeFiles/([^/]+)\\.dir/", str(path))
+
+              if match:
+                  return match.group(1)
+
+              return None
+
+          prepared_targets = set()
+
           for entry in compile_entries:
 
               if isinstance(entry.get("arguments"), list):
@@ -203,6 +220,51 @@ jobs:
                   ).resolve()
               else:
                   source_path = source_path.resolve()
+
+              for arg in cmd:
+
+                  if not arg.endswith(".pch"):
+                      continue
+
+                  pch_path = resolve_path(arg, workdir)
+
+                  if pch_path.exists():
+                      continue
+
+                  target_name = infer_target_name(pch_path)
+
+                  if target_name is None:
+                      print(
+                          "::error::Unable to infer target for "
+                          f"missing precompiled header: {pch_path}"
+                      )
+                      raise SystemExit(1)
+
+                  if target_name in prepared_targets:
+                      continue
+
+                  print(
+                      "Building prerequisite target:",
+                      target_name
+                  )
+
+                  result = subprocess.run(
+                      [
+                          "cmake",
+                          "--build",
+                          str(build),
+                          "--target",
+                          target_name,
+                          "--parallel",
+                          "1",
+                      ],
+                      cwd=repo
+                  )
+
+                  if result.returncode != 0:
+                      raise SystemExit(result.returncode)
+
+                  prepared_targets.add(target_name)
 
               for idx, arg in enumerate(cmd):
 
