@@ -71,7 +71,7 @@ jobs:
             base_ref="${{ inputs.base_sha }}"
           else
             default_branch="${{ github.event.repository.default_branch }}"
-            git fetch --no-tags --depth=1 origin "$default_branch"
+            git fetch --no-tags origin "$default_branch"
             if git rev-parse --verify "origin/$default_branch" >/dev/null 2>&1; then
               base_ref="$(git merge-base HEAD "origin/$default_branch")"
             elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
