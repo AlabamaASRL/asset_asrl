@@ -62,10 +62,10 @@ jobs:
 
           if [[ "${{ github.event_name }}" == "push" && "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]]; then
             base_ref="${{ github.event.before }}"
-          elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
-            base_ref="HEAD~1"
           else
-            base_ref="$(git rev-list --max-parents=0 HEAD)"
+            default_branch="${{ github.event.repository.default_branch }}"
+            git fetch --no-tags --depth=1 origin "$default_branch"
+            base_ref="$(git merge-base HEAD "origin/$default_branch")"
           fi
 
           mapfile -t changed_cpp < <(
@@ -97,6 +97,7 @@ jobs:
           build = (repo / "build").resolve()
 
           changed_files = []
+          missing = []
           for line in (build / "changed_cpp_files.txt").read_text().splitlines():
             line = line.strip()
             if not line:
@@ -104,22 +105,39 @@ jobs:
             src = (repo / line).resolve()
             if src.exists():
               changed_files.append(src)
+            else:
+              missing.append(line)
 
           compile_db = json.loads((build / "compile_commands.json").read_text())
           output_by_file = {}
+
+          def extract_output(entry):
+            cmd = entry.get("command")
+            if cmd:
+              match = re.search(r"(?:^|\\s)-o\\s+([^\\s]+)", cmd)
+              if match:
+                return match.group(1)
+
+            args = entry.get("arguments")
+            if isinstance(args, list):
+              for idx, arg in enumerate(args):
+                if arg == "-o" and idx + 1 < len(args):
+                  return args[idx + 1]
+                if arg.startswith("-o") and len(arg) > 2:
+                  return arg[2:]
+            return None
+
           for entry in compile_db:
             file_path = Path(entry["file"]).resolve()
-            cmd = entry.get("command", "")
-            match = re.search(r"(?:^|\\s)-o\\s+([^\\s]+)", cmd)
-            if not match:
+            out_raw = extract_output(entry)
+            if not out_raw:
               continue
-            out = Path(match.group(1))
+            out = Path(out_raw)
             if not out.is_absolute():
               out = (Path(entry["directory"]) / out).resolve()
             output_by_file[file_path] = out
 
           targets = []
-          missing = []
           for src in changed_files:
             out = output_by_file.get(src)
             if out is None:
