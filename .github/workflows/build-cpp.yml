@@ -86,7 +86,7 @@ jobs:
           fi
 
           mapfile -t changed_cpp < <(
-            git diff --name-only "$base_ref" "${{ github.sha }}" \
+            git diff --name-only --diff-filter=ACMR "$base_ref" "${{ github.sha }}" \
               -- '*.cpp' '*.cc' '*.cxx' \
             | sed '/^[[:space:]]*$/d'
           )
@@ -123,8 +123,6 @@ jobs:
             src = (repo / line).resolve()
             if src.exists():
               changed_files.append(src)
-            else:
-              missing.append(line)
 
           compile_db = json.loads((build / "compile_commands.json").read_text())
           entry_by_file = {}
