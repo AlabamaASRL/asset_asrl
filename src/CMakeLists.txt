@@ -24,8 +24,16 @@ set(ASSET_INCLUDES
 #-------------------------------------------------------------------------------
 ## PCH
 add_library(pch STATIC pch.h pch.cpp  )
-target_precompile_headers(pch PRIVATE pch.h 
-VectorFunctions/ASSET_VectorFunctions.h)
+set(ASSET_ENABLE_PCH TRUE)
+if(DEFINED ENV{GITHUB_ACTIONS} AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set(ASSET_ENABLE_PCH FALSE)
+  message(STATUS "Disabling precompiled headers for GitHub Actions clang builds")
+endif()
+
+if(ASSET_ENABLE_PCH)
+  target_precompile_headers(pch PRIVATE pch.h
+  VectorFunctions/ASSET_VectorFunctions.h)
+endif()
 
 target_include_directories(pch PRIVATE ${INCLUDE_DIRS})
 #target_link_libraries(pch PRIVATE fmt::fmt-header-only)
@@ -51,7 +59,9 @@ add_library(vectorfunctions STATIC VectorFunctions/ASSET_VectorFunctions.h
     )
 target_include_directories(vectorfunctions PRIVATE ${INCLUDE_DIRS})
 target_compile_options(vectorfunctions PUBLIC ${COMPILE_FLAGS})
-target_precompile_headers(vectorfunctions REUSE_FROM pch)
+if(ASSET_ENABLE_PCH)
+  target_precompile_headers(vectorfunctions REUSE_FROM pch)
+endif()
     
 
 
@@ -79,7 +89,9 @@ OptimalControl/LGLInterpTable.cpp
 )
 
 target_include_directories(optimalcontrol PRIVATE ${INCLUDE_DIRS})
-target_precompile_headers(optimalcontrol REUSE_FROM pch)
+if(ASSET_ENABLE_PCH)
+  target_precompile_headers(optimalcontrol REUSE_FROM pch)
+endif()
 
 target_compile_options(optimalcontrol PUBLIC ${COMPILE_FLAGS})
   
@@ -122,7 +134,9 @@ add_library(astro STATIC
   Astro/LambertSolvers.cpp
   )
 
-target_precompile_headers(astro REUSE_FROM pch)
+if(ASSET_ENABLE_PCH)
+  target_precompile_headers(astro REUSE_FROM pch)
+endif()
 target_include_directories(astro PRIVATE ${INCLUDE_DIRS})
 target_compile_options(astro PUBLIC ${COMPILE_FLAGS})
 
@@ -192,5 +206,4 @@ endif()
 
 
     
-
 
