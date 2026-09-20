@@ -1,0 +1,299 @@
+name: Build C++ development target
+
+on:
+  push:
+    branches:
+      - kurelowech_pines
+
+  workflow_dispatch:
+    inputs:
+      base_sha:
+        description: Optional base commit SHA to diff against for selective C++ builds
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: C++ build - Ubuntu 22.04
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install Ubuntu dependencies
+        env:
+          COMPILER: clang-13
+        run: bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
+
+      - name: Set up compiler cache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ubuntu-22.04-clang-13
+          max-size: 2G
+
+      - name: Install Python build requirements
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install -r requirements.txt
+
+      - name: Configure CMake
+        run: |
+          cmake -S . \
+            -B build \
+            -G "Unix Makefiles" \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DPIP_INSTALL=True \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DPython_EXECUTABLE="$(python -c 'import sys; print(sys.executable)')"
+
+      - name: Detect changed C++ files
+        id: cpp_changes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && \
+                -n "${{ inputs.base_sha }}" ]]; then
+
+            if ! git rev-parse --verify "${{ inputs.base_sha }}^{commit}" >/dev/null 2>&1; then
+              echo "::error::Invalid base_sha: ${{ inputs.base_sha }}"
+              exit 1
+            fi
+
+            base_ref="${{ inputs.base_sha }}"
+
+          else
+            default_branch="${{ github.event.repository.default_branch }}"
+
+            git fetch --no-tags origin \
+              "$default_branch:refs/remotes/origin/$default_branch"
+
+            if ! git rev-parse --verify "origin/$default_branch" >/dev/null 2>&1; then
+              echo "::error::Unable to find origin/$default_branch"
+              exit 1
+            fi
+
+            base_ref="$(git merge-base HEAD "origin/$default_branch")"
+          fi
+
+          echo "Current commit: ${{ github.sha }}"
+          echo "Base commit:    $base_ref"
+
+          mapfile -t changed_cpp < <(
+            git diff --name-only --diff-filter=ACMR \
+              "$base_ref" "${{ github.sha }}" \
+              -- '*.cpp' '*.cc' '*.cxx' \
+            | sed '/^[[:space:]]*$/d'
+          )
+
+          if [[ "${#changed_cpp[@]}" -eq 0 ]]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No C++ source changes detected."
+            exit 0
+          fi
+
+          echo "Changed C++ files:"
+          printf '%s\n' "${changed_cpp[@]}"
+
+          printf '%s\n' "${changed_cpp[@]}" > build/changed_cpp_files.txt
+
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+      - name: Compile changed C++ files
+        if: steps.cpp_changes.outputs.has_changes == 'true'
+        shell: bash
+        run: |
+          cmake --build build --target pch --parallel 1
+
+          python - <<'PY'
+          import json
+          import os
+          import shlex
+          import subprocess
+          from pathlib import Path
+
+          repo = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          build = (repo / "build").resolve()
+
+          changed_files = []
+          missing = []
+
+          for line in (build / "changed_cpp_files.txt").read_text().splitlines():
+              line = line.strip()
+
+              if not line:
+                  continue
+
+              src = (repo / line).resolve()
+
+              if src.exists():
+                  changed_files.append(src)
+
+          compile_db = json.loads(
+              (build / "compile_commands.json").read_text()
+          )
+
+          entry_by_file = {}
+
+          for entry in compile_db:
+              file_path = Path(entry["file"])
+
+              if not file_path.is_absolute():
+                  file_path = (
+                      Path(entry["directory"]) / file_path
+                  ).resolve()
+              else:
+                  file_path = file_path.resolve()
+
+              entry_by_file[file_path] = entry
+
+          compile_entries = []
+
+          for src in changed_files:
+              entry = entry_by_file.get(src)
+
+              if entry is None:
+                  missing.append(str(src.relative_to(repo)))
+              else:
+                  compile_entries.append(entry)
+
+          if missing:
+              print(
+                  "::error::No compile target mapping for changed files: "
+                  + ", ".join(missing)
+              )
+              raise SystemExit(1)
+
+          for entry in compile_entries:
+
+              if isinstance(entry.get("arguments"), list):
+                  cmd = list(entry["arguments"])
+
+              elif entry.get("command"):
+                  cmd = shlex.split(entry["command"])
+
+              else:
+                  print(
+                      "::error::Compile database entry is missing "
+                      "both 'arguments' and 'command'."
+                  )
+                  raise SystemExit(1)
+
+              workdir = Path(entry["directory"])
+
+              source_path = Path(entry["file"])
+
+              if not source_path.is_absolute():
+                  source_path = (
+                      workdir / source_path
+                  ).resolve()
+              else:
+                  source_path = source_path.resolve()
+
+              for idx, arg in enumerate(cmd):
+
+                  if arg.startswith("-"):
+                      continue
+
+                  candidate = Path(arg)
+
+                  if not candidate.is_absolute():
+                      candidate = (
+                          workdir / candidate
+                      ).resolve()
+                  else:
+                      candidate = candidate.resolve()
+
+                  if candidate == source_path:
+                      cmd[idx] = str(source_path)
+
+              for idx, arg in enumerate(cmd):
+
+                  if arg not in ("-o", "-MF"):
+                      continue
+
+                  if idx + 1 >= len(cmd):
+                      continue
+
+                  out_path = cmd[idx + 1]
+
+                  if out_path == "-":
+                      continue
+
+                  output = Path(out_path)
+
+                  if not output.is_absolute():
+                      output = (
+                          workdir / output
+                      ).resolve()
+
+                  output.parent.mkdir(
+                      parents=True,
+                      exist_ok=True
+                  )
+
+              print(
+                  "Compiling:",
+                  source_path.relative_to(repo)
+              )
+
+              result = subprocess.run(
+                  cmd,
+                  cwd=workdir
+              )
+
+              if result.returncode != 0:
+                  raise SystemExit(result.returncode)
+
+          print(
+              f"Compiled {len(compile_entries)} "
+              "changed C++ file(s)."
+          )
+          PY
+
+      - name: Show compiler cache statistics
+        if: always()
+        run: ccache --show-stats
+
+      - name: Verify selective build artifacts
+        shell: bash
+        run: |
+          if [[ ! -f build/compile_commands.json ]]; then
+            echo "::error::Missing expected artifact: build/compile_commands.json"
+            exit 1
+          fi
+
+          if [[ "${{ steps.cpp_changes.outputs.has_changes }}" != "true" ]]; then
+            echo "No C++ source changes detected; selective build was skipped."
+            exit 0
+          fi
+
+          if [[ ! -f build/changed_cpp_files.txt ]]; then
+            echo "::error::Missing expected changed file list: build/changed_cpp_files.txt"
+            exit 1
+          fi
+
+      - name: Upload development artifacts
+        if: steps.cpp_changes.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-asrl-cpp-build-ubuntu-22.04
+          path: |
+            build/compile_commands.json
+            build/changed_cpp_files.txt
+          if-no-files-found: error
+          retention-days: 14
