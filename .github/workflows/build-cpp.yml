@@ -69,12 +69,16 @@ jobs:
             base_ref="${{ github.event.before }}"
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.base_sha }}" ]]; then
             base_ref="${{ inputs.base_sha }}"
-          elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
-            base_ref="HEAD~1"
           else
             default_branch="${{ github.event.repository.default_branch }}"
             git fetch --no-tags --depth=1 origin "$default_branch"
-            base_ref="$(git merge-base HEAD "origin/$default_branch")"
+            if git rev-parse --verify "origin/$default_branch" >/dev/null 2>&1; then
+              base_ref="$(git merge-base HEAD "origin/$default_branch")"
+            elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+              base_ref="HEAD~1"
+            else
+              base_ref="$(git rev-list --max-parents=0 HEAD)"
+            fi
           fi
 
           mapfile -t changed_cpp < <(
@@ -146,6 +150,18 @@ jobs:
               raise SystemExit(1)
 
             workdir = Path(entry["directory"])
+
+            for idx, arg in enumerate(cmd):
+              if arg not in ("-o", "-MF") or idx + 1 >= len(cmd):
+                continue
+              out_path = cmd[idx + 1]
+              if out_path == "-":
+                continue
+              output = Path(out_path)
+              if not output.is_absolute():
+                output = (workdir / output).resolve()
+              output.parent.mkdir(parents=True, exist_ok=True)
+
             print("Compiling:", Path(entry["file"]).resolve().relative_to(repo))
             result = subprocess.run(cmd, cwd=workdir)
             if result.returncode != 0:
