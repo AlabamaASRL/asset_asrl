@@ -71,7 +71,7 @@ jobs:
             base_ref="${{ inputs.base_sha }}"
           else
             default_branch="${{ github.event.repository.default_branch }}"
-            git fetch --no-tags origin "$default_branch"
+            git fetch --no-tags origin "$default_branch:refs/remotes/origin/$default_branch"
             if git rev-parse --verify "origin/$default_branch" >/dev/null 2>&1; then
               base_ref="$(git merge-base HEAD "origin/$default_branch")"
             elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
@@ -142,7 +142,7 @@ jobs:
 
           for entry in compile_entries:
             if isinstance(entry.get("arguments"), list):
-              cmd = entry["arguments"]
+              cmd = list(entry["arguments"])
             elif entry.get("command"):
               cmd = shlex.split(entry["command"])
             else:
@@ -150,6 +150,18 @@ jobs:
               raise SystemExit(1)
 
             workdir = Path(entry["directory"])
+            source_path = Path(entry["file"]).resolve()
+
+            for idx, arg in enumerate(cmd):
+              if arg.startswith("-"):
+                continue
+              candidate = Path(arg)
+              if not candidate.is_absolute():
+                candidate = (workdir / candidate).resolve()
+              else:
+                candidate = candidate.resolve()
+              if candidate == source_path:
+                cmd[idx] = str(source_path)
 
             for idx, arg in enumerate(cmd):
               if arg not in ("-o", "-MF") or idx + 1 >= len(cmd):
@@ -162,7 +174,7 @@ jobs:
                 output = (workdir / output).resolve()
               output.parent.mkdir(parents=True, exist_ok=True)
 
-            print("Compiling:", Path(entry["file"]).resolve().relative_to(repo))
+            print("Compiling:", source_path.relative_to(repo))
             result = subprocess.run(cmd, cwd=workdir)
             if result.returncode != 0:
               raise SystemExit(result.returncode)
