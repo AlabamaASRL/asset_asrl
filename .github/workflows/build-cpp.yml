@@ -20,6 +20,11 @@ jobs:
     name: C++ build - Ubuntu 22.04
     runs-on: ubuntu-22.04
 
+    env:
+      BUILD_TYPE: RelWithDebInfo
+      PYTHON_VERSION: "3.9"
+      PYTHON_TARGET: asset
+
     steps:
 
       # ============================================================
@@ -112,7 +117,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Print Python information
         shell: bash
@@ -247,7 +252,10 @@ jobs:
           echo "============================================================"
 
           rm -rf build
+          rm -rf dist
+
           mkdir -p build
+          mkdir -p dist
 
           echo
           echo "Build directory:"
@@ -284,7 +292,7 @@ jobs:
             cmake -S . \
               -B build \
               -G "Unix Makefiles" \
-              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
               -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
               -DPIP_INSTALL=True \
               -DCMAKE_C_COMPILER_LAUNCHER=ccache \
@@ -297,7 +305,7 @@ jobs:
           cmake -S . \
             -B build \
             -G "Unix Makefiles" \
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DPIP_INSTALL=True \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
@@ -450,10 +458,6 @@ jobs:
           printf '%s\n' "${changed_files[@]}" \
             > build/changed_cxx_files.txt
 
-          cp \
-            build/changed_cxx_files.txt \
-            build/changed_cpp_files.txt
-
           echo "has_changes=true" \
             >> "$GITHUB_OUTPUT"
 
@@ -480,11 +484,11 @@ jobs:
       # ============================================================
       # BUILD PCH
       #
-      # IMPORTANT:
-      # This must occur after change detection because this step
-      # uses steps.cpp_changes.outputs.has_changes.
+      # This is intentionally done before the asset target.
       #
-      # This builds ONLY the PCH target.
+      # ASSET's C++ compile commands use the generated PCH.
+      # Building the PCH separately avoids the earlier failure where
+      # the compile command referenced a PCH that did not exist yet.
       # ============================================================
 
       - name: Build precompiled headers
@@ -501,16 +505,12 @@ jobs:
           free -h
 
           echo
-          echo "PCH target:"
-          echo "pch"
-
-          echo
           echo "Build command:"
-          echo "cmake --build build --target pch --config RelWithDebInfo --parallel 1"
+          echo "cmake --build build --target pch --config ${BUILD_TYPE} --parallel 1"
 
           cmake --build build \
             --target pch \
-            --config RelWithDebInfo \
+            --config "${BUILD_TYPE}" \
             --parallel 1 \
             --verbose
 
@@ -581,499 +581,7 @@ jobs:
             || true
 
       # ============================================================
-      # COMPILE CHANGED FILES
-      # ============================================================
-
-      - name: Compile changed C/C++ files
-        id: compile_changed
-        if: steps.cpp_changes.outputs.has_changes == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          python - <<'PY'
-          import json
-          import os
-          import shlex
-          import subprocess
-          import tempfile
-          from pathlib import Path
-
-          repo = Path(
-              os.environ["GITHUB_WORKSPACE"]
-          ).resolve()
-
-          build = (
-              repo / "build"
-          ).resolve()
-
-          source_suffixes = {
-              ".c",
-              ".cc",
-              ".cpp",
-              ".cxx",
-          }
-
-          header_suffixes = {
-              ".h",
-              ".hh",
-              ".hpp",
-              ".hxx",
-          }
-
-          print("=" * 60)
-          print("SELECTIVE C/C++ COMPILATION")
-          print("=" * 60)
-
-          changed_files = []
-
-          for line in (
-              build / "changed_cxx_files.txt"
-          ).read_text().splitlines():
-
-              line = line.strip()
-
-              if not line:
-                  continue
-
-              path = (
-                  repo / line
-              ).resolve()
-
-              if not path.exists():
-
-                  print(
-                      f"WARNING: changed file does not exist: "
-                      f"{line}"
-                  )
-
-                  continue
-
-              changed_files.append(path)
-
-          print(
-              f"Changed files to process: "
-              f"{len(changed_files)}"
-          )
-
-          compile_db_path = (
-              build / "compile_commands.json"
-          )
-
-          if not compile_db_path.exists():
-
-              raise RuntimeError(
-                  "compile_commands.json does not exist"
-              )
-
-          compile_db = json.loads(
-              compile_db_path.read_text()
-          )
-
-          print(
-              f"Compile database entries: "
-              f"{len(compile_db)}"
-          )
-
-          def resolve_entry_path(entry):
-
-              path = Path(entry["file"])
-
-              if not path.is_absolute():
-
-                  path = (
-                      Path(entry["directory"]) /
-                      path
-                  )
-
-              return path.resolve()
-
-          entry_by_file = {
-              resolve_entry_path(entry): entry
-              for entry in compile_db
-          }
-
-          def command_from_entry(entry):
-
-              if "arguments" in entry:
-
-                  return list(
-                      entry["arguments"]
-                  )
-
-              if "command" in entry:
-
-                  return shlex.split(
-                      entry["command"]
-                  )
-
-              raise RuntimeError(
-                  "Compile entry has neither "
-                  "'arguments' nor 'command'"
-              )
-
-          def remove_output_flags(command):
-
-              result = []
-
-              index = 0
-
-              while index < len(command):
-
-                  argument = command[index]
-
-                  if argument in (
-                      "-o",
-                      "-MF",
-                      "-MT",
-                  ):
-
-                      index += 2
-                      continue
-
-                  if (
-                      argument.startswith("-MF")
-                      or
-                      argument.startswith("-MT")
-                  ):
-
-                      index += 1
-                      continue
-
-                  result.append(argument)
-
-                  index += 1
-
-              return result
-
-          def replace_source(
-              command,
-              original,
-              replacement,
-              workdir,
-          ):
-
-              original = original.resolve()
-
-              for index, argument in enumerate(command):
-
-                  if argument.startswith("-"):
-
-                      continue
-
-                  candidate = Path(argument)
-
-                  if not candidate.is_absolute():
-
-                      candidate = (
-                          workdir / candidate
-                      ).resolve()
-
-                  else:
-
-                      candidate = (
-                          candidate.resolve()
-                      )
-
-                  if candidate == original:
-
-                      command[index] = str(
-                          replacement
-                      )
-
-                      return True
-
-              return False
-
-          source_files = [
-              path
-              for path in changed_files
-              if path.suffix.lower()
-              in source_suffixes
-          ]
-
-          header_files = [
-              path
-              for path in changed_files
-              if path.suffix.lower()
-              in header_suffixes
-          ]
-
-          print()
-          print(
-              f"Source files: {len(source_files)}"
-          )
-
-          print(
-              f"Header files: {len(header_files)}"
-          )
-
-          # --------------------------------------------------------
-          # Compile source files
-          # --------------------------------------------------------
-
-          for source in source_files:
-
-              print()
-              print("-" * 60)
-              print(
-                  "SOURCE:",
-                  source.relative_to(repo),
-              )
-              print("-" * 60)
-
-              entry = entry_by_file.get(
-                  source
-              )
-
-              if entry is None:
-
-                  raise RuntimeError(
-                      "No compile database entry for "
-                      f"{source}"
-                  )
-
-              command = command_from_entry(
-                  entry
-              )
-
-              workdir = Path(
-                  entry["directory"]
-              ).resolve()
-
-              print(
-                  "Working directory:",
-                  workdir,
-              )
-
-              print()
-              print(
-                  "Compile command:"
-              )
-
-              print(
-                  " ".join(
-                      shlex.quote(x)
-                      for x in command
-                  )
-              )
-
-              result = subprocess.run(
-                  command,
-                  cwd=workdir,
-              )
-
-              if result.returncode != 0:
-
-                  print()
-                  print(
-                      "::error::Compilation failed:"
-                  )
-
-                  print(
-                      source.relative_to(repo)
-                  )
-
-                  raise SystemExit(
-                      result.returncode
-                  )
-
-              print(
-                  "Compilation successful."
-              )
-
-          # --------------------------------------------------------
-          # Find compile command for headers
-          # --------------------------------------------------------
-
-          def choose_header_command(
-              header_path
-          ):
-
-              candidates = []
-
-              for entry in compile_db:
-
-                  source_path = (
-                      resolve_entry_path(
-                          entry
-                      )
-                  )
-
-                  if (
-                      source_path.suffix.lower()
-                      not in source_suffixes
-                  ):
-
-                      continue
-
-                  try:
-
-                      relative = (
-                          header_path.relative_to(
-                              source_path.parent
-                          )
-                      )
-
-                      distance = len(
-                          relative.parts
-                      )
-
-                  except ValueError:
-
-                      distance = 9999
-
-                  same_directory = (
-                      header_path.parent
-                      ==
-                      source_path.parent
-                  )
-
-                  score = (
-                      0 if same_directory else 1,
-                      distance,
-                      str(source_path),
-                  )
-
-                  candidates.append(
-                      (score, entry)
-                  )
-
-              if not candidates:
-
-                  return None
-
-              candidates.sort(
-                  key=lambda item: item[0]
-              )
-
-              return candidates[0][1]
-
-          # --------------------------------------------------------
-          # Validate headers
-          # --------------------------------------------------------
-
-          for header in header_files:
-
-              print()
-              print("-" * 60)
-              print(
-                  "HEADER:",
-                  header.relative_to(repo),
-              )
-              print("-" * 60)
-
-              entry = choose_header_command(
-                  header
-              )
-
-              if entry is None:
-
-                  raise RuntimeError(
-                      "Could not find compile command "
-                      f"for {header}"
-                  )
-
-              command = remove_output_flags(
-                  command_from_entry(entry)
-              )
-
-              workdir = Path(
-                  entry["directory"]
-              ).resolve()
-
-              source_path = resolve_entry_path(
-                  entry
-              )
-
-              with tempfile.NamedTemporaryFile(
-                  mode="w",
-                  suffix=".cpp",
-                  dir=str(header.parent),
-                  delete=False,
-                  encoding="utf-8",
-              ) as temporary_file:
-
-                  temporary_file.write(
-                      f'#include "{header.name}"\n'
-                  )
-
-                  wrapper = Path(
-                      temporary_file.name
-                  ).resolve()
-
-              try:
-
-                  replaced = replace_source(
-                      command,
-                      source_path,
-                      wrapper,
-                      workdir,
-                  )
-
-                  if not replaced:
-
-                      command.append(
-                          str(wrapper)
-                      )
-
-                  if (
-                      "-fsyntax-only"
-                      not in command
-                  ):
-
-                      command.append(
-                          "-fsyntax-only"
-                      )
-
-                  print(
-                      "Header validation command:"
-                  )
-
-                  print(
-                      " ".join(
-                          shlex.quote(x)
-                          for x in command
-                      )
-                  )
-
-                  result = subprocess.run(
-                      command,
-                      cwd=workdir,
-                  )
-
-                  if result.returncode != 0:
-
-                      print(
-                          "::error::Header validation "
-                          "failed."
-                      )
-
-                      raise SystemExit(
-                          result.returncode
-                      )
-
-                  print(
-                      "Header validation successful."
-                  )
-
-              finally:
-
-                  try:
-                      wrapper.unlink()
-
-                  except FileNotFoundError:
-                      pass
-
-          print()
-          print("=" * 60)
-          print("SELECTIVE COMPILATION COMPLETE")
-          print("=" * 60)
-
-          PY
-
-      # ============================================================
-      # CMAKE TARGET LIST
+      # LIST CMAKE TARGETS
       # ============================================================
 
       - name: List CMake targets
@@ -1093,142 +601,119 @@ jobs:
           cat build/cmake_targets.txt
 
           echo
-          echo "Potential Python targets:"
+          echo "Python target selected by workflow:"
+          echo "  ${PYTHON_TARGET}"
 
-          grep -Ei \
-            'python|pybind|extension|module|asset' \
+          echo
+          echo "Checking that the Python target exists:"
+
+          if grep -Eq \
+            "^\\.\\.\\. ${PYTHON_TARGET}([[:space:]]|$)" \
+            build/cmake_targets.txt; then
+
+            echo "PASS: ${PYTHON_TARGET} target exists."
+
+          else
+
+            echo "::error::Python target '${PYTHON_TARGET}' was not found."
+
+            echo
+            echo "Available targets:"
+            cat build/cmake_targets.txt
+
+            exit 1
+          fi
+
+          echo
+          echo "Important ASSET targets:"
+
+          grep -E \
+            '^\\.\\.\\. (asset|asset_extensions|astro|pch|psiopt|optimalcontrol|utils|vectorfunctions)' \
             build/cmake_targets.txt \
-            | head -200 \
             || true
 
       # ============================================================
-      # FIND PYTHON EXTENSION TARGET
+      # VERIFY CMAKE TARGET RELATIONSHIPS
+      #
+      # asset is the actual pybind11 Python module.
+      # asset_extensions is only a static library dependency.
       # ============================================================
 
-      - name: Find Python extension target
-        id: python_target
+      - name: Verify Python target configuration
         if: steps.cpp_changes.outputs.has_changes == 'true'
         shell: bash
         run: |
           set -euo pipefail
 
           echo "============================================================"
-          echo "FINDING PYTHON EXTENSION TARGET"
+          echo "VERIFYING PYTHON TARGET CONFIGURATION"
           echo "============================================================"
 
-          python - <<'PY'
-          import re
-          from pathlib import Path
+          echo "Python target:"
+          echo "  ${PYTHON_TARGET}"
 
-          target_file = Path(
-              "build/cmake_targets.txt"
-          )
+          echo
+          echo "Expected Python module:"
+          echo "  asset"
 
-          text = target_file.read_text()
+          echo
+          echo "Expected static extension library:"
+          echo "  asset_extensions"
 
-          targets = []
+          echo
+          echo "Checking src/CMakeLists.txt:"
 
-          for line in text.splitlines():
+          if grep -n \
+            'pybind11_add_module(asset main.cpp)' \
+            src/CMakeLists.txt; then
 
-              match = re.search(
-                  r'^\.\.\. ([A-Za-z0-9_.+-]+)',
-                  line,
-              )
+            echo
+            echo "PASS: asset is the pybind11 module target."
 
-              if not match:
-                  continue
+          else
 
-              target = match.group(1)
-              lower = target.lower()
+            echo
+            echo "::error::Expected pybind11 asset target was not found."
 
-              if any(
-                  token in lower
-                  for token in (
-                      "python",
-                      "pybind",
-                      "extension",
-                  )
-              ):
+            grep -n \
+              'pybind11_add_module' \
+              src/CMakeLists.txt \
+              || true
 
-                  if target not in targets:
-                      targets.append(target)
+            exit 1
+          fi
 
-          print("Candidate Python extension targets:")
+          echo
+          echo "Checking extensions/CMakeLists.txt:"
 
-          for target in targets:
-              print(f"  {target}")
+          if grep -n \
+            'add_library(asset_extensions STATIC' \
+            extensions/CMakeLists.txt; then
 
-          if not targets:
+            echo
+            echo "PASS: asset_extensions is a static library."
 
-              print(
-                  "::error::No Python extension target "
-                  "could be identified."
-              )
+          else
 
-              print()
-              print(
-                  "Complete target list:"
-              )
+            echo
+            echo "WARNING: Could not verify asset_extensions declaration."
 
-              print(text)
-
-              raise SystemExit(1)
-
-          if len(targets) > 1:
-
-              print()
-              print(
-                  "::error::More than one possible "
-                  "Python extension target was found."
-              )
-
-              print(
-                  "The workflow will not guess."
-              )
-
-              print()
-              print(
-                  "Candidates:"
-              )
-
-              for target in targets:
-                  print(
-                      f"  {target}"
-                  )
-
-              raise SystemExit(1)
-
-          target = targets[0]
-
-          Path(
-              "build/python_extension_target.txt"
-          ).write_text(
-              target + "\n"
-          )
-
-          print()
-          print(
-              "Selected Python extension target:"
-          )
-
-          print(target)
-
-          PY
-
-          target="$(
-            cat build/python_extension_target.txt
-          )"
-
-          echo "target=$target" \
-            >> "$GITHUB_OUTPUT"
+          fi
 
       # ============================================================
       # BUILD PYTHON EXTENSION
       #
-      # THIS IS THE ONLY FULL CMAKE TARGET BUILD.
+      # IMPORTANT:
       #
-      # Dependencies required by this target may still be built,
-      # but unrelated development libraries are not requested.
+      # The actual Python extension target is "asset".
+      #
+      # Do NOT build asset_extensions as the final target. That target
+      # produces libasset_extensions.a, not the Python .so.
+      #
+      # CMake will automatically build only the dependencies required
+      # by asset. Unrelated development targets are not requested.
+      #
+      # --parallel 1 keeps memory usage bounded.
       # ============================================================
 
       - name: Build Python extension
@@ -1237,14 +722,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          target="${{ steps.python_target.outputs.target }}"
-
           echo "============================================================"
           echo "BUILDING PYTHON EXTENSION"
           echo "============================================================"
 
           echo "Selected target:"
-          echo "$target"
+          echo "  ${PYTHON_TARGET}"
 
           echo
           echo "Memory before build:"
@@ -1256,14 +739,14 @@ jobs:
 
           echo
           echo "Build command:"
-          echo "cmake --build build --target $target --config RelWithDebInfo --parallel 1 --verbose"
+          echo "cmake --build build --target ${PYTHON_TARGET} --config ${BUILD_TYPE} --parallel 1 --verbose"
 
           echo
           echo "Starting build..."
 
           cmake --build build \
-            --target "$target" \
-            --config RelWithDebInfo \
+            --target "${PYTHON_TARGET}" \
+            --config "${BUILD_TYPE}" \
             --parallel 1 \
             --verbose
 
@@ -1292,8 +775,8 @@ jobs:
           echo "BUILD OUTPUT INSPECTION"
           echo "============================================================"
 
-          echo "Selected target:"
-          cat build/python_extension_target.txt
+          echo "Python target:"
+          echo "  ${PYTHON_TARGET}"
 
           echo
           echo "All shared libraries:"
@@ -1323,6 +806,20 @@ jobs:
             || true
 
           echo
+          echo "asset-related files:"
+          find build \
+            -type f \
+            \( \
+              -name "asset*.so" \
+              -o -name "asset*.so.*" \
+              -o -name "asset*.pyd" \
+              -o -name "*asset*.a" \
+            \) \
+            -print \
+            | sort \
+            || true
+
+          echo
           echo "Recently modified build files:"
           find build \
             -type f \
@@ -1345,10 +842,10 @@ jobs:
             || true
 
       # ============================================================
-      # PREPARE PYTHON EXTENSIONS
+      # PREPARE PYTHON EXTENSION
       # ============================================================
 
-      - name: Prepare Python extensions
+      - name: Prepare Python extension
         id: binaries
         if: steps.cpp_changes.outputs.has_changes == 'true'
         shell: bash
@@ -1356,60 +853,71 @@ jobs:
           set -euo pipefail
 
           echo "============================================================"
-          echo "SEARCHING FOR PYTHON EXTENSIONS"
+          echo "SEARCHING FOR PYTHON EXTENSION"
           echo "============================================================"
 
           rm -rf dist
           mkdir -p dist
 
           echo
-          echo "All .so/.pyd files in build tree:"
-
-          find build \
-            -type f \
-            \( \
-              -name "*.so" \
-              -o -name "*.so.*" \
-              -o -name "*.pyd" \
-            \) \
-            -print \
-            | sort \
-            || true
-
-          echo
-          echo "Python extension candidates:"
+          echo "Searching specifically for the asset Python extension:"
 
           mapfile -t extensions < <(
             find build \
               -type f \
               \( \
-                -name "*.so" \
-                -o -name "*.pyd" \
+                -name "asset*.so" \
+                -o -name "asset*.pyd" \
               \) \
               -print \
               | sort \
               | grep -E \
-                '(\.cpython-[0-9]+.*\.so$|\.abi3\.so$|\.pyd$)' \
+                '(^|/)asset[^/]*\.((cpython-[0-9]+[^/]*)|abi3)\.so$|(^|/)asset[^/]*\.pyd$' \
               || true
           )
 
           echo
-          echo "Number of candidates:"
+          echo "Number of asset Python extension candidates:"
           echo "${#extensions[@]}"
 
           if [[ "${#extensions[@]}" -eq 0 ]]; then
 
             echo
-            echo "::error::No Python extension binaries were found."
+            echo "::error::No asset Python extension binary was found."
 
             echo
-            echo "Selected target:"
-            cat build/python_extension_target.txt \
+            echo "Expected target:"
+            echo "${PYTHON_TARGET}"
+
+            echo
+            echo "Expected output similar to:"
+            echo "  build/src/asset.cpython-39-x86_64-linux-gnu.so"
+
+            echo
+            echo "All shared libraries:"
+            find build \
+              -type f \
+              \( \
+                -name "*.so" \
+                -o -name "*.so.*" \
+                -o -name "*.pyd" \
+              \) \
+              -print \
+              | sort \
               || true
 
             echo
-            echo "CMake targets:"
-            cat build/cmake_targets.txt \
+            echo "All libraries:"
+            find build \
+              -type f \
+              \( \
+                -name "*.a" \
+                -o -name "*.so" \
+                -o -name "*.so.*" \
+                -o -name "*.pyd" \
+              \) \
+              -print \
+              | sort \
               || true
 
             echo
@@ -1420,20 +928,6 @@ jobs:
               | sort \
               | head -1000
 
-            echo
-            echo "Possible shared libraries:"
-            find build \
-              -type f \
-              \( \
-                -name "*.so" \
-                -o -name "*.so.*" \
-                -o -name "*.dylib" \
-                -o -name "*.dll" \
-              \) \
-              -print \
-              | sort \
-              || true
-
             exit 1
           fi
 
@@ -1443,6 +937,15 @@ jobs:
           for extension in "${extensions[@]}"; do
             echo "  $extension"
           done
+
+          if [[ "${#extensions[@]}" -gt 1 ]]; then
+
+            echo
+            echo "WARNING: Multiple asset Python extensions were found."
+
+            echo "The workflow will copy all matching extensions."
+
+          fi
 
           echo
           echo "Copying extensions to dist/:"
@@ -1481,165 +984,100 @@ jobs:
             >> "$GITHUB_OUTPUT"
 
       # ============================================================
-      # VERIFY PYTHON EXTENSIONS
+      # VERIFY PYTHON EXTENSION
       # ============================================================
 
-      - name: Verify Python extensions
+      - name: Verify Python extension
         if: steps.binaries.outputs.has_binaries == 'true'
         shell: bash
         run: |
           set -euo pipefail
 
           echo "============================================================"
-          echo "VERIFYING PYTHON EXTENSIONS"
+          echo "VERIFYING PYTHON EXTENSION"
           echo "============================================================"
 
-          python - <<'PY'
-          import importlib.util
+          echo "Python executable:"
+          python -c "import sys; print(sys.executable)"
+
+          echo
+          echo "Python version:"
+          python --version
+
+          echo
+          echo "dist contents:"
+          find dist \
+            -type f \
+            -ls
+
+          echo
+          echo "Dynamic dependencies:"
+
+          for extension in dist/*.so dist/*.pyd; do
+
+            if [[ ! -f "$extension" ]]; then
+              continue
+            fi
+
+            echo
+            echo "------------------------------------------------------------"
+            echo "ldd: $extension"
+            echo "------------------------------------------------------------"
+
+            ldd "$extension" || true
+
+          done
+
+          echo
+          echo "Testing import of asset..."
+
+          PYTHONPATH="${GITHUB_WORKSPACE}/dist:${PYTHONPATH:-}" \
+            python - <<'PY'
           import sys
-          from pathlib import Path
 
-          dist = Path("dist")
+          print("Python executable:")
+          print(sys.executable)
 
-          extensions = sorted(
-              path
-              for path in dist.iterdir()
-              if path.is_file()
-              and (
-                  path.name.endswith(".so")
-                  or path.name.endswith(".pyd")
-              )
+          print()
+          print("Python version:")
+          print(sys.version)
+
+          print()
+          print("Python path:")
+          for path in sys.path:
+              print("  ", path)
+
+          print()
+          print("Importing asset...")
+
+          import asset
+
+          print()
+          print("PASS: import asset")
+
+          print()
+          print("asset module:")
+          print(asset)
+
+          print()
+          print("asset file:")
+          print(asset.__file__)
+
+          print()
+          print("Checking expected symbols:")
+
+          print(
+              "  SoftwareInfo:",
+              hasattr(asset, "SoftwareInfo"),
           )
 
           print(
-              "Python executable:"
-          )
-
-          print(
-              sys.executable
+              "  PyMain:",
+              hasattr(asset, "PyMain"),
           )
 
           print()
-          print(
-              "Python version:"
-          )
-
-          print(
-              sys.version
-          )
-
-          print()
-          print(
-              "Extensions found:"
-          )
-
-          for extension in extensions:
-              print(
-                  f"  {extension}"
-              )
-
-          if not extensions:
-
-              raise SystemExit(
-                  "No Python extensions found."
-              )
-
-          for extension in extensions:
-
-              filename = extension.name
-
-              if ".cpython-" in filename:
-
-                  module_name = filename.split(
-                      ".cpython-",
-                      1,
-                  )[0]
-
-              elif ".abi3." in filename:
-
-                  module_name = filename.split(
-                      ".abi3.",
-                      1,
-                  )[0]
-
-              else:
-
-                  module_name = filename.rsplit(
-                      ".",
-                      1,
-                  )[0]
-
-              print()
-              print("-" * 60)
-              print(
-                  f"Testing: {filename}"
-              )
-              print(
-                  f"Module:  {module_name}"
-              )
-              print("-" * 60)
-
-              spec = (
-                  importlib.util.spec_from_file_location(
-                      module_name,
-                      extension,
-                  )
-              )
-
-              if spec is None:
-
-                  raise SystemExit(
-                      "Could not create import spec for "
-                      f"{extension}"
-                  )
-
-              module = (
-                  importlib.util.module_from_spec(
-                      spec
-                  )
-              )
-
-              try:
-
-                  spec.loader.exec_module(
-                      module
-                  )
-
-              except Exception as exc:
-
-                  print(
-                      "::error::Python failed to load "
-                      f"{filename}"
-                  )
-
-                  print(
-                      f"Exception type: "
-                      f"{type(exc).__name__}"
-                  )
-
-                  print(
-                      f"Exception: {exc}"
-                  )
-
-                  raise
-
-              print(
-                  "SUCCESS: extension loaded."
-              )
-
-          print()
-          print(
-              "=" * 60
-          )
-
-          print(
-              "ALL PYTHON EXTENSIONS LOADED SUCCESSFULLY"
-          )
-
-          print(
-              "=" * 60
-          )
-
+          print("asset import verification successful.")
           PY
 
       # ============================================================
@@ -1685,13 +1123,7 @@ jobs:
 
           echo
           echo "Python target:"
-          if [[ -f build/python_extension_target.txt ]]; then
-            echo "  PASS"
-            cat build/python_extension_target.txt
-          else
-            echo "  FAIL"
-            exit 1
-          fi
+          echo "  ${PYTHON_TARGET}"
 
           echo
           echo "dist directory:"
@@ -1709,8 +1141,8 @@ jobs:
             find dist \
               -type f \
               \( \
-                -name "*.so" \
-                -o -name "*.pyd" \
+                -name "asset*.so" \
+                -o -name "asset*.pyd" \
               \) \
               -print
           )
@@ -1718,7 +1150,7 @@ jobs:
           if [[ "${#extension_files[@]}" -eq 0 ]]; then
 
             echo "  FAIL"
-            echo "::error::No Python extensions found in dist/."
+            echo "::error::No asset Python extensions found in dist/."
 
             echo
             echo "dist contents:"
@@ -1783,7 +1215,7 @@ jobs:
           du -sh dist 2>/dev/null || true
 
       # ============================================================
-      # COMMIT PYTHON EXTENSIONS
+      # COMMIT PYTHON EXTENSION
       # ============================================================
 
       - name: Commit updated Python extensions
@@ -1824,7 +1256,12 @@ jobs:
           echo "Git status before staging:"
           git status --short
 
-          git add -f dist/
+          # Only stage the generated Python extension binaries.
+          git add -f \
+            dist/asset*.so \
+            dist/asset*.pyd \
+            2>/dev/null \
+            || true
 
           echo
           echo "Git status after staging:"
@@ -1891,10 +1328,8 @@ jobs:
           du -sh build 2>/dev/null || true
 
           echo
-          echo "Selected Python target:"
-          cat build/python_extension_target.txt \
-            2>/dev/null \
-            || true
+          echo "Python target:"
+          echo "${PYTHON_TARGET}"
 
           echo
           echo "Changed C/C++ files:"
@@ -1916,6 +1351,29 @@ jobs:
               -name "*.so" \
               -o -name "*.so.*" \
               -o -name "*.pyd" \
+            \) \
+            -print \
+            | sort \
+            || true
+
+          echo
+          echo "Static libraries:"
+          find build \
+            -type f \
+            -name "*.a" \
+            -print \
+            | sort \
+            || true
+
+          echo
+          echo "asset-related files:"
+          find build \
+            -type f \
+            \( \
+              -name "asset*.so" \
+              -o -name "asset*.so.*" \
+              -o -name "asset*.pyd" \
+              -o -name "*asset*.a" \
             \) \
             -print \
             | sort \
