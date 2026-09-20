@@ -5,6 +5,11 @@ on:
     branches:
       - kurelowech_pines
   workflow_dispatch:
+    inputs:
+      base_sha:
+        description: Optional base commit SHA to diff against for selective C++ builds
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -62,6 +67,10 @@ jobs:
 
           if [[ "${{ github.event_name }}" == "push" && "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]]; then
             base_ref="${{ github.event.before }}"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.base_sha }}" ]]; then
+            base_ref="${{ inputs.base_sha }}"
+          elif git rev-parse --verify "origin/${{ github.ref_name }}~1" >/dev/null 2>&1; then
+            base_ref="origin/${{ github.ref_name }}~1"
           else
             default_branch="${{ github.event.repository.default_branch }}"
             git fetch --no-tags --depth=1 origin "$default_branch"
@@ -90,7 +99,7 @@ jobs:
           python - <<'PY'
           import json
           import os
-          import re
+          import shlex
           from pathlib import Path
 
           repo = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
@@ -114,9 +123,15 @@ jobs:
           def extract_output(entry):
             cmd = entry.get("command")
             if cmd:
-              match = re.search(r"(?:^|\\s)-o\\s+([^\\s]+)", cmd)
-              if match:
-                return match.group(1)
+              try:
+                args = shlex.split(cmd)
+              except ValueError:
+                args = []
+              for idx, arg in enumerate(args):
+                if arg == "-o" and idx + 1 < len(args):
+                  return args[idx + 1]
+                if arg.startswith("-o") and len(arg) > 2:
+                  return arg[2:]
 
             args = entry.get("arguments")
             if isinstance(args, list):
@@ -152,7 +167,8 @@ jobs:
           (build / "changed_object_targets.txt").write_text("\n".join(targets) + ("\n" if targets else ""))
 
           if missing:
-            print("::warning::No compile target mapping for changed files: " + ", ".join(missing))
+            print("::error::No compile target mapping for changed files: " + ", ".join(missing))
+            raise SystemExit(1)
           print(f"Mapped {len(targets)} changed C++ file(s) to object targets.")
           PY
 
