@@ -28,50 +28,6 @@ jobs:
     steps:
 
       # ============================================================
-      # SYSTEM INFORMATION
-      # ============================================================
-
-      - name: Print runner information
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "RUNNER INFORMATION"
-          echo "============================================================"
-
-          echo "Date:"
-          date
-
-          echo
-          echo "Hostname:"
-          hostname
-
-          echo
-          echo "OS:"
-          cat /etc/os-release
-
-          echo
-          echo "Kernel:"
-          uname -a
-
-          echo
-          echo "CPU:"
-          nproc
-          lscpu | sed -n '1,40p'
-
-          echo
-          echo "Memory:"
-          free -h
-
-          echo
-          echo "Disk:"
-          df -h
-
-          echo
-          echo "============================================================"
-
-      # ============================================================
       # CHECKOUT
       # ============================================================
 
@@ -82,34 +38,6 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Print repository information
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "REPOSITORY INFORMATION"
-          echo "============================================================"
-
-          echo "Repository:"
-          git remote -v
-
-          echo
-          echo "Branch:"
-          git branch --show-current
-
-          echo
-          echo "Commit:"
-          git rev-parse HEAD
-
-          echo
-          echo "Commit information:"
-          git log -1 --decorate --stat
-
-          echo
-          echo "Git status:"
-          git status --short
-
       # ============================================================
       # PYTHON
       # ============================================================
@@ -118,24 +46,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Print Python information
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "PYTHON INFORMATION"
-          echo "============================================================"
-
-          python --version
-          python -c "import sys; print('Python executable:', sys.executable)"
-          python -c "import sys; print('Python prefix:', sys.prefix)"
-          python -c "import sys; print('Python version:', sys.version)"
-
-          echo
-          echo "pip:"
-          python -m pip --version
 
       # ============================================================
       # UBUNTU DEPENDENCIES
@@ -148,51 +58,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "============================================================"
-          echo "INSTALLING UBUNTU DEPENDENCIES"
-          echo "============================================================"
-
           bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
-
-      # ============================================================
-      # COMPILER INFORMATION
-      # ============================================================
-
-      - name: Print compiler information
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "COMPILER INFORMATION"
-          echo "============================================================"
-
-          echo "clang:"
-          clang --version || true
-
-          echo
-          echo "clang++:"
-          clang++ --version || true
-
-          echo
-          echo "gcc:"
-          gcc --version | sed -n '1p' || true
-
-          echo
-          echo "g++:"
-          g++ --version | sed -n '1p' || true
-
-          echo
-          echo "cmake:"
-          cmake --version
-
-          echo
-          echo "ninja:"
-          ninja --version || true
-
-          echo
-          echo "make:"
-          make --version | sed -n '1p'
 
       # ============================================================
       # CCACHE
@@ -204,18 +70,15 @@ jobs:
           key: ubuntu-22.04-clang-13
           max-size: 2G
 
-      - name: Print ccache information
+      - name: Configure ccache
         shell: bash
         run: |
           set -euo pipefail
 
-          echo "============================================================"
-          echo "CCACHE INFORMATION"
-          echo "============================================================"
-
           ccache --version
-          ccache --show-config || true
-          ccache --show-stats || true
+          ccache --zero-stats
+
+          echo "CCACHE_DIR=${CCACHE_DIR:-}"
 
       # ============================================================
       # PYTHON BUILD REQUIREMENTS
@@ -226,144 +89,40 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "============================================================"
-          echo "INSTALLING PYTHON REQUIREMENTS"
-          echo "============================================================"
-
           python -m pip install --upgrade pip wheel setuptools
-
           python -m pip install -r requirements.txt
 
-          echo
-          echo "Installed packages:"
-          python -m pip list
-
       # ============================================================
-      # CLEAN BUILD
+      # PREPARE BUILD DIRECTORIES
+      #
+      # IMPORTANT:
+      # Do NOT delete build/.
+      #
+      # Keeping build/ allows CMake/Ninja to perform an incremental
+      # build and lets ccache reuse previously compiled objects.
       # ============================================================
 
-      - name: Clean CMake build directory
+      - name: Prepare build directories
         shell: bash
         run: |
           set -euo pipefail
-
-          echo "============================================================"
-          echo "CLEANING BUILD DIRECTORY"
-          echo "============================================================"
-
-          rm -rf build
-          rm -rf dist
 
           mkdir -p build
           mkdir -p dist
 
-          echo
           echo "Build directory:"
           ls -la build
 
-          echo
-          echo "Memory:"
-          free -h
-
       # ============================================================
-      # CMAKE CONFIGURATION
-      # ============================================================
-
-      - name: Configure CMake
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "CONFIGURING CMAKE"
-          echo "============================================================"
-
-          python_executable="$(
-            python -c 'import sys; print(sys.executable)'
-          )"
-
-          echo "Python executable:"
-          echo "$python_executable"
-
-          echo
-          echo "CMake command:"
-
-          echo \
-            cmake -S . \
-              -B build \
-              -G "Unix Makefiles" \
-              -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
-              -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-              -DPIP_INSTALL=True \
-              -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-              -DPython_EXECUTABLE="$python_executable"
-
-          echo
-          echo "Starting CMake configuration..."
-
-          cmake -S . \
-            -B build \
-            -G "Unix Makefiles" \
-            -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -DPIP_INSTALL=True \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DPython_EXECUTABLE="$python_executable"
-
-          echo
-          echo "CMake configuration completed."
-
-      # ============================================================
-      # CMAKE CONFIGURATION LOGGING
-      # ============================================================
-
-      - name: Log CMake configuration
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "CMAKE CONFIGURATION"
-          echo "============================================================"
-
-          echo "CMake cache:"
-          grep -E \
-            '^(CMAKE_BUILD_TYPE|CMAKE_C_COMPILER|CMAKE_CXX_COMPILER|Python|PIP_INSTALL|CMAKE_GENERATOR)' \
-            build/CMakeCache.txt \
-            | sort \
-            || true
-
-          echo
-          echo "CMake generator:"
-          grep '^CMAKE_GENERATOR:' \
-            build/CMakeCache.txt \
-            || true
-
-          echo
-          echo "Build directory:"
-          du -sh build || true
-
-          echo
-          echo "Build tree:"
-          find build \
-            -maxdepth 2 \
-            -type f \
-            -print \
-            | sort \
-            | sed -n '1,300p'
-
-          echo
-          echo "Memory:"
-          free -h
-
-      # ============================================================
-      # DETECT CHANGED C/C++ FILES (INFORMATIONAL ONLY)
+      # DETECT CHANGED C/C++ FILES
       #
-      # The asset Python extension build is intentionally unconditional on this
-      # branch/workflow trigger. This detection is only for reporting what changed
-      # in the diff range (including new headers like src/Astro/PinesGravity.h).
+      # This determines whether a C++ build is needed.
+      #
+      # We intentionally include headers because changing a header
+      # can require dependent .cpp files to be rebuilt.
+      #
+      # CMake/Ninja is responsible for determining exactly which
+      # translation units need recompilation.
       # ============================================================
 
       - name: Detect changed C/C++ files
@@ -448,36 +207,30 @@ jobs:
 
           if [[ "${#changed_files[@]}" -eq 0 ]]; then
 
-           echo "has_changes=true" \
-             >> "$GITHUB_OUTPUT"
-           echo "cpp_changes_detected=false" \
-             >> "$GITHUB_OUTPUT"
+            echo "cpp_changes_detected=false" >> "$GITHUB_OUTPUT"
 
-           echo
-           echo "No C/C++ changes detected in the selected diff range."
-           echo "Continuing anyway: the asset extension build is intentionally unconditional."
+            echo
+            echo "No C/C++ changes detected."
+            echo "The C++ build will be skipped."
 
           else
 
-           echo
-           echo "Changed C/C++ files:"
-           printf '  %s\n' "${changed_files[@]}"
+            echo
+            echo "Changed C/C++ files:"
+            printf '  %s\n' "${changed_files[@]}"
 
-           printf '%s\n' "${changed_files[@]}" \
-             > build/changed_cxx_files.txt
+            printf '%s\n' "${changed_files[@]}" \
+              > build/changed_cxx_files.txt
 
-           echo "has_changes=true" \
-             >> "$GITHUB_OUTPUT"
-           echo "cpp_changes_detected=true" \
-             >> "$GITHUB_OUTPUT"
+            echo "cpp_changes_detected=true" >> "$GITHUB_OUTPUT"
+
           fi
 
       # ============================================================
-      # LOG CHANGE DETECTION
+      # LOG CHANGED FILES
       # ============================================================
 
       - name: Log changed files
-        if: always()
         shell: bash
         run: |
           set -euo pipefail
@@ -486,28 +239,66 @@ jobs:
           echo "CHANGED C/C++ FILES"
           echo "============================================================"
 
-          if [[ "${{ steps.cpp_changes.outputs.cpp_changes_detected }}" == "true" ]]; then
+          if [[ -s build/changed_cxx_files.txt ]]; then
+
             nl -ba build/changed_cxx_files.txt
+
             echo
             echo "File count:"
             wc -l build/changed_cxx_files.txt
+
           else
-            echo "No C/C++ file diffs were detected."
-            echo "Build continues intentionally to keep asset binaries up to date."
+
+            echo "No C/C++ file changes detected."
+
           fi
 
       # ============================================================
-      # BUILD PCH
+      # CONFIGURE CMAKE
       #
-      # This is intentionally done before the asset target.
+      # Only configure when C++ work is required.
       #
-      # ASSET's C++ compile commands use the generated PCH.
-      # Building the PCH separately avoids the earlier failure where
-      # the compile command referenced a PCH that did not exist yet.
+      # Ninja provides fast incremental dependency checking.
+      # ============================================================
+
+      - name: Configure CMake
+        if: steps.cpp_changes.outputs.cpp_changes_detected == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "============================================================"
+          echo "CONFIGURING CMAKE"
+          echo "============================================================"
+
+          python_executable="$(
+            python -c 'import sys; print(sys.executable)'
+          )"
+
+          echo "Python executable:"
+          echo "$python_executable"
+
+          echo
+          echo "CMake configuration:"
+
+          cmake -S . \
+            -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DPIP_INSTALL=True \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DPython_EXECUTABLE="$python_executable"
+
+      # ============================================================
+      # BUILD PRECOMPILED HEADERS
+      #
+      # Ninja will skip this when the PCH is already current.
       # ============================================================
 
       - name: Build precompiled headers
-        if: steps.cpp_changes.outputs.has_changes == 'true'
+        if: steps.cpp_changes.outputs.cpp_changes_detected == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -516,227 +307,40 @@ jobs:
           echo "BUILDING PRECOMPILED HEADERS"
           echo "============================================================"
 
-          echo "Memory before PCH:"
-          free -h
+          jobs=$(( $(nproc) / 2 ))
 
-          echo
-          echo "Build command:"
-          echo "cmake --build build --target pch --config ${BUILD_TYPE} --parallel 1"
+          if [[ "$jobs" -lt 1 ]]; then
+            jobs=1
+          fi
+
+          echo "Available CPUs:"
+          nproc
+
+          echo "Using parallel jobs:"
+          echo "$jobs"
 
           cmake --build build \
             --target pch \
             --config "${BUILD_TYPE}" \
-            --parallel 1 \
-            --verbose
-
-          echo
-          echo "PCH build completed."
-
-          echo
-          echo "PCH files:"
-          find build \
-            -type f \
-            \( \
-              -name "*.pch" \
-              -o -name "cmake_pch.hxx" \
-              -o -name "cmake_pch.cxx" \
-            \) \
-            -print \
-            | sort \
-            || true
-
-          echo
-          echo "Memory after PCH:"
-          free -h
-
-      # ============================================================
-      # LOG COMPILE DATABASE
-      # ============================================================
-
-      - name: Inspect compile database
-        if: steps.cpp_changes.outputs.has_changes == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "COMPILE DATABASE"
-          echo "============================================================"
-
-          if [[ ! -f build/compile_commands.json ]]; then
-
-            echo "::error::compile_commands.json does not exist."
-
-            exit 1
-          fi
-
-          echo "Compile database:"
-          ls -lh build/compile_commands.json
-
-          echo
-          echo "Number of compile commands:"
-
-          python - <<'PY'
-          import json
-
-          with open("build/compile_commands.json") as f:
-              commands = json.load(f)
-
-          print(len(commands))
-          PY
-
-          echo
-          echo "PCH references:"
-          grep -o \
-            'cmake_pch[^" ]*' \
-            build/compile_commands.json \
-            | sort \
-            | uniq \
-            | sed -n '1,50p' \
-            || true
-
-      # ============================================================
-      # LIST CMAKE TARGETS
-      # ============================================================
-
-      - name: List CMake targets
-        if: steps.cpp_changes.outputs.has_changes == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "CMAKE TARGETS"
-          echo "============================================================"
-
-          cmake --build build \
-            --target help \
-            > build/cmake_targets.txt
-
-          cat build/cmake_targets.txt
-
-          echo
-          echo "Python target selected by workflow:"
-          echo "  ${PYTHON_TARGET}"
-
-          echo
-          echo "Checking that the Python target exists:"
-
-          if grep -Eq \
-            "^\\.\\.\\. ${PYTHON_TARGET}([[:space:]]|$)" \
-            build/cmake_targets.txt; then
-
-            echo "PASS: ${PYTHON_TARGET} target exists."
-
-          else
-
-            echo "::error::Python target '${PYTHON_TARGET}' was not found."
-
-            echo
-            echo "Available targets:"
-            cat build/cmake_targets.txt
-
-            exit 1
-          fi
-
-          echo
-          echo "Important ASSET targets:"
-
-          grep -E \
-            '^\\.\\.\\. (asset|asset_extensions|astro|pch|psiopt|optimalcontrol|utils|vectorfunctions)' \
-            build/cmake_targets.txt \
-            || true
-
-      # ============================================================
-      # VERIFY CMAKE TARGET RELATIONSHIPS
-      #
-      # asset is the actual pybind11 Python module.
-      # asset_extensions is only a static library dependency.
-      # ============================================================
-
-      - name: Verify Python target configuration
-        if: steps.cpp_changes.outputs.has_changes == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "============================================================"
-          echo "VERIFYING PYTHON TARGET CONFIGURATION"
-          echo "============================================================"
-
-          echo "Python target:"
-          echo "  ${PYTHON_TARGET}"
-
-          echo
-          echo "Expected Python module:"
-          echo "  asset"
-
-          echo
-          echo "Expected static extension library:"
-          echo "  asset_extensions"
-
-          echo
-          echo "Checking src/CMakeLists.txt:"
-
-          if grep -n \
-            'pybind11_add_module(asset main.cpp)' \
-            src/CMakeLists.txt; then
-
-            echo
-            echo "PASS: asset is the pybind11 module target."
-
-          else
-
-            echo
-            echo "::error::Expected pybind11 asset target was not found."
-
-            grep -n \
-              'pybind11_add_module' \
-              src/CMakeLists.txt \
-              || true
-
-            exit 1
-          fi
-
-          echo
-          echo "Checking extensions/CMakeLists.txt:"
-
-          if grep -n \
-            'add_library(asset_extensions STATIC' \
-            extensions/CMakeLists.txt; then
-
-            echo
-            echo "PASS: asset_extensions is a static library."
-
-          else
-
-            echo
-            echo "WARNING: Could not verify asset_extensions declaration."
-
-          fi
+            --parallel "$jobs"
 
       # ============================================================
       # BUILD PYTHON EXTENSION
       #
       # IMPORTANT:
       #
-      # The actual Python extension target is "asset".
+      # We build the "asset" target.
       #
-      # Do NOT build asset_extensions as the final target. That target
-      # produces libasset_extensions.a, not the Python .so.
+      # Ninja/CMake determines which source files are stale.
+      # We do NOT manually compile only the files listed in
+      # changed_cxx_files.txt.
       #
-      # CMake will automatically build only the dependencies required
-      # by asset. Unrelated development targets are not requested.
-      #
-      # This step is intentionally unconditional after configure, even when
-      # the C/C++ diff list is empty, so newly introduced headers such as
-      # src/Astro/PinesGravity.h are still compiled into the asset module.
-      #
-      # --parallel 1 keeps memory usage bounded.
+      # This is important for header changes because a changed
+      # header may require several .cpp files to be rebuilt.
       # ============================================================
 
       - name: Build Python extension
-        if: steps.cpp_changes.outputs.has_changes == 'true'
+        if: steps.cpp_changes.outputs.cpp_changes_detected == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -745,37 +349,122 @@ jobs:
           echo "BUILDING PYTHON EXTENSION"
           echo "============================================================"
 
-          echo "Selected target:"
-          echo "  ${PYTHON_TARGET}"
+          echo "Target:"
+          echo "${PYTHON_TARGET}"
+
+          jobs=$(( $(nproc) / 2 ))
+
+          if [[ "$jobs" -lt 1 ]]; then
+            jobs=1
+          fi
 
           echo
-          echo "Memory before build:"
-          free -h
+          echo "Available CPUs:"
+          nproc
 
           echo
-          echo "Disk before build:"
-          df -h .
+          echo "Using parallel jobs:"
+          echo "$jobs"
 
           echo
           echo "Build command:"
-          echo "cmake --build build --target ${PYTHON_TARGET} --config ${BUILD_TYPE} --parallel 1 --verbose"
-
-          echo
-          echo "Starting build..."
 
           cmake --build build \
             --target "${PYTHON_TARGET}" \
             --config "${BUILD_TYPE}" \
-            --parallel 1 \
+            --parallel "$jobs" \
             --verbose
 
-          echo
-          echo "Python extension target completed."
+      # ============================================================
+      # CCACHE STATISTICS
+      # ============================================================
+
+      - name: Show ccache statistics
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "============================================================"
+          echo "CCACHE STATISTICS"
+          echo "============================================================"
+
+          ccache --show-stats || true
+
+      # ============================================================
+      # VERIFY BUILD OUTPUT
+      # ============================================================
+
+      - name: Verify build output
+        if: steps.cpp_changes.outputs.cpp_changes_detected == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "============================================================"
+          echo "VERIFYING BUILD OUTPUT"
+          echo "============================================================"
+
+          echo "Build directory:"
+          du -sh build || true
 
           echo
-          echo "Memory after build:"
-          free -h
+          echo "Python extension files:"
 
+          find build \
+            -type f \
+            \( \
+              -name "*.so" \
+              -o -name "*.pyd" \
+            \) \
+            -print \
+            | sort
+
+      # ============================================================
+      # NO C++ CHANGES
+      # ============================================================
+
+      - name: Skip C++ build
+        if: steps.cpp_changes.outputs.cpp_changes_detected != 'true'
+        shell: bash
+        run: |
+          echo "============================================================"
+          echo "NO C/C++ CHANGES"
+          echo "============================================================"
           echo
-          echo "Disk after build:"
-          df -h .
+          echo "No C/C++ source or header files changed."
+          echo "Skipping CMake/C++ compilation."
+
+      # ============================================================
+      # COMMIT GENERATED BINARIES
+      #
+      # This preserves the behavior of committing generated build
+      # artifacts back to the branch.
+      # ============================================================
+
+      - name: Commit generated binaries
+        if: steps.cpp_changes.outputs.cpp_changes_detected == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "============================================================"
+          echo "COMMITTING GENERATED BINARIES"
+          echo "============================================================"
+
+          git status --short
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+            exit 0
+          fi
+
+          git commit \
+            -m "Build C++ binaries"
+
+          git push
