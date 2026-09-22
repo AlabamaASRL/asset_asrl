@@ -322,7 +322,7 @@ jobs:
           cmake --build build \
             --target pch \
             --config "${BUILD_TYPE}" \
-            --parallel "$jobs"
+            --parallel 1
 
       # ============================================================
       # BUILD PYTHON EXTENSION
