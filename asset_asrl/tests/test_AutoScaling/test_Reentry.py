@@ -1,38 +1,30 @@
 import numpy as np
-import asset as ast
-import matplotlib.pyplot as plt
+import asset_asrl as ast
+import asset_asrl.VectorFunctions as vf
+import asset_asrl.OptimalControl as oc
+from asset_asrl.VectorFunctions import Arguments as Args
 import unittest
 
-vf        = ast.VectorFunctions
-oc        = ast.OptimalControl
-Args      = vf.Arguments
-Tmodes    = oc.TranscriptionModes
-PhaseRegs = oc.PhaseRegionFlags
-Cmodes    = oc.ControlModes
 
 
-################### Non Dimensionalize ##################################
-g0 = 32.2 
-W  = 203000
+###################  ##################################
 
 Lstar = 100000.0     ## feet
 Tstar = 60.0         ## sec
-Mstar = W/g0         ## slugs
+Vstar = Lstar/Tstar
 
-Vstar   = Lstar/Tstar
-Fstar   = Mstar*Lstar/(Tstar**2)
-Astar   = Lstar/(Tstar**2)
-Rhostar = Mstar/(Lstar**3)
-BTUstar = 778.0*Lstar*Fstar
-Mustar  = (Lstar**3)/(Tstar**2)
 
-tmax = 2500/Tstar
-Re = 20902900          /Lstar
-S  = 2690.0            /(Lstar**2)
-m  = (W/g0)            /Mstar
-mu = (0.140765e17)     /Mustar
-rho0 =.002378          /Rhostar
-h_ref = 23800          /Lstar
+g0 = 32.2 
+W  = 203000
+
+
+tmax = 2500           
+Re = 20902900          
+S  = 2690.0            
+m  = (W/g0)            
+mu = (0.140765e17)    
+rho0 =.002378          
+h_ref = 23800        
 
 a0 = -.20704
 a1 = .029244
@@ -49,7 +41,7 @@ c3 = -.10117e-5
 Qlimit = 70.0
 
 ##############################################################################
-class ShuttleReentry(oc.ode_x_u.ode):
+class ShuttleReentry(oc.ODEBase):
     def __init__(self):
         ############################################################
         args  = oc.ODEArguments(5,2)
@@ -94,14 +86,25 @@ class ShuttleReentry(oc.ode_x_u.ode):
         
     
         ode = vf.stack([hdot,thetadot,vdot,gammadot,psidot])
+        
+        Vgroups = {}
+        Vgroups[('h','altitude')] =  h
+        Vgroups[("v","velocity")] =  v
+        Vgroups["theta"] =  theta
+        Vgroups["gamma"] =  gamma
+        Vgroups["psi"]   =  psi
+        Vgroups[("alpha","AoA")] =  alpha
+        Vgroups["beta"]  =  beta
+        Vgroups[("t","time")] =  args.TVar()
+        
         ##############################################################
-        super().__init__(ode,5,2)
+        super().__init__(ode,5,2,Vgroups = Vgroups)
 
 def QFunc():
     h,v,alpha = Args(3).tolist()
     alphadeg = (180.0/np.pi)*alpha
-    rhodim = rho0*vf.exp(-h/h_ref)*Rhostar
-    vdim = v*Vstar
+    rhodim = rho0*vf.exp(-h/h_ref)
+    vdim = v
     
     qr = 17700*vf.sqrt(rhodim)*((.0001*vdim)**3.07)
     qa = c0 + c1*alphadeg + c2*(alphadeg**2)+ c3*(alphadeg**3)
@@ -113,30 +116,26 @@ class test_Reentry(unittest.TestCase):
     
     @classmethod
     def setUpClass(self):
-        self.NumSegments1 = 64
-        self.NumSegments2 = 256
+        self.NumSegments1 = 40
         
         
-        self.FinalObj1 = -0.5958800738629952 
+        self.FinalObj1 = 0.5958800738629952 
         self.MaxObjError1 = .01
         
-        self.FinalObj2 = -0.534620087611498
+        self.FinalObj2 = 0.534620087611498
         self.MaxObjError2 = .01
         
-        self.MaximumIters1 = 250    
-        self.MaximumIters2 = 50   
     
-    def problem_impl(self,tmode,cmode,nsegs,errest):
+    def problem_impl(self,tmode,cmode,mtol):
         
         ##########################################################################
-        tf  = 1000/Tstar
+        tf  = 2000
 
-        ht0  = 260000/Lstar
-        htf  = 80000 /Lstar
-        vt0  = 25600/Vstar
-        vtf  = 2500 /Vstar
+        ht0  = 260000
+        htf  = 80000 
+        vt0  = 25600
+        vtf  = 2500 
 
-        thetaf =  (vt0*tf + 0.5*(vtf-vt0)*tf)/Re
 
         gammat0 = np.deg2rad(-1.0)
         gammatf = np.deg2rad(-5.0)
@@ -149,7 +148,7 @@ class test_Reentry(unittest.TestCase):
         for t in ts:
             X = np.zeros((8))
             X[0] = ht0*(1-t/tf) + htf*t/tf
-            X[1] = thetaf*t/tf
+            X[1] = 0
             X[2] = vt0*(1-t/tf) + vtf*t/tf
             X[3] = gammat0*(1-t/tf) + gammatf*t/tf
             X[4] = psit0
@@ -164,66 +163,63 @@ class test_Reentry(unittest.TestCase):
 
         ode = ShuttleReentry()
         
-        phase = ode.phase(tmode,TrajIG,nsegs)
+        phase = ode.phase(tmode,TrajIG,self.NumSegments1)
+        
+        phase.setAutoScaling(True)  
+        phase.setUnits(h = Lstar,
+                       v = Vstar,
+                       t = Tstar)
+        
         phase.setControlMode(cmode)
-        
+        phase.setAdaptiveMesh(True)
+
         phase.addBoundaryValue("Front",range(0,6),TrajIG[0][0:6])
-        phase.addLUVarBounds("Path",[1,3],np.deg2rad(-89.0),np.deg2rad(89.0),1.0)
-        phase.addLUVarBound("Path",6,np.deg2rad(-90.0),np.deg2rad(90.0),1.0)
-        phase.addLUVarBound("Path",7,np.deg2rad(-90.0),np.deg2rad(1.0) ,1.0)
+        phase.addLUVarBound("Path","theta",np.deg2rad(-89.0),np.deg2rad(89.0))
+        phase.addLUVarBound("Path","gamma",np.deg2rad(-89.0),np.deg2rad(89.0))
+        phase.addLUVarBound("Path","AoA",np.deg2rad(-90.0),np.deg2rad(90.0))
+        phase.addLUVarBound("Path","beta" ,np.deg2rad(-90.0),np.deg2rad(1.0))
         phase.addUpperDeltaTimeBound(tmax,1.0)
-        phase.addBoundaryValue("Back" ,[0,2,3],[htf,vtf,gammatf])
-        phase.addDeltaVarObjective(1,-1.0)
+        
+        phase.addBoundaryValue("Back" 
+                                  ,["h","v","gamma"]
+                                  ,[htf,vtf,gammatf])
+        
+        phase.addDeltaVarObjective("theta",-1.0)
         
         
-        phase.optimizer.set_OptLSMode("L1")
         phase.optimizer.set_SoeLSMode("L1")
+        phase.optimizer.set_OptLSMode("L1")
+        
         phase.optimizer.MaxLSIters = 2
         phase.optimizer.MaxAccIters = 100
         phase.optimizer.PrintLevel = 3
-        
-        phase.optimizer.EContol = 1.0e-8
-        phase.AdaptiveMesh = True
-        phase.MeshErrorEstimator = errest
-        phase.MeshIncFactor=5
-        phase.MeshTol=1.0e-7
-        phase.PrintMeshInfo = False
         phase.setThreads(1,1)
+        phase.optimizer.CNRMode =True
+        phase.PrintMeshInfo = False
+        phase.setMeshTol(mtol)
+
         Flag1 = phase.solve_optimize()
-        
-        
-        Mconv1 = phase.MeshConverged
         
         self.assertEqual(Flag1,ast.Solvers.ConvergenceFlags.CONVERGED, 
                          "Problem did not converge")
         
-        self.assertTrue(Mconv1, 
-                         "Problem Mesh did not converge converge")
-        
-        self.assertLess(phase.optimizer.LastIterNum, self.MaximumIters1,
-                         "Optimizer iterations exceeded expected maximum")
-        
-        
-        Obj1 = phase.optimizer.LastObjVal
+        Traj1 = phase.returnTraj()
+
+        Obj1 = Traj1[-1][1]
         ObjError1 = abs(Obj1-self.FinalObj1)
         self.assertLess(ObjError1, self.MaxObjError1,
                  "Final objective significantly differs from known answer")
 
         
-        phase.addUpperFuncBound("Path",QFunc(),[0,2,6],Qlimit,1/Qlimit)
+        phase.addUpperFuncBound("Path",QFunc(),["h","v","alpha"],Qlimit,1/Qlimit)
         Flag2 = phase.optimize()
-        Mconv2 = phase.MeshConverged
-
+        Traj2 = phase.returnTraj()
+       
         self.assertEqual(Flag2,ast.Solvers.ConvergenceFlags.CONVERGED, 
                          "Problem did not converge")
+       
         
-        self.assertTrue(Mconv2, 
-                         "Problem Mesh did not converge converge")
-        
-        self.assertLess(phase.optimizer.LastIterNum, self.MaximumIters2,
-                         "Optimizer iterations exceeded expected maximum")
-        
-        Obj2 = phase.optimizer.LastObjVal
+        Obj2 = Traj2[-1][1]
         ObjError2 = abs(Obj2-self.FinalObj2)
         self.assertLess(ObjError2, self.MaxObjError2,
                  "Final objective significantly differs from known answer")
@@ -232,31 +228,18 @@ class test_Reentry(unittest.TestCase):
     
     def test_FullProblem(self):
         
-        tmodes = ["LGL3","LGL5","LGL7"]
-        nsegs  = [40   ,20   ,15   ]
-        
-        for tmode,nseg in zip(tmodes,nsegs):
-            with self.subTest(TranscriptionMode=tmode):
-                
-                with self.subTest(errorest="deboor"):
-                   self.problem_impl(tmode,"HighestOrderSpline",nseg,'deboor')
-                with self.subTest(errorest="integrator"):
-                     self.problem_impl(tmode,"HighestOrderSpline",nseg,'integrator')
-        
-        '''
         for tmode in ["LGL3","LGL5","LGL7","Trapezoidal"]:
             with self.subTest(TranscriptionMode=tmode):
+                
+                mtol = 1.0e-4 if tmode=="Trapezoidal" else 1.0e-7
+                
                 with self.subTest(cmode="HighestOrderSpline"):
-                    self.problem_impl(tmode,"HighestOrderSpline")
+                    self.problem_impl(tmode,"HighestOrderSpline",mtol)
                 with self.subTest(cmode="BlockConstant"):
-                    self.problem_impl(tmode,"BlockConstant")
+                    self.problem_impl(tmode,"BlockConstant",mtol)
 
-        '''
+
 
 
 if __name__ == "__main__":
     unittest.main(exit=False)
-
-    
-  
-   

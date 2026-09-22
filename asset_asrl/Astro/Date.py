@@ -200,9 +200,7 @@ def jd_to_date2(jd):
     year, month, day = jd_to_date(jd)
     fractional_day, day_number = math.modf(day)
 
-    hour, minute, second, microsecond = days_to_hmsm(
-        fractional_day
-    )
+    hour, minute, second, microsecond = days_to_hmsm(fractional_day)
 
     months = (
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -430,6 +428,9 @@ def timedelta_to_days(td):
     4.5
     """
 
+    if not isinstance(td, dt.timedelta):
+        raise TypeError("td must be a datetime.timedelta")
+
     return td.total_seconds() / SECONDS_PER_DAY
 
 
@@ -551,6 +552,4 @@ def Date_SPJ2000(day, month, year):
         Seconds from the J2000 epoch.
     """
 
-    return JD_SPJ2000D(
-        date_to_jd(year, month, day)
-    )
+    return JD_SPJ2000D(date_to_jd(year, month, day))

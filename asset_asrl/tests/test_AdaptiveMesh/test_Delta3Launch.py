@@ -304,13 +304,7 @@ class test_Delta3Launch(unittest.TestCase):
                 with self.subTest(errorest="integrator"):
                      self.problem_impl(tmode,"HighestOrderSpline",nseg,'integrator')
 
-        
-
-        
-        
-
-###############################################################################
-
+    
 if __name__ == "__main__":
 
     unittest.main(exit=False)    
