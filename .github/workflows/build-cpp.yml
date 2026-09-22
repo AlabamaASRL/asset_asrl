@@ -359,7 +359,11 @@ jobs:
           free -h
 
       # ============================================================
-      # DETECT CHANGED C/C++ FILES
+      # DETECT CHANGED C/C++ FILES (INFORMATIONAL ONLY)
+      #
+      # The asset Python extension build is intentionally unconditional on this
+      # branch/workflow trigger. This detection is only for reporting what changed
+      # in the diff range (including new headers like src/Astro/PinesGravity.h).
       # ============================================================
 
       - name: Detect changed C/C++ files
@@ -440,33 +444,40 @@ jobs:
           echo "Number of changed C/C++ files:"
           echo "${#changed_files[@]}"
 
+          : > build/changed_cxx_files.txt
+
           if [[ "${#changed_files[@]}" -eq 0 ]]; then
 
-            echo "has_changes=false" \
-              >> "$GITHUB_OUTPUT"
+           echo "has_changes=true" \
+             >> "$GITHUB_OUTPUT"
+           echo "cpp_changes_detected=false" \
+             >> "$GITHUB_OUTPUT"
 
-            echo
-            echo "No C/C++ changes detected."
+           echo
+           echo "No C/C++ changes detected in the selected diff range."
+           echo "Continuing anyway: the asset extension build is intentionally unconditional."
 
-            exit 0
+          else
+
+           echo
+           echo "Changed C/C++ files:"
+           printf '  %s\n' "${changed_files[@]}"
+
+           printf '%s\n' "${changed_files[@]}" \
+             > build/changed_cxx_files.txt
+
+           echo "has_changes=true" \
+             >> "$GITHUB_OUTPUT"
+           echo "cpp_changes_detected=true" \
+             >> "$GITHUB_OUTPUT"
           fi
-
-          echo
-          echo "Changed C/C++ files:"
-          printf '  %s\n' "${changed_files[@]}"
-
-          printf '%s\n' "${changed_files[@]}" \
-            > build/changed_cxx_files.txt
-
-          echo "has_changes=true" \
-            >> "$GITHUB_OUTPUT"
 
       # ============================================================
       # LOG CHANGE DETECTION
       # ============================================================
 
       - name: Log changed files
-        if: steps.cpp_changes.outputs.has_changes == 'true'
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
@@ -475,11 +486,15 @@ jobs:
           echo "CHANGED C/C++ FILES"
           echo "============================================================"
 
-          nl -ba build/changed_cxx_files.txt
-
-          echo
-          echo "File count:"
-          wc -l build/changed_cxx_files.txt
+          if [[ "${{ steps.cpp_changes.outputs.cpp_changes_detected }}" == "true" ]]; then
+            nl -ba build/changed_cxx_files.txt
+            echo
+            echo "File count:"
+            wc -l build/changed_cxx_files.txt
+          else
+            echo "No C/C++ file diffs were detected."
+            echo "Build continues intentionally to keep asset binaries up to date."
+          fi
 
       # ============================================================
       # BUILD PCH
@@ -712,6 +727,10 @@ jobs:
       #
       # CMake will automatically build only the dependencies required
       # by asset. Unrelated development targets are not requested.
+      #
+      # This step is intentionally unconditional after configure, even when
+      # the C/C++ diff list is empty, so newly introduced headers such as
+      # src/Astro/PinesGravity.h are still compiled into the asset module.
       #
       # --parallel 1 keeps memory usage bounded.
       # ============================================================
@@ -1103,13 +1122,12 @@ jobs:
             exit 1
           fi
 
-          if [[ "${{ steps.cpp_changes.outputs.has_changes }}" != "true" ]]; then
-
-            echo
-            echo "No C/C++ changes were detected."
-            echo "Nothing else to verify."
-
-            exit 0
+          echo
+          if [[ "${{ steps.cpp_changes.outputs.cpp_changes_detected }}" == "true" ]]; then
+            echo "C/C++ changes were detected in the selected diff range."
+          else
+            echo "No C/C++ changes were detected in the selected diff range."
+            echo "Verification continues because the build is intentionally unconditional."
           fi
 
           echo
