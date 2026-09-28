@@ -1,0 +1,84 @@
+name: build-upload-artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_target:
+        description: "What to build"
+        required: true
+        type: choice
+        default: both
+        options:
+          - asset
+          - wheel
+          - both
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ubuntu dependencies
+        env:
+          COMPILER: clang-13
+        run: bash $GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install -r requirements.txt
+
+      - name: Configure CMake
+        run: |
+          cmake -S . \
+            -B build \
+            -G "Unix Makefiles" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPIP_INSTALL=True \
+            -DBUILD_ASSET_WHEEL=True
+
+      - name: Build asset module
+        if: ${{ inputs.build_target == 'asset' }}
+        run: |
+          cmake --build build --target asset --config Release -- -j2
+
+      - name: Build wheel (and module)
+        if: ${{ inputs.build_target == 'wheel' || inputs.build_target == 'both' }}
+        run: |
+          cmake --build build --target asset pypiwheel --config Release -- -j2
+
+      - name: Upload compiled module artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-module-${{ github.run_id }}
+          path: |
+            build/src/asset*.so
+            build/src/asset*.pyd
+            build/asset*.so
+            build/asset*.pyd
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload wheel artifact
+        if: ${{ inputs.build_target == 'wheel' || inputs.build_target == 'both' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-wheel-${{ github.run_id }}
+          path: |
+            build/asset_asrl/dist/*.whl
+            build/pypiwheel/asset_asrl/dist/*.whl
+          if-no-files-found: error
+          retention-days: 7
