@@ -26,7 +26,8 @@ jobs:
       - name: Install Ubuntu dependencies
         env:
           COMPILER: clang-13
-        run: bash $GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh
+        run: |
+          bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
 
       - name: Install Python dependencies
         run: |
@@ -43,17 +44,29 @@ jobs:
             -DBUILD_ASSET_WHEEL=True
 
       - name: Build asset module
-        if: ${{ inputs.build_target == 'asset' }}
         run: |
-          cmake --build build --target asset --config Release -- -j2
+          cmake --build build \
+            --target asset \
+            --config Release \
+            -- -j2
 
-        - name: Debug - List build directory
-        run: find build -name "asset*.so" -o -name "asset*.pyd" -o -name "*.whl"
-
-      - name: Build wheel (and module)
-        if: ${{ inputs.build_target == 'wheel' || inputs.build_target == 'both' }}
+      - name: Build wheel
         run: |
-          cmake --build build --target asset pypiwheel --config Release -- -j2
+          cmake --build build \
+            --target pypiwheel \
+            --config Release \
+            -- -j2
+
+      - name: Debug - List build directory
+        run: |
+          echo "=== Shared libraries ==="
+          find build -type f \( \
+            -name "asset*.so" -o \
+            -name "asset*.pyd" \
+          \) -print
+
+          echo "=== Wheels ==="
+          find build -type f -name "*.whl" -print
 
       - name: Upload compiled module artifact
         uses: actions/upload-artifact@v4
@@ -68,7 +81,6 @@ jobs:
           retention-days: 7
 
       - name: Upload wheel artifact
-        if: ${{ inputs.build_target == 'wheel' || inputs.build_target == 'both' }}
         uses: actions/upload-artifact@v4
         with:
           name: asset-wheel-${{ github.run_id }}
