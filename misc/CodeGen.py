@@ -250,7 +250,7 @@ class AssetHeaderGen:
             delim= "" if i == nargs-1 else ","
             vsize = len(Vec)
             typedarglist+= "const Eigen::Matrix<double,{1:},1> & {0:} {2:}".format(str(Name),vsize,delim)
-            untypearglist+= "{0:} {2:}".format(str(Name),vsize,delim)
+            untypearglist += "{0:} {1:}".format(str(Name), delim)
 
             ctorbody+= "\n\t this->{0:}={0:};".format(str(Name))
             members += "\n\t Eigen::Matrix<double,{1:},1> {0:}; // {2:}".format(str(Name),vsize,Descr)
@@ -261,7 +261,7 @@ class AssetHeaderGen:
             rows = len(Mat)
             cols = len(Mat[0])
             typedarglist+= "const Eigen::Matrix<double,{1:},{2:}> & {0:} {3:}".format(str(Name),rows,cols,delim)
-            untypearglist+= " {0:}{3:}".format(str(Name),rows,cols,delim)
+            untypearglist += "{0:} {1:}".format(str(Name), delim)
             ctorbody+= "\n\t this->{0:}={0:};".format(str(Name))
             members += "\n\t Eigen::Matrix<double,{1:},{2:}> {0:}; // {3:}".format(str(Name),rows,cols,Descr)
             i+=1
