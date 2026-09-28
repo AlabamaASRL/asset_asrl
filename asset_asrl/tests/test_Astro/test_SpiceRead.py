@@ -46,7 +46,6 @@ class SpiceReadTestBase(unittest.TestCase):
 
 # %% SPICE ephemeris state tests
 
-
 class SpiceReadEphemerisTests(SpiceReadTestBase):
     """Verify SPICE ephemeris state conversions and sampling."""
 
@@ -92,7 +91,6 @@ class SpiceReadEphemerisTests(SpiceReadTestBase):
 
 # %% SPICE pole-vector tests
 
-
 class SpiceReadPoleVectorTests(SpiceReadTestBase):
     """Verify body pole extraction from SPICE rotation matrices."""
 
@@ -104,7 +102,7 @@ class SpiceReadPoleVectorTests(SpiceReadTestBase):
     def test_pole_vector_has_nondimensional_elapsed_time(self):
         """Verify pole-vector times are measured relative to the initial epoch."""
         poles = spice_read.PoleVector("IAU_EARTH", "J2000", 2451545.0, 2451547.0, 2, TU=86400.0)
-        np.testing.assert_allclose(poles[:, 3], [0, 1])
+        np.testing.assert_allclose([pole[3] for pole in poles], [0, 1])
 
     def test_pole_vector_converts_julian_dates_to_et(self):
         """Verify pole-vector queries use the expected SPICE epochs."""
@@ -121,7 +119,6 @@ class SpiceReadPoleVectorTests(SpiceReadTestBase):
 
 
 # %% SPICE state-frame transformation tests
-
 
 class SpiceReadFrameTransformTests(SpiceReadTestBase):
     """Verify six-dimensional SPICE state transformations."""
@@ -141,9 +138,7 @@ class SpiceReadFrameTransformTests(SpiceReadTestBase):
         spice_read.SpiceFrameTransform("J2000", "ECLIPJ2000", np.arange(1.0, 7.0), 2451545.5)
         self.assertEqual(self.fake_spice.sxform_calls[0][:2], ("J2000", "ECLIPJ2000"))
 
-
 # %% SPICE convention tests
-
 
 class SpiceReadConventionTests(SpiceReadTestBase):
     """Verify physical and mathematical conventions used by SpiceRead."""
@@ -166,12 +161,14 @@ class SpiceReadConventionTests(SpiceReadTestBase):
     def test_spice_pole_vector_has_three_components_and_time(self):
         """Verify each pole-vector sample contains a three-vector and elapsed time."""
         poles = spice_read.PoleVector("IAU_EARTH", "J2000", 2451545.0, 2451547.0, 2, TU=86400.0)
-        self.assertEqual(poles.shape, (2, 4))
+        self.assertEqual(len(poles), 2)
+        self.assertTrue(all(len(pole) == 4 for pole in poles))
 
     def test_spice_frame_transform_preserves_state_dimension(self):
         """Verify frame transformation returns a six-component state."""
         state = spice_read.SpiceFrameTransform("J2000", "ECLIPJ2000", np.arange(1.0, 7.0), 2451545.5)
         self.assertEqual(len(state), 6)
+
 
 
 if __name__ == "__main__":
