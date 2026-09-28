@@ -108,6 +108,39 @@ namespace ASSET {
 	};
 
 
+	struct TwoBodyGravityAD : VectorFunction<TwoBodyGravityAD, 6, 6, AutodiffFwd, AutodiffFwd> {
+		using Base = VectorFunction<TwoBodyGravityAD, 6, 6, AutodiffFwd, AutodiffFwd>;
+		DENSE_FUNCTION_BASE_TYPES(Base)
+
+		double mu = 1.0;
+
+		TwoBodyGravityAD(double mu) :mu(mu) {}
+
+		template<class InType, class OutType>
+		inline void compute_impl(ConstVectorBaseRef<InType> x, ConstVectorBaseRef<OutType> fx_) const {
+
+			typedef typename InType::Scalar Scalar;
+			VectorBaseRef<OutType> fx = fx_.const_cast_derived();
+
+			Vector3<Scalar> r = x.template head<3>();
+			Vector3<Scalar> v = x.template segment<3>(3);
+
+			Scalar invr = Scalar(1.0) / r.norm();
+			Scalar invr3 = invr * invr * invr;
+
+			fx.template head<3>() = v;
+			fx.template tail<3>() = Scalar(-mu) * r * invr3;
+		}
+
+		static void Build(py::module& m, const char* name) {
+			auto obj = py::class_<TwoBodyGravityAD>(m, name).def(py::init<double>());
+			Base::DenseBaseBuild(obj);
+		}
+
+	};
+
+
+
 
 
 }
@@ -163,8 +196,21 @@ void ASSET::ExtensionsBuild(FunctionRegistry& reg, py::module& extmod)
 		
 		});
 
+	extmod.def("cpp_twobody", [](double mu) {
+
+		auto args = Arguments<6>();
+		auto r = args.head<3>();
+		auto v = args.segment<3, 3>();
+
+		auto acc = (-mu) * r.normalized_power<3>();
+		auto ode = stack(v, acc);
+
+		return GenericFunction<-1, -1>(ode); // Wrap as dynamic sized generic vector function
+		});
+
 	reg.Build_Register<CR3BPAD>(extmod, "cpp_cr3bp_ad");
 	reg.Build_Register<ModifiedDynamicsAD>(extmod, "ModifiedDynamicsAD");
+	reg.Build_Register<TwoBodyGravityAD>(extmod, "TwoBodyGravityAD");
 
 	
 }
