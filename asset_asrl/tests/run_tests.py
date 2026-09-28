@@ -79,7 +79,7 @@ class PyflakesTests(unittest.TestCase):
             and "__pycache__" not in path.parts
             and ".venv" not in path.parts
             and "venv" not in path.parts
-            and "__init__" not in path.parts
+            and "__init__.py" not in path.parts
         )
 
         self.assertGreater(len(python_files), 0, "No Python files found.")
