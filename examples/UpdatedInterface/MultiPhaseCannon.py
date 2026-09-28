@@ -1,11 +1,9 @@
 import numpy as np
-import asset_asrl as ast
 import asset_asrl.VectorFunctions as vf
 import asset_asrl.OptimalControl as oc
 from asset_asrl.VectorFunctions import Arguments as Args
 
 import matplotlib.pyplot as plt
-
 
 
 '''
@@ -219,7 +217,3 @@ if __name__ == "__main__":
     print("Optimized Radius:"  ,radopt," cm")
 
     Plot(Ascent,Descent)
-
-    ##########################################################################
-
-
