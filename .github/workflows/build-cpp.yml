@@ -47,6 +47,9 @@ jobs:
         run: |
           cmake --build build --target asset --config Release -- -j2
 
+        - name: Debug - List build directory
+        run: find build -name "asset*.so" -o -name "asset*.pyd" -o -name "*.whl"
+
       - name: Build wheel (and module)
         if: ${{ inputs.build_target == 'wheel' || inputs.build_target == 'both' }}
         run: |
