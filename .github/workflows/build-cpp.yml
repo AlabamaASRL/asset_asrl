@@ -79,42 +79,72 @@ jobs:
             build/asset*.pyd
           if-no-files-found: error
           retention-days: 7
+
       - name: Check Python extensions are importable
         run: |
           set -e
+
           WHEEL=$(find build -type f -name "*.whl" | head -n 1)
+
           if [ -z "$WHEEL" ]; then
             echo "No wheel found to test import against."
             exit 1
           fi
 
+          echo "Installing wheel: $WHEEL"
           python -m pip install --force-reinstall "$WHEEL"
 
           python - <<'EOF'
           import importlib
+          import pkgutil
           import sys
 
-          modules = [
-              "asset",
-              "asset_asrl",
-              "asset_asrl.VectorFunctions",
-              "asset_asrl.OptimalControl",
-              "asset_asrl.Utils",
-              "asset_asrl.Astro",
-              "asset_asrl.Solvers",
-          ]
+          def walk_modules(package_name):
+              pkg = importlib.import_module(package_name)
+              names = [package_name]
+
+              if hasattr(pkg, "__path__"):
+                  for mod in pkgutil.walk_packages(
+                      pkg.__path__,
+                      package_name + "."
+                  ):
+                      names.append(mod.name)
+
+              return names
+
+          modules = []
+          modules.extend(walk_modules("asset_asrl"))
+          modules.append("asset")
+
+          # De-duplicate while preserving order.
+          modules = list(dict.fromkeys(modules))
 
           failed = []
+
           for name in modules:
               try:
-                  importlib.import_module(name)
-                  print(f"OK: imported {name}")
+                  module = importlib.import_module(name)
+                  location = (
+                      module.__file__
+                      if hasattr(module, "__file__")
+                      else "built-in"
+                  )
+                  print(f"OK: imported {name} -> {location}")
               except Exception as exc:
                   failed.append((name, exc))
-                  print(f"FAILED: {name} -> {exc}", file=sys.stderr)
+                  print(
+                      f"FAILED: {name} -> {exc}",
+                      file=sys.stderr
+                  )
 
           if failed:
-              raise SystemExit(f"{len(failed)} module(s) failed to import")
+              print("\nFailed imports:", file=sys.stderr)
+              for name, exc in failed:
+                  print(f"  {name}: {exc}", file=sys.stderr)
+
+              raise SystemExit(
+                  f"{len(failed)} module(s) failed to import"
+              )
           EOF
 
       - name: Upload wheel artifact
