@@ -1,8 +1,6 @@
 
 import sympy as sp
-import numpy as np
 import re
-from sympy.codegen.cfunctions import Sqrt
 
 def find_pow_expressions(s):
     expressions = []
