@@ -112,7 +112,7 @@ def Plot(Traj):
         return (.5*v**2)/g + h
     E = EnergyHeight(V,H)
     ax4.plot(T1[1]*Vstar,T1[0]*Lstar)
-    
+    ax4.contour(V*Vstar,H*Lstar,E,colors= 'k',levels = 7,linestyles='dotted')
     ax4.scatter(T1[1][0]*Vstar,T1[0][0]*Lstar,color='k')
     ax4.scatter(T1[1][-1]*Vstar,T1[0][-1]*Lstar,color='k',marker='*')
 
