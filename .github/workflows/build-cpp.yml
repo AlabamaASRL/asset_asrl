@@ -1,17 +1,9 @@
 name: build-upload-artifacts
 
 on:
-  workflow_dispatch:
-    inputs:
-      build_target:
-        description: "What to build"
-        required: true
-        type: choice
-        default: both
-        options:
-          - asset
-          - wheel
-          - both
+  push:
+    branches:
+      - kurelowech_pines
 
 permissions:
   contents: read
