@@ -2,11 +2,9 @@ import asset as ast
 import numpy as np
 import asset_asrl.Astro.Constants as c
 from   asset_asrl.Astro.Extensions.TwoBodyFrame import TwoBodyFrame
-from   asset_asrl.Astro.Extensions.NBodyFrame   import NBodyFrame
 from   asset_asrl.Astro.Extensions.CR3BPFrame   import CR3BPFrame
-from   asset_asrl.Astro.Extensions.EPPRFrame    import EPPRFrame
 from   asset_asrl.Astro.Extensions.MEETwoBodyFrame   import MEETwoBodyFrame
-from   asset_asrl.Astro.Extensions.ThrusterModels   import SolarSail,LowThrustAcc,CSIThruster
+from   asset_asrl.Astro.Extensions.ThrusterModels   import SolarSail, LowThrustAcc
 from   asset_asrl.OptimalControl import ODEBase
 
 
@@ -300,9 +298,7 @@ class EPPR_SolarSail(ODEBase,CR3BPFrame):
         t =nargs[6]
         u = nargs.tail3()
         
-        f1 = self.SailModel.ThrustExpr(r-self.P1,u,1.0-self.mu)
         f2 = self.SailModel.ThrustExpr(Args(6).head3(),Args(6).tail3(),1.0-self.mu).eval(vf.Stack([r-self.P1,u]))
-        #f2 = self.SailModel.ThrustExpr(Args(6).head3(),Args(6).tail3(),1.0-self.mu).eval(r-self.P1,u)
 
         otherGaccs = [ f2 ]
         

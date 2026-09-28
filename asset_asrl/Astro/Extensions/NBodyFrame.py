@@ -2,8 +2,7 @@ import numpy as np
 import asset as ast
 import asset_asrl.Astro.Constants as c
 from   asset_asrl.Astro.SpiceRead import GetEphemTraj2,PoleVector,SpiceFrameTransform
-import asset_asrl.Astro.Date as dt
-from   asset_asrl.Astro.DataReadWrite import ReadData,WriteData,ReadCopernicusFile
+from   asset_asrl.Astro.DataReadWrite import ReadCopernicusFile
 from   asset_asrl.Astro.Extensions.TwoBodyFrame import TwoBodyFrame
 
 BProps=c.SpiceBodyProps
@@ -120,7 +119,6 @@ class NBodyFrame(TwoBodyFrame):
         
     def Copernicus_to_Frame(self,Filename,SpiceFrame='J2000'):
         data = ReadCopernicusFile(Filename)
-        Tab = self.P1Table
         Traj = []
         for T in data:
             X = np.zeros((7))
