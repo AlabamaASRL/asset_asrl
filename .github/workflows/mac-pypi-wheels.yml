@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - mac-test-build
+  workflow_dispatch:
+  
 
 permissions:
   contents: read
