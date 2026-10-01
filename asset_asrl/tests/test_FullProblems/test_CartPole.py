@@ -47,9 +47,7 @@ class CartPole(oc.ode_x_u.ode):
         super().__init__(ode, 4, 1)
 
 
-# =============================================================================
-# CartPole ODE tests
-# =============================================================================
+#%% CartPole ODE tests
 
 class test_CartPole(unittest.TestCase):
 
@@ -61,16 +59,8 @@ class test_CartPole(unittest.TestCase):
         cls.g = 9.81
         cls.ode = CartPole(cls.l, cls.m1, cls.m2, cls.g)
 
-    # -------------------------------------------------------------------------
-    # Basic construction
-    # -------------------------------------------------------------------------
-
     def test_Construction(self):
         self.assertIsNotNone(self.ode, "CartPole ODE failed to construct")
-
-    # -------------------------------------------------------------------------
-    # State derivative structure
-    # -------------------------------------------------------------------------
 
     def test_StateDerivativeStructure(self):
 
@@ -85,10 +75,6 @@ class test_CartPole(unittest.TestCase):
 
         np.testing.assert_allclose(result[0], state[2], rtol=1e-12, atol=1e-12)
         np.testing.assert_allclose(result[1], state[3], rtol=1e-12, atol=1e-12)
-
-    # -------------------------------------------------------------------------
-    # Zero velocity / zero control
-    # -------------------------------------------------------------------------
 
     def test_ZeroVelocityZeroControl(self):
 
@@ -106,10 +92,6 @@ class test_CartPole(unittest.TestCase):
         self.assertAlmostEqual(result[2], 0.0)
         self.assertAlmostEqual(result[3], 0.0)
 
-    # -------------------------------------------------------------------------
-    # Zero angle gravity check
-    # -------------------------------------------------------------------------
-
     def test_ZeroAngleGravity(self):
 
         state = np.array([0.0, 0.0, 0.0, 0.0])
@@ -118,10 +100,6 @@ class test_CartPole(unittest.TestCase):
 
         self.assertAlmostEqual(result[2], 0.0, places=12)
         self.assertAlmostEqual(result[3], 0.0, places=12)
-
-    # -------------------------------------------------------------------------
-    # Control sign symmetry at zero angle
-    # -------------------------------------------------------------------------
 
     def test_ControlSignSymmetry(self):
 
@@ -133,10 +111,6 @@ class test_CartPole(unittest.TestCase):
         # Control should reverse the acceleration response.
         np.testing.assert_allclose(plus[2], -minus[2], rtol=1e-12, atol=1e-12)
         np.testing.assert_allclose(plus[3], -minus[3], rtol=1e-12, atol=1e-12)
-
-    # -------------------------------------------------------------------------
-    # Zero control acceleration reference
-    # -------------------------------------------------------------------------
 
     def test_GravityAccelerationReference(self):
 
@@ -156,10 +130,6 @@ class test_CartPole(unittest.TestCase):
         np.testing.assert_allclose(result[2], expected_q1dd, rtol=1e-12, atol=1e-12)
         np.testing.assert_allclose(result[3], expected_q2dd, rtol=1e-12, atol=1e-12)
 
-    # -------------------------------------------------------------------------
-    # Control response reference
-    # -------------------------------------------------------------------------
-
     def test_ControlAccelerationReference(self):
 
         q2 = 0.0
@@ -174,10 +144,6 @@ class test_CartPole(unittest.TestCase):
         np.testing.assert_allclose(result[2], expected_q1dd, rtol=1e-12, atol=1e-12)
         np.testing.assert_allclose(result[3], expected_q2dd, rtol=1e-12, atol=1e-12)
 
-    # -------------------------------------------------------------------------
-    # Velocity dependence
-    # -------------------------------------------------------------------------
-
     def test_VelocityDependence(self):
 
         state = np.array([0.0, np.pi / 4, 1.0, 2.0])
@@ -191,10 +157,6 @@ class test_CartPole(unittest.TestCase):
         # Accelerations should be finite.
         self.assertTrue(np.all(np.isfinite(result)), "CartPole produced non-finite derivatives")
 
-    # -------------------------------------------------------------------------
-    # Periodicity in angular coordinate
-    # -------------------------------------------------------------------------
-
     def test_AnglePeriodicity(self):
 
         state1 = np.array([0.0, 0.7, 0.2, -0.4])
@@ -207,12 +169,7 @@ class test_CartPole(unittest.TestCase):
 
         np.testing.assert_allclose(result1, result2, rtol=1e-12, atol=1e-12)
 
-    # -------------------------------------------------------------------------
-    # Zero angular velocity
-    # -------------------------------------------------------------------------
-
     def test_ZeroAngularVelocity(self):
-
         state = np.array([0.4, 0.6, 1.2, 0.0])
         control = np.array([0.0])
         result = np.asarray(self.ode.eval(state, control))
@@ -221,12 +178,7 @@ class test_CartPole(unittest.TestCase):
         self.assertAlmostEqual(result[1], 0.0, places=12)
         self.assertTrue(np.all(np.isfinite(result)))
 
-    # -------------------------------------------------------------------------
-    # Random finite-state regression
-    # -------------------------------------------------------------------------
-
     def test_FiniteStateRegression(self):
-
         rng = np.random.default_rng(12345)
 
         for _ in range(25):
@@ -245,9 +197,7 @@ class test_CartPole(unittest.TestCase):
             self.assertTrue(np.all(np.isfinite(result)), "CartPole produced non-finite derivatives")
 
 
-# =============================================================================
-# Optimization regression tests
-# =============================================================================
+#%% Optimization regression tests
 
 class test_CartPoleOptimization(unittest.TestCase):
 
@@ -302,10 +252,6 @@ class test_CartPoleOptimization(unittest.TestCase):
         self.assertEqual(Flag, ast.Solvers.ConvergenceFlags.CONVERGED, "Problem did not converge")
         self.assertLess(ObjError, self.MaxObjError, "Final objective significantly differs from known answer")
 
-    # -------------------------------------------------------------------------
-    # Full optimization problem
-    # -------------------------------------------------------------------------
-
     def test_FullProblem(self):
 
         tmodes = [
@@ -317,11 +263,8 @@ class test_CartPoleOptimization(unittest.TestCase):
         ]
 
         nsegs = [256, 128, 96, 256, 256]
-
         for tmode, nseg in zip(tmodes, nsegs):
-
             with self.subTest(TranscriptionMode=tmode):
-
                 with self.subTest(cmode="HighestOrderSpline"):
                     self.problem_impl(tmode, "HighestOrderSpline", nseg)
 
