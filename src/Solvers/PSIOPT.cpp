@@ -1,6 +1,8 @@
 #include "PSIOPT.h"
 
+#ifndef USE_ACCELERATE_SPARSE
 #include <mkl.h>
+#endif
 
 #include "PyDocString/Solvers/PSIOPT_doc.h"
 
@@ -12,10 +14,19 @@ void ASSET::PSIOPT::setNLP(std::shared_ptr<NonLinearProgram> np) {
   this->SlackVars = this->nlp->SlackVars;
   this->KKTdim = this->nlp->KKTdim;
   this->setQPParams();
+#ifdef USE_ACCELERATE_SPARSE
+  accelerate_set_num_threads(QPThreads);
+#else
   mkl_set_num_threads(QPThreads);
+#endif
 
 
   this->nlp->analyzeSparsity(this->KKTSol.getMatrix());
+#ifdef USE_ACCELERATE_SPARSE
+  // we need to call this to update the internal AccelSparseMatrix since
+  // we changed the sparsity pattern via the reference returned from getMatrix.
+  this->KKTSol.reinitializeInternalMatrixRepresentation();
+#endif
   if (storespmat)
     spmat = this->KKTSol.getMatrix();
   this->QPanalyzed = false;
