@@ -2,8 +2,6 @@ import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
 from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
-import time
-import seaborn as sns    # pip install seaborn if you dont have it
 from matplotlib import ticker
 
 import sys
@@ -15,7 +13,6 @@ if USE_BASEMAP:
 else :
     import cartopy.crs as ccrs
     import cartopy.feature as cfeature
-    from pyproj import Geod
     from matplotlib.patches import Rectangle
     from shapely.geometry import Polygon
 
