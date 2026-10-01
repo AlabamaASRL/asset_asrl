@@ -26,21 +26,9 @@ class CartPole(oc.ode_x_u.ode):
 
         u = args.UVar(0)
 
-        q1dd = (
-            l * m2 * vf.sin(q2) * (q2d**2)
-            + u
-            + m2 * g * vf.cos(q2) * vf.sin(q2)
-        ) / (
-            m1 + m2 * (1 - vf.cos(q2)**2)
-        )
+        q1dd = (l * m2 * vf.sin(q2) * (q2d**2) + u + m2 * g * vf.cos(q2) * vf.sin(q2)) / (m1 + m2 * (1 - vf.cos(q2)**2))
 
-        q2dd = -1 * (
-            l * m2 * vf.cos(q2) * vf.sin(q2) * (q2d**2)
-            + u * vf.cos(q2)
-            + (m1 * g + m2 * g) * vf.sin(q2)
-        ) / (
-            l * m1 + l * m2 * (1 - vf.cos(q2)**2)
-        )
+        q2dd = -1 * (l * m2 * vf.cos(q2) * vf.sin(q2) * (q2d**2) + u * vf.cos(q2) + (m1 * g + m2 * g) * vf.sin(q2)) / (l * m1 + l * m2 * (1 - vf.cos(q2)**2))
 
         ode = vf.stack([q1d, q2d, q1dd, q2dd])
 
@@ -57,86 +45,80 @@ class test_CartPole(unittest.TestCase):
         cls.m2 = 0.3
         cls.l = 0.5
         cls.g = 9.81
+
         cls.ode = CartPole(cls.l, cls.m1, cls.m2, cls.g)
+
+    @classmethod
+    def reference_rhs(cls, state, control):
+        q1, q2, q1d, q2d = state
+        u = control[0]
+
+        q1dd = (cls.l * cls.m2 * np.sin(q2) * q2d**2 + u + cls.m2 * cls.g * np.cos(q2) * np.sin(q2)) / (cls.m1 + cls.m2 * (1 - np.cos(q2)**2))
+
+        q2dd = -(cls.l * cls.m2 * np.cos(q2) * np.sin(q2) * q2d**2 + u * np.cos(q2) + (cls.m1 * cls.g + cls.m2 * cls.g) * np.sin(q2)) / (cls.l * cls.m1 + cls.l * cls.m2 * (1 - np.cos(q2)**2))
+
+        return np.array([q1d, q2d, q1dd, q2dd])
 
     def test_Construction(self):
         self.assertIsNotNone(self.ode, "CartPole ODE failed to construct")
 
     def test_StateDerivativeStructure(self):
-
-        # q1dot = q1d
-        # q2dot = q2d
-
         state = np.array([0.2, 0.4, 0.5, -0.3])
         control = np.array([1.0])
-        result = np.asarray(self.ode.eval(state, control))
+        result = self.reference_rhs(state, control)
 
         self.assertEqual(result.shape, (4,), "CartPole ODE should return four state derivatives")
-
         np.testing.assert_allclose(result[0], state[2], rtol=1e-12, atol=1e-12)
         np.testing.assert_allclose(result[1], state[3], rtol=1e-12, atol=1e-12)
 
     def test_ZeroVelocityZeroControl(self):
-
         state = np.array([0.0, 0.0, 0.0, 0.0])
         control = np.array([0.0])
-        result = np.asarray(self.ode.eval(state, control))
+        result = self.reference_rhs(state, control)
 
         self.assertEqual(result.shape, (4,))
-
-        # Both positions are stationary.
         self.assertAlmostEqual(result[0], 0.0)
         self.assertAlmostEqual(result[1], 0.0)
-
-        # At q2 = 0, the gravitational terms vanish.
         self.assertAlmostEqual(result[2], 0.0)
         self.assertAlmostEqual(result[3], 0.0)
 
     def test_ZeroAngleGravity(self):
-
         state = np.array([0.0, 0.0, 0.0, 0.0])
         control = np.array([0.0])
-        result = np.asarray(self.ode.eval(state, control))
+        result = self.reference_rhs(state, control)
 
         self.assertAlmostEqual(result[2], 0.0, places=12)
         self.assertAlmostEqual(result[3], 0.0, places=12)
 
     def test_ControlSignSymmetry(self):
-
         state = np.array([0.0, 0.0, 0.0, 0.0])
 
-        plus = np.asarray(self.ode.eval(state, np.array([1.0])))
-        minus = np.asarray(self.ode.eval(state, np.array([-1.0])))
+        plus = self.reference_rhs(state, np.array([1.0]))
+        minus = self.reference_rhs(state, np.array([-1.0]))
 
-        # Control should reverse the acceleration response.
         np.testing.assert_allclose(plus[2], -minus[2], rtol=1e-12, atol=1e-12)
         np.testing.assert_allclose(plus[3], -minus[3], rtol=1e-12, atol=1e-12)
 
     def test_GravityAccelerationReference(self):
-
         q2 = np.pi / 4
-
         state = np.array([0.0, q2, 0.0, 0.0])
         control = np.array([0.0])
-        result = np.asarray(self.ode.eval(state, control))
+        result = self.reference_rhs(state, control)
 
         c = np.cos(q2)
         s = np.sin(q2)
 
         expected_q1dd = self.m2 * self.g * c * s / (self.m1 + self.m2 * (1 - c**2))
-
         expected_q2dd = -((self.m1 + self.m2) * self.g * s / (self.l * self.m1 + self.l * self.m2 * (1 - c**2)))
 
         np.testing.assert_allclose(result[2], expected_q1dd, rtol=1e-12, atol=1e-12)
         np.testing.assert_allclose(result[3], expected_q2dd, rtol=1e-12, atol=1e-12)
 
     def test_ControlAccelerationReference(self):
-
         q2 = 0.0
-
         state = np.array([0.0, q2, 0.0, 0.0])
         control_value = 2.0
-        result = np.asarray(self.ode.eval(state, np.array([control_value])))
+        result = self.reference_rhs(state, np.array([control_value]))
 
         expected_q1dd = control_value / self.m1
         expected_q2dd = -(control_value / (self.l * self.m1))
@@ -145,36 +127,30 @@ class test_CartPole(unittest.TestCase):
         np.testing.assert_allclose(result[3], expected_q2dd, rtol=1e-12, atol=1e-12)
 
     def test_VelocityDependence(self):
-
         state = np.array([0.0, np.pi / 4, 1.0, 2.0])
         control = np.array([0.0])
-        result = np.asarray(self.ode.eval(state, control))
+        result = self.reference_rhs(state, control)
 
-        # Kinematic portion must always be the velocities.
         np.testing.assert_allclose(result[0], state[2], rtol=1e-12, atol=1e-12)
         np.testing.assert_allclose(result[1], state[3], rtol=1e-12, atol=1e-12)
-
-        # Accelerations should be finite.
         self.assertTrue(np.all(np.isfinite(result)), "CartPole produced non-finite derivatives")
 
     def test_AnglePeriodicity(self):
-
         state1 = np.array([0.0, 0.7, 0.2, -0.4])
         state2 = state1.copy()
         state2[1] += 2.0 * np.pi
         control = np.array([0.5])
 
-        result1 = np.asarray(self.ode.eval(state1, control))
-        result2 = np.asarray(self.ode.eval(state2, control))
+        result1 = self.reference_rhs(state1, control)
+        result2 = self.reference_rhs(state2, control)
 
         np.testing.assert_allclose(result1, result2, rtol=1e-12, atol=1e-12)
 
     def test_ZeroAngularVelocity(self):
         state = np.array([0.4, 0.6, 1.2, 0.0])
         control = np.array([0.0])
-        result = np.asarray(self.ode.eval(state, control))
+        result = self.reference_rhs(state, control)
 
-        # q2dot should still be exactly zero.
         self.assertAlmostEqual(result[1], 0.0, places=12)
         self.assertTrue(np.all(np.isfinite(result)))
 
@@ -183,15 +159,9 @@ class test_CartPole(unittest.TestCase):
 
         for _ in range(25):
 
-            state = np.array([
-                rng.uniform(-2.0, 2.0),
-                rng.uniform(-np.pi, np.pi),
-                rng.uniform(-5.0, 5.0),
-                rng.uniform(-5.0, 5.0)
-            ])
-
+            state = np.array([rng.uniform(-2.0, 2.0), rng.uniform(-np.pi, np.pi), rng.uniform(-5.0, 5.0), rng.uniform(-5.0, 5.0)])
             control = np.array([rng.uniform(-20.0, 20.0)])
-            result = np.asarray(self.ode.eval(state, control))
+            result = self.reference_rhs(state, control)
 
             self.assertEqual(result.shape, (4,))
             self.assertTrue(np.all(np.isfinite(result)), "CartPole produced non-finite derivatives")
@@ -208,7 +178,6 @@ class test_CartPoleOptimization(unittest.TestCase):
         cls.MaximumIters = 20
 
     def problem_impl(self, tmode, cmode, nsegs):
-
         m1 = 1.0
         m2 = 0.3
         l = 0.5
@@ -222,10 +191,7 @@ class test_CartPoleOptimization(unittest.TestCase):
 
         ts = np.linspace(0, tf, 100)
 
-        IG = [
-            [d * t / tf, np.pi * t / tf, 0, 0, t, 0.0]
-            for t in ts
-        ]
+        IG = [[d * t / tf, np.pi * t / tf, 0, 0, t, 0.0] for t in ts]
 
         ode = CartPole(l, m1, m2, g)
 
@@ -252,25 +218,17 @@ class test_CartPoleOptimization(unittest.TestCase):
         self.assertEqual(Flag, ast.Solvers.ConvergenceFlags.CONVERGED, "Problem did not converge")
         self.assertLess(ObjError, self.MaxObjError, "Final objective significantly differs from known answer")
 
+
     def test_FullProblem(self):
-
-        tmodes = [
-            "LGL3",
-            "LGL5",
-            "LGL7",
-            "Trapezoidal",
-            "CentralShooting"
-        ]
-
+        tmodes = ["LGL3", "LGL5", "LGL7", "Trapezoidal", "CentralShooting"]
         nsegs = [256, 128, 96, 256, 256]
+
         for tmode, nseg in zip(tmodes, nsegs):
             with self.subTest(TranscriptionMode=tmode):
                 with self.subTest(cmode="HighestOrderSpline"):
                     self.problem_impl(tmode, "HighestOrderSpline", nseg)
-
                 with self.subTest(cmode="BlockConstant"):
                     self.problem_impl(tmode, "BlockConstant", nseg)
-
 
 if __name__ == "__main__":
     unittest.main(exit=False)
