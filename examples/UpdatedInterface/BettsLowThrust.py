@@ -5,8 +5,23 @@ from asset_asrl.VectorFunctions import Arguments as Args
 
 import matplotlib.pyplot as plt
 from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
-from mpl_toolkits.basemap import Basemap
+import time
+import seaborn as sns    # pip install seaborn if you dont have it
 from matplotlib import ticker
+
+import sys
+PY_VER = sys.version_info
+USE_BASEMAP = PY_VER < (3, 10)
+
+if USE_BASEMAP:
+    from mpl_toolkits.basemap import Basemap ## PIP INSTALL Basemap if you dont have it
+else :
+    import cartopy.crs as ccrs
+    import cartopy.feature as cfeature
+    from pyproj import Geod
+    from matplotlib.patches import Rectangle
+    from shapely.geometry import Polygon
+
 
 '''
 Low-Thrust Orbit Transfer taken from example 6 on page 265 of
@@ -92,6 +107,12 @@ def Zlevels(Traj,zaxis=2):
     return GP,GN
 
 def Plot(Traj):
+    if (USE_BASEMAP):
+        Plot_basemap(Traj)
+    else :
+        Plot_cartopy(Traj)
+
+def Plot_basemap(Traj):
     
     color = 'k'
     
@@ -130,11 +151,11 @@ def Plot(Traj):
             ZNs = tmp
         
         for ZP in ZPs:
-            T = np.array(ZP).T*.3048
+            T = np.array(ZP).T*Lstar*.3048
             axs[i].plot(T[views2[i][0]]+rs,T[views2[i][1]]+rs,zorder=10,color=color)
             
         for ZP in ZNs:
-            T = np.array(ZP).T*.3048
+            T = np.array(ZP).T*Lstar*.3048
             axs[i].plot(T[views2[i][0]]+rs,T[views2[i][1]]+rs,zorder=2,color=color)
             
         axs[i].xaxis.set_major_formatter(major_formatter)
@@ -169,9 +190,9 @@ def Plot(Traj):
     
     T = np.array(Traj).T
     
-    axu.plot(T[7]/3600,T[8],label=r'$u_r$')
-    axu.plot(T[7]/3600,T[9],label=r'$u_t$')
-    axu.plot(T[7]/3600,T[10],label=r'$u_n$')
+    axu.plot(T[7]*Tstar/3600,T[8],label=r'$u_r$')
+    axu.plot(T[7]*Tstar/3600,T[9],label=r'$u_t$')
+    axu.plot(T[7]*Tstar/3600,T[10],label=r'$u_n$')
     axu.grid(True)
     
     axu.set_ylabel(r"$\mathbf{u}$")
@@ -186,6 +207,128 @@ def Plot(Traj):
         axs[i].set_frame_on(True)
         
         
+    fig.set_size_inches(12.0, 9, forward=True)
+    fig.tight_layout()
+
+    plt.show()
+
+def Plot_cartopy(Traj):
+    color = 'k'
+
+    rs = 6370997.0
+    globe = ccrs.Globe(ellipse=None, semimajor_axis=rs, semiminor_axis=rs)
+
+    def ortho(lon_0, lat_0):
+        return ccrs.Orthographic(central_longitude=lon_0, central_latitude=lat_0, globe=globe)
+
+    fig = plt.figure()
+    projs = [ortho(0, 90), ortho(0, 0), ortho(90, 0)]
+
+    axu = plt.subplot(211)
+    ax0 = plt.subplot(234, projection=projs[0])
+    ax1 = plt.subplot(235, projection=projs[1])
+    ax2 = plt.subplot(236, projection=projs[2])
+
+    axs = [ax0, ax1, ax2]
+    @ticker.FuncFormatter
+    def major_formatter(x, pos):
+        t = x / rs
+        return f'{t:.1f}'
+
+    views1 = [2, 1, 0]
+    views2 = [[0, 1], [0, 2], [1, 2]]
+    limits = [None, None, None]
+    for i in range(0, 3):
+
+        ax = axs[i]
+        proj = projs[i]
+        ax.set_anchor('SW')
+
+        rect = Rectangle((0, 0), 1, 1, transform=ax.transAxes)
+
+        lim = [-rs, rs, -rs, rs]
+
+        ZPs, ZNs = Zlevels(np.copy(Traj), zaxis=views1[i])
+
+        if views1[i] == 1:
+            tmp = ZPs
+            ZPs = ZNs
+            ZNs = tmp
+
+        for group, z in ((ZPs, 10), (ZNs, 2)):
+            for ZP in group:
+                T = np.array(ZP).T * Lstar * .3048
+                x, y = T[views2[i][0]], T[views2[i][1]]
+                line, = ax.plot(x, y, zorder=z, color=color)
+                line.set_clip_path(rect)
+                lim = [min(lim[0], np.min(x)), max(lim[1], np.max(x)),
+                       min(lim[2], np.min(y)), max(lim[3], np.max(y))]
+
+        # Match the original autoscaled view (5% margins); applied at the end
+        padx = 0.05 * (lim[1] - lim[0])
+        pady = 0.05 * (lim[3] - lim[2])
+        limits[i] = [lim[0] - padx, lim[1] + padx, lim[2] - pady, lim[3] + pady]
+        ax.xaxis.set_visible(True)
+        ax.yaxis.set_visible(True)
+        ax.xaxis.set_major_formatter(major_formatter)
+        ax.yaxis.set_major_formatter(major_formatter)
+
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(rs))
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(rs))
+
+        ax.grid(True)
+        ax.xaxis.set_clip_path(rect)
+        ax.yaxis.set_clip_path(rect)
+
+        ax.add_geometries([Polygon(proj.boundary)], crs=proj,
+                          facecolor='aqua', edgecolor='none', zorder=3)
+
+        ax.add_feature(cfeature.LAND, facecolor='coral', edgecolor='none', zorder=5)
+        ax.add_feature(cfeature.LAKES, facecolor='aqua', edgecolor='none', zorder=5)
+
+        ax.coastlines(resolution='110m', linewidth=.25, zorder=5)
+
+        ax.gridlines(xlocs=np.arange(-180., 180., 60.),
+                     ylocs=np.arange(-90., 120., 30.),
+                     draw_labels=False, color='k', linewidth=1.0,
+                     linestyle=(0, (1, 1)), zorder=5)
+
+    axs[0].set_xlabel(r"$X (R_e)$")
+    axs[0].set_ylabel(r"$Y (R_e)$")
+
+    axs[1].set_xlabel(r"$X (R_e)$")
+    axs[1].set_ylabel(r"$Z (R_e)$")
+
+    axs[2].set_xlabel(r"$Y (R_e)$")
+    axs[2].set_ylabel(r"$Z (R_e)$")
+    print(limits)
+
+    T = np.array(Traj).T
+
+    axu.plot(T[7] * Tstar / 3600, T[8], label=r'$u_r$')
+    axu.plot(T[7] * Tstar / 3600, T[9], label=r'$u_t$')
+    axu.plot(T[7] * Tstar / 3600, T[10], label=r'$u_n$')
+    axu.grid(True)
+
+    axu.set_ylabel(r"$\mathbf{u}$")
+
+    axu.set_xlabel(r"$t (hrs)$")
+
+    axu.legend()
+
+    for i in range(0, 3):
+        x0, x1, y0, y1 = limits[i]
+        if i > 0:
+            y0, y1 = -2 * rs, 5 * rs
+        axs[i].set_autoscale_on(False)
+        axs[i].set_aspect('equal', adjustable='datalim')
+        axs[i].set_xlim(x0, x1)
+        axs[i].set_ylim(y0, y1)
+
+        axs[i].add_artist(Rectangle((0, 0), 1, 1, transform=axs[i].transAxes,
+                                    fill=False, edgecolor='k', linewidth=0.8,
+                                    clip_on=False, zorder=20))
+
     fig.set_size_inches(12.0, 9, forward=True)
     fig.tight_layout()
 
