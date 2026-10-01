@@ -1,0 +1,120 @@
+name: Build C++ development target
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  build-cpp:
+    runs-on: ubuntu-22.04
+
+    env:
+      WHEEL_DIR: build/asset_asrl/dist
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system deps
+        shell: bash
+        env:
+          COMPILER: clang-13
+        run: |
+          set -euo pipefail
+          bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
+
+      - name: Install Python build deps
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install build wheel setuptools
+
+      - name: Build wheel
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m build --wheel --outdir "${WHEEL_DIR}"
+
+      - name: Verify wheel exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Looking for wheels in: ${WHEEL_DIR}"
+          ls -la "${WHEEL_DIR}" || true
+          WHEEL="$(find "${WHEEL_DIR}" -maxdepth 1 -type f -name '*.whl' | head -n 1)"
+          if [ -z "${WHEEL}" ]; then
+            echo "No wheel found in ${WHEEL_DIR}"
+            echo "Debug listing of build tree:"
+            find build -maxdepth 6 -type f | sort || true
+            echo "Debug listing of repo tree (first 300 files):"
+            find . -maxdepth 6 -type f | sort | head -n 300 || true
+            exit 1
+          fi
+          echo "Found wheel: ${WHEEL}"
+          echo "WHEEL=${WHEEL}" >> "$GITHUB_ENV"
+
+      - name: Test Python imports from built wheel
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${WHEEL:-}" ]; then
+            echo "WHEEL env var not set"
+            exit 1
+          fi
+
+          echo "Installing wheel: ${WHEEL}"
+          python -m pip install --force-reinstall "${WHEEL}"
+
+          python - <<'PY'
+          import importlib
+          import sys
+
+          modules = [
+              "asset_asrl",
+          ]
+
+          failed = []
+          for name in modules:
+              try:
+                  module = importlib.import_module(name)
+                  location = getattr(module, "__file__", "built-in")
+                  print(f"OK: imported {name} -> {location}")
+              except Exception as exc:
+                  failed.append((name, exc))
+                  print(f"FAILED: {name} -> {exc}", file=sys.stderr)
+
+          if failed:
+              print("\nFailed imports:", file=sys.stderr)
+              for name, exc in failed:
+                  print(f"  {name}: {exc}", file=sys.stderr)
+              raise SystemExit(f"{len(failed)} module(s) failed to import")
+          PY
+
+      - name: Upload native build artifacts (.so/.pyd)
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-native-${{ github.run_id }}
+          path: |
+            build/src/asset*.so
+            build/src/asset*.pyd
+            build/asset*.so
+            build/asset*.pyd
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-wheel-${{ github.run_id }}
+          path: ${{ env.WHEEL_DIR }}/*.whl
+          if-no-files-found: error
+          retention-days: 7
