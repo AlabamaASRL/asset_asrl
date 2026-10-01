@@ -1,77 +1,112 @@
-name: build-upload-artifacts
+name: Build C++ development target
 
 on:
   push:
-    branches:
-      - kurelowech_pines
-
-permissions:
-  contents: read
+    branches: ["**"]
+  pull_request:
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
+  build-cpp:
+    runs-on: ubuntu-latest
+
+    env:
+      # Single source of truth for where wheel artifacts are expected.
+      WHEEL_DIR: build/asset_asrl/dist
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.11"
 
-      - name: Install Ubuntu dependencies
-        env:
-          COMPILER: clang-13
+      - name: Install system deps
+        shell: bash
         run: |
-          bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build
 
-      - name: Install Python dependencies
+      - name: Install Python build deps
+        shell: bash
         run: |
-          python -m pip install --upgrade pip wheel setuptools
-          python -m pip install -r requirements.txt
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install build wheel setuptools
 
-      - name: Configure CMake
-        run: |
-          cmake -S . \
-            -B build \
-            -G "Unix Makefiles" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DPIP_INSTALL=True \
-            -DBUILD_ASSET_WHEEL=True
-
-      - name: Build asset module
-        run: |
-          cmake --build build \
-            --target asset \
-            --config Release \
-            -- -j2
-
+      # ---- YOUR C++/Python build goes here ----
+      # Replace this block with your project's canonical wheel build command.
       - name: Build wheel
+        shell: bash
         run: |
-          cmake --build build \
-            --target pypiwheel \
-            --config Release \
-            -- -j2
+          set -euo pipefail
+          # Example command; replace if your project uses scikit-build/cibuildwheel/custom scripts.
+          python -m build --wheel --outdir "${WHEEL_DIR}"
 
-      - name: Debug - List build directory
+      - name: Verify wheel exists
+        shell: bash
         run: |
-          echo "=== Shared libraries ==="
-          find build -type f \( \
-            -name "asset*.so" -o \
-            -name "asset*.pyd" \
-          \) -print
+          set -euo pipefail
+          echo "Looking for wheels in: ${WHEEL_DIR}"
+          ls -la "${WHEEL_DIR}" || true
+          WHEEL="$(find "${WHEEL_DIR}" -maxdepth 1 -type f -name '*.whl' | head -n 1)"
+          if [ -z "${WHEEL}" ]; then
+            echo "No wheel found in ${WHEEL_DIR}"
+            echo "Debug listing of build tree:"
+            find build -maxdepth 6 -type f | sort || true
+            echo "Debug listing of repo tree (first 300 files):"
+            find . -maxdepth 6 -type f | sort | head -n 300 || true
+            exit 1
+          fi
+          echo "Found wheel: ${WHEEL}"
+          echo "WHEEL=${WHEEL}" >> "$GITHUB_ENV"
 
-          echo "=== Wheels ==="
-          find build -type f -name "*.whl" -print
+      - name: Test Python imports from built wheel
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${WHEEL:-}" ]; then
+            echo "WHEEL env var not set"
+            exit 1
+          fi
 
-      - name: Upload compiled module artifact
+          echo "Installing wheel: ${WHEEL}"
+          python -m pip install --force-reinstall "${WHEEL}"
+
+          python - <<'PY'
+          import importlib
+          import sys
+
+          # Keep only modules you truly expect to import from this wheel.
+          modules = [
+              "asset_asrl",
+              # "asset",
+              # "pines",
+          ]
+
+          failed = []
+          for name in modules:
+              try:
+                  module = importlib.import_module(name)
+                  location = getattr(module, "__file__", "built-in")
+                  print(f"OK: imported {name} -> {location}")
+              except Exception as exc:
+                  failed.append((name, exc))
+                  print(f"FAILED: {name} -> {exc}", file=sys.stderr)
+
+          if failed:
+              print("\nFailed imports:", file=sys.stderr)
+              for name, exc in failed:
+                  print(f"  {name}: {exc}", file=sys.stderr)
+              raise SystemExit(f"{len(failed)} module(s) failed to import")
+          PY
+
+      - name: Upload native build artifacts (.so/.pyd)
         uses: actions/upload-artifact@v4
         with:
-          name: asset-module-${{ github.run_id }}
+          name: asset-native-${{ github.run_id }}
           path: |
             build/src/asset*.so
             build/src/asset*.pyd
@@ -80,79 +115,10 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Check Python extensions are importable
-        run: |
-          set -e
-
-          WHEEL=$(find build -type f -name "*.whl" | head -n 1)
-
-          if [ -z "$WHEEL" ]; then
-            echo "No wheel found to test import against."
-            exit 1
-          fi
-
-          echo "Installing wheel: $WHEEL"
-          python -m pip install --force-reinstall "$WHEEL"
-
-          python - <<'EOF'
-          import importlib
-          import pkgutil
-          import sys
-
-          def walk_modules(package_name):
-              pkg = importlib.import_module(package_name)
-              names = [package_name]
-
-              if hasattr(pkg, "__path__"):
-                  for mod in pkgutil.walk_packages(
-                      pkg.__path__,
-                      package_name + "."
-                  ):
-                      names.append(mod.name)
-
-              return names
-
-          modules = []
-          modules.extend(walk_modules("asset_asrl"))
-          modules.append("asset")
-
-          # De-duplicate while preserving order.
-          modules = list(dict.fromkeys(modules))
-
-          failed = []
-
-          for name in modules:
-              try:
-                  module = importlib.import_module(name)
-                  location = (
-                      module.__file__
-                      if hasattr(module, "__file__")
-                      else "built-in"
-                  )
-                  print(f"OK: imported {name} -> {location}")
-              except Exception as exc:
-                  failed.append((name, exc))
-                  print(
-                      f"FAILED: {name} -> {exc}",
-                      file=sys.stderr
-                  )
-
-          if failed:
-              print("\nFailed imports:", file=sys.stderr)
-              for name, exc in failed:
-                  print(f"  {name}: {exc}", file=sys.stderr)
-
-              raise SystemExit(
-                  f"{len(failed)} module(s) failed to import"
-              )
-          EOF
-
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
           name: asset-wheel-${{ github.run_id }}
-          path: |
-            build/asset_asrl/dist/*.whl
-            build/pypiwheel/asset_asrl/dist/*.whl
+          path: ${{ env.WHEEL_DIR }}/*.whl
           if-no-files-found: error
           retention-days: 7
