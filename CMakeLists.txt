@@ -240,10 +240,27 @@ if(UNIX AND NOT APPLE)
 elseif(APPLE)
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
-      # fina_package(OpenMP REQUIRED) will fail with AppleClang so 
+      # find_package(OpenMP REQUIRED) will fail with AppleClang so
       # we need this to point towards the homebrew libomp
-      include_directories("/opt/homebrew/Cellar/libomp/21.1.0/include/")
-      link_directories("/opt/homebrew/Cellar/libomp/21.1.0/lib/")
+      set(LIBOMP_PREFIX "" CACHE PATH "Path to Homebrew libomp")
+      if(NOT LIBOMP_PREFIX)
+        if(DEFINED ENV{LIBOMP_PREFIX})
+          set(LIBOMP_PREFIX "$ENV{LIBOMP_PREFIX}")
+        else()
+          execute_process(
+            COMMAND brew --prefix libomp
+            OUTPUT_VARIABLE LIBOMP_PREFIX
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET)
+        endif()
+      endif()
+      if(NOT LIBOMP_PREFIX)
+        set(LIBOMP_PREFIX "/opt/homebrew/opt/libomp")
+      endif()
+      message(STATUS "Using libomp from: ${LIBOMP_PREFIX}")
+
+      include_directories("${LIBOMP_PREFIX}/include")
+      link_directories("${LIBOMP_PREFIX}/lib")
       list(APPEND COMPILE_FLAGS "-Xclang")
       list(APPEND COMPILE_FLAGS "-fopenmp")
       list(APPEND OpenMP_CXX_FLAGS "-lomp")
