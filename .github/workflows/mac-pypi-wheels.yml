@@ -1,9 +1,6 @@
 name: build-upload-artifacts-macos
 
 on:
-  push:
-    branches:
-      - mac-test-build
   workflow_dispatch:
   
 
@@ -12,7 +9,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-26
+    runs-on: macos-latest
 
     env:
       MACOSX_DEPLOYMENT_TARGET: "11.0"
@@ -50,11 +47,7 @@ jobs:
             -DCMAKE_OSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET}" \
             -DPIP_INSTALL=True \
             -DBUILD_ASSET_WHEEL=True \
-            -DOpenMP_C_FLAGS="-Xpreprocessor;-fopenmp;-I${LIBOMP_PREFIX}/include" \
-            -DOpenMP_CXX_FLAGS="-Xpreprocessor;-fopenmp;-I${LIBOMP_PREFIX}/include" \
-            -DOpenMP_C_LIB_NAMES="omp" \
-            -DOpenMP_CXX_LIB_NAMES="omp" \
-            -DOpenMP_omp_LIBRARY="${LIBOMP_PREFIX}/lib/libomp.dylib"
+            -DLIBOMP_PREFIX="${LIBOMP_PREFIX}"
 
       - name: Build asset module
         run: |
