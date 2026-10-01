@@ -5,17 +5,21 @@ on:
     branches: ["**"]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build-cpp:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     env:
-      # Single source of truth for where wheel artifacts are expected.
       WHEEL_DIR: build/asset_asrl/dist
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -24,27 +28,22 @@ jobs:
 
       - name: Install system deps
         shell: bash
+        env:
+          COMPILER: clang-13
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build
-
+          bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
       - name: Install Python build deps
         shell: bash
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
           python -m pip install build wheel setuptools
-
-      # ---- YOUR C++/Python build goes here ----
-      # Replace this block with your project's canonical wheel build command.
       - name: Build wheel
         shell: bash
         run: |
           set -euo pipefail
-          # Example command; replace if your project uses scikit-build/cibuildwheel/custom scripts.
           python -m build --wheel --outdir "${WHEEL_DIR}"
-
       - name: Verify wheel exists
         shell: bash
         run: |
@@ -62,7 +61,6 @@ jobs:
           fi
           echo "Found wheel: ${WHEEL}"
           echo "WHEEL=${WHEEL}" >> "$GITHUB_ENV"
-
       - name: Test Python imports from built wheel
         shell: bash
         run: |
@@ -71,21 +69,14 @@ jobs:
             echo "WHEEL env var not set"
             exit 1
           fi
-
           echo "Installing wheel: ${WHEEL}"
           python -m pip install --force-reinstall "${WHEEL}"
-
           python - <<'PY'
           import importlib
           import sys
-
-          # Keep only modules you truly expect to import from this wheel.
           modules = [
               "asset_asrl",
-              # "asset",
-              # "pines",
           ]
-
           failed = []
           for name in modules:
               try:
@@ -95,14 +86,12 @@ jobs:
               except Exception as exc:
                   failed.append((name, exc))
                   print(f"FAILED: {name} -> {exc}", file=sys.stderr)
-
           if failed:
               print("\nFailed imports:", file=sys.stderr)
               for name, exc in failed:
                   print(f"  {name}: {exc}", file=sys.stderr)
               raise SystemExit(f"{len(failed)} module(s) failed to import")
           PY
-
       - name: Upload native build artifacts (.so/.pyd)
         uses: actions/upload-artifact@v4
         with:
