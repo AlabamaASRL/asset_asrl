@@ -194,33 +194,21 @@ def PlotCorners(ode,XtU,SL,ax,col='b'):
     mat = np.array([[np.cos(theta),-np.sin(theta)],
                     [np.sin(theta),np.cos(theta)]])
     
-    xs = []
-    ys = []
-    
-    E = [SL,0]
     Xs =[]
     Ys =[]
     for Loc in [ode.Aloc,ode.Cloc,ode.Dloc,ode.Bloc]:
-        
         xyl = np.dot(mat,Loc)
         X = x+xyl[0]
         Y = y+xyl[1]
         Xs.append(X)
         Ys.append(Y)
-        xs = [E[0],X]
-        ys = [E[1],Y]
-                
-        
+
     for Loc in [ode.Aloc,ode.Cloc,ode.Dloc,ode.Bloc]:
         
         xyl = np.dot(mat,Loc)
         X = x+xyl[0]
         Y = y+xyl[1]
-       
-        xs = [0,X]
-        ys = [0,Y]
-        
-    
+
 def PlotCar(ode,XtU,ax,col='b'):
     x = XtU[0]
     y = XtU[1]

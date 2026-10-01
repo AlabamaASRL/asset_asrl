@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import asset_asrl as ast
 from asset_asrl.Astro.Extensions.ThrusterModels import CSIThruster
 from asset_asrl.Astro.AstroModels import MEETwoBody_CSI
-from asset_asrl.Astro.FramePlot import TBPlot,colpal
+from asset_asrl.Astro.FramePlot import TBPlot
 import asset_asrl.Astro.Constants as c
 
 
@@ -154,19 +154,3 @@ if __name__ == "__main__":
     axs[1].grid(True)
     
     plt.show()
-            
-        
-        
-        
-    
-    
-    
-    
-  
-    
-    
-
-    
-
-        
-

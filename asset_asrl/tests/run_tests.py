@@ -1,26 +1,26 @@
 # -*- coding: utf-8 -*-
 
 import importlib.util
+import io
 import logging
 import sys
 import unittest
 from pathlib import Path
 
+from pyflakes.api import checkPath
+from pyflakes.reporter import Reporter
+
 
 # %% Logging helpers
-
-# ANSI escape codes for colors
-
-# Could be abstracted to create custom logging class for use with rest of ASSET
 
 ANSI_RESET = "\033[0m"
 
 ANSI_COLORS = {
-    logging.DEBUG: "\033[36m",       # Cyan
-    logging.INFO: "\033[32m",        # Green
-    logging.WARNING: "\033[33m",     # Yellow
-    logging.ERROR: "\033[31m",       # Red
-    logging.CRITICAL: "\033[35;1m",  # Bright Magenta
+    logging.DEBUG: "\033[36m",
+    logging.INFO: "\033[32m",
+    logging.WARNING: "\033[33m",
+    logging.ERROR: "\033[31m",
+    logging.CRITICAL: "\033[35;1m",
 }
 
 
@@ -39,17 +39,14 @@ def setup_logging():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    # Remove any existing handlers to avoid duplicate logs
     if logger.hasHandlers():
         logger.handlers.clear()
 
-    # Console handler with colors
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
     console_format = ColorFormatter("%(asctime)s [%(levelname)s] %(message)s")
     console_handler.setFormatter(console_format)
 
-    # File handler without colors
     file_handler = logging.FileHandler("test_run.log", mode="w", encoding="utf-8")
     file_handler.setLevel(logging.DEBUG)
     file_format = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
@@ -58,13 +55,56 @@ def setup_logging():
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
 
-    # Prevent log propagation to root logger
     logger.propagate = False
 
     return logger
 
 
 logger = setup_logging()
+
+
+# %% Pyflakes tests
+
+class PyflakesTests(unittest.TestCase):
+    """Verify Python source files contain no Pyflakes diagnostics."""
+
+    def test_pyflakes(self):
+        """Verify Python files contain no unused imports or variables."""
+
+        root = Path(".").resolve()
+
+        python_files = sorted(
+            path for path in root.rglob("*.py")
+            if ".git" not in path.parts
+            and "__pycache__" not in path.parts
+            and ".venv" not in path.parts
+            and "venv" not in path.parts
+            and "__init__.py" not in path.parts
+        )
+
+        self.assertGreater(len(python_files), 0, "No Python files found.")
+
+        failures = []
+        error_count = 0
+
+        for path in python_files:
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            reporter = Reporter(stdout, stderr)
+
+            errors = checkPath(str(path), reporter)
+            error_count += errors
+
+            if errors:
+                output = stdout.getvalue() + stderr.getvalue()
+                failures.append(f"{path}:\n{output}")
+
+        print(f"\nPyflakes errors: {error_count}")
+
+        self.assertFalse(
+            failures,
+            "Pyflakes found issues:\n\n" + "\n".join(failures),
+        )
 
 
 # %% Unit test runner
@@ -90,6 +130,9 @@ def run_all_tests(start_dir=Path("tests"), pattern="test_*.py"):
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
+    # Add Pyflakes test explicitly.
+    suite.addTests(loader.loadTestsFromTestCase(PyflakesTests))
+
     test_files = sorted(start_dir.rglob(pattern))
 
     logger.info(f"Found {len(test_files)} test file(s).\n")
@@ -100,10 +143,7 @@ def run_all_tests(start_dir=Path("tests"), pattern="test_*.py"):
         module_name = f"_test_module_{test_file.stem}"
 
         try:
-            spec = importlib.util.spec_from_file_location(
-                module_name,
-                test_file,
-            )
+            spec = importlib.util.spec_from_file_location(module_name, test_file)
 
             if spec is None or spec.loader is None:
                 raise ImportError(f"Could not load module from {test_file}")
