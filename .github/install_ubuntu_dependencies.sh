@@ -31,7 +31,7 @@ source /opt/intel/oneapi/setvars.sh
 echo "MKLROOT=$MKLROOT" >>$GITHUB_ENV
 echo "INTEL=/opt/intel/oneapi" >>$GITHUB_ENV
 echo "ONEAPI_ROOT=$ONEAPI_ROOT" >>$GITHUB_ENV
-echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >>$GITHUB_ENV
+echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}" >>$GITHUB_ENV
 
 # Install other dependencies
 sudo apt install cmake
