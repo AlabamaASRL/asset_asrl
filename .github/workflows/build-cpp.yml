@@ -33,17 +33,20 @@ jobs:
         run: |
           set -euo pipefail
           bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
+
       - name: Install Python build deps
         shell: bash
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
           python -m pip install build wheel setuptools
+
       - name: Build wheel
         shell: bash
         run: |
           set -euo pipefail
           python -m build --wheel --outdir "${WHEEL_DIR}"
+
       - name: Verify wheel exists
         shell: bash
         run: |
@@ -61,6 +64,18 @@ jobs:
           fi
           echo "Found wheel: ${WHEEL}"
           echo "WHEEL=${WHEEL}" >> "$GITHUB_ENV"
+
+      - name: Reinstall test requirements
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f requirements.txt ]; then
+            python -m pip install --upgrade --force-reinstall -r requirements.txt
+          else
+            echo "requirements.txt not found at repo root"
+            exit 1
+          fi
+
       - name: Test Python imports from built wheel
         shell: bash
         run: |
@@ -92,6 +107,7 @@ jobs:
                   print(f"  {name}: {exc}", file=sys.stderr)
               raise SystemExit(f"{len(failed)} module(s) failed to import")
           PY
+
       - name: Upload native build artifacts (.so/.pyd)
         uses: actions/upload-artifact@v4
         with:
