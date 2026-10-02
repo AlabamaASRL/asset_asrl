@@ -93,6 +93,7 @@ setup(
     description="High-speed, extensible, object-oriented trajectory design and optimization",
     long_description="",
     ext_modules=[CMakeExtension("asset")],
+    install_requires=["numpy"],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
 )
