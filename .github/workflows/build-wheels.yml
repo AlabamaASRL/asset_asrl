@@ -1,144 +1,47 @@
-name: Build and publish wheels
+name: Build wheels
 
 on:
   push:
     branches: ["**"]
-    tags:
-      - "v*"
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
-concurrency:
-  group: build-wheels-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  build-wheels:
-    name: Build wheels on ${{ matrix.os }}
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-22.04, windows-2022, macos-13, macos-14]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
-
+    
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           submodules: true
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      
+      - uses: pypa/cibuildwheel@v2.17.0
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Linux dependencies
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt update
-          
-          # Install compiler
-          COMPILER=clang-13
-          sudo apt install -y $COMPILER
-          $COMPILER -v
-          echo "CC=$COMPILER" >> $GITHUB_ENV
-          echo "CXX=clang++-13" >> $GITHUB_ENV
-          
-          # Install Intel OneAPI MKL
-          cd /tmp
-          wget -q https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
-          sudo apt update
-          sudo apt install -y intel-oneapi-compiler-dpcpp-cpp intel-oneapi-mkl-devel intel-oneapi-openmp
-          source /opt/intel/oneapi/setvars.sh
-          echo "MKLROOT=$MKLROOT" >> $GITHUB_ENV
-          echo "INTEL=/opt/intel/oneapi" >> $GITHUB_ENV
-          echo "ONEAPI_ROOT=$ONEAPI_ROOT" >> $GITHUB_ENV
-          
-          # Install build tools
-          sudo apt install -y cmake
-
-      - name: Install macOS dependencies
-        if: runner.os == 'macOS'
-        shell: bash
-        run: |
-          set -euo pipefail
-          # Install Homebrew dependencies
-          brew install llvm cmake
-          
-          # Set up Intel MKL
-          python -m pip install mkl-devel mkl
-          
-          # Point to Homebrew clang
-          export LLVM_HOME=$(brew --prefix llvm)
-          echo "CC=$LLVM_HOME/bin/clang" >> $GITHUB_ENV
-          echo "CXX=$LLVM_HOME/bin/clang++" >> $GITHUB_ENV
-          echo "PATH=$LLVM_HOME/bin:$PATH" >> $GITHUB_ENV
-
-      - name: Install Windows dependencies
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          # Install LLVM/Clang via Chocolatey
-          choco install -y llvm cmake
-          
-          # Install Intel MKL via pip (conda would also work)
-          python -m pip install mkl-devel mkl
-          
-          # Set environment for Clang on Windows
-          $env:CC = "clang-cl"
-          $env:CXX = "clang-cl"
-          "CC=$env:CC" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          "CXX=$env:CXX" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Install Python build dependencies
-        shell: bash
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install build wheel setuptools cmake
-
-      - name: Build wheel
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m build --wheel --outdir dist/
-
-      - name: Test wheel installation
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install dist/asset_asrl*.whl
-          python -c "import asset_asrl; print('✓ asset_asrl imported successfully')"
-          python -c "from asset_asrl import Astro; print('✓ asset_asrl.Astro imported successfully')"
-
-      - name: Upload wheel artifacts
-        uses: actions/upload-artifact@v4
+          output-dir: wheelhouse
+        env:
+          CIBW_BUILD: cp39-* cp310-* cp311-* cp312-*
+          CIBW_SKIP: "pp*"
+          CIBW_BEFORE_ALL_LINUX: |
+            apt update
+            apt install -y clang-13 cmake
+            cd /tmp
+            wget -q https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+            apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+            echo "deb https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/sources.list.d/oneAPI.list
+            apt update
+            apt install -y intel-oneapi-mkl-devel intel-oneapi-openmp
+            source /opt/intel/oneapi/setvars.sh
+          CIBW_BEFORE_ALL_MACOS: |
+            brew install llvm cmake
+            python -m pip install mkl-devel
+          CIBW_BEFORE_ALL_WINDOWS: |
+            choco install -y llvm cmake
+            pip install mkl-devel
+      
+      - uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}-py${{ matrix.python-version }}
-          path: dist/*.whl
-          if-no-files-found: error
-          retention-days: 7
-
-  publish:
-    name: Publish to PyPI
-    needs: build-wheels
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: dist
-          merge-multiple: true
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          path: wheelhouse/*.whl
