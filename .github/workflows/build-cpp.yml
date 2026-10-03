@@ -24,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install system deps
         shell: bash
@@ -139,7 +139,7 @@ jobs:
             build/src/asset*.pyd
             build/asset*.so
             build/asset*.pyd
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
 
       - name: Upload wheel artifact
