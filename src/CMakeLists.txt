@@ -152,6 +152,11 @@ target_link_libraries(asset PUBLIC asset_extensions)
 
 target_include_directories(asset PRIVATE ${INCLUDE_DIRS})
 target_link_libraries(asset PRIVATE ${LINK_LIBS})
+if(UNIX AND NOT APPLE)
+    # LINKER_FLAGS opens a group before ASSET's mutually dependent static
+    # libraries. Close it after all direct libraries have been appended.
+    target_link_libraries(asset PRIVATE "-Wl,--end-group")
+endif()
 #set_target_properties(asset PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
 if(UNIX)
@@ -192,5 +197,4 @@ endif()
 
 
     
-
 
