@@ -1,0 +1,27 @@
+KPL/SCLK
+
+\begintext
+
+    this is an example of SCLK
+
+\begindata
+
+
+      SCLK_KERNEL_ID            = ( @2016-03-27 )
+
+      SCLK_DATA_TYPE_29        = ( 1 )
+      SCLK01_TIME_SYSTEM_29    = ( 2 )
+      SCLK01_N_FIELDS_29       = ( 2 )
+      SCLK01_MODULI_29         = ( 4294967296 65536 )
+      SCLK01_OFFSETS_29        = ( 0 0 )
+      SCLK01_OUTPUT_DELIM_29   = ( 1 )
+
+      SCLK_PARTITION_START_29  = ( 0.0000000000000E+00 )
+
+      SCLK_PARTITION_END_29    = ( 2.81474976710656E+14 )
+
+      SCLK01_COEFFICIENTS_29   = (
+
+          0.0000000000000E+00     @2022-MAY-30-23:59:59.999         1 
+
+                                  )

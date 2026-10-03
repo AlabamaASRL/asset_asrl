@@ -1,0 +1,29 @@
+CALCEPH library
+===============           
+
+This library is designed to access the binary planetary ephemeris files, such INPOPxx, JPL DExxx and SPICE ephemeris files.
+This library provides a C Application Programming Interface (API) and, optionally, Fortran 77/2003, Python 2/3 and Octave/Matlab interfaces to be called by the application
+
+This library  is developed by the "Astronomy and Dynamical System" team
+at  LTE, Observatoire de Paris, CNRS, PSL Research University, Sorbonne Universite,  (PARIS).  
+
+
+Installation
+------------
+
+.. image:: https://badge.fury.io/py/calcephpy.svg
+    :target: https://badge.fury.io/py/calcephpy
+    
+NumPy should be already installed.
+
+.. code:: python
+
+    pip install calcephpy
+
+
+Sources
+-------
+
+The library is available at :  https://calceph.imcce.fr
+
+

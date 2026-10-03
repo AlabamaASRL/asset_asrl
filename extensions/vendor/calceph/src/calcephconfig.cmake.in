@@ -1,0 +1,188 @@
+/* Define to 1 if you have the <errno.h> header file. */
+#cmakedefine HAVE_ERRNO_H 1 
+
+/* Define to 1 if you have the `freelocale' function. */
+#cmakedefine HAVE_FREELOCALE 1 
+
+/* Define to 1 if fseeko (and presumably ftello) exists and is declared. */
+#cmakedefine HAVE_FSEEKO 1 
+
+/* Define to 1 if _fseeki64 (and presumably ftello) exists and is declared. */
+#cmakedefine HAVE__FSEEKI64 1 
+
+/* Define 1 if iso c11 is supported */
+#cmakedefine HAVE_ISO_C11_THREAD 1
+
+/* Define to 1 if you have the <limits.h> header file. */
+#cmakedefine HAVE_LIMITS_H 1 
+
+/* Define to 1 if you have the <locale.h> header file. */
+#cmakedefine HAVE_LOCALE_H 1 
+
+/* Define to 1 if you have the <math.h> header file. */
+#cmakedefine HAVE_MATH_H 1 
+
+/* Define to 1 if you have a working `mmap' system call. */
+#cmakedefine HAVE_MMAP 1 
+
+/* Define to 1 if you have the `newlocale' function. */
+#cmakedefine HAVE_NEWLOCALE 1 
+
+/* Define if you have POSIX threads libraries and header files. */
+#cmakedefine HAVE_PTHREAD 1 
+
+/* define it to 1 if rint is available */
+#cmakedefine HAVE_RINT 1 
+
+/* Define to 1 if you have the `setlocale' function. */
+#cmakedefine HAVE_SETLOCALE 1 
+
+/* Define to 1 if you have the <stdbool.h> header file. */
+#cmakedefine HAVE_STDBOOL_H 1 
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#cmakedefine HAVE_STDIO_H 1 
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#cmakedefine HAVE_STDLIB_H 1 
+
+/* Define to 1 if you have the <string.h> header file. */
+#cmakedefine HAVE_STRING_H 1 
+
+/* Define to 1 if you have the `strncmp' function. */
+#cmakedefine HAVE_STRNCMP 1 
+
+/* Define to 1 if you have the `strcasecmp' function. */
+#cmakedefine HAVE_STRCASECMP 1 
+
+/* Define to 1 if you have the `_stricmp' function. */
+#cmakedefine HAVE__STRICMP 1 
+
+/* Define to 1 if you have the `_strtod_l' function. */
+#cmakedefine HAVE__STRTOD_L 1 
+
+/* Define to 1 if you have the `strtod_l' function. */
+#cmakedefine HAVE_STRTOD_L 1 
+
+/* Define to 1 if you have the <sys/mman.h> header file. */
+#cmakedefine HAVE_SYS_MMAN_H 1 
+
+/* Define to 1 if you have the <sys/resource.h> header file. */
+#cmakedefine HAVE_SYS_RESOURCE_H 1 
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#cmakedefine HAVE_SYS_STAT_H 1 
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#cmakedefine HAVE_SYS_TYPES_H 1 
+
+/* Define to 1 if you have the <time.h> header file. */
+#cmakedefine HAVE_TIME_H 1 
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#cmakedefine HAVE_UNISTD_H 1 
+
+/* Define to 1 if the system has the `unused' variable attribute */
+#cmakedefine HAVE_VAR_ATTRIBUTE_UNUSED 1 
+
+/* Define to 1 if you have the `snprintf' function. */
+#cmakedefine HAVE_SNPRINTF 1 
+
+/* Define to 1 if you have the `vasprintf' function. */
+#cmakedefine HAVE_VASPRINTF 1 
+
+/* Define to 1 if you have the `_vscprintf' function. */
+#cmakedefine HAVE__VSCPRINTF 1 
+
+/* Define to 1 if you have the `vsnprintf' function. */
+#cmakedefine HAVE_VSNPRINTF 1 
+
+/* Define to 1 if you have the <xlocale.h> header file. */
+#cmakedefine HAVE_XLOCALE_H 1 
+
+/* Define to 1 if you have the `strerror_r' function. */
+#cmakedefine HAVE_STRERROR_R 1
+
+/* Define to 1 if you have the `strerror_s' function. */
+#cmakedefine HAVE_STRERROR_S 1
+
+/* Define to 1 if you have the `pread' function. */
+#cmakedefine HAVE_PREAD 1
+
+/* Define to 1 if you have the `pwrite' function. */
+#cmakedefine HAVE_PWRITE 1
+
+/* Define to necessary symbol if this constant uses a non-standard name on
+   your system. */
+#cmakedefine PTHREAD_CREATE_JOINABLE 1 
+
+/* Define to 1 if you have the ANSI C header files. */
+#cmakedefine STDC_HEADERS 1 
+
+/* Define to 1 if bool is available. */
+#cmakedefine HAVE_BOOL 1
+
+/* Define to 1 if you have the <windows.h> header file */
+#cmakedefine HAVE_WINDOWS_H 1
+
+#if HAVE_WINDOWS_H
+#include <windows.h>
+#define HAVE_WIN32API 1
+#endif
+
+#ifndef HAVE_BOOL
+#define bool BOOL
+#define false FALSE
+#define true TRUE
+#endif
+
+#if !defined(HAVE_FSEEKO) && defined(HAVE__FSEEKI64)
+#define fseeko _fseeki64
+#define ftello _ftelli64
+#undef HAVE_FSEEKO
+#define HAVE_FSEEKO 1
+#endif
+
+#if !defined(HAVE_STRCASECMP) && defined(HAVE__STRICMP)
+#define strcasecmp _stricmp
+#undef HAVE_STRCASECMP
+#define HAVE_STRCASECMP 1
+#endif
+
+#if !defined(HAVE_STRTOD_L) && defined(HAVE__STRTOD_L)
+#define strtod_l _strtod_l
+#undef HAVE_STRTOD_L
+#define HAVE_STRTOD_L 1
+#endif
+
+
+#if defined(__MINGW32__) || defined (__MINGW64__) || defined(_MSC_VER)
+#if __MSVCRT_VERSION__<0x0800 &&  (defined(__MINGW32__) || defined (__MINGW64__))
+/* mingw defined _fseeki64 only for __MSVCRT_VERSION__>=0x0800 */
+#define fseeko fseek
+#define ftello ftell
+#undef HAVE_FSEEKO
+#define HAVE_FSEEKO 1
+#endif
+
+
+#if defined(__GNUC__) &&  !(defined(__MINGW32__) || defined (__MINGW64__))
+#undef fseeko 
+#undef ftello
+#undef HAVE_FSEEKO
+#endif
+
+#ifdef _MSC_VER
+#define locale_t _locale_t
+#define HAVE__CREATE_LOCALE 1
+#define freelocale _free_locale
+#undef HAVE__VSCPRINTF
+#define HAVE__VSCPRINTF 1
+#endif
+
+#if !defined(__cplusplus) && !defined(__GNUC__)
+#define inline _inline
+#endif /*__cplusplus*/
+
+
+#endif /*defined(__MINGW32__) || defined (__MINGW64__) || defined(_MSC_VER)*/

@@ -1,0 +1,10 @@
+Name: calcephoct
+Version: @CALCEPH_VERSION_MAJOR@.@CALCEPH_VERSION_MINOR@.@CALCEPH_VERSION_PATCH@
+Date: 2023-12-11
+Author: Mickael Gastineau.
+Maintainer: Mickael Gastineau.
+Title: MEX interface to the Calceph Library
+Description: This library is designed to access and interpolate INPOP and JPL Ephemeris data.
+ The sources needed to build the CALCEPH library are in the directory src.
+License: CeCILLv2.1
+Categories: read planetary ephemeris files

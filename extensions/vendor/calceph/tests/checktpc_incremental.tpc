@@ -1,0 +1,13 @@
+KPL/PCK
+
+   \begindata
+NAIF_BODY_NAME += ( 'VESTA' , 'UNAMED') 
+NAIF_BODY_CODE += ( 2000004 , 2100000 ) 
+
+
+NEW_CST = ( 5 )
+                           
+NAIF_BODY_NAME += ( 'JUNO' ) 
+NAIF_BODY_CODE += ( 2000003 ) 
+
+   \begintext

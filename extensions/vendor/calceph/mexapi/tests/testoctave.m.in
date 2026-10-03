@@ -1,0 +1,17 @@
+addpath('@CMAKE_SOURCE_DIR@/mexapi/src')
+addpath('@CMAKE_BINARY_DIR@/mexapi/src')
+addpath('@CMAKE_CURRENT_SOURCE_DIR@')
+addpath('@CMAKE_CURRENT_BINARY_DIR@')
+mkoctfile --mex -I'@CMAKE_SOURCE_DIR@/src/' '@CMAKE_SOURCE_DIR@/mexapi/src/interfacemex.c' -L'@CMAKE_BINARY_DIR@/src/' -lcalceph
+%quiet normal or verbose
+mode="verbose";
+success=test("@TEST_FILE_OCTAVE@",mode);
+resultat=success
+if (success)
+disp('all tests are OK')
+    exit(0)
+else
+disp('some tests are BAD')
+    exit(1)
+end
+       

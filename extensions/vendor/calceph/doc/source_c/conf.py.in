@@ -1,0 +1,295 @@
+import sys
+import os
+
+exec(open(os.path.abspath("@CMAKE_CURRENT_BINARY_DIR@/source/confcommon.py")).read())
+
+primary_domain = 'c'
+
+# General information about the project.
+project = u'CALCEPH  - C language'
+
+# List of patterns, relative to source directory, that match files and
+# directories to ignore when looking for source files.
+# This patterns also effect to html_static_path and html_extra_path
+exclude_patterns = ['calceph.*.pythonusage.rst',
+                    'calceph.*.mexusage.rst',
+                    'calceph.*.f9xusage.rst',
+                    'calceph.*.f2003usage.rst',
+                    'writeph.*.f2003usage.rst',
+                    'calceph.multiple_*.rst',
+                    'writeeph.spk_*.rst',
+                    'writeeph.pck_*.rst',
+                    'calceph.error.rst',
+                    'examples/*', 
+                    'replace.rst', 
+                    'arg_*.rst',
+                    'table_*.rst',
+                    'condsingle_f9x/*',
+                    'condsingle_f2003/*' ]
+
+
+# Grouping the document tree into LaTeX files. List of tuples
+# (source start file, target name, title,
+#  author, documentclass [howto, manual, or own class]).
+latex_documents = [
+    (master_doc, 'calceph.tex', u'CALCEPH - C language',
+     u'M. Gastineau, J. Laskar, A. Fienga, H. Manche', 'manual'),
+]
+
+# Grouping the document tree into Texinfo files. List of tuples
+# (source start file, target name, title, author,
+#  dir menu entry, description, category)
+texinfo_documents = [
+    (master_doc, 'calceph', u'CALCEPH - C language',
+     author, 'calceph', 'CALCEPH - C language.',
+     'Miscellaneous'),
+]
+
+
+def setup(app):
+    app.add_config_value('calcephapi', 'C', 'env')
+
+
+rst_epilog = """
+.. |API| replace:: C
+.. |supportedspk| replace:: 1, 2, 3, 5, 8, 9, 12, 13, 14, 17, 18, 19, 20, 21, 102, 103 and 120
+.. |LIBRARYNAME| replace:: CALCEPH Library
+.. |LIBRARYSHORTNAME| replace:: CALCEPH
+.. |EMAIL| replace:: Mickael.Gastineau@obspm.fr
+.. |eph| replace:: associated to *eph*
+.. |ephemerisdescriptoreph| replace:: the ephemeris descriptor *eph*
+.. |menu_calceph_open| replace:: calceph_open
+.. |calceph_open| replace:: :c:func:`calceph_open()`
+.. |menu_calceph_open_array| replace:: calceph_open_array
+.. |calceph_open_array| replace:: :c:func:`calceph_open_array()`
+.. |menu_calceph_close| replace:: calceph_close
+.. |calceph_close| replace:: :c:func:`calceph_close()`
+.. |menu_calceph_prefetch| replace:: calceph_prefetch
+.. |calceph_prefetch| replace:: :c:func:`calceph_prefetch()`
+.. |menu_calceph_isthreadsafe| replace:: calceph_isthreadsafe
+.. |calceph_isthreadsafe| replace:: :c:func:`calceph_isthreadsafe()`
+.. |menu_calceph_compute| replace:: calceph_compute
+.. |calceph_compute| replace:: :c:func:`calceph_compute()`
+.. |menu_calceph_compute_unit| replace:: calceph_compute_unit
+.. |calceph_compute_unit| replace:: :c:func:`calceph_compute_unit()`
+.. |menu_calceph_getconstant| replace:: calceph_getconstant
+.. |calceph_getconstant| replace:: :c:func:`calceph_getconstant()`
+.. |menu_calceph_getconstantsd| replace:: calceph_getconstantsd
+.. |calceph_getconstantsd| replace:: :c:func:`calceph_getconstantsd()`
+.. |menu_calceph_getconstantvd| replace:: calceph_getconstantvd
+.. |calceph_getconstantvd| replace:: :c:func:`calceph_getconstantvd()`
+.. |menu_calceph_getconstantss| replace:: calceph_getconstantss
+.. |calceph_getconstantss| replace:: :c:func:`calceph_getconstantss()`
+.. |menu_calceph_getconstantvs| replace:: calceph_getconstantvs
+.. |calceph_getconstantvs| replace:: :c:func:`calceph_getconstantvs()`
+.. |menu_calceph_getconstantcount| replace:: calceph_getconstantcount
+.. |calceph_getconstantcount| replace:: :c:func:`calceph_getconstantcount()`
+.. |menu_calceph_getconstantindex| replace:: calceph_getconstantindex
+.. |calceph_getconstantindex| replace:: :c:func:`calceph_getconstantindex()`
+.. |menu_calceph_gettimescale| replace:: calceph_gettimescale
+.. |calceph_gettimescale| replace:: :c:func:`calceph_gettimescale()`
+.. |menu_calceph_gettimespan| replace:: calceph_gettimespan
+.. |calceph_gettimespan| replace:: :c:func:`calceph_gettimespan()`
+.. |menu_calceph_getidbyname| replace:: calceph_getidbyname
+.. |calceph_getidbyname| replace:: :c:func:`calceph_getidbyname()`
+.. |menu_calceph_getnamebyidss| replace:: calceph_getnamebyidss
+.. |calceph_getnamebyidss| replace:: :c:func:`calceph_getnamebyidss()`
+.. |menu_calceph_getpositionrecordcount| replace:: calceph_getpositionrecordcount
+.. |calceph_getpositionrecordcount| replace:: :c:func:`calceph_getpositionrecordcount()`
+.. |menu_calceph_getpositionrecordindex| replace:: calceph_getpositionrecordindex
+.. |calceph_getpositionrecordindex| replace:: :c:func:`calceph_getpositionrecordindex()`
+.. |menu_calceph_getpositionrecordindex2| replace:: calceph_getpositionrecordindex2
+.. |calceph_getpositionrecordindex2| replace:: :c:func:`calceph_getpositionrecordindex2()`
+.. |menu_calceph_getorientrecordcount| replace:: calceph_getorientrecordcount
+.. |calceph_getorientrecordcount| replace:: :c:func:`calceph_getorientrecordcount()`
+.. |menu_calceph_getorientrecordindex| replace:: calceph_getorientrecordindex
+.. |calceph_getorientrecordindex| replace:: :c:func:`calceph_getorientrecordindex()`
+.. |menu_calceph_getorientrecordindex2| replace:: calceph_getorientrecordindex2
+.. |calceph_getorientrecordindex2| replace:: :c:func:`calceph_getorientrecordindex2()`
+.. |menu_calceph_orient_unit| replace:: calceph_orient_unit
+.. |calceph_orient_unit| replace:: :c:func:`calceph_orient_unit()`
+.. |menu_calceph_rotangmom_unit| replace:: calceph_rotangmom_unit
+.. |calceph_rotangmom_unit| replace:: :c:func:`calceph_rotangmom_unit()`
+.. |menu_calceph_compute_order| replace:: calceph_compute_order
+.. |calceph_compute_order| replace:: :c:func:`calceph_compute_order()`
+.. |menu_calceph_orient_order| replace:: calceph_orient_order
+.. |calceph_orient_order| replace:: :c:func:`calceph_orient_order()`
+.. |menu_calceph_rotangmom_order| replace:: calceph_rotangmom_order
+.. |calceph_rotangmom_order| replace:: :c:func:`calceph_rotangmom_order()`
+.. |menu_calceph_sopen| replace:: calceph_sopen
+.. |calceph_sopen| replace:: :c:func:`calceph_sopen()`
+.. |menu_calceph_sclose| replace:: calceph_sclose
+.. |calceph_sclose| replace:: :c:func:`calceph_sclose()`
+.. |menu_calceph_scompute| replace:: calceph_scompute
+.. |calceph_scompute| replace:: :c:func:`calceph_scompute()`
+.. |menu_calceph_sgetconstant| replace:: calceph_sgetconstant
+.. |calceph_sgetconstant| replace:: :c:func:`calceph_sgetconstant()`
+.. |menu_calceph_sgetconstantcount| replace:: calceph_sgetconstantcount
+.. |calceph_sgetconstantcount| replace:: :c:func:`calceph_sgetconstantcount()`
+.. |menu_calceph_sgetconstantindex| replace:: calceph_sgetconstantindex
+.. |calceph_sgetconstantindex| replace:: :c:func:`calceph_sgetconstantindex()`
+.. |menu_calceph_sgettimescale| replace:: calceph_sgettimescale
+.. |calceph_sgettimescale| replace:: :c:func:`calceph_sgettimescale()`
+.. |menu_calceph_sgettimespan| replace:: calceph_sgettimespan
+.. |calceph_sgettimespan| replace:: :c:func:`calceph_sgettimespan()`
+.. |menu_calceph_sgetfileversion| replace:: calceph_sgetfileversion
+.. |calceph_sgetfileversion| replace:: :c:func:`calceph_sgetfileversion()`
+.. |menu_calceph_getfileversion| replace:: calceph_getfileversion
+.. |calceph_getfileversion| replace:: :c:func:`calceph_getfileversion()`
+.. |menu_calceph_seterrorhandler| replace:: calceph_seterrorhandler
+.. |calceph_seterrorhandler| replace:: :c:func:`calceph_seterrorhandler()`
+.. |menu_calceph_getversion_str| replace:: calceph_getversion_str
+.. |menu_calceph_getmaxsupportedorder| replace:: calceph_getmaxsupportedorder
+.. |calceph_getmaxsupportedorder| replace:: :c:func:`calceph_getmaxsupportedorder()`
+.. |menu_writeph_spk_open| replace:: writeph_spk_open
+.. |writeph_spk_open| replace:: :c:func:`writeph_spk_open()`
+.. |menu_writeph_pck_open| replace:: writeph_pck_open
+.. |writeph_pck_open| replace:: :c:func:`writeph_pck_open()`
+.. |menu_writeph_spk_create| replace:: writeph_spk_create
+.. |writeph_spk_create| replace:: :c:func:`writeph_spk_create()`
+.. |menu_writeph_pck_create| replace:: writeph_pck_create
+.. |writeph_pck_create| replace:: :c:func:`writeph_pck_create()`
+.. |menu_writeph_close| replace:: writeph_close
+.. |writeph_close| replace:: :c:func:`writeph_close()`
+.. |menu_writeph_dump| replace:: writeph_dump
+.. |writeph_dump| replace:: :c:func:`writeph_dump()`
+.. |menu_writeph_restore| replace:: writeph_restore
+.. |writeph_restore| replace:: :c:func:`writeph_restore()`
+.. |menu_writeph_comment| replace:: writeph_comment
+.. |writeph_comment| replace:: :c:func:`writeph_comment()`
+.. |menu_writeph_spk2_seq_write| replace:: writeph_spk2_seq_write
+.. |writeph_spk2_seq_write| replace:: :c:func:`writeph_spk2_seq_write()`
+.. |menu_writeph_spk2_par_reserve| replace:: writeph_spk2_par_reserve
+.. |writeph_spk2_par_reserve| replace:: :c:func:`writeph_spk2_par_reserve()`
+.. |menu_writeph_spk2_par_write| replace:: writeph_spk2_par_write
+.. |writeph_spk2_par_write| replace:: :c:func:`writeph_spk2_par_write()`
+.. |menu_writeph_spk3_seq_write| replace:: writeph_spk3_seq_write
+.. |writeph_spk3_seq_write| replace:: :c:func:`writeph_spk3_seq_write()`
+.. |menu_writeph_spk3_par_reserve| replace:: writeph_spk3_par_reserve
+.. |writeph_spk3_par_reserve| replace:: :c:func:`writeph_spk3_par_reserve()`
+.. |menu_writeph_spk3_par_write| replace:: writeph_spk3_par_write
+.. |writeph_spk3_par_write| replace:: :c:func:`writeph_spk3_par_write()`
+.. |menu_writeph_spk8_seq_write| replace:: writeph_spk8_seq_write
+.. |writeph_spk8_seq_write| replace:: :c:func:`writeph_spk8_seq_write()`
+.. |menu_writeph_spk8_par_reserve| replace:: writeph_spk8_par_reserve
+.. |writeph_spk8_par_reserve| replace:: :c:func:`writeph_spk8_par_reserve()`
+.. |menu_writeph_spk8_par_write| replace:: writeph_spk8_par_write
+.. |writeph_spk8_par_write| replace:: :c:func:`writeph_spk8_par_write()`
+.. |menu_writeph_spk9_seq_write| replace:: writeph_spk9_seq_write
+.. |writeph_spk9_seq_write| replace:: :c:func:`writeph_spk9_seq_write()`
+.. |menu_writeph_spk9_par_reserve| replace:: writeph_spk9_par_reserve
+.. |writeph_spk9_par_reserve| replace:: :c:func:`writeph_spk9_par_reserve()`
+.. |menu_writeph_spk9_par_write| replace:: writeph_spk9_par_write
+.. |writeph_spk9_par_write| replace:: :c:func:`writeph_spk9_par_write()`
+.. |menu_writeph_spk12_seq_write| replace:: writeph_spk12_seq_write
+.. |writeph_spk12_seq_write| replace:: :c:func:`writeph_spk12_seq_write()`
+.. |menu_writeph_spk12_par_reserve| replace:: writeph_spk12_par_reserve
+.. |writeph_spk12_par_reserve| replace:: :c:func:`writeph_spk12_par_reserve()`
+.. |menu_writeph_spk12_par_write| replace:: writeph_spk12_par_write
+.. |writeph_spk12_par_write| replace:: :c:func:`writeph_spk12_par_write()`
+.. |menu_writeph_spk13_seq_write| replace:: writeph_spk13_seq_write
+.. |writeph_spk13_seq_write| replace:: :c:func:`writeph_spk13_seq_write()`
+.. |menu_writeph_spk13_par_reserve| replace:: writeph_spk13_par_reserve
+.. |writeph_spk13_par_reserve| replace:: :c:func:`writeph_spk13_par_reserve()`
+.. |menu_writeph_spk13_par_write| replace:: writeph_spk13_par_write
+.. |writeph_spk13_par_write| replace:: :c:func:`writeph_spk13_par_write()`
+.. |menu_writeph_spk14_begin| replace:: writeph_spk14_begin
+.. |writeph_spk14_begin| replace:: :c:func:`writeph_spk14_begin()`
+.. |menu_writeph_spk14_add| replace:: writeph_spk14_add
+.. |writeph_spk14_add| replace:: :c:func:`writeph_spk14_add()`
+.. |menu_writeph_spk14_end| replace:: writeph_spk14_end
+.. |writeph_spk14_end| replace:: :c:func:`writeph_spk14_end()`
+.. |menu_writeph_spk102_seq_write| replace:: writeph_spk102_seq_write
+.. |writeph_spk102_seq_write| replace:: :c:func:`writeph_spk102_seq_write()`
+.. |menu_writeph_spk102_par_reserve| replace:: writeph_spk102_par_reserve
+.. |writeph_spk102_par_reserve| replace:: :c:func:`writeph_spk102_par_reserve()`
+.. |menu_writeph_spk102_par_write| replace:: writeph_spk102_par_write
+.. |writeph_spk102_par_write| replace:: :c:func:`writeph_spk102_par_write()`
+.. |menu_writeph_spk103_seq_write| replace:: writeph_spk103_seq_write
+.. |writeph_spk103_seq_write| replace:: :c:func:`writeph_spk103_seq_write()`
+.. |menu_writeph_spk103_par_reserve| replace:: writeph_spk103_par_reserve
+.. |writeph_spk103_par_reserve| replace:: :c:func:`writeph_spk103_par_reserve()`
+.. |menu_writeph_spk103_par_write| replace:: writeph_spk103_par_write
+.. |writeph_spk103_par_write| replace:: :c:func:`writeph_spk103_par_write()`
+.. |menu_writeph_pck2_seq_write| replace:: writeph_pck2_seq_write
+.. |writeph_pck2_seq_write| replace:: :c:func:`writeph_pck2_seq_write()`
+.. |menu_writeph_pck2_par_reserve| replace:: writeph_pck2_par_reserve
+.. |writeph_pck2_par_reserve| replace:: :c:func:`writeph_pck2_par_reserve()`
+.. |menu_writeph_pck2_par_write| replace:: writeph_pck2_par_write
+.. |writeph_pck2_par_write| replace:: :c:func:`writeph_pck2_par_write()`
+.. |menu_writeph_pck3_seq_write| replace:: writeph_pck3_seq_write
+.. |writeph_pck3_seq_write| replace:: :c:func:`writeph_pck3_seq_write()`
+.. |menu_writeph_pck3_par_reserve| replace:: writeph_pck3_par_reserve
+.. |writeph_pck3_par_reserve| replace:: :c:func:`writeph_pck3_par_reserve()`
+.. |menu_writeph_pck3_par_write| replace:: writeph_pck3_par_write
+.. |writeph_pck3_par_write| replace:: :c:func:`writeph_pck3_par_write()`
+.. |menu_writeph_pck102_seq_write| replace:: writeph_pck102_seq_write
+.. |writeph_pck102_seq_write| replace:: :c:func:`writeph_pck102_seq_write()`
+.. |menu_writeph_pck102_par_reserve| replace:: writeph_pck102_par_reserve
+.. |writeph_pck102_par_reserve| replace:: :c:func:`writeph_pck102_par_reserve()`
+.. |menu_writeph_pck102_par_write| replace:: writeph_pck102_par_write
+.. |writeph_pck102_par_write| replace:: :c:func:`writeph_pck102_par_write()`
+.. |menu_writeph_pck103_seq_write| replace:: writeph_pck103_seq_write
+.. |writeph_pck103_seq_write| replace:: :c:func:`writeph_pck103_seq_write()`
+.. |menu_writeph_pck103_par_reserve| replace:: writeph_pck103_par_reserve
+.. |writeph_pck103_par_reserve| replace:: :c:func:`writeph_pck103_par_reserve()`
+.. |menu_writeph_pck103_par_write| replace:: writeph_pck103_par_write
+.. |writeph_pck103_par_write| replace:: :c:func:`writeph_pck103_par_write()`
+.. |menu_Headers_and_Libraries| replace:: Headers and Libraries
+.. |CALCEPH_UNIT_AU| replace:: :c:macro:`CALCEPH_UNIT_AU`
+.. |CALCEPH_UNIT_KM| replace:: :c:macro:`CALCEPH_UNIT_KM`
+.. |CALCEPH_UNIT_DAY| replace:: :c:macro:`CALCEPH_UNIT_DAY`
+.. |CALCEPH_UNIT_SEC| replace:: :c:macro:`CALCEPH_UNIT_SEC`
+.. |CALCEPH_UNIT_RAD| replace:: :c:macro:`CALCEPH_UNIT_RAD`
+.. |CALCEPH_OUTPUT_EULERANGLES| replace:: :c:macro:`CALCEPH_OUTPUT_EULERANGLES`
+.. |CALCEPH_OUTPUT_NUTATIONANGLES| replace:: :c:macro:`CALCEPH_OUTPUT_NUTATIONANGLES`
+.. |CALCEPH_USE_NAIFID| replace:: :c:macro:`CALCEPH_USE_NAIFID`
+.. |retfuncfails0| replace::  0 if an error occurs, otherwise non-zero value.
+.. |funcfails0| replace::  On exit, it returns 0 if an error occurs, otherwise the return value is a non-zero value.
+.. |retfuncfailsNULL| replace::  This value is NULL if an error occurs, otherwise non-NULL value.
+.. |funcfailsNULL| replace:: On exit, it returns NULL if an error occurs, otherwise the return value is a non-NULL value.
+.. |retfuncfailsnbval| replace:: returns 0 if an error occurs, otherwise the number of values associated to the constant.
+.. |retfuncnotfound0| replace::  returns 0 if the file version was not found, otherwise non-zero value.
+.. |funcnotfound0| replace::  On exit, it returns 0 if the file version was not found, otherwise non-zero value.
+.. |retfuncnotfoundid0| replace:: returns 0 if the name of the body was not found, otherwise non-zero value.
+
+.. |menu_calceph_time_jd_to_cal| replace:: calceph_time_jd_to_cal
+.. |calceph_time_jd_to_cal| replace:: :c:func:`calceph_time_jd_to_cal()`
+.. |menu_calceph_time_cal_to_jd| replace:: calceph_time_cal_to_jd
+.. |calceph_time_cal_to_jd| replace:: :c:func:`calceph_time_cal_to_jd()`
+.. |menu_calceph_time_str_to_jd| replace:: calceph_time_str_to_jd
+.. |calceph_time_str_to_jd| replace:: :c:func:`calceph_time_str_to_jd()`
+.. |menu_calceph_time_set_relationship_tt_tdb| replace:: calceph_time_set_relationship_tt_tdb
+.. |calceph_time_set_relationship_tt_tdb| replace:: :c:func:`calceph_time_set_relationship_tt_tdb()`
+.. |menu_calceph_time_jd_tdb_to_jd_tt| replace:: calceph_time_jd_tdb_to_jd_tt
+.. |calceph_time_jd_tdb_to_jd_tt| replace:: :c:func:`calceph_time_jd_tdb_to_jd_tt()`
+.. |menu_calceph_time_jd_tt_to_jd_tdb| replace:: calceph_time_jd_tt_to_jd_tdb
+.. |calceph_time_jd_tt_to_jd_tdb| replace:: :c:func:`calceph_time_jd_tt_to_jd_tdb()`
+.. |menu_calceph_time_jd_tdb_to_jd_tcb| replace:: calceph_time_jd_tdb_to_jd_tcb
+.. |calceph_time_jd_tdb_to_jd_tcb| replace:: :c:func:`calceph_time_jd_tdb_to_jd_tcb()`
+.. |menu_calceph_time_jd_tcb_to_jd_tdb| replace:: calceph_time_jd_tcb_to_jd_tdb
+.. |calceph_time_jd_tcb_to_jd_tdb| replace:: :c:func:`calceph_time_jd_tcb_to_jd_tdb()`
+.. |menu_calceph_time_cal_utc_to_jd_tdb| replace:: calceph_time_cal_utc_to_jd_tdb
+.. |calceph_time_cal_utc_to_jd_tdb| replace:: :c:func:`calceph_time_cal_utc_to_jd_tdb()`
+.. |menu_calceph_time_jd_tdb_to_cal_utc| replace:: calceph_time_jd_tdb_to_cal_utc
+.. |calceph_time_jd_tdb_to_cal_utc| replace:: :c:func:`calceph_time_jd_tdb_to_cal_utc()`
+.. |menu_calceph_time_str_utc_to_jd_tdb| replace:: calceph_time_str_utc_to_jd_tdb
+.. |calceph_time_str_utc_to_jd_tdb| replace:: :c:func:`calceph_time_str_utc_to_jd_tdb()`
+.. |menu_calceph_time_str_any_to_jd_tdb| replace:: calceph_time_str_any_to_jd_tdb
+.. |calceph_time_str_any_to_jd_tdb| replace:: :c:func:`calceph_time_str_any_to_jd_tdb()`
+.. |menu_calceph_time_str_spacecraft_clock_to_jd_tdb| replace:: calceph_time_str_spacecraft_clock_to_jd_tdb
+.. |calceph_time_str_spacecraft_clock_to_jd_tdb| replace:: :c:func:`calceph_time_str_spacecraft_clock_to_jd_tdb()`
+.. |menu_calceph_time_jd_tdb_to_str_spacecraft_clock| replace:: calceph_time_jd_tdb_to_str_spacecraft_clock
+.. |calceph_time_jd_tdb_to_str_spacecraft_clock| replace:: :c:func:`calceph_time_jd_tdb_to_str_spacecraft_clock()`
+
+.. |CALCEPH_TDB| replace:: :c:macro:`CALCEPH_TDB`
+.. |CALCEPH_UTC| replace:: :c:macro:`CALCEPH_UTC`
+.. |CALCEPH_TAI| replace:: :c:macro:`CALCEPH_TAI`
+.. |CALCEPH_TT| replace:: :c:macro:`CALCEPH_TT`
+.. |CALCEPH_TCB| replace:: :c:macro:`CALCEPH_TCB`
+.. |CALCEPH_TIMESCALE_FROM_STR| replace:: :c:macro:`CALCEPH_TIMESCALE_FROM_STR`
+
+.. |retreservation| replace:: return a reservation identifier on success, 0 on failure.
+"""
+
+highlight_language = 'C'

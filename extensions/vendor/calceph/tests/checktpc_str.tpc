@@ -1,0 +1,16 @@
+KPL/PCK
+
+   \begindata
+DISTANCE_UNITS = ( 'KILOMETERS' )
+MESSAGE = ( 'You can''t always get what you want.' )
+MISSION_UNITS = ( 'KILOMETERS','SECONDS'
+                           'KILOMETERS/SECOND' )
+CONTINUED_STRINGS = ( 'This //  ',
+                               'is //  ',
+                               'just //',
+                               'one long //',
+                               'string.',
+                               'Here''s a second //',
+                               'continued //'
+                               'string.'              )                           
+   \begintext
