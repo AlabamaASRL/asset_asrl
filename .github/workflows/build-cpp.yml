@@ -44,6 +44,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install build wheel setuptools
 
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential gfortran
+
       - name: Build wheel
         shell: bash
         run: |
