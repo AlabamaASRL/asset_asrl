@@ -1,0 +1,9 @@
+KPL/PCK
+
+   \begindata
+
+     BODY000_GMLIST4 = ( 199 299  301 399)
+     BODY000_GMLIST2 = ( 499 599  )
+     BODY000_GMLIST1 = ( 699 )
+     
+   \begintext

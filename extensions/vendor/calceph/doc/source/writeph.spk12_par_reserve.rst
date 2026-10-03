@@ -1,0 +1,22 @@
+This function is meant to enable the parallel writing (with multiple threads) of several type 12 segments (discrete states of the positions and velocities, Hermite interpolation with equal timesteps) to the SPK file associated to the ephemeris descriptor *eph*.
+This function is similar to |writeph_spk2_par_reserve|, except that it reserves enough space for type 12 segments (state vectors with derivatives).
+In the same way |writeph_spk2_par_reserve| is used with |writeph_spk2_par_write|, this function must be used with |writeph_spk12_par_write|.
+
+It reserves space in the file for *target_count* segments, each segment associated to a target in the *targets* array.
+Each target has its own interpolation interval length specified in the *intlens_jd_tdb* array, its own number of records specified in the *record_counts* array, and its own segment identifier specified in the *segids* array.
+All the targets share the same *center*, *frame*, *start_..._tdb*, *end_..._tdb* and *deg* parameters.
+
+The array *targets*, *intlens_jd_tdb*, *record_counts* and *segids* must be of size *target_count*.
+
+The reservation *id* returned by this function must be used in the function |writeph_spk12_par_write| to write in the corresponding reserved space.
+In addition, the function |writeph_spk12_par_write| will require a *target_index*, which is the index of the target in the *targets* array used in this function.
+
+A call to *writeph_spk12_par_reserve* is always performed by a single thread and is followed by several calls to |writeph_spk12_par_write| by one or several threads.
+
+.. warning::
+
+    The data covers the same timespan from the date *start_jd_tdb+start_frac_tdb* to *end_jd_tdb+end_frac_tdb* for all targets, but each target may have a different number of polynomials.
+    The time span *record_counts\*intlens_jd_tdb* must be equal to the timespan defined from the date *start_jd_tdb+start_frac_tdb* to *end_jd_tdb+end_frac_tdb*.
+    If the targets doesnot have the timespan, multiple reservations must be performed before the call to writing |writeph_spk12_par_write|. 
+
+.. include:: examples/writeph_spk12_par_reserve.rst

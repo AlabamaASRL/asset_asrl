@@ -1,0 +1,1 @@
+gindent -lp -nut -bad -bap -nbbo -bl -bli0 -c33 -cbi4 -cd33 -ncdw -nce -ci4 -cli4 -cp33 -d0 -i4 -ip4 -npcs -npsl -nsc -sob -ts4 --line-length120 $* || indent -lp -nut -bad -bap -nbbo -bl -bli0 -c33 -cbi4 -cd33 -ncdw -nce -ci4 -cli4 -cp33 -d0 -i4 -ip4 -npcs -npsl -nsc -sob -ts4 --line-length120 $*

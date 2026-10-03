@@ -1,0 +1,1 @@
+Depending on the target value, an array to receive the cartesian position (x,y,z), the velocity (xdot, ydot, zdot), the acceleration and the jerk, or a time scale transformation value, or the angles of the librations of the Moon and their successive derivatives, or the nutation angles and their successive derivatives. 

@@ -1,0 +1,1 @@
+An array to receive the angular momentum due to its rotation, divided by the product of the mass and of the square of the radius, and the derivatives, of the body.

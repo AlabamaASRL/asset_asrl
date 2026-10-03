@@ -1,0 +1,146 @@
+%  /*-----------------------------------------------------------------*/
+%  /*! 
+%    \file Constants.m
+%    \brief MEX interface for the class Constants
+%  
+%    \author  M. Gastineau 
+%             Astronomie et Systemes Dynamiques, LTE, CNRS, Observatoire de Paris. 
+%  
+%     Copyright,  2018-2025, CNRS
+%     email of the author : Mickael.Gastineau@obspm.fr
+%  
+%    History:
+%  */
+%  /*-----------------------------------------------------------------*/
+%  
+%   /*-----------------------------------------------------------------*/
+%   /* License  of this file :
+%    This file is "triple-licensed", you have to choose one  of the three licenses 
+%    below to apply on this file.
+%    
+%       CeCILL-C
+%       	The CeCILL-C license is close to the GNU LGPL.
+%       	( http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.html )
+%      
+%    or CeCILL-B
+%           The CeCILL-B license is close to the BSD.
+%           (http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.txt)
+%     
+%    or CeCILL v2.1
+%         The CeCILL license is compatible with the GNU GPL.
+%         ( http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html )
+%    
+%   
+%   This library is governed by the CeCILL-C, CeCILL-B or the CeCILL license under 
+%   French law and abiding by the rules of distribution of free software.  
+%   You can  use, modify and/ or redistribute the software under the terms 
+%   of the CeCILL-C,CeCILL-B or CeCILL license as circulated by CEA, CNRS and INRIA  
+%   at the following URL "http://www.cecill.info". 
+%   
+%   As a counterpart to the access to the source code and  rights to copy,
+%   modify and redistribute granted by the license, users are provided only
+%   with a limited warranty  and the software's author,  the holder of the
+%   economic rights,  and the successive licensors  have only  limited
+%   liability. 
+%   
+%   In this respect, the user's attention is drawn to the risks associated
+%   with loading,  using,  modifying and/or developing or reproducing the
+%   software by the user in light of its specific status of free software,
+%   that may mean  that it is complicated to manipulate,  and  that  also
+%   therefore means  that it is reserved for developers  and  experienced
+%   professionals having in-depth computer knowledge. Users are therefore
+%   encouraged to load and test the software's suitability as regards their
+%   requirements in conditions enabling the security of their systems and/or 
+%   data to be ensured and,  more generally, to use and operate it in the 
+%   same conditions as regards security. 
+%   
+%   The fact that you are presently reading this means that you have had
+%   knowledge of the CeCILL-C,CeCILL-B or CeCILL license and that you accept its terms.
+%   */
+%   /*-----------------------------------------------------------------*/
+
+classdef Constants
+%  Constants values of the CALCEPH library.
+   properties (GetAccess = public, Constant = true)
+    % /*----------------------------------------------------------------------------------------------*/
+    % /* definition of the CALCEPH library version */
+    % /*----------------------------------------------------------------------------------------------*/
+    % version : major number of CALCEPH library
+        VERSION_MAJOR  =@CALCEPH_VERSION_MAJOR@;
+    % version : minor number of CALCEPH library
+        VERSION_MINOR  =@CALCEPH_VERSION_MINOR@;
+    %  version : patch number of CALCEPH library 
+        VERSION_PATCH  =@CALCEPH_VERSION_PATCH@;
+    %  version : string of characters
+        VERSION_STRING='@CALCEPH_VERSION_MAJOR@.@CALCEPH_VERSION_MINOR@.@CALCEPH_VERSION_PATCH@';
+
+    %/*----------------------------------------------------------------------------------------------*/
+    %/* definition of some constants */
+    %/*----------------------------------------------------------------------------------------------*/
+    %/*! define the maximum number of characters (including the trailing '\0')
+    % that the name of a constant could contain. */
+        MAX_CONSTANTNAME = 33;
+
+    %/*! define the offset value for asteroid 2E6+... for calceph_?compute */
+        ASTEROID = 2000000;
+
+    %/*! define the offset value for asteroid 2E8+... for calceph_?compute */
+        ASTEROID_8 = 200000000;
+
+    %/* unit for the output */
+    %/*! outputs are in Astronomical Unit */
+        UNIT_AU = 1;
+    %/*! outputs are in kilometers */
+        UNIT_KM = 2;
+    %/*! outputs are in day */
+        UNIT_DAY = 4;
+    %/*! outputs are in seconds */
+        UNIT_SEC = 8;
+    %/*! outputs are in radians */
+        UNIT_RAD = 16;
+
+    %/*! use the NAIF body identification numbers for target and center integers */
+        USE_NAIFID = 32;
+
+    %/* kind of output */
+    %/*! outputs are the euler angles */
+        OUTPUT_EULERANGLES = 64;
+    %/*! outputs are the nutation angles */
+        OUTPUT_NUTATIONANGLES = 128;
+
+    %/* supported segment ype */
+    %/* segment of the original DE/INPOP file format */
+    SEGTYPE_ORIG_0 = 0;   
+    %/* segment of the spice kernels */
+    SEGTYPE_SPK_1 = 1;
+    SEGTYPE_SPK_2 = 2;
+    SEGTYPE_SPK_3 = 3;
+    SEGTYPE_SPK_5 = 5;
+    SEGTYPE_SPK_8 = 8;
+    SEGTYPE_SPK_9 = 9;
+    SEGTYPE_SPK_12 = 12;
+    SEGTYPE_SPK_13 = 13;
+    SEGTYPE_SPK_14 = 14;
+    SEGTYPE_SPK_17 = 17;
+    SEGTYPE_SPK_18 = 18;
+    SEGTYPE_SPK_19 = 19;
+    SEGTYPE_SPK_20 = 20;
+    SEGTYPE_SPK_21 = 21;
+    SEGTYPE_SPK_102 = 102;
+    SEGTYPE_SPK_103 = 103;
+    SEGTYPE_SPK_120 = 120; 
+
+
+    %/* Timescales */
+    TDB = 1;
+    TCB = 2;
+    UTC = 3;
+    TAI = 4;
+    TT = 5;
+    %/*! Timescale is detected from a string */
+    TIMESCALE_FROM_STR = 6;
+
+
+    end
+    
+end

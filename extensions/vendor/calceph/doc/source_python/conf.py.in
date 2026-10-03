@@ -1,0 +1,195 @@
+
+import sys
+import os
+
+exec(open(os.path.abspath("@CMAKE_CURRENT_BINARY_DIR@/source/confcommon.py")).read())
+
+primary_domain = 'py'
+
+# General information about the project.
+project = u'CALCEPH  - Python language'
+
+# List of patterns, relative to source directory, that match files and
+# directories to ignore when looking for source files.
+# This patterns also effect to html_static_path and html_extra_path
+exclude_patterns = ['condsingle', 'condsingle/calceph.single.rst',
+                    'calceph.*.cusage.rst',
+                    'writeph*',
+                    'calceph.*.mexusage.rst',
+                    'calceph.*.f9xusage.rst',
+                    'calceph.*.f2003usage.rst',
+                    'calceph.multiple_*.rst',
+                    'calceph.error.rst',
+                    'calceph.time_*.rst',
+                    'examples/*', 
+                    'replace.rst', 
+                    'arg_*.rst',
+                    'table_*.rst',
+                    'condsingle_c/*',
+                    'condsingle_f9x/*',
+                    'condsingle_f2003/*' ]
+
+
+# Grouping the document tree into LaTeX files. List of tuples
+# (source start file, target name, title,
+#  author, documentclass [howto, manual, or own class]).
+latex_documents = [
+    (master_doc, 'calceph.tex', u'CALCEPH - Python language',
+     u'M. Gastineau, J. Laskar, A. Fienga, H. Manche', 'manual'),
+]
+
+# Grouping the document tree into Texinfo files. List of tuples
+# (source start file, target name, title, author,
+#  dir menu entry, description, category)
+texinfo_documents = [
+    (master_doc, 'calceph', u'CALCEPH - Python language',
+     author, 'calceph', 'CALCEPH - Python language.',
+     'Miscellaneous'),
+]
+
+
+def setup(app):
+    app.add_config_value('calcephapi', 'Python', 'env')
+
+
+rst_epilog = """
+.. |API| replace:: Python
+.. |supportedspk| replace:: 1, 2, 3, 5, 8, 9, 12, 13, 14, 17, 18, 19, 20, 21, 102, 103 and 120
+.. |LIBRARYNAME| replace:: CALCEPH Library
+.. |LIBRARYSHORTNAME| replace:: CALCEPH
+.. |EMAIL| replace:: Mickael.Gastineau@obspm.fr
+.. |eph| replace:: *self*
+.. |ephemerisdescriptoreph| replace:: the ephemeris descriptor 
+.. |menu_calceph_open| replace:: calcephpy.CalcephBin.open
+.. |calceph_open| replace:: :py:func:`calcephpy.CalcephBin.open()`
+.. |menu_calceph_open_array| replace:: calcephpy.CalcephBin.open
+.. |calceph_open_array| replace:: :py:func:`calcephpy.CalcephBin.open()`
+.. |menu_calceph_close| replace:: calcephpy.CalcephBin.close
+.. |calceph_close| replace:: :py:func:`calcephpy.CalcephBin.close()`
+.. |menu_calceph_prefetch| replace:: calcephpy.CalcephBin.prefetch
+.. |calceph_prefetch| replace:: :py:func:`calcephpy.CalcephBin.prefetch()`
+.. |menu_calceph_isthreadsafe| replace:: calcephpy.CalcephBin.isthreadsafe
+.. |calceph_isthreadsafe| replace:: :py:func:`calcephpy.CalcephBin.isthreadsafe()`
+.. |menu_calceph_compute| replace:: calcephpy.CalcephBin.compute
+.. |calceph_compute| replace:: :py:func:`calcephpy.CalcephBin.compute()`
+.. |menu_calceph_compute_unit| replace:: calcephpy.CalcephBin.compute_unit
+.. |calceph_compute_unit| replace:: :py:func:`calcephpy.CalcephBin.compute_unit()`
+.. |menu_calceph_getconstant| replace:: calcephpy.CalcephBin.getconstant
+.. |calceph_getconstant| replace:: :py:func:`calcephpy.CalcephBin.getconstant()`
+.. |menu_calceph_getconstantsd| replace:: calcephpy.CalcephBin.getconstantsd
+.. |calceph_getconstantsd| replace:: :py:func:`calcephpy.CalcephBin.getconstantsd()`
+.. |menu_calceph_getconstantvd| replace:: calcephpy.CalcephBin.getconstantvd
+.. |calceph_getconstantvd| replace:: :py:func:`calcephpy.CalcephBin.getconstantvd()`
+.. |menu_calceph_getconstantss| replace:: calcephpy.CalcephBin.getconstantss
+.. |calceph_getconstantss| replace:: :py:func:`calcephpy.CalcephBin.getconstantss()`
+.. |menu_calceph_getconstantvs| replace:: calcephpy.CalcephBin.getconstantvs
+.. |calceph_getconstantvs| replace:: :py:func:`calcephpy.CalcephBin.getconstantvs()`
+.. |menu_calceph_getconstantcount| replace:: calcephpy.CalcephBin.getconstantcount
+.. |calceph_getconstantcount| replace:: :py:func:`calcephpy.CalcephBin.getconstantcount()`
+.. |menu_calceph_getconstantindex| replace:: calcephpy.CalcephBin.getconstantindex
+.. |calceph_getconstantindex| replace:: :py:func:`calcephpy.CalcephBin.getconstantindex()`
+.. |menu_calceph_gettimescale| replace:: calcephpy.CalcephBin.gettimescale
+.. |calceph_gettimescale| replace:: :py:func:`calcephpy.CalcephBin.gettimescale()`
+.. |menu_calceph_gettimespan| replace:: calcephpy.CalcephBin.gettimespan
+.. |calceph_gettimespan| replace:: :py:func:`calcephpy.CalcephBin.gettimespan()`
+.. |menu_calceph_getidbyname| replace:: calcephpy.CalcephBin.getidbyname
+.. |calceph_getidbyname| replace:: :py:func:`calcephpy.CalcephBin.getidbyname()`
+.. |menu_calceph_getnamebyidss| replace:: calcephpy.CalcephBin.getnamebyidss
+.. |calceph_getnamebyidss| replace:: :py:func:`calcephpy.CalcephBin.getnamebyidss()`
+.. |menu_calceph_getfileversion| replace:: calcephpy.CalcephBin.getfileversion
+.. |calceph_getfileversion| replace:: :py:func:`calcephpy.CalcephBin.getfileversion()`
+.. |menu_calceph_getpositionrecordcount| replace:: calcephpy.CalcephBin.getpositionrecordcount
+.. |calceph_getpositionrecordcount| replace:: :py:func:`calcephpy.CalcephBin.getpositionrecordcount()`
+.. |menu_calceph_getpositionrecordindex| replace:: calcephpy.CalcephBin.getpositionrecordindex
+.. |calceph_getpositionrecordindex| replace:: :py:func:`calcephpy.CalcephBin.getpositionrecordindex()`
+.. |menu_calceph_getpositionrecordindex2| replace:: calcephpy.CalcephBin.getpositionrecordindex2
+.. |calceph_getpositionrecordindex2| replace:: :py:func:`calcephpy.CalcephBin.getpositionrecordindex2()`
+.. |menu_calceph_getorientrecordcount| replace:: calcephpy.CalcephBin.getorientrecordcount
+.. |calceph_getorientrecordcount| replace:: :py:func:`calcephpy.CalcephBin.getorientrecordcount()`
+.. |menu_calceph_getorientrecordindex| replace:: calcephpy.CalcephBin.getorientrecordindex
+.. |calceph_getorientrecordindex| replace:: :py:func:`calcephpy.CalcephBin.getorientrecordindex()`
+.. |menu_calceph_getorientrecordindex2| replace:: calcephpy.CalcephBin.getorientrecordindex2
+.. |calceph_getorientrecordindex2| replace:: :py:func:`calcephpy.CalcephBin.getorientrecordindex2()`
+.. |menu_calceph_orient_unit| replace:: calcephpy.CalcephBin.orient_unit
+.. |calceph_orient_unit| replace:: :py:func:`calcephpy.CalcephBin.orient_unit()`
+.. |menu_calceph_rotangmom_unit| replace:: calcephpy.CalcephBin.rotangmom_unit
+.. |calceph_rotangmom_unit| replace:: :py:func:`calcephpy.CalcephBin.rotangmom_unit()`
+.. |menu_calceph_compute_order| replace:: calcephpy.CalcephBin.compute_order
+.. |calceph_compute_order| replace:: :py:func:`calcephpy.CalcephBin.compute_order()`
+.. |menu_calceph_orient_order| replace:: calcephpy.CalcephBin.orient_order
+.. |calceph_orient_order| replace:: :py:func:`calcephpy.CalcephBin.orient_order()`
+.. |menu_calceph_rotangmom_order| replace:: calcephpy.CalcephBin.rotangmom_order
+.. |calceph_rotangmom_order| replace:: :py:func:`calcephpy.CalcephBin.rotangmom_order()`
+.. |menu_calceph_sopen| replace:: calcephpy.CalcephBin.sopen
+.. |calceph_sopen| replace:: :py:func:`calcephpy.CalcephBin.sopen()`
+.. |menu_calceph_sclose| replace:: calcephpy.CalcephBin.sclose
+.. |calceph_sclose| replace:: :py:func:`calcephpy.CalcephBin.sclose()`
+.. |menu_calceph_scompute| replace:: calcephpy.CalcephBin.scompute
+.. |calceph_scompute| replace:: :py:func:`calcephpy.CalcephBin.scompute()`
+.. |menu_calceph_sgetconstant| replace:: calcephpy.CalcephBin.sgetconstant
+.. |calceph_sgetconstant| replace:: :py:func:`calcephpy.CalcephBin.sgetconstant()`
+.. |menu_calceph_sgetconstantcount| replace:: calcephpy.CalcephBin.sgetconstantcount
+.. |calceph_sgetconstantcount| replace:: :py:func:`calcephpy.CalcephBin.sgetconstantcount()`
+.. |menu_calceph_sgetconstantindex| replace:: calcephpy.CalcephBin.sgetconstantindex
+.. |calceph_sgetconstantindex| replace:: :py:func:`calcephpy.CalcephBin.sgetconstantindex()`
+.. |menu_calceph_seterrorhandler| replace:: calcephpy.seterrorhandler
+.. |calceph_seterrorhandler| replace:: :py:func:`calcephpy.seterrorhandler()`
+.. |menu_calceph_getversion_str| replace:: calcephpy.getversion_str
+.. |menu_calceph_getmaxsupportedorder| replace:: calcephpy.getmaxsupportedorder
+.. |calceph_getmaxsupportedorder| replace:: :py:func:`calcephpy.getmaxsupportedorder()`
+.. |menu_Headers_and_Libraries| replace:: Modules
+.. |CALCEPH_UNIT_AU| replace:: :py:data:`UNIT_AU`
+.. |CALCEPH_UNIT_KM| replace:: :py:data:`UNIT_KM`
+.. |CALCEPH_UNIT_DAY| replace:: :py:data:`UNIT_DAY`
+.. |CALCEPH_UNIT_SEC| replace:: :py:data:`UNIT_SEC`
+.. |CALCEPH_UNIT_RAD| replace:: :py:data:`UNIT_RAD`
+.. |CALCEPH_USE_NAIFID| replace:: :py:data:`USE_NAIFID`
+.. |CALCEPH_OUTPUT_EULERANGLES| replace:: :py:data:`OUTPUT_EULERANGLES`
+.. |CALCEPH_OUTPUT_NUTATIONANGLES| replace:: :py:data:`OUTPUT_NUTATIONANGLES`
+.. |retfuncfails0| replace:: returns 0 or an exception if an error occurs, otherwise a non-zero value.
+.. |funcfails0| replace::  On exit, it returns 0 or an exception if an error occurs, otherwise the return value is a non-zero value.
+.. |retfuncfailsNULL| replace:: raises an exception if an error occurs, otherwise a valid object.
+.. |funcfailsNULL| replace:: On exit, it raises an exception if an error occurs, otherwise the return value is a valid value.
+.. |retfuncfailsnbval| replace:: returns 0 or an exception if an error occurs, otherwise the number of values associated to the constant.
+.. |retfuncnotfound0| replace::  returns 0 if the file version was not found, otherwise non-zero value.
+.. |funcnotfound0| replace::  On exit, it returns 0 if the file version was not found, otherwise non-zero value.
+.. |retfuncnotfoundid0| replace:: returns 0 if the name of the body was not found, otherwise non-zero value.
+
+
+.. |menu_calceph_time_jd_to_cal| replace:: calcephpy.CalcephBin.time_jd_to_cal
+.. |calceph_time_jd_to_cal| replace:: :py:func:`calcephpy.CalcephBin.time_jd_to_cal()`
+.. |menu_calceph_time_cal_to_jd| replace:: calcephpy.CalcephBin.time_cal_to_jd
+.. |calceph_time_cal_to_jd| replace:: :py:func:`calcephpy.CalcephBin.time_cal_to_jd()`
+.. |menu_calceph_time_str_to_jd| replace:: calcephpy.CalcephBin.time_str_to_jd
+.. |calceph_time_str_to_jd| replace:: :py:func:`calcephpy.CalcephBin.time_str_to_jd()`
+.. |menu_calceph_time_set_relationship_tt_tdb| replace:: calcephpy.CalcephBin.time_set_relationship_tt_tdb
+.. |calceph_time_set_relationship_tt_tdb| replace:: :py:func:`calcephpy.CalcephBin.time_set_relationship_tt_tdb()`
+.. |menu_calceph_time_jd_tdb_to_jd_tt| replace:: calcephpy.CalcephBin.time_jd_tdb_to_jd_tt
+.. |calceph_time_jd_tdb_to_jd_tt| replace:: :py:func:`calcephpy.CalcephBin.time_jd_tdb_to_jd_tt()`
+.. |menu_calceph_time_jd_tt_to_jd_tdb| replace:: calcephpy.CalcephBin.time_jd_tt_to_jd_tdb
+.. |calceph_time_jd_tt_to_jd_tdb| replace:: :py:func:`calcephpy.CalcephBin.time_jd_tt_to_jd_tdb()`
+.. |menu_calceph_time_jd_tdb_to_jd_tcb| replace:: calcephpy.CalcephBin.time_jd_tdb_to_jd_tcb
+.. |calceph_time_jd_tdb_to_jd_tcb| replace:: :py:func:`calcephpy.CalcephBin.time_jd_tdb_to_jd_tcb()`
+.. |menu_calceph_time_jd_tcb_to_jd_tdb| replace:: calcephpy.CalcephBin.time_jd_tcb_to_jd_tdb
+.. |calceph_time_jd_tcb_to_jd_tdb| replace:: :py:func:`calcephpy.CalcephBin.time_jd_tcb_to_jd_tdb()`
+.. |menu_calceph_time_cal_utc_to_jd_tdb| replace:: calcephpy.CalcephBin.time_cal_utc_to_jd_tdb
+.. |calceph_time_cal_utc_to_jd_tdb| replace:: :py:func:`calcephpy.CalcephBin.time_cal_utc_to_jd_tdb()`
+.. |menu_calceph_time_jd_tdb_to_cal_utc| replace:: calcephpy.CalcephBin.time_jd_tdb_to_cal_utc
+.. |calceph_time_jd_tdb_to_cal_utc| replace:: :py:func:`calcephpy.CalcephBin.time_jd_tdb_to_cal_utc()`
+.. |menu_calceph_time_str_utc_to_jd_tdb| replace:: calcephpy.CalcephBin.time_str_utc_to_jd_tdb
+.. |calceph_time_str_utc_to_jd_tdb| replace:: :py:func:`calcephpy.CalcephBin.time_str_utc_to_jd_tdb()`
+.. |menu_calceph_time_str_any_to_jd_tdb| replace:: calcephpy.CalcephBin.time_str_any_to_jd_tdb
+.. |calceph_time_str_any_to_jd_tdb| replace:: :py:func:`calcephpy.CalcephBin.time_str_any_to_jd_tdb()`
+.. |menu_calceph_time_str_spacecraft_clock_to_jd_tdb| replace:: calcephpy.CalcephBin.time_str_spacecraft_clock_to_jd_tdb
+.. |calceph_time_str_spacecraft_clock_to_jd_tdb| replace:: :py:func:`calcephpy.CalcephBin.time_str_spacecraft_clock_to_jd_tdb()`
+.. |menu_calceph_time_jd_tdb_to_str_spacecraft_clock| replace:: calcephpy.CalcephBin.time_jd_tdb_to_str_spacecraft_clock
+.. |calceph_time_jd_tdb_to_str_spacecraft_clock| replace:: :py:func:`calcephpy.CalcephBin.time_jd_tdb_to_str_spacecraft_clock()`
+
+.. |CALCEPH_TDB| replace:: :py:data:`TDB`
+.. |CALCEPH_UTC| replace:: :py:data:`UTC`
+.. |CALCEPH_TAI| replace:: :py:data:`TAI`
+.. |CALCEPH_TT| replace:: :py:data:`TT`
+.. |CALCEPH_TCB| replace:: :py:data:`TCB`
+.. |CALCEPH_TIMESCALE_FROM_STR| replace:: :py:data:`TIMESCALE_FROM_STR`
+
+"""
