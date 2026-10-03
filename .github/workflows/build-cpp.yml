@@ -91,6 +91,8 @@ jobs:
           import sys
           modules = [
               "asset_asrl",
+              "asset_asrl.Astro",
+              "asset_asrl.Extensions",
           ]
           failed = []
           for name in modules:
@@ -101,6 +103,26 @@ jobs:
               except Exception as exc:
                   failed.append((name, exc))
                   print(f"FAILED: {name} -> {exc}", file=sys.stderr)
+          
+          # Try to list and import all extension submodules
+          try:
+              import asset_asrl.Extensions as ext_module
+              if hasattr(ext_module, '__all__'):
+                  ext_list = ext_module.__all__
+              else:
+                  ext_list = [name for name in dir(ext_module) if not name.startswith('_')]
+              
+              print(f"\nFound {len(ext_list)} extensions in asset_asrl.Extensions")
+              for ext_name in ext_list:
+                  try:
+                      ext = getattr(ext_module, ext_name)
+                      print(f"OK: extension {ext_name} -> {type(ext)}")
+                  except Exception as exc:
+                      failed.append((f"asset_asrl.Extensions.{ext_name}", exc))
+                      print(f"FAILED: asset_asrl.Extensions.{ext_name} -> {exc}", file=sys.stderr)
+          except Exception as exc:
+              print(f"Note: Could not enumerate extensions: {exc}")
+          
           if failed:
               print("\nFailed imports:", file=sys.stderr)
               for name, exc in failed:
@@ -113,9 +135,11 @@ jobs:
         with:
           name: asset-native-${{ github.run_id }}
           path: |
-            build/**/*.so
-            build/**/*.pyd
-          if-no-files-found: warn
+            build/src/asset*.so
+            build/src/asset*.pyd
+            build/asset*.so
+            build/asset*.pyd
+          if-no-files-found: error
           retention-days: 7
 
       - name: Upload wheel artifact
