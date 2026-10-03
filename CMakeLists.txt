@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(ASSET VERSION 0.5.2 LANGUAGES CXX)
+project(ASSET VERSION 0.5.2 LANGUAGES C CXX)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 set( CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
@@ -157,7 +157,10 @@ if(NOT WIN32)
   #list(APPEND RELEASE_FLAGS "-fno-stack-clash-protection")
   #list(APPEND RELEASE_FLAGS "-fcf-protection=none")
   list(APPEND RELEASE_FLAGS "-fno-asynchronous-unwind-tables")
-  list(APPEND RELEASE_FLAGS "-ffast-math")
+  option(ASSET_FAST_MATH "Enable relaxed floating-point transformations" ON)
+  if(ASSET_FAST_MATH)
+    list(APPEND RELEASE_FLAGS "-ffast-math")
+  endif()
 endif()
  
 if(APPLE)
@@ -229,7 +232,7 @@ if(UNIX AND NOT APPLE)
   # find_package(OpenMP REQUIRED)
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     list(APPEND COMPILE_FLAGS "-fopenmp=libiomp5")
-  elseif(CMAKE_CXX_COMPILER_ID MATCHES "GCC")
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     list(APPEND COMPILE_FLAGS "-fopenmp")
   endif()
 elseif(APPLE)
@@ -274,9 +277,9 @@ endif()
 ################################################################################
 ################ Linker Flags ##################################################
 if(BUILD_SHARED_LIBS AND NOT APPLE AND NOT WIN32)  # Windows and Linux Dynamic Linking
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
+  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST}")
 elseif(UNIX AND NOT APPLE)  # Linux Static Linking
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl,--end-group")
+  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST}")
 elseif(APPLE)  # Apple Dynamic and Static Linking
 
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Xlinker -undefined -Xlinker dynamic_lookup")
@@ -328,4 +331,3 @@ add_subdirectory(pypiwheel)
 
 # Formatting
 include(cmake/clang-format.cmake)
-
