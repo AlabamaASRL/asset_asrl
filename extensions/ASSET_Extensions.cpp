@@ -134,15 +134,7 @@ void ASSET::ExtensionsBuild(FunctionRegistry& reg, py::module& extmod)
 {
 
     BuildPinesGravity(reg, extmod);
-    BuildPanelDrag(reg, extmod);
     BuildGeodeticWGS84(reg, extmod);
-    BuildEarthFrame(reg, extmod);
-    BuildNRLMSISE00Density(reg, extmod);
-    BuildDE430Position(reg, extmod);
-    BuildThirdBodyGravity(reg, extmod);
-    BuildCannonballSRP(reg, extmod);
-    BuildJB2008Density(reg, extmod);
-    BuildSmoothAtmosphereBlend(reg, extmod);
 
 
 
