@@ -3,15 +3,7 @@
 namespace ASSET {
 
     void BuildPinesGravity(FunctionRegistry& reg, py::module& m);
-    void BuildPanelDrag(FunctionRegistry& reg, py::module& m);
     void BuildGeodeticWGS84(FunctionRegistry& reg, py::module& m);
-    void BuildEarthFrame(FunctionRegistry& reg, py::module& m);
-    void BuildNRLMSISE00Density(FunctionRegistry& reg, py::module& m);
-    void BuildDE430Position(FunctionRegistry& reg, py::module& m);
-    void BuildThirdBodyGravity(FunctionRegistry& reg, py::module& m);
-    void BuildCannonballSRP(FunctionRegistry& reg, py::module& m);
-    void BuildJB2008Density(FunctionRegistry& reg, py::module& m);
-    void BuildSmoothAtmosphereBlend(FunctionRegistry& reg, py::module& m);
 
 
 	struct CR3BPAD : VectorFunction<CR3BPAD, 7, 6, AutodiffFwd, AutodiffFwd> {
@@ -134,15 +126,7 @@ void ASSET::ExtensionsBuild(FunctionRegistry& reg, py::module& extmod)
 {
 
     BuildPinesGravity(reg, extmod);
-    BuildPanelDrag(reg, extmod);
     BuildGeodeticWGS84(reg, extmod);
-    BuildEarthFrame(reg, extmod);
-    BuildNRLMSISE00Density(reg, extmod);
-    BuildDE430Position(reg, extmod);
-    BuildThirdBodyGravity(reg, extmod);
-    BuildCannonballSRP(reg, extmod);
-    BuildJB2008Density(reg, extmod);
-    BuildSmoothAtmosphereBlend(reg, extmod);
 
 
 
