@@ -1,1 +1,0 @@
-An array to receive the euler angles, or nutation angles, and their derivatives for the orientation of the body.
