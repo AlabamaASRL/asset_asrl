@@ -37,10 +37,10 @@ jobs:
             source /opt/intel/oneapi/setvars.sh
           CIBW_BEFORE_ALL_MACOS: |
             brew install llvm cmake
-            python -m pip install mkl-devel
+            brew install mkl
           CIBW_BEFORE_ALL_WINDOWS: |
             choco install -y llvm cmake
-            pip install mkl-devel
+            pip install mkl
       
       - uses: actions/upload-artifact@v4
         with:
