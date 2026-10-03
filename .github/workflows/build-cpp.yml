@@ -113,11 +113,9 @@ jobs:
         with:
           name: asset-native-${{ github.run_id }}
           path: |
-            build/src/asset*.so
-            build/src/asset*.pyd
-            build/asset*.so
-            build/asset*.pyd
-          if-no-files-found: error
+            build/**/*.so
+            build/**/*.pyd
+          if-no-files-found: warn
           retention-days: 7
 
       - name: Upload wheel artifact
