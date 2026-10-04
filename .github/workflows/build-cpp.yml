@@ -10,7 +10,18 @@ permissions:
 
 jobs:
   build-cpp:
-    runs-on: ubuntu-22.04
+    name: build-cpp (${{ matrix.os }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            runner: ubuntu-22.04
+            python-version: "3.12"
+          - os: windows
+            runner: windows-2022
+            python-version: "3.12"
 
     env:
       WHEEL_DIR: build/asset_asrl/dist
@@ -22,20 +33,37 @@ jobs:
           submodules: true
 
       - name: Initialize submodules
+        shell: bash
         run: git submodule update --init --recursive
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
 
-      - name: Install system deps
+      - name: Install system deps (Linux)
+        if: runner.os == 'Linux'
         shell: bash
         env:
           COMPILER: clang-13
         run: |
           set -euo pipefail
           bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
+
+      - name: Install build dependencies (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y build-essential gfortran
+
+      - name: Install build dependencies (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install -y mingw
+          echo "C:\ProgramData\chocolatey\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Install Python build deps
         shell: bash
@@ -44,18 +72,14 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install build wheel setuptools
 
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential gfortran
-
       - name: Build wheel
         shell: bash
         run: |
           set -euo pipefail
           python -m build --wheel --outdir "${WHEEL_DIR}"
 
-      - name: Verify wheel exists
+      - name: Verify wheel exists (Linux)
+        if: runner.os == 'Linux'
         shell: bash
         run: |
           set -euo pipefail
@@ -72,6 +96,28 @@ jobs:
           fi
           echo "Found wheel: ${WHEEL}"
           echo "WHEEL=${WHEEL}" >> "$GITHUB_ENV"
+
+      - name: Verify wheel exists (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Write-Host "Looking for wheels in: $env:WHEEL_DIR"
+          if (Test-Path $env:WHEEL_DIR) {
+            Get-ChildItem -Path $env:WHEEL_DIR -Force | Format-Table -AutoSize
+          }
+          $wheel = Get-ChildItem -Path $env:WHEEL_DIR -Filter *.whl -File -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $wheel) {
+            Write-Host "No wheel found in $env:WHEEL_DIR"
+            Write-Host "Debug listing of build tree:"
+            if (Test-Path build) {
+              Get-ChildItem -Path build -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 500 | ForEach-Object { $_.FullName }
+            }
+            Write-Host "Debug listing of repo tree (first 300 files):"
+            Get-ChildItem -Path . -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 300 | ForEach-Object { $_.FullName }
+            exit 1
+          }
+          Write-Host "Found wheel: $($wheel.FullName)"
+          "WHEEL=$($wheel.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Reinstall test requirements
         shell: bash
@@ -111,15 +157,14 @@ jobs:
               except Exception as exc:
                   failed.append((name, exc))
                   print(f"FAILED: {name} -> {exc}", file=sys.stderr)
-          
-          # Try to list and import all extension submodules
+
           try:
               import asset_asrl.Extensions as ext_module
-              if hasattr(ext_module, '__all__'):
+              if hasattr(ext_module, "__all__"):
                   ext_list = ext_module.__all__
               else:
-                  ext_list = [name for name in dir(ext_module) if not name.startswith('_')]
-              
+                  ext_list = [name for name in dir(ext_module) if not name.startswith("_")]
+
               print(f"\nFound {len(ext_list)} extensions in asset_asrl.Extensions")
               for ext_name in ext_list:
                   try:
@@ -130,7 +175,7 @@ jobs:
                       print(f"FAILED: asset_asrl.Extensions.{ext_name} -> {exc}", file=sys.stderr)
           except Exception as exc:
               print(f"Note: Could not enumerate extensions: {exc}")
-          
+
           if failed:
               print("\nFailed imports:", file=sys.stderr)
               for name, exc in failed:
@@ -141,7 +186,7 @@ jobs:
       - name: Upload native build artifacts (.so/.pyd)
         uses: actions/upload-artifact@v4
         with:
-          name: asset-native-${{ github.run_id }}
+          name: asset-native-${{ matrix.os }}-${{ github.run_id }}
           path: |
             build/src/asset*.so
             build/src/asset*.pyd
@@ -153,7 +198,7 @@ jobs:
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: asset-wheel-${{ github.run_id }}
+          name: asset-wheel-${{ matrix.os }}-${{ github.run_id }}
           path: ${{ env.WHEEL_DIR }}/*.whl
           if-no-files-found: error
           retention-days: 7
