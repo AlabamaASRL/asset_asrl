@@ -9,20 +9,19 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    name: build-${{ matrix.os }}
+  build-cpp:
+    name: build-cpp (${{ matrix.os }})
     runs-on: ${{ matrix.runner }}
-
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: linux
             runner: ubuntu-22.04
-            python: "3.12"
+            python-version: "3.12"
           - os: windows
             runner: windows-2022
-            python: "3.12"
+            python-version: "3.12"
 
     env:
       WHEEL_DIR: build/asset_asrl/dist
@@ -37,133 +36,192 @@ jobs:
         shell: bash
         run: git submodule update --init --recursive
 
-      # ---------------- Linux ----------------
-
-      - name: Set up Python (Linux)
-        if: runner.os == 'Linux'
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python }}
-
-      - name: Install dependencies (Linux)
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash .github/install_ubuntu_dependencies.sh
-          sudo apt-get update
-          sudo apt-get install -y build-essential gfortran
-          python -m pip install --upgrade pip build wheel setuptools
-
-      # ---------------- Windows ----------------
+          python-version: ${{ matrix.python-version }}
 
       - name: Set up Conda (Windows)
         if: runner.os == 'Windows'
         uses: conda-incubator/setup-miniconda@v3
         with:
           activate-environment: build
-          python-version: ${{ matrix.python }}
-          auto-activate-base: false
-          channels: conda-forge
-          channel-priority: strict
+          python-version: ${{ matrix.python-version }}
+          auto-activate-base: true
 
-      - name: Install dependencies (Windows)
+      - name: Install system deps (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          COMPILER: clang-13
+        run: |
+          set -euo pipefail
+          bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
+
+      - name: Install build dependencies (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y build-essential gfortran
+
+      - name: Install build dependencies (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          conda install --name build -y `
-            -c conda-forge `
-            cmake ninja mkl mkl-devel intel-openmp
+          choco install -y mingw
+          conda install --name build -y -c conda-forge mkl mkl-devel intel-openmp
+          echo "C:\ProgramData\chocolatey\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-          conda run --name build python -m pip install `
-            --upgrade pip build wheel setuptools
+      - name: Install Python build deps (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install build wheel setuptools
 
-          conda run --name build cmake --version
-
-      # ---------------- Build ----------------
+      - name: Install Python build deps (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          conda run --name build python -m pip install --upgrade pip build wheel setuptools
 
       - name: Build wheel (Linux)
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          python -m build --wheel --outdir "$WHEEL_DIR"
+          set -euo pipefail
+          python -m build --wheel --outdir "${WHEEL_DIR}"
 
       - name: Build wheel (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          conda run --name build python -m build `
-            --wheel `
-            --outdir "$env:WHEEL_DIR"
+          conda run --name build python -m build --wheel --outdir "$env:WHEEL_DIR"
 
-      # ---------------- Verify ----------------
-
-      - name: Verify wheel (Linux)
+      - name: Verify wheel exists (Linux)
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          WHEEL=$(find "$WHEEL_DIR" -name "*.whl" | head -1)
-          test -n "$WHEEL" || exit 1
-          echo "WHEEL=$WHEEL" >> "$GITHUB_ENV"
-          echo "Built: $WHEEL"
+          set -euo pipefail
+          echo "Looking for wheels in: ${WHEEL_DIR}"
+          ls -la "${WHEEL_DIR}" || true
+          WHEEL="$(find "${WHEEL_DIR}" -maxdepth 1 -type f -name '*.whl' | head -n 1)"
+          if [ -z "${WHEEL}" ]; then
+            echo "No wheel found in ${WHEEL_DIR}"
+            echo "Debug listing of build tree:"
+            find build -maxdepth 6 -type f | sort || true
+            echo "Debug listing of repo tree (first 300 files):"
+            find . -maxdepth 6 -type f | sort | head -n 300 || true
+            exit 1
+          fi
+          echo "Found wheel: ${WHEEL}"
+          echo "WHEEL=${WHEEL}" >> "$GITHUB_ENV"
 
-      - name: Verify wheel (Windows)
+      - name: Verify wheel exists (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $wheel = Get-ChildItem "$env:WHEEL_DIR\*.whl" |
-            Select-Object -First 1
-
+          Write-Host "Looking for wheels in: $env:WHEEL_DIR"
+          if (Test-Path $env:WHEEL_DIR) {
+            Get-ChildItem -Path $env:WHEEL_DIR -Force | Format-Table -AutoSize
+          }
+          $wheel = Get-ChildItem -Path $env:WHEEL_DIR -Filter *.whl -File -ErrorAction SilentlyContinue | Select-Object -First 1
           if (-not $wheel) {
-            Write-Error "No wheel found"
+            Write-Host "No wheel found in $env:WHEEL_DIR"
+            Write-Host "Debug listing of build tree:"
+            if (Test-Path build) {
+              Get-ChildItem -Path build -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 500 | ForEach-Object { $_.FullName }
+            }
+            Write-Host "Debug listing of repo tree (first 300 files):"
+            Get-ChildItem -Path . -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 300 | ForEach-Object { $_.FullName }
             exit 1
           }
+          Write-Host "Found wheel: $($wheel.FullName)"
+          "WHEEL=$($wheel.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-          "WHEEL=$($wheel.FullName)" |
-            Out-File $env:GITHUB_ENV -Append
-
-          Write-Host "Built: $($wheel.FullName)"
-
-      # ---------------- Test ----------------
-
-      - name: Test wheel (Linux)
-        if: runner.os == 'Linux'
+      - name: Reinstall test requirements
         shell: bash
         run: |
-          python -m pip install --force-reinstall "$WHEEL"
-          python -c "import asset_asrl; import asset_asrl.Astro; import asset_asrl.Extensions"
-          echo "Linux wheel import test passed."
+          set -euo pipefail
+          if [ -f requirements.txt ]; then
+            python -m pip install --upgrade --force-reinstall -r requirements.txt
+          else
+            echo "requirements.txt not found at repo root"
+            exit 1
+          fi
 
-      - name: Test wheel (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
+      - name: Test Python imports from built wheel
+        shell: bash
         run: |
-          conda run --name build python -m pip install `
-            --force-reinstall "$env:WHEEL"
+          set -euo pipefail
+          if [ -z "${WHEEL:-}" ]; then
+            echo "WHEEL env var not set"
+            exit 1
+          fi
+          echo "Installing wheel: ${WHEEL}"
+          python -m pip install --force-reinstall "${WHEEL}"
+          python - <<'PY'
+          import importlib
+          import sys
+          modules = [
+              "asset_asrl",
+              "asset_asrl.Astro",
+              "asset_asrl.Extensions",
+          ]
+          failed = []
+          for name in modules:
+              try:
+                  module = importlib.import_module(name)
+                  location = getattr(module, "__file__", "built-in")
+                  print(f"OK: imported {name} -> {location}")
+              except Exception as exc:
+                  failed.append((name, exc))
+                  print(f"FAILED: {name} -> {exc}", file=sys.stderr)
 
-          conda run --name build python -c `
-            "import asset_asrl; import asset_asrl.Astro; import asset_asrl.Extensions"
+          try:
+              import asset_asrl.Extensions as ext_module
+              if hasattr(ext_module, "__all__"):
+                  ext_list = ext_module.__all__
+              else:
+                  ext_list = [name for name in dir(ext_module) if not name.startswith("_")]
 
-          Write-Host "Windows wheel import test passed."
+              print(f"\nFound {len(ext_list)} extensions in asset_asrl.Extensions")
+              for ext_name in ext_list:
+                  try:
+                      ext = getattr(ext_module, ext_name)
+                      print(f"OK: extension {ext_name} -> {type(ext)}")
+                  except Exception as exc:
+                      failed.append((f"asset_asrl.Extensions.{ext_name}", exc))
+                      print(f"FAILED: asset_asrl.Extensions.{ext_name} -> {exc}", file=sys.stderr)
+          except Exception as exc:
+              print(f"Note: Could not enumerate extensions: {exc}")
 
-      # ---------------- Artifacts ----------------
+          if failed:
+              print("\nFailed imports:", file=sys.stderr)
+              for name, exc in failed:
+                  print(f"  {name}: {exc}", file=sys.stderr)
+              raise SystemExit(f"{len(failed)} module(s) failed to import")
+          PY
 
-      - name: Upload wheel
+      - name: Upload native build artifacts (.so/.pyd)
         uses: actions/upload-artifact@v4
         with:
-          name: asset-wheel-${{ matrix.os }}
-          path: ${{ env.WHEEL_DIR }}/*.whl
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Upload native artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: asset-native-${{ matrix.os }}
+          name: asset-native-${{ matrix.os }}-${{ github.run_id }}
           path: |
             build/src/asset*.so
             build/src/asset*.pyd
             build/asset*.so
             build/asset*.pyd
           if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-wheel-${{ matrix.os }}-${{ github.run_id }}
+          path: ${{ env.WHEEL_DIR }}/*.whl
+          if-no-files-found: error
           retention-days: 7
