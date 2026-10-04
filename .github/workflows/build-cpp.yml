@@ -41,6 +41,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Set up Conda (Windows)
+        if: runner.os == 'Windows'
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          activate-environment: build
+          python-version: ${{ matrix.python-version }}
+          auto-activate-base: true
+
       - name: Install system deps (Linux)
         if: runner.os == 'Linux'
         shell: bash
