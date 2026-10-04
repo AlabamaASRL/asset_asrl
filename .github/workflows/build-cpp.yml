@@ -82,9 +82,10 @@ jobs:
           python -m pip install build wheel setuptools
 
       - name: Build wheel
-        shell: bash
+        shell: bash -l {0}
         run: |
           set -euo pipefail
+          conda activate build
           python -m build --wheel --outdir "${WHEEL_DIR}"
 
       - name: Verify wheel exists (Linux)
