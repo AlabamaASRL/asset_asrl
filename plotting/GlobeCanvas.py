@@ -1,724 +1,617 @@
 # -*- coding: utf-8 -*-
 
-"""
-GlobeCanvas.py
-
-Reusable native VisPy 3D Earth visualization.
-
-Features
---------
-- Interactive 3D Earth
-- High-resolution equirectangular Earth texture
-- Optional atmosphere
-- Equator
-- Trajectory plotting
-- Start/end markers
-- Arbitrary vectors
-- Camera framing
-- Clear/reset functions
-- Stand-alone test mode
-
-Coordinate convention
----------------------
-Public plotting functions accept Cartesian coordinates in km by default.
-
-If normalized=True:
-
-    normalized coordinate * Lstar / 1000 = km
-
-Expected Earth texture
-----------------------
-The default texture is:
-
-    world.200401.3x21600x10800.jpg
-
-It should be an equirectangular 2:1 Earth map.
-
-The NASA Blue Marble image can therefore be placed directly beside
-this file.
-
-Example
--------
-from GlobeCanvas import GlobeCanvas
-
-globe = GlobeCanvas(
-    earth_radius_km=6378.145
-)
-
-globe.plot_trajectory(
-    trajectory,
-    normalized=True,
-    Lstar=6378145
-)
-
-globe.show()
-"""
-
 import os
-from PIL import Image
-Image.MAX_IMAGE_PIXELS = None
-
+import time
 import numpy as np
+import pyvista as pv
+from pyvistaqt import BackgroundPlotter
 
-from vispy import app, io, scene
-from vispy.scene import visuals
-from vispy.visuals.filters import TextureFilter
-
-
-# ============================================================================
-# Globe Canvas
-# ============================================================================
 
 class GlobeCanvas:
-    """
-    Persistent interactive 3D Earth visualization.
-    """
 
     def __init__(
         self,
-        earth_radius_km=6378.145,
-        canvas_size=(1400, 900),
-        background="black",
-        texture_path=None,
-        show_earth=True,
+        earth_radius=6378.145,
+        earth_texture="bluemarble-2048.png",
+        cloud_texture="clouds_2048.png",
+        asset_logo="ASSETLOGO.png",
+        alabama_logo="ALABAMALOGO.png",
+        title="Earth Globe",
+        window_size=(1500, 950),
+        show_clouds=True,
         show_atmosphere=True,
         show_equator=True,
-        earth_subdivisions=160,
+        show_controls=True,
+        show_sim_time=True,
+        show_asset_logo=True,
+        show_alabama_logo=True,
+        background="black",
+        auto_setup=True,
     ):
 
-        self.earth_radius_km = float(earth_radius_km)
-        self.earth_subdivisions = int(earth_subdivisions)
+        self.earth_radius = float(earth_radius)
+        self.earth_texture = earth_texture
+        self.cloud_texture = cloud_texture
+        self.asset_logo = asset_logo
+        self.alabama_logo = alabama_logo
+        self.title = title
+        self.window_size = window_size
+        self.show_clouds = bool(show_clouds)
+        self.show_atmosphere = bool(show_atmosphere)
+        self.show_equator = bool(show_equator)
+        self.show_controls = bool(show_controls)
+        self.show_sim_time = bool(show_sim_time)
+        self.show_asset_logo = bool(show_asset_logo)
+        self.show_alabama_logo = bool(show_alabama_logo)
+        self.background = background
 
-        # --------------------------------------------------------------------
-        # Automatically use the NASA texture beside this file.
-        # --------------------------------------------------------------------
+        self.plotter = BackgroundPlotter(title=self.title, window_size=self.window_size)
+        self.plotter.set_background(self.background)
 
-        if texture_path is None:
+        self.earth_mesh = None
+        self.earth_actor = None
+        self.cloud_mesh = None
+        self.cloud_actor = None
+        self.atmosphere_actor = None
+        self.equator_actor = None
 
-            texture_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                "blue_marble_earth.jpg",
-            )
+        self.trajectory_actors = []
+        self.marker_actors = []
+        self.vector_actors = []
 
-        self.texture_path = texture_path
+        self.legend_labels = {}
 
-        # --------------------------------------------------------------------
-        # Canvas
-        # --------------------------------------------------------------------
+        self.controls_text_actor = None
+        self.sim_time_text_actor = None
+        self.asset_logo_widget = None
+        self.alabama_logo_widget = None
 
-        self.canvas = scene.SceneCanvas(
-            keys="interactive",
-            bgcolor=background,
-            size=canvas_size,
-            show=False,
-        )
+        self.animation_callback = None
+        self.animation_update_function = None
+        self.animation_reset_function = None
+        self.animation_time = 0.0
+        self.animation_time_scale = 1.0
+        self.animation_min_time_scale = 0.1
+        self.animation_max_time_scale = 5000.0
+        self.animation_running = False
+        self.animation_last_wall_time = None
 
-        self.view = self.canvas.central_widget.add_view()
+        if auto_setup:
+            self._setup_scene()
+            self._setup_canvas_overlays()
+            self._setup_keyboard_controls()
+            self._setup_asset_logo()
+            self._setup_alabama_logo()
 
-        self.view.camera = scene.cameras.TurntableCamera(
-            fov=45.0,
-            azimuth=35.0,
-            elevation=25.0,
-            distance=self.earth_radius_km * 4.0,
-        )
+    def _resolve_texture(self, filename):
+        if filename is None:
+            return None
 
-        # --------------------------------------------------------------------
-        # Object containers
-        # --------------------------------------------------------------------
+        if os.path.isabs(filename) and os.path.isfile(filename):
+            return filename
 
-        self.earth_objects = []
-        self.trajectory_objects = []
-        self.marker_objects = []
-        self.vector_objects = []
+        candidates = [
+            filename,
+            os.path.join(os.path.dirname(__file__), filename),
+            os.path.join(os.getcwd(), filename),
+        ]
 
-        # --------------------------------------------------------------------
-        # Earth
-        # --------------------------------------------------------------------
+        for candidate in candidates:
+            if os.path.isfile(candidate):
+                return candidate
 
-        if show_earth:
-            self._add_earth()
+        return None
 
-        # --------------------------------------------------------------------
-        # Atmosphere
-        # --------------------------------------------------------------------
+    def _create_equirectangular_sphere(self, radius, n_lon=360, n_lat=180):
+        longitude = np.linspace(0.0, 2.0 * np.pi, n_lon + 1)
+        latitude = np.linspace(-0.5 * np.pi, 0.5 * np.pi, n_lat + 1)
 
-        if show_atmosphere:
-            self._add_atmosphere()
+        n_points = (n_lon + 1) * (n_lat + 1)
 
-        # --------------------------------------------------------------------
-        # Equator
-        # --------------------------------------------------------------------
+        points = np.empty((n_points, 3), dtype=np.float64)
+        texture_coordinates = np.empty((n_points, 2), dtype=np.float64)
 
-        if show_equator:
-            self._add_equator()
+        index = 0
 
-    # ========================================================================
-    # Earth
-    # ========================================================================
+        for j, lat in enumerate(latitude):
+            cos_lat = np.cos(lat)
+            sin_lat = np.sin(lat)
+            v = j / n_lat
+
+            for i, lon in enumerate(longitude):
+                u = i / n_lon
+
+                x = radius * cos_lat * np.cos(lon)
+                y = radius * cos_lat * np.sin(lon)
+                z = radius * sin_lat
+
+                points[index] = [x, y, z]
+                texture_coordinates[index] = [u, v]
+
+                index += 1
+
+        faces = []
+        row_size = n_lon + 1
+
+        for j in range(n_lat):
+            for i in range(n_lon):
+                p0 = j * row_size + i
+                p1 = p0 + 1
+                p2 = (j + 1) * row_size + i
+                p3 = p2 + 1
+
+                faces.extend([4, p0, p1, p3, p2])
+
+        faces = np.asarray(faces, dtype=np.int64)
+
+        sphere = pv.PolyData(points, faces)
+        sphere.active_texture_coordinates = texture_coordinates
+
+        return sphere
+
+    def _setup_scene(self):
+        self._add_earth()
+        self._add_clouds()
+        self._add_atmosphere()
+        self._add_equator()
+        self._configure_lighting()
+        self._configure_camera()
 
     def _add_earth(self):
-        if not os.path.isfile(self.texture_path):
-            raise FileNotFoundError(
-                "Earth texture was not found:\n\n"
-                f"{self.texture_path}"
-            )
-    
-        print(f"Loading Earth texture:\n  {self.texture_path}")
-    
-        image = Image.open(self.texture_path).convert("RGB")
-    
-        # Reduce the huge NASA texture for reasonable GPU usage.
-        max_width = 8192
-        if image.width > max_width:
-            scale = max_width / image.width
-            new_size = (
-                int(image.width * scale),
-                int(image.height * scale),
-            )
-            print(f"Resizing texture: {image.size} -> {new_size}")
-            image = image.resize(new_size, Image.Resampling.LANCZOS)
-    
-        self.earth_texture_image = np.asarray(image)
-    
-        print(
-            "Earth texture loaded:"
-            f" {self.earth_texture_image.shape[1]}"
-            f" x {self.earth_texture_image.shape[0]}"
-        )
-    
-        vertices, faces, texcoords = self._create_uv_sphere(
-            radius=self.earth_radius_km,
-            subdivisions=self.earth_subdivisions,
-        )
-    
-        self.earth = scene.visuals.Mesh(
-            vertices=vertices,
-            faces=faces,
-            color="white",
-            shading="smooth",
-            parent=self.view.scene,
-        )
-    
-        self.earth_texture_filter = TextureFilter(
-            texture=self.earth_texture_image,
-            texcoords=texcoords,
-        )
-    
-        self.earth.attach(self.earth_texture_filter)
-    
-        self.earth_objects.append(self.earth)
+        self.earth_mesh = self._create_equirectangular_sphere(self.earth_radius)
 
-    # ========================================================================
-    # UV Sphere
-    # ========================================================================
+        texture_path = self._resolve_texture(self.earth_texture)
 
-    def _create_uv_sphere(self, radius, subdivisions):
-        n_lat = int(subdivisions)
-        n_lon = int(subdivisions * 2)
-    
-        lat = np.linspace(
-            -0.5 * np.pi,
-            0.5 * np.pi,
-            n_lat + 1,
-        )
-    
-        lon = np.linspace(
-            -np.pi,
-            np.pi,
-            n_lon + 1,
-        )
-    
-        lat_grid, lon_grid = np.meshgrid(
-            lat,
-            lon,
-            indexing="ij",
-        )
-    
-        # Geographic -> ECEF
-        x = (
-            radius
-            * np.cos(lat_grid)
-            * np.cos(lon_grid)
-        )
-    
-        y = (
-            radius
-            * np.cos(lat_grid)
-            * np.sin(lon_grid)
-        )
-    
-        z = radius * np.sin(lat_grid)
-    
-        vertices = np.column_stack(
-            (
-                x.ravel(),
-                y.ravel(),
-                z.ravel(),
-            )
-        )
-    
-        # NASA Blue Marble is an equirectangular map:
-        # left edge  = -180 deg longitude
-        # right edge = +180 deg longitude
-        # top        = +90 deg latitude
-        # bottom     = -90 deg latitude
-        u = (lon_grid + np.pi) / (2.0 * np.pi)
-        v = (lat_grid + 0.5 * np.pi) / np.pi
-    
-        texcoords = np.column_stack(
-            (
-                u.ravel(),
-                v.ravel(),
-            )
-        )
-    
-        faces = []
-    
-        for i in range(n_lat):
-            for j in range(n_lon):
-                a = i * (n_lon + 1) + j
-                b = a + 1
-                c = a + (n_lon + 1)
-                d = c + 1
-    
-                faces.append((a, c, b))
-                faces.append((b, c, d))
-    
-        faces = np.asarray(
-            faces,
-            dtype=np.uint32,
-        )
-    
-        return vertices, faces, texcoords
+        if texture_path is not None:
+            texture = pv.read_texture(texture_path)
+            self.earth_actor = self.plotter.add_mesh(self.earth_mesh, texture=texture, smooth_shading=True)
+        else:
+            self.earth_actor = self.plotter.add_mesh(self.earth_mesh, smooth_shading=True)
 
-    # ========================================================================
-    # Atmosphere
-    # ========================================================================
+    def _add_clouds(self):
+        if not self.show_clouds:
+            return
+
+        cloud_radius = self.earth_radius * 1.002
+        self.cloud_mesh = self._create_equirectangular_sphere(cloud_radius)
+
+        texture_path = self._resolve_texture(self.cloud_texture)
+
+        if texture_path is None:
+            return
+
+        texture = pv.read_texture(texture_path)
+        self.cloud_actor = self.plotter.add_mesh(self.cloud_mesh, texture=texture, opacity=0.35, smooth_shading=True)
 
     def _add_atmosphere(self):
+        if not self.show_atmosphere:
+            return
 
-        self.atmosphere = visuals.Sphere(
-            radius=self.earth_radius_km * 1.015,
-            method="latitude",
-            parent=self.view.scene,
-            color=(0.15, 0.35, 0.65, 0.10),
-            subdivisions=40,
-        )
-
-        self.earth_objects.append(
-            self.atmosphere
-        )
-
-    # ========================================================================
-    # Equator
-    # ========================================================================
+        atmosphere = pv.Sphere(radius=self.earth_radius * 1.015, theta_resolution=180, phi_resolution=90)
+        self.atmosphere_actor = self.plotter.add_mesh(atmosphere, color="lightskyblue", opacity=0.06, smooth_shading=True)
 
     def _add_equator(self):
+        if not self.show_equator:
+            return
 
-        theta = np.linspace(
-            0.0,
-            2.0 * np.pi,
-            500,
-        )
+        theta = np.linspace(0.0, 2.0 * np.pi, 361)
+        radius = self.earth_radius * 1.003
 
-        points = np.column_stack(
-            (
-                self.earth_radius_km * np.cos(theta),
-                self.earth_radius_km * np.sin(theta),
-                np.zeros_like(theta),
-            )
-        )
+        points = np.column_stack((radius * np.cos(theta), radius * np.sin(theta), np.zeros_like(theta)))
 
-        self.equator = visuals.Line(
-            pos=points,
-            color=(0.5, 0.5, 0.5, 0.7),
-            width=1.5,
-            method="gl",
-            parent=self.view.scene,
-        )
+        self.equator_actor = self.plotter.add_lines(points, width=1.5, color="white", connected=True)
 
-        self.earth_objects.append(
-            self.equator
-        )
+    def _configure_lighting(self):
+        self.plotter.remove_all_lights()
 
-    # ========================================================================
-    # Coordinate Conversion
-    # ========================================================================
+        main_light = pv.Light(position=(30000.0, -20000.0, 20000.0), focal_point=(0.0, 0.0, 0.0), intensity=1.8)
+        fill_light = pv.Light(position=(-25000.0, 15000.0, 10000.0), focal_point=(0.0, 0.0, 0.0), intensity=0.20)
 
-    def _convert_position(
-        self,
-        position,
-        normalized=False,
-        Lstar=None,
-    ):
+        self.plotter.add_light(main_light)
+        self.plotter.add_light(fill_light)
 
-        position = np.asarray(
-            position,
-            dtype=float,
-        )
+    def _configure_camera(self):
+        distance = self.earth_radius * 3.0
 
-        if normalized:
+        self.plotter.camera.position = (distance, -distance, distance * 0.75)
+        self.plotter.camera.focal_point = (0.0, 0.0, 0.0)
+        self.plotter.camera.up = (0.0, 0.0, 1.0)
 
-            if Lstar is None:
+    def _setup_canvas_overlays(self):
+        if self.show_controls:
+            controls = "SPACE  Pause / Resume\nr      Reset\n+ / =  Increase Speed\n- / _  Decrease Speed"
+            self.controls_text_actor = self.plotter.add_text(controls, position=(25, 25), font_size=9, color="white", shadow=True)
 
-                raise ValueError(
-                    "Lstar must be supplied for normalized coordinates."
-                )
+        if self.show_sim_time:
+            self.sim_time_text_actor = self.plotter.add_text(self._simulation_status_text(), position=(1110, 25), font_size=9, color="white", shadow=True)
 
-            position = position * Lstar / 1000.0
+    def _setup_asset_logo(self):
+        if not self.show_asset_logo:
+            return
 
-        return position
+        logo_path = self._resolve_texture(self.asset_logo)
 
-    # ========================================================================
-    # Trajectory
-    # ========================================================================
+        if logo_path is None:
+            print(f"ASSET logo not found: {self.asset_logo}")
+            return
 
-    def plot_trajectory(
-        self,
-        trajectory,
-        color=(1.0, 1.0, 1.0, 1.0),
-        width=3.0,
-        normalized=False,
-        Lstar=None,
-    ):
+        try:
+            print(f"ASSET logo loaded: {logo_path}")
+            print(f"ASSET logo exists: {os.path.isfile(logo_path)}")
 
-        trajectory = np.asarray(
-            trajectory,
-            dtype=float,
-        )
+            self.asset_logo_widget = self.plotter.add_logo_widget(logo_path, position=(0.78, 0.80), size=(0.25, 0.18), opacity=1.0)
 
-        if trajectory.ndim != 2:
+            print("ASSET logo widget created successfully.")
 
-            raise ValueError(
-                "Trajectory must be a 2D array."
-            )
+        except Exception as exc:
+            print(f"Failed to load ASSET logo: {exc}")
+            self.asset_logo_widget = None
 
-        if trajectory.shape[1] < 3:
+    def _setup_alabama_logo(self):
+        if not self.show_alabama_logo:
+            return
 
-            raise ValueError(
-                "Trajectory must contain at least three position columns."
-            )
+        logo_path = self._resolve_texture(self.alabama_logo)
 
-        xyz = self._convert_position(
-            trajectory[:, 0:3],
-            normalized=normalized,
-            Lstar=Lstar,
-        )
+        if logo_path is None:
+            print(f"University of Alabama logo not found: {self.alabama_logo}")
+            return
 
-        line = visuals.Line(
-            pos=xyz,
-            color=color,
-            width=width,
-            method="gl",
-            parent=self.view.scene,
-        )
+        try:
+            print(f"University of Alabama logo loaded: {logo_path}")
+            print(f"University of Alabama logo exists: {os.path.isfile(logo_path)}")
 
-        self.trajectory_objects.append(
-            line
-        )
+            self.alabama_logo_widget = self.plotter.add_logo_widget(logo_path, position=(0.78, 0.7), size=(0.25, 0.08), opacity=1.0)
 
-        return line
+            print("University of Alabama logo widget created successfully.")
 
-    # ========================================================================
-    # Point
-    # ========================================================================
+        except Exception as exc:
+            print(f"Failed to load University of Alabama logo: {exc}")
+            self.alabama_logo_widget = None
 
-    def plot_point(
-        self,
-        point,
-        color=(1.0, 1.0, 1.0, 1.0),
-        size=10.0,
-        normalized=False,
-        Lstar=None,
-    ):
+    def _setup_keyboard_controls(self):
+        self.plotter.add_key_event("space", self.toggle_animation)
+        self.plotter.add_key_event("r", self.reset_animation)
+        self.plotter.add_key_event("=", self.increase_animation_speed)
+        self.plotter.add_key_event("+", self.increase_animation_speed)
+        self.plotter.add_key_event("-", self.decrease_animation_speed)
+        self.plotter.add_key_event("_", self.decrease_animation_speed)
 
-        point = self._convert_position(
-            point,
-            normalized=normalized,
-            Lstar=Lstar,
-        )
+    def _simulation_status_text(self):
+        status = "RUNNING" if self.animation_running else "PAUSED"
 
-        point = np.asarray(
-            point,
-            dtype=float,
-        ).reshape(1, 3)
+        return f"Simulation Time\nt = {self.animation_time:,.2f} s\nSpeed = {self.animation_time_scale:.2f}x\nStatus = {status}"
 
-        marker = visuals.Markers(
-            parent=self.view.scene,
-        )
+    def _update_simulation_time_text(self):
+        if self.sim_time_text_actor is None:
+            return
 
-        marker.set_data(
-            point,
-            face_color=color,
-            edge_color=(1.0, 1.0, 1.0, 1.0),
-            size=size,
-        )
+        text = self._simulation_status_text()
 
-        self.marker_objects.append(
-            marker
-        )
+        if hasattr(self.sim_time_text_actor, "input"):
+            self.sim_time_text_actor.input = text
+        elif hasattr(self.sim_time_text_actor, "SetInput"):
+            self.sim_time_text_actor.SetInput(text)
+        elif hasattr(self.sim_time_text_actor, "SetText"):
+            self.sim_time_text_actor.SetText(2, text)
 
-        return marker
+        if hasattr(self.sim_time_text_actor, "Modified"):
+            self.sim_time_text_actor.Modified()
 
-    # ========================================================================
-    # Start Point
-    # ========================================================================
+    def _register_legend_label(self, label, color):
+        if label is None:
+            return
 
-    def plot_startpoint(
-        self,
-        trajectory,
-        color=(1.0, 1.0, 1.0, 1.0),
-        size=10.0,
-        normalized=False,
-        Lstar=None,
-    ):
+        self.legend_labels[label] = color
 
-        trajectory = np.asarray(
-            trajectory,
-            dtype=float,
-        )
+    def plot_trajectory(self, trajectory, color="white", width=3.0, label=None, normalized=False, Lstar=None, opacity=1.0):
+        trajectory = np.asarray(trajectory, dtype=float)
 
-        return self.plot_point(
-            trajectory[0, 0:3],
-            color=color,
-            size=size,
-            normalized=normalized,
-            Lstar=Lstar,
-        )
+        if trajectory.ndim != 2 or trajectory.shape[1] < 3:
+            raise ValueError("trajectory must be an Nx3 or NxM array")
 
-    # ========================================================================
-    # End Point
-    # ========================================================================
-
-    def plot_endpoint(
-        self,
-        trajectory,
-        color=(1.0, 1.0, 1.0, 1.0),
-        size=10.0,
-        normalized=False,
-        Lstar=None,
-    ):
-
-        trajectory = np.asarray(
-            trajectory,
-            dtype=float,
-        )
-
-        return self.plot_point(
-            trajectory[-1, 0:3],
-            color=color,
-            size=size,
-            normalized=normalized,
-            Lstar=Lstar,
-        )
-
-    # ========================================================================
-    # Vector
-    # ========================================================================
-
-    def plot_vector(
-        self,
-        origin,
-        vector,
-        scale=1.0,
-        color=(1.0, 1.0, 1.0, 1.0),
-        width=2.0,
-        normalized=False,
-        Lstar=None,
-    ):
-
-        origin = self._convert_position(
-            origin,
-            normalized=normalized,
-            Lstar=Lstar,
-        )
-
-        vector = np.asarray(
-            vector,
-            dtype=float,
-        )
+        points = trajectory[:, :3].copy()
 
         if normalized:
-
             if Lstar is None:
+                raise ValueError("Lstar must be supplied when normalized=True")
 
-                raise ValueError(
-                    "Lstar must be supplied for normalized coordinates."
-                )
+            points *= float(Lstar)
 
-            vector = vector * Lstar / 1000.0
+        polyline = pv.lines_from_points(points)
+        actor = self.plotter.add_mesh(polyline, color=color, line_width=width, opacity=opacity)
 
-        endpoint = origin + vector * scale
+        self.trajectory_actors.append(actor)
+        self._register_legend_label(label, color)
 
-        points = np.vstack(
-            (
-                origin,
-                endpoint,
-            )
-        )
+        return actor
 
-        line = visuals.Line(
-            pos=points,
-            color=color,
-            width=width,
-            method="gl",
-            parent=self.view.scene,
-        )
+    def plot_point(self, point, color="white", size=12.0, label=None):
+        point = np.asarray(point, dtype=float).reshape(3)
 
-        self.vector_objects.append(
-            line
-        )
+        actor = self.plotter.add_points(point.reshape(1, 3), color=color, point_size=size, render_points_as_spheres=True)
 
-        return line
+        self.marker_actors.append(actor)
+        self._register_legend_label(label, color)
 
-    # ========================================================================
-    # Camera Framing
-    # ========================================================================
+        return actor
 
-    def frame(
-        self,
-        padding=1.25,
-    ):
+    def plot_startpoint(self, trajectory, color="green", size=12.0, label="Start"):
+        trajectory = np.asarray(trajectory, dtype=float)
+        return self.plot_point(trajectory[0, :3], color=color, size=size, label=label)
 
-        max_radius = self.earth_radius_km
+    def plot_endpoint(self, trajectory, color="red", size=12.0, label="End"):
+        trajectory = np.asarray(trajectory, dtype=float)
+        return self.plot_point(trajectory[-1, :3], color=color, size=size, label=label)
 
-        for line in self.trajectory_objects:
+    def plot_vector(self, origin, vector, color="yellow", scale=1.0, width=3.0, label=None):
+        origin = np.asarray(origin, dtype=float).reshape(3)
+        vector = np.asarray(vector, dtype=float).reshape(3)
 
+        mesh = pv.Arrow(start=origin, direction=vector, scale=float(scale))
+        actor = self.plotter.add_mesh(mesh, color=color, line_width=width)
+
+        self.vector_actors.append(actor)
+        self._register_legend_label(label, color)
+
+        return actor
+
+    def create_batched_trajectories(self, trajectories):
+        all_points = []
+        all_lines = []
+        point_offset = 0
+
+        for trajectory in trajectories:
+            trajectory = np.asarray(trajectory, dtype=float)
+
+            if trajectory.ndim != 2 or trajectory.shape[1] < 3:
+                raise ValueError("Each trajectory must be an Nx3 or NxM array")
+
+            points = trajectory[:, :3]
+            n_points = len(points)
+
+            all_points.append(points)
+
+            line = np.concatenate(([n_points], np.arange(point_offset, point_offset + n_points)))
+            all_lines.append(line)
+
+            point_offset += n_points
+
+        if not all_points:
+            return pv.PolyData()
+
+        points = np.vstack(all_points)
+        lines = np.concatenate(all_lines)
+
+        return pv.PolyData(points, lines=lines)
+
+    def plot_batched_trajectories(self, trajectories, color="white", width=2.0, label=None, opacity=1.0):
+        mesh = self.create_batched_trajectories(trajectories)
+        actor = self.plotter.add_mesh(mesh, color=color, line_width=width, opacity=opacity)
+
+        self.trajectory_actors.append(actor)
+        self._register_legend_label(label, color)
+
+        return actor
+
+    def create_point_mesh(self, positions):
+        positions = np.asarray(positions, dtype=float)
+
+        if positions.ndim != 2 or positions.shape[1] != 3:
+            raise ValueError("positions must have shape Nx3")
+
+        return pv.PolyData(positions)
+
+    def plot_points(self, positions, color="white", size=8.0, label=None):
+        mesh = self.create_point_mesh(positions)
+
+        actor = self.plotter.add_mesh(mesh, color=color, point_size=size, render_points_as_spheres=True)
+
+        self.marker_actors.append(actor)
+        self._register_legend_label(label, color)
+
+        return mesh, actor
+
+    def update_points(self, positions):
+        positions = np.asarray(positions, dtype=float)
+
+        if positions.ndim != 2 or positions.shape[1] != 3:
+            raise ValueError("positions must have shape Nx3")
+
+        for actor in self.marker_actors:
+            mesh = actor.mapper.dataset
+
+            if mesh.n_points == positions.shape[0]:
+                mesh.points = positions
+                mesh.GetPoints().Modified()
+                mesh.Modified()
+
+    def add_legend(self):
+        if not self.legend_labels:
+            return
+
+        labels = [[label, color] for label, color in self.legend_labels.items()]
+
+        try:
+            self.plotter.add_legend(labels, bcolor=(0.05, 0.05, 0.05, 0.75), face="none", loc="lower_right", size=(0.20, 0.18))
+        except (ValueError, TypeError):
             try:
-
-                pos = line.pos
-
+                self.plotter.add_legend(labels, bcolor=(0.05, 0.05, 0.05, 0.75), loc="lower_right")
             except Exception:
+                pass
 
-                continue
+    def add_animation(self, update_function, interval=30, time_scale=60.0, min_time_scale=0.1, max_time_scale=5000.0, reset_function=None, start=True):
+        self.animation_update_function = update_function
+        self.animation_reset_function = reset_function
+        self.animation_time_scale = float(time_scale)
+        self.animation_min_time_scale = float(min_time_scale)
+        self.animation_max_time_scale = float(max_time_scale)
+        self.animation_running = bool(start)
+        self.animation_last_wall_time = time.perf_counter()
 
-            if pos is not None and len(pos) > 0:
+        if self.animation_callback is not None:
+            try:
+                self.plotter.clear_callback(self.animation_callback)
+            except Exception:
+                pass
 
-                radius = np.max(
-                    np.linalg.norm(
-                        pos,
-                        axis=1,
-                    )
-                )
+        self.animation_callback = self.plotter.add_callback(self._animation_tick, interval=interval)
+        self._update_simulation_time_text()
 
-                max_radius = max(
-                    max_radius,
-                    radius,
-                )
+    def _animation_tick(self, *args):
+        if not self.animation_running:
+            self.animation_last_wall_time = time.perf_counter()
+            return
 
-        self.view.camera.center = (
-            0.0,
-            0.0,
-            0.0,
-        )
+        now = time.perf_counter()
 
-        self.view.camera.distance = (
-            max_radius * padding
-        )
+        if self.animation_last_wall_time is None:
+            self.animation_last_wall_time = now
+            return
 
-    # ========================================================================
-    # Clear Trajectories
-    # ========================================================================
+        dt_wall = now - self.animation_last_wall_time
+        self.animation_last_wall_time = now
+
+        self.animation_time += dt_wall * self.animation_time_scale
+
+        if self.animation_update_function is not None:
+            self.animation_update_function(self.animation_time)
+
+        self._update_simulation_time_text()
+
+        try:
+            self.plotter.render()
+        except Exception:
+            pass
+
+    def pause_animation(self):
+        self.animation_running = False
+        self.animation_last_wall_time = time.perf_counter()
+        self._update_simulation_time_text()
+
+    def resume_animation(self):
+        self.animation_running = True
+        self.animation_last_wall_time = time.perf_counter()
+        self._update_simulation_time_text()
+
+    def toggle_animation(self):
+        if self.animation_running:
+            self.pause_animation()
+        else:
+            self.resume_animation()
+
+    def reset_animation(self):
+        self.animation_time = 0.0
+        self.animation_last_wall_time = time.perf_counter()
+
+        if self.animation_reset_function is not None:
+            self.animation_reset_function()
+
+        if self.animation_update_function is not None:
+            self.animation_update_function(self.animation_time)
+
+        self._update_simulation_time_text()
+
+        try:
+            self.plotter.render()
+        except Exception:
+            pass
+
+    def set_animation_speed(self, time_scale):
+        self.animation_time_scale = float(np.clip(time_scale, self.animation_min_time_scale, self.animation_max_time_scale))
+        self._update_simulation_time_text()
+
+    def increase_animation_speed(self):
+        self.set_animation_speed(self.animation_time_scale * 2.0)
+
+    def decrease_animation_speed(self):
+        self.set_animation_speed(self.animation_time_scale / 2.0)
+
+    def stop_animation(self):
+        self.animation_running = False
+
+        if self.animation_callback is not None:
+            try:
+                self.plotter.clear_callback(self.animation_callback)
+            except Exception:
+                pass
+
+            self.animation_callback = None
+
+        self._update_simulation_time_text()
+
+    def frame(self, padding=1.25):
+        bounds = np.asarray(self.earth_mesh.bounds, dtype=float)
+        xmin, xmax, ymin, ymax, zmin, zmax = bounds
+
+        center = np.array([
+            0.5 * (xmin + xmax),
+            0.5 * (ymin + ymax),
+            0.5 * (zmin + zmax),
+        ])
+
+        radius = 0.5 * max(xmax - xmin, ymax - ymin, zmax - zmin)
+        distance = radius * float(padding) * 2.0
+
+        direction = np.array([1.0, -1.0, 0.75])
+        direction /= np.linalg.norm(direction)
+
+        self.plotter.camera.focal_point = center
+        self.plotter.camera.position = center + direction * distance
+        self.plotter.camera.up = (0.0, 0.0, 1.0)
+
+    def set_camera(self, position, focal_point=(0.0, 0.0, 0.0), view_up=(0.0, 0.0, 1.0)):
+        self.plotter.camera.position = tuple(position)
+        self.plotter.camera.focal_point = tuple(focal_point)
+        self.plotter.camera.up = tuple(view_up)
+
+    def set_camera_distance(self, distance, focal_point=(0.0, 0.0, 0.0)):
+        direction = np.asarray(self.plotter.camera.position, dtype=float)
+        direction -= np.asarray(focal_point, dtype=float)
+
+        norm = np.linalg.norm(direction)
+
+        if norm == 0.0:
+            direction = np.array([1.0, -1.0, 0.75])
+            norm = np.linalg.norm(direction)
+
+        direction /= norm
+
+        self.plotter.camera.focal_point = tuple(focal_point)
+        self.plotter.camera.position = tuple(np.asarray(focal_point) + direction * float(distance))
 
     def clear_trajectories(self):
-
-        for obj in self.trajectory_objects:
-
+        for actor in self.trajectory_actors:
             try:
-
-                obj.parent = None
-
+                self.plotter.remove_actor(actor)
             except Exception:
-
                 pass
 
-        self.trajectory_objects = []
-
-    # ========================================================================
-    # Clear Markers
-    # ========================================================================
+        self.trajectory_actors = []
 
     def clear_markers(self):
-
-        for obj in self.marker_objects:
-
+        for actor in self.marker_actors:
             try:
-
-                obj.parent = None
-
+                self.plotter.remove_actor(actor)
             except Exception:
-
                 pass
 
-        self.marker_objects = []
-
-    # ========================================================================
-    # Clear Vectors
-    # ========================================================================
+        self.marker_actors = []
 
     def clear_vectors(self):
-
-        for obj in self.vector_objects:
-
+        for actor in self.vector_actors:
             try:
-
-                obj.parent = None
-
+                self.plotter.remove_actor(actor)
             except Exception:
-
                 pass
 
-        self.vector_objects = []
-
-    # ========================================================================
-    # Clear All Plotted Data
-    # ========================================================================
+        self.vector_actors = []
 
     def clear(self):
-
         self.clear_trajectories()
         self.clear_markers()
         self.clear_vectors()
-
-    # ========================================================================
-    # Show
-    # ========================================================================
+        self.legend_labels = {}
 
     def show(self):
-
-        self.frame()
-
-        self.canvas.show()
-
-        app.run()
-
-
-if __name__ == "__main__":
-    print("Starting Earth + trajectory test...")
-
-    globe = GlobeCanvas(
-        earth_radius_km=6378.145,
-        show_earth=True,
-        show_atmosphere=True,
-        show_equator=True,
-    )
-
-    theta = np.linspace(0.0, 2.0 * np.pi, 1000)
-
-    altitude_km = 500.0
-    radius_km = 6378.145 + altitude_km
-
-    trajectory = np.column_stack(
-        (
-            radius_km * np.cos(theta),
-            radius_km * np.sin(theta),
-            np.zeros_like(theta),
-        )
-    )
-
-    globe.plot_trajectory(
-        trajectory,
-        color=(1.0, 0.2, 0.1, 1.0),
-        width=4.0,
-    )
-    globe.show()
+        self.plotter.app.exec_()
