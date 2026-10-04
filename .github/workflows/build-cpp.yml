@@ -71,21 +71,35 @@ jobs:
         shell: pwsh
         run: |
           choco install -y mingw
-          conda install -y -c conda-forge mkl mkl-devel intel-openmp
+          conda install --name build -y -c conda-forge mkl mkl-devel intel-openmp
           echo "C:\ProgramData\chocolatey\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Install Python build deps
+      - name: Install Python build deps (Linux)
+        if: runner.os == 'Linux'
         shell: bash
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
           python -m pip install build wheel setuptools
 
-      - name: Build wheel
+      - name: Install Python build deps (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          conda run --name build python -m pip install --upgrade pip build wheel setuptools
+
+      - name: Build wheel (Linux)
+        if: runner.os == 'Linux'
         shell: bash
         run: |
           set -euo pipefail
           python -m build --wheel --outdir "${WHEEL_DIR}"
+
+      - name: Build wheel (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          conda run --name build python -m build --wheel --outdir "$env:WHEEL_DIR"
 
       - name: Verify wheel exists (Linux)
         if: runner.os == 'Linux'
