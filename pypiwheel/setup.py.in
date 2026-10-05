@@ -65,7 +65,7 @@ def main():
                     "spiceypy",
                     "seaborn",
                     "basemap",
-                    "intel-openmp"],
+                    "intel-openmp; sys_platform != 'darwin' or platform_machine == 'x86_64'"],
 
         cmdclass=dict(build_ext=CustomExtBuilder),
     )
