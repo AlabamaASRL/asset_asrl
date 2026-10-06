@@ -14,7 +14,7 @@ if sys.platform == "win32":
 
     # Add the DLL directory to the Windows DLL search path before importing ASSET.
     if dll_dir.is_dir():
-        print(f"Found {dll_dir} ... adding to DLL search path")
+        #print(f"Found {dll_dir} ... adding to DLL search path")
         os.add_dll_directory(str(dll_dir))
 
 # Import the compiled ASSET backend after its native dependencies are available.
