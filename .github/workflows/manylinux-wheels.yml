@@ -9,8 +9,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-20.04]
-        python-version: ["3.8","3.9","3.10","3.11","3.12","3.13","3.14"]
+        platform: [ubuntu-22.04]
+        python-version: ["3.8","3.9","3.10","3.11","3.12","3.13","3.pi","3.15"]
         compiler: ["clang-12"]
 
     runs-on: ${{ matrix.platform }}
@@ -103,4 +103,4 @@ jobs:
         with:
           name: All Wheels
           path: wheels/
-          retention-days: 5
+          retention-days: 7
