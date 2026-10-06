@@ -34,12 +34,17 @@ void SoftwareInfo() {
       std::string(ASSET_COMPILERSTRING) + std::string(" ") + std::string(ASSET_COMPILERVERSION);
   std::string pythonv = std::to_string(PY_MAJOR_VERSION) + "." + std::to_string(PY_MINOR_VERSION);
   std::string vecversion;
-  if (vsize == 2)
+  if (vsize == 2) {
+#ifdef __ARM_NEON
+    vecversion = "ARM NEON - 128 bit - 2 doubles";
+#else
     vecversion = "SSE - 128 bit - 2 doubles";
-  else if (vsize == 4)
+#endif
+  } else if (vsize == 4) {
     vecversion = "AVX2 - 256 bit - 4 doubles";
-  else if (vsize == 8)
+  } else if (vsize == 8) {
     vecversion = "AVX512 - 512 bit - 8 doubles";
+  }
 
 
   std::string ASSET_STR("         ___    _____   _____    ______  ______ \n"
@@ -91,7 +96,11 @@ void SoftwareInfo() {
   fmt::print(fmt::fg(fmt::color::white), vecversion);
   fmt::print("\n");
   fmt::print(fmt::fg(fmt::color::royal_blue), " Linear Solver        : ");
+  #ifndef USE_ACCELERATE_SPARSE
   fmt::print(fmt::fg(fmt::color::white), "Intel MKL Pardiso");
+  #else
+  fmt::print(fmt::fg(fmt::color::white), "Apple Accelerate Sparse");
+  #endif
   fmt::print("\n");
 
   fmt::print(fmt::fg(fmt::color::royal_blue), " Compiled With        : ");

@@ -72,7 +72,11 @@ using DomainMatrix = Eigen::Matrix<IOint, 2, -1>;
 template <class Scalar, int Sz>
 using SuperScalarType = Eigen::Array<Scalar, Sz, 1>;
 
+#ifdef __ARM_NEON
+using DefaultSuperScalar = SuperScalarType<double, 2>;
+#else
 using DefaultSuperScalar = SuperScalarType<double, 4>;
+#endif
 
 
 }  // namespace ASSET
