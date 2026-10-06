@@ -1,15 +1,21 @@
-name: build-upload-artifacts-macos
+name: arm64-pypy-wheels
 
 on:
   workflow_dispatch:
-  
 
 permissions:
   contents: read
 
 jobs:
   build:
-    runs-on: macos-latest
+    name: py${{ matrix.python-version }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false 
+      matrix:
+        os: [macos-latest] 
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
 
     env:
       MACOSX_DEPLOYMENT_TARGET: "11.0"
@@ -20,10 +26,12 @@ jobs:
         with:
           submodules: true
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
+        id: setup-python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true   # This will allow us to test future Python versions early
 
       - name: Install macOS dependencies
         run: |
@@ -45,38 +53,30 @@ jobs:
             -G "Unix Makefiles" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_OSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET}" \
+            -DPython_EXECUTABLE="${{ steps.setup-python.outputs.python-path }}" \
+            -DPython3_EXECUTABLE="${{ steps.setup-python.outputs.python-path }}" \
+            -DPYTHON_EXECUTABLE="${{ steps.setup-python.outputs.python-path }}" \
             -DPIP_INSTALL=True \
             -DBUILD_ASSET_WHEEL=True \
             -DLIBOMP_PREFIX="${LIBOMP_PREFIX}"
 
       - name: Build asset module
-        run: |
-          cmake --build build \
-            --target asset \
-            --config Release \
-            -- -j3
+        run: cmake --build build --target asset --config Release -- -j3
 
       - name: Build wheel
-        run: |
-          cmake --build build \
-            --target pypiwheel \
-            --config Release \
-            -- -j3
+        run: cmake --build build --target pypiwheel --config Release -- -j3
 
       - name: Debug - List build directory
         run: |
           echo "=== Shared libraries ==="
-          find build -type f \( \
-            -name "asset*.so" -o \
-            -name "asset*.dylib" \
-          \) -print
+          find build -type f \( -name "asset*.so" -o -name "asset*.dylib" \) -print
           echo "=== Wheels ==="
           find build -type f -name "*.whl" -print
 
       - name: Upload compiled module artifact
         uses: actions/upload-artifact@v4
         with:
-          name: asset-module-macos-${{ github.run_id }}
+          name: asset-module-macos-${{ runner.arch }}-py${{ matrix.python-version }}-${{ github.run_id }}
           path: |
             build/src/asset*.so
             build/asset*.so
@@ -86,7 +86,7 @@ jobs:
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: asset-wheel-macos-${{ github.run_id }}
+          name: asset-wheel-macos-${{ runner.arch }}-py${{ matrix.python-version }}-${{ github.run_id }}
           path: |
             build/asset_asrl/dist/*.whl
             build/pypiwheel/asset_asrl/dist/*.whl
