@@ -2,8 +2,6 @@ import numpy as np
 import asset as ast
 import unittest
 
-import matplotlib.pyplot as plt
-
 vf = ast.VectorFunctions
 oc = ast.OptimalControl
 sol = ast.Solvers
@@ -102,7 +100,6 @@ class test_FreeFlyingRobot(unittest.TestCase):
                     self.problem_impl(tmode,"BlockConstant",nseg)
 
 if __name__ == "__main__":
-    
     unittest.main(exit=False)
 
     

@@ -1,6 +1,5 @@
 import numpy as np
 import asset as ast
-import matplotlib.pyplot as plt
 import unittest
 
 vf        = ast.VectorFunctions
@@ -214,17 +213,13 @@ class test_Reentry(unittest.TestCase):
         
     
     def test_FullProblem(self):
-        
         for tmode in ["LGL3","LGL5","LGL7","Trapezoidal"]:
             with self.subTest(TranscriptionMode=tmode):
                 with self.subTest(cmode="HighestOrderSpline"):
                     self.problem_impl(tmode,"HighestOrderSpline")
                 with self.subTest(cmode="BlockConstant"):
                     self.problem_impl(tmode,"BlockConstant")
-
-
-
-
+                    
 if __name__ == "__main__":
     unittest.main(exit=False)
 
