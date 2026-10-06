@@ -34,7 +34,7 @@ jobs:
         with:
           version: "17.0"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
@@ -47,7 +47,7 @@ jobs:
         run: scripts/windowsoneapi_install.bat $WINDOWS_BASEKIT_URL $WINDOWS_CPP_COMPONENTS
         shell: bash
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -65,7 +65,7 @@ jobs:
         run: cmake --build build --target asset pypiwheel --config Release -- -j3
 
       - name: 'Upload Wheels'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v5
         with:
           name: dist_${{ matrix.python-version }}_${{ matrix.platform }}
           path: build/pypiwheel/asset_asrl/dist/*.whl
@@ -84,13 +84,13 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v5
 
-        - uses: actions/setup-python@v3
+        - uses: actions/setup-python@v5
           with:
             python-version: ${{ matrix.python-version }}
 
-        - uses: actions/download-artifact@v3
+        - uses: actions/download-artifact@5
           with:
               path: dists/
 
@@ -104,11 +104,11 @@ jobs:
           working-directory:  wheels/
 
         - name: 'Upload Wheels To GitHub'
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v5
           with:
                 name: All Wheels
                 path: wheels/
-                retention-days: 5
+                retention-days: 7
         #- name: Publish package to TestPyPI
         #  uses: pypa/gh-action-pypi-publish@release/v1
         #  with:
