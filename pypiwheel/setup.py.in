@@ -65,8 +65,8 @@ def main():
                     "spiceypy",
                     "seaborn",
                     "intel-openmp; sys_platform != 'darwin' or platform_machine == 'x86_64'",
-                    "basemap; python_version < 3.10",
-                    "cartopy; python_version >= 3.10"
+                    "basemap; python_version < '3.10'",
+                    "cartopy; python_version >= '3.10'"
         ],
 
         cmdclass=dict(build_ext=CustomExtBuilder),
