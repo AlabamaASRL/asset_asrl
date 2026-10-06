@@ -9,9 +9,10 @@ on:
 jobs:
  build_windows:
     env:
-      # WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/19078/w_BaseKit_p_2023.0.0.25940_offline.exe
+    # This link likely needs to be updated if you are building a new version of ASSET
+      WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/0cb67a0d-67f6-410b-868b-f4a0a17ff0cf/intel-oneapi-toolkit-2026.1.1.32_offline.exe
 
-      # WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel
+      WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel
       VS_VER: vs2022
       ONEAPI_ROOT: C:/Program Files (x86)/Intel/oneAPI/
       CC: clang-cl.exe
@@ -21,7 +22,7 @@ jobs:
        fail-fast: false
        matrix:
         platform: [windows-latest]
-        python-version: ["3.8","3.9","3.10","3.11","3.12","3.13","3.14"]
+        python-version: ["3.8","3.9","3.10","3.11","3.12","3.13","3.14","3.15"]
         compiler: ["clang-cl"]
 
     runs-on: ${{ matrix.platform }}
@@ -43,14 +44,10 @@ jobs:
           arch: x86_64
 
       - name: Install MKL
-        # run: scripts/windowsoneapi_install.bat $WINDOWS_BASEKIT_URL $WINDOWS_CPP_COMPONENTS
-        # shell: bash
-        uses: rscohn2/setup-oneapi@v0
-        with:
-          components: |
-            mkl
+        run: scripts/windowsoneapi_install.bat $WINDOWS_BASEKIT_URL $WINDOWS_CPP_COMPONENTS
+        shell: bash
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -68,7 +65,7 @@ jobs:
         run: cmake --build build --target asset pypiwheel --config Release -- -j3
 
       - name: 'Upload Wheels'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: dist_${{ matrix.python-version }}_${{ matrix.platform }}
           path: build/pypiwheel/asset_asrl/dist/*.whl
@@ -87,13 +84,13 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@v3
 
-        - uses: actions/setup-python@v5
+        - uses: actions/setup-python@v3
           with:
             python-version: ${{ matrix.python-version }}
 
-        - uses: actions/download-artifact@v4
+        - uses: actions/download-artifact@v3
           with:
               path: dists/
 
@@ -107,7 +104,7 @@ jobs:
           working-directory:  wheels/
 
         - name: 'Upload Wheels To GitHub'
-          uses: actions/upload-artifact@v4
+          uses: actions/upload-artifact@v3
           with:
                 name: All Wheels
                 path: wheels/
