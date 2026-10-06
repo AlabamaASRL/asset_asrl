@@ -1,4 +1,4 @@
-name: arm64-pypi-wheels
+name: build-upload-artifacts-macos
 
 on:
   workflow_dispatch:
