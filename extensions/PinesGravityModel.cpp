@@ -32,8 +32,6 @@ PinesGravityModel::PinesGravityModel(
   // Validate inputs
   // ==========================================================================
 
-  // Initial supported range covers the full EGM96 release. It also bounds
-  // allocations from configuration errors before reading the input file.
   if (degree < 0 || degree > 360)
     throw std::invalid_argument(
         "PinesGravity degree must be in [0, 360]");
@@ -472,11 +470,6 @@ PinesGravityModel::acceleration(
 
   // ==========================================================================
   // Longitude recurrence
-  //
-  // IMPORTANT:
-  // This intentionally preserves the existing recurrence exactly.
-  // Do not change the ordering of the re/im updates without revalidating
-  // the numerical model.
   // ==========================================================================
 
   for (int m = 1;
@@ -517,8 +510,9 @@ PinesGravityModel::acceleration(
     const int k =
         n + 1;
 
+
     // ------------------------------------------------------------------------
-    // Cache triangular row offsets.
+    // Cache triangular row offsets
     // ------------------------------------------------------------------------
 
     const std::size_t row_n =
@@ -623,11 +617,8 @@ PinesGravityModel::acceleration(
             a[j] *
             m_double_[m];
 
-        term1 +=
-            am * e;
-
-        term2 +=
-            am * f;
+        term1 += am * e;
+        term2 += am * f;
       }
 
 
@@ -663,17 +654,10 @@ PinesGravityModel::acceleration(
     // Accumulate
     // ------------------------------------------------------------------------
 
-    sum1 +=
-        radial * term1;
-
-    sum2 +=
-        radial * term2;
-
-    sum3 +=
-        radial * term3;
-
-    sum4 -=
-        radial * term4;
+    sum1 += radial * term1;
+    sum2 += radial * term2;
+    sum3 += radial * term3;
+    sum4 -= radial * term4;
   }
 
 
@@ -683,14 +667,9 @@ PinesGravityModel::acceleration(
 
   const std::array<double, 3> result = {
 
-      sum1 +
-          sum4 * xhat,
-
-      sum2 +
-          sum4 * yhat,
-
-      sum3 +
-          sum4 * zhat
+      sum1 + sum4 * xhat,
+      sum2 + sum4 * yhat,
+      sum3 + sum4 * zhat
   };
 
 
