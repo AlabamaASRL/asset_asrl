@@ -1,256 +1,229 @@
 # -*- coding: utf-8 -*-
 
+"""
+SatelliteDemo.py
+
+Earth-centered satellite orbit visualization using the existing:
+    - Earth
+    - CelestialBody
+    - Spacecraft
+    - Canvas
+
+Units:
+    Position: km
+    Time: s
+    Gravitational parameter: km^3/s^2
+
+Controls:
+    SPACE : Pause / resume
+    R     : Reset simulation
+    RIGHT : Increase simulation speed
+    LEFT  : Decrease simulation speed
+    F     : Follow satellite
+
+This is a circular-orbit visualization demo, not an ASSET propagation.
+"""
+
 import numpy as np
 
-from GlobeCanvas import GlobeCanvas
+from Earth import Earth
+from Spacecraft import Spacecraft
+from Canvas import Canvas
 
 
-RE = 6378.145
-MU = 398600.4418
+# ============================================================================
+# Orbit configuration
+# ============================================================================
 
-EARTH_TEXTURE_FILE = "bluemarble-2048.png"
-CLOUD_TEXTURE_FILE = "clouds_2048.png"
+MU_EARTH = 398600.4418       # km^3/s^2
+EARTH_RADIUS = 6378.145      # km
 
-NUM_PLANES = 6
-SATS_PER_PLANE = 20
+ORBIT_ALTITUDE = 700.0       # km above Earth's surface
+ORBIT_RADIUS = EARTH_RADIUS + ORBIT_ALTITUDE
 
-CONSTELLATION_ALTITUDE = 550.0
-CONSTELLATION_INCLINATION = 53.0
+# Circular-orbit angular rate and period.
+ORBIT_RATE = np.sqrt(
+    MU_EARTH / ORBIT_RADIUS**3
+)
 
-ANIMATION_INTERVAL_MS = 30
-
-INITIAL_TIME_SCALE = 60.0
-MIN_TIME_SCALE = 0.1
-MAX_TIME_SCALE = 5000.0
-
-
-def rotation_x(angle_rad):
-    c = np.cos(angle_rad)
-    s = np.sin(angle_rad)
-    return np.array([[1.0, 0.0, 0.0], [0.0, c, -s], [0.0, s, c]])
+ORBIT_PERIOD = 2.0 * np.pi / ORBIT_RATE
 
 
-def rotation_z(angle_rad):
-    c = np.cos(angle_rad)
-    s = np.sin(angle_rad)
-    return np.array([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]])
+def satellite_position(time):
+    """
+    Return satellite position in an Earth-centered inertial-style frame.
 
+    The circular orbit lies in the XY plane.
+    """
 
-def circular_orbit(altitude_km, raan_deg, inclination_deg, n_points=1000):
+    theta = ORBIT_RATE * time
 
-    radius = RE + altitude_km
-    theta = np.linspace(0.0, 2.0 * np.pi, n_points)
-
-    orbit = np.column_stack((
-        radius * np.cos(theta),
-        radius * np.sin(theta),
-        np.zeros_like(theta),
-    ))
-
-    rotation = rotation_z(np.deg2rad(raan_deg)) @ rotation_x(np.deg2rad(inclination_deg))
-
-    return orbit @ rotation.T
-
-
-def elliptical_orbit(perigee_altitude_km, apogee_altitude_km, inclination_deg, raan_deg, n_points=1200):
-
-    rp = RE + perigee_altitude_km
-    ra = RE + apogee_altitude_km
-    a = 0.5 * (rp + ra)
-    e = (ra - rp) / (ra + rp)
-
-    theta = np.linspace(0.0, 2.0 * np.pi, n_points)
-
-    radius = a * (1.0 - e**2) / (1.0 + e * np.cos(theta))
-
-    orbit = np.column_stack((
-        radius * np.cos(theta),
-        radius * np.sin(theta),
-        np.zeros_like(theta),
-    ))
-
-    rotation = rotation_z(np.deg2rad(raan_deg)) @ rotation_x(np.deg2rad(inclination_deg))
-
-    return orbit @ rotation.T
-
-
-def create_constellation(
-    num_planes=NUM_PLANES,
-    sats_per_plane=SATS_PER_PLANE,
-    altitude_km=CONSTELLATION_ALTITUDE,
-    inclination_deg=CONSTELLATION_INCLINATION,
-):
-
-    trajectories = []
-    radius = RE + altitude_km
-
-    for plane in range(num_planes):
-
-        raan_deg = 360.0 * plane / num_planes
-        phase_offset = 360.0 * plane / (num_planes * sats_per_plane)
-
-        theta = np.linspace(0.0, 2.0 * np.pi, 400)
-        theta_shifted = theta + np.deg2rad(phase_offset)
-
-        orbit = np.column_stack((
-            radius * np.cos(theta_shifted),
-            radius * np.sin(theta_shifted),
-            np.zeros_like(theta_shifted),
-        ))
-
-        rotation = rotation_z(np.deg2rad(raan_deg)) @ rotation_x(np.deg2rad(inclination_deg))
-
-        trajectories.append(orbit @ rotation.T)
-
-    return trajectories
-
-
-def circular_position(t, altitude_km, raan_deg, inclination_deg, phase_deg=0.0):
-
-    radius = RE + altitude_km
-    mean_motion = np.sqrt(MU / radius**3)
-
-    phase = np.deg2rad(phase_deg) + mean_motion * t
-
-    position_orbital = np.array([
-        radius * np.cos(phase),
-        radius * np.sin(phase),
+    return np.array([
+        ORBIT_RADIUS * np.cos(theta),
+        ORBIT_RADIUS * np.sin(theta),
         0.0,
     ])
 
-    rotation = rotation_z(np.deg2rad(raan_deg)) @ rotation_x(np.deg2rad(inclination_deg))
 
-    return rotation @ position_orbital
-
-
-def constellation_positions(
-    t,
-    num_planes=NUM_PLANES,
-    sats_per_plane=SATS_PER_PLANE,
-    altitude_km=CONSTELLATION_ALTITUDE,
-    inclination_deg=CONSTELLATION_INCLINATION,
+def create_orbit_trajectory(
+    samples=1000,
 ):
+    """
+    Generate a complete circular orbit for display.
+    """
 
-    positions = []
+    theta = np.linspace(
+        0.0,
+        2.0 * np.pi,
+        samples,
+    )
 
-    for plane in range(num_planes):
-
-        raan_deg = 360.0 * plane / num_planes
-
-        for satellite in range(sats_per_plane):
-
-            phase_deg = 360.0 * satellite / sats_per_plane
-            phase_deg += 360.0 * plane / (num_planes * sats_per_plane)
-
-            positions.append(circular_position(
-                t,
-                altitude_km,
-                raan_deg,
-                inclination_deg,
-                phase_deg,
-            ))
-
-    return np.asarray(positions, dtype=float)
-
-
-def create_demo_trajectories():
-
-    sat1 = circular_orbit(500.0, 0.0, 0.0, 1000)
-    sat2 = circular_orbit(800.0, 45.0, 30.0, 1000)
-    sat3 = circular_orbit(1000.0, 90.0, 60.0, 1000)
-    sat4 = elliptical_orbit(500.0, 12000.0, 55.0, 120.0, 1200)
-
-    return [sat1, sat2, sat3, sat4]
-
-
-def create_constellation_trajectories():
-    return create_constellation(NUM_PLANES, SATS_PER_PLANE, CONSTELLATION_ALTITUDE, CONSTELLATION_INCLINATION)
+    return np.column_stack((
+        ORBIT_RADIUS * np.cos(theta),
+        ORBIT_RADIUS * np.sin(theta),
+        np.zeros_like(theta),
+    ))
 
 
 def main():
 
-    globe = GlobeCanvas(
-        title="Earth Satellite Constellation — PyVistaQt",
-        earth_radius=RE,
-        earth_texture=EARTH_TEXTURE_FILE,
-        cloud_texture=CLOUD_TEXTURE_FILE,
-        window_size=(1500, 950),
+    print("=" * 64)
+    print("ASSET SATELLITE VISUALIZATION DEMO")
+    print("=" * 64)
+
+    print(f"Earth radius:       {EARTH_RADIUS:.3f} km")
+    print(f"Orbit altitude:     {ORBIT_ALTITUDE:.3f} km")
+    print(f"Orbit radius:       {ORBIT_RADIUS:.3f} km")
+    print(f"Orbital period:     {ORBIT_PERIOD / 60.0:.2f} minutes")
+    print(f"Orbital speed:      "
+          f"{np.sqrt(MU_EARTH / ORBIT_RADIUS):.3f} km/s")
+
+    # ------------------------------------------------------------------------
+    # Earth
+    # ------------------------------------------------------------------------
+
+    earth = Earth(
+        radius=EARTH_RADIUS,
+        texture="bluemarble-2048.png",
+        cloud_texture="clouds_2048.png",
         show_clouds=True,
         show_atmosphere=True,
         show_equator=True,
-        show_stars=True,
         show_reference_axis=True,
+    )
+
+    # ------------------------------------------------------------------------
+    # Canvas
+    # ------------------------------------------------------------------------
+
+    canvas = Canvas(
+        earth=earth,
+        title="ASSET | Earth Satellite Orbit",
+        window_size=(1500, 950),
+        show_stars=True,
         show_controls=True,
         show_sim_time=True,
         show_asset_logo=True,
         show_alabama_logo=True,
     )
 
-    demo_trajectories = create_demo_trajectories()
+    # ------------------------------------------------------------------------
+    # Orbit trajectory
+    # ------------------------------------------------------------------------
 
-    globe.plot_trajectory(demo_trajectories[0], color="red", width=3.0, label="Satellite 1 — 500 km")
-    globe.plot_trajectory(demo_trajectories[1], color="lime", width=3.0, label="Satellite 2 — 800 km / 45°")
-    globe.plot_trajectory(demo_trajectories[2], color="deepskyblue", width=3.0, label="Satellite 3 — 1000 km / 90°")
-    globe.plot_trajectory(demo_trajectories[3], color="gold", width=3.0, label="Satellite 4 — 500×12000 km / 55°")
+    trajectory = create_orbit_trajectory()
 
-    constellation_trajectories = create_constellation_trajectories()
-
-    globe.plot_batched_trajectories(
-        constellation_trajectories,
-        color="white",
-        width=1.5,
-        label="120-Satellite Constellation",
+    canvas.plot_trajectory(
+        trajectory,
+        color="cyan",
+        width=3.0,
+        label="Satellite Orbit",
     )
 
-    initial_positions = constellation_positions(
-        0.0,
-        NUM_PLANES,
-        SATS_PER_PLANE,
-        CONSTELLATION_ALTITUDE,
-        CONSTELLATION_INCLINATION,
+    canvas.plot_startpoint(
+        trajectory,
+        color="lime",
+        size=14.0,
+        label="Orbit Start",
     )
 
-    globe.plot_points(initial_positions, color="white", size=8.0, label="Constellation Satellites")
+    # ------------------------------------------------------------------------
+    # Satellite
+    # ------------------------------------------------------------------------
 
-    globe.plot_spacecraft(
-        initial_positions[0],
-        scale=RE * 0.025,
-        color="white",
+    initial_position = satellite_position(0.0)
+
+    satellite = Spacecraft(
+        name="LEO Satellite",
+        position=initial_position,
+        body_color="white",
         panel_color="silver",
-        label="Primary Spacecraft",
     )
 
-    def update_satellites(t):
+    canvas.add_spacecraft(satellite)
 
-        positions = constellation_positions(
-            t,
-            NUM_PLANES,
-            SATS_PER_PLANE,
-            CONSTELLATION_ALTITUDE,
-            CONSTELLATION_INCLINATION,
+    # ------------------------------------------------------------------------
+    # Camera
+    # ------------------------------------------------------------------------
+
+    # Show the entire orbit initially.
+    canvas.set_camera_position(
+        position=[
+            2.8 * ORBIT_RADIUS,
+            -2.8 * ORBIT_RADIUS,
+            1.5 * ORBIT_RADIUS,
+        ],
+        focal_point=[0.0, 0.0, 0.0],
+        up=[0.0, 0.0, 1.0],
+    )
+
+    # ------------------------------------------------------------------------
+    # Animation
+    # ------------------------------------------------------------------------
+
+    def update_satellite(time):
+        """
+        Update the spacecraft position using the shared Canvas clock.
+        """
+
+        position = satellite_position(time)
+
+        canvas.update_spacecraft(position)
+
+    def reset_satellite():
+        """
+        Restore the spacecraft to its initial orbital position.
+        """
+
+        canvas.update_spacecraft(
+            satellite_position(0.0)
         )
 
-        globe.update_points(positions)
-        globe.update_spacecraft(positions[0])
+    canvas.reset_callback = reset_satellite
 
-    def reset_satellites():
-
-        globe.update_points(initial_positions)
-        globe.update_spacecraft(initial_positions[0])
-
-    globe.add_animation(
-        update_function=update_satellites,
-        interval=ANIMATION_INTERVAL_MS,
-        time_scale=INITIAL_TIME_SCALE,
-        min_time_scale=MIN_TIME_SCALE,
-        max_time_scale=MAX_TIME_SCALE,
-        reset_function=reset_satellites,
-        start=True,
+    # The Canvas simulation time advances in simulated seconds.
+    # A 30x initial scale is useful for viewing the orbit.
+    canvas.add_animation(
+        update_function=update_satellite,
+        interval=30,
+        time_scale=30.0,
     )
 
-    globe.add_legend()
-    globe.frame(padding=1.25)
-    globe.show()
+    # Set initial state explicitly.
+    update_satellite(0.0)
+
+    print()
+    print("Controls:")
+    print("  SPACE  Pause / resume")
+    print("  R      Reset")
+    print("  RIGHT  Increase speed")
+    print("  LEFT   Decrease speed")
+    print("  F      Follow satellite")
+    print()
+    print("Close the visualization window to exit.")
+    print("=" * 64)
+
+    canvas.show()
 
 
 if __name__ == "__main__":
