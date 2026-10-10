@@ -110,14 +110,10 @@ def Animate(Traj,save=False):
     P1X  = T[0] + l*np.sin(T[1])
     P1Y  = -l*np.cos(T[1])
     
-    n = len(P0X)
     fig = plt.figure()
     
-   
     ax3 = fig.add_subplot(111, aspect='equal',xlim=(-.4, 1.6), ylim=(-1.0, 1.0))
-
     ax3.grid(True)
-    
     ax3.plot([-2,2],[0,0],color='k')
 
     pole, = ax3.plot([],[],marker="o")
@@ -166,12 +162,6 @@ def Animate(Traj,save=False):
     
 
 ##############################################################################        
-
-
-        
-    
-    
-        
 
 if __name__ == "__main__":
             

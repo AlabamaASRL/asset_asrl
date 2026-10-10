@@ -173,9 +173,8 @@ def plot2DTrajListVF(tList, wFunc_num):
             uPlot[i, j] = u_ij
             vPlot[i, j] = v_ij
             
-    QV = axes[0].quiver(xPlot, yPlot, uPlot, vPlot, label = "Wind", color = "blue")
+    axes[0].quiver(xPlot, yPlot, uPlot, vPlot, label = "Wind", color = "blue")
     
-
     # Overlay trajectories and control
     for i, t in enumerate(tList):
         clr = colorScale(i / len(tList))
@@ -243,15 +242,7 @@ def compareSpeed():
         lambda xyt: (vdwx.compute(xyt), vdwy.compute(xyt)),
     )
 
-
-################################################################################
-## Main
-def main():
-    compareWind()
-    compareSpeed()
-
-
-################################################################################
 ## Run
 if __name__ == "__main__":
-    main()
+    compareWind()
+    compareSpeed()

@@ -1,5 +1,4 @@
 import sympy as sp
-import numpy as np
 from CodeGen import AssetHeaderGen
 
 
@@ -58,6 +57,5 @@ def CR3BP():
 
 
 if __name__ == "__main__":
-     
      MEE()
      CR3BP()
