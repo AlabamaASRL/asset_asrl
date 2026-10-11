@@ -1,3 +1,4 @@
+
 name: Build C++ development target
 
 on:
@@ -31,18 +32,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: true
-
-      - name: Initialize submodules
-        shell: bash
-        run: git submodule update --init --recursive
+          submodules: recursive
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install system deps (Linux)
+      # ------------------------------------------------------------------
+      # Linux dependencies
+      # ------------------------------------------------------------------
+
+      - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         shell: bash
         env:
@@ -50,66 +51,134 @@ jobs:
         run: |
           set -euo pipefail
           bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
-
-      - name: Install build dependencies (Linux)
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y build-essential gfortran
 
-      - name: Set up LLVM/Clang toolchain (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          choco install llvm --version=18.1.8 -y --no-progress
-          echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          clang --version
-          cmake --version
-
-      - name: Install MKL via pip (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          python -m pip install --upgrade pip
-          python -m pip install mkl mkl-devel mkl-include
-          if ($LASTEXITCODE -ne 0) { throw "pip install of MKL failed" }
-
-          $prefix = (python -c "import sys; print(sys.prefix)").Trim()
-          $mklRoot = Join-Path $prefix "Library"
-          "MKLROOT=$mklRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          "ONEAPI_ROOT=$mklRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          "CMAKE_PREFIX_PATH=$mklRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          "$mklRoot\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-      - name: Verify MKL install (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          if (-not (Test-Path "$env:MKLROOT\include\mkl.h")) {
-            throw "MKL headers not found at $env:MKLROOT\include"
-          }
-          Get-ChildItem "$env:MKLROOT\lib" -Filter "mkl_*.lib" | Select-Object -First 10 | ForEach-Object { $_.Name }
-          Write-Host "MKL installed at $env:MKLROOT"
-
-      - name: Install Python build deps (Linux)
+      - name: Install Python build dependencies (Linux)
         if: runner.os == 'Linux'
         shell: bash
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
           python -m pip install build wheel setuptools
+          python -m pip install -r requirements.txt
 
-      - name: Install Python build deps (Windows)
+      # ------------------------------------------------------------------
+      # Windows toolchain
+      # ------------------------------------------------------------------
+
+      - name: Diagnose MSVC toolchain (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
+
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+
+          if (-not (Test-Path $vswhere)) {
+            throw "vswhere.exe was not found."
+          }
+
+          $vsPath = & $vswhere -latest -products '*' `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+            -property installationPath
+
+          if (-not $vsPath) {
+            throw "No Visual Studio installation with C++ tools was found."
+          }
+
+          Write-Host "Visual Studio installation: $vsPath"
+
+          $devShell = Join-Path $vsPath "Common7\Tools\Launch-VsDevShell.ps1"
+
+          if (-not (Test-Path $devShell)) {
+            throw "Visual Studio developer shell was not found: $devShell"
+          }
+
+          & $devShell -Arch amd64 -HostArch amd64 -SkipAutomaticLocation
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to initialize the Visual Studio developer environment."
+          }
+
+          Write-Host "=== MSVC compiler ==="
+          Get-Command cl.exe
+          cl.exe
+
+          Write-Host "=== CMake ==="
+          cmake --version
+
+          Write-Host "=== Ninja ==="
+          ninja --version
+
+      - name: Install MKL (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          python -m pip install --upgrade pip
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to upgrade pip."
+          }
+
+          python -m pip install mkl mkl-devel mkl-include
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to install MKL."
+          }
+
+          $prefix = (python -c "import sys; print(sys.prefix)").Trim()
+          $mklRoot = Join-Path $prefix "Library"
+
+          "MKLROOT=$mklRoot" |
+            Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          "ONEAPI_ROOT=$mklRoot" |
+            Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          "CMAKE_PREFIX_PATH=$mklRoot" |
+            Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          "$mklRoot\bin" |
+            Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+          Write-Host "MKLROOT=$mklRoot"
+
+      - name: Verify MKL installation (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          if (-not (Test-Path "$env:MKLROOT\include\mkl.h")) {
+            throw "MKL headers not found at $env:MKLROOT\include"
+          }
+
+          if (-not (Test-Path "$env:MKLROOT\lib\mkl_rt.lib")) {
+            throw "MKL runtime library not found at $env:MKLROOT\lib"
+          }
+
+          Write-Host "MKL installation verified."
+
+      - name: Install Python build dependencies (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
           python -m pip install --upgrade pip wheel setuptools
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to install Python build dependencies."
+          }
+
           python -m pip install -r requirements.txt
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to install requirements.txt."
+          }
+
+      # ------------------------------------------------------------------
+      # Build
+      # ------------------------------------------------------------------
 
       - name: Build wheel (Linux)
         if: runner.os == 'Linux'
@@ -118,47 +187,96 @@ jobs:
           set -euo pipefail
           python -m build --wheel --outdir "${WHEEL_DIR}"
 
-      - name: Build wheel (Windows)
+      - name: Build wheel with MSVC (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
+
+          # Initialize MSVC for this build step.
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = & $vswhere -latest -products '*' `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+            -property installationPath
+
+          $devShell = Join-Path $vsPath "Common7\Tools\Launch-VsDevShell.ps1"
+          & $devShell -Arch amd64 -HostArch amd64 -SkipAutomaticLocation
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to initialize MSVC."
+          }
+
+          Write-Host "=== Compiler used for this build ==="
+          cl.exe
+
           $wheelDir = "build/pypiwheel/asset_asrl/dist"
-          cmake -S . -B build -G "Ninja" `
-            -DCMAKE_BUILD_TYPE=Release `
+
+          # Use a fresh build directory to prevent compiler cache reuse.
+          if (Test-Path build) {
+            Remove-Item build -Recurse -Force
+          }
+
+          cmake -S . -B build `
+            -G "Visual Studio 17 2022" `
+            -A x64 `
             -DPIP_INSTALL=True `
             -DBUILD_ASSET_WHEEL=True `
-            -DCMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang-cl.exe" `
-            -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang-cl.exe" `
-            -DCMAKE_LINKER="C:/Program Files/LLVM/bin/lld-link.exe" `
-            -DCMAKE_C_COMPILER_AR="C:/Program Files/LLVM/bin/llvm-ar.exe" `
-            -DCMAKE_C_COMPILER_RANLIB="C:/Program Files/LLVM/bin/llvm-ranlib.exe" `
-            -DCMAKE_CXX_COMPILER_AR="C:/Program Files/LLVM/bin/llvm-ar.exe" `
-            -DCMAKE_CXX_COMPILER_RANLIB="C:/Program Files/LLVM/bin/llvm-ranlib.exe"
-          cmake --build build --target asset pypiwheel --config Release -- -j24
-          "WHEEL_DIR=$wheelDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          $wheel = Get-ChildItem -Path $wheelDir -Filter *.whl -File -ErrorAction SilentlyContinue | Select-Object -First 1
+            "-DCMAKE_PREFIX_PATH=$env:CMAKE_PREFIX_PATH"
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "CMake configuration failed."
+          }
+
+          cmake --build build `
+            --config Release `
+            --target asset pypiwheel `
+            --parallel 4
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "MSVC build failed."
+          }
+
+          if (-not (Test-Path $wheelDir)) {
+            throw "Wheel output directory was not created: $wheelDir"
+          }
+
+          $wheel = Get-ChildItem -Path $wheelDir -Filter "*.whl" -File |
+            Select-Object -First 1
+
           if (-not $wheel) {
             throw "No wheel produced in $wheelDir"
           }
-          "WHEEL=$($wheel.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          "WHEEL_DIR=$wheelDir" |
+            Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          "WHEEL=$($wheel.FullName)" |
+            Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          Write-Host "Built wheel: $($wheel.FullName)"
+
+      # ------------------------------------------------------------------
+      # Locate the Linux wheel
+      # ------------------------------------------------------------------
 
       - name: Verify wheel exists (Linux)
         if: runner.os == 'Linux'
         shell: bash
         run: |
           set -euo pipefail
+
           echo "Looking for wheels in: ${WHEEL_DIR}"
           ls -la "${WHEEL_DIR}" || true
+
           WHEEL="$(find "${WHEEL_DIR}" -maxdepth 1 -type f -name '*.whl' | head -n 1)"
+
           if [ -z "${WHEEL}" ]; then
             echo "No wheel found in ${WHEEL_DIR}"
-            echo "Debug listing of build tree:"
+            echo "Build tree:"
             find build -maxdepth 6 -type f | sort || true
-            echo "Debug listing of repo tree (first 300 files):"
-            find . -maxdepth 6 -type f | sort | head -n 300 || true
             exit 1
           fi
+
           echo "Found wheel: ${WHEEL}"
           echo "WHEEL=${WHEEL}" >> "$GITHUB_ENV"
 
@@ -166,47 +284,48 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Write-Host "Looking for wheels in: $env:WHEEL_DIR"
-          if (Test-Path $env:WHEEL_DIR) {
-            Get-ChildItem -Path $env:WHEEL_DIR -Force | Format-Table -AutoSize
-          }
-          $wheel = Get-ChildItem -Path $env:WHEEL_DIR -Filter *.whl -File -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (-not $wheel) {
-            Write-Host "No wheel found in $env:WHEEL_DIR"
-            Write-Host "Debug listing of build tree:"
-            if (Test-Path build) {
-              Get-ChildItem -Path build -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 500 | ForEach-Object { $_.FullName }
-            }
-            Write-Host "Debug listing of repo tree (first 300 files):"
-            Get-ChildItem -Path . -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 300 | ForEach-Object { $_.FullName }
-            exit 1
-          }
-          Write-Host "Found wheel: $($wheel.FullName)"
-          "WHEEL=$($wheel.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $ErrorActionPreference = "Stop"
 
-      - name: Reinstall test requirements
+          Write-Host "Wheel path: $env:WHEEL"
+
+          if (-not $env:WHEEL -or -not (Test-Path $env:WHEEL)) {
+            throw "The Windows wheel does not exist."
+          }
+
+          Get-Item $env:WHEEL | Format-List FullName, Length
+
+      # ------------------------------------------------------------------
+      # Install and smoke-test the built wheel
+      # ------------------------------------------------------------------
+
+      - name: Install and test wheel
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f requirements.txt ]; then
-            python -m pip install --upgrade --force-reinstall -r requirements.txt
-          else
-            echo "requirements.txt not found at repo root"
-            exit 1
-          fi
 
-      - name: Test Python imports from built wheel
-        shell: bash
-        run: |
-          set -euo pipefail
           if [ -z "${WHEEL:-}" ]; then
-            echo "WHEEL env var not set"
+            echo "WHEEL environment variable is not set."
             exit 1
           fi
-          echo "Installing wheel: ${WHEEL}"
-          python -m pip install --force-reinstall "${WHEEL}"
+
+          if [ ! -f "$WHEEL" ]; then
+            echo "Wheel does not exist: $WHEEL"
+            exit 1
+          fi
+
+          echo "Installing wheel: $WHEEL"
+          python -m pip install --force-reinstall "$WHEEL"
+
           python - <<'PY'
           import importlib
           import sys
-          modules = [
-              "asset_asrl*](#)`
+
+          print("Python:", sys.version)
+          print("Testing ASSET Python imports...")
+
+          # The compiled extension shown by CMake is named asset.
+          module = importlib.import_module("asset")
+          print("Imported asset:", module.__file__)
+
+          print("Wheel import test passed.")
+          PY
