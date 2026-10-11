@@ -21,8 +21,9 @@ jobs:
             runner: ubuntu-22.04
             python-version: "3.12"
           - os: windows
-            runner: windows-latest
+            runner: windows-2022
             python-version: "3.12"
+            msvc-toolset: "14.3"
 
     env:
       WHEEL_DIR: build/asset_asrl/dist
@@ -65,7 +66,15 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x86_64
-          toolset: 14.4
+          toolset: ${{ matrix.msvc-toolset }}
+
+      - name: Print MSVC version (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          cl
+          Write-Host "Using toolset: ${{ matrix.msvc-toolset }}"
 
       - name: Install MKL via pip (Windows)
         if: runner.os == 'Windows'
