@@ -25,7 +25,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install system dependencies
+      - name: Install dependencies
         shell: bash
         run: |
           sudo apt-get update
@@ -36,12 +36,9 @@ jobs:
             ninja-build \
             cmake
 
-      - name: Install Ubuntu dependencies
-        shell: bash
-        run: |
           bash install_ubuntu_dependencies.sh
 
-      - name: Configure CMake
+      - name: Configure
         shell: bash
         run: |
           export CC=clang-13
@@ -53,14 +50,14 @@ jobs:
             -DPIP_INSTALL=True \
             -DBUILD_SPHINX_DOCS=True
 
-      - name: Build ASSET and wheel
+      - name: Build
         shell: bash
         run: |
           cmake --build build \
             --target asset pypiwheel \
             --parallel 2
 
-      - name: List generated wheels
+      - name: List wheels
         shell: bash
         run: |
           find build -type f -name "*.whl" -print
@@ -89,7 +86,7 @@ jobs:
         uses: KyleMayes/install-llvm-action@v2
         with:
           version: "18.1.8"
-          directory: "C:/Program Files/LLVM"
+          directory: ${{ runner.temp }}/llvm
           cached: true
 
       - name: Install Ninja and MKL
@@ -98,78 +95,68 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install ninja mkl-devel intel-openmp
 
-          $pythonPrefix = python -c "import sys; print(sys.prefix)"
+          $llvm = Join-Path $env:RUNNER_TEMP "llvm/bin"
 
-          Write-Host "Python prefix: $pythonPrefix"
-
-          $mklHeader = Get-ChildItem `
-            -Path $pythonPrefix `
-            -Filter "mkl.h" `
-            -Recurse `
-            -File `
-            -ErrorAction SilentlyContinue |
-            Select-Object -First 1
-
-          if (-not $mklHeader) {
-            throw "mkl.h was not found under $pythonPrefix."
+          if (-not (Test-Path "$llvm/clang-cl.exe")) {
+            throw "clang-cl.exe not found at $llvm"
           }
 
-          $mklLibs = @(
-            Get-ChildItem `
-              -Path $pythonPrefix `
-              -Filter "*.lib" `
-              -Recurse `
-              -File `
-              -ErrorAction SilentlyContinue
+          $pythonPrefix = python -c "import sys; print(sys.prefix)"
+          $mklRoot = Join-Path $pythonPrefix "Library"
+          $includeDir = Join-Path $mklRoot "include"
+          $libDir = Join-Path $mklRoot "lib"
+          $binDir = Join-Path $mklRoot "bin"
+
+          $interface = Join-Path $libDir "mkl_intel_lp64_dll.lib"
+          $sequential = Join-Path $libDir "mkl_sequential_dll.lib"
+          $core = Join-Path $libDir "mkl_core_dll.lib"
+
+          $requiredFiles = @(
+            (Join-Path $includeDir "mkl.h"),
+            $interface,
+            $sequential,
+            $core
           )
 
-          Write-Host "MKL libraries found:"
-          $mklLibs |
-            Where-Object { $_.Name -like "mkl_*.lib" } |
-            Select-Object -ExpandProperty FullName
-
-          $interface = $mklLibs |
-            Where-Object { $_.Name -eq "mkl_intel_lp64.lib" } |
-            Select-Object -First 1
-
-          $sequential = $mklLibs |
-            Where-Object { $_.Name -eq "mkl_sequential.lib" } |
-            Select-Object -First 1
-
-          $core = $mklLibs |
-            Where-Object { $_.Name -eq "mkl_core.lib" } |
-            Select-Object -First 1
-
-          if (-not $interface -or -not $sequential -or -not $core) {
-            throw "Required MKL libraries were not found. Review the library list above."
+          foreach ($file in $requiredFiles) {
+            if (-not (Test-Path $file)) {
+              throw "Required MKL file not found: $file"
+            }
           }
 
-          $includeDir = $mklHeader.DirectoryName
-          $libDir = $interface.DirectoryName
-
-          "MKLROOT=$libDir" |
+          "MKLROOT=$mklRoot" |
             Out-File $env:GITHUB_ENV -Append
 
           "MKL_INCLUDE_DIRS=$includeDir" |
             Out-File $env:GITHUB_ENV -Append
 
-          "MKL_INTERFACE_LIBRARY=$($interface.FullName)" |
+          "MKL_INTERFACE_LIBRARY=$interface" |
             Out-File $env:GITHUB_ENV -Append
 
-          "MKL_SEQTHR_LIBRARY=$($sequential.FullName)" |
+          "MKL_SEQTHR_LIBRARY=$sequential" |
             Out-File $env:GITHUB_ENV -Append
 
-          "MKL_CORE_LIBRARY=$($core.FullName)" |
+          "MKL_CORE_LIBRARY=$core" |
             Out-File $env:GITHUB_ENV -Append
 
+          "CMAKE_PREFIX_PATH=$mklRoot" |
+            Out-File $env:GITHUB_ENV -Append
+
+          if (Test-Path $binDir) {
+            $binDir | Out-File $env:GITHUB_PATH -Append
+          }
+
+          Write-Host "MKL root: $mklRoot"
           Write-Host "MKL include directory: $includeDir"
           Write-Host "MKL library directory: $libDir"
 
       - name: Verify toolchain
         shell: pwsh
         run: |
-          & "C:/Program Files/LLVM/bin/clang-cl.exe" --version
-          & "C:/Program Files/LLVM/bin/lld-link.exe" --version
+          $llvm = Join-Path $env:RUNNER_TEMP "llvm/bin"
+
+          & "$llvm/clang-cl.exe" --version
+          & "$llvm/lld-link.exe" --version
           cmake --version
           ninja --version
           python --version
@@ -177,7 +164,13 @@ jobs:
       - name: Configure CMake
         shell: pwsh
         run: |
-          $llvm = "C:/Program Files/LLVM/bin"
+          $llvm = Join-Path $env:RUNNER_TEMP "llvm/bin"
+
+          $mklLibraries = @(
+            $env:MKL_INTERFACE_LIBRARY
+            $env:MKL_SEQTHR_LIBRARY
+            $env:MKL_CORE_LIBRARY
+          ) -join ";"
 
           cmake -S . -B build -G Ninja `
             "-DCMAKE_BUILD_TYPE=Release" `
@@ -186,15 +179,14 @@ jobs:
             "-DCMAKE_C_COMPILER=$llvm/clang-cl.exe" `
             "-DCMAKE_CXX_COMPILER=$llvm/clang-cl.exe" `
             "-DCMAKE_LINKER=$llvm/lld-link.exe" `
-            "-DCMAKE_C_COMPILER_RANLIB=$llvm/llvm-ranlib.exe" `
-            "-DCMAKE_CXX_COMPILER_RANLIB=$llvm/llvm-ranlib.exe" `
             "-DCMAKE_C_COMPILER_AR=$llvm/llvm-ar.exe" `
             "-DCMAKE_CXX_COMPILER_AR=$llvm/llvm-ar.exe" `
             "-DMKLROOT=$env:MKLROOT" `
             "-DMKL_INCLUDE_DIRS=$env:MKL_INCLUDE_DIRS" `
             "-DMKL_INTERFACE_LIBRARY=$env:MKL_INTERFACE_LIBRARY" `
             "-DMKL_SEQTHR_LIBRARY=$env:MKL_SEQTHR_LIBRARY" `
-            "-DMKL_CORE_LIBRARY=$env:MKL_CORE_LIBRARY"
+            "-DMKL_CORE_LIBRARY=$env:MKL_CORE_LIBRARY" `
+            "-DMKL_LIBRARIES=$mklLibraries"
 
           if ($LASTEXITCODE -ne 0) {
             throw "CMake configuration failed with exit code $LASTEXITCODE"
@@ -205,7 +197,7 @@ jobs:
         run: |
           cmake --build build `
             --target asset pypiwheel `
-            --parallel 24
+            --parallel 2
 
           if ($LASTEXITCODE -ne 0) {
             throw "Build failed with exit code $LASTEXITCODE"
