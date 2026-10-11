@@ -81,8 +81,12 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          if (Test-Path "webimage_extracted") {
-            Remove-Item -Path "webimage_extracted" -Recurse -Force
+          $path = "webimage_extracted"
+          if (Test-Path $path) {
+            Remove-Item -Path $path -Recurse -Force -ErrorAction Stop
+            Write-Host "Removed $path"
+          } else {
+            Write-Host "$path does not exist; skipping cleanup"
           }
 
       - name: Install MKL (Windows)
