@@ -1,6 +1,7 @@
 #include "ASSET_Astro.h"
 
 #include "CR3BPModel.h"
+#include <pybind11/numpy.h>
 void ASSET::AstroBuild(FunctionRegistry& reg, py::module& m) {
   auto mod = m.def_submodule("Astro");
 

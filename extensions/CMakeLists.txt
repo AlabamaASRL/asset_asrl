@@ -9,9 +9,13 @@ include_directories(${PROJECT_SOURCE_DIR}/src/Utils)
 include_directories(${PROJECT_SOURCE_DIR}/src/VectorFunctions)
 include_directories(${PROJECT_SOURCE_DIR}/src/Integrators)
 
-add_library(asset_extensions STATIC 
+add_library(asset_extensions STATIC
 ASSET_Extensions.h
-ASSET_Extensions.cpp)
+ASSET_Extensions.cpp
+PinesGravity.cpp
+PinesGravityModel.cpp
+PinesGravityModel.h
+GeodeticWGS84.cpp)
 
 add_dependencies(asset_extensions pch)
 target_include_directories(asset_extensions PRIVATE ${INCLUDE_DIRS})
