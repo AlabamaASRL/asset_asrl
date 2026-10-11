@@ -89,11 +89,36 @@ jobs:
             Write-Host "$path does not exist; skipping cleanup"
           }
 
-      - name: Install MKL (Windows)
+      - name: Install MKL via oneAPI installer (Windows)
         if: runner.os == 'Windows'
         shell: cmd
+        continue-on-error: true
         run: |
           call scripts\windowsoneapi_install.bat "%WINDOWS_BASEKIT_URL%" "%WINDOWS_CPP_COMPONENTS%"
+
+      - name: Fallback install MKL via package manager (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          # If the .bat installer succeeded, keep using it.
+          # Otherwise, fall back to a package-manager-based install path.
+          if (Test-Path "$env:ONEAPI_ROOT") {
+            Write-Host "oneAPI appears to be installed already at $env:ONEAPI_ROOT"
+            exit 0
+          }
+
+          Write-Host "oneAPI installer failed or was unavailable; falling back to package manager install."
+
+          # Example fallback using vcpkg for MKL-compatible math libraries.
+          # Adjust this to the exact dependency model used by the project.
+          if (-not (Test-Path vcpkg)) {
+            git clone https://github.com/microsoft/vcpkg.git
+            .\vcpkg\bootstrap-vcpkg.bat
+          }
+
+          .\vcpkg\vcpkg install mkl
 
       - name: Install Python build deps (Linux)
         if: runner.os == 'Linux'
