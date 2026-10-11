@@ -11,74 +11,51 @@ permissions:
 
 jobs:
   linux:
-    name: Linux Build
+    name: Linux
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install dependencies
-        shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            build-essential \
-            gfortran \
-            clang-13 \
-            ninja-build \
-            cmake
-
+          sudo apt-get install -y build-essential gfortran clang-13 ninja-build cmake
           bash install_ubuntu_dependencies.sh
+        shell: bash
 
       - name: Configure
-        shell: bash
         run: |
-          export CC=clang-13
-          export CXX=clang++-13
-
-          cmake -S . -B build \
-            -G Ninja \
+          CC=clang-13 CXX=clang++-13 cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DPIP_INSTALL=True \
             -DBUILD_SPHINX_DOCS=True
+        shell: bash
 
       - name: Build
+        run: cmake --build build --target asset pypiwheel --parallel 2
         shell: bash
-        run: |
-          cmake --build build \
-            --target asset pypiwheel \
-            --parallel 2
-
-      - name: List wheels
-        shell: bash
-        run: |
-          find build -type f -name "*.whl" -print
 
   windows:
-    name: Windows Build (Clang + Ninja)
+    name: Windows (Clang)
     runs-on: windows-2022
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Set up MSVC environment
-        uses: ilammy/msvc-dev-cmd@v1
+      - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
 
@@ -86,91 +63,61 @@ jobs:
         uses: KyleMayes/install-llvm-action@v2
         with:
           version: "18.1.8"
-          directory: ${{ runner.temp }}/llvm
           cached: true
 
-      - name: Install Ninja and MKL
+      - name: Install dependencies
         shell: pwsh
         run: |
-          python -m pip install --upgrade pip
           python -m pip install ninja mkl-devel intel-openmp
 
-          $llvm = Join-Path $env:RUNNER_TEMP "llvm/bin"
+          $clang = Get-Command clang-cl.exe -ErrorAction SilentlyContinue
+          if (-not $clang) {
+            $clangPath = @(
+              "C:/Program Files/LLVM/bin/clang-cl.exe",
+              "$env:RUNNER_TEMP/llvm/bin/clang-cl.exe"
+            ) | Where-Object { Test-Path $_ } | Select-Object -First 1
 
-          if (-not (Test-Path "$llvm/clang-cl.exe")) {
-            throw "clang-cl.exe not found at $llvm"
+            if (-not $clangPath) {
+              throw "clang-cl.exe not found."
+            }
+            $clangPath = (Resolve-Path $clangPath).Path
+          } else {
+            $clangPath = $clang.Source
           }
 
-          $pythonPrefix = python -c "import sys; print(sys.prefix)"
-          $mklRoot = Join-Path $pythonPrefix "Library"
-          $includeDir = Join-Path $mklRoot "include"
-          $libDir = Join-Path $mklRoot "lib"
-          $binDir = Join-Path $mklRoot "bin"
+          $llvm = Split-Path $clangPath -Parent
+          "LLVM_BIN=$llvm" | Out-File $env:GITHUB_ENV -Append
 
-          $interface = Join-Path $libDir "mkl_intel_lp64_dll.lib"
-          $sequential = Join-Path $libDir "mkl_sequential_dll.lib"
-          $core = Join-Path $libDir "mkl_core_dll.lib"
+          $root = Join-Path (python -c "import sys; print(sys.prefix)") "Library"
+          $inc = Join-Path $root "include"
+          $lib = Join-Path $root "lib"
 
-          $requiredFiles = @(
-            (Join-Path $includeDir "mkl.h"),
+          $interface = Join-Path $lib "mkl_intel_lp64_dll.lib"
+          $sequential = Join-Path $lib "mkl_sequential_dll.lib"
+          $core = Join-Path $lib "mkl_core_dll.lib"
+
+          foreach ($f in @(
+            (Join-Path $inc "mkl.h"),
             $interface,
             $sequential,
             $core
-          )
-
-          foreach ($file in $requiredFiles) {
-            if (-not (Test-Path $file)) {
-              throw "Required MKL file not found: $file"
+          )) {
+            if (-not (Test-Path $f)) {
+              throw "Required MKL file not found: $f"
             }
           }
 
-          "MKLROOT=$mklRoot" |
-            Out-File $env:GITHUB_ENV -Append
+          "MKLROOT=$root" | Out-File $env:GITHUB_ENV -Append
+          "MKL_INCLUDE_DIRS=$inc" | Out-File $env:GITHUB_ENV -Append
+          "MKL_INTERFACE_LIBRARY=$interface" | Out-File $env:GITHUB_ENV -Append
+          "MKL_SEQTHR_LIBRARY=$sequential" | Out-File $env:GITHUB_ENV -Append
+          "MKL_CORE_LIBRARY=$core" | Out-File $env:GITHUB_ENV -Append
 
-          "MKL_INCLUDE_DIRS=$includeDir" |
-            Out-File $env:GITHUB_ENV -Append
-
-          "MKL_INTERFACE_LIBRARY=$interface" |
-            Out-File $env:GITHUB_ENV -Append
-
-          "MKL_SEQTHR_LIBRARY=$sequential" |
-            Out-File $env:GITHUB_ENV -Append
-
-          "MKL_CORE_LIBRARY=$core" |
-            Out-File $env:GITHUB_ENV -Append
-
-          "CMAKE_PREFIX_PATH=$mklRoot" |
-            Out-File $env:GITHUB_ENV -Append
-
-          if (Test-Path $binDir) {
-            $binDir | Out-File $env:GITHUB_PATH -Append
-          }
-
-          Write-Host "MKL root: $mklRoot"
-          Write-Host "MKL include directory: $includeDir"
-          Write-Host "MKL library directory: $libDir"
-
-      - name: Verify toolchain
+      - name: Configure
         shell: pwsh
         run: |
-          $llvm = Join-Path $env:RUNNER_TEMP "llvm/bin"
-
-          & "$llvm/clang-cl.exe" --version
-          & "$llvm/lld-link.exe" --version
-          cmake --version
-          ninja --version
-          python --version
-
-      - name: Configure CMake
-        shell: pwsh
-        run: |
-          $llvm = Join-Path $env:RUNNER_TEMP "llvm/bin"
-
-          $mklLibraries = @(
-            $env:MKL_INTERFACE_LIBRARY
-            $env:MKL_SEQTHR_LIBRARY
-            $env:MKL_CORE_LIBRARY
-          ) -join ";"
+          $llvm = $env:LLVM_BIN
+          $libs = "$env:MKL_INTERFACE_LIBRARY;$env:MKL_SEQTHR_LIBRARY;$env:MKL_CORE_LIBRARY"
 
           cmake -S . -B build -G Ninja `
             "-DCMAKE_BUILD_TYPE=Release" `
@@ -179,41 +126,27 @@ jobs:
             "-DCMAKE_C_COMPILER=$llvm/clang-cl.exe" `
             "-DCMAKE_CXX_COMPILER=$llvm/clang-cl.exe" `
             "-DCMAKE_LINKER=$llvm/lld-link.exe" `
-            "-DCMAKE_C_COMPILER_AR=$llvm/llvm-ar.exe" `
-            "-DCMAKE_CXX_COMPILER_AR=$llvm/llvm-ar.exe" `
             "-DMKLROOT=$env:MKLROOT" `
             "-DMKL_INCLUDE_DIRS=$env:MKL_INCLUDE_DIRS" `
             "-DMKL_INTERFACE_LIBRARY=$env:MKL_INTERFACE_LIBRARY" `
             "-DMKL_SEQTHR_LIBRARY=$env:MKL_SEQTHR_LIBRARY" `
             "-DMKL_CORE_LIBRARY=$env:MKL_CORE_LIBRARY" `
-            "-DMKL_LIBRARIES=$mklLibraries"
+            "-DMKL_LIBRARIES=$libs"
 
           if ($LASTEXITCODE -ne 0) {
-            throw "CMake configuration failed with exit code $LASTEXITCODE"
+            throw "CMake configuration failed."
           }
 
-      - name: Build ASSET and wheel
+      - name: Build
         shell: pwsh
         run: |
-          cmake --build build `
-            --target asset pypiwheel `
-            --parallel 2
-
+          cmake --build build --target asset pypiwheel --parallel 2
           if ($LASTEXITCODE -ne 0) {
-            throw "Build failed with exit code $LASTEXITCODE"
+            throw "Build failed."
           }
 
-      - name: List generated wheels
+      - name: List wheels
         shell: pwsh
         run: |
-          $wheels = Get-ChildItem `
-            -Path build `
-            -Filter "*.whl" `
-            -Recurse `
-            -File
-
-          if (-not $wheels) {
-            Write-Warning "No wheel files were found under build."
-          } else {
-            $wheels | Select-Object -ExpandProperty FullName
-          }
+          Get-ChildItem build -Filter "*.whl" -Recurse -File |
+            Select-Object -ExpandProperty FullName
