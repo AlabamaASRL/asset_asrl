@@ -77,6 +77,14 @@ jobs:
         with:
           arch: x86_64
 
+      - name: Clean stale extracted web image (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (Test-Path "webimage_extracted") {
+            Remove-Item -Path "webimage_extracted" -Recurse -Force
+          }
+
       - name: Install MKL (Windows)
         if: runner.os == 'Windows'
         shell: bash
