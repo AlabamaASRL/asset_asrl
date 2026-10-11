@@ -4,6 +4,7 @@ on:
   push:
     branches: ["**"]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,11 +21,17 @@ jobs:
             runner: ubuntu-22.04
             python-version: "3.12"
           - os: windows
-            runner: windows-2022
+            runner: windows-latest
             python-version: "3.12"
 
     env:
       WHEEL_DIR: build/asset_asrl/dist
+      WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/19078/w_BaseKit_p_2023.0.0.25940_offline.exe
+      WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel
+      VS_VER: vs2022
+      ONEAPI_ROOT: C:/Program Files (x86)/Intel/oneAPI/
+      CC: clang-cl.exe
+      CXX: clang-cl.exe
 
     steps:
       - name: Checkout
@@ -40,14 +47,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Set up Conda (Windows)
-        if: runner.os == 'Windows'
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          activate-environment: build
-          python-version: ${{ matrix.python-version }}
-          auto-activate-base: true
 
       - name: Install system deps (Linux)
         if: runner.os == 'Linux'
@@ -66,15 +65,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential gfortran
 
-      - name: Install build dependencies (Windows)
+      - name: Install LLVM and Clang (Windows)
         if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          choco install -y mingw
-          conda install --name build -y -c conda-forge mkl mkl-devel intel-openmp
-          # Set CMake to find MKL in the conda environment
-          echo "MKLROOT=C:\Miniconda\envs\build\Library" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "C:\ProgramData\chocolatey\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "17.0"
+
+      - name: Set up MSVC dev environment (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86_64
+
+      - name: Install MKL (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: scripts/windowsoneapi_install.bat "$WINDOWS_BASEKIT_URL" "$WINDOWS_CPP_COMPONENTS"
 
       - name: Install Python build deps (Linux)
         if: runner.os == 'Linux'
@@ -88,7 +94,8 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          conda run --name build python -m pip install --upgrade pip build wheel setuptools
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install -r requirements.txt
 
       - name: Build wheel (Linux)
         if: runner.os == 'Linux'
@@ -101,7 +108,15 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          conda run --name build python -m build --wheel --outdir "$env:WHEEL_DIR"
+          $ErrorActionPreference = "Stop"
+          $wheelDir = "build/pypiwheel/asset_asrl/dist"
+          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_ASSET_WHEEL=True `
+            -DCMAKE_C_COMPILER:FILEPATH="C:/Program Files/LLVM/bin/clang-cl.exe" `
+            -DCMAKE_CXX_COMPILER:FILEPATH="C:/Program Files/LLVM/bin/clang-cl.exe" `
+            -DCMAKE_LINKER:FILEPATH="C:/Program Files/LLVM/bin/lld-link.exe"
+          cmake --build build --target asset pypiwheel --config Release -- -j3
+          "WHEEL_DIR=$wheelDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "WHEEL=$((Get-ChildItem -Path $wheelDir -Filter *.whl -File -ErrorAction SilentlyContinue | Select-Object -First 1).FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Verify wheel exists (Linux)
         if: runner.os == 'Linux'
