@@ -72,6 +72,8 @@ jobs:
         run: |
           choco install -y mingw
           conda install --name build -y -c conda-forge mkl mkl-devel intel-openmp
+          # Set CMake to find MKL in the conda environment
+          echo "MKLROOT=C:\Miniconda\envs\build\Library" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           echo "C:\ProgramData\chocolatey\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Install Python build deps (Linux)
