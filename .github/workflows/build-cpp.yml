@@ -21,12 +21,11 @@ jobs:
             runner: ubuntu-22.04
             python-version: "3.12"
           - os: windows
-            runner: [self-hosted, windows, x64]
+            runner: windows-2022
             python-version: "3.12"
 
     env:
-      WHEEL_DIR: build/asset_asrl/dist
-      VS_VER: vs2022
+      WHEEL_DIR: build/pypiwheel/asset_asrl/dist
 
     steps:
       - name: Checkout
@@ -60,21 +59,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential gfortran
 
-      - name: Set up MSVC dev environment (Windows)
-        if: runner.os == 'Windows'
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x86_64
-          toolset: 14.3
-
-      - name: Print MSVC version (Windows)
+      - name: Set up LLVM/Clang toolchain (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          cl
-          where cl
-          Write-Host "MSVC environment initialized"
+          choco install llvm --version=18.1.8 -y --no-progress
+          echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          clang --version
+          cmake --version
 
       - name: Install MKL via pip (Windows)
         if: runner.os == 'Windows'
@@ -85,7 +78,6 @@ jobs:
           python -m pip install mkl mkl-devel mkl-include
           if ($LASTEXITCODE -ne 0) { throw "pip install of MKL failed" }
 
-          # pip places MKL headers/libs/DLLs under <python prefix>\Library
           $prefix = (python -c "import sys; print(sys.prefix)").Trim()
           $mklRoot = Join-Path $prefix "Library"
           "MKLROOT=$mklRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
@@ -132,8 +124,18 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           $wheelDir = "build/pypiwheel/asset_asrl/dist"
-          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_ASSET_WHEEL=True
-          cmake --build build --target asset pypiwheel --config Release -- -j3
+          cmake -S . -B build -G "Ninja" `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DPIP_INSTALL=True `
+            -DBUILD_ASSET_WHEEL=True `
+            -DCMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang-cl.exe" `
+            -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang-cl.exe" `
+            -DCMAKE_LINKER="C:/Program Files/LLVM/bin/lld-link.exe" `
+            -DCMAKE_C_COMPILER_AR="C:/Program Files/LLVM/bin/llvm-ar.exe" `
+            -DCMAKE_C_COMPILER_RANLIB="C:/Program Files/LLVM/bin/llvm-ranlib.exe" `
+            -DCMAKE_CXX_COMPILER_AR="C:/Program Files/LLVM/bin/llvm-ar.exe" `
+            -DCMAKE_CXX_COMPILER_RANLIB="C:/Program Files/LLVM/bin/llvm-ranlib.exe"
+          cmake --build build --target asset pypiwheel --config Release -- -j24
           "WHEEL_DIR=$wheelDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           $wheel = Get-ChildItem -Path $wheelDir -Filter *.whl -File -ErrorAction SilentlyContinue | Select-Object -First 1
           if (-not $wheel) {
@@ -207,61 +209,5 @@ jobs:
           import importlib
           import sys
           modules = [
-              "asset_asrl",
-              "asset_asrl.Astro",
-              "asset_asrl.Extensions",
-          ]
-          failed = []
-          for name in modules:
-              try:
-                  module = importlib.import_module(name)
-                  location = getattr(module, "__file__", "built-in")
-                  print(f"OK: imported {name} -> {location}")
-              except Exception as exc:
-                  failed.append((name, exc))
-                  print(f"FAILED: {name} -> {exc}", file=sys.stderr)
-
-          try:
-              import asset_asrl.Extensions as ext_module
-              if hasattr(ext_module, "__all__"):
-                  ext_list = ext_module.__all__
-              else:
-                  ext_list = [name for name in dir(ext_module) if not name.startswith("_")]
-
-              print(f"\nFound {len(ext_list)} extensions in asset_asrl.Extensions")
-              for ext_name in ext_list:
-                  try:
-                      ext = getattr(ext_module, ext_name)
-                      print(f"OK: extension {ext_name} -> {type(ext)}")
-                  except Exception as exc:
-                      failed.append((f"asset_asrl.Extensions.{ext_name}", exc))
-                      print(f"FAILED: asset_asrl.Extensions.{ext_name} -> {exc}", file=sys.stderr)
-          except Exception as exc:
-              print(f"Note: Could not enumerate extensions: {exc}")
-
-          if failed:
-              print("\nFailed imports:", file=sys.stderr)
-              for name, exc in failed:
-                  print(f"  {name}: {exc}", file=sys.stderr)
-              raise SystemExit(f"{len(failed)} module(s) failed to import")
-          PY
-
-      - name: Upload native build artifacts (.so/.pyd)
-        uses: actions/upload-artifact@v4
-        with:
-          name: asset-native-${{ matrix.os }}-${{ github.run_id }}
-          path: |
-            build/src/asset*.so
-            build/src/asset*.pyd
-            build/asset*.so
-            build/asset*.pyd
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Upload wheel artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: asset-wheel-${{ matrix.os }}-${{ github.run_id }}
-          path: ${{ env.WHEEL_DIR }}/*.whl
-          if-no-files-found: error
-          retention-days: 7
+              "asset_asrl*](#)`
+
