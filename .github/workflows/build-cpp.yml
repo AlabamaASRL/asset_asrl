@@ -92,33 +92,18 @@ jobs:
       - name: Install MKL via oneAPI installer (Windows)
         if: runner.os == 'Windows'
         shell: cmd
-        continue-on-error: true
         run: |
           call scripts\windowsoneapi_install.bat "%WINDOWS_BASEKIT_URL%" "%WINDOWS_CPP_COMPONENTS%"
 
-      - name: Fallback install MKL via package manager (Windows)
+      - name: Verify oneAPI install (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-
-          # If the .bat installer succeeded, keep using it.
-          # Otherwise, fall back to a package-manager-based install path.
-          if (Test-Path "$env:ONEAPI_ROOT") {
-            Write-Host "oneAPI appears to be installed already at $env:ONEAPI_ROOT"
-            exit 0
+          if (-not (Test-Path "$env:ONEAPI_ROOT")) {
+            throw "oneAPI was not installed successfully at $env:ONEAPI_ROOT"
           }
-
-          Write-Host "oneAPI installer failed or was unavailable; falling back to package manager install."
-
-          # Example fallback using vcpkg for MKL-compatible math libraries.
-          # Adjust this to the exact dependency model used by the project.
-          if (-not (Test-Path vcpkg)) {
-            git clone https://github.com/microsoft/vcpkg.git
-            .\vcpkg\bootstrap-vcpkg.bat
-          }
-
-          .\vcpkg\vcpkg install mkl
+          Write-Host "oneAPI installed at $env:ONEAPI_ROOT"
 
       - name: Install Python build deps (Linux)
         if: runner.os == 'Linux'
@@ -154,7 +139,11 @@ jobs:
             -DCMAKE_LINKER:FILEPATH="C:/Program Files/LLVM/bin/lld-link.exe"
           cmake --build build --target asset pypiwheel --config Release -- -j3
           "WHEEL_DIR=$wheelDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          "WHEEL=$((Get-ChildItem -Path $wheelDir -Filter *.whl -File -ErrorAction SilentlyContinue | Select-Object -First 1).FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $wheel = Get-ChildItem -Path $wheelDir -Filter *.whl -File -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $wheel) {
+            throw "No wheel produced in $wheelDir"
+          }
+          "WHEEL=$($wheel.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Verify wheel exists (Linux)
         if: runner.os == 'Linux'
