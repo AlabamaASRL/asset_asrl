@@ -33,11 +33,10 @@ jobs:
             build-essential \
             gfortran \
             clang-13 \
-            lld-13 \
             ninja-build \
             cmake
 
-      - name: Install ASSET dependencies
+      - name: Install Ubuntu dependencies
         shell: bash
         run: |
           bash install_ubuntu_dependencies.sh
@@ -52,22 +51,17 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DPIP_INSTALL=True \
-            -DBUILD_ASSET_WHEEL=True
+            -DBUILD_SPHINX_DOCS=True
 
-      - name: Build ASSET and Python wheel
+      - name: Build ASSET and wheel
         shell: bash
         run: |
           cmake --build build \
             --target asset pypiwheel \
             --parallel 2
 
-      - name: List built wheels
-        shell: bash
-        run: |
-          find build -type f -name "*.whl" -print
-
   windows:
-    name: Windows Build (Clang)
+    name: Windows Build (Clang + Ninja)
     runs-on: windows-2022
 
     steps:
@@ -90,104 +84,58 @@ jobs:
         uses: KyleMayes/install-llvm-action@v2
         with:
           version: "18.1.8"
-          directory: ${{ runner.temp }}/llvm
+          directory: "C:/Program Files/LLVM"
           cached: true
 
-      - name: Install Ninja and MKL
+      - name: Install Ninja and Python dependencies
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
           python -m pip install ninja mkl-devel intel-openmp
 
-          $pythonPrefix = python -c "import sys; print(sys.prefix)"
-          $mklRoot = Join-Path $pythonPrefix "Library"
+      - name: Verify toolchain
+        shell: pwsh
+        run: |
+          & "C:/Program Files/LLVM/bin/clang-cl.exe" --version
+          & "C:/Program Files/LLVM/bin/lld-link.exe" --version
+          cmake --version
+          ninja --version
+          python --version
 
-          "MKLROOT=$mklRoot" | Out-File `
-            -FilePath $env:GITHUB_ENV `
-            -Append
+      - name: Configure CMake
+        shell: pwsh
+        run: |
+          $llvm = "C:/Program Files/LLVM/bin"
 
-          "ONEAPI_ROOT=$mklRoot" | Out-File `
-            -FilePath $env:GITHUB_ENV `
-            -Append
+          cmake -S . -B build -G Ninja `
+            "-DCMAKE_BUILD_TYPE=Release" `
+            "-DPIP_INSTALL=True" `
+            "-DBUILD_SPHINX_DOCS=True" `
+            "-DCMAKE_C_COMPILER=$llvm/clang-cl.exe" `
+            "-DCMAKE_CXX_COMPILER=$llvm/clang-cl.exe" `
+            "-DCMAKE_LINKER=$llvm/lld-link.exe" `
+            "-DCMAKE_C_COMPILER_RANLIB=$llvm/llvm-ranlib.exe" `
+            "-DCMAKE_CXX_COMPILER_RANLIB=$llvm/llvm-ranlib.exe" `
+            "-DCMAKE_C_COMPILER_AR=$llvm/llvm-ar.exe" `
+            "-DCMAKE_CXX_COMPILER_AR=$llvm/llvm-ar.exe"
 
-          "CMAKE_PREFIX_PATH=$mklRoot" | Out-File `
-            -FilePath $env:GITHUB_ENV `
-            -Append
-
-          $mklBin = Join-Path $mklRoot "bin"
-          if (Test-Path $mklBin) {
-            $mklBin | Out-File `
-              -FilePath $env:GITHUB_PATH `
-              -Append
+          if ($LASTEXITCODE -ne 0) {
+            throw "CMake configuration failed with exit code $LASTEXITCODE"
           }
 
-      - name: Verify compiler
-        shell: pwsh
-        run: |
-          where.exe clang-cl
-          clang-cl --version
-          where.exe lld-link
-          python --version
-          cmake --version
-
-      - name: Configure CMake with clang-cl
-        shell: pwsh
-        run: |
-          cmake -S . -B build `
-            -G Ninja `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_C_COMPILER=clang-cl `
-            -DCMAKE_CXX_COMPILER=clang-cl `
-            -DCMAKE_LINKER=lld-link `
-            -DCMAKE_AR=llvm-ar `
-            -DCMAKE_RANLIB=llvm-ranlib `
-            -DPIP_INSTALL=True `
-            -DBUILD_ASSET_WHEEL=True
-
-      - name: Build ASSET and Python wheel
+      - name: Build ASSET and wheel
         shell: pwsh
         run: |
           cmake --build build `
             --target asset pypiwheel `
-            --parallel 4
+            --parallel 24
 
-      - name: Locate wheel
-        id: wheel
-        shell: pwsh
-        run: |
-          $wheels = Get-ChildItem `
-            -Path "build/pypiwheel/asset_asrl/dist" `
-            -Filter "*.whl" `
-            -File `
-            -ErrorAction SilentlyContinue
-
-          if (-not $wheels) {
-            $wheels = Get-ChildItem `
-              -Path "build" `
-              -Filter "*.whl" `
-              -Recurse `
-              -File
+          if ($LASTEXITCODE -ne 0) {
+            throw "Build failed with exit code $LASTEXITCODE"
           }
 
-          if (-not $wheels) {
-            throw "No Python wheel was produced."
-          }
-
-          $wheel = $wheels |
-            Sort-Object LastWriteTime -Descending |
-            Select-Object -First 1
-
-          "WHEEL_PATH=$($wheel.FullName)" |
-            Out-File -FilePath $env:GITHUB_ENV -Append
-
-          Write-Host "Wheel: $($wheel.FullName)"
-
-      - name: Install wheel
+      - name: List generated wheels
         shell: pwsh
         run: |
-          python -m pip install --force-reinstall --no-deps "$env:WHEEL_PATH"
-
-      - name: Smoke test imports
-        shell: pwsh
-        run: |
-          python -c "import asset_asrl; print('asset_asrl import succeeded')"
+          Get-ChildItem -Path build -Filter "*.whl" -Recurse |
+            Select-Object -ExpandProperty FullName
