@@ -55,10 +55,11 @@ class CMakeBuild(build_ext):
         cfg = "Debug" if self.debug else "Release"
         build_args += ["--config", cfg]
 
-        # Limit core count if we're on a github runner
-        if "GITHUB_WORKSPACE" in os.environ:
+        if platform.system() == "Windows":
+            build_args += ["--", "/m"]
+        elif "GITHUB_WORKSPACE" in os.environ:
             build_args += ["--", "-j1"]
-        elif platform.system() != "Windows":
+        else:
             # build_args += ["--", "-j{}".format(int(0.5 * multiprocessing.cpu_count()))]
             build_args += ["--", "-j4"]
 
@@ -68,7 +69,6 @@ class CMakeBuild(build_ext):
             ]
             if sys.maxsize > 2 ** 32:
                 cmake_args += ["-A", "x64"]
-            build_args += ["--", "/m"]
         else:
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
 
@@ -93,7 +93,6 @@ setup(
     description="High-speed, extensible, object-oriented trajectory design and optimization",
     long_description="",
     ext_modules=[CMakeExtension("asset")],
-    install_requires=["numpy"],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
 )
