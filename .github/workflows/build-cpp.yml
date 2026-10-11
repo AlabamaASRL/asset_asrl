@@ -26,10 +26,7 @@ jobs:
 
     env:
       WHEEL_DIR: build/asset_asrl/dist
-      WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/19078/w_BaseKit_p_2023.0.0.25940_offline.exe
-      WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel
       VS_VER: vs2022
-      ONEAPI_ROOT: C:/Program Files (x86)/Intel/oneAPI/
       CC: clang-cl.exe
       CXX: clang-cl.exe
 
@@ -77,33 +74,33 @@ jobs:
         with:
           arch: x86_64
 
-      - name: Clean stale extracted web image (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $path = "webimage_extracted"
-          if (Test-Path $path) {
-            Remove-Item -Path $path -Recurse -Force -ErrorAction Stop
-            Write-Host "Removed $path"
-          } else {
-            Write-Host "$path does not exist; skipping cleanup"
-          }
-
-      - name: Install MKL via oneAPI installer (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          call scripts\windowsoneapi_install.bat "%WINDOWS_BASEKIT_URL%" "%WINDOWS_CPP_COMPONENTS%"
-
-      - name: Verify oneAPI install (Windows)
+      - name: Install MKL via pip (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          if (-not (Test-Path "$env:ONEAPI_ROOT")) {
-            throw "oneAPI was not installed successfully at $env:ONEAPI_ROOT"
+          python -m pip install --upgrade pip
+          python -m pip install mkl mkl-devel mkl-include
+          if ($LASTEXITCODE -ne 0) { throw "pip install of MKL failed" }
+
+          # pip places MKL headers/libs/DLLs under <python prefix>\Library
+          $prefix = (python -c "import sys; print(sys.prefix)").Trim()
+          $mklRoot = Join-Path $prefix "Library"
+          "MKLROOT=$mklRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "ONEAPI_ROOT=$mklRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "CMAKE_PREFIX_PATH=$mklRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "$mklRoot\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Verify MKL install (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          if (-not (Test-Path "$env:MKLROOT\include\mkl.h")) {
+            throw "MKL headers not found at $env:MKLROOT\include"
           }
-          Write-Host "oneAPI installed at $env:ONEAPI_ROOT"
+          Get-ChildItem "$env:MKLROOT\lib" -Filter "mkl_*.lib" | Select-Object -First 10 | ForEach-Object { $_.Name }
+          Write-Host "MKL installed at $env:MKLROOT"
 
       - name: Install Python build deps (Linux)
         if: runner.os == 'Linux'
