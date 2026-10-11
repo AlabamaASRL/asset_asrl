@@ -60,6 +60,11 @@ jobs:
             --target asset pypiwheel \
             --parallel 2
 
+      - name: List generated wheels
+        shell: bash
+        run: |
+          find build -type f -name "*.whl" -print
+
   windows:
     name: Windows Build (Clang + Ninja)
     runs-on: windows-2022
@@ -87,11 +92,78 @@ jobs:
           directory: "C:/Program Files/LLVM"
           cached: true
 
-      - name: Install Ninja and Python dependencies
+      - name: Install Ninja and MKL
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
           python -m pip install ninja mkl-devel intel-openmp
+
+          $pythonPrefix = python -c "import sys; print(sys.prefix)"
+
+          Write-Host "Python prefix: $pythonPrefix"
+
+          $mklHeader = Get-ChildItem `
+            -Path $pythonPrefix `
+            -Filter "mkl.h" `
+            -Recurse `
+            -File `
+            -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+
+          if (-not $mklHeader) {
+            throw "mkl.h was not found under $pythonPrefix."
+          }
+
+          $mklLibs = @(
+            Get-ChildItem `
+              -Path $pythonPrefix `
+              -Filter "*.lib" `
+              -Recurse `
+              -File `
+              -ErrorAction SilentlyContinue
+          )
+
+          Write-Host "MKL libraries found:"
+          $mklLibs |
+            Where-Object { $_.Name -like "mkl_*.lib" } |
+            Select-Object -ExpandProperty FullName
+
+          $interface = $mklLibs |
+            Where-Object { $_.Name -eq "mkl_intel_lp64.lib" } |
+            Select-Object -First 1
+
+          $sequential = $mklLibs |
+            Where-Object { $_.Name -eq "mkl_sequential.lib" } |
+            Select-Object -First 1
+
+          $core = $mklLibs |
+            Where-Object { $_.Name -eq "mkl_core.lib" } |
+            Select-Object -First 1
+
+          if (-not $interface -or -not $sequential -or -not $core) {
+            throw "Required MKL libraries were not found. Review the library list above."
+          }
+
+          $includeDir = $mklHeader.DirectoryName
+          $libDir = $interface.DirectoryName
+
+          "MKLROOT=$libDir" |
+            Out-File $env:GITHUB_ENV -Append
+
+          "MKL_INCLUDE_DIRS=$includeDir" |
+            Out-File $env:GITHUB_ENV -Append
+
+          "MKL_INTERFACE_LIBRARY=$($interface.FullName)" |
+            Out-File $env:GITHUB_ENV -Append
+
+          "MKL_SEQTHR_LIBRARY=$($sequential.FullName)" |
+            Out-File $env:GITHUB_ENV -Append
+
+          "MKL_CORE_LIBRARY=$($core.FullName)" |
+            Out-File $env:GITHUB_ENV -Append
+
+          Write-Host "MKL include directory: $includeDir"
+          Write-Host "MKL library directory: $libDir"
 
       - name: Verify toolchain
         shell: pwsh
@@ -117,7 +189,12 @@ jobs:
             "-DCMAKE_C_COMPILER_RANLIB=$llvm/llvm-ranlib.exe" `
             "-DCMAKE_CXX_COMPILER_RANLIB=$llvm/llvm-ranlib.exe" `
             "-DCMAKE_C_COMPILER_AR=$llvm/llvm-ar.exe" `
-            "-DCMAKE_CXX_COMPILER_AR=$llvm/llvm-ar.exe"
+            "-DCMAKE_CXX_COMPILER_AR=$llvm/llvm-ar.exe" `
+            "-DMKLROOT=$env:MKLROOT" `
+            "-DMKL_INCLUDE_DIRS=$env:MKL_INCLUDE_DIRS" `
+            "-DMKL_INTERFACE_LIBRARY=$env:MKL_INTERFACE_LIBRARY" `
+            "-DMKL_SEQTHR_LIBRARY=$env:MKL_SEQTHR_LIBRARY" `
+            "-DMKL_CORE_LIBRARY=$env:MKL_CORE_LIBRARY"
 
           if ($LASTEXITCODE -ne 0) {
             throw "CMake configuration failed with exit code $LASTEXITCODE"
@@ -137,5 +214,14 @@ jobs:
       - name: List generated wheels
         shell: pwsh
         run: |
-          Get-ChildItem -Path build -Filter "*.whl" -Recurse |
-            Select-Object -ExpandProperty FullName
+          $wheels = Get-ChildItem `
+            -Path build `
+            -Filter "*.whl" `
+            -Recurse `
+            -File
+
+          if (-not $wheels) {
+            Write-Warning "No wheel files were found under build."
+          } else {
+            $wheels | Select-Object -ExpandProperty FullName
+          }
