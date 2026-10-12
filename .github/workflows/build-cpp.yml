@@ -25,8 +25,22 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential gfortran clang-13 ninja-build cmake
-          bash install_ubuntu_dependencies.sh
+          sudo apt-get install -y build-essential gfortran clang-13 ninja-build cmake wget gpg
+
+          # Intel oneAPI MKL / OpenMP
+          wget -qO- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+            | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+            | sudo tee /etc/apt/sources.list.d/oneAPI.list
+          sudo apt-get update
+          sudo apt-get install -y intel-oneapi-mkl intel-oneapi-mkl-devel intel-oneapi-openmp
+
+          MKL_DIR=/opt/intel/oneapi/mkl/latest
+          ONEAPI_LIB=/opt/intel/oneapi/compiler/latest/lib
+          echo "MKLROOT=$MKL_DIR" >> "$GITHUB_ENV"
+          echo "INTEL=/opt/intel/oneapi" >> "$GITHUB_ENV"
+          echo "ONEAPI_ROOT=/opt/intel/oneapi" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$MKL_DIR/lib/intel64:$MKL_DIR/lib:$ONEAPI_LIB:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Configure
@@ -43,6 +57,37 @@ jobs:
 
       - name: Build
         run: cmake --build build --parallel 2
+        shell: bash
+
+      - name: Locate wheel files
+        id: wheels
+        run: |
+          mapfile -t WHEELS < <(find . -name "*.whl" -type f -not -path "./.git/*")
+          if [ ${#WHEELS[@]} -eq 0 ]; then
+            echo "::warning::No wheel files found"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "found=true" >> "$GITHUB_OUTPUT"
+          echo "Wheel files:"
+          printf '  %s\n' "${WHEELS[@]}"
+        shell: bash
+
+      - name: Upload wheel
+        id: upload
+        if: steps.wheels.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-wheel-linux
+          path: "**/*.whl"
+          if-no-files-found: error
+
+      - name: Wheel link
+        if: steps.wheels.outputs.found == 'true'
+        run: |
+          echo "Wheel artifact: ${{ steps.upload.outputs.artifact-url }}"
+          echo "### Linux wheel" >> "$GITHUB_STEP_SUMMARY"
+          echo "[Download wheel artifact](${{ steps.upload.outputs.artifact-url }})" >> "$GITHUB_STEP_SUMMARY"
         shell: bash
 
   windows:
@@ -158,7 +203,31 @@ jobs:
           }
 
       - name: List wheels
+        id: wheels
         shell: pwsh
         run: |
-          Get-ChildItem build -Filter "*.whl" -Recurse -File |
-            Select-Object -ExpandProperty FullName
+          $wheels = Get-ChildItem build -Filter "*.whl" -Recurse -File
+          if (-not $wheels) {
+            Write-Host "::warning::No wheel files found"
+            "found=false" | Out-File $env:GITHUB_OUTPUT -Append
+          } else {
+            "found=true" | Out-File $env:GITHUB_OUTPUT -Append
+            $wheels | Select-Object -ExpandProperty FullName
+          }
+
+      - name: Upload wheel
+        id: upload
+        if: steps.wheels.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-wheel-windows
+          path: build/**/*.whl
+          if-no-files-found: error
+
+      - name: Wheel link
+        if: steps.wheels.outputs.found == 'true'
+        shell: pwsh
+        run: |
+          Write-Host "Wheel artifact: ${{ steps.upload.outputs.artifact-url }}"
+          "### Windows wheel" | Out-File $env:GITHUB_STEP_SUMMARY -Append
+          "[Download wheel artifact](${{ steps.upload.outputs.artifact-url }})" | Out-File $env:GITHUB_STEP_SUMMARY -Append
