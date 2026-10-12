@@ -37,8 +37,12 @@ jobs:
             -DBUILD_SPHINX_DOCS=True
         shell: bash
 
+      - name: Show CMake targets
+        run: cmake --build build --target help
+        shell: bash
+
       - name: Build
-        run: cmake --build build --target asset pypiwheel --parallel 2
+        run: cmake --build build --parallel 2
         shell: bash
 
   windows:
@@ -137,10 +141,18 @@ jobs:
             throw "CMake configuration failed."
           }
 
+      - name: Show CMake targets
+        shell: pwsh
+        run: |
+          cmake --build build --target help
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to list CMake targets."
+          }
+
       - name: Build
         shell: pwsh
         run: |
-          cmake --build build --target asset pypiwheel --parallel 2
+          cmake --build build --parallel 2
           if ($LASTEXITCODE -ne 0) {
             throw "Build failed."
           }
