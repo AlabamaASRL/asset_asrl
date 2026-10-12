@@ -1,364 +1,416 @@
 
 @echo off
 setlocal EnableExtensions
+
+rem ============================================================================
+rem ASSET Windows build
+rem
+rem Requirements:
+rem   - .venv at the repository root
+rem   - LLVM/clang-cl 18.1.8
+rem   - Visual Studio C++ Build Tools and Windows SDK
+rem
+rem The script installs Python build dependencies into .venv only.
+rem ============================================================================
+
 title ASSET Windows Build
 
-REM ============================================================
-REM 0. Always run from the directory containing this script
-REM ============================================================
+echo.
+echo ============================================================
+echo ASSET Windows Build
+echo ============================================================
+echo.
 
-cd /d "%~dp0"
+rem Always run from the repository root, regardless of the caller's directory.
+set "ROOT=%~dp0"
+cd /d "%ROOT%"
+
+if not exist "%ROOT%CMakeLists.txt" (
+    echo ERROR: CMakeLists.txt was not found at:
+    echo        "%ROOT%"
+    echo Make sure this script is in the ASSET repository root.
+    goto :FAIL
+)
+
+rem ---------------------------------------------------------------------------
+rem 1. Activate the repository's virtual environment.
+rem ---------------------------------------------------------------------------
+
+echo [1/8] Checking the repository virtual environment...
+
+set "VENV=%ROOT%.venv"
+set "PYTHON=%VENV%\Scripts\python.exe"
+set "ACTIVATE=%VENV%\Scripts\activate.bat"
+
+if not exist "%PYTHON%" (
+    echo ERROR: Python was not found at:
+    echo        "%PYTHON%"
+    echo.
+    echo Create the environment from the repository root with:
+    echo   py -3.12 -m venv .venv
+    goto :FAIL
+)
+
+if not exist "%ACTIVATE%" (
+    echo ERROR: Virtual environment activation script is missing:
+    echo        "%ACTIVATE%"
+    goto :FAIL
+)
+
+call "%ACTIVATE%"
 if errorlevel 1 (
-    echo ERROR: Cannot enter the script directory.
-    goto :fail
+    echo ERROR: Failed to activate .venv.
+    goto :FAIL
 )
 
-echo.
-echo ============================================================
-echo                  ASSET Windows Build
-echo ============================================================
-echo.
-echo Repository: %CD%
-echo.
-
-if not exist "CMakeLists.txt" (
-    echo ERROR: CMakeLists.txt was not found in %CD%
-    echo Place this script in the ASSET repository root.
-    goto :fail
+rem Use the explicit venv interpreter for all Python operations.
+"%PYTHON%" -c "import sys; print('Python:', sys.executable); print('Version:', sys.version.split()[0])"
+if errorlevel 1 (
+    echo ERROR: The venv Python interpreter could not run.
+    goto :FAIL
 )
 
-REM ============================================================
-REM 1. Check Visual Studio C++ Build Tools
-REM ============================================================
+rem ---------------------------------------------------------------------------
+rem 2. Check pip.
+rem ---------------------------------------------------------------------------
 
 echo.
-echo [1/8] Checking Visual Studio C++ Build Tools...
+echo [2/8] Checking pip...
+
+"%PYTHON%" -m pip --version
+if errorlevel 1 (
+    echo pip is unavailable. Attempting to bootstrap pip...
+    "%PYTHON%" -m ensurepip --upgrade
+    if errorlevel 1 (
+        echo ERROR: Could not install pip in .venv.
+        goto :FAIL
+    )
+)
+
+rem ---------------------------------------------------------------------------
+rem 3. Check Visual Studio C++ Build Tools.
+rem ---------------------------------------------------------------------------
+
+echo.
+echo [3/8] Checking Visual Studio C++ Build Tools...
 
 set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
-set "VS_PATH="
+set "VSINSTALL="
 
-if exist "%VSWHERE%" (
-    for /f "usebackq delims=" %%V in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VS_PATH=%%V"
+if not exist "%VSWHERE%" (
+    echo ERROR: Visual Studio Installer vswhere.exe was not found.
+    echo Install Visual Studio 2022 Build Tools with the C++ workload.
+    echo Required components include MSVC x64/x86 tools and a Windows SDK.
+    goto :FAIL
 )
 
-if defined VS_PATH goto :vs_found
+for /f "usebackq delims=" %%I in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+    if not defined VSINSTALL set "VSINSTALL=%%I"
+)
 
-echo Visual Studio C++ tools are missing.
-call :check_winget
-if errorlevel 1 goto :fail
+if not defined VSINSTALL (
+    echo ERROR: Visual Studio C++ build tools were not detected.
+    echo Install Visual Studio 2022 Build Tools with:
+    echo   Desktop development with C++
+    goto :FAIL
+)
 
-echo Installing Visual Studio 2022 Build Tools...
-winget install --exact --id Microsoft.VisualStudio.2022.BuildTools --source winget --accept-source-agreements --accept-package-agreements --override "--quiet --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+set "VSDEVCMD=%VSINSTALL%\Common7\Tools\VsDevCmd.bat"
 
+if not exist "%VSDEVCMD%" (
+    echo ERROR: VsDevCmd.bat was not found:
+    echo        "%VSDEVCMD%"
+    goto :FAIL
+)
+
+call "%VSDEVCMD%" -arch=x64 -host_arch=x64
 if errorlevel 1 (
-    echo ERROR: Visual Studio Build Tools installation failed.
-    goto :fail
+    echo ERROR: Could not initialize the Visual Studio build environment.
+    goto :FAIL
 )
 
-if exist "%VSWHERE%" (
-    for /f "usebackq delims=" %%V in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VS_PATH=%%V"
-)
+echo Visual Studio: "%VSINSTALL%"
 
-if not defined VS_PATH (
-    echo ERROR: C++ Build Tools were not detected after installation.
-    echo Complete any pending installation and rerun this script.
-    goto :fail
-)
-
-:vs_found
-echo Found Visual Studio: %VS_PATH%
-
-if not exist "%VS_PATH%\Common7\Tools\VsDevCmd.bat" (
-    echo ERROR: VsDevCmd.bat was not found.
-    goto :fail
-)
-
-call "%VS_PATH%\Common7\Tools\VsDevCmd.bat" -arch=x64 -host_arch=x64
-if errorlevel 1 (
-    echo ERROR: Failed to initialize Visual Studio.
-    goto :fail
-)
-
-where cl.exe >nul 2>&1
-if errorlevel 1 (
-    echo ERROR: MSVC compiler is unavailable.
-    goto :fail
-)
-
-
-REM ============================================================
-REM 3. Check LLVM
-REM ============================================================
+rem ---------------------------------------------------------------------------
+rem 4. Find LLVM. Install the pinned version if it is missing.
+rem ---------------------------------------------------------------------------
 
 echo.
-echo [3/8] Checking LLVM compiler and linker...
+echo [4/8] Checking LLVM...
 
-call :find_llvm
-if defined LLVM_BIN goto :llvm_found
+set "LLVM_BIN="
+set "LLVM_BIN_DEFAULT=%ProgramFiles%\LLVM\bin"
 
-echo LLVM was not found.
-call :check_winget
-if errorlevel 1 goto :fail
+if exist "%LLVM_BIN_DEFAULT%\clang-cl.exe" (
+    set "LLVM_BIN=%LLVM_BIN_DEFAULT%"
+)
 
-echo Attempting to install LLVM 18.1.8...
-winget install --exact --id LLVM.LLVM --version 18.1.8 --source winget --accept-source-agreements --accept-package-agreements
-
-REM Check again regardless of installer exit code.
-call :find_llvm
-if defined LLVM_BIN goto :llvm_found
-
-echo.
-echo ERROR: clang-cl.exe and lld-link.exe were not found.
-echo Install a compatible LLVM version and rerun this script.
-echo Expected default path: C:\Program Files\LLVM\bin
-goto :fail
-
-:llvm_found
-echo LLVM directory: %LLVM_BIN%
-
-REM ============================================================
-REM 4. Check and install CMake and Ninja
-REM ============================================================
-
-echo.
-echo [4/8] Checking CMake and Ninja...
-
-set "PYTHON_SCRIPTS="
-for /f "delims=" %%V in ('%PYTHON% -c "import sysconfig; print(sysconfig.get_path('scripts'))"') do set "PYTHON_SCRIPTS=%%V"
-
-set "PATH=%PYTHON_SCRIPTS%;%PATH%"
-
-set "NEED_CMAKE="
-set "NEED_NINJA="
-
-where cmake.exe >nul 2>&1
-if errorlevel 1 set "NEED_CMAKE=1"
-
-where ninja.exe >nul 2>&1
-if errorlevel 1 set "NEED_NINJA=1"
-
-if not defined NEED_CMAKE if not defined NEED_NINJA goto :build_tools_found
-
-if defined NEED_CMAKE echo CMake is missing.
-if defined NEED_NINJA echo Ninja is missing.
-
-if defined NEED_CMAKE (
-    %PYTHON% -m pip install cmake
-    if errorlevel 1 (
-        echo ERROR: Could not install CMake.
-        goto :fail
+if not defined LLVM_BIN (
+    for /f "delims=" %%I in ('where.exe clang-cl.exe 2^>nul') do (
+        if not defined LLVM_BIN set "LLVM_BIN=%%~dpI"
     )
 )
 
-if defined NEED_NINJA (
-    %PYTHON% -m pip install ninja
+if not defined LLVM_BIN (
+    where.exe winget >nul 2>&1
     if errorlevel 1 (
-        echo ERROR: Could not install Ninja.
-        goto :fail
+        echo ERROR: LLVM is missing and winget is unavailable.
+        echo Install LLVM 18.1.8 and rerun this script.
+        goto :FAIL
+    )
+
+    echo LLVM was not found. Installing LLVM 18.1.8...
+    winget install --exact --id LLVM.LLVM --version 18.1.8 --accept-source-agreements --accept-package-agreements
+
+    if errorlevel 1 (
+        echo ERROR: LLVM installation failed.
+        goto :FAIL
+    )
+
+    if exist "%LLVM_BIN_DEFAULT%\clang-cl.exe" (
+        set "LLVM_BIN=%LLVM_BIN_DEFAULT%"
     )
 )
 
-set "PATH=%PYTHON_SCRIPTS%;%PATH%"
-
-where cmake.exe >nul 2>&1
-if errorlevel 1 (
-    echo ERROR: CMake is still unavailable.
-    goto :fail
+if not defined LLVM_BIN (
+    echo ERROR: clang-cl.exe could not be located after installation.
+    goto :FAIL
 )
 
-where ninja.exe >nul 2>&1
-if errorlevel 1 (
-    echo ERROR: Ninja is still unavailable.
-    goto :fail
+set "CLANG_CL=%LLVM_BIN%\clang-cl.exe"
+set "LLD_LINK=%LLVM_BIN%\lld-link.exe"
+
+if not exist "%CLANG_CL%" (
+    echo ERROR: clang-cl.exe was not found:
+    echo        "%CLANG_CL%"
+    goto :FAIL
 )
 
-:build_tools_found
-echo CMake and Ninja are available.
+if not exist "%LLD_LINK%" (
+    echo ERROR: lld-link.exe was not found:
+    echo        "%LLD_LINK%"
+    goto :FAIL
+)
 
-REM ============================================================
-REM 5. Check MKL headers and libraries before installing
-REM ============================================================
+"%CLANG_CL%" --version
+if errorlevel 1 (
+    echo ERROR: clang-cl failed to run.
+    goto :FAIL
+)
+
+rem Make LLVM available to CMake and its compiler subprocesses.
+set "PATH=%LLVM_BIN%;%PATH%"
+
+rem ---------------------------------------------------------------------------
+rem 5. Install/check CMake and Ninja inside .venv.
+rem ---------------------------------------------------------------------------
 
 echo.
-echo [5/8] Checking Intel MKL...
+echo [5/8] Checking CMake and Ninja...
 
-for /f "delims=" %%V in ('%PYTHON% -c "import sys; print(sys.prefix)"') do set "PYTHON_PREFIX=%%V"
+if not exist "%VENV%\Scripts\cmake.exe" (
+    echo Installing CMake into .venv...
+    "%PYTHON%" -m pip install cmake
+    if errorlevel 1 (
+        echo ERROR: Could not install CMake into .venv.
+        goto :FAIL
+    )
+)
 
-set "MKLROOT=%PYTHON_PREFIX%\Library"
-set "MKL_INCLUDE_DIRS=%MKLROOT%\include"
-set "MKL_LIB_DIR=%MKLROOT%\lib"
+if not exist "%VENV%\Scripts\ninja.exe" (
+    echo Installing Ninja into .venv...
+    "%PYTHON%" -m pip install ninja
+    if errorlevel 1 (
+        echo ERROR: Could not install Ninja into .venv.
+        goto :FAIL
+    )
+)
 
-set "MKL_INTERFACE_LIBRARY=%MKL_LIB_DIR%\mkl_intel_lp64_dll.lib"
-set "MKL_SEQTHR_LIBRARY=%MKL_LIB_DIR%\mkl_sequential_dll.lib"
-set "MKL_CORE_LIBRARY=%MKL_LIB_DIR%\mkl_core_dll.lib"
+set "CMAKE=%VENV%\Scripts\cmake.exe"
+set "NINJA=%VENV%\Scripts\ninja.exe"
 
-set "NEED_MKL="
+if not exist "%CMAKE%" (
+    echo ERROR: CMake executable is missing from .venv.
+    goto :FAIL
+)
 
-if not exist "%MKL_INCLUDE_DIRS%\mkl.h" set "NEED_MKL=1"
-if not exist "%MKL_INTERFACE_LIBRARY%" set "NEED_MKL=1"
-if not exist "%MKL_SEQTHR_LIBRARY%" set "NEED_MKL=1"
-if not exist "%MKL_CORE_LIBRARY%" set "NEED_MKL=1"
+if not exist "%NINJA%" (
+    echo ERROR: Ninja executable is missing from .venv.
+    goto :FAIL
+)
 
-if not defined NEED_MKL goto :mkl_found
-
-echo MKL headers or libraries are missing.
-echo Installing mkl-devel...
-%PYTHON% -m pip install mkl-devel
+"%CMAKE%" --version
 if errorlevel 1 (
-    echo ERROR: Could not install mkl-devel.
-    goto :fail
+    echo ERROR: CMake did not run successfully.
+    goto :FAIL
 )
 
-REM Recalculate the Python prefix and paths after installation.
-for /f "delims=" %%V in ('%PYTHON% -c "import sys; print(sys.prefix)"') do set "PYTHON_PREFIX=%%V"
-
-set "MKLROOT=%PYTHON_PREFIX%\Library"
-set "MKL_INCLUDE_DIRS=%MKLROOT%\include"
-set "MKL_LIB_DIR=%MKLROOT%\lib"
-set "MKL_INTERFACE_LIBRARY=%MKL_LIB_DIR%\mkl_intel_lp64_dll.lib"
-set "MKL_SEQTHR_LIBRARY=%MKL_LIB_DIR%\mkl_sequential_dll.lib"
-set "MKL_CORE_LIBRARY=%MKL_LIB_DIR%\mkl_core_dll.lib"
-
-if not exist "%MKL_INCLUDE_DIRS%\mkl.h" (
-    echo ERROR: MKL header is still missing.
-    goto :fail
-)
-if not exist "%MKL_INTERFACE_LIBRARY%" (
-    echo ERROR: MKL interface library is still missing.
-    goto :fail
-)
-if not exist "%MKL_SEQTHR_LIBRARY%" (
-    echo ERROR: MKL sequential library is still missing.
-    goto :fail
-)
-if not exist "%MKL_CORE_LIBRARY%" (
-    echo ERROR: MKL core library is still missing.
-    goto :fail
+"%NINJA%" --version
+if errorlevel 1 (
+    echo ERROR: Ninja did not run successfully.
+    goto :FAIL
 )
 
-:mkl_found
-echo MKL headers and libraries are available.
-
-REM ============================================================
-REM 6. Check Intel OpenMP Python package
-REM ============================================================
+rem ---------------------------------------------------------------------------
+rem 6. Check Intel MKL headers and libraries.
+rem ---------------------------------------------------------------------------
 
 echo.
-echo [6/8] Checking Intel OpenMP...
+echo [6/8] Checking Intel MKL...
 
-%PYTHON% -m pip show intel-openmp >nul 2>&1
-if not errorlevel 1 goto :openmp_found
+call :FindMKL
 
-echo Intel OpenMP package is missing. Installing...
-%PYTHON% -m pip install intel-openmp
-if errorlevel 1 (
-    echo ERROR: Could not install intel-openmp.
-    goto :fail
+if not defined MKL_INCLUDE_DIR (
+    echo MKL headers or libraries are missing. Installing MKL packages...
+    "%PYTHON%" -m pip install mkl-devel intel-openmp
+    if errorlevel 1 (
+        echo ERROR: Could not install mkl-devel and intel-openmp.
+        goto :FAIL
+    )
+
+    call :FindMKL
 )
 
-:openmp_found
-echo Intel OpenMP package is available.
+if not defined MKL_INCLUDE_DIR (
+    echo ERROR: mkl.h was not found inside .venv.
+    echo Check the mkl-devel installation and package layout.
+    goto :FAIL
+)
 
-set "MKL_LIBRARIES=%MKL_INTERFACE_LIBRARY%;%MKL_SEQTHR_LIBRARY%;%MKL_CORE_LIBRARY%"
+if not defined MKL_INTERFACE (
+    echo ERROR: mkl_intel_lp64_dll.lib was not found inside .venv.
+    goto :FAIL
+)
 
-REM ============================================================
-REM 7. Configure CMake
-REM ============================================================
+if not defined MKL_SEQTHR (
+    echo ERROR: mkl_sequential_dll.lib was not found inside .venv.
+    goto :FAIL
+)
+
+if not defined MKL_CORE (
+    echo ERROR: mkl_core_dll.lib was not found inside .venv.
+    goto :FAIL
+)
+
+echo MKL include directory:
+echo   "%MKL_INCLUDE_DIR%"
+echo MKL interface library:
+echo   "%MKL_INTERFACE%"
+echo MKL sequential library:
+echo   "%MKL_SEQTHR%"
+echo MKL core library:
+echo   "%MKL_CORE%"
+
+rem ---------------------------------------------------------------------------
+rem 7. Configure the CMake build.
+rem ---------------------------------------------------------------------------
 
 echo.
 echo [7/8] Configuring CMake...
 
-cmake -S . -B build -G Ninja ^
-    "-DCMAKE_BUILD_TYPE=Release" ^
-    "-DPIP_INSTALL=True" ^
-    "-DBUILD_SPHINX_DOCS=True" ^
-    "-DCMAKE_C_COMPILER=%LLVM_BIN%clang-cl.exe" ^
-    "-DCMAKE_CXX_COMPILER=%LLVM_BIN%clang-cl.exe" ^
-    "-DCMAKE_LINKER=%LLVM_BIN%lld-link.exe" ^
+set "BUILD_DIR=%ROOT%build-windows-venv"
+set "MKLROOT=%VENV%"
+
+if exist "%BUILD_DIR%\CMakeCache.txt" (
+    echo Existing CMake cache found:
+    echo   "%BUILD_DIR%\CMakeCache.txt"
+    echo.
+    echo To avoid reusing a cache configured with another compiler,
+    echo remove the build-windows-venv directory and rerun this script.
+    echo The script will not delete an existing build automatically.
+    goto :FAIL
+)
+
+if not exist "%BUILD_DIR%" mkdir "%BUILD_DIR%"
+if errorlevel 1 (
+    echo ERROR: Could not create the build directory.
+    goto :FAIL
+)
+
+"%CMAKE%" -S "%ROOT%" -B "%BUILD_DIR%" -G Ninja ^
+    -DCMAKE_BUILD_TYPE=Release ^
+    -DPIP_INSTALL=True ^
+    -DBUILD_SPHINX_DOCS=True ^
+    "-DCMAKE_C_COMPILER=%CLANG_CL%" ^
+    "-DCMAKE_CXX_COMPILER=%CLANG_CL%" ^
+    "-DCMAKE_LINKER=%LLD_LINK%" ^
+    "-DCMAKE_MAKE_PROGRAM=%NINJA%" ^
     "-DMKLROOT=%MKLROOT%" ^
-    "-DMKL_INCLUDE_DIRS=%MKL_INCLUDE_DIRS%" ^
-    "-DMKL_INTERFACE_LIBRARY=%MKL_INTERFACE_LIBRARY%" ^
-    "-DMKL_SEQTHR_LIBRARY=%MKL_SEQTHR_LIBRARY%" ^
-    "-DMKL_CORE_LIBRARY=%MKL_CORE_LIBRARY%" ^
-    "-DMKL_LIBRARIES=%MKL_LIBRARIES%"
+    "-DMKL_INCLUDE_DIRS=%MKL_INCLUDE_DIR%" ^
+    "-DMKL_INTERFACE_LIBRARY=%MKL_INTERFACE%" ^
+    "-DMKL_SEQTHR_LIBRARY=%MKL_SEQTHR%" ^
+    "-DMKL_CORE_LIBRARY=%MKL_CORE%" ^
+    "-DMKL_LIBRARIES=%MKL_INTERFACE%;%MKL_SEQTHR%;%MKL_CORE%"
 
 if errorlevel 1 (
     echo ERROR: CMake configuration failed.
-    goto :fail
+    goto :FAIL
 )
 
-REM ============================================================
-REM 8. Build ASSET
-REM ============================================================
+rem ---------------------------------------------------------------------------
+rem 8. Build ASSET and the wheel target.
+rem ---------------------------------------------------------------------------
 
 echo.
-echo [8/8] Building ASSET and Python wheel...
+echo [8/8] Building ASSET and pypiwheel...
 
-cmake --build build --target asset pypiwheel --parallel 2
+"%CMAKE%" --build "%BUILD_DIR%" --target asset pypiwheel --parallel 2
 if errorlevel 1 (
     echo ERROR: ASSET build failed.
-    goto :fail
+    goto :FAIL
 )
 
 echo.
 echo ============================================================
-echo BUILD COMPLETED
+echo BUILD SUCCEEDED
 echo ============================================================
+echo Build directory:
+echo   "%BUILD_DIR%"
 echo.
-echo Generated wheel files:
-where /r build *.whl
+echo Check the build output for generated wheel files.
 echo.
 pause
 exit /b 0
 
-REM ============================================================
-REM Helper: locate LLVM
-REM ============================================================
 
-:find_llvm
-set "LLVM_BIN="
+rem ============================================================================
+rem Search only the repository's .venv for the required MKL files.
+rem ============================================================================
 
-for /f "delims=" %%V in ('where clang-cl.exe 2^>nul') do (
-    if not defined LLVM_BIN set "LLVM_BIN=%%~dpV"
+:FindMKL
+set "MKL_INCLUDE_DIR="
+set "MKL_INTERFACE="
+set "MKL_SEQTHR="
+set "MKL_CORE="
+
+for /f "delims=" %%I in ('dir /s /b "%VENV%\mkl.h" 2^>nul') do (
+    if not defined MKL_INCLUDE_DIR set "MKL_INCLUDE_DIR=%%~dpI"
 )
 
-if not defined LLVM_BIN if exist "C:\Program Files\LLVM\bin\clang-cl.exe" (
-    if exist "C:\Program Files\LLVM\bin\lld-link.exe" (
-        set "LLVM_BIN=C:\Program Files\LLVM\bin\"
-    )
+for /f "delims=" %%I in ('dir /s /b "%VENV%\mkl_intel_lp64_dll.lib" 2^>nul') do (
+    if not defined MKL_INTERFACE set "MKL_INTERFACE=%%I"
 )
 
-if defined LLVM_BIN (
-    if not exist "%LLVM_BIN%clang-cl.exe" set "LLVM_BIN="
-    if defined LLVM_BIN if not exist "%LLVM_BIN%lld-link.exe" set "LLVM_BIN="
+for /f "delims=" %%I in ('dir /s /b "%VENV%\mkl_sequential_dll.lib" 2^>nul') do (
+    if not defined MKL_SEQTHR set "MKL_SEQTHR=%%I"
+)
+
+for /f "delims=" %%I in ('dir /s /b "%VENV%\mkl_core_dll.lib" 2^>nul') do (
+    if not defined MKL_CORE set "MKL_CORE=%%I"
 )
 
 exit /b 0
 
-REM ============================================================
-REM Helper: check winget only when an installation is needed
-REM ============================================================
 
-:check_winget
-where winget.exe >nul 2>&1
-if not errorlevel 1 exit /b 0
-
-echo ERROR: winget is required to install missing prerequisites.
-echo Install or update App Installer from the Microsoft Store.
-exit /b 1
-
-REM ============================================================
-REM Failure handler
-REM ============================================================
-
-:fail
+:FAIL
 echo.
 echo ============================================================
 echo BUILD FAILED
 echo ============================================================
 echo.
 echo Fix the reported issue and rerun this script.
-echo Already-installed dependencies will be checked again.
+echo The script uses the repository's .venv and does not
+echo automatically delete an existing build directory.
 echo.
 pause
 exit /b 1
