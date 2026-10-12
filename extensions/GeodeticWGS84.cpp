@@ -27,12 +27,14 @@ struct GeodeticWGS84
     constexpr double a_km = 6378.137;
     constexpr double flattening = 1.0 / 298.257223563;
     constexpr double e2 = flattening * (2.0 - flattening);
+    constexpr double half_pi = 1.57079632679489661923;
+
     const Scalar p = sqrt(x[0]*x[0] + x[1]*x[1]);
     if (p <= Scalar(0.0) && x[2] == Scalar(0.0))
       throw std::invalid_argument("GeodeticWGS84 is undefined at the origin");
     fx[2] = atan2(x[1], x[0]);
     if (p < Scalar(1.0e-12)) {
-      fx[1] = x[2] >= Scalar(0.0) ? Scalar(M_PI_2) : Scalar(-M_PI_2);
+      fx[1] = x[2] >= Scalar(0.0) ? Scalar(half_pi) : Scalar(-half_pi);
       fx[0] = abs(x[2]) - Scalar(a_km * (1.0 - flattening));
       return;
     }
