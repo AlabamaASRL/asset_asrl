@@ -126,7 +126,7 @@ jobs:
           cmake -S . -B build -G Ninja `
             "-DCMAKE_BUILD_TYPE=Release" `
             "-DPIP_INSTALL=True" `
-            "-DBUILD_SPHINX_DOCS=True" `
+            "-DBUILD_SPHINX_DOCS=False" `
             "-DCMAKE_C_COMPILER=$llvm/clang-cl.exe" `
             "-DCMAKE_CXX_COMPILER=$llvm/clang-cl.exe" `
             "-DCMAKE_LINKER=$llvm/lld-link.exe" `
