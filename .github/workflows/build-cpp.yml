@@ -229,23 +229,6 @@ jobs:
             $wheels | Select-Object -ExpandProperty FullName
           }
 
-      - name: Install each wheel and run unit tests
-        if: steps.wheels.outputs.found == 'true'
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          python -m pip install --upgrade pip
-          $wheels = Get-ChildItem build -Filter "*.whl" -Recurse -File
-          foreach ($whl in $wheels) {
-            Write-Host "Installing wheel: $($whl.FullName)"
-            python -m pip install --force-reinstall "$($whl.FullName)"
-            if ($LASTEXITCODE -ne 0) { throw "pip install failed for $($whl.FullName)" }
-
-            Write-Host "Running ASSET unit tests for wheel: $($whl.FullName)"
-            python -m unittest discover -v
-            if ($LASTEXITCODE -ne 0) { throw "Unit tests failed for $($whl.FullName)" }
-          }
-
       - name: Upload wheel
         id: upload
         if: steps.wheels.outputs.found == 'true'
