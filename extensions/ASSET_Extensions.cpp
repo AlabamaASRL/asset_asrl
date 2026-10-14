@@ -3,8 +3,6 @@
 namespace ASSET {
 
     void BuildPinesGravity(FunctionRegistry& reg, py::module& m);
-    void BuildGeodeticWGS84(FunctionRegistry& reg, py::module& m);
-
 
 	struct CR3BPAD : VectorFunction<CR3BPAD, 7, 6, AutodiffFwd, AutodiffFwd> {
 		using Base = VectorFunction<CR3BPAD, 7, 6, AutodiffFwd, AutodiffFwd>;
