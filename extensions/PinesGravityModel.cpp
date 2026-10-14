@@ -1,4 +1,3 @@
-```cpp
 #include "PinesGravityModel.h"
 
 #include <algorithm>
@@ -248,4 +247,3 @@ std::array<double, 3> PinesGravityModel::acceleration(
 }
 
 }  // namespace ASSET
-```
