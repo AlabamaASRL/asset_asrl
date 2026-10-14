@@ -1,4 +1,3 @@
-```cpp
 #pragma once
 
 #include <array>
@@ -221,4 +220,3 @@ class PinesGravityModel {
 };
 
 }  // namespace ASSET
-```
