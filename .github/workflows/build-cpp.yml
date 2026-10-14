@@ -73,6 +73,20 @@ jobs:
           printf '  %s\n' "${WHEELS[@]}"
         shell: bash
 
+      - name: Install each wheel and run unit tests
+        if: steps.wheels.outputs.found == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t WHEELS < <(find . -name "*.whl" -type f -not -path "./.git/*")
+          python -m pip install --upgrade pip
+          for whl in "${WHEELS[@]}"; do
+            echo "Installing wheel: $whl"
+            python -m pip install --force-reinstall "$whl"
+            echo "Running ASSET unit tests for wheel: $whl"
+            python -m unittest discover -v
+          done
+
       - name: Upload wheel
         id: upload
         if: steps.wheels.outputs.found == 'true'
