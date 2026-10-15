@@ -114,19 +114,10 @@ namespace ASSET {
 }
 
 
-
-
-
-
-
-
 void ASSET::ExtensionsBuild(FunctionRegistry& reg, py::module& extmod)
 {
 
     BuildPinesGravity(reg, extmod);
-    BuildGeodeticWGS84(reg, extmod);
-
-
 
 	extmod.def("cpp_cr3bp", [](double mu) {
 
