@@ -14,8 +14,7 @@ ASSET_Extensions.h
 ASSET_Extensions.cpp
 PinesGravity.cpp
 PinesGravityModel.cpp
-PinesGravityModel.h
-GeodeticWGS84.cpp)
+PinesGravityModel.h)
 
 add_dependencies(asset_extensions pch)
 target_include_directories(asset_extensions PRIVATE ${INCLUDE_DIRS})
