@@ -160,10 +160,8 @@ endif()
 #set_target_properties(asset PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
 if(UNIX)
-    set_target_properties(asset PROPERTIES LINK_FLAGS ${LINKER_FLAGS})
+    target_link_options(asset PRIVATE ${LINKER_FLAGS})
 endif()
-
-
 
 add_custom_target(pyassetsrc ALL DEPENDS ${CMAKE_SOURCE_DIR}/asset_asrl)
 
@@ -189,6 +187,7 @@ if(PYTHON_LOCAL_INSTALL_DIR)
                     COMMENT "Copied asset_asrl to ${PYTHON_LOCAL_INSTALL_DIR}")
 
 endif()
+<<<<<<< HEAD
 
 
     
@@ -198,3 +197,5 @@ endif()
 
     
 
+=======
+>>>>>>> e2e58cb9cb836ae00129a6be4daa20ceeeb0ac1a
