@@ -1,8 +1,17 @@
 import numpy as np
 import asset_asrl as ast
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap ## PIP INSTALL Basemap if you dont have it
 from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot
+
+import sys
+PY_VER = sys.version_info
+USE_BASEMAP = PY_VER < (3, 10)
+
+if USE_BASEMAP:
+    from mpl_toolkits.basemap import Basemap ## PIP INSTALL Basemap if you dont have it
+else :
+    import cartopy.crs as ccrs
+    from pyproj import Geod
 
 vf        = ast.VectorFunctions
 oc        = ast.OptimalControl
@@ -206,7 +215,16 @@ def Plot(Phase1,Phase2,Phase3,Phase4):
     ax0 = plt.subplot(321)
     ax1 = plt.subplot(323)
     ax2 = plt.subplot(325)
-    ax3 = plt.subplot(122)    
+    if USE_BASEMAP:
+        ax3 = plt.subplot(122)
+    else:
+        ax3 = fig.add_subplot(
+            122,
+            projection=ccrs.LambertConformal(
+                central_latitude=50,
+                central_longitude=-65
+            )
+        ) 
 
     ax0.grid(True)
     ax1.grid(True)
@@ -227,29 +245,66 @@ def Plot(Phase1,Phase2,Phase3,Phase4):
 
 
     
-    m = Basemap(projection='lcc',
+    if USE_BASEMAP:
+        m = Basemap(projection='lcc',
                 lat_1=45.,lat_2=55,lat_0=50,lon_0=-65.,
                 resolution=None,width=9000000,height=9000000,ax=ax3)
 
-    for i in range(0,len(LLs)-1):
-        lon1 = float(LLs[i][1])
-        lat1 = float(LLs[i][0])
-        lon2 = float(LLs[i+1][1])
-        lat2 = float(LLs[i+1][0])
-        m.drawgreatcircle(lon1=lon1,lat1=lat1,lon2=lon2,lat2=lat2)
+        for i in range(0,len(LLs)-1):
+            lon1 = float(LLs[i][1])
+            lat1 = float(LLs[i][0])
+            lon2 = float(LLs[i+1][1])
+            lat2 = float(LLs[i+1][0])
+            m.drawgreatcircle(lon1=lon1,lat1=lat1,lon2=lon2,lat2=lat2)
+    
+        ax2.legend()
+        #m.bluemarble()
+        m.shadedrelief()
+    
+        m.drawparallels(np.arange(-90.,91.,30.))
+        m.drawmeridians(np.arange(-180.,181.,60.))
+        #m.drawmapboundary(fill_color='aqua')
+        plt.title("Ground Track")
 
-    ax2.legend()
-    #m.bluemarble()
-    m.shadedrelief()
-
-    m.drawparallels(np.arange(-90.,91.,30.))
-    m.drawmeridians(np.arange(-180.,181.,60.))
-    #m.drawmapboundary(fill_color='aqua')
-    plt.title("Ground Track")
+    else:
+    
+        R = 6370997
+        globe = ccrs.Globe(ellipse=None, semimajor_axis=R, semiminor_axis=R)
+    
+        proj = ccrs.LambertConformal(central_longitude=-65., central_latitude=50.,
+                                    standard_parallels=(45., 55.), globe=globe)
+        latlon = ccrs.PlateCarree(globe=globe)
+    
+        x_half_width = 3.8e6
+        y_half_width = 4.4e6
+        ax3.set_extent([-x_half_width, x_half_width, -y_half_width, y_half_width], crs=proj)
+        geod = Geod(a=R, b=R)  # spherical geodesics
+        for i in range(len(LLs) - 1):
+            lon1, lat1 = float(LLs[i][1]),   float(LLs[i][0])
+            lon2, lat2 = float(LLs[i+1][1]), float(LLs[i+1][0])
+    
+            pts = geod.npts(lon1, lat1, lon2, lat2, 100)
+            lons = np.array([lon1] + [p[0] for p in pts] + [lon2])
+            lats = np.array([lat1] + [p[1] for p in pts] + [lat2])
+    
+            xyz = proj.transform_points(latlon, lons, lats)
+            ax3.plot(xyz[:, 0], xyz[:, 1])
+    
+        ax2.legend()
+    
+        ax3.stock_img() 
+    
+        gl = ax3.gridlines(crs=latlon,
+                   xlocs=np.arange(-180., 181., 60.),
+                   ylocs=np.arange(-90., 91., 30.),
+                   draw_labels=False, color='k', linewidth=1.0,
+                   linestyle=(0, (1, 1)))
+    
+        ax3.set_title("Ground Track")
     
     fig.set_size_inches(15.0, 7.5, forward=True)
     fig.tight_layout()
-
+    
     plt.show()
 
 ###############################################################################
