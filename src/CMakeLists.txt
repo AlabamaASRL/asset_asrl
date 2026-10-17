@@ -187,15 +187,3 @@ if(PYTHON_LOCAL_INSTALL_DIR)
                     COMMENT "Copied asset_asrl to ${PYTHON_LOCAL_INSTALL_DIR}")
 
 endif()
-<<<<<<< HEAD
-
-
-    
-
-
-
-
-    
-
-=======
->>>>>>> e2e58cb9cb836ae00129a6be4daa20ceeeb0ac1a
