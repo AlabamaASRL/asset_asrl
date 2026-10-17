@@ -84,7 +84,7 @@ jobs:
             echo "Installing wheel: $whl"
             python -m pip install --force-reinstall "$whl"
             echo "Running ASSET unit tests for wheel: $whl"
-            python -m unittest discover -v
+            python asset_asrl/tests/run_tests.py
           done
 
       - name: Upload wheel
@@ -227,6 +227,20 @@ jobs:
           } else {
             "found=true" | Out-File $env:GITHUB_OUTPUT -Append
             $wheels | Select-Object -ExpandProperty FullName
+          }
+
+      - name: Install each wheel and run unit tests
+        if: steps.wheels.outputs.found == 'true'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $wheels = Get-ChildItem build -Filter "*.whl" -Recurse -File
+          python -m pip install --upgrade pip
+          foreach ($whl in $wheels) {
+            Write-Host "Installing wheel: $($whl.FullName)"
+            python -m pip install --force-reinstall "$($whl.FullName)"
+            Write-Host "Running ASSET unit tests for wheel: $($whl.FullName)"
+            python asset_asrl/tests/run_tests.py
           }
 
       - name: Upload wheel
