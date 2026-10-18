@@ -2,6 +2,7 @@
 
 namespace ASSET {
 
+    void BuildPinesGravity(FunctionRegistry& reg, py::module& m);
 
 	struct CR3BPAD : VectorFunction<CR3BPAD, 7, 6, AutodiffFwd, AutodiffFwd> {
 		using Base = VectorFunction<CR3BPAD, 7, 6, AutodiffFwd, AutodiffFwd>;
@@ -113,16 +114,10 @@ namespace ASSET {
 }
 
 
-
-
-
-
-
-
 void ASSET::ExtensionsBuild(FunctionRegistry& reg, py::module& extmod)
 {
 
-
+    BuildPinesGravity(reg, extmod);
 
 	extmod.def("cpp_cr3bp", [](double mu) {
 
