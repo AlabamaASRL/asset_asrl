@@ -162,15 +162,10 @@ if(NOT WIN32)
   list(APPEND RELEASE_FLAGS "-fno-stack-protector")
   #list(APPEND RELEASE_FLAGS "-fcf-protection=none")
   list(APPEND RELEASE_FLAGS "-fno-asynchronous-unwind-tables")
-<<<<<<< HEAD
-  option(ASSET_FAST_MATH "Enable relaxed floating-point transformations" ON)
-  if(ASSET_FAST_MATH)
-    list(APPEND RELEASE_FLAGS "-ffast-math")
-=======
+
   list(APPEND RELEASE_FLAGS "-ffast-math")
   if (NOT APPLE)
     #list(APPEND RELEASE_FLAGS "-fno-stack-clash-protection")
->>>>>>> e2e58cb9cb836ae00129a6be4daa20ceeeb0ac1a
   endif()
 endif()
  
