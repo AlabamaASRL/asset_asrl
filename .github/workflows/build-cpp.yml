@@ -1,0 +1,264 @@
+name: ASSET Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential gfortran clang-13 ninja-build cmake wget gpg
+
+          # Intel oneAPI MKL / OpenMP
+          wget -qO- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+            | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+            | sudo tee /etc/apt/sources.list.d/oneAPI.list
+          sudo apt-get update
+          sudo apt-get install -y intel-oneapi-mkl intel-oneapi-mkl-devel intel-oneapi-openmp
+
+          MKL_DIR=/opt/intel/oneapi/mkl/latest
+          ONEAPI_LIB=/opt/intel/oneapi/compiler/latest/lib
+          echo "MKLROOT=$MKL_DIR" >> "$GITHUB_ENV"
+          echo "INTEL=/opt/intel/oneapi" >> "$GITHUB_ENV"
+          echo "ONEAPI_ROOT=/opt/intel/oneapi" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$MKL_DIR/lib/intel64:$MKL_DIR/lib:$ONEAPI_LIB:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Configure
+        run: |
+          CC=clang-13 CXX=clang++-13 cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPIP_INSTALL=True \
+            -DBUILD_SPHINX_DOCS=True
+        shell: bash
+
+      - name: Show CMake targets
+        run: cmake --build build --target help
+        shell: bash
+
+      - name: Build
+        run: cmake --build build --parallel 2
+        shell: bash
+
+      - name: Locate wheel files
+        id: wheels
+        run: |
+          mapfile -t WHEELS < <(find . -name "*.whl" -type f -not -path "./.git/*")
+          if [ ${#WHEELS[@]} -eq 0 ]; then
+            echo "::warning::No wheel files found"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "found=true" >> "$GITHUB_OUTPUT"
+          echo "Wheel files:"
+          printf '  %s\n' "${WHEELS[@]}"
+        shell: bash
+
+      - name: Install each wheel and run unit tests
+        if: steps.wheels.outputs.found == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t WHEELS < <(find . -name "*.whl" -type f -not -path "./.git/*")
+          python -m pip install --upgrade pip
+          for whl in "${WHEELS[@]}"; do
+            echo "Installing wheel: $whl"
+            python -m pip install --force-reinstall "$whl"
+            echo "Running ASSET unit tests for wheel: $whl"
+            python -m unittest discover -v
+          done
+
+      - name: Upload wheel
+        id: upload
+        if: steps.wheels.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-wheel-linux
+          path: "**/*.whl"
+          if-no-files-found: error
+
+      - name: Wheel link
+        if: steps.wheels.outputs.found == 'true'
+        run: |
+          echo "Wheel artifact: ${{ steps.upload.outputs.artifact-url }}"
+          echo "### Linux wheel" >> "$GITHUB_STEP_SUMMARY"
+          echo "[Download wheel artifact](${{ steps.upload.outputs.artifact-url }})" >> "$GITHUB_STEP_SUMMARY"
+        shell: bash
+
+  windows:
+    name: Windows (Clang)
+    runs-on: windows-2022
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install LLVM
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "18.1.8"
+          cached: true
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install ninja mkl-devel intel-openmp
+
+          $clang = Get-Command clang-cl.exe -ErrorAction SilentlyContinue
+          if (-not $clang) {
+            $clangPath = @(
+              "C:/Program Files/LLVM/bin/clang-cl.exe",
+              "$env:RUNNER_TEMP/llvm/bin/clang-cl.exe"
+            ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+            if (-not $clangPath) {
+              throw "clang-cl.exe not found."
+            }
+            $clangPath = (Resolve-Path $clangPath).Path
+          } else {
+            $clangPath = $clang.Source
+          }
+
+          $llvm = Split-Path $clangPath -Parent
+          "LLVM_BIN=$llvm" | Out-File $env:GITHUB_ENV -Append
+
+          $root = Join-Path (python -c "import sys; print(sys.prefix)") "Library"
+          $inc = Join-Path $root "include"
+          $lib = Join-Path $root "lib"
+
+          $interface = Join-Path $lib "mkl_intel_lp64_dll.lib"
+          $sequential = Join-Path $lib "mkl_sequential_dll.lib"
+          $core = Join-Path $lib "mkl_core_dll.lib"
+
+          foreach ($f in @(
+            (Join-Path $inc "mkl.h"),
+            $interface,
+            $sequential,
+            $core
+          )) {
+            if (-not (Test-Path $f)) {
+              throw "Required MKL file not found: $f"
+            }
+          }
+
+          "MKLROOT=$root" | Out-File $env:GITHUB_ENV -Append
+          "MKL_INCLUDE_DIRS=$inc" | Out-File $env:GITHUB_ENV -Append
+          "MKL_INTERFACE_LIBRARY=$interface" | Out-File $env:GITHUB_ENV -Append
+          "MKL_SEQTHR_LIBRARY=$sequential" | Out-File $env:GITHUB_ENV -Append
+          "MKL_CORE_LIBRARY=$core" | Out-File $env:GITHUB_ENV -Append
+
+      - name: Configure
+        shell: pwsh
+        run: |
+          $llvm = $env:LLVM_BIN
+          $libs = "$env:MKL_INTERFACE_LIBRARY;$env:MKL_SEQTHR_LIBRARY;$env:MKL_CORE_LIBRARY"
+
+          cmake -S . -B build -G Ninja `
+            "-DCMAKE_BUILD_TYPE=Release" `
+            "-DPIP_INSTALL=True" `
+            "-DBUILD_SPHINX_DOCS=False" `
+            "-DCMAKE_C_COMPILER=$llvm/clang-cl.exe" `
+            "-DCMAKE_CXX_COMPILER=$llvm/clang-cl.exe" `
+            "-DCMAKE_LINKER=$llvm/lld-link.exe" `
+            "-DMKLROOT=$env:MKLROOT" `
+            "-DMKL_INCLUDE_DIRS=$env:MKL_INCLUDE_DIRS" `
+            "-DMKL_INTERFACE_LIBRARY=$env:MKL_INTERFACE_LIBRARY" `
+            "-DMKL_SEQTHR_LIBRARY=$env:MKL_SEQTHR_LIBRARY" `
+            "-DMKL_CORE_LIBRARY=$env:MKL_CORE_LIBRARY" `
+            "-DMKL_LIBRARIES=$libs"
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "CMake configuration failed."
+          }
+
+      - name: Show CMake targets
+        shell: pwsh
+        run: |
+          cmake --build build --target help
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to list CMake targets."
+          }
+
+      - name: Build
+        shell: pwsh
+        run: |
+          cmake --build build --parallel 2
+          if ($LASTEXITCODE -ne 0) {
+            throw "Build failed."
+          }
+
+      - name: List wheels
+        id: wheels
+        shell: pwsh
+        run: |
+          $wheels = Get-ChildItem build -Filter "*.whl" -Recurse -File
+          if (-not $wheels) {
+            Write-Host "::warning::No wheel files found"
+            "found=false" | Out-File $env:GITHUB_OUTPUT -Append
+          } else {
+            "found=true" | Out-File $env:GITHUB_OUTPUT -Append
+            $wheels | Select-Object -ExpandProperty FullName
+          }
+
+      - name: Install each wheel and run unit tests
+        if: steps.wheels.outputs.found == 'true'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          python -m pip install --upgrade pip
+          $wheels = Get-ChildItem build -Filter "*.whl" -Recurse -File
+          foreach ($whl in $wheels) {
+            Write-Host "Installing wheel: $($whl.FullName)"
+            python -m pip install --force-reinstall "$($whl.FullName)"
+            if ($LASTEXITCODE -ne 0) { throw "pip install failed for $($whl.FullName)" }
+
+            Write-Host "Running ASSET unit tests for wheel: $($whl.FullName)"
+            python -m unittest discover -v
+            if ($LASTEXITCODE -ne 0) { throw "Unit tests failed for $($whl.FullName)" }
+          }
+
+      - name: Upload wheel
+        id: upload
+        if: steps.wheels.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-wheel-windows
+          path: build/**/*.whl
+          if-no-files-found: error
+
+      - name: Wheel link
+        if: steps.wheels.outputs.found == 'true'
+        shell: pwsh
+        run: |
+          Write-Host "Wheel artifact: ${{ steps.upload.outputs.artifact-url }}"
+          "### Windows wheel" | Out-File $env:GITHUB_STEP_SUMMARY -Append
+          "[Download wheel artifact](${{ steps.upload.outputs.artifact-url }})" | Out-File $env:GITHUB_STEP_SUMMARY -Append
