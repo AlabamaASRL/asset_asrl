@@ -9,9 +9,6 @@ Tests:
     - Acceleration direction
     - Finite outputs at degree 20
     - Deterministic repeated evaluation
-
-Run:
-    python -m unittest -v test_pines_gravity.py
 """
 
 import unittest
@@ -83,10 +80,7 @@ def evaluate_acceleration(vf, position):
         except Exception as exc:
             errors.append(f"Input size {state.size}: {exc}")
 
-    raise RuntimeError(
-        "Could not evaluate Pines acceleration:\n"
-        + "\n".join(errors)
-    )
+    raise RuntimeError("Could not evaluate Pines acceleration:\n" + "\n".join(errors))
 
 
 # ============================================================
@@ -138,12 +132,8 @@ class TestPinesGravity(unittest.TestCase):
         }
         S = {(2, 0): 0.0}
 
-        cls.degree2_vf = make_pines(
-            degree=2,
-            C=C,
-            S=S,
-        )
-
+        cls.degree2_vf = make_pines(degree=2, C=C, S=S)
+        
         # Degree 20, central-only coefficients.
         cls.degree20_vf = make_pines(degree=20)
 
@@ -167,9 +157,7 @@ class TestPinesGravity(unittest.TestCase):
 
         for name, position in positions:
             with self.subTest(position=name):
-                actual = evaluate_acceleration(
-                    self.degree0_vf, position
-                )
+                actual = evaluate_acceleration(self.degree0_vf, position)
                 expected = central_gravity(position)
 
                 self.assertTrue(np.all(np.isfinite(actual)))
@@ -181,10 +169,7 @@ class TestPinesGravity(unittest.TestCase):
                 )
 
     def test_degree_zero_equatorial_x_reference(self):
-        actual = evaluate_acceleration(
-            self.degree0_vf,
-            [7000.0, 0.0, 0.0],
-        )
+        actual = evaluate_acceleration(self.degree0_vf, [7000.0, 0.0, 0.0])
 
         expected = np.array([
             -8.134702893878e-3,
@@ -214,10 +199,7 @@ class TestPinesGravity(unittest.TestCase):
                 # Acceleration must be parallel to -r.
                 cross_product = np.cross(r, a)
 
-                self.assertLess(
-                    np.linalg.norm(cross_product),
-                    1e-8,
-                )
+                self.assertLess(np.linalg.norm(cross_product), 1e-8)
                 self.assertLess(np.dot(r, a), 0.0)
 
     # --------------------------------------------------------
@@ -255,18 +237,9 @@ class TestPinesGravity(unittest.TestCase):
 
     def test_j2_changes_equatorial_radial_acceleration(self):
         position = [7000.0, 0.0, 0.0]
-
-        central = evaluate_acceleration(
-            self.degree0_vf, position
-        )
-        harmonic = evaluate_acceleration(
-            self.degree2_vf, position
-        )
-
-        self.assertGreater(
-            abs(harmonic[0] - central[0]),
-            1e-8,
-        )
+        central = evaluate_acceleration(self.degree0_vf, position)
+        harmonic = evaluate_acceleration(self.degree2_vf, position)
+        self.assertGreater(abs(harmonic[0] - central[0]), 1e-8,)
 
     # --------------------------------------------------------
     # Symmetry
@@ -308,10 +281,7 @@ class TestPinesGravity(unittest.TestCase):
 
         for position in positions:
             with self.subTest(position=position):
-                actual = evaluate_acceleration(
-                    self.degree20_vf,
-                    position,
-                )
+                actual = evaluate_acceleration(self.degree20_vf, position)
 
                 self.assertEqual(actual.shape, (3,))
                 self.assertTrue(np.all(np.isfinite(actual)))
@@ -323,10 +293,7 @@ class TestPinesGravity(unittest.TestCase):
             -4912.55385412,
         ]
 
-        first = evaluate_acceleration(
-            self.degree2_vf,
-            position,
-        )
+        first = evaluate_acceleration(self.degree2_vf, position)
 
         for _ in range(20):
             current = evaluate_acceleration(
