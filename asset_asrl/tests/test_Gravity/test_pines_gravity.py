@@ -125,6 +125,8 @@ class TestPinesGravity(unittest.TestCase):
     def setUpClass(cls):
         """Build each model once for the test class."""
         cls.degree0_vf = make_pines(degree=0)
+        if cls.degree0_vf is None:
+            raise unittest.SkipTest("Skipping all tests: 'PinesGravity' is not installed.")
 
         C = {
             (0, 0): 1.0,
