@@ -1,6 +1,5 @@
 import asset_asrl as ast
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 vf        = ast.VectorFunctions

@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import asset_asrl as ast
 import asset_asrl.VectorFunctions as vf
 import asset_asrl.OptimalControl as oc
 from asset_asrl.VectorFunctions import Arguments as Args
@@ -183,5 +182,3 @@ if __name__ == "__main__":
     
     axs[1].legend()
     plt.show()
-
-

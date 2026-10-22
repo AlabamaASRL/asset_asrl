@@ -1,11 +1,6 @@
 import numpy as np
 import asset as ast
 
-
-def FiniteDiffCheck(Fun,X,L, jsize=1.0e-6,hsize=1.0e-6):
-    IRows = Fun.IRows()
-    ORows = Fun.ORows()
-
 def FDDerivChecker(Fun,X):
     IRows = Fun.IRows()
     ORows = Fun.ORows()
@@ -47,7 +42,3 @@ def FDDerivChecker(Fun,X):
         print(Herr)
         print("Hessian Value:")
         print(HFT)
-    
-        #print(HF)
-        #print(JF,HF)
-    

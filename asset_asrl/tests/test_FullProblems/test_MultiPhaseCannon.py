@@ -49,7 +49,6 @@ class Cannon(oc.ode_x_u_p.ode):
         v     = args.XVar(0)
         gamma = args.XVar(1)
         h     = args.XVar(2)
-        r     = args.XVar(3)
         
         rad = args.PVar(0)
         
@@ -149,10 +148,6 @@ class test_MultiPhaseCannon(unittest.TestCase):
         ocp.optimizer.set_QPOrderingMode("MINDEG")
        
         Flag = ocp.optimize()
-        
-        Ascent  = aphase.returnTraj()
-        Descent = dphase.returnTraj()
-        
         
         Obj = ocp.optimizer.LastObjVal*Lstar
         ObjError = abs(Obj-self.FinalObj)

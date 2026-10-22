@@ -787,12 +787,12 @@ lim = 2*np.pi
 xs = np.linspace(-lim,lim,nx)
 ys = np.linspace(-lim,lim,ny)
 
-def f(x,y):
+def func(x,y):
     return np.sin(x)*np.cos(y) 
 
 
 X, Y = np.meshgrid(xs, ys)
-Z    = f(X,Y)             #Scalar data defined on 2-D meshgrid
+Z    = func(X,Y)             #Scalar data defined on 2-D meshgrid
 
 kind = 'cubic' # or 'linear'
 
@@ -822,7 +822,8 @@ print(Func([np.pi/2,0,1.0]))  # prints [2.0]
 
 ############ 3D Tables ##############################
 #####################################################
-def f(x,y,z):return np.cos(x)*np.cos(y)*np.cos(z)
+def func2(x,y,z):
+    return np.cos(x)*np.cos(y)*np.cos(z)
 
 nx = 100
 ny = 100
@@ -837,7 +838,7 @@ ys = np.linspace(-ylim,ylim,ny)
 zs = np.linspace(-zlim,zlim,nz)
 
 X,Y,Z = np.meshgrid(xs, ys,zs,indexing = 'ij')
-Fs    = f(X,Y,Z)    #Scalar data defined on 3-D meshgrid in ij format!!!
+Fs    = func2(X,Y,Z)    #Scalar data defined on 3-D meshgrid in ij format!!!
 
 kind = 'cubic' # or 'linear', defaults to 'cubic'
 cache = False # defaults to False

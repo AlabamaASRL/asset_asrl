@@ -33,7 +33,6 @@ class TwoBodyLTODE(oc.ODEBase):
         
         XVars = 6
         UVars = 3
-        PVars = 1
         
         XtU = oc.ODEArguments(XVars,UVars)
         
