@@ -90,7 +90,7 @@ jobs:
           ls -l wheelhouse
 
       - name: Upload wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist_${{ matrix.python-version }}_${{ matrix.platform }}
           path: wheelhouse/*.whl
@@ -103,7 +103,7 @@ jobs:
 
     steps:
       - name: Download all wheels
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: dist_*
           path: wheels
@@ -113,7 +113,7 @@ jobs:
         run: ls -R wheels
 
       - name: Upload combined wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: all-wheels
           path: wheels/
