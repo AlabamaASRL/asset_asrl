@@ -42,7 +42,7 @@ def make_pines(degree, C=None, S=None):
     if S is None:
         S = {}
     try:
-        model = ast.Extensions.PinesGravity(MU, R_REF, C, S, degree)
+        model = ast.Astro.PinesGravity(MU, R_REF, C, S, degree)
         return model.vf()
     except:
         print("Pines Model could not be initialized... skipping tests")
