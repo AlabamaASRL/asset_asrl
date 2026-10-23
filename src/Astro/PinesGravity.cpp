@@ -1,4 +1,3 @@
-#include "ASSET_Extensions.h"
 #include "PinesGravityModel.h"
 
 namespace ASSET {
