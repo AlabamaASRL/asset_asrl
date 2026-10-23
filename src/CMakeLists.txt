@@ -120,7 +120,9 @@ add_library(astro STATIC
   Astro/KeplerModel.cpp
   Astro/LambertSolvers.h
   Astro/LambertSolvers.cpp
-  )
+  Astro/PinesGravity.cpp
+  Astro/PinesGravityModel.cpp
+  Astro/PinesGravityModel.h)
 
 target_precompile_headers(astro REUSE_FROM pch)
 target_include_directories(astro PRIVATE ${INCLUDE_DIRS})
