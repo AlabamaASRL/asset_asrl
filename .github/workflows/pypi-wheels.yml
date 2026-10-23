@@ -9,7 +9,8 @@ on:
 jobs:
  build_windows:
     env:
-      WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/19078/w_BaseKit_p_2023.0.0.25940_offline.exe
+    # This link likely needs to be updated if you are building a new version of ASSET
+      WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/0cb67a0d-67f6-410b-868b-f4a0a17ff0cf/intel-oneapi-toolkit-2026.1.1.32_offline.exe
 
       WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel
       VS_VER: vs2022
@@ -21,7 +22,7 @@ jobs:
        fail-fast: false
        matrix:
         platform: [windows-latest]
-        python-version: ["3.8","3.9","3.10","3.11","3.12","3.13","3.14"]
+        python-version: ["3.8","3.9","3.10","3.11","3.12","3.13","3.14","3.15"]
         compiler: ["clang-cl"]
 
     runs-on: ${{ matrix.platform }}
@@ -31,9 +32,9 @@ jobs:
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v2
         with:
-          version: "17.0"
+          version: "20"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
@@ -49,6 +50,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
 
       - name: Add python requirements
         run: python -m pip install --upgrade wheel setuptools && python -m pip install -r requirements.txt
@@ -64,7 +66,7 @@ jobs:
         run: cmake --build build --target asset pypiwheel --config Release -- -j3
 
       - name: 'Upload Wheels'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dist_${{ matrix.python-version }}_${{ matrix.platform }}
           path: build/pypiwheel/asset_asrl/dist/*.whl
@@ -79,17 +81,17 @@ jobs:
        matrix:
         platform: [ubuntu-latest]
         python-version: ["3.9"]
-        compiler: ["clang-13"]
+        compiler: ["clang-20"]
     runs-on: ${{ matrix.platform }}
 
     steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@v5
 
         - uses: actions/setup-python@v5
           with:
             python-version: ${{ matrix.python-version }}
 
-        - uses: actions/download-artifact@v4
+        - uses: actions/download-artifact@7
           with:
               path: dists/
 
@@ -103,11 +105,11 @@ jobs:
           working-directory:  wheels/
 
         - name: 'Upload Wheels To GitHub'
-          uses: actions/upload-artifact@v4
+          uses: actions/upload-artifact@v7
           with:
                 name: All Wheels
                 path: wheels/
-                retention-days: 5
+                retention-days: 7
         #- name: Publish package to TestPyPI
         #  uses: pypa/gh-action-pypi-publish@release/v1
         #  with:
