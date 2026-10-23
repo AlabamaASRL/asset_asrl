@@ -17,7 +17,7 @@ modified_to_classic = _asset.Astro.modified_to_classic
 propagate_cartesian = _asset.Astro.propagate_cartesian
 propagate_classic = _asset.Astro.propagate_classic
 propagate_modified = _asset.Astro.propagate_modified
-
+PinesGravity = _asset.Astro.PinesGravity
 
 from .AstroFrames import CR3BPFrame
 
