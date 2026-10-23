@@ -8,6 +8,7 @@
 #include <vector>
 
 namespace ASSET {
+
 // References:
 // [1] S. Pines, "Uniform Representation of the Gravitational Potential
 //     and its Derivatives," AIAA Journal, Vol. 11, No. 11, 1973,
@@ -40,6 +41,9 @@ namespace ASSET {
  * expected by this implementation, including its C00 convention.
  *
  */
+//Delcare for build
+void BuildPinesGravity(FunctionRegistry& reg, py::module& m);
+
 class PinesGravityModel {
  public:
   /**
