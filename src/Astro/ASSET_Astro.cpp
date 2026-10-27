@@ -7,7 +7,7 @@ void ASSET::AstroBuild(FunctionRegistry& reg, py::module& m) {
   BuildKeplerMod(reg, mod);
   KeplerUtilsBuild(reg, mod);
   LambertSolversBuild(reg, mod);
-
+  BuildPinesGravity(reg, mod);
 
   /////////////////////////////////////////////////////////////
   //////////// Binding Misc CPP Functions here for now ////////

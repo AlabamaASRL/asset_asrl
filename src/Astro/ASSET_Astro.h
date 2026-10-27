@@ -6,6 +6,7 @@
 #include "LambertSolvers.h"
 #include "MEEDynamics.h"
 #include "ThrusterModels.h"
+#include "PinesGravityModel.h"
 #include "VectorFunctions/ASSET_VectorFunctions.h"
 #include "pch.h"
 

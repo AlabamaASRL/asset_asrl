@@ -335,10 +335,23 @@ if(NOT WIN32)
   endif()
 endif()
 
-if(BUILD_SHARED_LIBS AND NOT APPLE AND NOT WIN32)  # Windows and Linux Dynamic Linking
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
-elseif(UNIX AND NOT APPLE)  # Linux Static Linking
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
+if(UNIX AND NOT APPLE)  # Linux (shared or static)
+  set(_mkl_libs ${MKL_LIBRARIES_LIST})
+  list(TRANSFORM _mkl_libs STRIP)
+  list(FILTER _mkl_libs EXCLUDE REGEX "^$")
+
+  separate_arguments(_omp_flags UNIX_COMMAND "${OpenMP_CXX_FLAGS}")
+
+  message(STATUS "MKL link list: [${_mkl_libs}]")
+
+  list(APPEND LINKER_FLAGS ${_omp_flags})
+  if(ASSET_NO_UNDEFINED)
+    list(APPEND LINKER_FLAGS "-Wl,--no-undefined")
+  endif()
+  list(APPEND LINKER_FLAGS
+       -Wl,--start-group
+       ${_mkl_libs}
+       -Wl,--end-group)
 elseif(APPLE)  # Apple Dynamic and Static Linking
   list(APPEND LINKER_FLAGS ${OpenMP_CXX_FLAGS})
   list(APPEND LINKER_FLAGS "-Wl,-bind_at_load")
