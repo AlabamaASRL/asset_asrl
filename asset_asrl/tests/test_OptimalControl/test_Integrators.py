@@ -141,7 +141,7 @@ class test_Integrators(unittest.TestCase):
         
         if __name__ == "__main__":
             Traj = np.array(Traj)
-            fig = plt.figure()
+            plt.figure()
             ax = plt.subplot(projection="3d")
             ax.plot(Traj[:, 0], Traj[:, 1], Traj[:, 2])
             plt.show()
@@ -222,9 +222,7 @@ class test_Integrators(unittest.TestCase):
         integ.Adaptive = True
         integ.setAbsTol(1.0e-14)
         tf = np.linalg.norm(W0*Ivec)
-        
-        n  = 1000
-        
+
         Traj = integ.integrate_dense(X0,tf)
         
         QF = np.array([-0.893804752502,0.125508984388,0.070813040593,0.424671723248])

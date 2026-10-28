@@ -52,7 +52,6 @@ class Cannon(oc.ODEBase):
         v     = args.XVar(0)
         gamma = args.XVar(1)
         h     = args.XVar(2)
-        r     = args.XVar(3)
         
         rad = args.PVar(0)
         
@@ -205,11 +204,3 @@ if __name__ == "__main__":
     print("Optimized Radius:"  ,Descent[-1][-1]*Lstar," m")
 
     Plot(Ascent,Descent)
-
-    ##########################################################################
-
-
-
-
-
-

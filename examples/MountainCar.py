@@ -113,7 +113,7 @@ def Animate(Traj):
         objs[3].set_data([T[0][j],T[0][j]],[f(T[0][j]),f(T[0][j])])
         return objs
             
-    ani = animation.FuncAnimation(fig, animate, frames=len(T[0]),
+    animation.FuncAnimation(fig, animate, frames=len(T[0]),
                                   interval=60, blit=True, init_func=init,
                                   repeat_delay=5000)
     fig.set_size_inches(15.5, 7.5, forward=True)
@@ -155,12 +155,3 @@ if __name__ == "__main__":
     
     Plot(Traj)
     Animate(Traj)
-
-################################################################
-
-
-
-#############################################################################
-
-
-

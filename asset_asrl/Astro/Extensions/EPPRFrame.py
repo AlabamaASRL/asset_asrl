@@ -2,9 +2,8 @@ import numpy as np
 import asset as ast
 import asset_asrl.Astro.Constants as c
 from   asset_asrl.Astro.SpiceRead import GetEphemTraj2,PoleVector,SpiceFrameTransform
-import asset_asrl.Astro.Date as dt
 from   asset_asrl.Astro.Extensions.CR3BPFrame import CR3BPFrame
-from   asset_asrl.Astro.DataReadWrite import ReadData,WriteData,ReadCopernicusFile
+from   asset_asrl.Astro.DataReadWrite import ReadCopernicusFile
 BProps=c.SpiceBodyProps
 
 
@@ -291,11 +290,7 @@ class EPPRFrame(CR3BPFrame):
         if(self.P2_J2 != False):
              NP2 = self.P2_PoleFunc.eval(t)#.normalized()
              RP2 = r-self.P2
-             Scale = 0.5*(self.mu)*self.P2_J2*(self.P2_Rad)**2
-             dotterm = (vf.dot(RP2.normalized(),NP2))**2
-             
-             t1 = (15.0*dotterm - 3.0)*RP2.normalized_power5() 
-             t2 = -6.0*vf.dot(RP2.normalized_power5(),NP2)*NP2
+
              #J2Accs.append(Scale*( t1 + t2))
              
              j2func = ast.Astro.J2Cartesian((self.mu),self.P2_J2,self.P2_Rad)
@@ -305,25 +300,16 @@ class EPPRFrame(CR3BPFrame):
         if(self.P1_J2 != False):
              NP2 = self.P1_PoleFunc.eval(t)#.normalized()
              RP2 = r-self.P1
-             Scale = 0.5*(1-self.mu)*self.P1_J1*(self.P1_Rad)**2
-             dotterm = (vf.dot(RP2.normalized(),NP2))**2
-             
-             t1 = (15.0*dotterm - 3.0)*RP2.normalized_power5() 
-             t2 = -6.0*vf.dot(RP2.normalized_power5(),NP2)*NP2
-             
-             #J2Accs.append(Scale*( t1 + t2))
-             
              j2func = ast.Astro.J2Cartesian((1-self.mu),self.P1_J2,self.P1_Rad)
-             
              J2Accs.append(j2func(RP2,NP2))
              
              
         if(len(J2Accs)>0):
             return [vf.Sum(J2Accs)*j2sc]
-        else: return []
+        else: 
+            return []
          
-             
-        
+            
     def Copernicus_to_Frame(self,Filename,center="P2",SpiceFrame='J2000',Folder='Data'):
         data = ReadCopernicusFile(Filename,Folder)
         if(center=="P2"):

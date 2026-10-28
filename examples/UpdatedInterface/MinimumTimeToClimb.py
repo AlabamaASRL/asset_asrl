@@ -1,8 +1,6 @@
 import numpy as np
-import asset_asrl as ast
 import asset_asrl.VectorFunctions as vf
 import asset_asrl.OptimalControl as oc
-from asset_asrl.VectorFunctions import Arguments as Args
 import matplotlib.pyplot as plt
 from asset_asrl.OptimalControl.MeshErrorPlots import PhaseMeshErrorPlot,sns
 
@@ -118,8 +116,7 @@ def Plot(Traj):
         return (.5*v**2)/g + h
     E = EnergyHeight(V,H)
     ax4.plot(T1[1],T1[0])
-    cs = ax4.contour(V,H,E,colors= 'k',levels = 7,linestyles='dotted')
-    
+    ax4.contour(V,H,E,colors= 'k',levels = 7,linestyles='dotted')
     ax4.scatter(T1[1][0],T1[0][0],color='k')
     ax4.scatter(T1[1][-1],T1[0][-1],color='k',marker='*')
 
