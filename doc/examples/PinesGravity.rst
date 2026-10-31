@@ -44,8 +44,8 @@ The constants used in this example are
 
    \begin{aligned}
    \mu &= 3.9860043543609598 \times 10^5
-   \; \text{km}^3/\text{s}^2 \\
-   R_E &= 6378.1363 \; \text{km}
+   \;\mathrm{km^3/s^2}, \\
+   R_E &= 6378.1363 \;\mathrm{km}.
    \end{aligned}
 
 The gravity coefficients are read from the EGM96 coefficient file:
@@ -91,27 +91,28 @@ single position. The selected position is
 
 .. math::
 
-   \vec{r} =
+   \mathbf{r} =
    \begin{bmatrix}
    4510 \\
    -3120 \\
    5230
    \end{bmatrix}
-   \; \text{km}
+   \;\mathrm{km}.
 
 For comparison, the point-mass gravitational acceleration is calculated
 analytically using
 
 .. math::
 
-   \vec{a}_{2B} =
-   -\frac{\mu}{r^3}\vec{r}
+   \mathbf{a}_{2B}
+   =
+   -\frac{\mu}{r^3}\mathbf{r},
 
 where
 
 .. math::
 
-   r = \|\vec{r}\|
+   r = \|\mathbf{r}\|.
 
 The Pines gravity kernel is evaluated at spherical harmonic degrees
 0, 2, 8, and 20. Degree zero represents the central point-mass contribution,
@@ -148,23 +149,23 @@ Acceleration Derivatives
 In addition to evaluating acceleration, the Pines VectorFunction interface
 can provide derivatives of the gravitational acceleration.
 
-For a position vector :math:`\vec{r}`, the acceleration Jacobian is
+For a position vector :math:`\mathbf{r}`, the acceleration Jacobian is
 
 .. math::
 
-   \frac{\partial \vec{a}}{\partial \vec{r}}
+   \frac{\partial \mathbf{a}}{\partial \mathbf{r}}
    =
    \begin{bmatrix}
-   \frac{\partial a_x}{\partial x} &
-   \frac{\partial a_x}{\partial y} &
-   \frac{\partial a_x}{\partial z} \\
-   \frac{\partial a_y}{\partial x} &
-   \frac{\partial a_y}{\partial y} &
-   \frac{\partial a_y}{\partial z} \\
-   \frac{\partial a_z}{\partial x} &
-   \frac{\partial a_z}{\partial y} &
-   \frac{\partial a_z}{\partial z}
-   \end{bmatrix}
+   \dfrac{\partial a_x}{\partial x} &
+   \dfrac{\partial a_x}{\partial y} &
+   \dfrac{\partial a_x}{\partial z} \\
+   \dfrac{\partial a_y}{\partial x} &
+   \dfrac{\partial a_y}{\partial y} &
+   \dfrac{\partial a_y}{\partial z} \\
+   \dfrac{\partial a_z}{\partial x} &
+   \dfrac{\partial a_z}{\partial y} &
+   \dfrac{\partial a_z}{\partial z}
+   \end{bmatrix}.
 
 This derivative describes how the gravitational acceleration changes with
 position and is useful for sensitivity analysis, variational equations, and
@@ -202,22 +203,23 @@ The state is defined as
 
 .. math::
 
-   \vec{x} =
+   \mathbf{x}
+   =
    \begin{bmatrix}
-   \vec{r} \\
-   \vec{v}
-   \end{bmatrix}
+   \mathbf{r} \\
+   \mathbf{v}
+   \end{bmatrix},
 
-where :math:`\vec{r}` and :math:`\vec{v}` are the position and velocity vectors,
-respectively.
+where :math:`\mathbf{r}` and :math:`\mathbf{v}` are the position and velocity
+vectors, respectively.
 
 The equations of motion are
 
 .. math::
 
    \begin{aligned}
-   \dot{\vec{r}} &= \vec{v} \\
-   \dot{\vec{v}} &= \vec{a}_{Pines}(\vec{r})
+   \dot{\mathbf{r}} &= \mathbf{v}, \\
+   \dot{\mathbf{v}} &= \mathbf{a}_{\mathrm{Pines}}(\mathbf{r}).
    \end{aligned}
 
 The acceleration function includes central gravity and the selected
@@ -262,28 +264,27 @@ For a circular point-mass orbit, the initial velocity magnitude is
 
 .. math::
 
-   v_0 = \sqrt{\frac{\mu}{r_0}}
+   v_0 = \sqrt{\frac{\mu}{r_0}}.
 
 The initial position and velocity are
 
 .. math::
 
    \begin{aligned}
-   \vec{r}_0 &=
+   \mathbf{r}_0 &=
    \begin{bmatrix}
    7000 \\
    0 \\
    0
    \end{bmatrix}
-   \; \text{km}
-   \\[1em]
-   \vec{v}_0 &=
+   \;\mathrm{km}, \\[1em]
+   \mathbf{v}_0 &=
    \begin{bmatrix}
    0 \\
    v_0\cos(51.6^\circ) \\
    v_0\sin(51.6^\circ)
    \end{bmatrix}
-   \; \text{km/s}
+   \;\mathrm{km/s}.
    \end{aligned}
 
 The initial state is constructed in Python as follows:
@@ -316,7 +317,7 @@ The orbital period of the corresponding point-mass circular orbit is
 
 .. math::
 
-   T = 2\pi\sqrt{\frac{r_0^3}{\mu}}
+   T = 2\pi\sqrt{\frac{r_0^3}{\mu}}.
 
 The propagation duration is selected as ten orbital periods:
 
@@ -368,7 +369,9 @@ the position opposite its initial position:
 
 .. math::
 
-   \vec{r}\left(\frac{T}{2}\right) = -\vec{r}(0)
+   \mathbf{r}\left(\frac{T}{2}\right)
+   =
+   -\mathbf{r}(0).
 
 The position error is calculated as
 
@@ -376,10 +379,10 @@ The position error is calculated as
 
    e_r =
    \left\|
-   \vec{r}\left(\frac{T}{2}\right)
+   \mathbf{r}\left(\frac{T}{2}\right)
    +
-   \vec{r}(0)
-   \right\|
+   \mathbf{r}(0)
+   \right\|.
 
 The implementation is
 
@@ -417,14 +420,16 @@ calculated at each output time:
 
 .. math::
 
-   \Delta r(t) =
+   \Delta r(t)
+   =
    \left\|
-   \vec{r}_{8}(t) -
-   \vec{r}_{0}(t)
-   \right\|
+   \mathbf{r}_{8}(t)
+   -
+   \mathbf{r}_{0}(t)
+   \right\|.
 
-where :math:`\vec{r}_{8}` is the degree-8 position and
-:math:`\vec{r}_{0}` is the point-mass position.
+where :math:`\mathbf{r}_{8}` is the degree-8 position and
+:math:`\mathbf{r}_{0}` is the point-mass position.
 
 The position difference is computed using
 
@@ -463,9 +468,9 @@ The surface is constructed from longitude and latitude coordinates:
 .. math::
 
    \begin{aligned}
-   x &= R_E\cos(\phi)\cos(\lambda) \\
-   y &= R_E\cos(\phi)\sin(\lambda) \\
-   z &= R_E\sin(\phi)
+   x &= R_E\cos(\phi)\cos(\lambda), \\
+   y &= R_E\cos(\phi)\sin(\lambda), \\
+   z &= R_E\sin(\phi).
    \end{aligned}
 
 where :math:`\phi` is latitude and :math:`\lambda` is longitude.
@@ -745,6 +750,15 @@ The complete example is shown below.
 
        fig.suptitle(
            "Pines Gravity Model: Effect of EGM96 Harmonics"
+       )
+
+       fig.savefig(
+           Path(__file__).resolve().parents[1]
+           / "docs"
+           / "_static"
+           / "PinesGravity.svg",
+           format="svg",
+           bbox_inches="tight"
        )
 
        plt.show()
