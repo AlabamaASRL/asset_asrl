@@ -1,12 +1,6 @@
 Pines Gravity Model
 ===================
 
-.. figure:: _static/PinesGravity.svg
-    :width: 100%
-    :align: center
-
-    Orbit propagation using point-mass and degree-8 EGM96 gravity models.
-
 This example demonstrates the use of ASSET's native Pines gravity kernel for
 evaluating high-fidelity gravitational acceleration and propagating orbital
 trajectories. The example uses spherical harmonic gravity coefficients from
