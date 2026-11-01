@@ -7,7 +7,11 @@ In most cases we suggest simply installing ASSET via pip, which is as simple as 
 
     pip install asset-asrl
 
-We currently host Windows and Linux binaries for Python 3.7–3.12 on PyPI.
+We currently host the following binaries on PyPI:
+
+* Windows for Python versions 3.8-3.15
+* Linux for Python versions 3.9–3.15
+* MacOS for Python versions 3.10-3.15
 
 If you are interested in building ASSET from source, please see the following sections for a step-by-step guide on how to do so on:
 
@@ -15,12 +19,15 @@ If you are interested in building ASSET from source, please see the following se
 * Linux
 * Docker (Linux)
 
+We do not currently have a section for building on an Arm64 based Mac. If you would like to build from source, you can do it based off of the workflow file in the .github folder.
+
 Build from Source on Windows
 ----------------------------
 
 In order to build ASSET on Windows the following dependencies are required:
 
 * Visual Studio 2017 or greater (`Link to Visual Studio Community 2022 <https://visualstudio.microsoft.com/downloads/>`_)
+    * Currently building ASSET on Visual Studio Community 2026 is not supported. This will be addressed soon.
 * `LLVM Compiler Toolkit <https://github.com/llvm/llvm-project/releases/latest>`_
 * `Intel oneAPI MKL <https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=window&distributions=offline>`_
 * A Python installation with NumPy, however we recommend using Anaconda.
