@@ -1,163 +1,257 @@
-==================
-Cart-Pole Swing Up
-==================
+===========================
+Minimum-Time Parallel Parking
+===========================
 
-In this example, derived from Kelly's excellent intro to collocation methods [1], we will compute the minimum effort trajectory to swing a cart-pole system to a vertical orientation. 
-The cart with mass, :math:`m_1`, is free to move along a horizontal track in the :math:`x` direction subject to an applied force, :math:`F`. 
-The angular position, :math:`\theta`, of the attached pole with length, :math:`l`, and mass, :math:`m_2`, is measured from the :math:`-y` direction. 
-The dynamics of the combined cart-pole system can be represented as a system of first order ODE's as shown below.
+In this example, we solve a minimum-time parallel parking problem using
+ASSET's optimal control framework. The problem is derived from the ICLOCS
+parallel parking example [1], which is based on Case 7 in Table 2 of the
+referenced research paper [2].
 
-.. math::
-    
-    \vec{X} = [x,\theta,\dot{x},\dot{\theta}]^T \quad \quad \vec{U} = [F]
+The vehicle is modeled using a kinematic bicycle model. The optimization
+determines the vehicle motion and control inputs required to move from an
+initial position on the roadway into a parallel parking space while satisfying
+vehicle dynamics, state and control bounds, roadway boundaries, and
+collision-avoidance constraints.
 
+The initial conditions used in this implementation follow the referenced
+research paper. The resulting maneuver time is compared with the reported
+reference value of 18.426 seconds.
 
-    \dot{\vec{X}}=\begin{bmatrix}
-                    \dot{x}\\
-                    \dot{\theta}\\
-                    \ddot{x}\\
-                    \ddot{\theta}\\
-                    \end{bmatrix}
-                    = \begin{bmatrix}
-                    \dot{x}\\
-                    \dot{\theta}\\
-                    \textbf{M}^{-1} \vec{Q}
-                    \end{bmatrix}
-                    
-The matrix, :math:`\textbf{M}`, and vector, :math:`\vec{Q}`, necessary for computing the second time derivatives of :math:`x` and :math:`\theta`, can be found by straightforward
-application of Newtonian or Lagrangian mechanics. 
-Since :math:`\textbf{M}` is a 2 by 2 matrix it is easy to derive an explicit formula for :math:`\ddot{x}` and :math:`\ddot{\theta}` [1]. However, in this example, we leave the dynamics
-in implicit matrix form in order to demonstrate ASSET's differentiable matrix inverse expressions.
+Problem Setup
+#############
+
+The parking space and roadway dimensions are defined below.
 
 .. math::
 
-    \textbf{M} = \begin{bmatrix}
-    \cos(\theta) & l \\
-    m_1 +m_2 & m_2 l \cos(\theta)
-    \end{bmatrix}
-    \quad \quad
-    \vec{Q} = \begin{bmatrix}
-    -g \sin(\theta)  \\
-    F + l m_2 \sin(\theta) \dot{\theta}^2
-    \end{bmatrix}
-    
+    L_s = 5.0\;m \quad\quad W_s = 2.0\;m \quad\quad W_r = 3.5\;m
 
-The cart/pole masses, boundary conditions, and path constraints used by Kelly [1] are shown below.
+where :math:`L_s` is the parking-space length, :math:`W_s` is the
+parking-space width, and :math:`W_r` is the roadway boundary.
+
+The vehicle dimensions are:
 
 .. math::
 
-    m_1 = 1\;kg\quad\quad m_2 = .3\;kg\quad\quad l = .5\; m \quad \quad g = 9.81 \; m/s^2
+    l_f = 0.839\;m \quad\quad L = 2.588\;m
+    \quad\quad l_r = 0.657\;m \quad\quad b = 0.8855\;m
 
+where :math:`l_f` is the front overhang, :math:`L` is the wheelbase,
+:math:`l_r` is the rear overhang, and :math:`b` is the vehicle half-width.
 
+Vehicle Dynamics
+################
 
-.. math::
-    
-    x(0) = 0\; m \quad \quad \theta(0)  &= 0 \; rad   \quad \quad \dot{x}(0)&= 0\; m/s  \quad \quad \dot{\theta}(0)=0 \; rad/s
-
-
-    x(1) = 1\; m \quad \quad \theta(1)  &= \pi \; rad   \quad \quad \dot{x}(1)&= 0\; m/s  \quad \quad \dot{\theta}(1)=0 \; rad/s
-
-.. math::
-
-    -2\;m \leq x(t)\leq 2\;m  \quad \quad   -20\;N \leq F(t)\leq 20\;N
-
-
-
-The minimum effort trajectory is obtained by minimizing the integral of the square of the force applied to the cart.
+The vehicle state vector is
 
 .. math::
 
-    J = \int_0^1 F(t)^2 \;dt
+    \vec{X} =
+    [x,y,v,a,\theta,\phi]^T
 
-The cart-pole dynamics can be implemented as an ASSET ODE as shown below. Here we use ASSET's matrix functions to construct a row-major view of the coefficients of :math:`\textbf{M}`.
-We can then invert this expression and multiply by :math:`\vec{Q}`, to define :math:`\ddot{x}` and :math:`\ddot{\theta}`.
+where :math:`x` and :math:`y` are the rear-axle position coordinates,
+:math:`v` is the longitudinal velocity, :math:`a` is the longitudinal
+acceleration, :math:`\theta` is the vehicle heading angle, and :math:`\phi`
+is the steering angle.
 
-.. code-block:: python
+The control vector is
 
-    class CartPole(oc.ODEBase):
-    
-        def __init__(self,l,m1,m2,g):
-            Xvars = 4
-            Uvars = 1
-            ####################################################
-            XtU = oc.ODEArguments(Xvars,Uvars)
-        
-            x,theta,xdot,thetadot = XtU.XVec().tolist()
-            F = XtU.UVar(0)
-        
-            Q = vf.stack([-g*vf.sin(theta),
-                            F+m2*l*vf.sin(theta)*thetadot**2])
-        
-            Mvec_rm = vf.stack(vf.cos(theta),l,
-                                m1+m2,m2*l*vf.cos(theta))
-        
-            M = vf.RowMatrix(Mvec_rm,2,2)
-        
-            xddot_thetaddot = M.inverse()*Q
-    
-            ode = vf.stack([xdot,thetadot,xddot_thetaddot])
-            ####################################################
-            super().__init__(ode,Xvars,Uvars)
-        
+.. math::
 
+    \vec{U} = [j,\dot{\phi}]^T
 
-After implementing the ODE, we define a phase and apply our boundary conditions and integral objective function. The units and time scale of this problem are already well conditioned
-and do not need any non-dimensionalization. Furthermore, it is sufficient to initialize the trajectory with a straight line initial guess between the fixed boundary conditions.
+where :math:`j` is longitudinal jerk and :math:`\dot{\phi}` is the steering
+rate.
 
-.. code-block:: python
+The equations of motion are
 
-    m1 = 1     # Mass of Cart kg
-    m2 =.3     # Mass of Pole kg
-    l  =.5     # Length of Pole m
-    g = 9.81   # you already know m/s^2
-    
-    Fmax = 20  # N
-    xmax = 2   # m
-    
-    tf  = 2    # s
-    xf  = 1    # m       
-    
-    ts = np.linspace(0,tf,100)
-    IG = [[xf*t/tf,np.pi*t/tf,0,0,t,.00] for t in ts]
-    
-    
-    ode = CartPole(l,m1,m2,g)
-    
-    phase = ode.phase("LGL5",IG,64)
-    #Fix first state (x,theta,xdot,thetadot) and time
-    phase.addBoundaryValue("First",range(0,5),[0 ,0    , 0, 0, 0])
-    #Fix last state (x,theta,xdot,thetadot) and time
-    phase.addBoundaryValue("Last" ,range(0,5),[xf,np.pi, 0, 0, tf])
-    # Bound control forces
-    phase.addLUVarBound("Path",5,-Fmax,Fmax)
-    phase.addLUVarBound("Path",0,-xmax,xmax)
-    # Minimize the "control effort", the integral of square of applied force
-    phase.addIntegralObjective(Args(1)[0]**2,[5])
-    
-    phase.setThreads(8,8)
-    phase.optimizer.set_PrintLevel(1)
-    phase.optimize()
-    
-    Traj = phase.returnTraj()
+.. math::
 
-On a 6 core i7-9750H laptop, with 64 LGL5 segments, this problem converges in 12 iterations of the optimize algorithm taking only 28 milliseconds.
-The final objective value is 58.80819. A plot and animation of the converged trajectory can be seen below.
+    \dot{x} &= v\cos(\theta), \\
+    \dot{y} &= v\sin(\theta), \\
+    \dot{v} &= a, \\
+    \dot{a} &= j, \\
+    \dot{\theta} &= \frac{v\tan(\phi)}{L}, \\
+    \dot{\phi} &= \dot{\phi}.
 
+The vehicle is implemented as an ASSET ``ODEBase`` model. The four vehicle
+corners are defined in the body-fixed frame and transformed into the inertial
+frame using the vehicle heading angle.
 
-.. image:: _static/CartPoleFig.svg
-    :width: 100%
+Parking-Space Boundary
+######################
 
-.. image:: _static/CartPoleGif2.gif
-    :width: 100%
+A smoothed Heaviside function is used to represent the parking-space boundary:
+
+.. math::
+
+    H(x,k) = \frac{1+\tanh(kx)}{2}
+
+where :math:`k` controls the smoothing of the transition.
+
+The lower parking-space boundary is defined as
+
+.. math::
+
+    y_s(x) =
+    \left[-H(x,k)+H(x-L_s,k)\right]W_s.
+
+This provides a smooth representation of the parking-space entrance and exit
+boundaries.
+
+Initial Conditions
+##################
+
+The initial position and heading follow the referenced research paper.
+
+.. math::
+
+    x(0) = -5.14\;m \quad\quad y(0) = 1.41\;m
+
+    \theta(0) = 13.18^\circ
+
+    v(0) = 0 \quad\quad a(0) = 0 \quad\quad \phi(0) = 0
+
+The initial trajectory guess is constructed using a sequence of intermediate
+vehicle positions, heading angles, and time values.
+
+Constraints
+###########
+
+The optimization enforces the following constraints:
+
+- The initial vehicle state is fixed.
+- The final vehicle velocity and acceleration are zero.
+- All vehicle corners remain within the roadway and parking-space boundaries.
+- The final vehicle corners lie within the parking-space width.
+- Collision-avoidance constraints prevent intersection with the two upper
+  parking-space entrance corners.
+- Vehicle state and control variables remain within their specified bounds.
+- The vehicle curvature rate remains bounded.
+
+The state and control limits are
+
+.. math::
+
+    |\phi| \leq 33^\circ
+
+    |v| \leq 2.0\;m/s
+
+    |a| \leq 0.75\;m/s^2
+
+    |j| \leq 0.5\;m/s^3
+
+    |\dot{\kappa}| \leq 0.6
+
+The curvature rate is calculated as
+
+.. math::
+
+    \dot{\kappa} =
+    \frac{\dot{\phi}}{L\cos^2(\phi)}.
+
+Optimization
+############
+
+The minimum-time maneuver is obtained by minimizing the final time:
+
+.. math::
+
+    J = t_f
+
+The problem is transcribed using ASSET's LGL5 discretization and block-constant
+control parameterization.
+
+The initial optimization uses 50 mesh segments and a smoothing parameter of
+75. After the first optimization, the trajectory is refined to 200 segments
+and the smoothing parameter is increased to 150.
+
+The optimizer is configured with a maximum of 2000 iterations and a bound
+fraction of 0.995. The refined optimization uses a KKT tolerance of
+:math:`10^{-8}`.
+
+Trajectory Reintegration
+########################
+
+After optimization, the trajectory is independently reintegrated using the
+vehicle model. The integration step size is 0.1 seconds, and 500 dense
+trajectory points are generated.
+
+The optimized and reintegrated terminal states are compared using
+
+.. math::
+
+    \Delta \vec{X}_f =
+    \vec{X}_{f,\mathrm{optimized}} -
+    \vec{X}_{f,\mathrm{reintegrated}}.
+
+The norm of the terminal-state difference is also reported.
+
+Results
+#######
+
+The optimized maneuver time is compared against the reference maneuver time
+of 18.426 seconds.
+
+The relative maneuver-time difference is calculated as
+
+.. math::
+
+    \Delta t_{\%} =
+    100\frac{t_{\mathrm{ASSET}}-t_{\mathrm{reference}}}
+    {t_{\mathrm{reference}}}.
+
+The example prints the following results:
+
+- ASSET maneuver time.
+- Reference maneuver time.
+- Absolute maneuver-time difference.
+- Relative maneuver-time difference.
+- Optimized versus reintegrated terminal-state difference.
+- Norm of the terminal-state difference.
+
+The numerical optimization results are generated when the Python example is
+executed.
+
+Trajectory Visualization
+########################
+
+The example plots the initial trajectory guess and the optimized vehicle
+trajectory. The vehicle body, wheels, and axle locations are displayed along
+with the roadway and parking-space boundaries.
+
+An animation of the independently reintegrated trajectory is also generated.
+The animation displays the vehicle motion, trajectory history, and current
+simulation time.
+
+Running the Example
+###################
+
+Run the Python example from the repository root:
+
+.. code-block:: bash
+
+    python examples/ParallelParking.py
+
+The example requires ASSET, NumPy, and Matplotlib. FFmpeg is additionally
+required if the animation is saved as an MP4 file.
+
+Full Code
+#########
+
+The complete Python implementation is included below.
+
+.. literalinclude:: ../../examples/ParallelParking.py
+    :language: python
+    :linenos:
+    :caption: ParallelParking.py
 
 References
 ##########
-#. Kelly, M., 2017. An introduction to trajectory optimization: How to do your own direct collocation. SIAM Review, 59(4), pp.849-904.
 
+.. [1] Imperial College London, "ICLOCS Parallel Parking Example."
+   http://www.ee.ic.ac.uk/ICLOCS/ExampleParallelParking.html
 
-.. literalinclude:: ../../examples/CartPole.py
-   :language: python
-   :linenos:
-   :caption: CartPole.py
-        ###########################################################################
-
+.. [2] IEEE, "Research paper containing the parallel parking Case 7
+   formulation, Table 2."
+   https://ieeexplore.ieee.org/document/7463491
