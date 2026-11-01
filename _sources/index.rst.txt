@@ -19,6 +19,26 @@ A newly developed high-performance interior-point optimizer (PSIOPT) is included
     examples/examples.rst
     python/python.rst
 
+.. toctree::
+    :maxdepth: 2
+    :caption: Installation:
+
+    Installation
+    install
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Additional Examples:
+
+    examples/ParallelParking
+    examples/PinesGravity
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Contributing:
+
+    contrib
+
 Citation
 ########
 
@@ -84,11 +104,6 @@ The license and copyright notices of ASSET's source and redistributable dependen
     kepler propagator - MIT License : Copyright (C) 2014 Darin Koblick
 
     lambert solver - MIT License : Copyright (C) 2018 Rody Oldenhuis
-
-..
-    cpp/cpp_root.rst
-    install
-    contrib
 
 Indices and tables
 ==================
