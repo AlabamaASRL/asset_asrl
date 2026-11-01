@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Multi-Spacecraft Optimization" href="MultiTarg.html"><link rel="prev" title="Zermelo’s Problem" href="zermelo.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Python Library Documentation" href="../python/python.html"><link rel="prev" title="Zermelo’s Problem" href="zermelo.html">
         <link rel="prefetch" href="../_static/ASSETLOGO.svg" as="image">
 
     <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
@@ -212,16 +212,16 @@
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="examples.html">Examples</a><input aria-label="Toggle navigation of Examples" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CartPole.html">Minimum-Time Parallel Parking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="HyperSensitive.html">Hyper-Sensitive Optimal Control Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="halo.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Multi-Spacecraft Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OrbitContinuation.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ParallelParking.html">Parallel Parking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PinesGravity.html">Pines Gravity Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="zermelo.html">Zermelo’s Problem</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Multi-Phase Zermelo’s Problem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Multi-Spacecraft Optimization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="PinesGravity.html">Pines Gravity Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ParallelParking.html">Parallel Parking</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input aria-label="Toggle navigation of Python Library Documentation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -391,311 +391,316 @@ We defined the initial points such that the boat maneuvers back to the initial s
 <a class="reference internal image-reference" href="../_images/CompareBoatSpeedLink.svg"><img alt="../_images/CompareBoatSpeedLink.svg" src="../_images/CompareBoatSpeedLink.svg" style="width: 100%;" />
 </a>
 </figure>
-</section>
 <section id="full-code">
-<h2>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">asset_asrl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
-
-<span class="c1">#Change a few of the matplotlib label sizes for ease of reading plots</span>
-<span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'xtick.labelsize'</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">'ytick.labelsize'</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
-          <span class="s1">'axes.labelsize'</span><span class="p">:</span><span class="mi">15</span><span class="p">,</span> <span class="s1">'legend.fontsize'</span><span class="p">:</span><span class="mi">11</span><span class="p">}</span>
-<span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-<span class="c1">################################################################################</span>
-<span class="c1">## Setup</span>
-<span class="n">oc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
-<span class="n">vf</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
-
-<span class="n">phaseRegs</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">PhaseRegionFlags</span>
-<span class="n">tModes</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">TranscriptionModes</span>
-
-
-<span class="c1">################################################################################</span>
-<span class="c1">## Constants</span>
-<span class="n">nSeg</span> <span class="o">=</span> <span class="mi">150</span>
-<span class="n">tol</span> <span class="o">=</span> <span class="mf">1e-12</span>
-<span class="n">nVecPlot</span> <span class="o">=</span> <span class="mi">20</span>
-<span class="n">vecPlotScale</span> <span class="o">=</span> <span class="mf">0.1</span>
-
-
-<span class="c1">################################################################################</span>
-<span class="c1">## System Dynamics</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Zermelo</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vMax</span><span class="p">,</span> <span class="n">wFunc</span><span class="p">):</span>
-        <span class="n">Xvars</span> <span class="o">=</span> <span class="mi">2</span>
-        <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">1</span>
-
-        <span class="c1">#we use vf.Arguments as opposed to</span>
-        <span class="c1">#oc.ODEArguments because of the time dependent model</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span><span class="p">(</span><span class="n">Xvars</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">Uvars</span><span class="p">)</span>
-        <span class="n">xyt</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">head_3</span><span class="p">()</span>
-        <span class="n">th</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-
-        <span class="n">wx</span><span class="p">,</span> <span class="n">wy</span> <span class="o">=</span> <span class="n">wFunc</span><span class="p">(</span><span class="n">xyt</span><span class="p">)</span>
-
-        <span class="n">xD</span> <span class="o">=</span> <span class="n">vMax</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">+</span> <span class="n">wx</span>
-        <span class="n">yD</span> <span class="o">=</span> <span class="n">vMax</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">+</span> <span class="n">wy</span>
-
-        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Stack</span><span class="p">([</span><span class="n">xD</span><span class="p">,</span> <span class="n">yD</span><span class="p">])</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span> <span class="n">Xvars</span><span class="p">,</span> <span class="n">Uvars</span><span class="p">)</span>
-
-
-<span class="c1">################################################################################</span>
-<span class="c1">## Wind Functions</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">noWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">):</span>
-    <span class="c1"># No asset functions, just numbers</span>
-    <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
-
-
-<span class="c1"># -------------------------------------</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">uniformWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">,</span> <span class="n">ang</span><span class="o">=</span><span class="mi">135</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">,</span> <span class="n">vel</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="c1"># No asset functions, just numbers</span>
-    <span class="k">return</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang</span><span class="p">),</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang</span><span class="p">)</span>
-
-
-<span class="c1"># -------------------------------------</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">constantDirWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">,</span> <span class="n">ang</span><span class="o">=</span><span class="mi">45</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">):</span>
-    <span class="n">vel</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">xyt</span><span class="o">.</span><span class="n">head2</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">())</span>
-
-    <span class="k">return</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang</span><span class="p">),</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang</span><span class="p">)</span>
-
-
-<span class="c1"># -------------------------------------</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">variableDirWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">):</span>
-    <span class="n">vel</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">xyt</span><span class="o">.</span><span class="n">head2</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">())</span>
-    <span class="n">ang</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">xyt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xyt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-
-    <span class="k">return</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang</span><span class="p">),</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang</span><span class="p">)</span>
-
-
-<span class="c1">################################################################################</span>
-<span class="c1">## Solver function</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">navigate</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">vM</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">uniformWind</span><span class="p">):</span>
-    <span class="c1"># Each phase between two points, therefore</span>
-    <span class="c1"># the number of phases is the number of points - 1</span>
-    <span class="n">numphase</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="c1"># 1. Initial guesses for phases by creating a straigh line from each point to the next</span>
-    <span class="n">trajG</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numphase</span><span class="p">):</span>
-        <span class="n">A</span> <span class="o">=</span> <span class="n">Points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">B</span> <span class="o">=</span> <span class="n">Points</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">B</span> <span class="o">-</span> <span class="n">A</span><span class="p">)</span>
-        <span class="n">t0</span> <span class="o">=</span> <span class="n">dist</span> <span class="o">/</span> <span class="n">vM</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">B</span> <span class="o">-</span> <span class="n">A</span><span class="p">)</span> <span class="o">/</span> <span class="n">dist</span>
-        <span class="n">ang</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">trajG</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">A</span> <span class="o">+</span> <span class="n">d</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">t0</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="n">ang</span><span class="p">])</span>
-                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">nSeg</span><span class="p">)</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
-
-    <span class="n">ocp</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">OptimalControlProblem</span><span class="p">()</span>
-
-    <span class="c1"># 2. Initialize phases for each</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numphase</span><span class="p">):</span>
-        <span class="n">A</span> <span class="o">=</span> <span class="n">Points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">B</span> <span class="o">=</span> <span class="n">Points</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="n">phase</span> <span class="o">=</span> <span class="n">Zermelo</span><span class="p">(</span><span class="n">vM</span><span class="p">,</span> <span class="n">wF</span><span class="p">)</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tModes</span><span class="o">.</span><span class="n">LGL3</span><span class="p">)</span>
-
-        <span class="n">phase</span><span class="o">.</span><span class="n">Threads</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># Equal to number of physical cores</span>
-
-        <span class="n">phase</span><span class="o">.</span><span class="n">setTraj</span><span class="p">(</span><span class="n">trajG</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nSeg</span><span class="p">)</span>
-
-        <span class="c1"># 3. Enforce start and end point</span>
-        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">A</span><span class="p">)</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
-
-        <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-
-        <span class="c1"># 4. Add objective function</span>
-        <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaTimeObjective</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="n">phase</span><span class="o">.</span><span class="n">addLowerDeltaTimeBound</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-        <span class="c1"># 5. Optimize</span>
-        <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_EContol</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
-        <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_KKTtol</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
-
-        <span class="c1"># 6. add each phase to the optimal control problem</span>
-        <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
-
-    <span class="c1"># Add a link constraint from the first phase to the last phase</span>
-    <span class="c1"># This enforces that at the point between the phases the positions and time must be the</span>
-    <span class="c1"># same as we assign it to state variables 0 and 1, and 2.</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">addForwardLinkEqualCon</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-
-    <span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
-
-    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">:</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="n">ph</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
-
-    <span class="k">return</span> <span class="n">out</span>
-
-
-<span class="c1">################################################################################</span>
-<span class="c1">## 2D Plotting</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">colorScale</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">194</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="p">[</span><span class="mi">208</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">70</span><span class="p">]):</span>
-    <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">x</span> <span class="o">*</span> <span class="n">right</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">left</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span><span class="o">/</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">plot2DTrajList</span><span class="p">(</span><span class="n">tList</span><span class="p">):</span>
-    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tList</span><span class="p">):</span>
-        <span class="n">clr</span> <span class="o">=</span> <span class="n">colorScale</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">tList</span><span class="p">))</span>
-        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span>
-                     <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span>
-                     <span class="n">label</span> <span class="o">=</span> <span class="s2">"Path "</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-
-        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span>
-                     <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])])</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"X"</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Y"</span><span class="p">)</span>
-
-    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Time"</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"$</span><span class="se">\\</span><span class="s2">theta$ (rad)"</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"Plots/Zermelo/CompareWindModelsLink.svg"</span><span class="p">,</span>
-                <span class="n">dpi</span> <span class="o">=</span> <span class="mi">500</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-
-<span class="c1"># -------------------------------------</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">plot2DTrajListVF</span><span class="p">(</span><span class="n">tList</span><span class="p">,</span> <span class="n">wFunc_num</span><span class="p">):</span>
-    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
-
-    <span class="c1"># Generate vector field for trajectory plot</span>
-    <span class="n">maxX</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">max</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">t</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tList</span><span class="p">])</span>
-    <span class="n">minX</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="nb">min</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">t</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tList</span><span class="p">])</span>
-    <span class="n">maxY</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">max</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">t</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tList</span><span class="p">])</span>
-    <span class="n">minY</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="nb">min</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">t</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tList</span><span class="p">])</span>
-
-    <span class="n">xRange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minX</span><span class="p">,</span> <span class="n">maxX</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">nVecPlot</span><span class="p">)</span>
-    <span class="n">yRange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minY</span><span class="p">,</span> <span class="n">maxY</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">nVecPlot</span><span class="p">)</span>
-
-    <span class="n">xPlot</span><span class="p">,</span> <span class="n">yPlot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xRange</span><span class="p">,</span> <span class="n">yRange</span><span class="p">)</span>
-
-    <span class="n">uPlot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">xPlot</span><span class="p">)</span>
-    <span class="n">vPlot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">xPlot</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nVecPlot</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nVecPlot</span><span class="p">):</span>
-            <span class="n">u_ij</span><span class="p">,</span> <span class="n">v_ij</span> <span class="o">=</span> <span class="n">wFunc_num</span><span class="p">([</span><span class="n">xPlot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">yPlot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]])</span>
-            <span class="n">uPlot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_ij</span>
-            <span class="n">vPlot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">v_ij</span>
-
-    <span class="n">QV</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span><span class="n">xPlot</span><span class="p">,</span> <span class="n">yPlot</span><span class="p">,</span> <span class="n">uPlot</span><span class="p">,</span> <span class="n">vPlot</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">"Wind"</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">"blue"</span><span class="p">)</span>
-
-
-    <span class="c1"># Overlay trajectories and control</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tList</span><span class="p">):</span>
-        <span class="n">clr</span> <span class="o">=</span> <span class="n">colorScale</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">tList</span><span class="p">))</span>
-        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span>
-                     <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span>
-                     <span class="n">label</span> <span class="o">=</span> <span class="s2">"Path "</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-
-        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span>
-                     <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])])</span>
-
-    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"X"</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Y"</span><span class="p">)</span>
-
-    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Time"</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"$</span><span class="se">\\</span><span class="s2">theta$ (rad)"</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">ncol</span> <span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"Plots/Zermelo/CompareBoatSpeedLink.svg"</span><span class="p">,</span>
-                <span class="n">dpi</span> <span class="o">=</span> <span class="mi">500</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-
-<span class="c1">################################################################################</span>
-<span class="c1">## Compare Wind Models</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">compareWind</span><span class="p">():</span>
-    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-    <span class="n">D</span> <span class="o">=</span> <span class="n">A</span>
-    <span class="n">vM</span> <span class="o">=</span> <span class="mf">1.5</span>
-
-    <span class="n">test1</span> <span class="o">=</span> <span class="n">navigate</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">],</span> <span class="n">vM</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">noWind</span><span class="p">)</span>
-    <span class="n">test2</span> <span class="o">=</span> <span class="n">navigate</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">],</span>
-        <span class="n">vM</span><span class="o">=</span><span class="n">vM</span><span class="p">,</span>
-        <span class="n">wF</span><span class="o">=</span><span class="k">lambda</span> <span class="n">xyt</span><span class="p">:</span> <span class="n">uniformWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">,</span> <span class="n">vel</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
-    <span class="p">)</span>
-    <span class="n">test3</span> <span class="o">=</span> <span class="n">navigate</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">],</span>
-        <span class="n">vM</span><span class="o">=</span><span class="n">vM</span><span class="p">,</span>
-        <span class="n">wF</span><span class="o">=</span><span class="n">constantDirWind</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">test4</span> <span class="o">=</span> <span class="n">navigate</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">],</span> <span class="n">vM</span><span class="o">=</span><span class="n">vM</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">variableDirWind</span><span class="p">)</span>
-
-    <span class="n">plot2DTrajList</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="n">test1</span><span class="p">,</span>
-            <span class="n">test2</span><span class="p">,</span>
-            <span class="n">test3</span><span class="p">,</span>
-            <span class="n">test4</span><span class="p">,</span>
-        <span class="p">],</span>
-    <span class="p">)</span>
-
-
-<span class="c1">################################################################################</span>
-<span class="c1">## Compare Boat Speed</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">compareSpeed</span><span class="p">():</span>
-    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-    <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">])</span>
-    <span class="n">D</span> <span class="o">=</span> <span class="n">A</span>
-
-    <span class="n">vMRange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1.85</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
-    <span class="n">trajs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">vM</span> <span class="ow">in</span> <span class="n">vMRange</span><span class="p">:</span>
-        <span class="n">trajs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">navigate</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">],</span> <span class="n">vM</span><span class="o">=</span><span class="n">vM</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">variableDirWind</span><span class="p">))</span>
-
-    <span class="n">vdwx</span><span class="p">,</span> <span class="n">vdwy</span> <span class="o">=</span> <span class="n">variableDirWind</span><span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-
-    <span class="n">plot2DTrajListVF</span><span class="p">(</span>
-        <span class="n">trajs</span><span class="p">,</span>
-        <span class="k">lambda</span> <span class="n">xyt</span><span class="p">:</span> <span class="p">(</span><span class="n">vdwx</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">xyt</span><span class="p">),</span> <span class="n">vdwy</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">xyt</span><span class="p">)),</span>
-    <span class="p">)</span>
-
-
-<span class="c1">################################################################################</span>
-<span class="c1">## Main</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-    <span class="n">compareWind</span><span class="p">()</span>
-    <span class="n">compareSpeed</span><span class="p">()</span>
-
-
-<span class="c1">################################################################################</span>
-<span class="c1">## Run</span>
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
-    <span class="n">main</span><span class="p">()</span>
+<h3>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h3>
+<p>The complete Python implementation is included below.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">MultiPhaseZermelo.py</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="kn">import</span><span class="w"> </span><span class="nn">asset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
+<span class="linenos">  2</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="linenos">  3</span><span class="kn">import</span><span class="w"> </span><span class="nn">asset_asrl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
+<span class="linenos">  4</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="linenos">  5</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="linenos">  6</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="linenos">  7</span>
+<span class="linenos">  8</span><span class="c1">#Change a few of the matplotlib label sizes for ease of reading plots</span>
+<span class="linenos">  9</span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'xtick.labelsize'</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">'ytick.labelsize'</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+<span class="linenos"> 10</span>          <span class="s1">'axes.labelsize'</span><span class="p">:</span><span class="mi">15</span><span class="p">,</span> <span class="s1">'legend.fontsize'</span><span class="p">:</span><span class="mi">11</span><span class="p">}</span>
+<span class="linenos"> 11</span><span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> 
+<span class="linenos"> 12</span><span class="c1">################################################################################</span>
+<span class="linenos"> 13</span><span class="c1">## Setup</span>
+<span class="linenos"> 14</span><span class="n">oc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
+<span class="linenos"> 15</span><span class="n">vf</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
+<span class="linenos"> 16</span>
+<span class="linenos"> 17</span><span class="n">phaseRegs</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">PhaseRegionFlags</span>
+<span class="linenos"> 18</span><span class="n">tModes</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">TranscriptionModes</span>
+<span class="linenos"> 19</span>
+<span class="linenos"> 20</span>
+<span class="linenos"> 21</span><span class="c1">################################################################################</span>
+<span class="linenos"> 22</span><span class="c1">## Constants</span>
+<span class="linenos"> 23</span><span class="n">nSeg</span> <span class="o">=</span> <span class="mi">150</span>
+<span class="linenos"> 24</span><span class="n">tol</span> <span class="o">=</span> <span class="mf">1e-12</span>
+<span class="linenos"> 25</span><span class="n">nVecPlot</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="linenos"> 26</span><span class="n">vecPlotScale</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="linenos"> 27</span>
+<span class="linenos"> 28</span>
+<span class="linenos"> 29</span><span class="c1">################################################################################</span>
+<span class="linenos"> 30</span><span class="c1">## System Dynamics</span>
+<span class="linenos"> 31</span><span class="k">class</span><span class="w"> </span><span class="nc">Zermelo</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+<span class="linenos"> 32</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vMax</span><span class="p">,</span> <span class="n">wFunc</span><span class="p">):</span>
+<span class="linenos"> 33</span>        <span class="n">Xvars</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="linenos"> 34</span>        <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="linenos"> 35</span>        
+<span class="linenos"> 36</span>        <span class="c1">#we use vf.Arguments as opposed to </span>
+<span class="linenos"> 37</span>        <span class="c1">#oc.ODEArguments because of the time dependent model</span>
+<span class="linenos"> 38</span>        <span class="n">args</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span><span class="p">(</span><span class="n">Xvars</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">Uvars</span><span class="p">)</span>
+<span class="linenos"> 39</span>        <span class="n">xyt</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">head_3</span><span class="p">()</span>
+<span class="linenos"> 40</span>        <span class="n">th</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="linenos"> 41</span>
+<span class="linenos"> 42</span>        <span class="n">wx</span><span class="p">,</span> <span class="n">wy</span> <span class="o">=</span> <span class="n">wFunc</span><span class="p">(</span><span class="n">xyt</span><span class="p">)</span>
+<span class="linenos"> 43</span>
+<span class="linenos"> 44</span>        <span class="n">xD</span> <span class="o">=</span> <span class="n">vMax</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">+</span> <span class="n">wx</span>
+<span class="linenos"> 45</span>        <span class="n">yD</span> <span class="o">=</span> <span class="n">vMax</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">+</span> <span class="n">wy</span>
+<span class="linenos"> 46</span>
+<span class="linenos"> 47</span>        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Stack</span><span class="p">([</span><span class="n">xD</span><span class="p">,</span> <span class="n">yD</span><span class="p">])</span>
+<span class="linenos"> 48</span>
+<span class="linenos"> 49</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span> <span class="n">Xvars</span><span class="p">,</span> <span class="n">Uvars</span><span class="p">)</span>
+<span class="linenos"> 50</span>
+<span class="linenos"> 51</span>
+<span class="linenos"> 52</span><span class="c1">################################################################################</span>
+<span class="linenos"> 53</span><span class="c1">## Wind Functions</span>
+<span class="linenos"> 54</span><span class="k">def</span><span class="w"> </span><span class="nf">noWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">):</span>
+<span class="linenos"> 55</span>    <span class="c1"># No asset functions, just numbers</span>
+<span class="linenos"> 56</span>    <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+<span class="linenos"> 57</span>
+<span class="linenos"> 58</span>
+<span class="linenos"> 59</span><span class="c1"># -------------------------------------</span>
+<span class="linenos"> 60</span>
+<span class="linenos"> 61</span>
+<span class="linenos"> 62</span><span class="k">def</span><span class="w"> </span><span class="nf">uniformWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">,</span> <span class="n">ang</span><span class="o">=</span><span class="mi">135</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">,</span> <span class="n">vel</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="linenos"> 63</span>    <span class="c1"># No asset functions, just numbers</span>
+<span class="linenos"> 64</span>    <span class="k">return</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang</span><span class="p">),</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang</span><span class="p">)</span>
+<span class="linenos"> 65</span>
+<span class="linenos"> 66</span>
+<span class="linenos"> 67</span><span class="c1"># -------------------------------------</span>
+<span class="linenos"> 68</span>
+<span class="linenos"> 69</span>
+<span class="linenos"> 70</span><span class="k">def</span><span class="w"> </span><span class="nf">constantDirWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">,</span> <span class="n">ang</span><span class="o">=</span><span class="mi">45</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">):</span>
+<span class="linenos"> 71</span>    <span class="n">vel</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">xyt</span><span class="o">.</span><span class="n">head2</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">())</span>
+<span class="linenos"> 72</span>
+<span class="linenos"> 73</span>    <span class="k">return</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang</span><span class="p">),</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang</span><span class="p">)</span>
+<span class="linenos"> 74</span>
+<span class="linenos"> 75</span>
+<span class="linenos"> 76</span><span class="c1"># -------------------------------------</span>
+<span class="linenos"> 77</span>
+<span class="linenos"> 78</span>
+<span class="linenos"> 79</span><span class="k">def</span><span class="w"> </span><span class="nf">variableDirWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">):</span>
+<span class="linenos"> 80</span>    <span class="n">vel</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">xyt</span><span class="o">.</span><span class="n">head2</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">())</span>
+<span class="linenos"> 81</span>    <span class="n">ang</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">xyt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xyt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos"> 82</span>
+<span class="linenos"> 83</span>    <span class="k">return</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang</span><span class="p">),</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang</span><span class="p">)</span>
+<span class="linenos"> 84</span>
+<span class="linenos"> 85</span>
+<span class="linenos"> 86</span><span class="c1">################################################################################</span>
+<span class="linenos"> 87</span><span class="c1">## Solver function</span>
+<span class="linenos"> 88</span><span class="k">def</span><span class="w"> </span><span class="nf">navigate</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">vM</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">uniformWind</span><span class="p">):</span>
+<span class="linenos"> 89</span>    <span class="c1"># Each phase between two points, therefore</span>
+<span class="linenos"> 90</span>    <span class="c1"># the number of phases is the number of points - 1</span>
+<span class="linenos"> 91</span>    <span class="n">numphase</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="linenos"> 92</span>    <span class="c1"># 1. Initial guesses for phases by creating a straigh line from each point to the next</span>
+<span class="linenos"> 93</span>    <span class="n">trajG</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos"> 94</span>
+<span class="linenos"> 95</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numphase</span><span class="p">):</span>
+<span class="linenos"> 96</span>        <span class="n">A</span> <span class="o">=</span> <span class="n">Points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="linenos"> 97</span>        <span class="n">B</span> <span class="o">=</span> <span class="n">Points</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+<span class="linenos"> 98</span>        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">B</span> <span class="o">-</span> <span class="n">A</span><span class="p">)</span>
+<span class="linenos"> 99</span>        <span class="n">t0</span> <span class="o">=</span> <span class="n">dist</span> <span class="o">/</span> <span class="n">vM</span>
+<span class="linenos">100</span>        <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">B</span> <span class="o">-</span> <span class="n">A</span><span class="p">)</span> <span class="o">/</span> <span class="n">dist</span>
+<span class="linenos">101</span>        <span class="n">ang</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">102</span>        <span class="n">trajG</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<span class="linenos">103</span>            <span class="p">[</span>
+<span class="linenos">104</span>                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">A</span> <span class="o">+</span> <span class="n">d</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">t0</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="n">ang</span><span class="p">])</span>
+<span class="linenos">105</span>                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">nSeg</span><span class="p">)</span>
+<span class="linenos">106</span>            <span class="p">]</span>
+<span class="linenos">107</span>        <span class="p">)</span>
+<span class="linenos">108</span>
+<span class="linenos">109</span>    <span class="n">ocp</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">OptimalControlProblem</span><span class="p">()</span>
+<span class="linenos">110</span>
+<span class="linenos">111</span>    <span class="c1"># 2. Initialize phases for each</span>
+<span class="linenos">112</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numphase</span><span class="p">):</span>
+<span class="linenos">113</span>        <span class="n">A</span> <span class="o">=</span> <span class="n">Points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="linenos">114</span>        <span class="n">B</span> <span class="o">=</span> <span class="n">Points</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+<span class="linenos">115</span>        <span class="n">phase</span> <span class="o">=</span> <span class="n">Zermelo</span><span class="p">(</span><span class="n">vM</span><span class="p">,</span> <span class="n">wF</span><span class="p">)</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tModes</span><span class="o">.</span><span class="n">LGL3</span><span class="p">)</span>
+<span class="linenos">116</span>
+<span class="linenos">117</span>        <span class="n">phase</span><span class="o">.</span><span class="n">Threads</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># Equal to number of physical cores</span>
+<span class="linenos">118</span>
+<span class="linenos">119</span>        <span class="n">phase</span><span class="o">.</span><span class="n">setTraj</span><span class="p">(</span><span class="n">trajG</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nSeg</span><span class="p">)</span>
+<span class="linenos">120</span>
+<span class="linenos">121</span>        <span class="c1"># 3. Enforce start and end point</span>
+<span class="linenos">122</span>        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">123</span>            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">A</span><span class="p">)</span>
+<span class="linenos">124</span>            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
+<span class="linenos">125</span>            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
+<span class="linenos">126</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">127</span>            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
+<span class="linenos">128</span>
+<span class="linenos">129</span>        <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">130</span>
+<span class="linenos">131</span>        <span class="c1"># 4. Add objective function</span>
+<span class="linenos">132</span>        <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaTimeObjective</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="linenos">133</span>        <span class="n">phase</span><span class="o">.</span><span class="n">addLowerDeltaTimeBound</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">134</span>
+<span class="linenos">135</span>        <span class="c1"># 5. Optimize</span>
+<span class="linenos">136</span>        <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_EContol</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
+<span class="linenos">137</span>        <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_KKTtol</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
+<span class="linenos">138</span>
+<span class="linenos">139</span>        <span class="c1"># 6. add each phase to the optimal control problem</span>
+<span class="linenos">140</span>        <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
+<span class="linenos">141</span>
+<span class="linenos">142</span>    <span class="c1"># Add a link constraint from the first phase to the last phase</span>
+<span class="linenos">143</span>    <span class="c1"># This enforces that at the point between the phases the positions and time must be the</span>
+<span class="linenos">144</span>    <span class="c1"># same as we assign it to state variables 0 and 1, and 2.</span>
+<span class="linenos">145</span>    <span class="n">ocp</span><span class="o">.</span><span class="n">addForwardLinkEqualCon</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="linenos">146</span>
+<span class="linenos">147</span>    <span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
+<span class="linenos">148</span>
+<span class="linenos">149</span>    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">150</span>    <span class="k">for</span> <span class="n">ph</span> <span class="ow">in</span> <span class="n">ocp</span><span class="o">.</span><span class="n">Phases</span><span class="p">:</span>
+<span class="linenos">151</span>        <span class="n">out</span> <span class="o">+=</span> <span class="n">ph</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+<span class="linenos">152</span>
+<span class="linenos">153</span>    <span class="k">return</span> <span class="n">out</span>
+<span class="linenos">154</span>
+<span class="linenos">155</span>
+<span class="linenos">156</span><span class="c1">################################################################################</span>
+<span class="linenos">157</span><span class="c1">## 2D Plotting</span>
+<span class="linenos">158</span><span class="k">def</span><span class="w"> </span><span class="nf">colorScale</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">194</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="p">[</span><span class="mi">208</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">70</span><span class="p">]):</span>
+<span class="linenos">159</span>    <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">x</span> <span class="o">*</span> <span class="n">right</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">left</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span><span class="o">/</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+<span class="linenos">160</span>
+<span class="linenos">161</span><span class="k">def</span><span class="w"> </span><span class="nf">plot2DTrajList</span><span class="p">(</span><span class="n">tList</span><span class="p">):</span>
+<span class="linenos">162</span>    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="linenos">163</span>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tList</span><span class="p">):</span>
+<span class="linenos">164</span>        <span class="n">clr</span> <span class="o">=</span> <span class="n">colorScale</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">tList</span><span class="p">))</span>
+<span class="linenos">165</span>        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span>
+<span class="linenos">166</span>                     <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span>
+<span class="linenos">167</span>                     <span class="n">label</span> <span class="o">=</span> <span class="s2">"Path "</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+<span class="linenos">168</span>        
+<span class="linenos">169</span>        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span>
+<span class="linenos">170</span>                     <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])])</span>
+<span class="linenos">171</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">172</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"X"</span><span class="p">)</span>
+<span class="linenos">173</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Y"</span><span class="p">)</span>
+<span class="linenos">174</span>    
+<span class="linenos">175</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">176</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Time"</span><span class="p">)</span>
+<span class="linenos">177</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"$</span><span class="se">\\</span><span class="s2">theta$ (rad)"</span><span class="p">)</span>
+<span class="linenos">178</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="linenos">179</span>    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="linenos">180</span>    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"Plots/Zermelo/CompareWindModelsLink.svg"</span><span class="p">,</span>
+<span class="linenos">181</span>                <span class="n">dpi</span> <span class="o">=</span> <span class="mi">500</span><span class="p">)</span>
+<span class="linenos">182</span>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="linenos">183</span>
+<span class="linenos">184</span>
+<span class="linenos">185</span><span class="c1"># -------------------------------------</span>
+<span class="linenos">186</span>
+<span class="linenos">187</span>
+<span class="linenos">188</span><span class="k">def</span><span class="w"> </span><span class="nf">plot2DTrajListVF</span><span class="p">(</span><span class="n">tList</span><span class="p">,</span> <span class="n">wFunc_num</span><span class="p">):</span>
+<span class="linenos">189</span>    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="linenos">190</span>
+<span class="linenos">191</span>    <span class="c1"># Generate vector field for trajectory plot</span>
+<span class="linenos">192</span>    <span class="n">maxX</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">max</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">t</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tList</span><span class="p">])</span>
+<span class="linenos">193</span>    <span class="n">minX</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="nb">min</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">t</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tList</span><span class="p">])</span>
+<span class="linenos">194</span>    <span class="n">maxY</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">max</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">t</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tList</span><span class="p">])</span>
+<span class="linenos">195</span>    <span class="n">minY</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="nb">min</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">t</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tList</span><span class="p">])</span>
+<span class="linenos">196</span>
+<span class="linenos">197</span>    <span class="n">xRange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minX</span><span class="p">,</span> <span class="n">maxX</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">nVecPlot</span><span class="p">)</span>
+<span class="linenos">198</span>    <span class="n">yRange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minY</span><span class="p">,</span> <span class="n">maxY</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">nVecPlot</span><span class="p">)</span>
+<span class="linenos">199</span>
+<span class="linenos">200</span>    <span class="n">xPlot</span><span class="p">,</span> <span class="n">yPlot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xRange</span><span class="p">,</span> <span class="n">yRange</span><span class="p">)</span>
+<span class="linenos">201</span>
+<span class="linenos">202</span>    <span class="n">uPlot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">xPlot</span><span class="p">)</span>
+<span class="linenos">203</span>    <span class="n">vPlot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">xPlot</span><span class="p">)</span>
+<span class="linenos">204</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nVecPlot</span><span class="p">):</span>
+<span class="linenos">205</span>        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nVecPlot</span><span class="p">):</span>
+<span class="linenos">206</span>            <span class="n">u_ij</span><span class="p">,</span> <span class="n">v_ij</span> <span class="o">=</span> <span class="n">wFunc_num</span><span class="p">([</span><span class="n">xPlot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">yPlot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]])</span>
+<span class="linenos">207</span>            <span class="n">uPlot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_ij</span>
+<span class="linenos">208</span>            <span class="n">vPlot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">v_ij</span>
+<span class="linenos">209</span>            
+<span class="linenos">210</span>    <span class="n">QV</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span><span class="n">xPlot</span><span class="p">,</span> <span class="n">yPlot</span><span class="p">,</span> <span class="n">uPlot</span><span class="p">,</span> <span class="n">vPlot</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">"Wind"</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">"blue"</span><span class="p">)</span>
+<span class="linenos">211</span>    
+<span class="linenos">212</span>
+<span class="linenos">213</span>    <span class="c1"># Overlay trajectories and control</span>
+<span class="linenos">214</span>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tList</span><span class="p">):</span>
+<span class="linenos">215</span>        <span class="n">clr</span> <span class="o">=</span> <span class="n">colorScale</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">tList</span><span class="p">))</span>
+<span class="linenos">216</span>        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span>
+<span class="linenos">217</span>                     <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span>
+<span class="linenos">218</span>                     <span class="n">label</span> <span class="o">=</span> <span class="s2">"Path "</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+<span class="linenos">219</span>        
+<span class="linenos">220</span>        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span>
+<span class="linenos">221</span>                     <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])])</span>
+<span class="linenos">222</span>        
+<span class="linenos">223</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">224</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"X"</span><span class="p">)</span>
+<span class="linenos">225</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Y"</span><span class="p">)</span>
+<span class="linenos">226</span>    
+<span class="linenos">227</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">228</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Time"</span><span class="p">)</span>
+<span class="linenos">229</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"$</span><span class="se">\\</span><span class="s2">theta$ (rad)"</span><span class="p">)</span>
+<span class="linenos">230</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span> <span class="o">=</span> <span class="s1">'lower left'</span><span class="p">,</span> <span class="n">ncol</span> <span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos">231</span>    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="linenos">232</span>    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"Plots/Zermelo/CompareBoatSpeedLink.svg"</span><span class="p">,</span>
+<span class="linenos">233</span>                <span class="n">dpi</span> <span class="o">=</span> <span class="mi">500</span><span class="p">)</span>
+<span class="linenos">234</span>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="linenos">235</span>
+<span class="linenos">236</span>
+<span class="linenos">237</span><span class="c1">################################################################################</span>
+<span class="linenos">238</span><span class="c1">## Compare Wind Models</span>
+<span class="linenos">239</span><span class="k">def</span><span class="w"> </span><span class="nf">compareWind</span><span class="p">():</span>
+<span class="linenos">240</span>    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">241</span>    <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="linenos">242</span>    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="linenos">243</span>    <span class="n">D</span> <span class="o">=</span> <span class="n">A</span>
+<span class="linenos">244</span>    <span class="n">vM</span> <span class="o">=</span> <span class="mf">1.5</span>
+<span class="linenos">245</span>
+<span class="linenos">246</span>    <span class="n">test1</span> <span class="o">=</span> <span class="n">navigate</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">],</span> <span class="n">vM</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">noWind</span><span class="p">)</span>
+<span class="linenos">247</span>    <span class="n">test2</span> <span class="o">=</span> <span class="n">navigate</span><span class="p">(</span>
+<span class="linenos">248</span>        <span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">],</span>
+<span class="linenos">249</span>        <span class="n">vM</span><span class="o">=</span><span class="n">vM</span><span class="p">,</span>
+<span class="linenos">250</span>        <span class="n">wF</span><span class="o">=</span><span class="k">lambda</span> <span class="n">xyt</span><span class="p">:</span> <span class="n">uniformWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">,</span> <span class="n">vel</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span>
+<span class="linenos">251</span>    <span class="p">)</span>
+<span class="linenos">252</span>    <span class="n">test3</span> <span class="o">=</span> <span class="n">navigate</span><span class="p">(</span>
+<span class="linenos">253</span>        <span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">],</span>
+<span class="linenos">254</span>        <span class="n">vM</span><span class="o">=</span><span class="n">vM</span><span class="p">,</span>
+<span class="linenos">255</span>        <span class="n">wF</span><span class="o">=</span><span class="n">constantDirWind</span><span class="p">,</span>
+<span class="linenos">256</span>    <span class="p">)</span>
+<span class="linenos">257</span>    <span class="n">test4</span> <span class="o">=</span> <span class="n">navigate</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">],</span> <span class="n">vM</span><span class="o">=</span><span class="n">vM</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">variableDirWind</span><span class="p">)</span>
+<span class="linenos">258</span>
+<span class="linenos">259</span>    <span class="n">plot2DTrajList</span><span class="p">(</span>
+<span class="linenos">260</span>        <span class="p">[</span>
+<span class="linenos">261</span>            <span class="n">test1</span><span class="p">,</span>
+<span class="linenos">262</span>            <span class="n">test2</span><span class="p">,</span>
+<span class="linenos">263</span>            <span class="n">test3</span><span class="p">,</span>
+<span class="linenos">264</span>            <span class="n">test4</span><span class="p">,</span>
+<span class="linenos">265</span>        <span class="p">],</span>
+<span class="linenos">266</span>    <span class="p">)</span>
+<span class="linenos">267</span>
+<span class="linenos">268</span>
+<span class="linenos">269</span><span class="c1">################################################################################</span>
+<span class="linenos">270</span><span class="c1">## Compare Boat Speed</span>
+<span class="linenos">271</span><span class="k">def</span><span class="w"> </span><span class="nf">compareSpeed</span><span class="p">():</span>
+<span class="linenos">272</span>    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="linenos">273</span>    <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="linenos">274</span>    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+<span class="linenos">275</span>    <span class="n">D</span> <span class="o">=</span> <span class="n">A</span>
+<span class="linenos">276</span>
+<span class="linenos">277</span>    <span class="n">vMRange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1.85</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<span class="linenos">278</span>    <span class="n">trajs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">279</span>    <span class="k">for</span> <span class="n">vM</span> <span class="ow">in</span> <span class="n">vMRange</span><span class="p">:</span>
+<span class="linenos">280</span>        <span class="n">trajs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">navigate</span><span class="p">([</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">],</span> <span class="n">vM</span><span class="o">=</span><span class="n">vM</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">variableDirWind</span><span class="p">))</span>
+<span class="linenos">281</span>
+<span class="linenos">282</span>    <span class="n">vdwx</span><span class="p">,</span> <span class="n">vdwy</span> <span class="o">=</span> <span class="n">variableDirWind</span><span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="linenos">283</span>
+<span class="linenos">284</span>    <span class="n">plot2DTrajListVF</span><span class="p">(</span>
+<span class="linenos">285</span>        <span class="n">trajs</span><span class="p">,</span>
+<span class="linenos">286</span>        <span class="k">lambda</span> <span class="n">xyt</span><span class="p">:</span> <span class="p">(</span><span class="n">vdwx</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">xyt</span><span class="p">),</span> <span class="n">vdwy</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">xyt</span><span class="p">)),</span>
+<span class="linenos">287</span>    <span class="p">)</span>
+<span class="linenos">288</span>
+<span class="linenos">289</span>
+<span class="linenos">290</span><span class="c1">################################################################################</span>
+<span class="linenos">291</span><span class="c1">## Main</span>
+<span class="linenos">292</span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="linenos">293</span>    <span class="n">compareWind</span><span class="p">()</span>
+<span class="linenos">294</span>    <span class="n">compareSpeed</span><span class="p">()</span>
+<span class="linenos">295</span>
+<span class="linenos">296</span>
+<span class="linenos">297</span><span class="c1">################################################################################</span>
+<span class="linenos">298</span><span class="c1">## Run</span>
+<span class="linenos">299</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<span class="linenos">300</span>    <span class="n">main</span><span class="p">()</span>
+<span class="linenos">301</span>
 </pre></div>
 </div>
+</div>
+</section>
 </section>
 </section>
 
@@ -704,12 +709,12 @@ We defined the initial points such that the boat maneuvers back to the initial s
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="MultiTarg.html">
+          <a class="next-page" href="../python/python.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Multi-Spacecraft Optimization</div>
+                <div class="title">Python Library Documentation</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -755,8 +760,10 @@ We defined the initial points such that the boat maneuvers back to the initial s
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Multi-Phase Zermelo’s Problem</a><ul>
-<li><a class="reference internal" href="#link-constraints">Link Constraints:</a></li>
+<li><a class="reference internal" href="#link-constraints">Link Constraints:</a><ul>
 <li><a class="reference internal" href="#full-code">Full Code</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
