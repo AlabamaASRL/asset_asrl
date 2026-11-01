@@ -1,3 +1,4 @@
+```cmake
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/OptimalControl)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Solvers)
@@ -9,33 +10,46 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Integrators)
 include_directories(${PROJECT_SOURCE_DIR}/extensions)
 
 
+# =============================================================================
+# ASSET INCLUDE DIRECTORIES
+# =============================================================================
 
 set(ASSET_INCLUDES
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}/OptimalControl
-  ${CMAKE_CURRENT_SOURCE_DIR}/Solvers
-  ${CMAKE_CURRENT_SOURCE_DIR}/TypeDefs
-  ${CMAKE_CURRENT_SOURCE_DIR}/Utils
-  ${CMAKE_CURRENT_SOURCE_DIR}/VectorFunctions
-  ${CMAKE_CURRENT_SOURCE_DIR}/Integrators
-  PARENT_SCOPE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/OptimalControl
+    ${CMAKE_CURRENT_SOURCE_DIR}/Solvers
+    ${CMAKE_CURRENT_SOURCE_DIR}/TypeDefs
+    ${CMAKE_CURRENT_SOURCE_DIR}/Utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/VectorFunctions
+    ${CMAKE_CURRENT_SOURCE_DIR}/Integrators
+    PARENT_SCOPE
 )
 
-#-------------------------------------------------------------------------------
-## PCH
-add_library(pch STATIC pch.h pch.cpp  )
-target_precompile_headers(pch PRIVATE pch.h 
-VectorFunctions/ASSET_VectorFunctions.h)
+
+# =============================================================================
+# PRECOMPILED HEADERS
+# =============================================================================
+
+add_library(pch STATIC
+    pch.h
+    pch.cpp
+)
+
+target_precompile_headers(pch PRIVATE
+    pch.h
+    VectorFunctions/ASSET_VectorFunctions.h
+)
 
 target_include_directories(pch PRIVATE ${INCLUDE_DIRS})
-#target_link_libraries(pch PRIVATE fmt::fmt-header-only)
 target_compile_options(pch PUBLIC ${COMPILE_FLAGS})
 
 
-## Put all ".h"/".cpp" pairs here
-# Example: add_library(myODE STATIC odes/myode.h odes/myode.cpp)
+# =============================================================================
+# VECTOR FUNCTIONS
+# =============================================================================
 
-add_library(vectorfunctions STATIC VectorFunctions/ASSET_VectorFunctions.h
+add_library(vectorfunctions STATIC
+    VectorFunctions/ASSET_VectorFunctions.h
     VectorFunctions/ASSET_VectorFunctions.cpp
     VectorFunctions/VectorFunctionBuildPart1.cpp
     VectorFunctions/VectorFunctionBuildPart2.cpp
@@ -48,107 +62,143 @@ add_library(vectorfunctions STATIC VectorFunctions/ASSET_VectorFunctions.h
     VectorFunctions/FreeFunctionsBuild.cpp
     VectorFunctions/MatrixFunctionBuild.cpp
     VectorFunctions/PythonArgParsing.cpp
-    )
+)
+
 target_include_directories(vectorfunctions PRIVATE ${INCLUDE_DIRS})
 target_compile_options(vectorfunctions PUBLIC ${COMPILE_FLAGS})
 target_precompile_headers(vectorfunctions REUSE_FROM pch)
-    
 
 
+# =============================================================================
+# OPTIMAL CONTROL
+# =============================================================================
 
-
-
-add_library(optimalcontrol STATIC OptimalControl/ASSET_OptimalControl.h
-OptimalControl/ASSET_OptimalControl.cpp
-OptimalControl/ODEPhaseBase.h
-OptimalControl/ODEPhaseBase.cpp
-OptimalControl/ODEPhaseBaseBind.cpp
-OptimalControl/GenericODESBuildPart1.cpp
-OptimalControl/GenericODESBuildPart2.cpp
-OptimalControl/GenericODESBuildPart3.cpp
-OptimalControl/GenericODESBuildPart4.cpp
-OptimalControl/GenericODESBuildPart5.cpp
-OptimalControl/GenericODESBuildPart6.cpp
-OptimalControl/PhaseIndexer.h
-OptimalControl/PhaseIndexer.cpp
-OptimalControl/OptimalControlProblem.h
-OptimalControl/OptimalControlProblem.cpp
-OptimalControl/OptimalControlProblemBind.cpp
-OptimalControl/LGLInterpTable.h
-OptimalControl/LGLInterpTable.cpp
+add_library(optimalcontrol STATIC
+    OptimalControl/ASSET_OptimalControl.h
+    OptimalControl/ASSET_OptimalControl.cpp
+    OptimalControl/ODEPhaseBase.h
+    OptimalControl/ODEPhaseBase.cpp
+    OptimalControl/ODEPhaseBaseBind.cpp
+    OptimalControl/GenericODESBuildPart1.cpp
+    OptimalControl/GenericODESBuildPart2.cpp
+    OptimalControl/GenericODESBuildPart3.cpp
+    OptimalControl/GenericODESBuildPart4.cpp
+    OptimalControl/GenericODESBuildPart5.cpp
+    OptimalControl/GenericODESBuildPart6.cpp
+    OptimalControl/PhaseIndexer.h
+    OptimalControl/PhaseIndexer.cpp
+    OptimalControl/OptimalControlProblem.h
+    OptimalControl/OptimalControlProblem.cpp
+    OptimalControl/OptimalControlProblemBind.cpp
+    OptimalControl/LGLInterpTable.h
+    OptimalControl/LGLInterpTable.cpp
 )
 
 target_include_directories(optimalcontrol PRIVATE ${INCLUDE_DIRS})
 target_precompile_headers(optimalcontrol REUSE_FROM pch)
-
 target_compile_options(optimalcontrol PUBLIC ${COMPILE_FLAGS})
-  
 
 
-
-
-
+# =============================================================================
+# PSIOPT SOLVER
+# =============================================================================
 
 add_library(psiopt STATIC
-  Solvers/PSIOPT.h Solvers/PSIOPT.cpp
-  Solvers/NonLinearProgram.h Solvers/NonLinearProgram.cpp
-  Solvers/Jet.h Solvers/Jet.cpp
-  Solvers/OptimizationProblemBase.h Solvers/OptimizationProblemBase.cpp
-  Solvers/OptimizationProblem.h Solvers/OptimizationProblem.cpp
- )
+    Solvers/PSIOPT.h
+    Solvers/PSIOPT.cpp
+    Solvers/NonLinearProgram.h
+    Solvers/NonLinearProgram.cpp
+    Solvers/Jet.h
+    Solvers/Jet.cpp
+    Solvers/OptimizationProblemBase.h
+    Solvers/OptimizationProblemBase.cpp
+    Solvers/OptimizationProblem.h
+    Solvers/OptimizationProblem.cpp
+)
+
 target_include_directories(psiopt PRIVATE ${INCLUDE_DIRS})
 target_compile_options(psiopt PUBLIC ${COMPILE_FLAGS})
 
 
+# =============================================================================
+# UTILITIES
+# =============================================================================
 
 add_library(utils STATIC
-  Utils/ColorText.h Utils/ColorText.cpp
-  Utils/GetCoreCount.h Utils/GetCoreCount.cpp
-  Utils/MemoryManagement.h Utils/MemoryManagement.cpp
- )
+    Utils/ColorText.h
+    Utils/ColorText.cpp
+    Utils/GetCoreCount.h
+    Utils/GetCoreCount.cpp
+    Utils/MemoryManagement.h
+    Utils/MemoryManagement.cpp
+)
+
 target_include_directories(utils PRIVATE ${INCLUDE_DIRS})
 target_compile_options(utils PUBLIC ${COMPILE_FLAGS})
 target_link_libraries(utils PRIVATE fmt::fmt-header-only)
 
 
+# =============================================================================
+# STANDALONE GRAVITY COEFFICIENT READER
+#
+# Independent C++ utility for reading spherical harmonic gravity coefficients.
+# Does not use the ASSET precompiled header or FunctionRegistry.
+# =============================================================================
+
+add_library(gravitycoefficientreader STATIC
+    Astro/GravityCoefficientReader.h
+    Astro/GravityCoefficientReader.cpp
+)
+
+target_include_directories(gravitycoefficientreader
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Astro
+)
+
+target_compile_options(gravitycoefficientreader
+    PUBLIC ${COMPILE_FLAGS}
+)
+
+
+# =============================================================================
+# ASTRO
+# =============================================================================
+
 add_library(astro STATIC
-  Astro/ASSET_Astro.h 
-  Astro/ASSET_Astro.cpp
-  Astro/KeplerUtils.h 
-  Astro/KeplerUtils.cpp
-  Astro/KeplerModel.h 
-  Astro/KeplerModel.cpp
-  Astro/LambertSolvers.h
-  Astro/LambertSolvers.cpp
-  Astro/PinesGravity.cpp
-  Astro/PinesGravityModel.cpp
-  Astro/PinesGravityModel.h
-  Astro/GravityCoefficientReader.cpp
-  Astro/GravityCoefficientReader.h)
+    Astro/ASSET_Astro.h
+    Astro/ASSET_Astro.cpp
+    Astro/KeplerUtils.h
+    Astro/KeplerUtils.cpp
+    Astro/KeplerModel.h
+    Astro/KeplerModel.cpp
+    Astro/LambertSolvers.h
+    Astro/LambertSolvers.cpp
+    Astro/PinesGravity.cpp
+    Astro/PinesGravityModel.cpp
+    Astro/PinesGravityModel.h
+)
 
 target_precompile_headers(astro REUSE_FROM pch)
+
 target_include_directories(astro PRIVATE ${INCLUDE_DIRS})
 target_compile_options(astro PUBLIC ${COMPILE_FLAGS})
 
+# Pines and other Astro components can use the standalone coefficient reader.
+target_link_libraries(astro PUBLIC gravitycoefficientreader)
 
 
+# =============================================================================
+# ASSET PYTHON MODULE
+# =============================================================================
 
+pybind11_add_module(asset
+    main.cpp
+)
 
-#---------------------------------------------------------------------------------
+target_compile_options(asset PUBLIC ${COMPILE_FLAGS})
 
-
-
-
-
-#-------------------------------------------------------------------------------
-## ASSET Python Module
-pybind11_add_module(asset main.cpp)
-
-
-target_compile_options(asset PUBLIC  ${COMPILE_FLAGS})
 target_link_libraries(asset PUBLIC psiopt)
 target_link_libraries(asset PUBLIC utils)
-
 target_link_libraries(asset PUBLIC optimalcontrol)
 target_link_libraries(asset PUBLIC vectorfunctions)
 target_link_libraries(asset PUBLIC astro)
@@ -156,33 +206,50 @@ target_link_libraries(asset PUBLIC asset_extensions)
 
 target_include_directories(asset PRIVATE ${INCLUDE_DIRS})
 target_link_libraries(asset PRIVATE ${LINK_LIBS})
-#set_target_properties(asset PROPERTIES CXX_VISIBILITY_PRESET hidden)
+
 
 if(UNIX)
     target_link_options(asset PRIVATE ${LINKER_FLAGS})
 endif()
 
-add_custom_target(pyassetsrc ALL DEPENDS ${CMAKE_SOURCE_DIR}/asset_asrl)
+
+# =============================================================================
+# PYTHON SOURCE INSTALLATION
+# =============================================================================
+
+add_custom_target(pyassetsrc ALL
+    DEPENDS ${CMAKE_SOURCE_DIR}/asset_asrl
+)
 
 
-message(STATUS "CMAKE DIR LOC" ${CMAKE_CURRENT_SOURCE_DIR})
-message(STATUS "CMAKE PROJ LOC" ${CMAKE_SOURCE_DIR})
+message(STATUS "CMAKE DIR LOC ${CMAKE_CURRENT_SOURCE_DIR}")
+message(STATUS "CMAKE PROJ LOC ${CMAKE_SOURCE_DIR}")
+
 
 if(PYTHON_LOCAL_INSTALL_DIR)
+
     add_custom_command(TARGET asset POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:asset> ${PYTHON_LOCAL_INSTALL_DIR}/
-    COMMENT "Copied asset.pyd to ${PYTHON_LOCAL_INSTALL_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy
+            $<TARGET_FILE:asset>
+            ${PYTHON_LOCAL_INSTALL_DIR}/
+        COMMENT "Copied asset.pyd to ${PYTHON_LOCAL_INSTALL_DIR}"
     )
+
     message(STATUS "Cleaning pyasset install directory")
 
     add_custom_command(TARGET pyassetsrc POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E rm -rf ${PYTHON_LOCAL_INSTALL_DIR}/asset_asrl
-                    COMMENT "Cleaning asset_asrl install directory")
+        COMMAND ${CMAKE_COMMAND} -E rm -rf
+            ${PYTHON_LOCAL_INSTALL_DIR}/asset_asrl
+        COMMENT "Cleaning asset_asrl install directory"
+    )
 
     add_custom_command(TARGET pyassetsrc POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_SOURCE_DIR}/asset_asrl
-                                                ${PYTHON_LOCAL_INSTALL_DIR}/asset_asrl
-                    DEPENDS ${CMAKE_SOURCE_DIR}/asset_asrl
-                    COMMENT "Copied asset_asrl to ${PYTHON_LOCAL_INSTALL_DIR}")
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/asset_asrl
+            ${PYTHON_LOCAL_INSTALL_DIR}/asset_asrl
+        DEPENDS ${CMAKE_SOURCE_DIR}/asset_asrl
+        COMMENT "Copied asset_asrl to ${PYTHON_LOCAL_INSTALL_DIR}/asset_asrl"
+    )
 
 endif()
+```
