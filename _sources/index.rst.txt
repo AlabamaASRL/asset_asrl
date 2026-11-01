@@ -28,13 +28,6 @@ A newly developed high-performance interior-point optimizer (PSIOPT) is included
 
 .. toctree::
     :maxdepth: 2
-    :caption: Additional Examples:
-
-    examples/ParallelParking
-    examples/PinesGravity
-
-.. toctree::
-    :maxdepth: 2
     :caption: Contributing:
 
     contrib
