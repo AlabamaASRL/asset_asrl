@@ -7,7 +7,7 @@
         <link rel="prefetch" href="../_static/ASSETLOGO.svg" as="image">
 
     <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
-        <title>Minimum-Time Parallel Parking - ASSET 0.5.2 documentation</title>
+        <title>Cart-Pole Swing Up - ASSET 0.5.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -212,7 +212,7 @@
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="examples.html">Examples</a><input aria-label="Toggle navigation of Examples" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Minimum-Time Parallel Parking</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Cart-Pole Swing Up</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="HyperSensitive.html">Hyper-Sensitive Optimal Control Problem</a></li>
 <li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Multi-Spacecraft Optimization</a></li>
@@ -278,750 +278,370 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="minimum-time-parallel-parking">
-<h1>Minimum-Time Parallel Parking<a class="headerlink" href="#minimum-time-parallel-parking" title="Link to this heading">¶</a></h1>
-<p>In this example, we solve a minimum-time parallel parking problem using
-ASSET’s optimal control framework. The problem is derived from the ICLOCS
-parallel parking example [1], which is based on Case 7 in Table 2 of the
-referenced research paper [2].</p>
-<p>The vehicle is modeled using a kinematic bicycle model. The optimization
-determines the vehicle motion and control inputs required to move from an
-initial position on the roadway into a parallel parking space while satisfying
-vehicle dynamics, state and control bounds, roadway boundaries, and
-collision-avoidance constraints.</p>
-<p>The initial conditions used in this implementation follow the referenced
-research paper. The resulting maneuver time is compared with the reported
-reference value of 18.426 seconds.</p>
-<section id="problem-setup">
-<h2>Problem Setup<a class="headerlink" href="#problem-setup" title="Link to this heading">¶</a></h2>
-<p>The parking space and roadway dimensions are defined below.</p>
+          <section id="cart-pole-swing-up">
+<h1>Cart-Pole Swing Up<a class="headerlink" href="#cart-pole-swing-up" title="Link to this heading">¶</a></h1>
+<p>In this example, derived from Kelly’s excellent intro to collocation methods [1], we will compute the minimum effort trajectory to swing a cart-pole system to a vertical orientation.
+The cart with mass, <span class="math notranslate nohighlight">\(m_1\)</span>, is free to move along a horizontal track in the <span class="math notranslate nohighlight">\(x\)</span> direction subject to an applied force, <span class="math notranslate nohighlight">\(F\)</span>.
+The angular position, <span class="math notranslate nohighlight">\(\theta\)</span>, of the attached pole with length, <span class="math notranslate nohighlight">\(l\)</span>, and mass, <span class="math notranslate nohighlight">\(m_2\)</span>, is measured from the <span class="math notranslate nohighlight">\(-y\)</span> direction.
+The dynamics of the combined cart-pole system can be represented as a system of first order ODE’s as shown below.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[L_s = 5.0\;m \quad\quad W_s = 2.0\;m \quad\quad W_r = 3.5\;m\]</div>
+\[ \begin{align}\begin{aligned}\vec{X} = [x,\theta,\dot{x},\dot{\theta}]^T \quad \quad \vec{U} = [F]\\\begin{split}
+\dot{\vec{X}}=\begin{bmatrix}
+                \dot{x}\\
+                \dot{\theta}\\
+                \ddot{x}\\
+                \ddot{\theta}\\
+                \end{bmatrix}
+                = \begin{bmatrix}
+                \dot{x}\\
+                \dot{\theta}\\
+                \textbf{M}^{-1} \vec{Q}
+                \end{bmatrix}\end{split}\end{aligned}\end{align} \]</div>
 </div>
-<p>where <span class="math notranslate nohighlight">\(L_s\)</span> is the parking-space length, <span class="math notranslate nohighlight">\(W_s\)</span> is the
-parking-space width, and <span class="math notranslate nohighlight">\(W_r\)</span> is the roadway boundary.</p>
-<p>The vehicle dimensions are:</p>
+<p>The matrix, <span class="math notranslate nohighlight">\(\textbf{M}\)</span>, and vector, <span class="math notranslate nohighlight">\(\vec{Q}\)</span>, necessary for computing the second time derivatives of <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(\theta\)</span>, can be found by straightforward
+application of Newtonian or Lagrangian mechanics.
+Since <span class="math notranslate nohighlight">\(\textbf{M}\)</span> is a 2 by 2 matrix it is easy to derive an explicit formula for <span class="math notranslate nohighlight">\(\ddot{x}\)</span> and <span class="math notranslate nohighlight">\(\ddot{\theta}\)</span> [1]. However, in this example, we leave the dynamics
+in implicit matrix form in order to demonstrate ASSET’s differentiable matrix inverse expressions.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[l_f = 0.839\;m \quad\quad L = 2.588\;m
-\quad\quad l_r = 0.657\;m \quad\quad b = 0.8855\;m\]</div>
+\[\begin{split}\textbf{M} = \begin{bmatrix}
+\cos(\theta) &amp; l \\
+m_1 +m_2 &amp; m_2 l \cos(\theta)
+\end{bmatrix}
+\quad \quad
+\vec{Q} = \begin{bmatrix}
+-g \sin(\theta)  \\
+F + l m_2 \sin(\theta) \dot{\theta}^2
+\end{bmatrix}\end{split}\]</div>
 </div>
-<p>where <span class="math notranslate nohighlight">\(l_f\)</span> is the front overhang, <span class="math notranslate nohighlight">\(L\)</span> is the wheelbase,
-<span class="math notranslate nohighlight">\(l_r\)</span> is the rear overhang, and <span class="math notranslate nohighlight">\(b\)</span> is the vehicle half-width.</p>
-</section>
-<section id="vehicle-dynamics">
-<h2>Vehicle Dynamics<a class="headerlink" href="#vehicle-dynamics" title="Link to this heading">¶</a></h2>
-<p>The vehicle state vector is</p>
+<p>The cart/pole masses, boundary conditions, and path constraints used by Kelly [1] are shown below.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[\vec{X} =
-[x,y,v,a,\theta,\phi]^T\]</div>
+\[m_1 = 1\;kg\quad\quad m_2 = .3\;kg\quad\quad l = .5\; m \quad \quad g = 9.81 \; m/s^2\]</div>
 </div>
-<p>where <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> are the rear-axle position coordinates,
-<span class="math notranslate nohighlight">\(v\)</span> is the longitudinal velocity, <span class="math notranslate nohighlight">\(a\)</span> is the longitudinal
-acceleration, <span class="math notranslate nohighlight">\(\theta\)</span> is the vehicle heading angle, and <span class="math notranslate nohighlight">\(\phi\)</span>
-is the steering angle.</p>
-<p>The control vector is</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[\vec{U} = [j,\dot{\phi}]^T\]</div>
+\[ \begin{align}\begin{aligned}x(0) = 0\; m \quad \quad \theta(0)  &amp;= 0 \; rad   \quad \quad \dot{x}(0)&amp;= 0\; m/s  \quad \quad \dot{\theta}(0)=0 \; rad/s\\
+x(1) = 1\; m \quad \quad \theta(1)  &amp;= \pi \; rad   \quad \quad \dot{x}(1)&amp;= 0\; m/s  \quad \quad \dot{\theta}(1)=0 \; rad/s\end{aligned}\end{align} \]</div>
 </div>
-<p>where <span class="math notranslate nohighlight">\(j\)</span> is longitudinal jerk and <span class="math notranslate nohighlight">\(\dot{\phi}\)</span> is the steering
-rate.</p>
-<p>The equations of motion are</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[\begin{split}\dot{x} &amp;= v\cos(\theta), \\
-\dot{y} &amp;= v\sin(\theta), \\
-\dot{v} &amp;= a, \\
-\dot{a} &amp;= j, \\
-\dot{\theta} &amp;= \frac{v\tan(\phi)}{L}, \\
-\dot{\phi} &amp;= \dot{\phi}.\end{split}\]</div>
+\[-2\;m \leq x(t)\leq 2\;m  \quad \quad   -20\;N \leq F(t)\leq 20\;N\]</div>
 </div>
-<p>The vehicle is implemented as an ASSET <code class="docutils literal notranslate"><span class="pre">ODEBase</span></code> model. The four vehicle
-corners are defined in the body-fixed frame and transformed into the inertial
-frame using the vehicle heading angle.</p>
-</section>
-<section id="parking-space-boundary">
-<h2>Parking-Space Boundary<a class="headerlink" href="#parking-space-boundary" title="Link to this heading">¶</a></h2>
-<p>A smoothed Heaviside function is used to represent the parking-space boundary:</p>
+<p>The minimum effort trajectory is obtained by minimizing the integral of the square of the force applied to the cart.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[H(x,k) = \frac{1+\tanh(kx)}{2}\]</div>
+\[J = \int_0^1 F(t)^2 \;dt\]</div>
 </div>
-<p>where <span class="math notranslate nohighlight">\(k\)</span> controls the smoothing of the transition.</p>
-<p>The lower parking-space boundary is defined as</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[y_s(x) =
-\left[-H(x,k)+H(x-L_s,k)\right]W_s.\]</div>
-</div>
-<p>This provides a smooth representation of the parking-space entrance and exit
-boundaries.</p>
-</section>
-<section id="initial-conditions">
-<h2>Initial Conditions<a class="headerlink" href="#initial-conditions" title="Link to this heading">¶</a></h2>
-<p>The initial position and heading follow the referenced research paper.</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}x(0) = -5.14\;m \quad\quad y(0) = 1.41\;m\\\theta(0) = 13.18^\circ\\v(0) = 0 \quad\quad a(0) = 0 \quad\quad \phi(0) = 0\end{aligned}\end{align} \]</div>
-</div>
-<p>The initial trajectory guess is constructed using a sequence of intermediate
-vehicle positions, heading angles, and time values.</p>
-</section>
-<section id="constraints">
-<h2>Constraints<a class="headerlink" href="#constraints" title="Link to this heading">¶</a></h2>
-<p>The optimization enforces the following constraints:</p>
-<ul class="simple">
-<li><p>The initial vehicle state is fixed.</p></li>
-<li><p>The final vehicle velocity and acceleration are zero.</p></li>
-<li><p>All vehicle corners remain within the roadway and parking-space boundaries.</p></li>
-<li><p>The final vehicle corners lie within the parking-space width.</p></li>
-<li><p>Collision-avoidance constraints prevent intersection with the two upper
-parking-space entrance corners.</p></li>
-<li><p>Vehicle state and control variables remain within their specified bounds.</p></li>
-<li><p>The vehicle curvature rate remains bounded.</p></li>
-</ul>
-<p>The state and control limits are</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}|\phi| \leq 33^\circ\\|v| \leq 2.0\;m/s\\|a| \leq 0.75\;m/s^2\\|j| \leq 0.5\;m/s^3\\|\dot{\kappa}| \leq 0.6\end{aligned}\end{align} \]</div>
-</div>
-<p>The curvature rate is calculated as</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[\dot{\kappa} =
-\frac{\dot{\phi}}{L\cos^2(\phi)}.\]</div>
-</div>
-</section>
-<section id="optimization">
-<h2>Optimization<a class="headerlink" href="#optimization" title="Link to this heading">¶</a></h2>
-<p>The minimum-time maneuver is obtained by minimizing the final time:</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[J = t_f\]</div>
-</div>
-<p>The problem is transcribed using ASSET’s LGL5 discretization and block-constant
-control parameterization.</p>
-<p>The initial optimization uses 50 mesh segments and a smoothing parameter of
-75. After the first optimization, the trajectory is refined to 200 segments
-and the smoothing parameter is increased to 150.</p>
-<p>The optimizer is configured with a maximum of 2000 iterations and a bound
-fraction of 0.995. The refined optimization uses a KKT tolerance of
-<span class="math notranslate nohighlight">\(10^{-8}\)</span>.</p>
-</section>
-<section id="trajectory-reintegration">
-<h2>Trajectory Reintegration<a class="headerlink" href="#trajectory-reintegration" title="Link to this heading">¶</a></h2>
-<p>After optimization, the trajectory is independently reintegrated using the
-vehicle model. The integration step size is 0.1 seconds, and 500 dense
-trajectory points are generated.</p>
-<p>The optimized and reintegrated terminal states are compared using</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[\Delta \vec{X}_f =
-\vec{X}_{f,\mathrm{optimized}} -
-\vec{X}_{f,\mathrm{reintegrated}}.\]</div>
-</div>
-<p>The norm of the terminal-state difference is also reported.</p>
-</section>
-<section id="results">
-<h2>Results<a class="headerlink" href="#results" title="Link to this heading">¶</a></h2>
-<p>The optimized maneuver time is compared against the reference maneuver time
-of 18.426 seconds.</p>
-<p>The relative maneuver-time difference is calculated as</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[\Delta t_{\%} =
-100\frac{t_{\mathrm{ASSET}}-t_{\mathrm{reference}}}
-{t_{\mathrm{reference}}}.\]</div>
-</div>
-<p>The example prints the following results:</p>
-<ul class="simple">
-<li><p>ASSET maneuver time.</p></li>
-<li><p>Reference maneuver time.</p></li>
-<li><p>Absolute maneuver-time difference.</p></li>
-<li><p>Relative maneuver-time difference.</p></li>
-<li><p>Optimized versus reintegrated terminal-state difference.</p></li>
-<li><p>Norm of the terminal-state difference.</p></li>
-</ul>
-<p>The numerical optimization results are generated when the Python example is
-executed.</p>
-</section>
-<section id="trajectory-visualization">
-<h2>Trajectory Visualization<a class="headerlink" href="#trajectory-visualization" title="Link to this heading">¶</a></h2>
-<p>The example plots the initial trajectory guess and the optimized vehicle
-trajectory. The vehicle body, wheels, and axle locations are displayed along
-with the roadway and parking-space boundaries.</p>
-<p>An animation of the independently reintegrated trajectory is also generated.
-The animation displays the vehicle motion, trajectory history, and current
-simulation time.</p>
-</section>
-<section id="running-the-example">
-<h2>Running the Example<a class="headerlink" href="#running-the-example" title="Link to this heading">¶</a></h2>
-<p>Run the Python example from the repository root:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>examples/ParallelParking.py
+<p>The cart-pole dynamics can be implemented as an ASSET ODE as shown below. Here we use ASSET’s matrix functions to construct a row-major view of the coefficients of <span class="math notranslate nohighlight">\(\textbf{M}\)</span>.
+We can then invert this expression and multiply by <span class="math notranslate nohighlight">\(\vec{Q}\)</span>, to define <span class="math notranslate nohighlight">\(\ddot{x}\)</span> and <span class="math notranslate nohighlight">\(\ddot{\theta}\)</span>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">CartPole</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">g</span><span class="p">):</span>
+        <span class="n">Xvars</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1">####################################################</span>
+        <span class="n">XtU</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">Xvars</span><span class="p">,</span><span class="n">Uvars</span><span class="p">)</span>
+
+        <span class="n">x</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">xdot</span><span class="p">,</span><span class="n">thetadot</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVar</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="o">-</span><span class="n">g</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span>
+                        <span class="n">F</span><span class="o">+</span><span class="n">m2</span><span class="o">*</span><span class="n">l</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">thetadot</span><span class="o">**</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">Mvec_rm</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span><span class="n">l</span><span class="p">,</span>
+                            <span class="n">m1</span><span class="o">+</span><span class="n">m2</span><span class="p">,</span><span class="n">m2</span><span class="o">*</span><span class="n">l</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
+
+        <span class="n">M</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">RowMatrix</span><span class="p">(</span><span class="n">Mvec_rm</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">xddot_thetaddot</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span><span class="o">*</span><span class="n">Q</span>
+
+        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">xdot</span><span class="p">,</span><span class="n">thetadot</span><span class="p">,</span><span class="n">xddot_thetaddot</span><span class="p">])</span>
+        <span class="c1">####################################################</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="n">Xvars</span><span class="p">,</span><span class="n">Uvars</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The example requires ASSET, NumPy, and Matplotlib. FFmpeg is additionally
-required if the animation is saved as an MP4 file.</p>
-</section>
-<section id="full-code">
-<h2>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h2>
-<p>The complete Python implementation is included below.</p>
-<div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">ParallelParking.py</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="linenos">  2</span><span class="sd">"""</span>
-<span class="linenos">  3</span><span class="sd">Minimum-Time Parallel Parking Example Using ASSET</span>
-<span class="linenos">  4</span>
-<span class="linenos">  5</span><span class="sd">This example solves a minimum-time parallel parking problem using ASSET's</span>
-<span class="linenos">  6</span><span class="sd">optimal control framework.</span>
-<span class="linenos">  7</span>
-<span class="linenos">  8</span><span class="sd">The problem is derived from the ICLOCS parallel parking example:</span>
-<span class="linenos">  9</span>
-<span class="linenos"> 10</span><span class="sd">    http://www.ee.ic.ac.uk/ICLOCS/ExampleParallelParking.html</span>
-<span class="linenos"> 11</span>
-<span class="linenos"> 12</span><span class="sd">The ICLOCS example is based on Case 7 in Table 2 of:</span>
-<span class="linenos"> 13</span>
-<span class="linenos"> 14</span><span class="sd">    https://ieeexplore.ieee.org/document/7463491</span>
-<span class="linenos"> 15</span>
-<span class="linenos"> 16</span><span class="sd">The initial conditions used here follow the referenced research paper.</span>
-<span class="linenos"> 17</span><span class="sd">The resulting maneuver time is compared with the reported value of</span>
-<span class="linenos"> 18</span><span class="sd">18.426 seconds.</span>
-<span class="linenos"> 19</span><span class="sd">"""</span>
-<span class="linenos"> 20</span>
-<span class="linenos"> 21</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="linenos"> 22</span><span class="kn">import</span><span class="w"> </span><span class="nn">asset_asrl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
-<span class="linenos"> 23</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="linenos"> 24</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.animation</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">animation</span>
-<span class="linenos"> 25</span>
-<span class="linenos"> 26</span><span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span>
-<span class="linenos"> 27</span>
-<span class="linenos"> 28</span><span class="n">vf</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
-<span class="linenos"> 29</span><span class="n">oc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
-<span class="linenos"> 30</span><span class="n">args</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
-<span class="linenos"> 31</span>
-<span class="linenos"> 32</span>
-<span class="linenos"> 33</span><span class="k">def</span><span class="w"> </span><span class="nf">corner_location</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">loc_x</span><span class="p">,</span> <span class="n">loc_y</span><span class="p">):</span>
-<span class="linenos"> 34</span><span class="w">    </span><span class="sd">"""Rotate a body-frame point by the vehicle heading angle."""</span>
-<span class="linenos"> 35</span>    <span class="n">x_rotated</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">loc_x</span> <span class="o">-</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">loc_y</span>
-<span class="linenos"> 36</span>    <span class="n">y_rotated</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">loc_x</span> <span class="o">+</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">loc_y</span>
-<span class="linenos"> 37</span>    <span class="k">return</span> <span class="n">x_rotated</span><span class="p">,</span> <span class="n">y_rotated</span>
-<span class="linenos"> 38</span>
-<span class="linenos"> 39</span>
-<span class="linenos"> 40</span><span class="k">def</span><span class="w"> </span><span class="nf">heaviside</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-<span class="linenos"> 41</span><span class="w">    </span><span class="sd">"""Smooth approximation of the Heaviside step function."""</span>
-<span class="linenos"> 42</span>    <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">vf</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">x</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span>
-<span class="linenos"> 43</span>
-<span class="linenos"> 44</span>
-<span class="linenos"> 45</span><span class="k">def</span><span class="w"> </span><span class="nf">parking_slot_boundary</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">slot_length</span><span class="p">,</span> <span class="n">slot_width</span><span class="p">):</span>
-<span class="linenos"> 46</span><span class="w">    </span><span class="sd">"""Return the smoothed lower boundary of the parking space."""</span>
-<span class="linenos"> 47</span>    <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="n">heaviside</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="o">+</span> <span class="n">heaviside</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">slot_length</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span> <span class="o">*</span> <span class="n">slot_width</span>
-<span class="linenos"> 48</span>
-<span class="linenos"> 49</span>
-<span class="linenos"> 50</span><span class="k">def</span><span class="w"> </span><span class="nf">triangle_area</span><span class="p">(</span><span class="n">point_a</span><span class="p">,</span> <span class="n">point_b</span><span class="p">,</span> <span class="n">point_c</span><span class="p">):</span>
-<span class="linenos"> 51</span><span class="w">    </span><span class="sd">"""Calculate the area of a triangle using its vertex coordinates."""</span>
-<span class="linenos"> 52</span>    <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">point_a</span>
-<span class="linenos"> 53</span>    <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">point_b</span>
-<span class="linenos"> 54</span>    <span class="n">x3</span><span class="p">,</span> <span class="n">y3</span> <span class="o">=</span> <span class="n">point_c</span>
-<span class="linenos"> 55</span>    <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x1</span> <span class="o">*</span> <span class="p">(</span><span class="n">y2</span> <span class="o">-</span> <span class="n">y3</span><span class="p">)</span> <span class="o">+</span> <span class="n">x2</span> <span class="o">*</span> <span class="p">(</span><span class="n">y3</span> <span class="o">-</span> <span class="n">y1</span><span class="p">)</span> <span class="o">+</span> <span class="n">x3</span> <span class="o">*</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y2</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span>
-<span class="linenos"> 56</span>
-<span class="linenos"> 57</span>
-<span class="linenos"> 58</span><span class="k">class</span><span class="w"> </span><span class="nc">CarODE</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
-<span class="linenos"> 59</span><span class="w">    </span><span class="sd">"""Kinematic bicycle model with vehicle geometry constraints."""</span>
-<span class="linenos"> 60</span>
-<span class="linenos"> 61</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l_front</span><span class="p">,</span> <span class="n">l_axes</span><span class="p">,</span> <span class="n">l_rear</span><span class="p">,</span> <span class="n">b_width</span><span class="p">):</span>
-<span class="linenos"> 62</span><span class="w">        </span><span class="sd">"""Initialize the vehicle dimensions and equations of motion."""</span>
-<span class="linenos"> 63</span>
-<span class="linenos"> 64</span>        <span class="bp">self</span><span class="o">.</span><span class="n">l_front</span> <span class="o">=</span> <span class="n">l_front</span>
-<span class="linenos"> 65</span>        <span class="bp">self</span><span class="o">.</span><span class="n">l_axes</span> <span class="o">=</span> <span class="n">l_axes</span>
-<span class="linenos"> 66</span>        <span class="bp">self</span><span class="o">.</span><span class="n">l_rear</span> <span class="o">=</span> <span class="n">l_rear</span>
-<span class="linenos"> 67</span>        <span class="bp">self</span><span class="o">.</span><span class="n">b_width</span> <span class="o">=</span> <span class="n">b_width</span>
-<span class="linenos"> 68</span>
-<span class="linenos"> 69</span>        <span class="bp">self</span><span class="o">.</span><span class="n">area_reference</span> <span class="o">=</span> <span class="p">(</span><span class="n">l_axes</span> <span class="o">+</span> <span class="n">l_front</span> <span class="o">+</span> <span class="n">l_rear</span><span class="p">)</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">b_width</span>
-<span class="linenos"> 70</span>
-<span class="linenos"> 71</span>        <span class="c1"># Vehicle corners in the body frame, measured from the rear axle.</span>
-<span class="linenos"> 72</span>        <span class="bp">self</span><span class="o">.</span><span class="n">corner_a</span> <span class="o">=</span> <span class="p">[</span><span class="n">l_front</span> <span class="o">+</span> <span class="n">l_axes</span><span class="p">,</span> <span class="n">b_width</span><span class="p">]</span>
-<span class="linenos"> 73</span>        <span class="bp">self</span><span class="o">.</span><span class="n">corner_b</span> <span class="o">=</span> <span class="p">[</span><span class="n">l_front</span> <span class="o">+</span> <span class="n">l_axes</span><span class="p">,</span> <span class="o">-</span><span class="n">b_width</span><span class="p">]</span>
-<span class="linenos"> 74</span>        <span class="bp">self</span><span class="o">.</span><span class="n">corner_c</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">l_rear</span><span class="p">,</span> <span class="n">b_width</span><span class="p">]</span>
-<span class="linenos"> 75</span>        <span class="bp">self</span><span class="o">.</span><span class="n">corner_d</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">l_rear</span><span class="p">,</span> <span class="o">-</span><span class="n">b_width</span><span class="p">]</span>
-<span class="linenos"> 76</span>        <span class="bp">self</span><span class="o">.</span><span class="n">corners</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">corner_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">corner_b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">corner_c</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">corner_d</span><span class="p">]</span>
-<span class="linenos"> 77</span>
-<span class="linenos"> 78</span>        <span class="n">state_control</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="linenos"> 79</span>        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">phi</span> <span class="o">=</span> <span class="n">state_control</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="linenos"> 80</span>        <span class="n">jerk</span><span class="p">,</span> <span class="n">steering_rate</span> <span class="o">=</span> <span class="n">state_control</span><span class="o">.</span><span class="n">UVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="linenos"> 81</span>
-<span class="linenos"> 82</span>        <span class="n">x_dot</span> <span class="o">=</span> <span class="n">velocity</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-<span class="linenos"> 83</span>        <span class="n">y_dot</span> <span class="o">=</span> <span class="n">velocity</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-<span class="linenos"> 84</span>        <span class="n">velocity_dot</span> <span class="o">=</span> <span class="n">acceleration</span>
-<span class="linenos"> 85</span>        <span class="n">acceleration_dot</span> <span class="o">=</span> <span class="n">jerk</span>
-<span class="linenos"> 86</span>        <span class="n">theta_dot</span> <span class="o">=</span> <span class="n">velocity</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_axes</span>
-<span class="linenos"> 87</span>        <span class="n">phi_dot</span> <span class="o">=</span> <span class="n">steering_rate</span>
-<span class="linenos"> 88</span>
-<span class="linenos"> 89</span>        <span class="n">dynamics</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">x_dot</span><span class="p">,</span> <span class="n">y_dot</span><span class="p">,</span> <span class="n">velocity_dot</span><span class="p">,</span> <span class="n">acceleration_dot</span><span class="p">,</span> <span class="n">theta_dot</span><span class="p">,</span> <span class="n">phi_dot</span><span class="p">])</span>
-<span class="linenos"> 90</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dynamics</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="linenos"> 91</span>
-<span class="linenos"> 92</span>    <span class="k">def</span><span class="w"> </span><span class="nf">slot_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot_length</span><span class="p">,</span> <span class="n">slot_width</span><span class="p">,</span> <span class="n">curb_width</span><span class="p">):</span>
-<span class="linenos"> 93</span><span class="w">        </span><span class="sd">"""Constrain all vehicle corners to remain within the roadway and parking-space boundaries."""</span>
-<span class="linenos"> 94</span>
-<span class="linenos"> 95</span>        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">smoothing</span> <span class="o">=</span> <span class="n">args</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="linenos"> 96</span>        <span class="n">constraints</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="linenos"> 97</span>
-<span class="linenos"> 98</span>        <span class="k">for</span> <span class="n">loc_x</span><span class="p">,</span> <span class="n">loc_y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">corners</span><span class="p">:</span>
-<span class="linenos"> 99</span>            <span class="n">rotated_x</span><span class="p">,</span> <span class="n">rotated_y</span> <span class="o">=</span> <span class="n">corner_location</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">loc_x</span><span class="p">,</span> <span class="n">loc_y</span><span class="p">)</span>
-<span class="linenos">100</span>            <span class="n">corner_x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">rotated_x</span>
-<span class="linenos">101</span>            <span class="n">corner_y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">rotated_y</span>
-<span class="linenos">102</span>
-<span class="linenos">103</span>            <span class="n">upper_boundary</span> <span class="o">=</span> <span class="n">corner_y</span> <span class="o">-</span> <span class="n">curb_width</span>
-<span class="linenos">104</span>            <span class="n">lower_boundary</span> <span class="o">=</span> <span class="o">-</span><span class="n">corner_y</span> <span class="o">+</span> <span class="n">parking_slot_boundary</span><span class="p">(</span><span class="n">corner_x</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">,</span> <span class="n">slot_length</span><span class="p">,</span> <span class="n">slot_width</span><span class="p">)</span>
-<span class="linenos">105</span>
-<span class="linenos">106</span>            <span class="n">constraints</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">upper_boundary</span><span class="p">,</span> <span class="n">lower_boundary</span><span class="p">])</span>
-<span class="linenos">107</span>
-<span class="linenos">108</span>        <span class="k">return</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">constraints</span><span class="p">)</span>
-<span class="linenos">109</span>
-<span class="linenos">110</span>    <span class="k">def</span><span class="w"> </span><span class="nf">corner_collision_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slot_length</span><span class="p">):</span>
-<span class="linenos">111</span><span class="w">        </span><span class="sd">"""Prevent collisions with the two upper corners of the parking-space entrance."""</span>
-<span class="linenos">112</span>
-<span class="linenos">113</span>        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="n">args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="linenos">114</span>        <span class="n">slot_corner_left</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
-<span class="linenos">115</span>        <span class="n">slot_corner_right</span> <span class="o">=</span> <span class="p">[</span><span class="n">slot_length</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
-<span class="linenos">116</span>
-<span class="linenos">117</span>        <span class="n">vehicle_corners</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="linenos">118</span>
-<span class="linenos">119</span>        <span class="k">for</span> <span class="n">loc_x</span><span class="p">,</span> <span class="n">loc_y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">corners</span><span class="p">:</span>
-<span class="linenos">120</span>            <span class="n">rotated_x</span><span class="p">,</span> <span class="n">rotated_y</span> <span class="o">=</span> <span class="n">corner_location</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">loc_x</span><span class="p">,</span> <span class="n">loc_y</span><span class="p">)</span>
-<span class="linenos">121</span>            <span class="n">vehicle_corners</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x</span> <span class="o">+</span> <span class="n">rotated_x</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">rotated_y</span><span class="p">])</span>
-<span class="linenos">122</span>
-<span class="linenos">123</span>        <span class="n">corner_a</span><span class="p">,</span> <span class="n">corner_b</span><span class="p">,</span> <span class="n">corner_c</span><span class="p">,</span> <span class="n">corner_d</span> <span class="o">=</span> <span class="n">vehicle_corners</span>
-<span class="linenos">124</span>
-<span class="linenos">125</span>        <span class="n">left_areas</span> <span class="o">=</span> <span class="p">[</span>
-<span class="linenos">126</span>            <span class="n">triangle_area</span><span class="p">(</span><span class="n">slot_corner_left</span><span class="p">,</span> <span class="n">corner_a</span><span class="p">,</span> <span class="n">corner_b</span><span class="p">),</span>
-<span class="linenos">127</span>            <span class="n">triangle_area</span><span class="p">(</span><span class="n">slot_corner_left</span><span class="p">,</span> <span class="n">corner_c</span><span class="p">,</span> <span class="n">corner_b</span><span class="p">),</span>
-<span class="linenos">128</span>            <span class="n">triangle_area</span><span class="p">(</span><span class="n">slot_corner_left</span><span class="p">,</span> <span class="n">corner_a</span><span class="p">,</span> <span class="n">corner_d</span><span class="p">),</span>
-<span class="linenos">129</span>            <span class="n">triangle_area</span><span class="p">(</span><span class="n">slot_corner_left</span><span class="p">,</span> <span class="n">corner_d</span><span class="p">,</span> <span class="n">corner_c</span><span class="p">),</span>
-<span class="linenos">130</span>        <span class="p">]</span>
-<span class="linenos">131</span>
-<span class="linenos">132</span>        <span class="n">right_areas</span> <span class="o">=</span> <span class="p">[</span>
-<span class="linenos">133</span>            <span class="n">triangle_area</span><span class="p">(</span><span class="n">slot_corner_right</span><span class="p">,</span> <span class="n">corner_a</span><span class="p">,</span> <span class="n">corner_b</span><span class="p">),</span>
-<span class="linenos">134</span>            <span class="n">triangle_area</span><span class="p">(</span><span class="n">slot_corner_right</span><span class="p">,</span> <span class="n">corner_c</span><span class="p">,</span> <span class="n">corner_b</span><span class="p">),</span>
-<span class="linenos">135</span>            <span class="n">triangle_area</span><span class="p">(</span><span class="n">slot_corner_right</span><span class="p">,</span> <span class="n">corner_a</span><span class="p">,</span> <span class="n">corner_d</span><span class="p">),</span>
-<span class="linenos">136</span>            <span class="n">triangle_area</span><span class="p">(</span><span class="n">slot_corner_right</span><span class="p">,</span> <span class="n">corner_d</span><span class="p">,</span> <span class="n">corner_c</span><span class="p">),</span>
-<span class="linenos">137</span>        <span class="p">]</span>
-<span class="linenos">138</span>
-<span class="linenos">139</span>        <span class="n">constraint_left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_reference</span> <span class="o">-</span> <span class="n">vf</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">left_areas</span><span class="p">)</span>
-<span class="linenos">140</span>        <span class="n">constraint_right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_reference</span> <span class="o">-</span> <span class="n">vf</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">right_areas</span><span class="p">)</span>
-<span class="linenos">141</span>
-<span class="linenos">142</span>        <span class="k">return</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">constraint_left</span><span class="p">,</span> <span class="n">constraint_right</span><span class="p">)</span>
-<span class="linenos">143</span>
-<span class="linenos">144</span>    <span class="k">def</span><span class="w"> </span><span class="nf">final_y_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos">145</span><span class="w">        </span><span class="sd">"""Constrain all four vehicle corners to lie within the parking-space width."""</span>
-<span class="linenos">146</span>
-<span class="linenos">147</span>        <span class="n">y</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="n">args</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="linenos">148</span>        <span class="n">constraints</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="linenos">149</span>
-<span class="linenos">150</span>        <span class="k">for</span> <span class="n">loc_x</span><span class="p">,</span> <span class="n">loc_y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">corners</span><span class="p">:</span>
-<span class="linenos">151</span>            <span class="n">_</span><span class="p">,</span> <span class="n">rotated_y</span> <span class="o">=</span> <span class="n">corner_location</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">loc_x</span><span class="p">,</span> <span class="n">loc_y</span><span class="p">)</span>
-<span class="linenos">152</span>            <span class="n">constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span> <span class="o">+</span> <span class="n">rotated_y</span><span class="p">)</span>
-<span class="linenos">153</span>
-<span class="linenos">154</span>        <span class="k">return</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">constraints</span><span class="p">)</span>
-<span class="linenos">155</span>
-<span class="linenos">156</span>    <span class="k">def</span><span class="w"> </span><span class="nf">curvature_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos">157</span><span class="w">        </span><span class="sd">"""Return the rate of change of vehicle curvature."""</span>
-<span class="linenos">158</span>
-<span class="linenos">159</span>        <span class="n">phi</span><span class="p">,</span> <span class="n">steering_rate</span> <span class="o">=</span> <span class="n">args</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="linenos">160</span>        <span class="k">return</span> <span class="n">steering_rate</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">l_axes</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
-<span class="linenos">161</span>
-<span class="linenos">162</span>
-<span class="linenos">163</span><span class="k">def</span><span class="w"> </span><span class="nf">make_state</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">theta_degrees</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
-<span class="linenos">164</span><span class="w">    </span><span class="sd">"""Construct an ASSET state-control vector for the initial guess."""</span>
-<span class="linenos">165</span>
-<span class="linenos">166</span>    <span class="n">state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
-<span class="linenos">167</span>    <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
-<span class="linenos">168</span>    <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
-<span class="linenos">169</span>    <span class="n">state</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">theta_degrees</span><span class="p">)</span>
-<span class="linenos">170</span>    <span class="n">state</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span>
-<span class="linenos">171</span>
-<span class="linenos">172</span>    <span class="k">return</span> <span class="n">state</span>
-<span class="linenos">173</span>
-<span class="linenos">174</span>
-<span class="linenos">175</span><span class="k">def</span><span class="w"> </span><span class="nf">rotation_matrix</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
-<span class="linenos">176</span><span class="w">    </span><span class="sd">"""Return a two-dimensional rotation matrix."""</span>
-<span class="linenos">177</span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)],</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)]])</span>
-<span class="linenos">178</span>
-<span class="linenos">179</span>
-<span class="linenos">180</span><span class="k">def</span><span class="w"> </span><span class="nf">transform_point</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">local_point</span><span class="p">):</span>
-<span class="linenos">181</span><span class="w">    </span><span class="sd">"""Transform a body-frame point into the inertial frame."""</span>
-<span class="linenos">182</span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">position</span><span class="p">)</span> <span class="o">+</span> <span class="n">rotation_matrix</span><span class="p">(</span><span class="n">heading</span><span class="p">)</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">local_point</span><span class="p">)</span>
-<span class="linenos">183</span>
-<span class="linenos">184</span>
-<span class="linenos">185</span><span class="k">def</span><span class="w"> </span><span class="nf">vehicle_body_points</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-<span class="linenos">186</span><span class="w">    </span><span class="sd">"""Return the vehicle body polygon in inertial coordinates."""</span>
-<span class="linenos">187</span>
-<span class="linenos">188</span>    <span class="n">position</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
-<span class="linenos">189</span>    <span class="n">heading</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
-<span class="linenos">190</span>    <span class="n">local_points</span> <span class="o">=</span> <span class="p">[</span><span class="n">vehicle</span><span class="o">.</span><span class="n">corner_a</span><span class="p">,</span> <span class="n">vehicle</span><span class="o">.</span><span class="n">corner_c</span><span class="p">,</span> <span class="n">vehicle</span><span class="o">.</span><span class="n">corner_d</span><span class="p">,</span> <span class="n">vehicle</span><span class="o">.</span><span class="n">corner_b</span><span class="p">]</span>
-<span class="linenos">191</span>
-<span class="linenos">192</span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">transform_point</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">point</span><span class="p">)</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">local_points</span><span class="p">])</span>
-<span class="linenos">193</span>
-<span class="linenos">194</span>
-<span class="linenos">195</span><span class="k">def</span><span class="w"> </span><span class="nf">wheel_points</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">axle_position</span><span class="p">,</span> <span class="n">steering_angle</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
-<span class="linenos">196</span><span class="w">    </span><span class="sd">"""Return the four corners of a wheel in inertial coordinates."""</span>
-<span class="linenos">197</span>
-<span class="linenos">198</span>    <span class="n">position</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
-<span class="linenos">199</span>    <span class="n">heading</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
-<span class="linenos">200</span>    <span class="n">wheel_length</span> <span class="o">=</span> <span class="mf">0.30</span>
-<span class="linenos">201</span>    <span class="n">wheel_width</span> <span class="o">=</span> <span class="mf">0.12</span>
-<span class="linenos">202</span>
-<span class="linenos">203</span>    <span class="n">local_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-<span class="linenos">204</span>        <span class="p">[</span><span class="n">wheel_length</span><span class="p">,</span> <span class="n">wheel_width</span><span class="p">],</span>
-<span class="linenos">205</span>        <span class="p">[</span><span class="o">-</span><span class="n">wheel_length</span><span class="p">,</span> <span class="n">wheel_width</span><span class="p">],</span>
-<span class="linenos">206</span>        <span class="p">[</span><span class="o">-</span><span class="n">wheel_length</span><span class="p">,</span> <span class="o">-</span><span class="n">wheel_width</span><span class="p">],</span>
-<span class="linenos">207</span>        <span class="p">[</span><span class="n">wheel_length</span><span class="p">,</span> <span class="o">-</span><span class="n">wheel_width</span><span class="p">],</span>
-<span class="linenos">208</span>    <span class="p">])</span>
-<span class="linenos">209</span>
-<span class="linenos">210</span>    <span class="n">rotated_points</span> <span class="o">=</span> <span class="p">(</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">steering_angle</span><span class="p">)</span> <span class="o">@</span> <span class="n">local_points</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-<span class="linenos">211</span>    <span class="n">wheel_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">axle_position</span><span class="p">)</span>
-<span class="linenos">212</span>
-<span class="linenos">213</span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">transform_point</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">wheel_center</span> <span class="o">+</span> <span class="n">point</span><span class="p">)</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">rotated_points</span><span class="p">])</span>
-<span class="linenos">214</span>
-<span class="linenos">215</span>
-<span class="linenos">216</span><span class="k">def</span><span class="w"> </span><span class="nf">vehicle_wheel_geometry</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-<span class="linenos">217</span><span class="w">    </span><span class="sd">"""Return the front and rear wheel polygons."""</span>
-<span class="linenos">218</span>
-<span class="linenos">219</span>    <span class="n">axle_width</span> <span class="o">=</span> <span class="n">vehicle</span><span class="o">.</span><span class="n">b_width</span> <span class="o">/</span> <span class="mf">1.5</span>
-<span class="linenos">220</span>    <span class="n">rear_centers</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">axle_width</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">axle_width</span><span class="p">]]</span>
-<span class="linenos">221</span>    <span class="n">front_centers</span> <span class="o">=</span> <span class="p">[[</span><span class="n">vehicle</span><span class="o">.</span><span class="n">l_axes</span><span class="p">,</span> <span class="n">axle_width</span><span class="p">],</span> <span class="p">[</span><span class="n">vehicle</span><span class="o">.</span><span class="n">l_axes</span><span class="p">,</span> <span class="o">-</span><span class="n">axle_width</span><span class="p">]]</span>
-<span class="linenos">222</span>
-<span class="linenos">223</span>    <span class="n">rear_wheels</span> <span class="o">=</span> <span class="p">[</span><span class="n">wheel_points</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">center</span><span class="p">)</span> <span class="k">for</span> <span class="n">center</span> <span class="ow">in</span> <span class="n">rear_centers</span><span class="p">]</span>
-<span class="linenos">224</span>    <span class="n">front_wheels</span> <span class="o">=</span> <span class="p">[</span><span class="n">wheel_points</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">state</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span> <span class="k">for</span> <span class="n">center</span> <span class="ow">in</span> <span class="n">front_centers</span><span class="p">]</span>
-<span class="linenos">225</span>
-<span class="linenos">226</span>    <span class="k">return</span> <span class="n">rear_wheels</span><span class="p">,</span> <span class="n">front_wheels</span>
-<span class="linenos">227</span>
-<span class="linenos">228</span>
-<span class="linenos">229</span><span class="k">def</span><span class="w"> </span><span class="nf">vehicle_axle_geometry</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-<span class="linenos">230</span><span class="w">    </span><span class="sd">"""Return the rear and front axle line segments."""</span>
-<span class="linenos">231</span>
-<span class="linenos">232</span>    <span class="n">position</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
-<span class="linenos">233</span>    <span class="n">heading</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
-<span class="linenos">234</span>    <span class="n">axle_width</span> <span class="o">=</span> <span class="n">vehicle</span><span class="o">.</span><span class="n">b_width</span> <span class="o">/</span> <span class="mf">1.5</span>
-<span class="linenos">235</span>
-<span class="linenos">236</span>    <span class="n">rear_axle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-<span class="linenos">237</span>        <span class="n">transform_point</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">axle_width</span><span class="p">]),</span>
-<span class="linenos">238</span>        <span class="n">transform_point</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">axle_width</span><span class="p">]),</span>
-<span class="linenos">239</span>    <span class="p">])</span>
-<span class="linenos">240</span>
-<span class="linenos">241</span>    <span class="n">front_axle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-<span class="linenos">242</span>        <span class="n">transform_point</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="p">[</span><span class="n">vehicle</span><span class="o">.</span><span class="n">l_axes</span><span class="p">,</span> <span class="n">axle_width</span><span class="p">]),</span>
-<span class="linenos">243</span>        <span class="n">transform_point</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="p">[</span><span class="n">vehicle</span><span class="o">.</span><span class="n">l_axes</span><span class="p">,</span> <span class="o">-</span><span class="n">axle_width</span><span class="p">]),</span>
-<span class="linenos">244</span>    <span class="p">])</span>
-<span class="linenos">245</span>
-<span class="linenos">246</span>    <span class="k">return</span> <span class="n">rear_axle</span><span class="p">,</span> <span class="n">front_axle</span>
-<span class="linenos">247</span>
-<span class="linenos">248</span>
-<span class="linenos">249</span><span class="k">def</span><span class="w"> </span><span class="nf">plot_slot</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">,</span> <span class="n">slot_length</span><span class="p">,</span> <span class="n">slot_width</span><span class="p">,</span> <span class="n">curb_width</span><span class="p">,</span> <span class="n">x_limits</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">8.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">)):</span>
-<span class="linenos">250</span><span class="w">    </span><span class="sd">"""Plot the roadway, parking space, and smoothed slot boundary."""</span>
-<span class="linenos">251</span>
-<span class="linenos">252</span>    <span class="n">x_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x_limits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x_limits</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2000</span><span class="p">)</span>
-<span class="linenos">253</span>    <span class="n">step_left</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">smoothing</span> <span class="o">*</span> <span class="n">x_values</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.0</span>
-<span class="linenos">254</span>    <span class="n">step_right</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">smoothing</span> <span class="o">*</span> <span class="p">(</span><span class="n">x_values</span> <span class="o">-</span> <span class="n">slot_length</span><span class="p">)))</span> <span class="o">/</span> <span class="mf">2.0</span>
-<span class="linenos">255</span>    <span class="n">y_values</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">step_left</span> <span class="o">+</span> <span class="n">step_right</span><span class="p">)</span> <span class="o">*</span> <span class="n">slot_width</span>
-<span class="linenos">256</span>
-<span class="linenos">257</span>    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"red"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Parking boundary"</span><span class="p">)</span>
-<span class="linenos">258</span>    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">x_values</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">curb_width</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"grey"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Roadway"</span><span class="p">)</span>
-<span class="linenos">259</span>    <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"green"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Parking space"</span><span class="p">)</span>
-<span class="linenos">260</span>    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_limits</span><span class="p">,</span> <span class="p">[</span><span class="n">curb_width</span><span class="p">,</span> <span class="n">curb_width</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"red"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
-<span class="linenos">261</span>
-<span class="linenos">262</span>
-<span class="linenos">263</span><span class="k">def</span><span class="w"> </span><span class="nf">plot_vehicle</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"blue"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-<span class="linenos">264</span><span class="w">    </span><span class="sd">"""Plot the vehicle body, wheels, and axles at one trajectory point."""</span>
-<span class="linenos">265</span>
-<span class="linenos">266</span>    <span class="n">body</span> <span class="o">=</span> <span class="n">vehicle_body_points</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
-<span class="linenos">267</span>    <span class="n">ax</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">body</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">body</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">facecolor</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Vehicle"</span><span class="p">)</span>
-<span class="linenos">268</span>
-<span class="linenos">269</span>    <span class="n">rear_wheels</span><span class="p">,</span> <span class="n">front_wheels</span> <span class="o">=</span> <span class="n">vehicle_wheel_geometry</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
-<span class="linenos">270</span>
-<span class="linenos">271</span>    <span class="k">for</span> <span class="n">wheel</span> <span class="ow">in</span> <span class="n">rear_wheels</span> <span class="o">+</span> <span class="n">front_wheels</span><span class="p">:</span>
-<span class="linenos">272</span>        <span class="n">ax</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">wheel</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">wheel</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
-<span class="linenos">273</span>
-<span class="linenos">274</span>    <span class="n">rear_axle</span><span class="p">,</span> <span class="n">front_axle</span> <span class="o">=</span> <span class="n">vehicle_axle_geometry</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
-<span class="linenos">275</span>
-<span class="linenos">276</span>    <span class="k">for</span> <span class="n">axle</span> <span class="ow">in</span> <span class="p">[</span><span class="n">rear_axle</span><span class="p">,</span> <span class="n">front_axle</span><span class="p">]:</span>
-<span class="linenos">277</span>        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">axle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">axle</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
-<span class="linenos">278</span>
-<span class="linenos">279</span>
-<span class="linenos">280</span><span class="k">def</span><span class="w"> </span><span class="nf">plot_trajectory</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">,</span> <span class="n">slot_length</span><span class="p">,</span> <span class="n">slot_width</span><span class="p">,</span> <span class="n">curb_width</span><span class="p">,</span> <span class="n">x_limits</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">6.3</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)):</span>
-<span class="linenos">281</span><span class="w">    </span><span class="sd">"""Plot the roadway, parking space, and vehicle trajectory."""</span>
-<span class="linenos">282</span>
-<span class="linenos">283</span>    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-<span class="linenos">284</span>    <span class="n">plot_slot</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">,</span> <span class="n">slot_length</span><span class="p">,</span> <span class="n">slot_width</span><span class="p">,</span> <span class="n">curb_width</span><span class="p">,</span> <span class="n">x_limits</span><span class="p">)</span>
-<span class="linenos">285</span>
-<span class="linenos">286</span>    <span class="n">colors</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">"viridis"</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)))</span>
-<span class="linenos">287</span>
-<span class="linenos">288</span>    <span class="k">for</span> <span class="n">state</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">colors</span><span class="p">):</span>
-<span class="linenos">289</span>        <span class="n">plot_vehicle</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.85</span><span class="p">)</span>
-<span class="linenos">290</span>
-<span class="linenos">291</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$X$ (m)"</span><span class="p">)</span>
-<span class="linenos">292</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$Y$ (m)"</span><span class="p">)</span>
-<span class="linenos">293</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Parallel Parking Trajectory"</span><span class="p">)</span>
-<span class="linenos">294</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">"equal"</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s2">"box"</span><span class="p">)</span>
-<span class="linenos">295</span>    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
-<span class="linenos">296</span>    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="linenos">297</span>    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-<span class="linenos">298</span>
-<span class="linenos">299</span>    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span>
-<span class="linenos">300</span>
-<span class="linenos">301</span>
-<span class="linenos">302</span><span class="k">def</span><span class="w"> </span><span class="nf">animate_trajectory</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">,</span> <span class="n">slot_length</span><span class="p">,</span> <span class="n">slot_width</span><span class="p">,</span> <span class="n">curb_width</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">"parallel_parking.mp4"</span><span class="p">):</span>
-<span class="linenos">303</span><span class="w">    </span><span class="sd">"""Animate the vehicle maneuver and its trajectory history."""</span>
-<span class="linenos">304</span>
-<span class="linenos">305</span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-<span class="linenos">306</span>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The trajectory must contain at least two states."</span><span class="p">)</span>
-<span class="linenos">307</span>
-<span class="linenos">308</span>    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">15.5</span><span class="p">,</span> <span class="mf">7.5</span><span class="p">))</span>
-<span class="linenos">309</span>    <span class="n">plot_slot</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">,</span> <span class="n">slot_length</span><span class="p">,</span> <span class="n">slot_width</span><span class="p">,</span> <span class="n">curb_width</span><span class="p">,</span> <span class="n">x_limits</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">8.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">))</span>
-<span class="linenos">310</span>
-<span class="linenos">311</span>    <span class="n">body_patch</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">closed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">"royalblue"</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Vehicle"</span><span class="p">)</span>
-<span class="linenos">312</span>    <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">body_patch</span><span class="p">)</span>
-<span class="linenos">313</span>
-<span class="linenos">314</span>    <span class="n">wheel_patches</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="linenos">315</span>
-<span class="linenos">316</span>    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
-<span class="linenos">317</span>        <span class="n">wheel_patch</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">closed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">"black"</span><span class="p">)</span>
-<span class="linenos">318</span>        <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">wheel_patch</span><span class="p">)</span>
-<span class="linenos">319</span>        <span class="n">wheel_patches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wheel_patch</span><span class="p">)</span>
-<span class="linenos">320</span>
-<span class="linenos">321</span>    <span class="n">rear_axle_line</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
-<span class="linenos">322</span>    <span class="n">front_axle_line</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
-<span class="linenos">323</span>    <span class="n">trajectory_line</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"blue"</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">"dotted"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Trajectory"</span><span class="p">)</span>
-<span class="linenos">324</span>    <span class="n">current_position</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"o"</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">"none"</span><span class="p">)</span>
-<span class="linenos">325</span>    <span class="n">time_text</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s2">"top"</span><span class="p">)</span>
-<span class="linenos">326</span>
-<span class="linenos">327</span>    <span class="n">artists</span> <span class="o">=</span> <span class="p">[</span><span class="n">body_patch</span><span class="p">,</span> <span class="o">*</span><span class="n">wheel_patches</span><span class="p">,</span> <span class="n">rear_axle_line</span><span class="p">,</span> <span class="n">front_axle_line</span><span class="p">,</span> <span class="n">trajectory_line</span><span class="p">,</span> <span class="n">current_position</span><span class="p">,</span> <span class="n">time_text</span><span class="p">]</span>
-<span class="linenos">328</span>
-<span class="linenos">329</span>    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">():</span>
-<span class="linenos">330</span><span class="w">        </span><span class="sd">"""Initialize all animation artists."""</span>
-<span class="linenos">331</span>
-<span class="linenos">332</span>        <span class="n">body_patch</span><span class="o">.</span><span class="n">set_xy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
-<span class="linenos">333</span>
-<span class="linenos">334</span>        <span class="k">for</span> <span class="n">wheel</span> <span class="ow">in</span> <span class="n">wheel_patches</span><span class="p">:</span>
-<span class="linenos">335</span>            <span class="n">wheel</span><span class="o">.</span><span class="n">set_xy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
-<span class="linenos">336</span>
-<span class="linenos">337</span>        <span class="n">rear_axle_line</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],</span> <span class="p">[])</span>
-<span class="linenos">338</span>        <span class="n">front_axle_line</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],</span> <span class="p">[])</span>
-<span class="linenos">339</span>        <span class="n">trajectory_line</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],</span> <span class="p">[])</span>
-<span class="linenos">340</span>        <span class="n">current_position</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],</span> <span class="p">[])</span>
-<span class="linenos">341</span>        <span class="n">time_text</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
-<span class="linenos">342</span>
-<span class="linenos">343</span>        <span class="k">return</span> <span class="n">artists</span>
-<span class="linenos">344</span>
-<span class="linenos">345</span>    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
-<span class="linenos">346</span><span class="w">        </span><span class="sd">"""Update the vehicle geometry for one animation frame."""</span>
-<span class="linenos">347</span>
-<span class="linenos">348</span>        <span class="n">state</span> <span class="o">=</span> <span class="n">trajectory</span><span class="p">[</span><span class="n">frame</span><span class="p">]</span>
-<span class="linenos">349</span>        <span class="n">position</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
-<span class="linenos">350</span>        <span class="n">body</span> <span class="o">=</span> <span class="n">vehicle_body_points</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
-<span class="linenos">351</span>        <span class="n">body_patch</span><span class="o">.</span><span class="n">set_xy</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-<span class="linenos">352</span>
-<span class="linenos">353</span>        <span class="n">rear_wheels</span><span class="p">,</span> <span class="n">front_wheels</span> <span class="o">=</span> <span class="n">vehicle_wheel_geometry</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
-<span class="linenos">354</span>
-<span class="linenos">355</span>        <span class="k">for</span> <span class="n">wheel_patch</span><span class="p">,</span> <span class="n">wheel_geometry</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">wheel_patches</span><span class="p">,</span> <span class="n">rear_wheels</span> <span class="o">+</span> <span class="n">front_wheels</span><span class="p">):</span>
-<span class="linenos">356</span>            <span class="n">wheel_patch</span><span class="o">.</span><span class="n">set_xy</span><span class="p">(</span><span class="n">wheel_geometry</span><span class="p">)</span>
-<span class="linenos">357</span>
-<span class="linenos">358</span>        <span class="n">rear_axle</span><span class="p">,</span> <span class="n">front_axle</span> <span class="o">=</span> <span class="n">vehicle_axle_geometry</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
-<span class="linenos">359</span>        <span class="n">rear_axle_line</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">rear_axle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">rear_axle</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="linenos">360</span>        <span class="n">front_axle_line</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">front_axle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">front_axle</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="linenos">361</span>
-<span class="linenos">362</span>        <span class="n">trajectory_history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">sample</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">trajectory</span><span class="p">[:</span><span class="n">frame</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]])</span>
-<span class="linenos">363</span>        <span class="n">trajectory_line</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">trajectory_history</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">trajectory_history</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="linenos">364</span>        <span class="n">current_position</span><span class="o">.</span><span class="n">set_data</span><span class="p">([</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
-<span class="linenos">365</span>        <span class="n">time_text</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Time = </span><span class="si">{</span><span class="n">state</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> s"</span><span class="p">)</span>
-<span class="linenos">366</span>
-<span class="linenos">367</span>        <span class="k">return</span> <span class="n">artists</span>
-<span class="linenos">368</span>
-<span class="linenos">369</span>    <span class="n">duration</span> <span class="o">=</span> <span class="n">trajectory</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">-</span> <span class="n">trajectory</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span>
-<span class="linenos">370</span>    <span class="n">interval</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1000.0</span> <span class="o">*</span> <span class="n">duration</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
-<span class="linenos">371</span>
-<span class="linenos">372</span>    <span class="n">ani</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">FuncAnimation</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">trajectory</span><span class="p">),</span> <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span> <span class="n">blit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">init_func</span><span class="o">=</span><span class="n">initialize</span><span class="p">,</span> <span class="n">repeat_delay</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
-<span class="linenos">373</span>
-<span class="linenos">374</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$X$ (m)"</span><span class="p">)</span>
-<span class="linenos">375</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$Y$ (m)"</span><span class="p">)</span>
-<span class="linenos">376</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Minimum-Time Parallel Parking Maneuver"</span><span class="p">)</span>
-<span class="linenos">377</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="o">-</span><span class="mf">6.1</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">])</span>
-<span class="linenos">378</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="o">-</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">])</span>
-<span class="linenos">379</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">"equal"</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s2">"box"</span><span class="p">)</span>
-<span class="linenos">380</span>    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
-<span class="linenos">381</span>    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="linenos">382</span>
-<span class="linenos">383</span>    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-<span class="linenos">384</span>
-<span class="linenos">385</span>    <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
-<span class="linenos">386</span>        <span class="n">writer</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">FFMpegWriter</span><span class="p">(</span><span class="n">fps</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-<span class="linenos">387</span>        <span class="n">ani</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="n">writer</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
-<span class="linenos">388</span>
-<span class="linenos">389</span>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-<span class="linenos">390</span>
-<span class="linenos">391</span>    <span class="k">return</span> <span class="n">ani</span>
-<span class="linenos">392</span>
-<span class="linenos">393</span>
-<span class="linenos">394</span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-<span class="linenos">395</span><span class="w">    </span><span class="sd">"""Construct, solve, and visualize the parallel parking problem."""</span>
-<span class="linenos">396</span>
-<span class="linenos">397</span>    <span class="c1"># Parking-space dimensions.</span>
-<span class="linenos">398</span>    <span class="n">slot_length</span> <span class="o">=</span> <span class="mf">5.0</span>
-<span class="linenos">399</span>    <span class="n">slot_width</span> <span class="o">=</span> <span class="mf">2.0</span>
-<span class="linenos">400</span>    <span class="n">curb_width</span> <span class="o">=</span> <span class="mf">3.5</span>
-<span class="linenos">401</span>
-<span class="linenos">402</span>    <span class="c1"># Vehicle dimensions.</span>
-<span class="linenos">403</span>    <span class="n">l_front</span> <span class="o">=</span> <span class="mf">0.839</span>
-<span class="linenos">404</span>    <span class="n">l_axes</span> <span class="o">=</span> <span class="mf">2.588</span>
-<span class="linenos">405</span>    <span class="n">l_rear</span> <span class="o">=</span> <span class="mf">0.657</span>
-<span class="linenos">406</span>    <span class="n">b_width</span> <span class="o">=</span> <span class="mf">1.771</span> <span class="o">/</span> <span class="mf">2.0</span>
-<span class="linenos">407</span>
-<span class="linenos">408</span>    <span class="n">vehicle</span> <span class="o">=</span> <span class="n">CarODE</span><span class="p">(</span><span class="n">l_front</span><span class="p">,</span> <span class="n">l_axes</span><span class="p">,</span> <span class="n">l_rear</span><span class="p">,</span> <span class="n">b_width</span><span class="p">)</span>
-<span class="linenos">409</span>
-<span class="linenos">410</span>    <span class="c1"># Vehicle and control limits.</span>
-<span class="linenos">411</span>    <span class="n">max_steering_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">33.0</span><span class="p">)</span>
-<span class="linenos">412</span>    <span class="n">max_velocity</span> <span class="o">=</span> <span class="mf">2.0</span>
-<span class="linenos">413</span>    <span class="n">max_acceleration</span> <span class="o">=</span> <span class="mf">0.75</span>
-<span class="linenos">414</span>    <span class="n">max_jerk</span> <span class="o">=</span> <span class="mf">0.5</span>
-<span class="linenos">415</span>    <span class="n">max_curvature_rate</span> <span class="o">=</span> <span class="mf">0.6</span>
-<span class="linenos">416</span>
-<span class="linenos">417</span>    <span class="n">min_x</span> <span class="o">=</span> <span class="o">-</span><span class="mf">10.0</span>
-<span class="linenos">418</span>    <span class="n">max_x</span> <span class="o">=</span> <span class="mf">7.5</span>
-<span class="linenos">419</span>
-<span class="linenos">420</span>    <span class="c1"># Initial conditions from the reference paper.</span>
-<span class="linenos">421</span>    <span class="n">initial_x</span> <span class="o">=</span> <span class="o">-</span><span class="mf">5.14</span>
-<span class="linenos">422</span>    <span class="n">initial_y</span> <span class="o">=</span> <span class="mf">1.41</span>
-<span class="linenos">423</span>    <span class="n">initial_heading_degrees</span> <span class="o">=</span> <span class="mf">13.18</span>
-<span class="linenos">424</span>
-<span class="linenos">425</span>    <span class="n">initial_state</span> <span class="o">=</span> <span class="n">make_state</span><span class="p">(</span><span class="n">initial_x</span><span class="p">,</span> <span class="n">initial_y</span><span class="p">,</span> <span class="n">initial_heading_degrees</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="linenos">426</span>
-<span class="linenos">427</span>    <span class="c1"># Initial trajectory guess.</span>
-<span class="linenos">428</span>    <span class="n">guess_1</span> <span class="o">=</span> <span class="n">make_state</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">initial_y</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>
-<span class="linenos">429</span>    <span class="n">guess_2</span> <span class="o">=</span> <span class="n">make_state</span><span class="p">(</span><span class="mf">5.5</span><span class="p">,</span> <span class="n">initial_y</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
-<span class="linenos">430</span>    <span class="n">guess_3</span> <span class="o">=</span> <span class="n">make_state</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">)</span>
-<span class="linenos">431</span>    <span class="n">guess_4</span> <span class="o">=</span> <span class="n">make_state</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">)</span>
-<span class="linenos">432</span>
-<span class="linenos">433</span>    <span class="n">trajectory_guess</span> <span class="o">=</span> <span class="p">[</span><span class="n">initial_state</span><span class="p">,</span> <span class="n">guess_1</span><span class="p">,</span> <span class="n">guess_2</span><span class="p">,</span> <span class="n">guess_3</span><span class="p">,</span> <span class="n">guess_4</span><span class="p">]</span>
-<span class="linenos">434</span>
-<span class="linenos">435</span>    <span class="c1"># Display the initial trajectory guess.</span>
-<span class="linenos">436</span>    <span class="n">plot_trajectory</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">trajectory_guess</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="n">slot_length</span><span class="p">,</span> <span class="n">slot_width</span><span class="p">,</span> <span class="n">curb_width</span><span class="p">)</span>
-<span class="linenos">437</span>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-<span class="linenos">438</span>
-<span class="linenos">439</span>    <span class="c1"># Optimization and mesh-refinement parameters.</span>
-<span class="linenos">440</span>    <span class="n">initial_segments</span> <span class="o">=</span> <span class="mi">50</span>
-<span class="linenos">441</span>    <span class="n">refined_segments</span> <span class="o">=</span> <span class="mi">200</span>
-<span class="linenos">442</span>    <span class="n">initial_smoothing</span> <span class="o">=</span> <span class="mf">75.0</span>
-<span class="linenos">443</span>    <span class="n">refined_smoothing</span> <span class="o">=</span> <span class="mf">150.0</span>
-<span class="linenos">444</span>
-<span class="linenos">445</span>    <span class="c1"># Construct the optimal control phase.</span>
-<span class="linenos">446</span>    <span class="n">phase</span> <span class="o">=</span> <span class="n">vehicle</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">"LGL5"</span><span class="p">,</span> <span class="n">trajectory_guess</span><span class="p">,</span> <span class="n">initial_segments</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-<span class="linenos">447</span>    <span class="n">phase</span><span class="o">.</span><span class="n">setStaticParams</span><span class="p">([</span><span class="n">initial_smoothing</span><span class="p">])</span>
-<span class="linenos">448</span>    <span class="n">phase</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="s2">"BlockConstant"</span><span class="p">)</span>
-<span class="linenos">449</span>
-<span class="linenos">450</span>    <span class="c1"># Fix the initial vehicle state.</span>
-<span class="linenos">451</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"First"</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">initial_state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
-<span class="linenos">452</span>
-<span class="linenos">453</span>    <span class="c1"># Enforce roadway and parking-space boundaries.</span>
-<span class="linenos">454</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="n">vehicle</span><span class="o">.</span><span class="n">slot_bounds</span><span class="p">(</span><span class="n">slot_length</span><span class="p">,</span> <span class="n">slot_width</span><span class="p">,</span> <span class="n">curb_width</span><span class="p">),</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="linenos">455</span>
-<span class="linenos">456</span>    <span class="c1"># Require the final vehicle corners to lie within the slot.</span>
-<span class="linenos">457</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">"Last"</span><span class="p">,</span> <span class="n">vehicle</span><span class="o">.</span><span class="n">final_y_constraints</span><span class="p">(),</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="linenos">458</span>
-<span class="linenos">459</span>    <span class="c1"># Require zero terminal velocity and acceleration.</span>
-<span class="linenos">460</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Last"</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
-<span class="linenos">461</span>
-<span class="linenos">462</span>    <span class="c1"># State and control bounds.</span>
-<span class="linenos">463</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">min_x</span><span class="p">,</span> <span class="n">max_x</span><span class="p">)</span>
-<span class="linenos">464</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">max_velocity</span><span class="p">,</span> <span class="n">max_velocity</span><span class="p">)</span>
-<span class="linenos">465</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="n">max_acceleration</span><span class="p">,</span> <span class="n">max_acceleration</span><span class="p">)</span>
-<span class="linenos">466</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="n">max_steering_angle</span><span class="p">,</span> <span class="n">max_steering_angle</span><span class="p">)</span>
-<span class="linenos">467</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="o">-</span><span class="n">max_jerk</span><span class="p">,</span> <span class="n">max_jerk</span><span class="p">)</span>
-<span class="linenos">468</span>
-<span class="linenos">469</span>    <span class="c1"># Bound the rate of change of curvature.</span>
-<span class="linenos">470</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUFuncBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="n">vehicle</span><span class="o">.</span><span class="n">curvature_rate</span><span class="p">(),</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="o">-</span><span class="n">max_curvature_rate</span><span class="p">,</span> <span class="n">max_curvature_rate</span><span class="p">)</span>
-<span class="linenos">471</span>
-<span class="linenos">472</span>    <span class="c1"># Prevent collisions with the parking-space entrance corners.</span>
-<span class="linenos">473</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="n">vehicle</span><span class="o">.</span><span class="n">corner_collision_constraints</span><span class="p">(</span><span class="n">slot_length</span><span class="p">),</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="linenos">474</span>
-<span class="linenos">475</span>    <span class="c1"># Keep the initial smoothing parameter fixed during the first solve.</span>
-<span class="linenos">476</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addValueLock</span><span class="p">(</span><span class="s2">"StaticParams"</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="linenos">477</span>
-<span class="linenos">478</span>    <span class="c1"># First optimization.</span>
-<span class="linenos">479</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaTimeObjective</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="linenos">480</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_BoundFraction</span><span class="p">(</span><span class="mf">0.995</span><span class="p">)</span>
-<span class="linenos">481</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_MaxIters</span><span class="p">(</span><span class="mi">2000</span><span class="p">)</span>
-<span class="linenos">482</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_PrintLevel</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="linenos">483</span>    <span class="n">phase</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
-<span class="linenos">484</span>
-<span class="linenos">485</span>    <span class="c1"># Mesh refinement and second optimization.</span>
-<span class="linenos">486</span>    <span class="n">phase</span><span class="o">.</span><span class="n">refineTrajManual</span><span class="p">(</span><span class="n">refined_segments</span><span class="p">)</span>
-<span class="linenos">487</span>    <span class="n">phase</span><span class="o">.</span><span class="n">subVariable</span><span class="p">(</span><span class="s2">"StaticParams"</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">refined_smoothing</span><span class="p">)</span>
-<span class="linenos">488</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_KKTtol</span><span class="p">(</span><span class="mf">1.0e-8</span><span class="p">)</span>
-<span class="linenos">489</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
-<span class="linenos">490</span>
-<span class="linenos">491</span>    <span class="c1"># Extract optimized trajectory.</span>
-<span class="linenos">492</span>    <span class="n">trajectory</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
-<span class="linenos">493</span>    <span class="n">trajectory_table</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnTrajTable</span><span class="p">()</span>
-<span class="linenos">494</span>
-<span class="linenos">495</span>    <span class="c1"># Independently reintegrate the optimized trajectory.</span>
-<span class="linenos">496</span>    <span class="n">integrator</span> <span class="o">=</span> <span class="n">vehicle</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">trajectory_table</span><span class="p">)</span>
-<span class="linenos">497</span>    <span class="n">reintegrated_trajectory</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">integrate_dense</span><span class="p">(</span><span class="n">trajectory</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">trajectory</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">6</span><span class="p">],</span> <span class="mi">500</span><span class="p">)</span>
-<span class="linenos">498</span>
-<span class="linenos">499</span>    <span class="c1"># Report maneuver time and terminal-state consistency.</span>
-<span class="linenos">500</span>    <span class="n">final_time</span> <span class="o">=</span> <span class="n">trajectory</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span>
-<span class="linenos">501</span>    <span class="n">reference_time</span> <span class="o">=</span> <span class="mf">18.426</span>
-<span class="linenos">502</span>
-<span class="linenos">503</span>    <span class="nb">print</span><span class="p">()</span>
-<span class="linenos">504</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
-<span class="linenos">505</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"PARALLEL PARKING OPTIMIZATION RESULTS"</span><span class="p">)</span>
-<span class="linenos">506</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
-<span class="linenos">507</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"ASSET maneuver time:      </span><span class="si">{</span><span class="n">final_time</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"> s"</span><span class="p">)</span>
-<span class="linenos">508</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Reference maneuver time:  </span><span class="si">{</span><span class="n">reference_time</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"> s"</span><span class="p">)</span>
-<span class="linenos">509</span>
-<span class="linenos">510</span>    <span class="n">time_difference</span> <span class="o">=</span> <span class="n">final_time</span> <span class="o">-</span> <span class="n">reference_time</span>
-<span class="linenos">511</span>    <span class="n">time_difference_percent</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="n">time_difference</span> <span class="o">/</span> <span class="n">reference_time</span>
-<span class="linenos">512</span>
-<span class="linenos">513</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Time difference:          </span><span class="si">{</span><span class="n">time_difference</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"> s"</span><span class="p">)</span>
-<span class="linenos">514</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Relative time difference: </span><span class="si">{</span><span class="n">time_difference_percent</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> %"</span><span class="p">)</span>
-<span class="linenos">515</span>
-<span class="linenos">516</span>    <span class="n">terminal_state_error</span> <span class="o">=</span> <span class="n">trajectory</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span> <span class="o">-</span> <span class="n">reintegrated_trajectory</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span>
-<span class="linenos">517</span>
-<span class="linenos">518</span>    <span class="nb">print</span><span class="p">()</span>
-<span class="linenos">519</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Optimized versus reintegrated terminal-state difference:"</span><span class="p">)</span>
-<span class="linenos">520</span>    <span class="nb">print</span><span class="p">(</span><span class="n">terminal_state_error</span><span class="p">)</span>
-<span class="linenos">521</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Terminal-state difference norm:"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">terminal_state_error</span><span class="p">))</span>
-<span class="linenos">522</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
-<span class="linenos">523</span>
-<span class="linenos">524</span>    <span class="c1"># Plot optimized trajectory.</span>
-<span class="linenos">525</span>    <span class="n">plot_trajectory</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">,</span> <span class="n">refined_smoothing</span><span class="p">,</span> <span class="n">slot_length</span><span class="p">,</span> <span class="n">slot_width</span><span class="p">,</span> <span class="n">curb_width</span><span class="p">)</span>
-<span class="linenos">526</span>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-<span class="linenos">527</span>
-<span class="linenos">528</span>    <span class="c1"># Animate the reintegrated trajectory.</span>
-<span class="linenos">529</span>    <span class="n">animate_trajectory</span><span class="p">(</span><span class="n">vehicle</span><span class="p">,</span> <span class="n">reintegrated_trajectory</span><span class="p">,</span> <span class="n">refined_smoothing</span><span class="p">,</span> <span class="n">slot_length</span><span class="p">,</span> <span class="n">slot_width</span><span class="p">,</span> <span class="n">curb_width</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="linenos">530</span>
-<span class="linenos">531</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
-<span class="linenos">532</span>    <span class="n">main</span><span class="p">()</span>
+<p>After implementing the ODE, we define a phase and apply our boundary conditions and integral objective function. The units and time scale of this problem are already well conditioned
+and do not need any non-dimensionalization. Furthermore, it is sufficient to initialize the trajectory with a straight line initial guess between the fixed boundary conditions.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m1</span> <span class="o">=</span> <span class="mi">1</span>     <span class="c1"># Mass of Cart kg</span>
+<span class="n">m2</span> <span class="o">=</span><span class="mf">.3</span>     <span class="c1"># Mass of Pole kg</span>
+<span class="n">l</span>  <span class="o">=</span><span class="mf">.5</span>     <span class="c1"># Length of Pole m</span>
+<span class="n">g</span> <span class="o">=</span> <span class="mf">9.81</span>   <span class="c1"># you already know m/s^2</span>
+
+<span class="n">Fmax</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># N</span>
+<span class="n">xmax</span> <span class="o">=</span> <span class="mi">2</span>   <span class="c1"># m</span>
+
+<span class="n">tf</span>  <span class="o">=</span> <span class="mi">2</span>    <span class="c1"># s</span>
+<span class="n">xf</span>  <span class="o">=</span> <span class="mi">1</span>    <span class="c1"># m</span>
+
+<span class="n">ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">tf</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">IG</span> <span class="o">=</span> <span class="p">[[</span><span class="n">xf</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="mf">.00</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">]</span>
+
+
+<span class="n">ode</span> <span class="o">=</span> <span class="n">CartPole</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">g</span><span class="p">)</span>
+
+<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">"LGL5"</span><span class="p">,</span><span class="n">IG</span><span class="p">,</span><span class="mi">64</span><span class="p">)</span>
+<span class="c1">#Fix first state (x,theta,xdot,thetadot) and time</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"First"</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),[</span><span class="mi">0</span> <span class="p">,</span><span class="mi">0</span>    <span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="c1">#Fix last state (x,theta,xdot,thetadot) and time</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Last"</span> <span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),[</span><span class="n">xf</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tf</span><span class="p">])</span>
+<span class="c1"># Bound control forces</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="o">-</span><span class="n">Fmax</span><span class="p">,</span><span class="n">Fmax</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="n">xmax</span><span class="p">,</span><span class="n">xmax</span><span class="p">)</span>
+<span class="c1"># Minimize the "control effort", the integral of square of applied force</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addIntegralObjective</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,[</span><span class="mi">5</span><span class="p">])</span>
+
+<span class="n">phase</span><span class="o">.</span><span class="n">setThreads</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_PrintLevel</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+
+<span class="n">Traj</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-</section>
+<p>On a 6 core i7-9750H laptop, with 64 LGL5 segments, this problem converges in 12 iterations of the optimize algorithm taking only 28 milliseconds.
+The final objective value is 58.80819. A plot and animation of the converged trajectory can be seen below.</p>
+<a class="reference internal image-reference" href="../_images/CartPoleFig.svg"><img alt="../_images/CartPoleFig.svg" src="../_images/CartPoleFig.svg" style="width: 100%;" />
+</a>
+<a class="reference internal image-reference" href="../_images/CartPoleGif2.gif"><img alt="../_images/CartPoleGif2.gif" src="../_images/CartPoleGif2.gif" style="width: 100%;" />
+</a>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
-<aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id1" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p>Imperial College London, “ICLOCS Parallel Parking Example.”
-<a class="reference external" href="http://www.ee.ic.ac.uk/ICLOCS/ExampleParallelParking.html">http://www.ee.ic.ac.uk/ICLOCS/ExampleParallelParking.html</a></p>
-</aside>
-<aside class="footnote brackets" id="id2" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
-<p>IEEE, “Research paper containing the parallel parking Case 7
-formulation, Table 2.”
-<a class="reference external" href="https://ieeexplore.ieee.org/document/7463491">https://ieeexplore.ieee.org/document/7463491</a></p>
-</aside>
-</aside>
+<ol class="arabic simple">
+<li><p>Kelly, M., 2017. An introduction to trajectory optimization: How to do your own direct collocation. SIAM Review, 59(4), pp.849-904.</p></li>
+</ol>
+<section id="full-code">
+<h3>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h3>
+<p>The complete Python implementation is included below.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">CartPole.py</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="linenos">  2</span><span class="kn">import</span><span class="w"> </span><span class="nn">asset_asrl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
+<span class="linenos">  3</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="linenos">  4</span><span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>    <span class="c1"># pip install seaborn if you dont have it</span>
+<span class="linenos">  5</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.animation</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">animation</span>
+<span class="linenos">  6</span>
+<span class="linenos">  7</span>
+<span class="linenos">  8</span>
+<span class="linenos">  9</span><span class="n">vf</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
+<span class="linenos"> 10</span><span class="n">oc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
+<span class="linenos"> 11</span><span class="n">Args</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
+<span class="linenos"> 12</span>
+<span class="linenos"> 13</span><span class="sd">'''</span>
+<span class="linenos"> 14</span><span class="sd">Example taken from </span>
+<span class="linenos"> 15</span><span class="sd">Kelly, M., 2017. An introduction to trajectory optimization: How to do your own direct collocation. SIAM Review, 59(4), pp.849-904.</span>
+<span class="linenos"> 16</span>
+<span class="linenos"> 17</span><span class="sd">Compute the minimum effort trajectory to swing a cart pole system to vertical.</span>
+<span class="linenos"> 18</span><span class="sd">The boundary conditions, dynamics and objective are the same as in the reference,</span>
+<span class="linenos"> 19</span><span class="sd">but we use asset's matrix functions to invert the mass matrix at run-time rather than solving</span>
+<span class="linenos"> 20</span><span class="sd">for the equations of motion explicitly.</span>
+<span class="linenos"> 21</span>
+<span class="linenos"> 22</span><span class="sd">'''</span>
+<span class="linenos"> 23</span>
+<span class="linenos"> 24</span><span class="k">class</span><span class="w"> </span><span class="nc">CartPole</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+<span class="linenos"> 25</span>    
+<span class="linenos"> 26</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">g</span><span class="p">):</span>
+<span class="linenos"> 27</span>        <span class="n">Xvars</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="linenos"> 28</span>        <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="linenos"> 29</span>        <span class="c1">####################################################</span>
+<span class="linenos"> 30</span>        <span class="n">XtU</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">Xvars</span><span class="p">,</span><span class="n">Uvars</span><span class="p">)</span>
+<span class="linenos"> 31</span>        
+<span class="linenos"> 32</span>        <span class="n">x</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">xdot</span><span class="p">,</span><span class="n">thetadot</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="linenos"> 33</span>        <span class="n">F</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVar</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos"> 34</span>        
+<span class="linenos"> 35</span>        <span class="n">Q</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="o">-</span><span class="n">g</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span>
+<span class="linenos"> 36</span>                        <span class="n">F</span><span class="o">+</span><span class="n">m2</span><span class="o">*</span><span class="n">l</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">*</span><span class="n">thetadot</span><span class="o">**</span><span class="mi">2</span><span class="p">])</span>
+<span class="linenos"> 37</span>        
+<span class="linenos"> 38</span>        <span class="n">Mvec_rm</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span><span class="n">l</span><span class="p">,</span>
+<span class="linenos"> 39</span>                            <span class="n">m1</span><span class="o">+</span><span class="n">m2</span><span class="p">,</span><span class="n">m2</span><span class="o">*</span><span class="n">l</span><span class="o">*</span><span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
+<span class="linenos"> 40</span>        
+<span class="linenos"> 41</span>        <span class="n">M</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">RowMatrix</span><span class="p">(</span><span class="n">Mvec_rm</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos"> 42</span>        
+<span class="linenos"> 43</span>        <span class="n">xddot_thetaddot</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span><span class="o">*</span><span class="n">Q</span>
+<span class="linenos"> 44</span>    
+<span class="linenos"> 45</span>        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">xdot</span><span class="p">,</span><span class="n">thetadot</span><span class="p">,</span><span class="n">xddot_thetaddot</span><span class="p">])</span>
+<span class="linenos"> 46</span>        <span class="c1">####################################################</span>
+<span class="linenos"> 47</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="n">Xvars</span><span class="p">,</span><span class="n">Uvars</span><span class="p">)</span>
+<span class="linenos"> 48</span>        
+<span class="linenos"> 49</span><span class="c1">###############################################################################</span>
+<span class="linenos"> 50</span>
+<span class="linenos"> 51</span><span class="k">def</span><span class="w"> </span><span class="nf">Plot</span><span class="p">(</span><span class="n">Traj</span><span class="p">):</span>
+<span class="linenos"> 52</span>    
+<span class="linenos"> 53</span>    <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Traj</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="linenos"> 54</span>    
+<span class="linenos"> 55</span>    
+<span class="linenos"> 56</span>    <span class="n">P0X</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos"> 57</span>    <span class="n">P0Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos"> 58</span>    <span class="n">P1X</span>  <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">l</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos"> 59</span>    <span class="n">P1Y</span>  <span class="o">=</span> <span class="o">-</span><span class="n">l</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos"> 60</span>    
+<span class="linenos"> 61</span>    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">P0X</span><span class="p">)</span>
+<span class="linenos"> 62</span>    
+<span class="linenos"> 63</span>    <span class="n">cols</span><span class="o">=</span><span class="n">sns</span><span class="o">.</span><span class="n">color_palette</span><span class="p">(</span><span class="s2">"viridis"</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+<span class="linenos"> 64</span>    
+<span class="linenos"> 65</span>    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="linenos"> 66</span>    <span class="n">ax0</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">321</span><span class="p">)</span>
+<span class="linenos"> 67</span>    <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">323</span><span class="p">)</span>
+<span class="linenos"> 68</span>    <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">325</span><span class="p">)</span>
+<span class="linenos"> 69</span>    <span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="linenos"> 70</span>    
+<span class="linenos"> 71</span>    <span class="n">axs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ax0</span><span class="p">,</span><span class="n">ax1</span><span class="p">,</span><span class="n">ax2</span><span class="p">]</span>
+<span class="linenos"> 72</span>    
+<span class="linenos"> 73</span>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">]):</span>
+<span class="linenos"> 74</span>        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+<span class="linenos"> 75</span>            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">],</span><span class="n">T</span><span class="p">[</span><span class="n">var</span><span class="p">][</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">],</span><span class="n">color</span><span class="o">=</span><span class="n">cols</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+<span class="linenos"> 76</span>    
+<span class="linenos"> 77</span>    
+<span class="linenos"> 78</span>    
+<span class="linenos"> 79</span>    <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P0X</span><span class="p">,</span><span class="n">P0Y</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">'k'</span><span class="p">)</span>
+<span class="linenos"> 80</span>    <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P1X</span><span class="p">,</span><span class="n">P1Y</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">'k'</span><span class="p">)</span>
+<span class="linenos"> 81</span>    
+<span class="linenos"> 82</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+<span class="linenos"> 83</span>        <span class="n">xs</span> <span class="o">=</span> <span class="p">[</span><span class="n">P0X</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">P1X</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+<span class="linenos"> 84</span>        <span class="n">ys</span> <span class="o">=</span> <span class="p">[</span><span class="n">P0Y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">P1Y</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+<span class="linenos"> 85</span>        <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">cols</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">marker</span><span class="o">=</span><span class="s1">'o'</span><span class="p">)</span>
+<span class="linenos"> 86</span>      
+<span class="linenos"> 87</span>    <span class="n">ax0</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 88</span>    <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 89</span>    <span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 90</span>    <span class="n">ax3</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 91</span>    
+<span class="linenos"> 92</span>    <span class="n">ax0</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">'$X$'</span><span class="p">)</span>
+<span class="linenos"> 93</span>    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">'$\theta$'</span><span class="p">)</span>
+<span class="linenos"> 94</span>    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">'$U$'</span><span class="p">)</span>
+<span class="linenos"> 95</span>    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">'t'</span><span class="p">)</span>
+<span class="linenos"> 96</span>    
+<span class="linenos"> 97</span>    <span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">'$X$'</span><span class="p">)</span>
+<span class="linenos"> 98</span>    <span class="n">ax3</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">'$Y$'</span><span class="p">)</span>
+<span class="linenos"> 99</span>    <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mf">10.5</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="n">forward</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">100</span>    
+<span class="linenos">101</span>    <span class="n">fig</span><span class="o">.</span><span class="n">set_tight_layout</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">102</span>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="linenos">103</span>
+<span class="linenos">104</span><span class="k">def</span><span class="w"> </span><span class="nf">Animate</span><span class="p">(</span><span class="n">Traj</span><span class="p">):</span>
+<span class="linenos">105</span>    <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Traj</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="linenos">106</span>    
+<span class="linenos">107</span>    
+<span class="linenos">108</span>    <span class="n">P0X</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">109</span>    <span class="n">P0Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">110</span>    <span class="n">P1X</span>  <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">l</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">111</span>    <span class="n">P1Y</span>  <span class="o">=</span> <span class="o">-</span><span class="n">l</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">112</span>    
+<span class="linenos">113</span>    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">P0X</span><span class="p">)</span>
+<span class="linenos">114</span>    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="linenos">115</span>    
+<span class="linenos">116</span>    <span class="n">ax0</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">321</span><span class="p">,</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">.05</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="o">*</span><span class="mf">1.05</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="mf">1.2</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="mf">1.1</span><span class="p">))</span>
+<span class="linenos">117</span>    <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">323</span><span class="p">,</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">.05</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="o">*</span><span class="mf">1.05</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="mf">1.2</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="mf">1.1</span><span class="p">))</span>
+<span class="linenos">118</span>    <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">325</span><span class="p">,</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">.05</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="o">*</span><span class="mf">1.05</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span><span class="o">*</span><span class="mf">1.2</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span><span class="o">*</span><span class="mf">1.1</span><span class="p">))</span>    
+<span class="linenos">119</span>    <span class="n">ax3</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">'equal'</span><span class="p">,</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">.4</span><span class="p">,</span> <span class="mf">1.6</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+<span class="linenos">120</span>
+<span class="linenos">121</span>    <span class="n">ax3</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">122</span>    
+<span class="linenos">123</span>    <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">color</span><span class="o">=</span><span class="s1">'k'</span><span class="p">)</span>
+<span class="linenos">124</span>
+<span class="linenos">125</span>    <span class="n">pole</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">([],[],</span><span class="n">marker</span><span class="o">=</span><span class="s2">"o"</span><span class="p">)</span>
+<span class="linenos">126</span>    <span class="n">X</span><span class="p">,</span> <span class="o">=</span><span class="n">ax0</span><span class="o">.</span><span class="n">plot</span><span class="p">([],[])</span>
+<span class="linenos">127</span>    <span class="n">theta</span><span class="p">,</span> <span class="o">=</span><span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">([],[])</span>
+<span class="linenos">128</span>    <span class="n">U</span><span class="p">,</span> <span class="o">=</span><span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">([],[])</span>
+<span class="linenos">129</span>
+<span class="linenos">130</span>    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">():</span>
+<span class="linenos">131</span>        <span class="n">pole</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],[])</span>
+<span class="linenos">132</span>        <span class="n">U</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],[])</span>
+<span class="linenos">133</span>        <span class="n">X</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],[])</span>
+<span class="linenos">134</span>        <span class="n">theta</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],[])</span>
+<span class="linenos">135</span>        <span class="k">return</span> <span class="n">pole</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">U</span>
+<span class="linenos">136</span>
+<span class="linenos">137</span>    <span class="k">def</span><span class="w"> </span><span class="nf">animate</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+<span class="linenos">138</span>        <span class="n">xs</span> <span class="o">=</span> <span class="p">[</span><span class="n">P0X</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">P1X</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+<span class="linenos">139</span>        <span class="n">ys</span> <span class="o">=</span> <span class="p">[</span><span class="n">P0Y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">P1Y</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+<span class="linenos">140</span>        <span class="n">pole</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">)</span>
+<span class="linenos">141</span>        <span class="n">X</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">142</span>        <span class="n">theta</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">143</span>        <span class="n">U</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="n">T</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">144</span>        
+<span class="linenos">145</span>        <span class="k">return</span> <span class="n">pole</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">U</span>
+<span class="linenos">146</span>
+<span class="linenos">147</span>    <span class="n">ani</span> <span class="o">=</span> <span class="n">animation</span><span class="o">.</span><span class="n">FuncAnimation</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">animate</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">P0X</span><span class="p">),</span>
+<span class="linenos">148</span>                                  <span class="n">interval</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">blit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">init_func</span><span class="o">=</span><span class="n">init</span><span class="p">,</span>
+<span class="linenos">149</span>                                  <span class="n">repeat_delay</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+<span class="linenos">150</span>
+<span class="linenos">151</span>
+<span class="linenos">152</span>
+<span class="linenos">153</span>    <span class="n">ax0</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">154</span>    <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">155</span>    <span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">156</span>    <span class="n">ax3</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">157</span>    
+<span class="linenos">158</span>    <span class="n">ax0</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">'$X$'</span><span class="p">)</span>
+<span class="linenos">159</span>    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">'$\theta$'</span><span class="p">)</span>
+<span class="linenos">160</span>    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">'$U$'</span><span class="p">)</span>
+<span class="linenos">161</span>    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">'t'</span><span class="p">)</span>
+<span class="linenos">162</span>    <span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">'$X$'</span><span class="p">)</span>
+<span class="linenos">163</span>    <span class="n">ax3</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">'$Y$'</span><span class="p">)</span>
+<span class="linenos">164</span>    <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mf">15.5</span><span class="p">,</span> <span class="mf">7.5</span><span class="p">,</span> <span class="n">forward</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">165</span>
+<span class="linenos">166</span>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="linenos">167</span>    
+<span class="linenos">168</span>
+<span class="linenos">169</span>
+<span class="linenos">170</span><span class="c1">##############################################################################        </span>
+<span class="linenos">171</span>        
+<span class="linenos">172</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<span class="linenos">173</span>            
+<span class="linenos">174</span>    <span class="n">m1</span> <span class="o">=</span> <span class="mi">1</span>     <span class="c1"># Mass of Cart kg</span>
+<span class="linenos">175</span>    <span class="n">m2</span> <span class="o">=</span><span class="mf">.3</span>     <span class="c1"># Mass of Pole kg</span>
+<span class="linenos">176</span>    <span class="n">l</span>  <span class="o">=</span><span class="mf">.5</span>     <span class="c1"># Length of Pole m</span>
+<span class="linenos">177</span>    <span class="n">g</span> <span class="o">=</span> <span class="mf">9.81</span>   <span class="c1"># gravity m/s^2</span>
+<span class="linenos">178</span>    
+<span class="linenos">179</span>    <span class="n">Fmax</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># N</span>
+<span class="linenos">180</span>    <span class="n">xmax</span> <span class="o">=</span> <span class="mi">2</span>   <span class="c1"># m</span>
+<span class="linenos">181</span>    
+<span class="linenos">182</span>    <span class="n">tf</span>  <span class="o">=</span> <span class="mi">2</span>    <span class="c1"># s</span>
+<span class="linenos">183</span>    <span class="n">xf</span>  <span class="o">=</span> <span class="mi">1</span>    <span class="c1"># m       </span>
+<span class="linenos">184</span>    
+<span class="linenos">185</span>    <span class="n">ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">tf</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+<span class="linenos">186</span>    <span class="n">IG</span> <span class="o">=</span> <span class="p">[[</span><span class="n">xf</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="mf">.00</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">]</span>
+<span class="linenos">187</span>    
+<span class="linenos">188</span>    
+<span class="linenos">189</span>    <span class="n">ode</span> <span class="o">=</span> <span class="n">CartPole</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">g</span><span class="p">)</span>
+<span class="linenos">190</span>    
+<span class="linenos">191</span>    <span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">"LGL5"</span><span class="p">,</span><span class="n">IG</span><span class="p">,</span><span class="mi">64</span><span class="p">)</span>
+<span class="linenos">192</span>    <span class="c1">#Fix first state (x,theta,xdot,thetadot) and time</span>
+<span class="linenos">193</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"First"</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),[</span><span class="mi">0</span> <span class="p">,</span><span class="mi">0</span>    <span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="linenos">194</span>    <span class="c1">#Fix last state (x,theta,xdot,thetadot) and time</span>
+<span class="linenos">195</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Last"</span> <span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),[</span><span class="n">xf</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tf</span><span class="p">])</span>
+<span class="linenos">196</span>    <span class="c1"># Bound control forces</span>
+<span class="linenos">197</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="o">-</span><span class="n">Fmax</span><span class="p">,</span><span class="n">Fmax</span><span class="p">)</span>
+<span class="linenos">198</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="n">xmax</span><span class="p">,</span><span class="n">xmax</span><span class="p">)</span>
+<span class="linenos">199</span>    <span class="c1"># Minimize the "control effort", the integral of square of applied force</span>
+<span class="linenos">200</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addIntegralObjective</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,[</span><span class="mi">5</span><span class="p">])</span>
+<span class="linenos">201</span>    
+<span class="linenos">202</span>    <span class="n">phase</span><span class="o">.</span><span class="n">setThreads</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+<span class="linenos">203</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_PrintLevel</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">204</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+<span class="linenos">205</span>    
+<span class="linenos">206</span>    <span class="n">Traj</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+<span class="linenos">207</span>
+<span class="linenos">208</span>    
+<span class="linenos">209</span>    <span class="c1">## Example of how to get exact timing statistics should you need to</span>
+<span class="linenos">210</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Total Time (Sum of all below)             :"</span><span class="p">,</span><span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">LastTotalTime</span><span class="p">,</span><span class="s2">" s"</span><span class="p">)</span>
+<span class="linenos">211</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Function/Derivative Eval Time             :"</span><span class="p">,</span><span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">LastFuncTime</span><span class="p">,</span><span class="s2">" s"</span><span class="p">)</span>
+<span class="linenos">212</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"KKT Matrix Factor/Solve Time              :"</span><span class="p">,</span><span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">LastKKTTime</span><span class="p">,</span><span class="s2">" s"</span><span class="p">)</span>
+<span class="linenos">213</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"KKT Matrix Pre-Analysis/Mem Alloc Time    :"</span><span class="p">,</span><span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">LastPreTime</span><span class="p">,</span><span class="s2">" s"</span><span class="p">)</span>
+<span class="linenos">214</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Miscellaneous (Mostly Console Print) Time :"</span><span class="p">,</span><span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">LastMiscTime</span><span class="p">,</span><span class="s2">" s"</span><span class="p">)</span>
+<span class="linenos">215</span>    
+<span class="linenos">216</span>    
+<span class="linenos">217</span>   
+<span class="linenos">218</span>    <span class="n">Plot</span><span class="p">(</span><span class="n">Traj</span><span class="p">)</span>
+<span class="linenos">219</span>    <span class="n">Animate</span><span class="p">(</span><span class="n">Traj</span><span class="p">)</span>
+<span class="linenos">220</span>
+<span class="linenos">221</span>    <span class="c1">###########################################################################</span>
+<span class="linenos">222</span>
+<span class="linenos">223</span>
+</pre></div>
+</div>
+</div>
+</section>
 </section>
 </section>
 
@@ -1080,19 +700,11 @@ formulation, Table 2.”
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Minimum-Time Parallel Parking</a><ul>
-<li><a class="reference internal" href="#problem-setup">Problem Setup</a></li>
-<li><a class="reference internal" href="#vehicle-dynamics">Vehicle Dynamics</a></li>
-<li><a class="reference internal" href="#parking-space-boundary">Parking-Space Boundary</a></li>
-<li><a class="reference internal" href="#initial-conditions">Initial Conditions</a></li>
-<li><a class="reference internal" href="#constraints">Constraints</a></li>
-<li><a class="reference internal" href="#optimization">Optimization</a></li>
-<li><a class="reference internal" href="#trajectory-reintegration">Trajectory Reintegration</a></li>
-<li><a class="reference internal" href="#results">Results</a></li>
-<li><a class="reference internal" href="#trajectory-visualization">Trajectory Visualization</a></li>
-<li><a class="reference internal" href="#running-the-example">Running the Example</a></li>
+<li><a class="reference internal" href="#">Cart-Pole Swing Up</a><ul>
+<li><a class="reference internal" href="#references">References</a><ul>
 <li><a class="reference internal" href="#full-code">Full Code</a></li>
-<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
