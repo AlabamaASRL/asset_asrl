@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Python Library Documentation" href="../python/python.html"><link rel="prev" title="Pines Gravity Model" href="PinesGravity.html">
         <link rel="prefetch" href="../_static/ASSETLOGO.svg" as="image">
 
     <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
@@ -197,7 +197,7 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/tutorials.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
@@ -211,7 +211,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="examples.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="examples.html">Examples</a><input aria-label="Toggle navigation of Examples" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CartPole.html">Cart-Pole Swing Up</a></li>
@@ -221,6 +221,7 @@
 <li class="toctree-l2"><a class="reference internal" href="zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
 <li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 <li class="toctree-l2"><a class="reference internal" href="PinesGravity.html">Pines Gravity Model</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Parallel Parking</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input aria-label="Toggle navigation of Python Library Documentation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -279,26 +280,39 @@
         <article role="main" id="furo-main-content">
           <section id="parallel-parking">
 <h1>Parallel Parking<a class="headerlink" href="#parallel-parking" title="Link to this heading">¶</a></h1>
-<p>This example demonstrates the use of ASSET’s optimal control framework to solve a minimum-time parallel parking problem. A vehicle is maneuvered into a parking space with dimensions only marginally larger than the vehicle itself. The optimization accounts for vehicle dynamics, steering and acceleration limits, roadway boundaries, and collision avoidance.</p>
-<p>The example is derived from the parallel parking problem presented in the <a class="reference external" href="http://www.ee.ic.ac.uk/ICLOCS/ExampleParallelParking.html">ICLOCS parallel parking example</a>, which is based on Case 7 in Table 2 of the research paper:</p>
-<p><a class="reference external" href="https://ieeexplore.ieee.org/document/7463491">Optimal Control for Automated Parallel Parking</a>.</p>
-<p>The initial conditions used here follow the referenced research paper. The resulting maneuver time is compared with the reported paper value of 18.426 seconds.</p>
-<section id="problem-description">
-<h2>Problem Description<a class="headerlink" href="#problem-description" title="Link to this heading">¶</a></h2>
-<p>The objective is to find a minimum-time vehicle trajectory that moves a car from an initial position on the roadway into a constrained parallel parking space.</p>
-<p>The vehicle must satisfy the following requirements:</p>
-<ul class="simple">
-<li><p>Begin at a prescribed initial position and orientation.</p></li>
-<li><p>Remain within the roadway and parking-space boundaries.</p></li>
-<li><p>Avoid collisions with the corners of the parking-space entrance.</p></li>
-<li><p>Satisfy velocity, acceleration, steering-angle, jerk, and steering-rate limits.</p></li>
-<li><p>Finish with the vehicle positioned inside the parking space and with zero terminal velocity and acceleration.</p></li>
-</ul>
-<p>The optimization uses a fixed initial state and a free final time. The parking-space geometry is represented using a smoothed step function to provide differentiable boundary constraints.</p>
+<section id="overview">
+<span id="example-parallel-parking"></span><h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>This example demonstrates a minimum-time parallel parking maneuver formulated
+and solved using the ASSET optimal control framework.</p>
+<p>The vehicle is modeled using a kinematic bicycle model with acceleration and
+steering dynamics. The optimization determines the control inputs required to
+move the vehicle from its initial position on the roadway into a parallel
+parking space while satisfying vehicle dynamics, control limits, roadway
+boundaries, parking-space constraints, and collision-avoidance constraints.</p>
+<p>The problem is derived from the ICLOCS parallel parking example:</p>
+<p><a class="reference external" href="http://www.ee.ic.ac.uk/ICLOCS/ExampleParallelParking.html">ICLOCS Parallel Parking Example</a>.</p>
+<p>The ICLOCS example is based on Case 7 in Table 2 of the following research
+paper:</p>
+<p><a class="reference external" href="https://ieeexplore.ieee.org/document/7463491">IEEE Reference Paper</a>.</p>
+<p>The initial conditions used in this implementation follow the referenced
+research paper. The resulting maneuver time is compared against the reported
+reference value of 18.426 seconds.</p>
+</section>
+<section id="problem-formulation">
+<h2>Problem Formulation<a class="headerlink" href="#problem-formulation" title="Link to this heading">¶</a></h2>
+<p>The objective is to minimize the total maneuver time:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\min_{t_f} \quad t_f\]</div>
+</div>
+<p>subject to the vehicle equations of motion, initial and terminal conditions,
+state and control bounds, and geometric constraints.</p>
+<p>The optimization is implemented using an ASSET optimal control phase with
+Legendre-Gauss-Lobatto discretization.</p>
 </section>
 <section id="vehicle-dynamics">
 <h2>Vehicle Dynamics<a class="headerlink" href="#vehicle-dynamics" title="Link to this heading">¶</a></h2>
-<p>The vehicle is modeled as a six-state kinematic bicycle model. The state vector is</p>
+<p>The vehicle is represented by a kinematic bicycle model. The state vector is</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[\mathbf{x} =
@@ -308,87 +322,213 @@ x &amp; y &amp; v &amp; a &amp; \theta &amp; \phi
 </div>
 <p>where:</p>
 <ul class="simple">
-<li><p><span class="math notranslate nohighlight">\(x,y\)</span> are the vehicle position coordinates.</p></li>
+<li><p><span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> are the vehicle rear-axle position coordinates.</p></li>
 <li><p><span class="math notranslate nohighlight">\(v\)</span> is the longitudinal velocity.</p></li>
 <li><p><span class="math notranslate nohighlight">\(a\)</span> is the longitudinal acceleration.</p></li>
 <li><p><span class="math notranslate nohighlight">\(\theta\)</span> is the vehicle heading angle.</p></li>
 <li><p><span class="math notranslate nohighlight">\(\phi\)</span> is the steering angle.</p></li>
 </ul>
-<p>The control vector contains the jerk and steering-angle rate:</p>
+<p>The control vector is</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[\mathbf{u} =
 \begin{bmatrix}
-u_1 &amp; u_2
-\end{bmatrix}^{T}.\]</div>
+j &amp; \dot{\phi}
+\end{bmatrix}^{T},\]</div>
 </div>
+<p>where <span class="math notranslate nohighlight">\(j\)</span> is longitudinal jerk and <span class="math notranslate nohighlight">\(\dot{\phi}\)</span> is the steering
+rate.</p>
 <p>The equations of motion are</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[\begin{split}\dot{x} &amp;= v\cos(\theta), \\
 \dot{y} &amp;= v\sin(\theta), \\
 \dot{v} &amp;= a, \\
-\dot{a} &amp;= u_1, \\
-\dot{\theta} &amp;= \frac{v\tan(\phi)}{l_{\mathrm{axes}}}, \\
-\dot{\phi} &amp;= u_2,\end{split}\]</div>
+\dot{a} &amp;= j, \\
+\dot{\theta} &amp;= \frac{v\tan(\phi)}{L}, \\
+\dot{\phi} &amp;= \dot{\phi},\end{split}\]</div>
 </div>
-<p>where <span class="math notranslate nohighlight">\(l_{\mathrm{axes}}\)</span> is the distance between the front and rear axles.</p>
-<p>The model is implemented by subclassing <code class="docutils literal notranslate"><span class="pre">oc.ODEBase</span></code>. This allows the vehicle dynamics and geometric constraint functions to be used directly in ASSET’s optimal control phase.</p>
+<p>where <span class="math notranslate nohighlight">\(L\)</span> is the wheelbase.</p>
 </section>
 <section id="vehicle-geometry">
 <h2>Vehicle Geometry<a class="headerlink" href="#vehicle-geometry" title="Link to this heading">¶</a></h2>
-<p>The vehicle is represented as a rectangular body defined by four corners in the vehicle body frame. The corner coordinates are measured relative to the center of the rear axle.</p>
-<p>The vehicle dimensions are specified by:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">l_front</span></code>: distance from the front axle to the front of the vehicle.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">l_axes</span></code>: distance between the front and rear axles.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">l_rear</span></code>: distance from the rear axle to the rear of the vehicle.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">b_width</span></code>: half-width of the vehicle.</p></li>
-</ul>
-<p>The body-frame corner coordinates are rotated into the inertial frame using the vehicle heading angle. These transformed coordinates are used to construct the roadway and parking-space constraints.</p>
-</section>
-<section id="roadway-and-parking-space-constraints">
-<h2>Roadway and Parking-Space Constraints<a class="headerlink" href="#roadway-and-parking-space-constraints" title="Link to this heading">¶</a></h2>
-<p>The parking space is defined using its length, width, and the roadway width. The roadway and parking-space boundaries are enforced at all four vehicle corners.</p>
-<p>The parking-space boundary is modeled using a hyperbolic tangent approximation of the Heaviside step function:</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[H_k(x) = \frac{1+\tanh(kx)}{2},\]</div>
-</div>
-<p>where <span class="math notranslate nohighlight">\(k\)</span> controls the sharpness of the transition. The parking-space boundary is constructed as</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[F_{\mathrm{slot}}(x)
-=
-\left[-H_k(x)+H_k(x-S_L)\right]S_W,\]</div>
-</div>
-<p>where <span class="math notranslate nohighlight">\(S_L\)</span> is the parking-space length and <span class="math notranslate nohighlight">\(S_W\)</span> is the parking-space width.</p>
-<p>The smoothing parameter allows the boundary to be represented by a differentiable function, which is useful for gradient-based optimization. The parameter is initially set to a moderate value and increased during the refinement process to provide a closer approximation to the desired parking-space geometry.</p>
-</section>
-<section id="corner-collision-constraints">
-<h2>Corner Collision Constraints<a class="headerlink" href="#corner-collision-constraints" title="Link to this heading">¶</a></h2>
-<p>Additional constraints prevent the vehicle from colliding with the upper corners of the parking-space entrance.</p>
-<p>These constraints use the areas of triangles formed by the vehicle corners and the two parking-space entrance corners. The sum of the triangle areas is compared with a reference area based on the vehicle dimensions.</p>
-<p>The resulting inequalities constrain the vehicle geometry relative to both entrance corners. This provides an additional geometric collision-avoidance condition during the maneuver.</p>
-</section>
-<section id="terminal-constraints">
-<h2>Terminal Constraints<a class="headerlink" href="#terminal-constraints" title="Link to this heading">¶</a></h2>
-<p>At the end of the maneuver, all four vehicle corners must lie within the parking-space width. The terminal longitudinal velocity and acceleration are also constrained to zero:</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[v(t_f)=0, \qquad a(t_f)=0.\]</div>
-</div>
-<p>Together, these conditions require the vehicle to finish inside the parking space in a stationary configuration.</p>
-</section>
-<section id="control-and-path-constraints">
-<h2>Control and Path Constraints<a class="headerlink" href="#control-and-path-constraints" title="Link to this heading">¶</a></h2>
-<p>The optimization enforces bounds on the vehicle states and controls. The example uses the following limits:</p>
+<p>The vehicle geometry is defined relative to the rear axle. The four vehicle
+corners are used to formulate roadway, parking-space, and collision-avoidance
+constraints.</p>
+<p>The vehicle dimensions used in the example are:</p>
 <div class="table-wrapper colwidths-given docutils container">
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 36.8%" />
-<col style="width: 31.6%" />
-<col style="width: 31.6%" />
+<col style="width: 45.0%" />
+<col style="width: 25.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Symbol</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Front overhang</p></td>
+<td><p><span class="math notranslate nohighlight">\(l_f\)</span></p></td>
+<td><p>0.839 m</p></td>
+</tr>
+<tr class="row-odd"><td><p>Wheelbase</p></td>
+<td><p><span class="math notranslate nohighlight">\(L\)</span></p></td>
+<td><p>2.588 m</p></td>
+</tr>
+<tr class="row-even"><td><p>Rear overhang</p></td>
+<td><p><span class="math notranslate nohighlight">\(l_r\)</span></p></td>
+<td><p>0.657 m</p></td>
+</tr>
+<tr class="row-odd"><td><p>Half vehicle width</p></td>
+<td><p><span class="math notranslate nohighlight">\(b\)</span></p></td>
+<td><p>0.8855 m</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parking-space-geometry">
+<h2>Parking-Space Geometry<a class="headerlink" href="#parking-space-geometry" title="Link to this heading">¶</a></h2>
+<p>The parking space and roadway are represented using geometric boundary
+constraints.</p>
+<p>The parking-space dimensions are:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 45.0%" />
+<col style="width: 25.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Symbol</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Parking-space length</p></td>
+<td><p><span class="math notranslate nohighlight">\(L_s\)</span></p></td>
+<td><p>5.0 m</p></td>
+</tr>
+<tr class="row-odd"><td><p>Parking-space width</p></td>
+<td><p><span class="math notranslate nohighlight">\(W_s\)</span></p></td>
+<td><p>2.0 m</p></td>
+</tr>
+<tr class="row-even"><td><p>Roadway boundary</p></td>
+<td><p><span class="math notranslate nohighlight">\(W_r\)</span></p></td>
+<td><p>3.5 m</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A smoothed Heaviside function is used to represent the parking-space boundary:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[H(x,k) = \frac{1+\tanh(kx)}{2},\]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(k\)</span> controls the smoothing of the transition.</p>
+<p>The lower parking-space boundary is defined as</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[y_s(x) =
+\left[-H(x,k)+H(x-L_s,k)\right]W_s.\]</div>
+</div>
+<p>This formulation provides a smooth representation of the parking-space
+entrance and exit boundaries.</p>
+</section>
+<section id="initial-conditions">
+<h2>Initial Conditions<a class="headerlink" href="#initial-conditions" title="Link to this heading">¶</a></h2>
+<p>The initial vehicle position and heading follow the reference research paper.</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 45.0%" />
+<col style="width: 25.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Symbol</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Initial horizontal position</p></td>
+<td><p><span class="math notranslate nohighlight">\(x_0\)</span></p></td>
+<td><p>-5.14 m</p></td>
+</tr>
+<tr class="row-odd"><td><p>Initial vertical position</p></td>
+<td><p><span class="math notranslate nohighlight">\(y_0\)</span></p></td>
+<td><p>1.41 m</p></td>
+</tr>
+<tr class="row-even"><td><p>Initial heading</p></td>
+<td><p><span class="math notranslate nohighlight">\(\theta_0\)</span></p></td>
+<td><p>13.18 degrees</p></td>
+</tr>
+<tr class="row-odd"><td><p>Initial velocity</p></td>
+<td><p><span class="math notranslate nohighlight">\(v_0\)</span></p></td>
+<td><p>0 m/s</p></td>
+</tr>
+<tr class="row-even"><td><p>Initial acceleration</p></td>
+<td><p><span class="math notranslate nohighlight">\(a_0\)</span></p></td>
+<td><p>0 m/s<sup>2</sup></p></td>
+</tr>
+<tr class="row-odd"><td><p>Initial steering angle</p></td>
+<td><p><span class="math notranslate nohighlight">\(\phi_0\)</span></p></td>
+<td><p>0 rad</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The initial trajectory guess is constructed using a sequence of intermediate
+vehicle positions and heading angles. This guess provides an initial maneuver
+for the nonlinear optimization.</p>
+</section>
+<section id="constraints">
+<h2>Constraints<a class="headerlink" href="#constraints" title="Link to this heading">¶</a></h2>
+<p>The optimization includes the following constraints.</p>
+<section id="id1">
+<h3>Vehicle dynamics<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>The vehicle state evolves according to the kinematic bicycle model.</p>
+</section>
+<section id="id2">
+<h3>Initial conditions<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<p>The initial vehicle state is fixed using an ASSET boundary-value constraint.</p>
+</section>
+<section id="terminal-conditions">
+<h3>Terminal conditions<a class="headerlink" href="#terminal-conditions" title="Link to this heading">¶</a></h3>
+<p>The final velocity and acceleration are constrained to zero:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[v(t_f) = 0, \qquad a(t_f) = 0.\]</div>
+</div>
+<p>The four vehicle corners are also constrained to lie within the parking-space
+width at the final time.</p>
+</section>
+<section id="roadway-and-parking-space-boundaries">
+<h3>Roadway and parking-space boundaries<a class="headerlink" href="#roadway-and-parking-space-boundaries" title="Link to this heading">¶</a></h3>
+<p>The vehicle corners must remain within the roadway and parking-space
+boundaries throughout the maneuver. These constraints are evaluated using
+the transformed vehicle corner coordinates.</p>
+</section>
+<section id="collision-avoidance">
+<h3>Collision avoidance<a class="headerlink" href="#collision-avoidance" title="Link to this heading">¶</a></h3>
+<p>Additional geometric constraints prevent the vehicle from intersecting the
+two upper corners of the parking-space entrance. The constraints use triangle
+areas formed by the vehicle corners and the parking-space entrance corners.</p>
+</section>
+<section id="state-and-control-bounds">
+<h3>State and control bounds<a class="headerlink" href="#state-and-control-bounds" title="Link to this heading">¶</a></h3>
+<p>The following limits are imposed:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 45.0%" />
+<col style="width: 25.0%" />
+<col style="width: 30.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Quantity</p></th>
@@ -399,100 +539,120 @@ u_1 &amp; u_2
 <tbody>
 <tr class="row-even"><td><p>Steering angle</p></td>
 <td><p><span class="math notranslate nohighlight">\(\phi\)</span></p></td>
-<td><p><span class="math notranslate nohighlight">\(\pm 33^\circ\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\pm 33\)</span> degrees</p></td>
 </tr>
 <tr class="row-odd"><td><p>Velocity</p></td>
 <td><p><span class="math notranslate nohighlight">\(v\)</span></p></td>
-<td><p><span class="math notranslate nohighlight">\(\pm 2\ \mathrm{m/s}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\pm 2.0\)</span> m/s</p></td>
 </tr>
 <tr class="row-even"><td><p>Acceleration</p></td>
 <td><p><span class="math notranslate nohighlight">\(a\)</span></p></td>
-<td><p><span class="math notranslate nohighlight">\(\pm 0.75\ \mathrm{m/s^2}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\pm 0.75\)</span> m/s<sup>2</sup></p></td>
 </tr>
 <tr class="row-odd"><td><p>Jerk</p></td>
-<td><p><span class="math notranslate nohighlight">\(u_1\)</span></p></td>
-<td><p><span class="math notranslate nohighlight">\(\pm 0.5\ \mathrm{m/s^3}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(j\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\pm 0.5\)</span> m/s<sup>3</sup></p></td>
 </tr>
-<tr class="row-even"><td><p>Steering-angle rate</p></td>
-<td><p><span class="math notranslate nohighlight">\(u_2\)</span></p></td>
-<td><p>Bounded through the curvature-rate constraint</p></td>
+<tr class="row-even"><td><p>Curvature rate</p></td>
+<td><p><span class="math notranslate nohighlight">\(\dot{\kappa}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\pm 0.6\)</span></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>The curvature-rate constraint is defined by</p>
+<p>The curvature rate is calculated from the steering angle and steering rate:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[\dot{\kappa}
 =
-\frac{u_2}
-{l_{\mathrm{axes}}\cos^2(\phi)}.\]</div>
-</div>
-<p>The absolute value of this quantity is limited to 0.6 in the example.</p>
-</section>
-<section id="optimal-control-formulation">
-<h2>Optimal Control Formulation<a class="headerlink" href="#optimal-control-formulation" title="Link to this heading">¶</a></h2>
-<p>The problem is formulated as an ASSET optimal control phase using the <code class="docutils literal notranslate"><span class="pre">LGL5</span></code> transcription. The initial trajectory guess is constructed from a sequence of vehicle positions, headings, and times.</p>
-<p>The initial guess provides a rough maneuver consisting of several forward and reverse motions. The optimizer then adjusts the trajectory and control history to satisfy the constraints while minimizing the maneuver time.</p>
-<p>The objective is</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[\min_{\mathbf{x}(t),\mathbf{u}(t),t_f} \quad t_f.\]</div>
-</div>
-<p>The phase uses block-constant controls and a static smoothing parameter for the parking-space boundary.</p>
-<p>The optimization proceeds in two stages:</p>
-<ol class="arabic simple">
-<li><p>The initial problem is solved using 50 segments and a smoothing parameter of 75.</p></li>
-<li><p>The trajectory is refined to 200 segments, the smoothing parameter is increased to 150, and the problem is optimized again using a tighter KKT tolerance.</p></li>
-</ol>
-<p>This refinement procedure improves the representation of the parking-space boundary while increasing the temporal resolution of the trajectory.</p>
-</section>
-<section id="trajectory-propagation-and-validation">
-<h2>Trajectory Propagation and Validation<a class="headerlink" href="#trajectory-propagation-and-validation" title="Link to this heading">¶</a></h2>
-<p>After optimization, the resulting trajectory is extracted from the phase and used to construct an integration table. The vehicle dynamics are then independently reintegrated using an ASSET integrator.</p>
-<p>The reintegrated trajectory is sampled at 500 points. The terminal state difference between the optimized trajectory and the reintegrated solution is printed to assess the consistency of the trajectory and the vehicle dynamics.</p>
-<p>The maneuver time is also compared against the reference value reported in the research paper:</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[t_{\mathrm{paper}} = 18.426\ \mathrm{s}.\]</div>
+\frac{\dot{\phi}}{L\cos^2(\phi)}.\]</div>
 </div>
 </section>
-<section id="visualization-and-animation">
-<h2>Visualization and Animation<a class="headerlink" href="#visualization-and-animation" title="Link to this heading">¶</a></h2>
-<p>The example includes plotting and animation utilities to visualize the parking maneuver.</p>
-<p>The trajectory visualization displays:</p>
+</section>
+<section id="optimization-setup">
+<h2>Optimization Setup<a class="headerlink" href="#optimization-setup" title="Link to this heading">¶</a></h2>
+<p>The problem is implemented using an ASSET <code class="docutils literal notranslate"><span class="pre">ODEBase</span></code> model and an optimal
+control phase.</p>
+<p>The initial optimization uses:</p>
 <ul class="simple">
-<li><p>The roadway and parking-space boundaries.</p></li>
-<li><p>The vehicle at selected points along the trajectory.</p></li>
-<li><p>The vehicle orientation and position throughout the maneuver.</p></li>
+<li><p>LGL5 transcription.</p></li>
+<li><p>50 mesh segments.</p></li>
+<li><p>Block-constant controls.</p></li>
+<li><p>Initial boundary smoothing parameter of 75.</p></li>
+<li><p>Maximum of 2000 optimizer iterations.</p></li>
+<li><p>Bound fraction of 0.995.</p></li>
 </ul>
-<p>The animation additionally displays the vehicle body, front and rear axles, wheels, and the path traced by the vehicle. The simulation time is displayed as the maneuver progresses.</p>
-<p>The animation can optionally be saved as an MP4 file using Matplotlib’s <code class="docutils literal notranslate"><span class="pre">FFMpegWriter</span></code>. This requires FFmpeg to be installed and available on the system path.</p>
+<p>After the first optimization, the trajectory is refined to 200 mesh segments.
+The smoothing parameter is increased to 150, and the refined problem is
+optimized using a KKT tolerance of <span class="math notranslate nohighlight">\(10^{-8}\)</span>.</p>
+<p>The maneuver time is minimized using ASSET’s delta-time objective.</p>
+</section>
+<section id="trajectory-reintegration">
+<h2>Trajectory Reintegration<a class="headerlink" href="#trajectory-reintegration" title="Link to this heading">¶</a></h2>
+<p>After optimization, the resulting trajectory is independently reintegrated
+using the vehicle model.</p>
+<p>The reintegration uses a step size of 0.1 seconds and generates 500 dense
+trajectory points. The optimized and reintegrated terminal states are
+compared to assess trajectory consistency.</p>
+<p>The terminal-state difference is calculated as</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\Delta \mathbf{x}_f =
+\mathbf{x}_{f,\mathrm{optimized}} -
+\mathbf{x}_{f,\mathrm{reintegrated}}.\]</div>
+</div>
+<p>The norm of this difference is also reported.</p>
+</section>
+<section id="results">
+<h2>Results<a class="headerlink" href="#results" title="Link to this heading">¶</a></h2>
+<p>The optimized maneuver time is compared with the reference maneuver time of
+18.426 seconds.</p>
+<p>The implementation reports:</p>
+<ul class="simple">
+<li><p>Optimized ASSET maneuver time.</p></li>
+<li><p>Reference maneuver time.</p></li>
+<li><p>Absolute maneuver-time difference.</p></li>
+<li><p>Relative maneuver-time difference.</p></li>
+<li><p>Optimized versus reintegrated terminal-state difference.</p></li>
+<li><p>Norm of the terminal-state difference.</p></li>
+</ul>
+<p>The relative maneuver-time difference is calculated as</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\Delta t_{\%}
+=
+100
+\frac{t_{\mathrm{ASSET}}-t_{\mathrm{reference}}}
+     {t_{\mathrm{reference}}}.\]</div>
+</div>
+<p>The numerical results are printed when the example is executed. No numerical
+optimization result is assumed in this documentation.</p>
+</section>
+<section id="trajectory-visualization">
+<h2>Trajectory Visualization<a class="headerlink" href="#trajectory-visualization" title="Link to this heading">¶</a></h2>
+<p>The example generates a plot of the initial trajectory guess and the
+optimized trajectory.</p>
+<p>The vehicle is represented by its rectangular body, four wheels, and front
+and rear axle lines. The parking-space boundary and roadway are plotted
+alongside the vehicle trajectory.</p>
+<p>The optimized trajectory is also independently reintegrated and animated.
+The animation displays the vehicle motion, the trajectory history, and the
+current simulation time.</p>
 </section>
 <section id="running-the-example">
 <h2>Running the Example<a class="headerlink" href="#running-the-example" title="Link to this heading">¶</a></h2>
-<p>The example requires the following Python packages:</p>
-<ul class="simple">
-<li><p>NumPy</p></li>
-<li><p>Matplotlib</p></li>
-<li><p>Seaborn</p></li>
-<li><p>ASSET</p></li>
-</ul>
-<p>Seaborn can be installed using:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>seaborn
+<p>Run the Python example from the repository root:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>examples/ParallelParking.py
 </pre></div>
 </div>
-<p>Run the example from the repository using:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>asset_asrl/examples/ParallelParking.py
-</pre></div>
-</div>
-<p>The main routine constructs the vehicle model, defines the optimal control phase, solves and refines the trajectory, reintegrates the solution, and displays the trajectory and animation.</p>
+<p>The example requires ASSET, NumPy, and Matplotlib. Saving the animation as an
+MP4 file additionally requires FFmpeg.</p>
 </section>
 <section id="full-code">
 <h2>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h2>
-<p>The complete Python implementation is included directly from the ASSET repository. This ensures that the code displayed in the documentation remains synchronized with the executable example.</p>
-<div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">ParallelParking.py</span><a class="headerlink" href="#id4" title="Link to this code">¶</a></div>
+<p>The complete Python implementation is included below.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">ParallelParking.py</span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="linenos">  2</span><span class="sd">"""</span>
 <span class="linenos">  3</span><span class="sd">Minimum-Time Parallel Parking Example Using ASSET</span>
@@ -1032,13 +1192,16 @@ u_1 &amp; u_2
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id1" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p>Imperial College London, <a class="reference external" href="http://www.ee.ic.ac.uk/ICLOCS/ExampleParallelParking.html">ICLOCS Parallel Parking Example</a>.</p>
-</aside>
 <aside class="footnote brackets" id="id3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>Imperial College London, “ICLOCS Parallel Parking Example.”
+<a class="reference external" href="http://www.ee.ic.ac.uk/ICLOCS/ExampleParallelParking.html">http://www.ee.ic.ac.uk/ICLOCS/ExampleParallelParking.html</a></p>
+</aside>
+<aside class="footnote brackets" id="id4" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://ieeexplore.ieee.org/document/7463491">IEEE research paper, Document 7463491</a>, Case 7 in Table 2.</p>
+<p>IEEE, “Research paper containing the parallel parking Case 7
+formulation, Table 2.”
+<a class="reference external" href="https://ieeexplore.ieee.org/document/7463491">https://ieeexplore.ieee.org/document/7463491</a></p>
 </aside>
 </aside>
 </section>
@@ -1049,8 +1212,26 @@ u_1 &amp; u_2
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="../python/python.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Python Library Documentation</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="PinesGravity.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Pines Gravity Model</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -1082,16 +1263,25 @@ u_1 &amp; u_2
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Parallel Parking</a><ul>
-<li><a class="reference internal" href="#problem-description">Problem Description</a></li>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#problem-formulation">Problem Formulation</a></li>
 <li><a class="reference internal" href="#vehicle-dynamics">Vehicle Dynamics</a></li>
 <li><a class="reference internal" href="#vehicle-geometry">Vehicle Geometry</a></li>
-<li><a class="reference internal" href="#roadway-and-parking-space-constraints">Roadway and Parking-Space Constraints</a></li>
-<li><a class="reference internal" href="#corner-collision-constraints">Corner Collision Constraints</a></li>
-<li><a class="reference internal" href="#terminal-constraints">Terminal Constraints</a></li>
-<li><a class="reference internal" href="#control-and-path-constraints">Control and Path Constraints</a></li>
-<li><a class="reference internal" href="#optimal-control-formulation">Optimal Control Formulation</a></li>
-<li><a class="reference internal" href="#trajectory-propagation-and-validation">Trajectory Propagation and Validation</a></li>
-<li><a class="reference internal" href="#visualization-and-animation">Visualization and Animation</a></li>
+<li><a class="reference internal" href="#parking-space-geometry">Parking-Space Geometry</a></li>
+<li><a class="reference internal" href="#initial-conditions">Initial Conditions</a></li>
+<li><a class="reference internal" href="#constraints">Constraints</a><ul>
+<li><a class="reference internal" href="#id1">Vehicle dynamics</a></li>
+<li><a class="reference internal" href="#id2">Initial conditions</a></li>
+<li><a class="reference internal" href="#terminal-conditions">Terminal conditions</a></li>
+<li><a class="reference internal" href="#roadway-and-parking-space-boundaries">Roadway and parking-space boundaries</a></li>
+<li><a class="reference internal" href="#collision-avoidance">Collision avoidance</a></li>
+<li><a class="reference internal" href="#state-and-control-bounds">State and control bounds</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#optimization-setup">Optimization Setup</a></li>
+<li><a class="reference internal" href="#trajectory-reintegration">Trajectory Reintegration</a></li>
+<li><a class="reference internal" href="#results">Results</a></li>
+<li><a class="reference internal" href="#trajectory-visualization">Trajectory Visualization</a></li>
 <li><a class="reference internal" href="#running-the-example">Running the Example</a></li>
 <li><a class="reference internal" href="#full-code">Full Code</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
