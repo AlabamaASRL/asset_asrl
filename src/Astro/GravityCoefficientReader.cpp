@@ -1,4 +1,3 @@
-```cpp
 #include "GravityCoefficientReader.h"
 
 #include <algorithm>
@@ -420,4 +419,3 @@ GravityCoefficientData GravityCoefficientReader::read(
 }
 
 }  // namespace ASSET
-```
