@@ -7,9 +7,6 @@
 
 namespace ASSET {
 
-//Delcare for build
-void BuildGravityCoefficientReader(FunctionRegistry& reg, py::module& m);
-
 // Identifies the normalization convention of the coefficient data.
 enum class GravityNormalization {
     Unknown,
