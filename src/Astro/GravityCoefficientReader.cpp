@@ -415,8 +415,3 @@ GravityCoefficientData GravityCoefficientReader::read(
 
     return data;
 }
-
-void BuildGravityCoefficientReader(FunctionRegistry& reg, py::module& m) {
-  reg.Build_Register<GravityCoefficientReader>(m, "GravityCoefficientReader");
-}
-}  // namespace ASSET
