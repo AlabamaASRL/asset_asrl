@@ -1,23 +1,24 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Multi-Spacecraft Optimization" href="MultiTarg.html" /><link rel="prev" title="Zermelo’s Problem" href="zermelo.html" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Multi-Spacecraft Optimization" href="MultiTarg.html"><link rel="prev" title="Zermelo’s Problem" href="zermelo.html">
+        <link rel="prefetch" href="../_static/ASSETLOGO.svg" as="image">
 
-    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
         <title>Multi-Phase Zermelo’s Problem - ASSET 0.5.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
 
 
 <style>
   body {
-    --color-code-background: #f8f8f8;
-  --color-code-foreground: black;
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
   
@@ -146,14 +147,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -163,8 +160,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -172,8 +168,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -181,8 +176,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -190,7 +184,6 @@
     <div class="sidebar-container">
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
-  
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/ASSETLOGO.svg" alt="Logo"/>
   </div>
@@ -205,7 +198,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Tutorials</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/tutorials.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/ODEGuide.html">ODE Tutorial</a></li>
@@ -218,7 +211,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="examples.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="examples.html">Examples</a><input aria-label="Toggle navigation of Examples" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CartPole.html">Cart-Pole Swing Up</a></li>
@@ -229,7 +222,7 @@
 <li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Python Library Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input aria-label="Toggle navigation of Python Library Documentation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
@@ -262,8 +255,7 @@
   </a>
 </div>
 <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -271,8 +263,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -288,7 +279,7 @@ useful tool to have for trajectory optimization.</p>
 <h2>Link Constraints:<a class="headerlink" href="#link-constraints" title="Link to this heading">¶</a></h2>
 <p>Link Constraints are the way that ASSET handles multi-phase problems. A link constraint enforces that state variables must be equal across phases. That is to say that the final state of phase 1 must be equal to the first state of phase 2.
 To do this to the previous problem, we only have to make a few additions to the code from <a class="reference internal" href="zermelo.html#zermelo-s-problem"><span class="std std-ref">Zermelo’s Problem</span></a>. The primary changes occur in the <code class="code docutils literal notranslate"><span class="pre">navigate</span></code> function.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">navigate</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">vM</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">uniformWind</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">navigate</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">vM</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">uniformWind</span><span class="p">):</span>
     <span class="c1"># Each phase between two points, therefore</span>
     <span class="c1"># the number of phases is the number of points - 1</span>
     <span class="n">numphase</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
@@ -329,13 +320,13 @@ initial guess generating code to accompany this design choice. Lastly, we are go
 
         <span class="c1"># 3. Enforce start and end point</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">A</span><span class="p">)</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
+            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">A</span><span class="p">)</span>
+            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
+            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
+            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
 
-        <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># 4. Add objective function</span>
         <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaTimeObjective</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
@@ -392,16 +383,16 @@ We defined the initial points such that the boat maneuvers back to the initial s
 </section>
 <section id="full-code">
 <h2>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asset</span> <span class="k">as</span> <span class="nn">ast</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">asset_asrl</span> <span class="k">as</span> <span class="nn">ast</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asset</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asset_asrl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
 
 <span class="c1">#Change a few of the matplotlib label sizes for ease of reading plots</span>
-<span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;xtick.labelsize&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;ytick.labelsize&#39;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
-          <span class="s1">&#39;axes.labelsize&#39;</span><span class="p">:</span><span class="mi">15</span><span class="p">,</span> <span class="s1">&#39;legend.fontsize&#39;</span><span class="p">:</span><span class="mi">11</span><span class="p">}</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'xtick.labelsize'</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">'ytick.labelsize'</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+          <span class="s1">'axes.labelsize'</span><span class="p">:</span><span class="mi">15</span><span class="p">,</span> <span class="s1">'legend.fontsize'</span><span class="p">:</span><span class="mi">11</span><span class="p">}</span>
 <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
 <span class="c1">################################################################################</span>
 <span class="c1">## Setup</span>
@@ -422,8 +413,8 @@ We defined the initial points such that the boat maneuvers back to the initial s
 
 <span class="c1">################################################################################</span>
 <span class="c1">## System Dynamics</span>
-<span class="k">class</span> <span class="nc">Zermelo</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vMax</span><span class="p">,</span> <span class="n">wFunc</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Zermelo</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vMax</span><span class="p">,</span> <span class="n">wFunc</span><span class="p">):</span>
         <span class="n">Xvars</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="n">Uvars</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -445,7 +436,7 @@ We defined the initial points such that the boat maneuvers back to the initial s
 
 <span class="c1">################################################################################</span>
 <span class="c1">## Wind Functions</span>
-<span class="k">def</span> <span class="nf">noWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">noWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">):</span>
     <span class="c1"># No asset functions, just numbers</span>
     <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
 
@@ -453,7 +444,7 @@ We defined the initial points such that the boat maneuvers back to the initial s
 <span class="c1"># -------------------------------------</span>
 
 
-<span class="k">def</span> <span class="nf">uniformWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">,</span> <span class="n">ang</span><span class="o">=</span><span class="mi">135</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">,</span> <span class="n">vel</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">uniformWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">,</span> <span class="n">ang</span><span class="o">=</span><span class="mi">135</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">,</span> <span class="n">vel</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="c1"># No asset functions, just numbers</span>
     <span class="k">return</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang</span><span class="p">),</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang</span><span class="p">)</span>
 
@@ -461,7 +452,7 @@ We defined the initial points such that the boat maneuvers back to the initial s
 <span class="c1"># -------------------------------------</span>
 
 
-<span class="k">def</span> <span class="nf">constantDirWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">,</span> <span class="n">ang</span><span class="o">=</span><span class="mi">45</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">constantDirWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">,</span> <span class="n">ang</span><span class="o">=</span><span class="mi">45</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">):</span>
     <span class="n">vel</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">xyt</span><span class="o">.</span><span class="n">head2</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">())</span>
 
     <span class="k">return</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang</span><span class="p">),</span> <span class="n">vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang</span><span class="p">)</span>
@@ -470,7 +461,7 @@ We defined the initial points such that the boat maneuvers back to the initial s
 <span class="c1"># -------------------------------------</span>
 
 
-<span class="k">def</span> <span class="nf">variableDirWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">variableDirWind</span><span class="p">(</span><span class="n">xyt</span><span class="p">):</span>
     <span class="n">vel</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">xyt</span><span class="o">.</span><span class="n">head2</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">())</span>
     <span class="n">ang</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">xyt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xyt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
@@ -479,7 +470,7 @@ We defined the initial points such that the boat maneuvers back to the initial s
 
 <span class="c1">################################################################################</span>
 <span class="c1">## Solver function</span>
-<span class="k">def</span> <span class="nf">navigate</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">vM</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">uniformWind</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">navigate</span><span class="p">(</span><span class="n">Points</span><span class="p">,</span> <span class="n">vM</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">wF</span><span class="o">=</span><span class="n">uniformWind</span><span class="p">):</span>
     <span class="c1"># Each phase between two points, therefore</span>
     <span class="c1"># the number of phases is the number of points - 1</span>
     <span class="n">numphase</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
@@ -514,13 +505,13 @@ We defined the initial points such that the boat maneuvers back to the initial s
 
         <span class="c1"># 3. Enforce start and end point</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">A</span><span class="p">)</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
+            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">A</span><span class="p">)</span>
+            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">])</span>
+            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
+            <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">B</span><span class="p">)</span>
 
-        <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># 4. Add objective function</span>
         <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaTimeObjective</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
@@ -549,29 +540,29 @@ We defined the initial points such that the boat maneuvers back to the initial s
 
 <span class="c1">################################################################################</span>
 <span class="c1">## 2D Plotting</span>
-<span class="k">def</span> <span class="nf">colorScale</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">194</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="p">[</span><span class="mi">208</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">70</span><span class="p">]):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">colorScale</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="p">[</span><span class="mi">48</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">194</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="p">[</span><span class="mi">208</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">70</span><span class="p">]):</span>
     <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">x</span> <span class="o">*</span> <span class="n">right</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">left</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span><span class="o">/</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
 
-<span class="k">def</span> <span class="nf">plot2DTrajList</span><span class="p">(</span><span class="n">tList</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot2DTrajList</span><span class="p">(</span><span class="n">tList</span><span class="p">):</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tList</span><span class="p">):</span>
         <span class="n">clr</span> <span class="o">=</span> <span class="n">colorScale</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">tList</span><span class="p">))</span>
         <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span>
                      <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span>
-                     <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Path &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                     <span class="n">label</span> <span class="o">=</span> <span class="s2">"Path "</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
 
         <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span>
                      <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])])</span>
     <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Y&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"X"</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Y"</span><span class="p">)</span>
 
     <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$</span><span class="se">\\</span><span class="s2">theta$ (rad)&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Time"</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"$</span><span class="se">\\</span><span class="s2">theta$ (rad)"</span><span class="p">)</span>
     <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;Plots/Zermelo/CompareWindModelsLink.svg&quot;</span><span class="p">,</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"Plots/Zermelo/CompareWindModelsLink.svg"</span><span class="p">,</span>
                 <span class="n">dpi</span> <span class="o">=</span> <span class="mi">500</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
@@ -579,7 +570,7 @@ We defined the initial points such that the boat maneuvers back to the initial s
 <span class="c1"># -------------------------------------</span>
 
 
-<span class="k">def</span> <span class="nf">plot2DTrajListVF</span><span class="p">(</span><span class="n">tList</span><span class="p">,</span> <span class="n">wFunc_num</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot2DTrajListVF</span><span class="p">(</span><span class="n">tList</span><span class="p">,</span> <span class="n">wFunc_num</span><span class="p">):</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
 
     <span class="c1"># Generate vector field for trajectory plot</span>
@@ -601,7 +592,7 @@ We defined the initial points such that the boat maneuvers back to the initial s
             <span class="n">uPlot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_ij</span>
             <span class="n">vPlot</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">v_ij</span>
 
-    <span class="n">QV</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span><span class="n">xPlot</span><span class="p">,</span> <span class="n">yPlot</span><span class="p">,</span> <span class="n">uPlot</span><span class="p">,</span> <span class="n">vPlot</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Wind&quot;</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;blue&quot;</span><span class="p">)</span>
+    <span class="n">QV</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span><span class="n">xPlot</span><span class="p">,</span> <span class="n">yPlot</span><span class="p">,</span> <span class="n">uPlot</span><span class="p">,</span> <span class="n">vPlot</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">"Wind"</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">"blue"</span><span class="p">)</span>
 
 
     <span class="c1"># Overlay trajectories and control</span>
@@ -609,28 +600,28 @@ We defined the initial points such that the boat maneuvers back to the initial s
         <span class="n">clr</span> <span class="o">=</span> <span class="n">colorScale</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">tList</span><span class="p">))</span>
         <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span>
                      <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span>
-                     <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Path &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                     <span class="n">label</span> <span class="o">=</span> <span class="s2">"Path "</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
 
         <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">t</span><span class="p">],</span>
                      <span class="n">color</span> <span class="o">=</span> <span class="p">[(</span><span class="n">clr</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">clr</span><span class="p">[</span><span class="mi">2</span><span class="p">])])</span>
 
     <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Y&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"X"</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Y"</span><span class="p">)</span>
 
     <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
-    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$</span><span class="se">\\</span><span class="s2">theta$ (rad)&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Time"</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"$</span><span class="se">\\</span><span class="s2">theta$ (rad)"</span><span class="p">)</span>
     <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">ncol</span> <span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;Plots/Zermelo/CompareBoatSpeedLink.svg&quot;</span><span class="p">,</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"Plots/Zermelo/CompareBoatSpeedLink.svg"</span><span class="p">,</span>
                 <span class="n">dpi</span> <span class="o">=</span> <span class="mi">500</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 
 <span class="c1">################################################################################</span>
 <span class="c1">## Compare Wind Models</span>
-<span class="k">def</span> <span class="nf">compareWind</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compareWind</span><span class="p">():</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
     <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
@@ -662,7 +653,7 @@ We defined the initial points such that the boat maneuvers back to the initial s
 
 <span class="c1">################################################################################</span>
 <span class="c1">## Compare Boat Speed</span>
-<span class="k">def</span> <span class="nf">compareSpeed</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compareSpeed</span><span class="p">():</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
     <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
     <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">])</span>
@@ -683,14 +674,14 @@ We defined the initial points such that the boat maneuvers back to the initial s
 
 <span class="c1">################################################################################</span>
 <span class="c1">## Main</span>
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
     <span class="n">compareWind</span><span class="p">()</span>
     <span class="n">compareSpeed</span><span class="p">()</span>
 
 
 <span class="c1">################################################################################</span>
 <span class="c1">## Run</span>
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -767,8 +758,8 @@ We defined the initial points such that the boat maneuvers back to the initial s
     </aside>
   </div>
 </div><script src="../_static/documentation_options.js?v=8e576371"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
     </body>
 </html>

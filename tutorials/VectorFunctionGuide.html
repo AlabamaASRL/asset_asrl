@@ -1,23 +1,24 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="ODE Tutorial" href="ODEGuide.html" /><link rel="prev" title="Installing ASSET" href="Install.html" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="ODE Tutorial" href="ODEGuide.html"><link rel="prev" title="Installing ASSET" href="Install.html">
+        <link rel="prefetch" href="../_static/ASSETLOGO.svg" as="image">
 
-    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
         <title>Vector Function Tutorial - ASSET 0.5.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
 
 
 <style>
   body {
-    --color-code-background: #f8f8f8;
-  --color-code-foreground: black;
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
   
@@ -146,14 +147,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -163,8 +160,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -172,8 +168,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -181,8 +176,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -190,7 +184,6 @@
     <div class="sidebar-container">
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
-  
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/ASSETLOGO.svg" alt="Logo"/>
   </div>
@@ -205,7 +198,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Tutorials</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Install.html">Installing ASSET</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ODEGuide.html">ODE Tutorial</a></li>
@@ -218,7 +211,7 @@
 <li class="toctree-l2"><a class="reference internal" href="OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../examples/examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../examples/examples.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../examples/Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/ReentryExample.html">Space Shuttle Reentry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/CartPole.html">Cart-Pole Swing Up</a></li>
@@ -229,7 +222,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Python Library Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input aria-label="Toggle navigation of Python Library Documentation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
@@ -262,8 +255,7 @@
   </a>
 </div>
 <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -271,8 +263,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -892,7 +883,7 @@ encapsulate the construction of ASSET VectorFunctions is up to you, but we sugge
 any meta data or constants, needed to define the function, then writing and returning your ASSET
 VectorFunction. A trivial example of this is shown below, and you can find many others throughout our
 problem specific examples contained in other sections.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">FuncMethod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">FuncMethod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
         <span class="n">x0</span><span class="p">,</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">eq1</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span><span class="n">a</span> <span class="o">-</span> <span class="n">x1</span>
         <span class="n">eq2</span> <span class="o">=</span> <span class="n">x2</span><span class="o">*</span><span class="n">b</span> <span class="o">+</span> <span class="n">x1</span><span class="o">*</span><span class="n">c</span>
@@ -909,8 +900,8 @@ and then defining and initializing the expression in the constructor. This metho
 be preferred if you need to store the meta-data as part of the class
 or add additional methods to the object. Otherwise, this method is functionally identical to
 the one above.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FuncClass</span><span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">VectorFunction</span><span class="p">):</span>
-        <span class="k">def</span> <span class="fm">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">FuncClass</span><span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">VectorFunction</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span><span class="n">a</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span><span class="n">b</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span><span class="n">c</span>
@@ -921,7 +912,7 @@ the one above.</p>
 
                 <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">eq1</span><span class="p">,</span><span class="n">eq2</span><span class="p">))</span> <span class="c1">#Do not forget to call CTOR of Base!!</span>
 
-        <span class="k">def</span> <span class="nf">get_a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span>
 
 <span class="n">func</span> <span class="o">=</span> <span class="n">FuncClass</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
 
@@ -939,7 +930,7 @@ in astrodynamics: frame conversions. Specifically, we wish to write a function t
 the position and velocity of some object in Cartesian coordinates, as well as some other vector,
 and then transforms that vector into the RTN frame. The RTN basis vectors can be computed purely as a function
 of position and velocity, so let us first write a function that does just that.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">RTNBasis</span><span class="p">():</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">RTNBasis</span><span class="p">():</span>
 
         <span class="n">R</span><span class="p">,</span><span class="n">V</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
 
@@ -960,7 +951,7 @@ way to the define the expression. However, if this were not the case, we could a
 call signatures shown. We can provide two separate functions, in this case <code class="code docutils literal notranslate"><span class="pre">R</span></code> and <code class="code docutils literal notranslate"><span class="pre">V</span></code>,
 either as individual arguments or grouped together in a python list. These will be implicitly
 stacked using the same rules governing <code class="code docutils literal notranslate"><span class="pre">vf.stack</span></code> and then forwarded to the function.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">RTNTransform</span><span class="p">():</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">RTNTransform</span><span class="p">():</span>
 
 
         <span class="n">X</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
@@ -1040,7 +1031,7 @@ that the function is twice differentiable.</p>
 
 <span class="n">VecDat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">])</span>
 
-<span class="n">kind</span> <span class="o">=</span> <span class="s1">&#39;cubic&#39;</span> <span class="c1"># or &#39;linear&#39;</span>
+<span class="n">kind</span> <span class="o">=</span> <span class="s1">'cubic'</span> <span class="c1"># or 'linear'</span>
 
 <span class="n">Tab</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">InterpTable1D</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span><span class="n">VecDat</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">Tab</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.0</span><span class="p">))</span> <span class="c1">#prints [1,.0]</span>
@@ -1102,11 +1093,11 @@ are the same size, we will not be able to detect an error.</p>
 <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">lim</span><span class="p">,</span><span class="n">lim</span><span class="p">,</span><span class="n">nx</span><span class="p">)</span>
 <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">lim</span><span class="p">,</span><span class="n">lim</span><span class="p">,</span><span class="n">ny</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span><span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span><span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
 <span class="n">Z</span>    <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">)</span>             <span class="c1">#Scalar data defined on 2-D meshgrid</span>
 
-<span class="n">kind</span> <span class="o">=</span> <span class="s1">&#39;cubic&#39;</span> <span class="c1"># or &#39;linear&#39;</span>
+<span class="n">kind</span> <span class="o">=</span> <span class="s1">'cubic'</span> <span class="c1"># or 'linear'</span>
 
 <span class="n">Tab2D</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">InterpTable2D</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">Z</span><span class="p">,</span><span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span>
 
@@ -1153,7 +1144,7 @@ you want to pre-calculate and cache all possible values of the interpolation coe
 This requires the up front calculation of  <code class="code docutils literal notranslate"><span class="pre">(nx-1)*(ny-1)*(nz-1)</span></code> matrix vector products of size (64x64)x(64x1)  and 8 times the storage of the non-cached
 algorithm. However, interpolation will be 10-20 times faster. So use this if the dimensions are small and the interpolator
 will be called a lot.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">):</span><span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">):</span><span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
 
 <span class="n">nx</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="n">ny</span> <span class="o">=</span> <span class="mi">100</span>
@@ -1167,10 +1158,10 @@ will be called a lot.</p>
 <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">ylim</span><span class="p">,</span><span class="n">ylim</span><span class="p">,</span><span class="n">ny</span><span class="p">)</span>
 <span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">zlim</span><span class="p">,</span><span class="n">zlim</span><span class="p">,</span><span class="n">nz</span><span class="p">)</span>
 
-<span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span><span class="n">zs</span><span class="p">,</span><span class="n">indexing</span> <span class="o">=</span> <span class="s1">&#39;ij&#39;</span><span class="p">)</span>
+<span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span><span class="n">zs</span><span class="p">,</span><span class="n">indexing</span> <span class="o">=</span> <span class="s1">'ij'</span><span class="p">)</span>
 <span class="n">Fs</span>    <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">)</span>    <span class="c1">#Scalar data defined on 3-D meshgrid in ij format!!!</span>
 
-<span class="n">kind</span> <span class="o">=</span> <span class="s1">&#39;cubic&#39;</span> <span class="c1"># or &#39;linear&#39;, defaults to &#39;cubic&#39;</span>
+<span class="n">kind</span> <span class="o">=</span> <span class="s1">'cubic'</span> <span class="c1"># or 'linear', defaults to 'cubic'</span>
 <span class="n">cache</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># defaults to False</span>
 <span class="c1">#cache = True # will precalculate and cache all interpolation coeffs</span>
 
@@ -1206,7 +1197,7 @@ you want to pre-calculate and cache all possible values of the interpolation coe
 This requires the up front calculation of  <code class="code docutils literal notranslate"><span class="pre">(nx-1)*(ny-1)*(nz-1)*(nw-1)</span></code> matrix vector products of size (256x256)x(256x1)  and 16 times the storage of the non-cached
 algorithm. However, interpolation will be 5-6 times faster. So use this if the dimensions are small and the interpolator
 will be called a lot.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">w</span><span class="p">):</span><span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">w</span><span class="p">):</span><span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
 
 <span class="n">nx</span> <span class="o">=</span> <span class="mi">50</span>
 <span class="n">ny</span> <span class="o">=</span> <span class="mi">50</span>
@@ -1224,10 +1215,10 @@ will be called a lot.</p>
 <span class="n">ws</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">zlim</span><span class="p">,</span><span class="n">zlim</span><span class="p">,</span><span class="n">nw</span><span class="p">)</span>
 
 
-<span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">,</span><span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">zs</span><span class="p">,</span><span class="n">ws</span><span class="p">,</span><span class="n">indexing</span> <span class="o">=</span> <span class="s1">&#39;ij&#39;</span><span class="p">)</span>
+<span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">,</span><span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">zs</span><span class="p">,</span><span class="n">ws</span><span class="p">,</span><span class="n">indexing</span> <span class="o">=</span> <span class="s1">'ij'</span><span class="p">)</span>
 <span class="n">Fs</span>    <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">,</span><span class="n">W</span><span class="p">)</span>    <span class="c1">#Scalar data defined on 4-D meshgrid in ij format!!!</span>
 
-<span class="n">kind</span> <span class="o">=</span> <span class="s1">&#39;cubic&#39;</span> <span class="c1"># or &#39;linear&#39;, defaults to &#39;cubic&#39;</span>
+<span class="n">kind</span> <span class="o">=</span> <span class="s1">'cubic'</span> <span class="c1"># or 'linear', defaults to 'cubic'</span>
 <span class="n">cache</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># defaults to False</span>
 <span class="c1">#cache = True # will precalculate and cache all interpolation coeffs</span>
 
@@ -1288,7 +1279,7 @@ arguments.
 You must also explicitly state the input and output (if not scalar) sizes of the function. The function jacobian and hessian will be computed with finite differences
 using the user specified jacobian and hessian step sizes.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># A vector function</span>
-<span class="k">def</span> <span class="nf">VFunc</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">VFunc</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a</span><span class="o">*</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">b</span><span class="p">])</span>
 
 <span class="n">InputSize</span> <span class="o">=</span> <span class="mi">2</span>
@@ -1300,7 +1291,7 @@ using the user specified jacobian and hessian step sizes.</p>
 
 
 <span class="c1"># A scalar function</span>
-<span class="k">def</span> <span class="nf">SFunc</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SFunc</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a</span><span class="o">*</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="p">])</span> <span class="c1"># output is 1x1 array</span>
 
 <span class="n">InputSize</span> <span class="o">=</span> <span class="mi">2</span>
@@ -1404,9 +1395,9 @@ If it’s truly not possible, we will consider adding the missing expression to 
     </aside>
   </div>
 </div><script src="../_static/documentation_options.js?v=8e576371"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     </body>
 </html>

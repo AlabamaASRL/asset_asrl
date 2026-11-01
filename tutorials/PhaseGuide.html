@@ -1,23 +1,24 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Optimal Control Problem Tutorial" href="OptimalControlProblem.html" /><link rel="prev" title="Integrator Tutorial" href="IntegratorGuide.html" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Optimal Control Problem Tutorial" href="OptimalControlProblem.html"><link rel="prev" title="Integrator Tutorial" href="IntegratorGuide.html">
+        <link rel="prefetch" href="../_static/ASSETLOGO.svg" as="image">
 
-    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
         <title>Optimal Control Phase Tutorial - ASSET 0.5.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
 
 
 <style>
   body {
-    --color-code-background: #f8f8f8;
-  --color-code-foreground: black;
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
   --color-brand-primary: red;
   --color-brand-content: #CC3333;
   
@@ -146,14 +147,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -163,8 +160,7 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
@@ -172,8 +168,7 @@
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -181,8 +176,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -190,7 +184,6 @@
     <div class="sidebar-container">
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
-  
   <div class="sidebar-logo-container">
     <img class="sidebar-logo" src="../_static/ASSETLOGO.svg" alt="Logo"/>
   </div>
@@ -205,7 +198,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Tutorials</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="tutorials.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Install.html">Installing ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="VectorFunctionGuide.html">Vector Function Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ODEGuide.html">ODE Tutorial</a></li>
@@ -218,7 +211,7 @@
 <li class="toctree-l2"><a class="reference internal" href="OptimalControlUtilites.html">Optimal Control Utilities</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../examples/examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../examples/examples.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../examples/Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/ReentryExample.html">Space Shuttle Reentry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/CartPole.html">Cart-Pole Swing Up</a></li>
@@ -229,7 +222,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../examples/MultiTarg.html">Multi-Spacecraft Optimization</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Python Library Documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input aria-label="Toggle navigation of Python Library Documentation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
@@ -262,8 +255,7 @@
   </a>
 </div>
 <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -271,8 +263,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -285,8 +276,8 @@ combine multiple phases and optimize them all simultaneously.</p>
 <p>To construct a phase, we must first define an ODE using what
 we have learned in previous sections on <a class="reference internal" href="VectorFunctionGuide.html#vectorfunction-guide"><span class="std std-ref">vector functions</span></a> and <a class="reference internal" href="ODEGuide.html#ode-guide"><span class="std std-ref">ODEs</span></a>. In this section
 we will utilize the trivial ODE below as a reference while we discuss the phase API.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DummyODE</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">xv</span><span class="p">,</span><span class="n">uv</span><span class="p">,</span><span class="n">pv</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DummyODE</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">xv</span><span class="p">,</span><span class="n">uv</span><span class="p">,</span><span class="n">pv</span><span class="p">):</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">xv</span><span class="p">,</span><span class="n">uv</span><span class="p">,</span><span class="n">pv</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">XVec</span><span class="p">(),</span><span class="n">xv</span><span class="p">,</span><span class="n">uv</span><span class="p">,</span><span class="n">pv</span><span class="p">)</span>
 </pre></div>
@@ -301,7 +292,7 @@ cases we suggest first trying the <code class="code docutils literal notranslate
 Additionally, users should prefer the LGL collocation methods over the central shooting scheme
 for almost all applications, as they are almost always significantly faster and more robust.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ode</span> <span class="o">=</span> <span class="n">DummyODE</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">)</span>
+<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">"LGL3"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>We can supply an initial guess to the <code class="code docutils literal notranslate"><span class="pre">phase</span></code> using the <code class="code docutils literal notranslate"><span class="pre">.setTraj</span></code> method.
@@ -344,13 +335,13 @@ call as shown on the final line.</p>
 <span class="n">phase</span><span class="o">.</span><span class="n">setTraj</span><span class="p">(</span><span class="n">InitialGuess</span><span class="p">,</span><span class="n">SegBinSpacing</span><span class="p">,</span><span class="n">SegsPerBin</span><span class="p">)</span>
 
 <span class="c1">## create phase, set Transcription, IG, and number of segments</span>
-<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">,</span><span class="n">InitialGuess</span><span class="p">,</span><span class="mi">500</span><span class="p">)</span>
+<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">"LGL3"</span><span class="p">,</span><span class="n">InitialGuess</span><span class="p">,</span><span class="mi">500</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In addition to specifying the transcription mode, we can also choose from several
 different control parameterizations, using the <code class="code docutils literal notranslate"><span class="pre">.setControlMode</span></code> method.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Options: FirstOrderSpline,HighestOrderSpline,BlockConstant,NoSpline</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="s2">&quot;FirstOrderSpline&quot;</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="s2">"FirstOrderSpline"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>By default, this is set to <code class="code docutils literal notranslate"><span class="pre">'FirstOrderSpline'</span></code>, which will ensure that the control history has smooth
@@ -507,9 +498,9 @@ constraint that enforces that the first time-varying inputs in the trajectory an
 Custom constraints must be written such that the inputs consist of the time-varying inputs (if any), followed by the ODE parameters (if any), and then the static
 parameters (if any). However, the variables inside of a particular variable group (ex:<code class="code docutils literal notranslate"><span class="pre">XtUVars</span></code>) can be specified in any order so long as it is consistent
 with how you have defined your constraint function.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">&quot;First&quot;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">"First"</span>
 
-<span class="k">def</span> <span class="nf">AnEqualCon</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">AnEqualCon</span><span class="p">():</span>
     <span class="n">XtU_OP_SP</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">XtU_OP_SP</span>
 
@@ -526,10 +517,10 @@ with how you have defined your constraint function.</p>
 </div>
 <p>For example, below we add a constraint involving the second and third state variables from the
 last time-varying state in the trajectory, as well as the first ODE parameter and second static parameter.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">&quot;Last&quot;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">"Last"</span>
 
 <span class="c1">## Only need second and third state variables, the first ode parameter, and the second static parameter</span>
-<span class="k">def</span> <span class="nf">AnotherEqualCon</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">AnotherEqualCon</span><span class="p">():</span>
     <span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">op0</span><span class="p">,</span><span class="n">sp1</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">vf</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">op0</span><span class="o">/</span><span class="n">sp1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">42.0</span>
 
@@ -544,23 +535,23 @@ last time-varying state in the trajectory, as well as the first ODE parameter an
 examples below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">XtUVars</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]</span>  <span class="c1"># Just the controls and nothing else</span>
 <span class="c1"># enforce unit norm of all control vectors</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="n">XtUVars</span><span class="p">,[],[])</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="n">XtUVars</span><span class="p">,[],[])</span>
 <span class="c1"># same as above</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="n">XtUVars</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="n">XtUVars</span><span class="p">)</span>
 
 
 <span class="n">OPVars</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Just the ODEParam</span>
 <span class="c1">#Enforce Square of first ODE param = 4</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">&quot;ODEParams&quot;</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">4.0</span><span class="p">,[],</span><span class="n">OPVars</span><span class="p">,[])</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">"ODEParams"</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">4.0</span><span class="p">,[],</span><span class="n">OPVars</span><span class="p">,[])</span>
 <span class="c1"># same as above</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">&quot;ODEParams&quot;</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">4.0</span><span class="p">,</span><span class="n">OPVars</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">"ODEParams"</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">4.0</span><span class="p">,</span><span class="n">OPVars</span><span class="p">)</span>
 
 
 <span class="n">SPVars</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Just the static params</span>
 <span class="c1">#Enforce sum of static params = 2</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">&quot;StaticParams&quot;</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="mf">2.0</span><span class="p">,[],[],</span><span class="n">SPVars</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">"StaticParams"</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="mf">2.0</span><span class="p">,[],[],</span><span class="n">SPVars</span><span class="p">)</span>
 <span class="c1"># same as above</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">&quot;StaticParams&quot;</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="mf">2.0</span><span class="p">,</span><span class="n">SPVars</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">"StaticParams"</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="mf">2.0</span><span class="p">,</span><span class="n">SPVars</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The previous examples only illustrate the usage of the phase regions that take at most one time-varying input; however, phase regions <code class="code docutils literal notranslate"><span class="pre">&quot;FrontandBack&quot;</span></code>, and
@@ -568,7 +559,7 @@ examples below.</p>
 and that the difference between the last and first time of the phase should be equal to a static parameter that we have added to the phase. We only specify which time-varying variables
 we want once. The same set is gathered from the first state and last state and forwarded to the function, followed by any ODE parameters (none in this case)
 and static parameters (just the first in this case).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">FrontBackEqCon</span><span class="p">():</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">FrontBackEqCon</span><span class="p">():</span>
     <span class="n">X_0</span><span class="p">,</span><span class="n">t_0</span><span class="p">,</span><span class="n">X_f</span><span class="p">,</span><span class="n">t_f</span><span class="p">,</span><span class="n">sp0</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">),(</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">7</span><span class="p">,</span><span class="mi">6</span><span class="p">),(</span><span class="mi">13</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">14</span><span class="p">,</span><span class="mi">1</span><span class="p">)])</span>
 
     <span class="n">eq1</span> <span class="o">=</span> <span class="n">X_0</span><span class="o">-</span><span class="n">X_f</span>
@@ -580,7 +571,7 @@ and static parameters (just the first in this case).</p>
 <span class="n">SPVars</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># first static parameter</span>
 <span class="c1"># Constrain first and last states to be equal and</span>
 <span class="c1"># constrain Delta Time over the phase (tf-t0) to be equal to the first static parameter</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">&quot;FirstandLast&quot;</span><span class="p">,</span><span class="n">FrontBackEqCon</span><span class="p">(),</span><span class="n">XtUVars</span><span class="p">,[],</span><span class="n">SPVars</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">"FirstandLast"</span><span class="p">,</span><span class="n">FrontBackEqCon</span><span class="p">(),</span><span class="n">XtUVars</span><span class="p">,[],</span><span class="n">SPVars</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In addition to the general methods of adding equality constraints illustrated in the previous examples, there are several additional methods to simplify the
@@ -589,15 +580,15 @@ variables should be equal to some vector of constants (can be a 1-D numpy array 
 enforce known initial and terminal conditions on a phase.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">XtUVars</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">9</span><span class="p">]</span>
 <span class="n">Values</span>  <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">e</span><span class="p">,</span><span class="mf">42.0</span><span class="p">]</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;First&quot;</span><span class="p">,</span><span class="n">XtUVars</span><span class="p">,</span><span class="n">Values</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"First"</span><span class="p">,</span><span class="n">XtUVars</span><span class="p">,</span><span class="n">Values</span><span class="p">)</span>
 
 <span class="n">OPVars</span>  <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">Values</span>  <span class="o">=</span> <span class="p">[</span><span class="mf">10.034</span><span class="p">]</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;ODEParams&quot;</span><span class="p">,</span><span class="n">OPVars</span><span class="p">,</span><span class="n">Values</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"ODEParams"</span><span class="p">,</span><span class="n">OPVars</span><span class="p">,</span><span class="n">Values</span><span class="p">)</span>
 
 <span class="n">SPVars</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 <span class="n">Values</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">4.0</span><span class="p">])</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;StaticParams&quot;</span><span class="p">,</span><span class="n">SPVars</span><span class="p">,</span><span class="n">Values</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"StaticParams"</span><span class="p">,</span><span class="n">SPVars</span><span class="p">,</span><span class="n">Values</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Additionally, you can also use the <code class="code docutils literal notranslate"><span class="pre">addDeltaVarEqualCon</span></code> method
@@ -609,7 +600,7 @@ so common that we also provide the <code class="code docutils literal notranslat
 <span class="c1"># This does the same as the following</span>
 
 <span class="n">DeltaEqualCon</span><span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">2</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Args</span><span class="p">(</span><span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span><span class="mf">1.0</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">&quot;FirstandLast&quot;</span><span class="p">,</span><span class="n">DeltaEqualCon</span><span class="p">,[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">"FirstandLast"</span><span class="p">,</span><span class="n">DeltaEqualCon</span><span class="p">,[</span><span class="mi">0</span><span class="p">])</span>
 
 
 <span class="c1">## These do the same thing, constraining the elapsed time over the phase to be = 3.0</span>
@@ -618,7 +609,7 @@ so common that we also provide the <code class="code docutils literal notranslat
 
 <span class="c1"># Both are equivalent to the following</span>
 <span class="n">DeltaEqualCon</span><span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">2</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Args</span><span class="p">(</span><span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span><span class="mf">3.0</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">&quot;FirstandLast&quot;</span><span class="p">,</span><span class="n">DeltaEqualCon</span><span class="p">,[</span><span class="mi">6</span><span class="p">])</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">"FirstandLast"</span><span class="p">,</span><span class="n">DeltaEqualCon</span><span class="p">,[</span><span class="mi">6</span><span class="p">])</span>
 </pre></div>
 </div>
 </section>
@@ -628,9 +619,9 @@ so common that we also provide the <code class="code docutils literal notranslat
 is that our functions should be constraints of the form <span class="math notranslate nohighlight">\(\vec{g}(\vec{x}) \leq \vec{0}\)</span>. In other words, we assume that our function is in the feasible region whenever
 its value is negative. For example, if we wanted to add a constraint specifying that all of the initial time-varying input variables, ODE parameters, and the phase’s static
 parameters should be positive, we could implement that as shown below.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">&quot;First&quot;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">"First"</span>
 
-<span class="k">def</span> <span class="nf">AnInequalCon</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">AnInequalCon</span><span class="p">():</span>
     <span class="n">XtU_OP_SP</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span>
     <span class="k">return</span> <span class="o">-</span><span class="mf">1.0</span><span class="o">*</span><span class="n">XtU_OP_SP</span>
 
@@ -641,9 +632,9 @@ parameters should be positive, we could implement that as shown below.</p>
 <span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="n">PhaseRegion</span><span class="p">,</span><span class="n">AnInequalCon</span><span class="p">(),</span><span class="n">XtUVars</span><span class="p">,</span><span class="n">OPVars</span><span class="p">,</span><span class="n">SPVars</span><span class="p">)</span>
 
 <span class="c1"># Other signatures follow the same rules as covered for addEqualCon</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span> <span class="n">Args</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(),[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[],[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span>  <span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">squared_norm</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">,[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">&quot;StaticParams&quot;</span><span class="p">,</span><span class="mi">1</span><span class="o">-</span><span class="n">Args</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">(),[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="n">Args</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(),[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[],[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span>  <span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">squared_norm</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">,[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">"StaticParams"</span><span class="p">,</span><span class="mi">1</span><span class="o">-</span><span class="n">Args</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">(),[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>However, it can be somewhat cumbersome to write many of the types of inequality constraints that you will encounter using this generalized method, thus
@@ -652,7 +643,7 @@ we offer many simplified alternatives which we now discuss.</p>
 shown below, these can be applied to any of the single time-varying input phase regions or the parameters. For any method, we can also specify a positive scale factor that will be
 applied to the final bounding function. This can help scale an ill-conditioned bound but will not change the meaning of the constraint.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add lower bound to the 7th state,time,control variable</span>
-<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">&quot;Back&quot;</span>
+<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">"Back"</span>
 <span class="n">VarIndex</span>    <span class="o">=</span> <span class="mi">7</span>
 <span class="n">LowerBound</span>  <span class="o">=</span> <span class="mf">0.0</span>
 <span class="n">Scale</span>       <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># strictly positive scale factor</span>
@@ -663,7 +654,7 @@ applied to the final bounding function. This can help scale an ill-conditioned b
 
 
 <span class="c1"># Add upper bound to the 7th state,time,control variable</span>
-<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">&quot;Back&quot;</span>
+<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">"Back"</span>
 <span class="n">VarIndex</span>    <span class="o">=</span> <span class="mi">7</span>
 <span class="n">UpperBound</span>  <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">Scale</span>       <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># strictly positive scale factor</span>
@@ -674,7 +665,7 @@ applied to the final bounding function. This can help scale an ill-conditioned b
 
 
 <span class="c1">## Add Both Lower and Upper Bounds at same time</span>
-<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">&quot;Back&quot;</span>
+<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">"Back"</span>
 <span class="n">VarIndex</span>    <span class="o">=</span> <span class="mi">7</span>
 <span class="n">LowerBound</span>  <span class="o">=</span> <span class="mf">0.0</span>
 <span class="n">UpperBound</span>  <span class="o">=</span> <span class="mf">1.0</span>
@@ -685,18 +676,18 @@ applied to the final bounding function. This can help scale an ill-conditioned b
 <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="n">PhaseRegion</span><span class="p">,</span><span class="n">VarIndex</span><span class="p">,</span><span class="n">LowerBound</span><span class="p">,</span><span class="n">UpperBound</span><span class="p">)</span>
 
 <span class="c1"># Also works for the parameter variables</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">&quot;StaticParams&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"StaticParams"</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
 
 <span class="c1"># Violations are now of order one</span>
 <span class="n">Scale</span> <span class="o">=</span> <span class="mf">10000.0</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addUpperVarBound</span><span class="p">(</span><span class="s2">&quot;ODEParams&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">10000.0</span><span class="p">,</span> <span class="n">Scale</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addUpperVarBound</span><span class="p">(</span><span class="s2">"ODEParams"</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">10000.0</span><span class="p">,</span> <span class="n">Scale</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In addition to placing bounds on variables, you can also place bounds on the outputs of ScalarFunctions of the variables. This
 is accomplished using the <code class="code docutils literal notranslate"><span class="pre">.addLower/Upper/LUFuncBound</span></code> methods as shown below. In this example we are showing various ways to bound the norm
 of all of the controls (variables <code class="code docutils literal notranslate"><span class="pre">[7,8,9]</span></code> for this contrived ODE) to be between 0 and 1.0.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## Upper bound on the norm of the controls</span>
-<span class="n">PhaseRegion</span> <span class="o">=</span><span class="s2">&quot;Path&quot;</span>
+<span class="n">PhaseRegion</span> <span class="o">=</span><span class="s2">"Path"</span>
 <span class="n">ScalarFunc</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
 <span class="n">XTUVars</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]</span>
 <span class="n">UpperBound</span> <span class="o">=</span> <span class="mf">1.0</span>
@@ -708,7 +699,7 @@ of all of the controls (variables <code class="code docutils literal notranslate
 
 
 <span class="c1">## Lower bound on the norm of the controls</span>
-<span class="n">PhaseRegion</span> <span class="o">=</span><span class="s2">&quot;Path&quot;</span>
+<span class="n">PhaseRegion</span> <span class="o">=</span><span class="s2">"Path"</span>
 <span class="n">ScalarFunc</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
 <span class="n">XTUVars</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]</span>
 <span class="n">LowerBound</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -720,7 +711,7 @@ of all of the controls (variables <code class="code docutils literal notranslate
 
 
 <span class="c1">## Lower and Upper on squared norm at the same time</span>
-<span class="n">PhaseRegion</span> <span class="o">=</span><span class="s2">&quot;Path&quot;</span>
+<span class="n">PhaseRegion</span> <span class="o">=</span><span class="s2">"Path"</span>
 <span class="n">ScalarFunc</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">squared_norm</span><span class="p">()</span>
 <span class="n">XTUVars</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]</span>
 <span class="n">LowerBound</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -737,7 +728,7 @@ of all of the controls (variables <code class="code docutils literal notranslate
 that bound the <code class="code docutils literal notranslate"><span class="pre">norm</span></code> or <code class="code docutils literal notranslate"><span class="pre">squared_norm</span></code> are so common that we also provide methods that do just that. Below, we use the <code class="code docutils literal notranslate"><span class="pre">.addLower/Upper/NormBound</span></code>
 and <code class="code docutils literal notranslate"><span class="pre">.addLower/Upper/SquaredNormBound</span></code> methods that accomplish the same tasks as the previous code block.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">## Upper bound on the norm of the controls</span>
-<span class="n">PhaseRegion</span> <span class="o">=</span><span class="s2">&quot;Path&quot;</span>
+<span class="n">PhaseRegion</span> <span class="o">=</span><span class="s2">"Path"</span>
 <span class="n">XTUVars</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]</span>
 <span class="n">UpperBound</span> <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">Scale</span> <span class="o">=</span> <span class="mf">1.0</span>
@@ -748,7 +739,7 @@ and <code class="code docutils literal notranslate"><span class="pre">.addLower/
 
 
 <span class="c1">## Lower bound on the norm of the controls</span>
-<span class="n">PhaseRegion</span> <span class="o">=</span><span class="s2">&quot;Path&quot;</span>
+<span class="n">PhaseRegion</span> <span class="o">=</span><span class="s2">"Path"</span>
 <span class="n">XTUVars</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]</span>
 <span class="n">LowerBound</span> <span class="o">=</span> <span class="mf">0.0</span>
 <span class="n">Scale</span> <span class="o">=</span> <span class="mf">1.0</span>
@@ -759,7 +750,7 @@ and <code class="code docutils literal notranslate"><span class="pre">.addLower/
 
 
 <span class="c1">## Both at the same time</span>
-<span class="n">PhaseRegion</span> <span class="o">=</span><span class="s2">&quot;Path&quot;</span>
+<span class="n">PhaseRegion</span> <span class="o">=</span><span class="s2">"Path"</span>
 <span class="n">XTUVars</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]</span>
 <span class="n">LowerBound</span> <span class="o">=</span> <span class="mf">0.0</span>
 <span class="n">UpperBound</span> <span class="o">=</span> <span class="mf">1.0</span>
@@ -809,11 +800,11 @@ wish to directly minimize that takes some or all of the variables at a phase reg
 multiply it’s value by a negative constant, as ASSET interprets all objective values as values to be minimized. Generalized state objectives can be added to a phase using the <code class="code docutils literal notranslate"><span class="pre">.addStateObjective</span></code> function as shown below. The same rules governing
 <code class="code docutils literal notranslate"><span class="pre">.addEqualCon</span></code>, and <code class="code docutils literal notranslate"><span class="pre">.addInequalCon</span></code> apply here to all possible permutations to the inputs of <code class="code docutils literal notranslate"><span class="pre">.addStateObjective</span></code>. The only exception being that the function
 must be an ASSET ScalarFunction.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">AStateObjective</span><span class="p">():</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">AStateObjective</span><span class="p">():</span>
 <span class="n">XtU_OP_SP</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span>
 <span class="k">return</span> <span class="n">XtU_OP_SP</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>  <span class="c1">## An Asset Scalar Function</span>
 
-<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">&quot;Back&quot;</span>
+<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">"Back"</span>
 <span class="n">XtUVars</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># indices of state, time, and control variables at the PhaseRegion we want to forward to our function</span>
 <span class="n">OPVars</span>  <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>   <span class="c1"># indices of the ODE Parameters (indexed from 0) we want to forward to our function</span>
 <span class="n">SPVars</span>  <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>   <span class="c1"># indices of the phase Static Parameters (indexed from 0) we want to forward to our function</span>
@@ -825,21 +816,21 @@ must be an ASSET ScalarFunction.</p>
 <p>The first is the <code class="code docutils literal notranslate"><span class="pre">.addValueObjective</span></code> method which simply adds an objective function specifying that we want to minimize the value of one the variables
 at a specified phase region multiplied by a scalar factor. To maximize the value, make the scale factor negative.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Minimize the final value of XtUVar 5</span>
-<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">&quot;Last&quot;</span>
+<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">"Last"</span>
 <span class="n">VarIdx</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">Scale</span> <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">addValueObjective</span><span class="p">(</span><span class="n">PhaseRegion</span><span class="p">,</span><span class="n">VarIdx</span><span class="p">,</span><span class="n">Scale</span><span class="p">)</span>
 
 
 <span class="c1"># Maximize the initial value of XtUVar 0</span>
-<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">&quot;First&quot;</span>
+<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">"First"</span>
 <span class="n">VarIdx</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">Scale</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>  <span class="c1">## Negative scale factors to maximize!!!</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">addValueObjective</span><span class="p">(</span><span class="n">PhaseRegion</span><span class="p">,</span><span class="n">VarIdx</span><span class="p">,</span><span class="n">Scale</span><span class="p">)</span>
 
 
 <span class="c1"># Minimize the Static Param 0</span>
-<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">&quot;StaticParams&quot;</span>
+<span class="n">PhaseRegion</span> <span class="o">=</span> <span class="s2">"StaticParams"</span>
 <span class="n">VarIdx</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">Scale</span> <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">addValueObjective</span><span class="p">(</span><span class="n">PhaseRegion</span><span class="p">,</span><span class="n">VarIdx</span><span class="p">,</span><span class="n">Scale</span><span class="p">)</span>
@@ -878,7 +869,7 @@ a scale factor. As before, to maximize the change, make the scale factor negativ
 The quadrature method used to approximate the integral will be depend on the current transcription type and are given in table 1.
 When adding integral objectives as shown below, we only need to provide the integrand function and the
 indices from the various variable groupings we want to forward to the integrand (ie: no phase region is needed).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">AnIntegrand</span><span class="p">():</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">AnIntegrand</span><span class="p">():</span>
     <span class="n">XtU_OP_SP</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">XtU_OP_SP</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>  <span class="c1">## An Asset Scalar Function</span>
 
@@ -910,7 +901,7 @@ to facilitate integral constraints on a <code class="code docutils literal notra
 One can then place constraints on this static parameter using any of the previously discussed methods.
 Adding in an integral parameter function, using <code class="code docutils literal notranslate"><span class="pre">.addIntegralParamFunction</span></code> works essentially the same as <code class="code docutils literal notranslate"><span class="pre">.addIntegralObjective</span></code>, except we also provide the index
 of the static parameter the integral value will be assigned to as the last argument.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">AnIntegrand</span><span class="p">():</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">AnIntegrand</span><span class="p">():</span>
     <span class="n">XtU_OP_SP</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">XtU_OP_SP</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>  <span class="c1">## An Asset Scalar Function</span>
 
@@ -927,7 +918,7 @@ of the static parameter the integral value will be assigned to as the last argum
 
 <span class="c1">## Now we can apply constraints to the integral by constraining the static param</span>
 <span class="c1"># Ex: constrain the integral to be equal to 100.0</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;StaticParams&quot;</span><span class="p">,[</span><span class="mi">1</span><span class="p">],[</span><span class="mf">100.0</span><span class="p">])</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"StaticParams"</span><span class="p">,[</span><span class="mi">1</span><span class="p">],[</span><span class="mf">100.0</span><span class="p">])</span>
 </pre></div>
 </div>
 </section>
@@ -938,7 +929,7 @@ of the static parameter the integral value will be assigned to as the last argum
 the trajectory. The settings of the optimizer can be manipulated through a reference to PSIOPT attached to the phase object. However, calls to
 the optimizer are handled through the phase itself as shown below. Both of these topics are handled in more details in the section on <a class="reference internal" href="PSIOPT.html#psiopt-guide"><span class="std std-ref">PSIOPT</span></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span> <span class="c1">## reference to this phases instance of psiopt</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">&quot;L1&quot;</span><span class="p">)</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">"L1"</span><span class="p">)</span>
 
 
 <span class="c1">## Solve just the dynamics,equality, and inequality constraints</span>
@@ -1017,7 +1008,7 @@ This <code class="code docutils literal notranslate"><span class="pre">integrato
 maximum step sizes of the integrator to improve performance or increase accuracy. Users can access this <code class="code docutils literal notranslate"><span class="pre">integrator</span></code> using the <code class="code docutils literal notranslate"><span class="pre">.integrator</span></code> field of the phase and then
 modify its settings just as was shown in the <a class="reference internal" href="IntegratorGuide.html#integrator-guide"><span class="std std-ref">integrator tutorial</span></a>. Note that we set the default step size of the integrator attached to a phase to 0.1. For fastest performance
 you should modify this to be something near what you anticipate the real average step size to be when integrating your ODE.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;CentralShooting&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">"CentralShooting"</span><span class="p">)</span>
 
 <span class="n">phase</span><span class="o">.</span><span class="n">integrator</span><span class="o">.</span><span class="n">setAbsTol</span><span class="p">(</span><span class="mf">1.0e-13</span><span class="p">)</span>  <span class="c1">## Modify tolerances of adaptive step size algorithm</span>
 
@@ -1036,7 +1027,7 @@ However, this can be accomplished manually by using a custom constraint with pha
 For example, if we wanted to bound the rates of the control variables (<code class="code docutils literal notranslate"><span class="pre">[7,8,9]</span></code> in this example) to be between -1 and 1, we could do so with the following code.
 <code class="code docutils literal notranslate"><span class="pre">'PairWisePath'</span></code> will, as the name suggests, call our <code class="code docutils literal notranslate"><span class="pre">URateBound</span></code> function at every sequential pair of time-varying states in the trajectory, thus allowing us to bound a linear estimate of
 the control rates from the times and values of the controls.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">URateBound</span><span class="p">(</span><span class="n">LBoundVec</span><span class="p">,</span><span class="n">UBoundVec</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">URateBound</span><span class="p">(</span><span class="n">LBoundVec</span><span class="p">,</span><span class="n">UBoundVec</span><span class="p">):</span>
     <span class="n">tUtU</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
     <span class="n">ti</span><span class="p">,</span><span class="n">Ui</span> <span class="o">=</span> <span class="n">tUtU</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
     <span class="n">tip1</span><span class="p">,</span><span class="n">Uip1</span> <span class="o">=</span> <span class="n">tUtU</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
@@ -1049,7 +1040,7 @@ the control rates from the times and values of the controls.</p>
 
     <span class="k">return</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">UpperBound</span><span class="p">,</span><span class="n">LowerBound</span><span class="p">)</span>
 
-<span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">&quot;PairWisePath&quot;</span><span class="p">,</span><span class="n">URateBound</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)),[</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">])</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">"PairWisePath"</span><span class="p">,</span><span class="n">URateBound</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)),[</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>It should be noted that for the higher order collocation methods (<code class="code docutils literal notranslate"><span class="pre">LGL5</span></code> and <code class="code docutils literal notranslate"><span class="pre">LGL7</span></code>), the controls are piece-wise quadratic or cubic, so this will not be an exact constraint.
@@ -1070,8 +1061,8 @@ to fix the phase duration as well, then the problem is over constrained. Thus, y
 
 <span class="n">dt</span> <span class="o">=</span> <span class="mf">1.0</span>
 
-<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;First&quot;</span><span class="p">,[</span><span class="mi">6</span><span class="p">],[</span><span class="mf">0.0</span><span class="p">])</span>
-<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">],[</span><span class="n">dt</span><span class="p">])</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"First"</span><span class="p">,[</span><span class="mi">6</span><span class="p">],[</span><span class="mf">0.0</span><span class="p">])</span>
+<span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">],[</span><span class="n">dt</span><span class="p">])</span>
 
 <span class="c1">#. Other things that make you forget what you have already done</span>
 <span class="c1">#.</span>
@@ -1097,12 +1088,12 @@ For compressed collocation methods, when the initial guess is very poor, this ca
 If the user supplied initial guess is linear or constant, we recommend using the linear interpolation method.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">LerpIG</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="c1">#Interpolate initial mesh using transcriptions interpolation method (same as default)</span>
-<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="n">nsegs</span><span class="p">,</span><span class="n">LerpIG</span><span class="p">)</span>
-<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="n">nsegs</span><span class="p">)</span> <span class="c1"># Above is the same as this</span>
+<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">"LGL3"</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="n">nsegs</span><span class="p">,</span><span class="n">LerpIG</span><span class="p">)</span>
+<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">"LGL3"</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="n">nsegs</span><span class="p">)</span> <span class="c1"># Above is the same as this</span>
 
 <span class="n">LerpIG</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="c1">#Interpolate initial mesh using linear interpolation</span>
-<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">&quot;LGL3&quot;</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="n">nsegs</span><span class="p">,</span><span class="n">LerpIG</span><span class="p">)</span>
+<span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">"LGL3"</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="n">nsegs</span><span class="p">,</span><span class="n">LerpIG</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -1125,7 +1116,7 @@ precisely between each time in the converged trajectory.</p>
 
 <span class="c1"># recall time is variable 6 for this ODE</span>
 
-<span class="c1">## Do this for non-BlockConstant control or if you don&#39;t care about exact accuracy</span>
+<span class="c1">## Do this for non-BlockConstant control or if you don't care about exact accuracy</span>
 <span class="c1">## Integrate from initial ODE input to final time</span>
 <span class="n">ReintTraj1</span> <span class="o">=</span> <span class="n">integ</span><span class="o">.</span><span class="n">integrate_dense</span><span class="p">(</span><span class="n">ConvTraj</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">ConvTraj</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">6</span><span class="p">])</span>
 
@@ -1146,11 +1137,11 @@ want to express some homotopic or continuation scheme without having to create a
 a function of a certain type, it can be removed from the phase using the corresponding <code class="code docutils literal notranslate"><span class="pre">.remove#####(id)</span></code> method as shown below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">###########################</span>
 <span class="c1">## Ex. Equality Constraint</span>
-<span class="n">edx1</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">)))</span>
-<span class="n">edx2</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">])</span>
+<span class="n">edx1</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">)))</span>
+<span class="n">edx2</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">])</span>
 <span class="n">edx3</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaVarEqualCon</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
 
-<span class="c1">## Removal order doesn&#39;t matter</span>
+<span class="c1">## Removal order doesn't matter</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">removeEqualCon</span><span class="p">(</span><span class="n">edx1</span><span class="p">)</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">removeEqualCon</span><span class="p">(</span><span class="n">edx3</span><span class="p">)</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">removeEqualCon</span><span class="p">(</span><span class="n">edx2</span><span class="p">)</span>
@@ -1158,9 +1149,9 @@ a function of a certain type, it can be removed from the phase using the corresp
 
 <span class="c1">#############################</span>
 <span class="c1">## Ex. Inequality Constraint</span>
-<span class="n">idx1</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span> <span class="n">Args</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(),[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[],[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">idx2</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">&quot;StaticParams&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
-<span class="n">idx3</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addLUFuncBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">(),[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">idx1</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addInequalCon</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="n">Args</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(),[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[],[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">idx2</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"StaticParams"</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">idx3</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addLUFuncBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">(),[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="n">phase</span><span class="o">.</span><span class="n">removeInequalCon</span><span class="p">(</span><span class="n">idx2</span><span class="p">)</span>
 <span class="n">phase</span><span class="o">.</span><span class="n">removeInequalCon</span><span class="p">(</span><span class="n">idx3</span><span class="p">)</span>
@@ -1168,8 +1159,8 @@ a function of a certain type, it can be removed from the phase using the corresp
 
 <span class="c1">#######################</span>
 <span class="c1">## Ex. State Objective</span>
-<span class="n">sdx1</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addStateObjective</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">squared_norm</span><span class="p">(),[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
-<span class="n">sdx2</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addValueObjective</span><span class="p">(</span><span class="s2">&quot;Back&quot;</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">sdx1</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addStateObjective</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span><span class="n">Args</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">squared_norm</span><span class="p">(),[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">sdx2</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addValueObjective</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
 <span class="n">sdx3</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaTimeObjective</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 
 <span class="n">phase</span><span class="o">.</span><span class="n">removeStateObjective</span><span class="p">(</span><span class="n">sdx3</span><span class="p">)</span>
@@ -1200,8 +1191,8 @@ In all cases, the violations/multipliers are returned as a list of numpy arrays,
 the optimization problem. For constraints applied only at a single state, the returned list will contain only one numpy array. In general, for path constraints, the list will contain the same number of elements
 as the returned trajectory, and the constraint violations in the ith element will be associated with calling the constraint with variables from the ith state as inputs. Note that for inequality constraints, the return values do not have slacks applied, thus
 negative values indicate that the constraint is in the feasible region and positive values indicate that the constraint is in the infeasible region.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">edx</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">&quot;Front&quot;</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">)))</span>
-<span class="n">idx</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">&quot;Path&quot;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">edx</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">)))</span>
+<span class="n">idx</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
 
 <span class="n">phase</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
 
@@ -1331,9 +1322,9 @@ the returned lists will be empty.</p>
     </aside>
   </div>
 </div><script src="../_static/documentation_options.js?v=8e576371"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     </body>
 </html>
