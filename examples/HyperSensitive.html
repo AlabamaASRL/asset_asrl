@@ -388,109 +388,113 @@ below, has modestly increased the number of LGL7 arcs to 32, but has them cluste
 <ol class="arabic simple">
 <li><p>Patterson, M. A., Hager, W. W., &amp; Rao, A. V. (2015). A ph mesh refinement method for optimal control. Optimal Control Applications and Methods, 36(4), 398-421.</p></li>
 </ol>
-</section>
 <section id="full-code">
-<h2>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">asset_asrl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">asset_asrl.OptimalControl.MeshErrorPlots</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhaseMeshErrorPlot</span>
-
-<span class="n">vf</span>        <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
-<span class="n">oc</span>        <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
-<span class="n">Args</span>      <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
-
-
-<span class="sd">'''</span>
-<span class="sd">Hyper-Sensitive Problem</span>
-<span class="sd">Classic hypersensitive mesh refinement benchmark problem from Rao and company</span>
-<span class="sd">https://onlinelibrary.wiley.com/doi/epdf/10.1002/oca.2114</span>
-
-<span class="sd">See MeshRefinement Folder for more in depth version</span>
-
-<span class="sd">'''</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">HyperSens</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1">################################</span>
-        <span class="n">XtU</span>  <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">x</span>    <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVar</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">u</span>    <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVar</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">xdot</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">u</span>
-        <span class="c1">################################</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xdot</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
-
-    <span class="n">xt0</span> <span class="o">=</span> <span class="mf">1.5</span>
-    <span class="n">xtf</span> <span class="o">=</span> <span class="mf">1.0</span>
-    <span class="n">tf</span>  <span class="o">=</span> <span class="mf">10000.0</span>
-
-    <span class="n">ode</span><span class="o">=</span> <span class="n">HyperSens</span><span class="p">()</span>
-    <span class="c1">## Lerp boundary conditions</span>
-    <span class="n">TrajIG</span> <span class="o">=</span><span class="p">[[</span><span class="n">xt0</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">)</span> <span class="o">+</span> <span class="n">xtf</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">),</span><span class="n">t</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">tf</span><span class="p">,</span><span class="mi">1000</span><span class="p">)]</span>
-
-    <span class="n">nsegs</span>   <span class="o">=</span> <span class="mi">10</span>
-    <span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">"LGL7"</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="n">nsegs</span><span class="p">)</span>
-    <span class="c1"># Boundary Conditions</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"First"</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="n">xt0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Last"</span> <span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="n">xtf</span><span class="p">,</span><span class="n">tf</span><span class="p">])</span>
-    <span class="c1">#Objective</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">addIntegralObjective</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">squared_norm</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
-    <span class="c1"># Some loose bounds on variables</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
-    <span class="c1"># Enable line searches</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">"L1"</span><span class="p">)</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_SoeLSMode</span><span class="p">(</span><span class="s2">"L1"</span><span class="p">)</span>
-    <span class="c1">## Neccessary for this problem</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_QPOrderingMode</span><span class="p">(</span><span class="s2">"MINDEG"</span><span class="p">)</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">PrintLevel</span> <span class="o">=</span> <span class="mi">2</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">setThreads</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="c1"># Enable Adaptive Mesh</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">setAdaptiveMesh</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="c1">## Set Error tolerance on mesh:</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">setMeshTol</span><span class="p">(</span><span class="mf">1.0e-6</span><span class="p">)</span> <span class="c1">#default = 1.0e-6</span>
-    <span class="c1">## Set Max number of mesh iterations:</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">setMaxMeshIters</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="c1">#default = 10</span>
-    <span class="c1">## Make sure to set optimizer Econtol to be the same as or smaller than MeshTol</span>
-    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_EContol</span><span class="p">(</span><span class="mf">1.0e-7</span><span class="p">)</span>
-
-    <span class="n">flag</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">optimize_solve</span><span class="p">()</span> <span class="c1">#Recommended to run with post solve enabled</span>
-
-    <span class="k">if</span><span class="p">(</span><span class="n">phase</span><span class="o">.</span><span class="n">MeshConverged</span> <span class="ow">and</span> <span class="n">flag</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">"Success"</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">"Failure"</span><span class="p">)</span>
-
-    <span class="c1">#######################################################</span>
-    <span class="n">TT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">())</span><span class="o">.</span><span class="n">T</span>
-
-    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-
-    <span class="n">ax0</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
-    <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">223</span><span class="p">)</span>
-    <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">224</span><span class="p">)</span>
-
-    <span class="n">axs</span> <span class="o">=</span><span class="p">[</span><span class="n">ax0</span><span class="p">,</span><span class="n">ax1</span><span class="p">,</span><span class="n">ax2</span><span class="p">]</span>
-
-    <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axs</span><span class="p">:</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">TT</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s1">'x'</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s1">'o'</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">TT</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s1">'u'</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s1">'o'</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"t"</span><span class="p">)</span>
-
-
-    <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-    <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="o">-</span><span class="mf">.5</span><span class="p">,</span><span class="mi">12</span><span class="p">])</span>
-    <span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">tf</span><span class="o">-</span><span class="mi">12</span><span class="p">,</span><span class="n">tf</span><span class="o">+</span><span class="mf">.5</span><span class="p">])</span>
-
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-    <span class="c1">###############################################################</span>
-    <span class="n">PhaseMeshErrorPlot</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<h3>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h3>
+<p>The complete Python implementation is included below.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">HyperSens.py</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">asset_asrl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
+<span class="linenos"> 3</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="linenos"> 4</span><span class="kn">from</span><span class="w"> </span><span class="nn">asset_asrl.OptimalControl.MeshErrorPlots</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhaseMeshErrorPlot</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="n">vf</span>        <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
+<span class="linenos"> 7</span><span class="n">oc</span>        <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
+<span class="linenos"> 8</span><span class="n">Args</span>      <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="sd">'''</span>
+<span class="linenos">12</span><span class="sd">Hyper-Sensitive Problem</span>
+<span class="linenos">13</span><span class="sd">Classic hypersensitive mesh refinement benchmark problem from Rao and company</span>
+<span class="linenos">14</span><span class="sd">https://onlinelibrary.wiley.com/doi/epdf/10.1002/oca.2114</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="sd">See MeshRefinement Folder for more in depth version</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="sd">'''</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span><span class="k">class</span><span class="w"> </span><span class="nc">HyperSens</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+<span class="linenos">21</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos">22</span>        <span class="c1">################################</span>
+<span class="linenos">23</span>        <span class="n">XtU</span>  <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">24</span>        <span class="n">x</span>    <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVar</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">25</span>        <span class="n">u</span>    <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVar</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">26</span>        <span class="n">xdot</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">u</span>
+<span class="linenos">27</span>        <span class="c1">################################</span>
+<span class="linenos">28</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xdot</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">29</span>
+<span class="linenos">30</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span>    <span class="n">xt0</span> <span class="o">=</span> <span class="mf">1.5</span>
+<span class="linenos">33</span>    <span class="n">xtf</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="linenos">34</span>    <span class="n">tf</span>  <span class="o">=</span> <span class="mf">10000.0</span>  
+<span class="linenos">35</span>    
+<span class="linenos">36</span>    <span class="n">ode</span><span class="o">=</span> <span class="n">HyperSens</span><span class="p">()</span>
+<span class="linenos">37</span>    <span class="c1">## Lerp boundary conditions</span>
+<span class="linenos">38</span>    <span class="n">TrajIG</span> <span class="o">=</span><span class="p">[[</span><span class="n">xt0</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">)</span> <span class="o">+</span> <span class="n">xtf</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="n">tf</span><span class="p">),</span><span class="n">t</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">tf</span><span class="p">,</span><span class="mi">1000</span><span class="p">)]</span>
+<span class="linenos">39</span>    
+<span class="linenos">40</span>    <span class="n">nsegs</span>   <span class="o">=</span> <span class="mi">10</span>
+<span class="linenos">41</span>    <span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">"LGL7"</span><span class="p">,</span><span class="n">TrajIG</span><span class="p">,</span><span class="n">nsegs</span><span class="p">)</span>  
+<span class="linenos">42</span>    <span class="c1"># Boundary Conditions</span>
+<span class="linenos">43</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"First"</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="n">xt0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">44</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Last"</span> <span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="n">xtf</span><span class="p">,</span><span class="n">tf</span><span class="p">])</span>
+<span class="linenos">45</span>    <span class="c1">#Objective</span>
+<span class="linenos">46</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addIntegralObjective</span><span class="p">(</span><span class="n">Args</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">squared_norm</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="linenos">47</span>    <span class="c1"># Some loose bounds on variables</span>
+<span class="linenos">48</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
+<span class="linenos">49</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
+<span class="linenos">50</span>    <span class="c1"># Enable line searches</span>
+<span class="linenos">51</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">"L1"</span><span class="p">)</span>
+<span class="linenos">52</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_SoeLSMode</span><span class="p">(</span><span class="s2">"L1"</span><span class="p">)</span>
+<span class="linenos">53</span>    <span class="c1">## Neccessary for this problem</span>
+<span class="linenos">54</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_QPOrderingMode</span><span class="p">(</span><span class="s2">"MINDEG"</span><span class="p">)</span>
+<span class="linenos">55</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">PrintLevel</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="linenos">56</span>    <span class="n">phase</span><span class="o">.</span><span class="n">setThreads</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">57</span>    
+<span class="linenos">58</span>    <span class="c1"># Enable Adaptive Mesh</span>
+<span class="linenos">59</span>    <span class="n">phase</span><span class="o">.</span><span class="n">setAdaptiveMesh</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">60</span>    <span class="c1">## Set Error tolerance on mesh: </span>
+<span class="linenos">61</span>    <span class="n">phase</span><span class="o">.</span><span class="n">setMeshTol</span><span class="p">(</span><span class="mf">1.0e-6</span><span class="p">)</span> <span class="c1">#default = 1.0e-6</span>
+<span class="linenos">62</span>    <span class="c1">## Set Max number of mesh iterations: </span>
+<span class="linenos">63</span>    <span class="n">phase</span><span class="o">.</span><span class="n">setMaxMeshIters</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="c1">#default = 10</span>
+<span class="linenos">64</span>    <span class="c1">## Make sure to set optimizer Econtol to be the same as or smaller than MeshTol</span>
+<span class="linenos">65</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_EContol</span><span class="p">(</span><span class="mf">1.0e-7</span><span class="p">)</span>
+<span class="linenos">66</span>    
+<span class="linenos">67</span>    <span class="n">flag</span> <span class="o">=</span> <span class="n">phase</span><span class="o">.</span><span class="n">optimize_solve</span><span class="p">()</span> <span class="c1">#Recommended to run with post solve enabled    </span>
+<span class="linenos">68</span>   
+<span class="linenos">69</span>    <span class="k">if</span><span class="p">(</span><span class="n">phase</span><span class="o">.</span><span class="n">MeshConverged</span> <span class="ow">and</span> <span class="n">flag</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+<span class="linenos">70</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">"Success"</span><span class="p">)</span>
+<span class="linenos">71</span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos">72</span>        <span class="nb">print</span><span class="p">(</span><span class="s2">"Failure"</span><span class="p">)</span>
+<span class="linenos">73</span>        
+<span class="linenos">74</span>    <span class="c1">#######################################################</span>
+<span class="linenos">75</span>    <span class="n">TT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">())</span><span class="o">.</span><span class="n">T</span>
+<span class="linenos">76</span>    
+<span class="linenos">77</span>    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="linenos">78</span>    
+<span class="linenos">79</span>    <span class="n">ax0</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="linenos">80</span>    <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">223</span><span class="p">)</span>
+<span class="linenos">81</span>    <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">224</span><span class="p">)</span>
+<span class="linenos">82</span>    
+<span class="linenos">83</span>    <span class="n">axs</span> <span class="o">=</span><span class="p">[</span><span class="n">ax0</span><span class="p">,</span><span class="n">ax1</span><span class="p">,</span><span class="n">ax2</span><span class="p">]</span>
+<span class="linenos">84</span>
+<span class="linenos">85</span>    <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axs</span><span class="p">:</span>
+<span class="linenos">86</span>        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">87</span>        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">TT</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s1">'x'</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s1">'o'</span><span class="p">)</span>
+<span class="linenos">88</span>        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">TT</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">TT</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s1">'u'</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s1">'o'</span><span class="p">)</span>
+<span class="linenos">89</span>        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"t"</span><span class="p">)</span>
+<span class="linenos">90</span>    
+<span class="linenos">91</span>    
+<span class="linenos">92</span>    <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="linenos">93</span>    <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="o">-</span><span class="mf">.5</span><span class="p">,</span><span class="mi">12</span><span class="p">])</span>
+<span class="linenos">94</span>    <span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">tf</span><span class="o">-</span><span class="mi">12</span><span class="p">,</span><span class="n">tf</span><span class="o">+</span><span class="mf">.5</span><span class="p">])</span>
+<span class="linenos">95</span>
+<span class="linenos">96</span>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="linenos">97</span>    <span class="c1">###############################################################</span>
+<span class="linenos">98</span>    <span class="n">PhaseMeshErrorPlot</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+</section>
 </section>
 </section>
 
@@ -550,8 +554,10 @@ below, has modestly increased the number of LGL7 arcs to 32, but has them cluste
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Hyper-Sensitive Optimal Control Problem</a><ul>
-<li><a class="reference internal" href="#references">References</a></li>
+<li><a class="reference internal" href="#references">References</a><ul>
 <li><a class="reference internal" href="#full-code">Full Code</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

@@ -586,463 +586,479 @@ Final Mass Delivered to the GTO is 7529.749kg, which is effectively the same as 
 <li><p>Patterson, M. A., &amp; Rao, A. V. (2014). GPOPS-II: A MATLAB software for solving multiple-phase optimal control problems using hp-adaptive Gaussian quadrature collocation methods and sparse nonlinear programming. ACM Transactions on Mathematical Software (TOMS), 41(1), 1-37.</p></li>
 <li><p>Benson, D. (2005). A Gauss pseudospectral transcription for optimal control (Doctoral dissertation, Massachusetts Institute of Technology).</p></li>
 </ol>
-</section>
 <section id="full-code">
-<h2>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">asset_asrl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="n">PY_VER</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span>
-<span class="n">USE_BASEMAP</span> <span class="o">=</span> <span class="n">PY_VER</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="n">USE_BASEMAP</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">mpl_toolkits.basemap</span><span class="w"> </span><span class="kn">import</span> <span class="n">Basemap</span> <span class="c1">## PIP INSTALL Basemap if you dont have it</span>
-<span class="k">else</span> <span class="p">:</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">cartopy.crs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ccrs</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geod</span>
-
-<span class="n">vf</span>        <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
-<span class="n">oc</span>        <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
-<span class="n">Args</span>      <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
-
-<span class="c1">############################################################################</span>
-
-<span class="n">g0</span>      <span class="o">=</span>  <span class="mf">9.80665</span>
-<span class="n">Lstar</span>   <span class="o">=</span>  <span class="mi">6378145</span>           <span class="c1">## m   Radius of Earth</span>
-<span class="n">Tstar</span>   <span class="o">=</span>  <span class="mf">961.0</span>             <span class="c1">## sec Engine Burn Time</span>
-<span class="n">Mstar</span>   <span class="o">=</span>  <span class="mf">301454.0</span>          <span class="c1">## kgs Inital Mass of Rocket</span>
-
-
-<span class="n">Astar</span>   <span class="o">=</span>  <span class="n">Lstar</span><span class="o">/</span><span class="n">Tstar</span><span class="o">**</span><span class="mi">2</span>
-<span class="n">Vstar</span>   <span class="o">=</span>  <span class="n">Lstar</span><span class="o">/</span><span class="n">Tstar</span>
-<span class="n">Rhostar</span> <span class="o">=</span>  <span class="n">Mstar</span><span class="o">/</span><span class="n">Lstar</span><span class="o">**</span><span class="mi">3</span>
-<span class="n">Estar</span>   <span class="o">=</span>  <span class="n">Mstar</span><span class="o">*</span><span class="p">(</span><span class="n">Vstar</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">Mustar</span>  <span class="o">=</span>  <span class="p">(</span><span class="n">Lstar</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">Tstar</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">Fstar</span>   <span class="o">=</span>  <span class="n">Astar</span><span class="o">*</span><span class="n">Mstar</span>
-<span class="c1">#############################################################################</span>
-
-<span class="n">mu</span>      <span class="o">=</span> <span class="mf">3.986012e14</span>      <span class="o">/</span><span class="n">Mustar</span>
-<span class="n">Re</span>      <span class="o">=</span> <span class="mi">6378145</span>          <span class="o">/</span><span class="n">Lstar</span>
-<span class="n">We</span>      <span class="o">=</span> <span class="mf">7.29211585e-5</span>    <span class="o">*</span><span class="n">Tstar</span>
-
-<span class="n">RhoAir</span>  <span class="o">=</span> <span class="mf">1.225</span>        <span class="o">/</span><span class="n">Rhostar</span>
-<span class="n">h_scale</span> <span class="o">=</span> <span class="mi">7200</span>         <span class="o">/</span><span class="n">Lstar</span>
-<span class="n">g</span>       <span class="o">=</span> <span class="n">g0</span>           <span class="o">/</span><span class="n">Astar</span>
-
-
-<span class="n">CD</span> <span class="o">=</span> <span class="mf">.5</span>
-<span class="n">S</span>  <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>   <span class="o">/</span><span class="n">Lstar</span><span class="o">**</span><span class="mi">2</span>
-
-
-
-<span class="n">TS</span> <span class="o">=</span> <span class="mi">628500</span>      <span class="o">/</span><span class="n">Fstar</span>
-<span class="n">T1</span> <span class="o">=</span> <span class="mi">1083100</span>     <span class="o">/</span><span class="n">Fstar</span>
-<span class="n">T2</span> <span class="o">=</span> <span class="mi">110094</span>      <span class="o">/</span><span class="n">Fstar</span>
-
-<span class="n">IS</span> <span class="o">=</span> <span class="mf">283.33364</span>   <span class="o">/</span><span class="n">Tstar</span>
-<span class="n">I1</span> <span class="o">=</span> <span class="mf">301.68</span>      <span class="o">/</span><span class="n">Tstar</span>
-<span class="n">I2</span> <span class="o">=</span> <span class="mf">467.21</span>       <span class="o">/</span><span class="n">Tstar</span>
-
-<span class="n">tS</span> <span class="o">=</span> <span class="mf">75.2</span>        <span class="o">/</span><span class="n">Tstar</span>
-<span class="n">t1</span> <span class="o">=</span> <span class="mi">261</span>         <span class="o">/</span><span class="n">Tstar</span>
-<span class="n">t2</span> <span class="o">=</span> <span class="mi">700</span>         <span class="o">/</span><span class="n">Tstar</span>
-
-
-<span class="n">TMS</span> <span class="o">=</span> <span class="mi">19290</span>      <span class="o">/</span><span class="n">Mstar</span>
-<span class="n">TM1</span> <span class="o">=</span> <span class="mi">104380</span>     <span class="o">/</span><span class="n">Mstar</span>
-<span class="n">TM2</span> <span class="o">=</span> <span class="mi">19300</span>      <span class="o">/</span><span class="n">Mstar</span>
-<span class="n">TMPay</span> <span class="o">=</span> <span class="mi">4164</span>     <span class="o">/</span><span class="n">Mstar</span>
-
-
-<span class="n">PMS</span> <span class="o">=</span> <span class="mi">17010</span>     <span class="o">/</span><span class="n">Mstar</span>
-<span class="n">PM1</span> <span class="o">=</span> <span class="mi">95550</span>     <span class="o">/</span><span class="n">Mstar</span>
-<span class="n">PM2</span> <span class="o">=</span> <span class="mi">16820</span>     <span class="o">/</span><span class="n">Mstar</span>
-
-<span class="n">SMS</span> <span class="o">=</span> <span class="n">TMS</span> <span class="o">-</span> <span class="n">PMS</span>
-<span class="n">SM1</span> <span class="o">=</span> <span class="n">TM1</span> <span class="o">-</span> <span class="n">PM1</span>
-<span class="n">SM2</span> <span class="o">=</span> <span class="n">TM2</span> <span class="o">-</span> <span class="n">PM2</span>
-
-<span class="n">T_phase1</span> <span class="o">=</span> <span class="mi">6</span><span class="o">*</span><span class="n">TS</span> <span class="o">+</span> <span class="n">T1</span>
-<span class="n">T_phase2</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">TS</span> <span class="o">+</span> <span class="n">T1</span>
-<span class="n">T_phase3</span> <span class="o">=</span> <span class="n">T1</span>
-<span class="n">T_phase4</span> <span class="o">=</span> <span class="n">T2</span>
-
-<span class="n">mdot_phase1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="o">*</span><span class="n">TS</span><span class="o">/</span><span class="n">IS</span> <span class="o">+</span> <span class="n">T1</span><span class="o">/</span><span class="n">I1</span><span class="p">)</span><span class="o">/</span><span class="n">g</span>
-<span class="n">mdot_phase2</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">TS</span><span class="o">/</span><span class="n">IS</span> <span class="o">+</span> <span class="n">T1</span><span class="o">/</span><span class="n">I1</span><span class="p">)</span><span class="o">/</span><span class="n">g</span>
-<span class="n">mdot_phase3</span> <span class="o">=</span> <span class="n">T1</span><span class="o">/</span><span class="p">(</span><span class="n">g</span><span class="o">*</span><span class="n">I1</span><span class="p">)</span>
-<span class="n">mdot_phase4</span> <span class="o">=</span> <span class="n">T2</span><span class="o">/</span><span class="p">(</span><span class="n">g</span><span class="o">*</span><span class="n">I2</span><span class="p">)</span>
-
-
-<span class="n">tf_phase1</span> <span class="o">=</span> <span class="n">tS</span>
-<span class="n">tf_phase2</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">tS</span>
-<span class="n">tf_phase3</span> <span class="o">=</span> <span class="n">t1</span>
-<span class="n">tf_phase4</span> <span class="o">=</span> <span class="n">t1</span><span class="o">+</span><span class="n">t2</span>
-
-<span class="n">m0_phase1</span> <span class="o">=</span> <span class="mi">9</span><span class="o">*</span><span class="n">TMS</span> <span class="o">+</span> <span class="n">TM1</span> <span class="o">+</span> <span class="n">TM2</span> <span class="o">+</span> <span class="n">TMPay</span>
-<span class="n">mf_phase1</span> <span class="o">=</span> <span class="n">m0_phase1</span> <span class="o">-</span> <span class="mi">6</span><span class="o">*</span><span class="n">PMS</span> <span class="o">-</span> <span class="p">(</span><span class="n">tS</span><span class="o">/</span><span class="n">t1</span><span class="p">)</span><span class="o">*</span><span class="n">PM1</span>
-
-<span class="n">m0_phase2</span> <span class="o">=</span> <span class="n">mf_phase1</span> <span class="o">-</span> <span class="mi">6</span><span class="o">*</span><span class="n">SMS</span>
-<span class="n">mf_phase2</span> <span class="o">=</span> <span class="n">m0_phase2</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">PMS</span> <span class="o">-</span> <span class="p">(</span><span class="n">tS</span><span class="o">/</span><span class="n">t1</span><span class="p">)</span><span class="o">*</span><span class="n">PM1</span>
-
-<span class="n">m0_phase3</span> <span class="o">=</span> <span class="n">mf_phase2</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">SMS</span>
-<span class="n">mf_phase3</span> <span class="o">=</span> <span class="n">m0_phase3</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">tS</span><span class="o">/</span><span class="n">t1</span><span class="p">)</span><span class="o">*</span><span class="n">PM1</span>
-
-<span class="n">m0_phase4</span> <span class="o">=</span> <span class="n">mf_phase3</span> <span class="o">-</span> <span class="n">SM1</span>
-<span class="n">mf_phase4</span> <span class="o">=</span> <span class="n">m0_phase4</span> <span class="o">-</span> <span class="n">PM2</span>
-
-
-<span class="c1">#############################################################################</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">RocketODE</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">mdot</span><span class="p">):</span>
-        <span class="c1">####################################################</span>
-        <span class="n">XtU</span>  <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
-
-        <span class="n">R</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span>
-        <span class="n">V</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">segment3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVar</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
-
-        <span class="c1"># We normalize the control direction in the dynamics so it doesnt have</span>
-        <span class="c1"># to be done as a path constraint</span>
-        <span class="n">u</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVec</span><span class="p">()</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span>
-
-        <span class="n">h</span>       <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span> <span class="o">-</span> <span class="n">Re</span>
-        <span class="n">rho</span>     <span class="o">=</span> <span class="n">RhoAir</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">h</span> <span class="o">/</span> <span class="n">h_scale</span><span class="p">)</span>
-        <span class="n">Vr</span>      <span class="o">=</span> <span class="n">V</span> <span class="o">+</span> <span class="n">R</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">We</span><span class="p">]))</span>
-
-        <span class="c1">## We cant let let Vr be exactly 0, derivative of norm of 0 vector is NAN</span>
-        <span class="c1">## Will handle this in inititial conditions</span>
-        <span class="n">D</span>       <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">CD</span><span class="o">*</span><span class="n">S</span><span class="p">)</span><span class="o">*</span><span class="n">rho</span><span class="o">*</span><span class="p">(</span><span class="n">Vr</span><span class="o">*</span><span class="n">Vr</span><span class="o">.</span><span class="n">norm</span><span class="p">())</span>
-
-        <span class="n">Rdot</span>    <span class="o">=</span>  <span class="n">V</span>
-        <span class="n">Vdot</span>    <span class="o">=</span>  <span class="p">(</span><span class="o">-</span><span class="n">mu</span><span class="p">)</span><span class="o">*</span><span class="n">R</span><span class="o">.</span><span class="n">normalized_power3</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">u</span> <span class="o">+</span> <span class="n">D</span><span class="p">)</span><span class="o">/</span><span class="n">m</span>
-
-        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">Rdot</span><span class="p">,</span><span class="n">Vdot</span><span class="p">,</span><span class="o">-</span><span class="n">mdot</span><span class="p">)</span>
-        <span class="c1">####################################################</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">TargetOrbit</span><span class="p">(</span><span class="n">at</span><span class="p">,</span><span class="n">et</span><span class="p">,</span><span class="n">it</span><span class="p">,</span> <span class="n">Ot</span><span class="p">,</span><span class="n">Wt</span><span class="p">):</span>
-    <span class="n">R</span><span class="p">,</span><span class="n">V</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
-
-    <span class="n">r</span>    <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
-    <span class="n">v</span>    <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
-
-    <span class="c1">#Angular momentum vector</span>
-    <span class="n">hvec</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
-
-    <span class="c1">#Node vector</span>
-    <span class="n">nvec</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">cross</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">hvec</span><span class="p">)</span>
-
-    <span class="c1"># Energy</span>
-    <span class="n">eps</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">mu</span><span class="o">/</span><span class="n">r</span>
-
-    <span class="c1"># Semi-major axis</span>
-    <span class="n">a</span> <span class="o">=</span>  <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">mu</span><span class="o">/</span><span class="n">eps</span>
-
-    <span class="n">evec</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">hvec</span><span class="p">)</span><span class="o">/</span><span class="n">mu</span> <span class="o">-</span> <span class="n">R</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span>
-    <span class="c1">#Eccentrcity</span>
-    <span class="n">e</span> <span class="o">=</span> <span class="n">evec</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
-
-    <span class="c1">#inclination</span>
-    <span class="n">i</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">hvec</span><span class="o">.</span><span class="n">normalized</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span>
-
-    <span class="c1">#RAAN</span>
-    <span class="n">O</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">nvec</span><span class="o">.</span><span class="n">normalized</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="c1"># Quadrant Check</span>
-    <span class="n">O</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">ifelse</span><span class="p">(</span><span class="n">nvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">,</span><span class="n">O</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span><span class="n">O</span><span class="p">)</span>
-
-    <span class="c1"># Argument of periapse</span>
-    <span class="n">W</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">nvec</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">evec</span><span class="o">.</span><span class="n">normalized</span><span class="p">()))</span>
-    <span class="c1">#QuadrantCheck</span>
-    <span class="n">W</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">ifelse</span><span class="p">(</span><span class="n">evec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">,</span><span class="n">W</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">W</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">a</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">O</span><span class="p">,</span><span class="n">W</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">at</span><span class="p">,</span><span class="n">et</span><span class="p">,</span><span class="n">it</span><span class="p">,</span><span class="n">Ot</span><span class="p">,</span><span class="n">Wt</span><span class="p">])</span>
-
-<span class="c1">###############################################################################</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">Plot</span><span class="p">(</span><span class="n">Phase1</span><span class="p">,</span><span class="n">Phase2</span><span class="p">,</span><span class="n">Phase3</span><span class="p">,</span><span class="n">Phase4</span><span class="p">):</span>
-    <span class="c1">############################################</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">LatLongAlt</span><span class="p">(</span><span class="n">Traj</span><span class="p">):</span>
-        <span class="n">LLs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">Traj</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">z</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-            <span class="n">r</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
-
-            <span class="n">lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">z</span><span class="o">/</span><span class="n">r</span><span class="p">))</span>
-
-            <span class="n">long</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">))</span>
-            <span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">):</span><span class="n">long</span><span class="o">+=</span><span class="mi">0</span>
-            <span class="k">elif</span><span class="p">(</span><span class="n">y</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">):</span><span class="n">long</span><span class="o">+=</span><span class="mi">180</span>
-            <span class="k">else</span><span class="p">:</span><span class="n">long</span><span class="o">-=</span><span class="mi">180</span>
-            <span class="n">LLs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">lat</span><span class="p">,</span><span class="n">long</span><span class="o">-</span><span class="mf">80.649</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">LLs</span>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">AltVelMass</span><span class="p">(</span><span class="n">Traj</span><span class="p">):</span>
-        <span class="n">Xs</span> <span class="o">=</span><span class="p">[]</span>
-        <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">Traj</span><span class="p">:</span>
-            <span class="n">r</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
-            <span class="n">alt</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">Re</span><span class="p">)</span><span class="o">*</span><span class="n">Lstar</span><span class="o">/</span><span class="mi">1000</span>
-            <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span><span class="o">*</span><span class="n">Vstar</span><span class="o">/</span><span class="mi">1000</span>
-            <span class="n">m</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">*</span><span class="n">Mstar</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span>
-            <span class="n">Xs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">alt</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">t</span><span class="p">])</span>
-
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Xs</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-
-    <span class="n">LLs</span> <span class="o">=</span> <span class="n">LatLongAlt</span><span class="p">([</span><span class="n">Phase1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">Phase2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">Phase3</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">Phase4</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">Phase4</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
-
-    <span class="n">P1</span> <span class="o">=</span> <span class="n">AltVelMass</span><span class="p">(</span><span class="n">Phase1</span><span class="p">)</span>
-    <span class="n">P2</span> <span class="o">=</span> <span class="n">AltVelMass</span><span class="p">(</span><span class="n">Phase2</span><span class="p">)</span>
-    <span class="n">P3</span> <span class="o">=</span> <span class="n">AltVelMass</span><span class="p">(</span><span class="n">Phase3</span><span class="p">)</span>
-    <span class="n">P4</span> <span class="o">=</span> <span class="n">AltVelMass</span><span class="p">(</span><span class="n">Phase4</span><span class="p">)</span>
-
-    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-    <span class="n">ax0</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">321</span><span class="p">)</span>
-    <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">323</span><span class="p">)</span>
-    <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">325</span><span class="p">)</span>
-    <span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
-
-    <span class="n">ax0</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="n">ax0</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"h (km)"</span><span class="p">)</span>
-    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"v (km)/s"</span><span class="p">)</span>
-    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"M (kg)"</span><span class="p">)</span>
-    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"t (s)"</span><span class="p">)</span>
-
-    <span class="n">PS</span> <span class="o">=</span> <span class="p">[</span><span class="n">P1</span><span class="p">,</span><span class="n">P2</span><span class="p">,</span><span class="n">P3</span><span class="p">,</span><span class="n">P4</span><span class="p">]</span>
-
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">P</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">PS</span><span class="p">):</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
-        <span class="n">ax0</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">P</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">P</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">'Stage </span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-
-
-
-    <span class="k">if</span> <span class="n">USE_BASEMAP</span><span class="p">:</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="n">Basemap</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">'lcc'</span><span class="p">,</span>
-                    <span class="n">lat_1</span><span class="o">=</span><span class="mf">45.</span><span class="p">,</span><span class="n">lat_2</span><span class="o">=</span><span class="mi">55</span><span class="p">,</span><span class="n">lat_0</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span><span class="n">lon_0</span><span class="o">=-</span><span class="mf">65.</span><span class="p">,</span>
-                    <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mi">9000000</span><span class="p">,</span><span class="n">height</span><span class="o">=</span><span class="mi">9000000</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="n">ax3</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">LLs</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="n">lon1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">lat1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">lon2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">lat2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">m</span><span class="o">.</span><span class="n">drawgreatcircle</span><span class="p">(</span><span class="n">lon1</span><span class="o">=</span><span class="n">lon1</span><span class="p">,</span><span class="n">lat1</span><span class="o">=</span><span class="n">lat1</span><span class="p">,</span><span class="n">lon2</span><span class="o">=</span><span class="n">lon2</span><span class="p">,</span><span class="n">lat2</span><span class="o">=</span><span class="n">lat2</span><span class="p">)</span>
-
-        <span class="n">ax2</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-        <span class="c1">#m.bluemarble()</span>
-        <span class="n">m</span><span class="o">.</span><span class="n">shadedrelief</span><span class="p">()</span>
-
-        <span class="n">m</span><span class="o">.</span><span class="n">drawparallels</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">90.</span><span class="p">,</span><span class="mf">91.</span><span class="p">,</span><span class="mf">30.</span><span class="p">))</span>
-        <span class="n">m</span><span class="o">.</span><span class="n">drawmeridians</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">180.</span><span class="p">,</span><span class="mf">181.</span><span class="p">,</span><span class="mf">60.</span><span class="p">))</span>
-        <span class="c1">#m.drawmapboundary(fill_color='aqua')</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Ground Track"</span><span class="p">)</span>
-
-    <span class="k">else</span><span class="p">:</span>
-
-        <span class="n">R</span> <span class="o">=</span> <span class="mi">6370997</span>
-        <span class="n">globe</span> <span class="o">=</span> <span class="n">ccrs</span><span class="o">.</span><span class="n">Globe</span><span class="p">(</span><span class="n">ellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">semimajor_axis</span><span class="o">=</span><span class="n">R</span><span class="p">,</span> <span class="n">semiminor_axis</span><span class="o">=</span><span class="n">R</span><span class="p">)</span>
-
-        <span class="n">proj</span> <span class="o">=</span> <span class="n">ccrs</span><span class="o">.</span><span class="n">LambertConformal</span><span class="p">(</span><span class="n">central_longitude</span><span class="o">=-</span><span class="mf">65.</span><span class="p">,</span> <span class="n">central_latitude</span><span class="o">=</span><span class="mf">50.</span><span class="p">,</span>
-                                    <span class="n">standard_parallels</span><span class="o">=</span><span class="p">(</span><span class="mf">45.</span><span class="p">,</span> <span class="mf">55.</span><span class="p">),</span> <span class="n">globe</span><span class="o">=</span><span class="n">globe</span><span class="p">)</span>
-        <span class="n">latlon</span> <span class="o">=</span> <span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">(</span><span class="n">globe</span><span class="o">=</span><span class="n">globe</span><span class="p">)</span>
-
-        <span class="n">x_half_width</span> <span class="o">=</span> <span class="mf">3.8e6</span>
-        <span class="n">y_half_width</span> <span class="o">=</span> <span class="mf">4.4e6</span>
-        <span class="n">ax3</span><span class="o">.</span><span class="n">set_extent</span><span class="p">([</span><span class="o">-</span><span class="n">x_half_width</span><span class="p">,</span> <span class="n">x_half_width</span><span class="p">,</span> <span class="o">-</span><span class="n">y_half_width</span><span class="p">,</span> <span class="n">y_half_width</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="n">proj</span><span class="p">)</span>
-        <span class="n">geod</span> <span class="o">=</span> <span class="n">Geod</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">R</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">R</span><span class="p">)</span>  <span class="c1"># spherical geodesics</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">LLs</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">lon1</span><span class="p">,</span> <span class="n">lat1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>   <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">lon2</span><span class="p">,</span> <span class="n">lat2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-
-            <span class="n">pts</span> <span class="o">=</span> <span class="n">geod</span><span class="o">.</span><span class="n">npts</span><span class="p">(</span><span class="n">lon1</span><span class="p">,</span> <span class="n">lat1</span><span class="p">,</span> <span class="n">lon2</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-            <span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lon1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pts</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">lon2</span><span class="p">])</span>
-            <span class="n">lats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lat1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pts</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">lat2</span><span class="p">])</span>
-
-            <span class="c1"># Project to map coordinates ourselves so dateline wrapping can't cause issues</span>
-            <span class="n">xyz</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">transform_points</span><span class="p">(</span><span class="n">latlon</span><span class="p">,</span> <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span><span class="p">)</span>
-            <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
-
-        <span class="n">ax2</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-
-        <span class="n">ax3</span><span class="o">.</span><span class="n">stock_img</span><span class="p">()</span>
-
-        <span class="n">gl</span> <span class="o">=</span> <span class="n">ax3</span><span class="o">.</span><span class="n">gridlines</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">latlon</span><span class="p">,</span>
-                   <span class="n">xlocs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">180.</span><span class="p">,</span> <span class="mf">181.</span><span class="p">,</span> <span class="mf">60.</span><span class="p">),</span>
-                   <span class="n">ylocs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">90.</span><span class="p">,</span> <span class="mf">91.</span><span class="p">,</span> <span class="mf">30.</span><span class="p">),</span>
-                   <span class="n">draw_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">'k'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-                   <span class="n">linestyle</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
-
-        <span class="n">ax3</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Ground Track"</span><span class="p">)</span>
-
-    <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mf">15.0</span><span class="p">,</span> <span class="mf">7.5</span><span class="p">,</span> <span class="n">forward</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-<span class="c1">###############################################################################</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
-
-    <span class="n">ast</span><span class="o">.</span><span class="n">SoftwareInfo</span><span class="p">()</span>
-
-
-    <span class="c1"># Target orbital elements</span>
-    <span class="n">at</span>     <span class="o">=</span> <span class="mi">24361140</span> <span class="o">/</span><span class="n">Lstar</span>
-    <span class="n">et</span>     <span class="o">=</span> <span class="mf">.7308</span>
-    <span class="n">Ot</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">269.8</span><span class="p">)</span>
-    <span class="n">Wt</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">130.5</span><span class="p">)</span>
-    <span class="n">istart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">28.5</span><span class="p">)</span>
-
-
-    <span class="n">y0</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">))</span>
-    <span class="n">y0</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">istart</span><span class="p">),</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">istart</span><span class="p">)])</span><span class="o">*</span><span class="n">Re</span>
-    <span class="n">y0</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">y0</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">We</span><span class="p">]))</span>
-    <span class="n">y0</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>  <span class="o">+=</span> <span class="mf">0.00001</span><span class="o">/</span><span class="n">Vstar</span>  <span class="c1"># cant be exactly zero,our drag equation's derivative would NAN !!!</span>
-
-
-    <span class="c1">## MF is the only magic number in the script, just trying to find</span>
-    <span class="c1">## a mean anomaly such that the terminal state on the orbit is downrange</span>
-    <span class="c1">## eastward from KSC in and doesnt pass through earth when LERPed from KSC</span>
-    <span class="n">MF</span>   <span class="o">=-</span><span class="mf">.05</span>
-    <span class="n">OEF</span>  <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="p">,</span><span class="n">et</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">Ot</span><span class="p">,</span><span class="n">Wt</span><span class="p">,</span><span class="n">MF</span><span class="p">]</span>
-    <span class="n">yf</span>   <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Astro</span><span class="o">.</span><span class="n">classic_to_cartesian</span><span class="p">(</span><span class="n">OEF</span><span class="p">,</span><span class="n">mu</span><span class="p">)</span>
-
-    <span class="n">ts</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">tf_phase4</span><span class="p">,</span><span class="mi">1000</span><span class="p">)</span>
-
-    <span class="n">IG1</span> <span class="o">=</span><span class="p">[]</span>
-    <span class="n">IG2</span> <span class="o">=</span><span class="p">[]</span>
-    <span class="n">IG3</span> <span class="o">=</span><span class="p">[]</span>
-    <span class="n">IG4</span> <span class="o">=</span><span class="p">[]</span>
-
-
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">:</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">11</span><span class="p">))</span>
-        <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span> <span class="n">y0</span> <span class="o">+</span> <span class="p">(</span><span class="n">yf</span><span class="o">-</span><span class="n">y0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="n">ts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">X</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>  <span class="o">=</span> <span class="n">t</span>
-        <span class="n">X</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">tf_phase1</span><span class="p">):</span>
-            <span class="n">m</span><span class="o">=</span> <span class="n">m0_phase1</span> <span class="o">+</span> <span class="p">(</span><span class="n">mf_phase1</span><span class="o">-</span><span class="n">m0_phase1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="n">tf_phase1</span><span class="p">)</span>
-            <span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="n">m</span>
-            <span class="n">IG1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="k">elif</span><span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">tf_phase2</span><span class="p">):</span>
-            <span class="n">m</span><span class="o">=</span> <span class="n">m0_phase2</span> <span class="o">+</span> <span class="p">(</span><span class="n">mf_phase2</span><span class="o">-</span><span class="n">m0_phase2</span><span class="p">)</span><span class="o">*</span><span class="p">((</span> <span class="n">t</span><span class="o">-</span><span class="n">tf_phase1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tf_phase2</span> <span class="o">-</span> <span class="n">tf_phase1</span><span class="p">))</span>
-            <span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="n">m</span>
-            <span class="n">IG2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="k">elif</span><span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">tf_phase3</span><span class="p">):</span>
-            <span class="n">m</span><span class="o">=</span> <span class="n">m0_phase3</span> <span class="o">+</span> <span class="p">(</span><span class="n">mf_phase3</span><span class="o">-</span><span class="n">m0_phase3</span><span class="p">)</span><span class="o">*</span><span class="p">((</span> <span class="n">t</span><span class="o">-</span><span class="n">tf_phase2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tf_phase3</span> <span class="o">-</span> <span class="n">tf_phase2</span><span class="p">))</span>
-            <span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="n">m</span>
-            <span class="n">IG3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="k">elif</span><span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">tf_phase4</span><span class="p">):</span>
-            <span class="n">m</span><span class="o">=</span> <span class="n">m0_phase4</span> <span class="o">+</span> <span class="p">(</span><span class="n">mf_phase4</span><span class="o">-</span><span class="n">m0_phase4</span><span class="p">)</span><span class="o">*</span><span class="p">((</span> <span class="n">t</span><span class="o">-</span><span class="n">tf_phase3</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tf_phase4</span> <span class="o">-</span> <span class="n">tf_phase3</span><span class="p">))</span>
-            <span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="n">m</span>
-            <span class="n">IG4</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-
-
-
-    <span class="n">ode1</span> <span class="o">=</span> <span class="n">RocketODE</span><span class="p">(</span><span class="n">T_phase1</span><span class="p">,</span><span class="n">mdot_phase1</span><span class="p">)</span>
-    <span class="n">ode2</span> <span class="o">=</span> <span class="n">RocketODE</span><span class="p">(</span><span class="n">T_phase2</span><span class="p">,</span><span class="n">mdot_phase2</span><span class="p">)</span>
-    <span class="n">ode3</span> <span class="o">=</span> <span class="n">RocketODE</span><span class="p">(</span><span class="n">T_phase3</span><span class="p">,</span><span class="n">mdot_phase3</span><span class="p">)</span>
-    <span class="n">ode4</span> <span class="o">=</span> <span class="n">RocketODE</span><span class="p">(</span><span class="n">T_phase4</span><span class="p">,</span><span class="n">mdot_phase4</span><span class="p">)</span>
-
-    <span class="n">tmode</span> <span class="o">=</span> <span class="s2">"LGL3"</span>
-    <span class="n">cmode</span> <span class="o">=</span> <span class="s2">"HighestOrderSpline"</span>
-
-    <span class="n">nsegs1</span> <span class="o">=</span> <span class="mi">40</span>
-    <span class="n">nsegs2</span> <span class="o">=</span> <span class="mi">40</span>
-    <span class="n">nsegs3</span> <span class="o">=</span> <span class="mi">40</span>
-    <span class="n">nsegs4</span> <span class="o">=</span> <span class="mi">40</span>
-
-    <span class="c1">#########################################</span>
-    <span class="n">phase1</span> <span class="o">=</span> <span class="n">ode1</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tmode</span><span class="p">,</span><span class="n">IG1</span><span class="p">,</span><span class="n">nsegs1</span><span class="p">)</span>
-    <span class="n">phase1</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="n">cmode</span><span class="p">)</span>
-
-    <span class="c1">## Thrust direction is normalized in dynamics, so we dont</span>
-    <span class="c1">## have to enforce norm of 1 on controls. For good measure,</span>
-    <span class="c1">## we do bound the maginitude to prevent it from becoming too large or small</span>
-    <span class="n">phase1</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mf">.5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
-    <span class="n">phase1</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">8</span><span class="p">),</span><span class="n">IG1</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">8</span><span class="p">])</span>
-
-    <span class="c1">#Dont want our bound to interfere with initial condition which starts at Re</span>
-    <span class="c1">#so i relax the Earth radius constraint slightly here</span>
-    <span class="n">phase1</span><span class="o">.</span><span class="n">addLowerNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">Re</span><span class="o">*</span><span class="mf">.999999</span><span class="p">)</span>
-    <span class="n">phase1</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,[</span><span class="mi">7</span><span class="p">],[</span><span class="n">tf_phase1</span><span class="p">])</span>
-
-    <span class="c1">#########################################</span>
-    <span class="n">phase2</span> <span class="o">=</span> <span class="n">ode2</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tmode</span><span class="p">,</span><span class="n">IG2</span><span class="p">,</span><span class="n">nsegs2</span><span class="p">)</span>
-    <span class="n">phase2</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="n">cmode</span><span class="p">)</span>
-
-    <span class="n">phase2</span><span class="o">.</span><span class="n">addLowerNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">Re</span><span class="p">)</span>
-    <span class="n">phase2</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mf">.5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
-
-    <span class="c1">## Fixing initial mass and final time on first 3 phases.</span>
-    <span class="c1">## Since the engine cant be throttled, constraining final mass</span>
-    <span class="c1">## as well would be redundant and overconstrained</span>
-    <span class="n">phase2</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,[</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="n">m0_phase2</span><span class="p">])</span>
-    <span class="n">phase2</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">,[</span><span class="n">tf_phase2</span><span class="p">])</span>
-
-    <span class="c1">#########################################</span>
-    <span class="n">phase3</span> <span class="o">=</span> <span class="n">ode3</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tmode</span><span class="p">,</span><span class="n">IG3</span><span class="p">,</span><span class="n">nsegs3</span><span class="p">)</span>
-    <span class="n">phase3</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="n">cmode</span><span class="p">)</span>
-
-    <span class="n">phase3</span><span class="o">.</span><span class="n">addLowerNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">Re</span><span class="p">)</span>
-    <span class="n">phase3</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mf">.5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
-    <span class="n">phase3</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,[</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="n">m0_phase3</span><span class="p">])</span>
-    <span class="n">phase3</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">,[</span><span class="n">tf_phase3</span><span class="p">])</span>
-
-    <span class="c1">#########################################</span>
-    <span class="n">phase4</span> <span class="o">=</span> <span class="n">ode4</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tmode</span><span class="p">,</span><span class="n">IG4</span><span class="p">,</span><span class="n">nsegs4</span><span class="p">)</span>
-    <span class="n">phase4</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="n">cmode</span><span class="p">)</span>
-
-    <span class="n">phase4</span><span class="o">.</span><span class="n">addLowerNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">Re</span><span class="p">)</span>
-    <span class="n">phase4</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mf">.5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
-    <span class="n">phase4</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,[</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="n">m0_phase4</span><span class="p">])</span>
-    <span class="n">phase4</span><span class="o">.</span><span class="n">addUpperVarBound</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="n">tf_phase4</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
-    <span class="n">phase4</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span><span class="n">TargetOrbit</span><span class="p">(</span><span class="n">at</span><span class="p">,</span><span class="n">et</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">Ot</span><span class="p">,</span><span class="n">Wt</span><span class="p">),</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
-    <span class="c1"># Maximize final mass</span>
-    <span class="n">phase4</span><span class="o">.</span><span class="n">addValueObjective</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
-
-    <span class="c1">#########################################</span>
-
-    <span class="n">ocp</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">OptimalControlProblem</span><span class="p">()</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase1</span><span class="p">)</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase2</span><span class="p">)</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase3</span><span class="p">)</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase4</span><span class="p">)</span>
-
-    <span class="c1">## All phases continuous in everything but mass (var 6)</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">addForwardLinkEqualCon</span><span class="p">(</span><span class="n">phase1</span><span class="p">,</span><span class="n">phase4</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">])</span>
-
-
-    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">"L1"</span><span class="p">)</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_SoeLSMode</span><span class="p">(</span><span class="s2">"L1"</span><span class="p">)</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_MaxLSIters</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_PrintLevel</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
-    <span class="c1">#########################################</span>
-
-
-    <span class="n">Phase1Traj</span> <span class="o">=</span> <span class="n">phase1</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>  <span class="c1"># or ocp.Phase(i).returnTraj()</span>
-    <span class="n">Phase2Traj</span> <span class="o">=</span> <span class="n">phase2</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
-    <span class="n">Phase3Traj</span> <span class="o">=</span> <span class="n">phase3</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
-    <span class="n">Phase4Traj</span> <span class="o">=</span> <span class="n">phase4</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
-
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Final Mass = "</span><span class="p">,</span><span class="n">Phase4Traj</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span><span class="o">*</span><span class="n">Mstar</span><span class="p">,</span><span class="s1">' kg'</span><span class="p">)</span>
-
-
-    <span class="n">Plot</span><span class="p">(</span><span class="n">Phase1Traj</span><span class="p">,</span><span class="n">Phase2Traj</span><span class="p">,</span><span class="n">Phase3Traj</span><span class="p">,</span><span class="n">Phase4Traj</span><span class="p">)</span>
+<h3>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h3>
+<p>The complete Python implementation is included below.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">Delta3Launch.py</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="linenos">  2</span><span class="kn">import</span><span class="w"> </span><span class="nn">asset_asrl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
+<span class="linenos">  3</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="linenos">  4</span>
+<span class="linenos">  5</span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="linenos">  6</span><span class="n">PY_VER</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span>
+<span class="linenos">  7</span><span class="n">USE_BASEMAP</span> <span class="o">=</span> <span class="n">PY_VER</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="linenos">  8</span>
+<span class="linenos">  9</span><span class="k">if</span> <span class="n">USE_BASEMAP</span><span class="p">:</span>
+<span class="linenos"> 10</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">mpl_toolkits.basemap</span><span class="w"> </span><span class="kn">import</span> <span class="n">Basemap</span> <span class="c1">## PIP INSTALL Basemap if you dont have it</span>
+<span class="linenos"> 11</span><span class="k">else</span> <span class="p">:</span>
+<span class="linenos"> 12</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">cartopy.crs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ccrs</span>
+<span class="linenos"> 13</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geod</span>
+<span class="linenos"> 14</span>
+<span class="linenos"> 15</span><span class="n">vf</span>        <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
+<span class="linenos"> 16</span><span class="n">oc</span>        <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
+<span class="linenos"> 17</span><span class="n">Args</span>      <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
+<span class="linenos"> 18</span>
+<span class="linenos"> 19</span><span class="c1">############################################################################</span>
+<span class="linenos"> 20</span>
+<span class="linenos"> 21</span><span class="n">g0</span>      <span class="o">=</span>  <span class="mf">9.80665</span> 
+<span class="linenos"> 22</span><span class="n">Lstar</span>   <span class="o">=</span>  <span class="mi">6378145</span>           <span class="c1">## m   Radius of Earth</span>
+<span class="linenos"> 23</span><span class="n">Tstar</span>   <span class="o">=</span>  <span class="mf">961.0</span>             <span class="c1">## sec Engine Burn Time</span>
+<span class="linenos"> 24</span><span class="n">Mstar</span>   <span class="o">=</span>  <span class="mf">301454.0</span>          <span class="c1">## kgs Inital Mass of Rocket</span>
+<span class="linenos"> 25</span>
+<span class="linenos"> 26</span>
+<span class="linenos"> 27</span><span class="n">Astar</span>   <span class="o">=</span>  <span class="n">Lstar</span><span class="o">/</span><span class="n">Tstar</span><span class="o">**</span><span class="mi">2</span>
+<span class="linenos"> 28</span><span class="n">Vstar</span>   <span class="o">=</span>  <span class="n">Lstar</span><span class="o">/</span><span class="n">Tstar</span>
+<span class="linenos"> 29</span><span class="n">Rhostar</span> <span class="o">=</span>  <span class="n">Mstar</span><span class="o">/</span><span class="n">Lstar</span><span class="o">**</span><span class="mi">3</span>
+<span class="linenos"> 30</span><span class="n">Estar</span>   <span class="o">=</span>  <span class="n">Mstar</span><span class="o">*</span><span class="p">(</span><span class="n">Vstar</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos"> 31</span><span class="n">Mustar</span>  <span class="o">=</span>  <span class="p">(</span><span class="n">Lstar</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">Tstar</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos"> 32</span><span class="n">Fstar</span>   <span class="o">=</span>  <span class="n">Astar</span><span class="o">*</span><span class="n">Mstar</span>
+<span class="linenos"> 33</span><span class="c1">#############################################################################</span>
+<span class="linenos"> 34</span>
+<span class="linenos"> 35</span><span class="n">mu</span>      <span class="o">=</span> <span class="mf">3.986012e14</span>      <span class="o">/</span><span class="n">Mustar</span>
+<span class="linenos"> 36</span><span class="n">Re</span>      <span class="o">=</span> <span class="mi">6378145</span>          <span class="o">/</span><span class="n">Lstar</span>
+<span class="linenos"> 37</span><span class="n">We</span>      <span class="o">=</span> <span class="mf">7.29211585e-5</span>    <span class="o">*</span><span class="n">Tstar</span>
+<span class="linenos"> 38</span>
+<span class="linenos"> 39</span><span class="n">RhoAir</span>  <span class="o">=</span> <span class="mf">1.225</span>        <span class="o">/</span><span class="n">Rhostar</span>
+<span class="linenos"> 40</span><span class="n">h_scale</span> <span class="o">=</span> <span class="mi">7200</span>         <span class="o">/</span><span class="n">Lstar</span>
+<span class="linenos"> 41</span><span class="n">g</span>       <span class="o">=</span> <span class="n">g0</span>           <span class="o">/</span><span class="n">Astar</span>
+<span class="linenos"> 42</span>
+<span class="linenos"> 43</span>
+<span class="linenos"> 44</span><span class="n">CD</span> <span class="o">=</span> <span class="mf">.5</span>
+<span class="linenos"> 45</span><span class="n">S</span>  <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>   <span class="o">/</span><span class="n">Lstar</span><span class="o">**</span><span class="mi">2</span>
+<span class="linenos"> 46</span>
+<span class="linenos"> 47</span>
+<span class="linenos"> 48</span>
+<span class="linenos"> 49</span><span class="n">TS</span> <span class="o">=</span> <span class="mi">628500</span>      <span class="o">/</span><span class="n">Fstar</span>
+<span class="linenos"> 50</span><span class="n">T1</span> <span class="o">=</span> <span class="mi">1083100</span>     <span class="o">/</span><span class="n">Fstar</span>
+<span class="linenos"> 51</span><span class="n">T2</span> <span class="o">=</span> <span class="mi">110094</span>      <span class="o">/</span><span class="n">Fstar</span>
+<span class="linenos"> 52</span>
+<span class="linenos"> 53</span><span class="n">IS</span> <span class="o">=</span> <span class="mf">283.33364</span>   <span class="o">/</span><span class="n">Tstar</span>
+<span class="linenos"> 54</span><span class="n">I1</span> <span class="o">=</span> <span class="mf">301.68</span>      <span class="o">/</span><span class="n">Tstar</span>
+<span class="linenos"> 55</span><span class="n">I2</span> <span class="o">=</span> <span class="mf">467.21</span>       <span class="o">/</span><span class="n">Tstar</span>
+<span class="linenos"> 56</span>
+<span class="linenos"> 57</span><span class="n">tS</span> <span class="o">=</span> <span class="mf">75.2</span>        <span class="o">/</span><span class="n">Tstar</span>
+<span class="linenos"> 58</span><span class="n">t1</span> <span class="o">=</span> <span class="mi">261</span>         <span class="o">/</span><span class="n">Tstar</span>
+<span class="linenos"> 59</span><span class="n">t2</span> <span class="o">=</span> <span class="mi">700</span>         <span class="o">/</span><span class="n">Tstar</span>
+<span class="linenos"> 60</span>
+<span class="linenos"> 61</span>
+<span class="linenos"> 62</span><span class="n">TMS</span> <span class="o">=</span> <span class="mi">19290</span>      <span class="o">/</span><span class="n">Mstar</span>
+<span class="linenos"> 63</span><span class="n">TM1</span> <span class="o">=</span> <span class="mi">104380</span>     <span class="o">/</span><span class="n">Mstar</span>
+<span class="linenos"> 64</span><span class="n">TM2</span> <span class="o">=</span> <span class="mi">19300</span>      <span class="o">/</span><span class="n">Mstar</span>
+<span class="linenos"> 65</span><span class="n">TMPay</span> <span class="o">=</span> <span class="mi">4164</span>     <span class="o">/</span><span class="n">Mstar</span>
+<span class="linenos"> 66</span>
+<span class="linenos"> 67</span>
+<span class="linenos"> 68</span><span class="n">PMS</span> <span class="o">=</span> <span class="mi">17010</span>     <span class="o">/</span><span class="n">Mstar</span>
+<span class="linenos"> 69</span><span class="n">PM1</span> <span class="o">=</span> <span class="mi">95550</span>     <span class="o">/</span><span class="n">Mstar</span>
+<span class="linenos"> 70</span><span class="n">PM2</span> <span class="o">=</span> <span class="mi">16820</span>     <span class="o">/</span><span class="n">Mstar</span>
+<span class="linenos"> 71</span>
+<span class="linenos"> 72</span><span class="n">SMS</span> <span class="o">=</span> <span class="n">TMS</span> <span class="o">-</span> <span class="n">PMS</span>
+<span class="linenos"> 73</span><span class="n">SM1</span> <span class="o">=</span> <span class="n">TM1</span> <span class="o">-</span> <span class="n">PM1</span>
+<span class="linenos"> 74</span><span class="n">SM2</span> <span class="o">=</span> <span class="n">TM2</span> <span class="o">-</span> <span class="n">PM2</span>
+<span class="linenos"> 75</span>
+<span class="linenos"> 76</span><span class="n">T_phase1</span> <span class="o">=</span> <span class="mi">6</span><span class="o">*</span><span class="n">TS</span> <span class="o">+</span> <span class="n">T1</span>
+<span class="linenos"> 77</span><span class="n">T_phase2</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">TS</span> <span class="o">+</span> <span class="n">T1</span>
+<span class="linenos"> 78</span><span class="n">T_phase3</span> <span class="o">=</span> <span class="n">T1</span>
+<span class="linenos"> 79</span><span class="n">T_phase4</span> <span class="o">=</span> <span class="n">T2</span>
+<span class="linenos"> 80</span>
+<span class="linenos"> 81</span><span class="n">mdot_phase1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="o">*</span><span class="n">TS</span><span class="o">/</span><span class="n">IS</span> <span class="o">+</span> <span class="n">T1</span><span class="o">/</span><span class="n">I1</span><span class="p">)</span><span class="o">/</span><span class="n">g</span>
+<span class="linenos"> 82</span><span class="n">mdot_phase2</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">TS</span><span class="o">/</span><span class="n">IS</span> <span class="o">+</span> <span class="n">T1</span><span class="o">/</span><span class="n">I1</span><span class="p">)</span><span class="o">/</span><span class="n">g</span>
+<span class="linenos"> 83</span><span class="n">mdot_phase3</span> <span class="o">=</span> <span class="n">T1</span><span class="o">/</span><span class="p">(</span><span class="n">g</span><span class="o">*</span><span class="n">I1</span><span class="p">)</span>
+<span class="linenos"> 84</span><span class="n">mdot_phase4</span> <span class="o">=</span> <span class="n">T2</span><span class="o">/</span><span class="p">(</span><span class="n">g</span><span class="o">*</span><span class="n">I2</span><span class="p">)</span>
+<span class="linenos"> 85</span>
+<span class="linenos"> 86</span>
+<span class="linenos"> 87</span><span class="n">tf_phase1</span> <span class="o">=</span> <span class="n">tS</span>
+<span class="linenos"> 88</span><span class="n">tf_phase2</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">tS</span>
+<span class="linenos"> 89</span><span class="n">tf_phase3</span> <span class="o">=</span> <span class="n">t1</span>
+<span class="linenos"> 90</span><span class="n">tf_phase4</span> <span class="o">=</span> <span class="n">t1</span><span class="o">+</span><span class="n">t2</span>
+<span class="linenos"> 91</span>
+<span class="linenos"> 92</span><span class="n">m0_phase1</span> <span class="o">=</span> <span class="mi">9</span><span class="o">*</span><span class="n">TMS</span> <span class="o">+</span> <span class="n">TM1</span> <span class="o">+</span> <span class="n">TM2</span> <span class="o">+</span> <span class="n">TMPay</span>
+<span class="linenos"> 93</span><span class="n">mf_phase1</span> <span class="o">=</span> <span class="n">m0_phase1</span> <span class="o">-</span> <span class="mi">6</span><span class="o">*</span><span class="n">PMS</span> <span class="o">-</span> <span class="p">(</span><span class="n">tS</span><span class="o">/</span><span class="n">t1</span><span class="p">)</span><span class="o">*</span><span class="n">PM1</span>
+<span class="linenos"> 94</span>
+<span class="linenos"> 95</span><span class="n">m0_phase2</span> <span class="o">=</span> <span class="n">mf_phase1</span> <span class="o">-</span> <span class="mi">6</span><span class="o">*</span><span class="n">SMS</span>
+<span class="linenos"> 96</span><span class="n">mf_phase2</span> <span class="o">=</span> <span class="n">m0_phase2</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">PMS</span> <span class="o">-</span> <span class="p">(</span><span class="n">tS</span><span class="o">/</span><span class="n">t1</span><span class="p">)</span><span class="o">*</span><span class="n">PM1</span>
+<span class="linenos"> 97</span>
+<span class="linenos"> 98</span><span class="n">m0_phase3</span> <span class="o">=</span> <span class="n">mf_phase2</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">SMS</span>
+<span class="linenos"> 99</span><span class="n">mf_phase3</span> <span class="o">=</span> <span class="n">m0_phase3</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">tS</span><span class="o">/</span><span class="n">t1</span><span class="p">)</span><span class="o">*</span><span class="n">PM1</span>
+<span class="linenos">100</span>
+<span class="linenos">101</span><span class="n">m0_phase4</span> <span class="o">=</span> <span class="n">mf_phase3</span> <span class="o">-</span> <span class="n">SM1</span>
+<span class="linenos">102</span><span class="n">mf_phase4</span> <span class="o">=</span> <span class="n">m0_phase4</span> <span class="o">-</span> <span class="n">PM2</span>
+<span class="linenos">103</span>
+<span class="linenos">104</span>
+<span class="linenos">105</span><span class="c1">#############################################################################</span>
+<span class="linenos">106</span><span class="k">class</span><span class="w"> </span><span class="nc">RocketODE</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+<span class="linenos">107</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">mdot</span><span class="p">):</span>
+<span class="linenos">108</span>        <span class="c1">####################################################</span>
+<span class="linenos">109</span>        <span class="n">XtU</span>  <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">110</span>        
+<span class="linenos">111</span>        <span class="n">R</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span>
+<span class="linenos">112</span>        <span class="n">V</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">segment3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">113</span>        <span class="n">m</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">XVar</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+<span class="linenos">114</span>       
+<span class="linenos">115</span>        <span class="c1"># We normalize the control direction in the dynamics so it doesnt have</span>
+<span class="linenos">116</span>        <span class="c1"># to be done as a path constraint</span>
+<span class="linenos">117</span>        <span class="n">u</span> <span class="o">=</span> <span class="n">XtU</span><span class="o">.</span><span class="n">UVec</span><span class="p">()</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span>
+<span class="linenos">118</span>        
+<span class="linenos">119</span>        <span class="n">h</span>       <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span> <span class="o">-</span> <span class="n">Re</span>
+<span class="linenos">120</span>        <span class="n">rho</span>     <span class="o">=</span> <span class="n">RhoAir</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">h</span> <span class="o">/</span> <span class="n">h_scale</span><span class="p">)</span>
+<span class="linenos">121</span>        <span class="n">Vr</span>      <span class="o">=</span> <span class="n">V</span> <span class="o">+</span> <span class="n">R</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">We</span><span class="p">]))</span>
+<span class="linenos">122</span>        
+<span class="linenos">123</span>        <span class="c1">## We cant let let Vr be exactly 0, derivative of norm of 0 vector is NAN</span>
+<span class="linenos">124</span>        <span class="c1">## Will handle this in inititial conditions</span>
+<span class="linenos">125</span>        <span class="n">D</span>       <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">CD</span><span class="o">*</span><span class="n">S</span><span class="p">)</span><span class="o">*</span><span class="n">rho</span><span class="o">*</span><span class="p">(</span><span class="n">Vr</span><span class="o">*</span><span class="n">Vr</span><span class="o">.</span><span class="n">norm</span><span class="p">())</span>
+<span class="linenos">126</span>        
+<span class="linenos">127</span>        <span class="n">Rdot</span>    <span class="o">=</span>  <span class="n">V</span>
+<span class="linenos">128</span>        <span class="n">Vdot</span>    <span class="o">=</span>  <span class="p">(</span><span class="o">-</span><span class="n">mu</span><span class="p">)</span><span class="o">*</span><span class="n">R</span><span class="o">.</span><span class="n">normalized_power3</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">u</span> <span class="o">+</span> <span class="n">D</span><span class="p">)</span><span class="o">/</span><span class="n">m</span>
+<span class="linenos">129</span>        
+<span class="linenos">130</span>        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">Rdot</span><span class="p">,</span><span class="n">Vdot</span><span class="p">,</span><span class="o">-</span><span class="n">mdot</span><span class="p">)</span>
+<span class="linenos">131</span>        <span class="c1">####################################################</span>
+<span class="linenos">132</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">133</span>
+<span class="linenos">134</span><span class="k">def</span><span class="w"> </span><span class="nf">TargetOrbit</span><span class="p">(</span><span class="n">at</span><span class="p">,</span><span class="n">et</span><span class="p">,</span><span class="n">it</span><span class="p">,</span> <span class="n">Ot</span><span class="p">,</span><span class="n">Wt</span><span class="p">):</span>
+<span class="linenos">135</span>    <span class="n">R</span><span class="p">,</span><span class="n">V</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)])</span>
+<span class="linenos">136</span>    
+<span class="linenos">137</span>    <span class="n">r</span>    <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
+<span class="linenos">138</span>    <span class="n">v</span>    <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
+<span class="linenos">139</span>    
+<span class="linenos">140</span>    <span class="c1">#Angular momentum vector</span>
+<span class="linenos">141</span>    <span class="n">hvec</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+<span class="linenos">142</span>    
+<span class="linenos">143</span>    <span class="c1">#Node vector</span>
+<span class="linenos">144</span>    <span class="n">nvec</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">cross</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">hvec</span><span class="p">)</span>
+<span class="linenos">145</span>    
+<span class="linenos">146</span>    <span class="c1"># Energy</span>
+<span class="linenos">147</span>    <span class="n">eps</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">mu</span><span class="o">/</span><span class="n">r</span>
+<span class="linenos">148</span>    
+<span class="linenos">149</span>    <span class="c1"># Semi-major axis</span>
+<span class="linenos">150</span>    <span class="n">a</span> <span class="o">=</span>  <span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">mu</span><span class="o">/</span><span class="n">eps</span>
+<span class="linenos">151</span>    
+<span class="linenos">152</span>    <span class="n">evec</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">hvec</span><span class="p">)</span><span class="o">/</span><span class="n">mu</span> <span class="o">-</span> <span class="n">R</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span>
+<span class="linenos">153</span>    <span class="c1">#Eccentrcity</span>
+<span class="linenos">154</span>    <span class="n">e</span> <span class="o">=</span> <span class="n">evec</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
+<span class="linenos">155</span>    
+<span class="linenos">156</span>    <span class="c1">#inclination</span>
+<span class="linenos">157</span>    <span class="n">i</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">hvec</span><span class="o">.</span><span class="n">normalized</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span> 
+<span class="linenos">158</span>    
+<span class="linenos">159</span>    <span class="c1">#RAAN</span>
+<span class="linenos">160</span>    <span class="n">O</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">nvec</span><span class="o">.</span><span class="n">normalized</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">161</span>    <span class="c1"># Quadrant Check</span>
+<span class="linenos">162</span>    <span class="n">O</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">ifelse</span><span class="p">(</span><span class="n">nvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">,</span><span class="n">O</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span><span class="n">O</span><span class="p">)</span>
+<span class="linenos">163</span>    
+<span class="linenos">164</span>    <span class="c1"># Argument of periapse</span>
+<span class="linenos">165</span>    <span class="n">W</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">nvec</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">evec</span><span class="o">.</span><span class="n">normalized</span><span class="p">()))</span>
+<span class="linenos">166</span>    <span class="c1">#QuadrantCheck</span>
+<span class="linenos">167</span>    <span class="n">W</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">ifelse</span><span class="p">(</span><span class="n">evec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">,</span><span class="n">W</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">W</span><span class="p">)</span>
+<span class="linenos">168</span>    
+<span class="linenos">169</span>    <span class="k">return</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">a</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">O</span><span class="p">,</span><span class="n">W</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">at</span><span class="p">,</span><span class="n">et</span><span class="p">,</span><span class="n">it</span><span class="p">,</span><span class="n">Ot</span><span class="p">,</span><span class="n">Wt</span><span class="p">])</span>
+<span class="linenos">170</span>    
+<span class="linenos">171</span><span class="c1">###############################################################################</span>
+<span class="linenos">172</span>
+<span class="linenos">173</span><span class="k">def</span><span class="w"> </span><span class="nf">Plot</span><span class="p">(</span><span class="n">Phase1</span><span class="p">,</span><span class="n">Phase2</span><span class="p">,</span><span class="n">Phase3</span><span class="p">,</span><span class="n">Phase4</span><span class="p">):</span>
+<span class="linenos">174</span>    <span class="c1">############################################</span>
+<span class="linenos">175</span>
+<span class="linenos">176</span>    <span class="k">def</span><span class="w"> </span><span class="nf">LatLongAlt</span><span class="p">(</span><span class="n">Traj</span><span class="p">):</span>
+<span class="linenos">177</span>        <span class="n">LLs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">178</span>        <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">Traj</span><span class="p">:</span>
+<span class="linenos">179</span>            <span class="n">x</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">180</span>            <span class="n">y</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">181</span>            <span class="n">z</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="linenos">182</span>            <span class="n">r</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+<span class="linenos">183</span>            
+<span class="linenos">184</span>            <span class="n">lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">z</span><span class="o">/</span><span class="n">r</span><span class="p">))</span>
+<span class="linenos">185</span>            
+<span class="linenos">186</span>            <span class="n">long</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">))</span>
+<span class="linenos">187</span>            <span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">):</span><span class="n">long</span><span class="o">+=</span><span class="mi">0</span>
+<span class="linenos">188</span>            <span class="k">elif</span><span class="p">(</span><span class="n">y</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">):</span><span class="n">long</span><span class="o">+=</span><span class="mi">180</span>
+<span class="linenos">189</span>            <span class="k">else</span><span class="p">:</span><span class="n">long</span><span class="o">-=</span><span class="mi">180</span>
+<span class="linenos">190</span>            <span class="n">LLs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">lat</span><span class="p">,</span><span class="n">long</span><span class="o">-</span><span class="mf">80.649</span><span class="p">])</span> 
+<span class="linenos">191</span>        <span class="k">return</span> <span class="n">LLs</span>
+<span class="linenos">192</span>
+<span class="linenos">193</span>
+<span class="linenos">194</span>    <span class="k">def</span><span class="w"> </span><span class="nf">AltVelMass</span><span class="p">(</span><span class="n">Traj</span><span class="p">):</span>
+<span class="linenos">195</span>        <span class="n">Xs</span> <span class="o">=</span><span class="p">[]</span>
+<span class="linenos">196</span>        <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">Traj</span><span class="p">:</span>
+<span class="linenos">197</span>            <span class="n">r</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+<span class="linenos">198</span>            <span class="n">alt</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">Re</span><span class="p">)</span><span class="o">*</span><span class="n">Lstar</span><span class="o">/</span><span class="mi">1000</span>
+<span class="linenos">199</span>            <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span><span class="o">*</span><span class="n">Vstar</span><span class="o">/</span><span class="mi">1000</span>
+<span class="linenos">200</span>            <span class="n">m</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">*</span><span class="n">Mstar</span>
+<span class="linenos">201</span>            <span class="n">t</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="o">*</span><span class="n">Tstar</span>
+<span class="linenos">202</span>            <span class="n">Xs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">alt</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">t</span><span class="p">])</span>
+<span class="linenos">203</span>            
+<span class="linenos">204</span>        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Xs</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="linenos">205</span>
+<span class="linenos">206</span>    <span class="n">LLs</span> <span class="o">=</span> <span class="n">LatLongAlt</span><span class="p">([</span><span class="n">Phase1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">Phase2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">Phase3</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">Phase4</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">Phase4</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+<span class="linenos">207</span>            
+<span class="linenos">208</span>    <span class="n">P1</span> <span class="o">=</span> <span class="n">AltVelMass</span><span class="p">(</span><span class="n">Phase1</span><span class="p">)</span>
+<span class="linenos">209</span>    <span class="n">P2</span> <span class="o">=</span> <span class="n">AltVelMass</span><span class="p">(</span><span class="n">Phase2</span><span class="p">)</span>
+<span class="linenos">210</span>    <span class="n">P3</span> <span class="o">=</span> <span class="n">AltVelMass</span><span class="p">(</span><span class="n">Phase3</span><span class="p">)</span>
+<span class="linenos">211</span>    <span class="n">P4</span> <span class="o">=</span> <span class="n">AltVelMass</span><span class="p">(</span><span class="n">Phase4</span><span class="p">)</span>
+<span class="linenos">212</span>
+<span class="linenos">213</span>    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="linenos">214</span>    <span class="n">ax0</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">321</span><span class="p">)</span>
+<span class="linenos">215</span>    <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">323</span><span class="p">)</span>
+<span class="linenos">216</span>    <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">325</span><span class="p">)</span>
+<span class="linenos">217</span>    <span class="k">if</span> <span class="n">USE_BASEMAP</span><span class="p">:</span>
+<span class="linenos">218</span>        <span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="linenos">219</span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos">220</span>        <span class="n">ax3</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span>
+<span class="linenos">221</span>            <span class="mi">122</span><span class="p">,</span>
+<span class="linenos">222</span>            <span class="n">projection</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">LambertConformal</span><span class="p">(</span>
+<span class="linenos">223</span>                <span class="n">central_latitude</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+<span class="linenos">224</span>                <span class="n">central_longitude</span><span class="o">=-</span><span class="mi">65</span>
+<span class="linenos">225</span>            <span class="p">)</span>
+<span class="linenos">226</span>        <span class="p">)</span> 
+<span class="linenos">227</span>
+<span class="linenos">228</span>    <span class="n">ax0</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">229</span>    <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">230</span>    <span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">231</span>
+<span class="linenos">232</span>    <span class="n">ax0</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"h (km)"</span><span class="p">)</span>
+<span class="linenos">233</span>    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"v (km)/s"</span><span class="p">)</span>
+<span class="linenos">234</span>    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"M (kg)"</span><span class="p">)</span>
+<span class="linenos">235</span>    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"t (s)"</span><span class="p">)</span>
+<span class="linenos">236</span>
+<span class="linenos">237</span>    <span class="n">PS</span> <span class="o">=</span> <span class="p">[</span><span class="n">P1</span><span class="p">,</span><span class="n">P2</span><span class="p">,</span><span class="n">P3</span><span class="p">,</span><span class="n">P4</span><span class="p">]</span>
+<span class="linenos">238</span>
+<span class="linenos">239</span>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">P</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">PS</span><span class="p">):</span>
+<span class="linenos">240</span>        <span class="n">s</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+<span class="linenos">241</span>        <span class="n">ax0</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">242</span>        <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">P</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">243</span>        <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">P</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">'Stage </span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="linenos">244</span>
+<span class="linenos">245</span>
+<span class="linenos">246</span>    
+<span class="linenos">247</span>    <span class="k">if</span> <span class="n">USE_BASEMAP</span><span class="p">:</span>
+<span class="linenos">248</span>        <span class="n">m</span> <span class="o">=</span> <span class="n">Basemap</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s1">'lcc'</span><span class="p">,</span>
+<span class="linenos">249</span>                <span class="n">lat_1</span><span class="o">=</span><span class="mf">45.</span><span class="p">,</span><span class="n">lat_2</span><span class="o">=</span><span class="mi">55</span><span class="p">,</span><span class="n">lat_0</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span><span class="n">lon_0</span><span class="o">=-</span><span class="mf">65.</span><span class="p">,</span>
+<span class="linenos">250</span>                <span class="n">resolution</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mi">9000000</span><span class="p">,</span><span class="n">height</span><span class="o">=</span><span class="mi">9000000</span><span class="p">,</span><span class="n">ax</span><span class="o">=</span><span class="n">ax3</span><span class="p">)</span>
+<span class="linenos">251</span>
+<span class="linenos">252</span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">LLs</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+<span class="linenos">253</span>            <span class="n">lon1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">254</span>            <span class="n">lat1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">255</span>            <span class="n">lon2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">256</span>            <span class="n">lat2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">257</span>            <span class="n">m</span><span class="o">.</span><span class="n">drawgreatcircle</span><span class="p">(</span><span class="n">lon1</span><span class="o">=</span><span class="n">lon1</span><span class="p">,</span><span class="n">lat1</span><span class="o">=</span><span class="n">lat1</span><span class="p">,</span><span class="n">lon2</span><span class="o">=</span><span class="n">lon2</span><span class="p">,</span><span class="n">lat2</span><span class="o">=</span><span class="n">lat2</span><span class="p">)</span>
+<span class="linenos">258</span>    
+<span class="linenos">259</span>        <span class="n">ax2</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="linenos">260</span>        <span class="c1">#m.bluemarble()</span>
+<span class="linenos">261</span>        <span class="n">m</span><span class="o">.</span><span class="n">shadedrelief</span><span class="p">()</span>
+<span class="linenos">262</span>    
+<span class="linenos">263</span>        <span class="n">m</span><span class="o">.</span><span class="n">drawparallels</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">90.</span><span class="p">,</span><span class="mf">91.</span><span class="p">,</span><span class="mf">30.</span><span class="p">))</span>
+<span class="linenos">264</span>        <span class="n">m</span><span class="o">.</span><span class="n">drawmeridians</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">180.</span><span class="p">,</span><span class="mf">181.</span><span class="p">,</span><span class="mf">60.</span><span class="p">))</span>
+<span class="linenos">265</span>        <span class="c1">#m.drawmapboundary(fill_color='aqua')</span>
+<span class="linenos">266</span>        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">"Ground Track"</span><span class="p">)</span>
+<span class="linenos">267</span>
+<span class="linenos">268</span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos">269</span>    
+<span class="linenos">270</span>        <span class="n">R</span> <span class="o">=</span> <span class="mi">6370997</span>
+<span class="linenos">271</span>        <span class="n">globe</span> <span class="o">=</span> <span class="n">ccrs</span><span class="o">.</span><span class="n">Globe</span><span class="p">(</span><span class="n">ellipse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">semimajor_axis</span><span class="o">=</span><span class="n">R</span><span class="p">,</span> <span class="n">semiminor_axis</span><span class="o">=</span><span class="n">R</span><span class="p">)</span>
+<span class="linenos">272</span>    
+<span class="linenos">273</span>        <span class="n">proj</span> <span class="o">=</span> <span class="n">ccrs</span><span class="o">.</span><span class="n">LambertConformal</span><span class="p">(</span><span class="n">central_longitude</span><span class="o">=-</span><span class="mf">65.</span><span class="p">,</span> <span class="n">central_latitude</span><span class="o">=</span><span class="mf">50.</span><span class="p">,</span>
+<span class="linenos">274</span>                                    <span class="n">standard_parallels</span><span class="o">=</span><span class="p">(</span><span class="mf">45.</span><span class="p">,</span> <span class="mf">55.</span><span class="p">),</span> <span class="n">globe</span><span class="o">=</span><span class="n">globe</span><span class="p">)</span>
+<span class="linenos">275</span>        <span class="n">latlon</span> <span class="o">=</span> <span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">(</span><span class="n">globe</span><span class="o">=</span><span class="n">globe</span><span class="p">)</span>
+<span class="linenos">276</span>    
+<span class="linenos">277</span>        <span class="n">x_half_width</span> <span class="o">=</span> <span class="mf">3.8e6</span>
+<span class="linenos">278</span>        <span class="n">y_half_width</span> <span class="o">=</span> <span class="mf">4.4e6</span>
+<span class="linenos">279</span>        <span class="n">ax3</span><span class="o">.</span><span class="n">set_extent</span><span class="p">([</span><span class="o">-</span><span class="n">x_half_width</span><span class="p">,</span> <span class="n">x_half_width</span><span class="p">,</span> <span class="o">-</span><span class="n">y_half_width</span><span class="p">,</span> <span class="n">y_half_width</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="n">proj</span><span class="p">)</span>
+<span class="linenos">280</span>        <span class="n">geod</span> <span class="o">=</span> <span class="n">Geod</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">R</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">R</span><span class="p">)</span>  <span class="c1"># spherical geodesics</span>
+<span class="linenos">281</span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">LLs</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+<span class="linenos">282</span>            <span class="n">lon1</span><span class="p">,</span> <span class="n">lat1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>   <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">283</span>            <span class="n">lon2</span><span class="p">,</span> <span class="n">lat2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">LLs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">284</span>    
+<span class="linenos">285</span>            <span class="n">pts</span> <span class="o">=</span> <span class="n">geod</span><span class="o">.</span><span class="n">npts</span><span class="p">(</span><span class="n">lon1</span><span class="p">,</span> <span class="n">lat1</span><span class="p">,</span> <span class="n">lon2</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="linenos">286</span>            <span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lon1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pts</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">lon2</span><span class="p">])</span>
+<span class="linenos">287</span>            <span class="n">lats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lat1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pts</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">lat2</span><span class="p">])</span>
+<span class="linenos">288</span>    
+<span class="linenos">289</span>            <span class="n">xyz</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">transform_points</span><span class="p">(</span><span class="n">latlon</span><span class="p">,</span> <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span><span class="p">)</span>
+<span class="linenos">290</span>            <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="linenos">291</span>    
+<span class="linenos">292</span>        <span class="n">ax2</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="linenos">293</span>    
+<span class="linenos">294</span>        <span class="n">ax3</span><span class="o">.</span><span class="n">stock_img</span><span class="p">()</span> 
+<span class="linenos">295</span>    
+<span class="linenos">296</span>        <span class="n">gl</span> <span class="o">=</span> <span class="n">ax3</span><span class="o">.</span><span class="n">gridlines</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">latlon</span><span class="p">,</span>
+<span class="linenos">297</span>                   <span class="n">xlocs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">180.</span><span class="p">,</span> <span class="mf">181.</span><span class="p">,</span> <span class="mf">60.</span><span class="p">),</span>
+<span class="linenos">298</span>                   <span class="n">ylocs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">90.</span><span class="p">,</span> <span class="mf">91.</span><span class="p">,</span> <span class="mf">30.</span><span class="p">),</span>
+<span class="linenos">299</span>                   <span class="n">draw_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">'k'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="linenos">300</span>                   <span class="n">linestyle</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+<span class="linenos">301</span>    
+<span class="linenos">302</span>        <span class="n">ax3</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Ground Track"</span><span class="p">)</span>
+<span class="linenos">303</span>    
+<span class="linenos">304</span>    <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mf">15.0</span><span class="p">,</span> <span class="mf">7.5</span><span class="p">,</span> <span class="n">forward</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">305</span>    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="linenos">306</span>    
+<span class="linenos">307</span>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="linenos">308</span>
+<span class="linenos">309</span><span class="c1">###############################################################################</span>
+<span class="linenos">310</span>
+<span class="linenos">311</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<span class="linenos">312</span>
+<span class="linenos">313</span>    <span class="n">ast</span><span class="o">.</span><span class="n">SoftwareInfo</span><span class="p">()</span>
+<span class="linenos">314</span>    
+<span class="linenos">315</span>    
+<span class="linenos">316</span>    <span class="c1"># Target orbital elements</span>
+<span class="linenos">317</span>    <span class="n">at</span>     <span class="o">=</span> <span class="mi">24361140</span> <span class="o">/</span><span class="n">Lstar</span>
+<span class="linenos">318</span>    <span class="n">et</span>     <span class="o">=</span> <span class="mf">.7308</span>
+<span class="linenos">319</span>    <span class="n">Ot</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">269.8</span><span class="p">)</span>
+<span class="linenos">320</span>    <span class="n">Wt</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">130.5</span><span class="p">)</span>
+<span class="linenos">321</span>    <span class="n">istart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">28.5</span><span class="p">)</span>
+<span class="linenos">322</span>    
+<span class="linenos">323</span>    
+<span class="linenos">324</span>    <span class="n">y0</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">))</span>
+<span class="linenos">325</span>    <span class="n">y0</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">istart</span><span class="p">),</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">istart</span><span class="p">)])</span><span class="o">*</span><span class="n">Re</span>
+<span class="linenos">326</span>    <span class="n">y0</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">y0</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">We</span><span class="p">]))</span>
+<span class="linenos">327</span>    <span class="n">y0</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>  <span class="o">+=</span> <span class="mf">0.00001</span><span class="o">/</span><span class="n">Vstar</span>  <span class="c1"># cant be exactly zero,our drag equation's derivative would NAN !!!</span>
+<span class="linenos">328</span>    
+<span class="linenos">329</span>    <span class="nb">print</span><span class="p">(</span><span class="n">y0</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
+<span class="linenos">330</span>    
+<span class="linenos">331</span>    <span class="c1">## MF is the only magic number in the script, just trying to find</span>
+<span class="linenos">332</span>    <span class="c1">## a mean anomaly such that the terminal state on the orbit is downrange</span>
+<span class="linenos">333</span>    <span class="c1">## eastward from KSC in and doesnt pass through earth when LERPed from KSC</span>
+<span class="linenos">334</span>    <span class="n">MF</span>   <span class="o">=-</span><span class="mf">.05</span>
+<span class="linenos">335</span>    <span class="n">OEF</span>  <span class="o">=</span> <span class="p">[</span><span class="n">at</span><span class="p">,</span><span class="n">et</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">Ot</span><span class="p">,</span><span class="n">Wt</span><span class="p">,</span><span class="n">MF</span><span class="p">]</span>
+<span class="linenos">336</span>    <span class="n">yf</span>   <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Astro</span><span class="o">.</span><span class="n">classic_to_cartesian</span><span class="p">(</span><span class="n">OEF</span><span class="p">,</span><span class="n">mu</span><span class="p">)</span>
+<span class="linenos">337</span>    
+<span class="linenos">338</span>    <span class="n">ts</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">tf_phase4</span><span class="p">,</span><span class="mi">1000</span><span class="p">)</span>
+<span class="linenos">339</span>    
+<span class="linenos">340</span>    <span class="n">IG1</span> <span class="o">=</span><span class="p">[]</span>
+<span class="linenos">341</span>    <span class="n">IG2</span> <span class="o">=</span><span class="p">[]</span>
+<span class="linenos">342</span>    <span class="n">IG3</span> <span class="o">=</span><span class="p">[]</span>
+<span class="linenos">343</span>    <span class="n">IG4</span> <span class="o">=</span><span class="p">[]</span> 
+<span class="linenos">344</span>    
+<span class="linenos">345</span>    
+<span class="linenos">346</span>    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">:</span>
+<span class="linenos">347</span>        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">11</span><span class="p">))</span>
+<span class="linenos">348</span>        <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span> <span class="n">y0</span> <span class="o">+</span> <span class="p">(</span><span class="n">yf</span><span class="o">-</span><span class="n">y0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="n">ts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">349</span>        <span class="n">X</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>  <span class="o">=</span> <span class="n">t</span>
+<span class="linenos">350</span>        <span class="n">X</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+<span class="linenos">351</span>        <span class="k">if</span><span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">tf_phase1</span><span class="p">):</span>
+<span class="linenos">352</span>            <span class="n">m</span><span class="o">=</span> <span class="n">m0_phase1</span> <span class="o">+</span> <span class="p">(</span><span class="n">mf_phase1</span><span class="o">-</span><span class="n">m0_phase1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="n">tf_phase1</span><span class="p">)</span>
+<span class="linenos">353</span>            <span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="n">m</span>
+<span class="linenos">354</span>            <span class="n">IG1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="linenos">355</span>        <span class="k">elif</span><span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">tf_phase2</span><span class="p">):</span>
+<span class="linenos">356</span>            <span class="n">m</span><span class="o">=</span> <span class="n">m0_phase2</span> <span class="o">+</span> <span class="p">(</span><span class="n">mf_phase2</span><span class="o">-</span><span class="n">m0_phase2</span><span class="p">)</span><span class="o">*</span><span class="p">((</span> <span class="n">t</span><span class="o">-</span><span class="n">tf_phase1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tf_phase2</span> <span class="o">-</span> <span class="n">tf_phase1</span><span class="p">))</span>
+<span class="linenos">357</span>            <span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="n">m</span>
+<span class="linenos">358</span>            <span class="n">IG2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="linenos">359</span>        <span class="k">elif</span><span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">tf_phase3</span><span class="p">):</span>
+<span class="linenos">360</span>            <span class="n">m</span><span class="o">=</span> <span class="n">m0_phase3</span> <span class="o">+</span> <span class="p">(</span><span class="n">mf_phase3</span><span class="o">-</span><span class="n">m0_phase3</span><span class="p">)</span><span class="o">*</span><span class="p">((</span> <span class="n">t</span><span class="o">-</span><span class="n">tf_phase2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tf_phase3</span> <span class="o">-</span> <span class="n">tf_phase2</span><span class="p">))</span>
+<span class="linenos">361</span>            <span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="n">m</span>
+<span class="linenos">362</span>            <span class="n">IG3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="linenos">363</span>        <span class="k">elif</span><span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="n">tf_phase4</span><span class="p">):</span>
+<span class="linenos">364</span>            <span class="n">m</span><span class="o">=</span> <span class="n">m0_phase4</span> <span class="o">+</span> <span class="p">(</span><span class="n">mf_phase4</span><span class="o">-</span><span class="n">m0_phase4</span><span class="p">)</span><span class="o">*</span><span class="p">((</span> <span class="n">t</span><span class="o">-</span><span class="n">tf_phase3</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tf_phase4</span> <span class="o">-</span> <span class="n">tf_phase3</span><span class="p">))</span>
+<span class="linenos">365</span>            <span class="n">X</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="n">m</span>
+<span class="linenos">366</span>            <span class="n">IG4</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="linenos">367</span>        
+<span class="linenos">368</span>    
+<span class="linenos">369</span>    
+<span class="linenos">370</span>    <span class="n">ode1</span> <span class="o">=</span> <span class="n">RocketODE</span><span class="p">(</span><span class="n">T_phase1</span><span class="p">,</span><span class="n">mdot_phase1</span><span class="p">)</span>
+<span class="linenos">371</span>    <span class="n">ode2</span> <span class="o">=</span> <span class="n">RocketODE</span><span class="p">(</span><span class="n">T_phase2</span><span class="p">,</span><span class="n">mdot_phase2</span><span class="p">)</span>
+<span class="linenos">372</span>    <span class="n">ode3</span> <span class="o">=</span> <span class="n">RocketODE</span><span class="p">(</span><span class="n">T_phase3</span><span class="p">,</span><span class="n">mdot_phase3</span><span class="p">)</span>
+<span class="linenos">373</span>    <span class="n">ode4</span> <span class="o">=</span> <span class="n">RocketODE</span><span class="p">(</span><span class="n">T_phase4</span><span class="p">,</span><span class="n">mdot_phase4</span><span class="p">)</span>
+<span class="linenos">374</span>    
+<span class="linenos">375</span>    <span class="n">tmode</span> <span class="o">=</span> <span class="s2">"LGL3"</span>
+<span class="linenos">376</span>    <span class="n">cmode</span> <span class="o">=</span> <span class="s2">"HighestOrderSpline"</span>
+<span class="linenos">377</span>    
+<span class="linenos">378</span>    <span class="n">nsegs1</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="linenos">379</span>    <span class="n">nsegs2</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="linenos">380</span>    <span class="n">nsegs3</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="linenos">381</span>    <span class="n">nsegs4</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="linenos">382</span>    
+<span class="linenos">383</span>    <span class="c1">#########################################</span>
+<span class="linenos">384</span>    <span class="n">phase1</span> <span class="o">=</span> <span class="n">ode1</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tmode</span><span class="p">,</span><span class="n">IG1</span><span class="p">,</span><span class="n">nsegs1</span><span class="p">)</span>
+<span class="linenos">385</span>    <span class="n">phase1</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="n">cmode</span><span class="p">)</span>
+<span class="linenos">386</span>    
+<span class="linenos">387</span>    <span class="c1">## Thrust direction is normalized in dynamics, so we dont</span>
+<span class="linenos">388</span>    <span class="c1">## have to enforce norm of 1 on controls. For good measure,</span>
+<span class="linenos">389</span>    <span class="c1">## we do bound the maginitude to prevent it from becoming too large or small</span>
+<span class="linenos">390</span>    <span class="n">phase1</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mf">.5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="linenos">391</span>    <span class="n">phase1</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">8</span><span class="p">),</span><span class="n">IG1</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">8</span><span class="p">])</span>
+<span class="linenos">392</span>    
+<span class="linenos">393</span>    <span class="c1">#Dont want our bound to interfere with initial condition which starts at Re</span>
+<span class="linenos">394</span>    <span class="c1">#so i relax the Earth radius constraint slightly here</span>
+<span class="linenos">395</span>    <span class="n">phase1</span><span class="o">.</span><span class="n">addLowerNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">Re</span><span class="o">*</span><span class="mf">.999999</span><span class="p">)</span>
+<span class="linenos">396</span>    <span class="n">phase1</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,[</span><span class="mi">7</span><span class="p">],[</span><span class="n">tf_phase1</span><span class="p">])</span>
+<span class="linenos">397</span>    
+<span class="linenos">398</span>    <span class="c1">#########################################</span>
+<span class="linenos">399</span>    <span class="n">phase2</span> <span class="o">=</span> <span class="n">ode2</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tmode</span><span class="p">,</span><span class="n">IG2</span><span class="p">,</span><span class="n">nsegs2</span><span class="p">)</span>
+<span class="linenos">400</span>    <span class="n">phase2</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="n">cmode</span><span class="p">)</span>
+<span class="linenos">401</span>    
+<span class="linenos">402</span>    <span class="n">phase2</span><span class="o">.</span><span class="n">addLowerNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">Re</span><span class="p">)</span>
+<span class="linenos">403</span>    <span class="n">phase2</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mf">.5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="linenos">404</span>    
+<span class="linenos">405</span>    <span class="c1">## Fixing initial mass and final time on first 3 phases.</span>
+<span class="linenos">406</span>    <span class="c1">## Since the engine cant be throttled, constraining final mass</span>
+<span class="linenos">407</span>    <span class="c1">## as well would be redundant and overconstrained</span>
+<span class="linenos">408</span>    <span class="n">phase2</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,[</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="n">m0_phase2</span><span class="p">])</span>
+<span class="linenos">409</span>    <span class="n">phase2</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">,[</span><span class="n">tf_phase2</span><span class="p">])</span>
+<span class="linenos">410</span>    
+<span class="linenos">411</span>    <span class="c1">#########################################</span>
+<span class="linenos">412</span>    <span class="n">phase3</span> <span class="o">=</span> <span class="n">ode3</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tmode</span><span class="p">,</span><span class="n">IG3</span><span class="p">,</span><span class="n">nsegs3</span><span class="p">)</span>
+<span class="linenos">413</span>    <span class="n">phase3</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="n">cmode</span><span class="p">)</span>
+<span class="linenos">414</span>    
+<span class="linenos">415</span>    <span class="n">phase3</span><span class="o">.</span><span class="n">addLowerNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">Re</span><span class="p">)</span>
+<span class="linenos">416</span>    <span class="n">phase3</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mf">.5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="linenos">417</span>    <span class="n">phase3</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,[</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="n">m0_phase3</span><span class="p">])</span>
+<span class="linenos">418</span>    <span class="n">phase3</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="p">,[</span><span class="n">tf_phase3</span><span class="p">])</span>
+<span class="linenos">419</span>    
+<span class="linenos">420</span>    <span class="c1">#########################################</span>
+<span class="linenos">421</span>    <span class="n">phase4</span> <span class="o">=</span> <span class="n">ode4</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="n">tmode</span><span class="p">,</span><span class="n">IG4</span><span class="p">,</span><span class="n">nsegs4</span><span class="p">)</span>
+<span class="linenos">422</span>    <span class="n">phase4</span><span class="o">.</span><span class="n">setControlMode</span><span class="p">(</span><span class="n">cmode</span><span class="p">)</span>
+<span class="linenos">423</span>
+<span class="linenos">424</span>    <span class="n">phase4</span><span class="o">.</span><span class="n">addLowerNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">Re</span><span class="p">)</span>
+<span class="linenos">425</span>    <span class="n">phase4</span><span class="o">.</span><span class="n">addLUNormBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,[</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="mf">.5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="linenos">426</span>    <span class="n">phase4</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Front"</span><span class="p">,[</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="n">m0_phase4</span><span class="p">])</span>
+<span class="linenos">427</span>    <span class="n">phase4</span><span class="o">.</span><span class="n">addUpperVarBound</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="n">tf_phase4</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="linenos">428</span>    <span class="n">phase4</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span><span class="n">TargetOrbit</span><span class="p">(</span><span class="n">at</span><span class="p">,</span><span class="n">et</span><span class="p">,</span><span class="n">istart</span><span class="p">,</span><span class="n">Ot</span><span class="p">,</span><span class="n">Wt</span><span class="p">),</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="linenos">429</span>    <span class="c1"># Maximize final mass</span>
+<span class="linenos">430</span>    <span class="n">phase4</span><span class="o">.</span><span class="n">addValueObjective</span><span class="p">(</span><span class="s2">"Back"</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="linenos">431</span>    
+<span class="linenos">432</span>    <span class="c1">#########################################</span>
+<span class="linenos">433</span>    
+<span class="linenos">434</span>    <span class="n">ocp</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">OptimalControlProblem</span><span class="p">()</span>
+<span class="linenos">435</span>    <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase1</span><span class="p">)</span>
+<span class="linenos">436</span>    <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase2</span><span class="p">)</span>
+<span class="linenos">437</span>    <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase3</span><span class="p">)</span>
+<span class="linenos">438</span>    <span class="n">ocp</span><span class="o">.</span><span class="n">addPhase</span><span class="p">(</span><span class="n">phase4</span><span class="p">)</span>
+<span class="linenos">439</span>    
+<span class="linenos">440</span>    <span class="c1">## All phases contniuous in everything but mass (var 6)</span>
+<span class="linenos">441</span>    <span class="n">ocp</span><span class="o">.</span><span class="n">addForwardLinkEqualCon</span><span class="p">(</span><span class="n">phase1</span><span class="p">,</span><span class="n">phase4</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">])</span>
+<span class="linenos">442</span>    
+<span class="linenos">443</span>    
+<span class="linenos">444</span>    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_OptLSMode</span><span class="p">(</span><span class="s2">"L1"</span><span class="p">)</span>
+<span class="linenos">445</span>    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_SoeLSMode</span><span class="p">(</span><span class="s2">"L1"</span><span class="p">)</span>
+<span class="linenos">446</span>    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_MaxLSIters</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos">447</span>    <span class="n">ocp</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set_PrintLevel</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">448</span>
+<span class="linenos">449</span>    <span class="n">ocp</span><span class="o">.</span><span class="n">solve_optimize</span><span class="p">()</span>
+<span class="linenos">450</span>    
+<span class="linenos">451</span>
+<span class="linenos">452</span>    <span class="n">Phase1Traj</span> <span class="o">=</span> <span class="n">phase1</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>  <span class="c1"># or ocp.Phase(i).returnTraj()</span>
+<span class="linenos">453</span>    <span class="n">Phase2Traj</span> <span class="o">=</span> <span class="n">phase2</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+<span class="linenos">454</span>    <span class="n">Phase3Traj</span> <span class="o">=</span> <span class="n">phase3</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+<span class="linenos">455</span>    <span class="n">Phase4Traj</span> <span class="o">=</span> <span class="n">phase4</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">()</span>
+<span class="linenos">456</span>    
+<span class="linenos">457</span>    
+<span class="linenos">458</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Final Mass = "</span><span class="p">,</span><span class="n">Phase4Traj</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span><span class="o">*</span><span class="n">Mstar</span><span class="p">,</span><span class="s1">' kg'</span><span class="p">)</span>
+<span class="linenos">459</span>
+<span class="linenos">460</span>    <span class="n">Plot</span><span class="p">(</span><span class="n">Phase1Traj</span><span class="p">,</span><span class="n">Phase2Traj</span><span class="p">,</span><span class="n">Phase3Traj</span><span class="p">,</span><span class="n">Phase4Traj</span><span class="p">)</span>
+<span class="linenos">461</span>    <span class="c1">#########################################</span>
+<span class="linenos">462</span>
+<span class="linenos">463</span>
+<span class="linenos">464</span>
 </pre></div>
 </div>
+</div>
+</section>
 </section>
 </section>
 
@@ -1102,8 +1118,10 @@ Final Mass Delivered to the GTO is 7529.749kg, which is effectively the same as 
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Delta 3 Multi-phase GTO Transfer</a><ul>
-<li><a class="reference internal" href="#references">References</a></li>
+<li><a class="reference internal" href="#references">References</a><ul>
 <li><a class="reference internal" href="#full-code">Full Code</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
