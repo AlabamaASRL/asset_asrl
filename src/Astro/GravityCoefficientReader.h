@@ -63,13 +63,20 @@ struct GravityCoefficientData {
 //        - Six-column coefficient records:
 //          n, m, C_nm, S_nm, sigma_Cnm, sigma_Snm.
 //
-//     2. Whitespace-delimited coefficient files
+//     2. EGM96 / whitespace-delimited coefficient files
 //        - Four-column records:
-//          n, m, C_nm, S_nm.
+//          n m C_nm S_nm
+//        - Six-column records:
+//          n m C_nm S_nm sigma_Cnm sigma_Snm
 //        - Supports Fortran D/d exponents.
+//
+// The uncertainty fields are validated but are not stored.
 //
 // The reader does not perform gravity evaluation or normalization
 // conversion. It returns the coefficient values as stored in the file.
+//
+// For whitespace-delimited files, GM, reference radius, and
+// normalization must be supplied separately by the caller.
 class GravityCoefficientReader {
 
 public:
