@@ -1,4 +1,3 @@
-```cmake
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/OptimalControl)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Solvers)
@@ -252,4 +251,3 @@ if(PYTHON_LOCAL_INSTALL_DIR)
     )
 
 endif()
-```
