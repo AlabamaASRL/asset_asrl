@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+//Delcare for build
+void BuildGravityCoefficientReader(FunctionRegistry& reg, py::module& m);
+
 namespace ASSET {
 
 // Identifies the normalization convention of the coefficient data.
