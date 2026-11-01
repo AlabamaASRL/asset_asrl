@@ -9,9 +9,9 @@ In most cases we suggest simply installing ASSET via pip, which is as simple as 
 
 We currently host the following binaries on PyPI:
 
-* Windows for Python 3.8-3.15
-* Linux for Python 3.9–3.15
-* MacOS for Python 3.10-3.15
+* Windows for Python versions 3.8-3.15
+* Linux for Python versions 3.9–3.15
+* MacOS for versions Python 3.10-3.15
 
 If you are interested in building ASSET from source, please see the following sections for a step-by-step guide on how to do so on:
 
