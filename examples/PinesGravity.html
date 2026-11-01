@@ -325,32 +325,10 @@ perturbations.</p>
 R_E &amp;= 6378.1363 \;\mathrm{km}.
 \end{aligned}\end{split}\]</div>
 </div>
-<p>The gravity coefficients are read from the EGM96 coefficient file:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">COEFF_FILE</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
-    <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="o">/</span> <span class="s2">"native"</span>
-    <span class="o">/</span> <span class="s2">"data"</span>
-    <span class="o">/</span> <span class="s2">"egm96.nor"</span>
-<span class="p">)</span>
-</pre></div>
-</div>
+<p>The gravity coefficients are read from the EGM96 coefficient file.</p>
 <p>The gravity model is constructed using <code class="code docutils literal notranslate"><span class="pre">astro.PinesGravity</span></code>, which
 accepts the coefficient file, maximum degree, gravitational parameter,
 reference radius, and coefficient normalization convention.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">MakePines</span><span class="p">(</span><span class="n">degree</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Build each gravity model once; coefficient parsing can take time.</span>
-<span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">astro</span><span class="o">.</span><span class="n">PinesGravity</span><span class="p">(</span>
-        <span class="n">COEFF_FILE</span><span class="p">,</span>
-        <span class="n">degree</span><span class="p">,</span>
-        <span class="n">MU</span><span class="p">,</span>
-        <span class="n">RE</span><span class="p">,</span>
-        <span class="s2">"fully_normalized"</span>
-    <span class="p">)</span>
-</pre></div>
-</div>
 <p>The <code class="code docutils literal notranslate"><span class="pre">lru_cache</span></code> decorator ensures that each requested gravity model is
 constructed only once. This avoids repeatedly parsing the coefficient file
 when the same harmonic degree is used for multiple acceleration evaluations
@@ -387,24 +365,6 @@ analytically using</p>
 0, 2, 8, and 20. Degree zero represents the central point-mass contribution,
 while increasing the maximum degree includes additional spherical harmonic
 terms.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">4510.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">3120.0</span><span class="p">,</span> <span class="mf">5230.0</span><span class="p">])</span>
-<span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-<span class="n">two_body</span> <span class="o">=</span> <span class="o">-</span><span class="n">MU</span> <span class="o">*</span> <span class="n">position</span> <span class="o">/</span> <span class="n">radius</span><span class="o">**</span><span class="mi">3</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Degree   |a| [km/s^2]       |a - a_2body| [km/s^2]"</span><span class="p">)</span>
-
-<span class="k">for</span> <span class="n">degree</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">]:</span>
-    <span class="n">gravity</span> <span class="o">=</span> <span class="n">MakePines</span><span class="p">(</span><span class="n">degree</span><span class="p">)</span>
-    <span class="n">acceleration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gravity</span><span class="o">.</span><span class="n">acceleration</span><span class="p">(</span><span class="n">position</span><span class="p">))</span>
-    <span class="n">difference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">acceleration</span> <span class="o">-</span> <span class="n">two_body</span><span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">degree</span><span class="si">:</span><span class="s2">6d</span><span class="si">}</span><span class="s2">   "</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">acceleration</span><span class="p">)</span><span class="si">:</span><span class="s2">.12e</span><span class="si">}</span><span class="s2">   "</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">difference</span><span class="si">:</span><span class="s2">.12e</span><span class="si">}</span><span class="s2">"</span>
-    <span class="p">)</span>
-</pre></div>
-</div>
 <p>The acceleration magnitude and difference from the analytical point-mass
 solution provide a basic comparison of the gravity models. The difference
 measures the perturbing contribution relative to central gravity at the
@@ -434,22 +394,6 @@ can provide derivatives of the gravitational acceleration.</p>
 <p>This derivative describes how the gravitational acceleration changes with
 position and is useful for sensitivity analysis, variational equations, and
 gradient-based optimization.</p>
-<p>The degree-8 gravity model is used to demonstrate Jacobian evaluation:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">gravity8</span> <span class="o">=</span> <span class="n">MakePines</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
-
-<span class="n">acceleration</span><span class="p">,</span> <span class="n">jacobian</span> <span class="o">=</span> <span class="n">gravity8</span><span class="o">.</span><span class="n">compute_jacobian</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span>
-    <span class="s2">"</span><span class="se">\n</span><span class="s2">Degree-8 acceleration [km/s^2]:"</span><span class="p">,</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">acceleration</span><span class="p">)</span>
-<span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span>
-    <span class="s2">"Acceleration Jacobian [1/s^2]:</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">jacobian</span><span class="p">)</span>
-<span class="p">)</span>
-</pre></div>
-</div>
 <p>The <code class="code docutils literal notranslate"><span class="pre">compute_jacobian</span></code> method returns both the acceleration and its
 Jacobian with respect to the input position.</p>
 </section>
@@ -480,28 +424,7 @@ vectors, respectively.</p>
 </div>
 <p>The acceleration function includes central gravity and the selected
 spherical harmonic perturbations.</p>
-<p>The dynamics are implemented using <code class="code docutils literal notranslate"><span class="pre">oc.ODEBase</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PinesModel</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Orbital state dynamics using Pines gravity.</span>
-
-<span class="sd">    The Pines model evaluates gravity at a body-fixed position. This simple</span>
-<span class="sd">    example holds that frame fixed and does not model Earth rotation.</span>
-<span class="sd">    """</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gravity</span><span class="p">):</span>
-        <span class="n">xvars</span> <span class="o">=</span> <span class="mi">6</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">xvars</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-        <span class="n">position</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span>
-        <span class="n">velocity</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">segment3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-
-        <span class="n">acceleration</span> <span class="o">=</span> <span class="n">gravity</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">velocity</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">])</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span> <span class="n">xvars</span><span class="p">)</span>
-</pre></div>
-</div>
+<p>The dynamics are implemented using <code class="code docutils literal notranslate"><span class="pre">oc.ODEBase</span></code>.</p>
 <p>The gravity model is passed directly into the dynamics constructor. This
 preserves the ASSET VectorFunction representation of the acceleration and
 allows the resulting ODE to be integrated using ASSET’s numerical integrators.</p>
@@ -536,26 +459,6 @@ v_0\sin(51.6^\circ)
 \;\mathrm{km/s}.
 \end{aligned}\end{split}\]</div>
 </div>
-<p>The initial state is constructed in Python as follows:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">initial_radius</span> <span class="o">=</span> <span class="mf">7000.0</span>
-<span class="n">initial_speed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">MU</span> <span class="o">/</span> <span class="n">initial_radius</span><span class="p">)</span>
-<span class="n">inclination</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">51.6</span><span class="p">)</span>
-
-<span class="n">initial_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
-
-<span class="n">initial_state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">initial_radius</span><span class="p">,</span>
-    <span class="mf">0.0</span><span class="p">,</span>
-    <span class="mf">0.0</span>
-<span class="p">]</span>
-
-<span class="n">initial_state</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="mf">0.0</span><span class="p">,</span>
-    <span class="n">initial_speed</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">inclination</span><span class="p">),</span>
-    <span class="n">initial_speed</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">inclination</span><span class="p">)</span>
-<span class="p">]</span>
-</pre></div>
-</div>
 <p>The initial state contains seven entries because the integrator’s trajectory
 output includes time as an additional variable. The ODE itself contains six
 state variables.</p>
@@ -564,11 +467,7 @@ state variables.</p>
 <div class="math notranslate nohighlight">
 \[T = 2\pi\sqrt{\frac{r_0^3}{\mu}}.\]</div>
 </div>
-<p>The propagation duration is selected as ten orbital periods:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">period</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">initial_radius</span><span class="o">**</span><span class="mi">3</span> <span class="o">/</span> <span class="n">MU</span><span class="p">)</span>
-<span class="n">final_time</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">*</span> <span class="n">period</span>
-</pre></div>
-</div>
+<p>The propagation duration is selected as ten orbital periods.</p>
 </section>
 <section id="orbit-propagation">
 <h2>Orbit Propagation<a class="headerlink" href="#orbit-propagation" title="Link to this heading">¶</a></h2>
@@ -579,23 +478,6 @@ state variables.</p>
 </ol>
 <p>Both models use an ASSET integrator with a nominal integration step of
 30 seconds and an absolute tolerance of <span class="math notranslate nohighlight">\(10^{-8}\)</span>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trajectories</span> <span class="o">=</span> <span class="p">{}</span>
-
-<span class="k">for</span> <span class="n">degree</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">]:</span>
-    <span class="n">ode</span> <span class="o">=</span> <span class="n">PinesModel</span><span class="p">(</span><span class="n">MakePines</span><span class="p">(</span><span class="n">degree</span><span class="p">))</span>
-
-    <span class="n">integrator</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="mf">30.0</span><span class="p">)</span>
-    <span class="n">integrator</span><span class="o">.</span><span class="n">setAbsTol</span><span class="p">(</span><span class="mf">1.0e-8</span><span class="p">)</span>
-
-    <span class="n">trajectories</span><span class="p">[</span><span class="n">degree</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
-        <span class="n">integrator</span><span class="o">.</span><span class="n">integrate_dense</span><span class="p">(</span>
-            <span class="n">initial_state</span><span class="p">,</span>
-            <span class="n">final_time</span><span class="p">,</span>
-            <span class="mi">2000</span>
-        <span class="p">)</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
-</pre></div>
-</div>
 <p>The resulting trajectories contain position, velocity, and time histories.
 The two trajectories can therefore be compared at matching output times.</p>
 </section>
@@ -621,29 +503,6 @@ the position opposite its initial position:</p>
 \mathbf{r}(0)
 \right\|.\]</div>
 </div>
-<p>The implementation is</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ode0</span> <span class="o">=</span> <span class="n">PinesModel</span><span class="p">(</span><span class="n">MakePines</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-
-<span class="n">integrator0</span> <span class="o">=</span> <span class="n">ode0</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="mf">30.0</span><span class="p">)</span>
-<span class="n">integrator0</span><span class="o">.</span><span class="n">setAbsTol</span><span class="p">(</span><span class="mf">1.0e-8</span><span class="p">)</span>
-
-<span class="n">half_period_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
-    <span class="n">integrator0</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span>
-        <span class="n">initial_state</span><span class="p">,</span>
-        <span class="n">period</span> <span class="o">/</span> <span class="mf">2.0</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-
-<span class="n">half_period_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
-    <span class="n">half_period_state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">initial_state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
-<span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Half-period position error [km]: "</span>
-    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">half_period_error</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">"</span>
-<span class="p">)</span>
-</pre></div>
-</div>
 <p>This provides a basic numerical check of the degree-zero gravity propagation
 against the expected circular-orbit geometry.</p>
 </section>
@@ -663,15 +522,6 @@ calculated at each output time:</p>
 </div>
 <p>where <span class="math notranslate nohighlight">\(\mathbf{r}_{8}\)</span> is the degree-8 position and
 <span class="math notranslate nohighlight">\(\mathbf{r}_{0}\)</span> is the point-mass position.</p>
-<p>The position difference is computed using</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">time_hours</span> <span class="o">=</span> <span class="n">trajectories</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">/</span> <span class="mf">3600.0</span>
-
-<span class="n">position_difference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
-    <span class="n">trajectories</span><span class="p">[</span><span class="mi">8</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">trajectories</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span>
-    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
-<span class="p">)</span>
-</pre></div>
-</div>
 <p>The comparison illustrates the accumulated trajectory separation caused by
 the spherical harmonic perturbations included in the degree-8 model.</p>
 <p>The plotting routine displays the two propagated trajectories around a
@@ -701,289 +551,195 @@ z &amp;= R_E\sin(\phi).
 \end{aligned}\end{split}\]</div>
 </div>
 <p>where <span class="math notranslate nohighlight">\(\phi\)</span> is latitude and <span class="math notranslate nohighlight">\(\lambda\)</span> is longitude.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">make_earth_surface</span><span class="p">():</span>
-    <span class="n">longitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>
-    <span class="n">latitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-
-    <span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span><span class="p">)</span>
-
-    <span class="n">x</span> <span class="o">=</span> <span class="n">RE</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">RE</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="n">RE</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
-</pre></div>
-</div>
 <p>The resulting surface is plotted with partial transparency so that both
 orbital trajectories remain visible.</p>
 </section>
 <section id="full-code">
 <h2>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h2>
-<p>The complete example is shown below.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""</span>
-<span class="sd">Example use of ASSET's Pines gravity kernel.</span>
-<span class="sd">"""</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">lru_cache</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">asset_asrl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-
-<span class="n">vf</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
-<span class="n">oc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
-<span class="n">astro</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Astro</span>
-
-<span class="n">MU</span> <span class="o">=</span> <span class="mf">3.9860043543609598e5</span>
-<span class="n">RE</span> <span class="o">=</span> <span class="mf">6378.1363</span>
-
-<span class="n">COEFF_FILE</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
-    <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="o">/</span> <span class="s2">"native"</span>
-    <span class="o">/</span> <span class="s2">"data"</span>
-    <span class="o">/</span> <span class="s2">"egm96.nor"</span>
-<span class="p">)</span>
-
-<span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">MakePines</span><span class="p">(</span><span class="n">degree</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Build each gravity model once; coefficient parsing can take time.</span>
-<span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">astro</span><span class="o">.</span><span class="n">PinesGravity</span><span class="p">(</span>
-        <span class="n">COEFF_FILE</span><span class="p">,</span>
-        <span class="n">degree</span><span class="p">,</span>
-        <span class="n">MU</span><span class="p">,</span>
-        <span class="n">RE</span><span class="p">,</span>
-        <span class="s2">"fully_normalized"</span>
-    <span class="p">)</span>
-
-<span class="k">class</span><span class="w"> </span><span class="nc">PinesModel</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Orbital state dynamics using Pines gravity.</span>
-
-<span class="sd">    The Pines model evaluates gravity at a body-fixed position. This simple</span>
-<span class="sd">    example holds that frame fixed and does not model Earth rotation.</span>
-<span class="sd">    """</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gravity</span><span class="p">):</span>
-        <span class="n">xvars</span> <span class="o">=</span> <span class="mi">6</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">xvars</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
-        <span class="n">position</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span>
-        <span class="n">velocity</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">segment3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-
-        <span class="n">acceleration</span> <span class="o">=</span> <span class="n">gravity</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">velocity</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">])</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span> <span class="n">xvars</span><span class="p">)</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">make_earth_surface</span><span class="p">():</span>
-    <span class="n">longitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>
-    <span class="n">latitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-    <span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span><span class="p">)</span>
-
-    <span class="n">x</span> <span class="o">=</span> <span class="n">RE</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">RE</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="n">RE</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
-
-    <span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">4510.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">3120.0</span><span class="p">,</span> <span class="mf">5230.0</span><span class="p">])</span>
-    <span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-    <span class="n">two_body</span> <span class="o">=</span> <span class="o">-</span><span class="n">MU</span> <span class="o">*</span> <span class="n">position</span> <span class="o">/</span> <span class="n">radius</span><span class="o">**</span><span class="mi">3</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Degree   |a| [km/s^2]       |a - a_2body| [km/s^2]"</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">degree</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">]:</span>
-        <span class="n">gravity</span> <span class="o">=</span> <span class="n">MakePines</span><span class="p">(</span><span class="n">degree</span><span class="p">)</span>
-        <span class="n">acceleration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gravity</span><span class="o">.</span><span class="n">acceleration</span><span class="p">(</span><span class="n">position</span><span class="p">))</span>
-        <span class="n">difference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">acceleration</span> <span class="o">-</span> <span class="n">two_body</span><span class="p">)</span>
-
-        <span class="nb">print</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">degree</span><span class="si">:</span><span class="s2">6d</span><span class="si">}</span><span class="s2">   "</span>
-            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">acceleration</span><span class="p">)</span><span class="si">:</span><span class="s2">.12e</span><span class="si">}</span><span class="s2">   "</span>
-            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">difference</span><span class="si">:</span><span class="s2">.12e</span><span class="si">}</span><span class="s2">"</span>
-        <span class="p">)</span>
-
-    <span class="c1"># Show that the Pines VectorFunction can also provide derivatives.</span>
-    <span class="n">gravity8</span> <span class="o">=</span> <span class="n">MakePines</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
-    <span class="n">acceleration</span><span class="p">,</span> <span class="n">jacobian</span> <span class="o">=</span> <span class="n">gravity8</span><span class="o">.</span><span class="n">compute_jacobian</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span>
-        <span class="s2">"</span><span class="se">\n</span><span class="s2">Degree-8 acceleration [km/s^2]:"</span><span class="p">,</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">acceleration</span><span class="p">)</span>
-    <span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span>
-        <span class="s2">"Acceleration Jacobian [1/s^2]:</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">jacobian</span><span class="p">)</span>
-    <span class="p">)</span>
-
-    <span class="c1"># Circular orbit initial state, inclined by 51.6 degrees.</span>
-    <span class="n">initial_radius</span> <span class="o">=</span> <span class="mf">7000.0</span>
-    <span class="n">initial_speed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">MU</span> <span class="o">/</span> <span class="n">initial_radius</span><span class="p">)</span>
-    <span class="n">inclination</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">51.6</span><span class="p">)</span>
-
-    <span class="n">initial_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
-    <span class="n">initial_state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">initial_radius</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
-
-    <span class="n">initial_state</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="mf">0.0</span><span class="p">,</span>
-        <span class="n">initial_speed</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">inclination</span><span class="p">),</span>
-        <span class="n">initial_speed</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">inclination</span><span class="p">)</span>
-    <span class="p">]</span>
-
-    <span class="n">period</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">initial_radius</span><span class="o">**</span><span class="mi">3</span> <span class="o">/</span> <span class="n">MU</span><span class="p">)</span>
-    <span class="n">final_time</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">*</span> <span class="n">period</span>
-
-    <span class="c1"># Integrate point-mass and degree-8 gravity models.</span>
-    <span class="n">trajectories</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="k">for</span> <span class="n">degree</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">]:</span>
-        <span class="n">ode</span> <span class="o">=</span> <span class="n">PinesModel</span><span class="p">(</span><span class="n">MakePines</span><span class="p">(</span><span class="n">degree</span><span class="p">))</span>
-        <span class="n">integrator</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="mf">30.0</span><span class="p">)</span>
-        <span class="n">integrator</span><span class="o">.</span><span class="n">setAbsTol</span><span class="p">(</span><span class="mf">1.0e-8</span><span class="p">)</span>
-
-        <span class="n">trajectories</span><span class="p">[</span><span class="n">degree</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
-            <span class="n">integrator</span><span class="o">.</span><span class="n">integrate_dense</span><span class="p">(</span>
-                <span class="n">initial_state</span><span class="p">,</span>
-                <span class="n">final_time</span><span class="p">,</span>
-                <span class="mi">2000</span>
-            <span class="p">)</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">T</span>
-
-    <span class="c1"># Degree-zero circular-orbit half-period check.</span>
-    <span class="n">ode0</span> <span class="o">=</span> <span class="n">PinesModel</span><span class="p">(</span><span class="n">MakePines</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-    <span class="n">integrator0</span> <span class="o">=</span> <span class="n">ode0</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="mf">30.0</span><span class="p">)</span>
-    <span class="n">integrator0</span><span class="o">.</span><span class="n">setAbsTol</span><span class="p">(</span><span class="mf">1.0e-8</span><span class="p">)</span>
-
-    <span class="n">half_period_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
-        <span class="n">integrator0</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span>
-            <span class="n">initial_state</span><span class="p">,</span>
-            <span class="n">period</span> <span class="o">/</span> <span class="mf">2.0</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
-
-    <span class="n">half_period_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
-        <span class="n">half_period_state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">initial_state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
-    <span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Half-period position error [km]: "</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">half_period_error</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">"</span>
-    <span class="p">)</span>
-
-    <span class="c1"># Difference between the two trajectories at matching output times.</span>
-    <span class="n">time_hours</span> <span class="o">=</span> <span class="n">trajectories</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">/</span> <span class="mf">3600.0</span>
-
-    <span class="n">position_difference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
-        <span class="n">trajectories</span><span class="p">[</span><span class="mi">8</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">trajectories</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span>
-        <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
-    <span class="p">)</span>
-
-    <span class="c1"># Plot orbits in 3D with Earth for scale, plus trajectory separation.</span>
-    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">constrained_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="n">orbit_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s2">"3d"</span><span class="p">)</span>
-    <span class="n">difference_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-
-    <span class="n">earth_x</span><span class="p">,</span> <span class="n">earth_y</span><span class="p">,</span> <span class="n">earth_z</span> <span class="o">=</span> <span class="n">make_earth_surface</span><span class="p">()</span>
-
-    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span>
-        <span class="n">earth_x</span><span class="p">,</span>
-        <span class="n">earth_y</span><span class="p">,</span>
-        <span class="n">earth_z</span><span class="p">,</span>
-        <span class="n">color</span><span class="o">=</span><span class="s2">"steelblue"</span><span class="p">,</span>
-        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
-        <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">shade</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-
-    <span class="n">colors</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="mi">0</span><span class="p">:</span> <span class="s2">"tab:blue"</span><span class="p">,</span>
-        <span class="mi">8</span><span class="p">:</span> <span class="s2">"tab:orange"</span>
-    <span class="p">}</span>
-
-    <span class="k">for</span> <span class="n">degree</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">]:</span>
-        <span class="n">trajectory</span> <span class="o">=</span> <span class="n">trajectories</span><span class="p">[</span><span class="n">degree</span><span class="p">]</span>
-
-        <span class="n">orbit_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-            <span class="n">trajectory</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="n">trajectory</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-            <span class="n">trajectory</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-            <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">degree</span><span class="p">],</span>
-            <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.6</span><span class="p">,</span>
-            <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Degree </span><span class="si">{</span><span class="n">degree</span><span class="si">}</span><span class="s2">"</span>
-        <span class="p">)</span>
-
-    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">initial_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
-        <span class="p">[</span><span class="n">initial_state</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
-        <span class="p">[</span><span class="n">initial_state</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span>
-        <span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span>
-        <span class="n">s</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span>
-        <span class="n">label</span><span class="o">=</span><span class="s2">"Start"</span>
-    <span class="p">)</span>
-
-    <span class="n">limit</span> <span class="o">=</span> <span class="mf">1.12</span> <span class="o">*</span> <span class="n">initial_radius</span>
-
-    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-        <span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">limit</span><span class="p">,</span> <span class="n">limit</span><span class="p">),</span>
-        <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">limit</span><span class="p">,</span> <span class="n">limit</span><span class="p">),</span>
-        <span class="n">zlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">limit</span><span class="p">,</span> <span class="n">limit</span><span class="p">),</span>
-        <span class="n">xlabel</span><span class="o">=</span><span class="s2">"X [km]"</span><span class="p">,</span>
-        <span class="n">ylabel</span><span class="o">=</span><span class="s2">"Y [km]"</span><span class="p">,</span>
-        <span class="n">zlabel</span><span class="o">=</span><span class="s2">"Z [km]"</span><span class="p">,</span>
-        <span class="n">title</span><span class="o">=</span><span class="s2">"Orbit Propagation"</span>
-    <span class="p">)</span>
-
-    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">set_box_aspect</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">view_init</span><span class="p">(</span><span class="n">elev</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">azim</span><span class="o">=</span><span class="mi">35</span><span class="p">)</span>
-    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"upper left"</span><span class="p">)</span>
-    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
-
-    <span class="n">difference_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-        <span class="n">time_hours</span><span class="p">,</span>
-        <span class="n">position_difference</span><span class="p">,</span>
-        <span class="n">color</span><span class="o">=</span><span class="s2">"tab:purple"</span><span class="p">,</span>
-        <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span>
-    <span class="p">)</span>
-
-    <span class="n">difference_ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">time_hours</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span>
-        <span class="p">[</span><span class="n">position_difference</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span>
-        <span class="n">color</span><span class="o">=</span><span class="s2">"tab:purple"</span><span class="p">,</span>
-        <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-        <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span>
-    <span class="p">)</span>
-
-    <span class="n">difference_ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-        <span class="n">xlabel</span><span class="o">=</span><span class="s2">"Time [hours]"</span><span class="p">,</span>
-        <span class="n">ylabel</span><span class="o">=</span><span class="s2">"Position Difference [km]"</span><span class="p">,</span>
-        <span class="n">title</span><span class="o">=</span><span class="s2">"Degree-8 vs. Point-Mass Trajectory"</span>
-    <span class="p">)</span>
-
-    <span class="n">difference_ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
-
-    <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span>
-        <span class="s2">"Pines Gravity Model: Effect of EGM96 Harmonics"</span>
-    <span class="p">)</span>
-
-    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
-        <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="o">/</span> <span class="s2">"docs"</span>
-        <span class="o">/</span> <span class="s2">"_static"</span>
-        <span class="o">/</span> <span class="s2">"PinesGravity.svg"</span><span class="p">,</span>
-        <span class="nb">format</span><span class="o">=</span><span class="s2">"svg"</span><span class="p">,</span>
-        <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span>
-    <span class="p">)</span>
-
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<p>The complete Python implementation is included directly from the ASSET
+repository. This ensures that the code displayed here remains synchronized
+with the executable example.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">PinesGravity.py</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="linenos">  2</span><span class="sd">"""</span>
+<span class="linenos">  3</span><span class="sd">Example use of ASSET's Pines gravity kernel.</span>
+<span class="linenos">  4</span><span class="sd">"""</span>
+<span class="linenos">  5</span>
+<span class="linenos">  6</span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">lru_cache</span>
+<span class="linenos">  7</span>
+<span class="linenos">  8</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="linenos">  9</span><span class="kn">import</span><span class="w"> </span><span class="nn">asset_asrl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
+<span class="linenos"> 10</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="linenos"> 11</span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="linenos"> 12</span>
+<span class="linenos"> 13</span><span class="n">vf</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
+<span class="linenos"> 14</span><span class="n">oc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
+<span class="linenos"> 15</span><span class="n">astro</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Astro</span>
+<span class="linenos"> 16</span>
+<span class="linenos"> 17</span><span class="n">MU</span> <span class="o">=</span> <span class="mf">3.9860043543609598e5</span>
+<span class="linenos"> 18</span><span class="n">RE</span> <span class="o">=</span> <span class="mf">6378.1363</span>
+<span class="linenos"> 19</span>
+<span class="linenos"> 20</span><span class="n">COEFF_FILE</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="s2">"native"</span> <span class="o">/</span> <span class="s2">"data"</span> <span class="o">/</span> <span class="s2">"egm96.nor"</span><span class="p">)</span>
+<span class="linenos"> 21</span>
+<span class="linenos"> 22</span><span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="linenos"> 23</span><span class="k">def</span><span class="w"> </span><span class="nf">MakePines</span><span class="p">(</span><span class="n">degree</span><span class="p">):</span>
+<span class="linenos"> 24</span><span class="w">    </span><span class="sd">"""</span>
+<span class="linenos"> 25</span><span class="sd">    Build each gravity model once; coefficient parsing can take time.</span>
+<span class="linenos"> 26</span><span class="sd">    """</span>
+<span class="linenos"> 27</span>    <span class="k">return</span> <span class="n">astro</span><span class="o">.</span><span class="n">PinesGravity</span><span class="p">(</span><span class="n">COEFF_FILE</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">MU</span><span class="p">,</span> <span class="n">RE</span><span class="p">,</span> <span class="s2">"fully_normalized"</span><span class="p">)</span>
+<span class="linenos"> 28</span>
+<span class="linenos"> 29</span><span class="k">class</span><span class="w"> </span><span class="nc">PinesModel</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+<span class="linenos"> 30</span><span class="w">    </span><span class="sd">"""</span>
+<span class="linenos"> 31</span><span class="sd">    Two-body state dynamics using Pines gravity.</span>
+<span class="linenos"> 32</span>
+<span class="linenos"> 33</span><span class="sd">    The Pines model evaluates gravity at a body-fixed position. This simple</span>
+<span class="linenos"> 34</span><span class="sd">    example holds that frame fixed and does not model Earth rotation.</span>
+<span class="linenos"> 35</span><span class="sd">    """</span>
+<span class="linenos"> 36</span>
+<span class="linenos"> 37</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gravity</span><span class="p">):</span>
+<span class="linenos"> 38</span>        <span class="n">xvars</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="linenos"> 39</span>        <span class="n">args</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span><span class="p">(</span><span class="n">xvars</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="linenos"> 40</span>        <span class="n">position</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">head3</span><span class="p">()</span>
+<span class="linenos"> 41</span>        <span class="n">velocity</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">segment3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos"> 42</span>
+<span class="linenos"> 43</span>        <span class="n">acceleration</span> <span class="o">=</span> <span class="n">gravity</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>  <span class="c1"># Includes central gravity.</span>
+<span class="linenos"> 44</span>        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">velocity</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">])</span>
+<span class="linenos"> 45</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span> <span class="n">xvars</span><span class="p">)</span>
+<span class="linenos"> 46</span>
+<span class="linenos"> 47</span><span class="k">def</span><span class="w"> </span><span class="nf">make_earth_surface</span><span class="p">():</span>
+<span class="linenos"> 48</span>    <span class="c1"># If we had common plotting library, this would go in there</span>
+<span class="linenos"> 49</span>    <span class="n">longitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>
+<span class="linenos"> 50</span>    <span class="n">latitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="linenos"> 51</span>    <span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span><span class="p">)</span>
+<span class="linenos"> 52</span>
+<span class="linenos"> 53</span>    <span class="n">x</span> <span class="o">=</span> <span class="n">RE</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
+<span class="linenos"> 54</span>    <span class="n">y</span> <span class="o">=</span> <span class="n">RE</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
+<span class="linenos"> 55</span>    <span class="n">z</span> <span class="o">=</span> <span class="n">RE</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
+<span class="linenos"> 56</span>    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
+<span class="linenos"> 57</span>
+<span class="linenos"> 58</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<span class="linenos"> 59</span>    <span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">4510.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">3120.0</span><span class="p">,</span> <span class="mf">5230.0</span><span class="p">])</span>
+<span class="linenos"> 60</span>    <span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+<span class="linenos"> 61</span>    <span class="n">two_body</span> <span class="o">=</span> <span class="o">-</span><span class="n">MU</span> <span class="o">*</span> <span class="n">position</span> <span class="o">/</span> <span class="n">radius</span><span class="o">**</span><span class="mi">3</span>
+<span class="linenos"> 62</span>
+<span class="linenos"> 63</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Degree   |a| [km/s^2]       |a - a_2body| [km/s^2]"</span><span class="p">)</span>
+<span class="linenos"> 64</span>    <span class="k">for</span> <span class="n">degree</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">]:</span>
+<span class="linenos"> 65</span>        <span class="n">gravity</span> <span class="o">=</span> <span class="n">MakePines</span><span class="p">(</span><span class="n">degree</span><span class="p">)</span>
+<span class="linenos"> 66</span>        <span class="n">acceleration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gravity</span><span class="o">.</span><span class="n">acceleration</span><span class="p">(</span><span class="n">position</span><span class="p">))</span>
+<span class="linenos"> 67</span>        <span class="n">difference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">acceleration</span> <span class="o">-</span> <span class="n">two_body</span><span class="p">)</span>
+<span class="linenos"> 68</span>
+<span class="linenos"> 69</span>    <span class="c1"># Show that the Pines VectorFunction can also provide derivatives.</span>
+<span class="linenos"> 70</span>    <span class="n">gravity8</span> <span class="o">=</span> <span class="n">MakePines</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+<span class="linenos"> 71</span>    <span class="n">acceleration</span><span class="p">,</span> <span class="n">jacobian</span> <span class="o">=</span> <span class="n">gravity8</span><span class="o">.</span><span class="n">compute_jacobian</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+<span class="linenos"> 72</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Degree-8 acceleration [km/s^2]:"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">acceleration</span><span class="p">))</span>
+<span class="linenos"> 73</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Acceleration Jacobian [1/s^2]:</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">jacobian</span><span class="p">))</span>
+<span class="linenos"> 74</span>
+<span class="linenos"> 75</span>    <span class="c1"># Circular orbit initial state, inclined by 51.6 degrees.</span>
+<span class="linenos"> 76</span>    <span class="n">initial_radius</span> <span class="o">=</span> <span class="mf">7000.0</span>
+<span class="linenos"> 77</span>    <span class="n">initial_speed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">MU</span> <span class="o">/</span> <span class="n">initial_radius</span><span class="p">)</span>
+<span class="linenos"> 78</span>    <span class="n">inclination</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">51.6</span><span class="p">)</span>
+<span class="linenos"> 79</span>
+<span class="linenos"> 80</span>    <span class="n">initial_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+<span class="linenos"> 81</span>    <span class="n">initial_state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">initial_radius</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+<span class="linenos"> 82</span>    <span class="n">initial_state</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">initial_speed</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">inclination</span><span class="p">),</span> <span class="n">initial_speed</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">inclination</span><span class="p">)]</span>
+<span class="linenos"> 83</span>
+<span class="linenos"> 84</span>    <span class="n">period</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">initial_radius</span><span class="o">**</span><span class="mi">3</span> <span class="o">/</span> <span class="n">MU</span><span class="p">)</span>
+<span class="linenos"> 85</span>    <span class="n">final_time</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">*</span> <span class="n">period</span>
+<span class="linenos"> 86</span>
+<span class="linenos"> 87</span>    <span class="c1"># Integrate point-mass and degree-8 gravity models.</span>
+<span class="linenos"> 88</span>    <span class="n">trajectories</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="linenos"> 89</span>    <span class="k">for</span> <span class="n">degree</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">]:</span>
+<span class="linenos"> 90</span>        <span class="n">ode</span> <span class="o">=</span> <span class="n">PinesModel</span><span class="p">(</span><span class="n">MakePines</span><span class="p">(</span><span class="n">degree</span><span class="p">))</span>
+<span class="linenos"> 91</span>        <span class="n">integrator</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="mf">30.0</span><span class="p">)</span>
+<span class="linenos"> 92</span>        <span class="n">integrator</span><span class="o">.</span><span class="n">setAbsTol</span><span class="p">(</span><span class="mf">1.0e-8</span><span class="p">)</span>
+<span class="linenos"> 93</span>        <span class="n">trajectories</span><span class="p">[</span><span class="n">degree</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">integrator</span><span class="o">.</span><span class="n">integrate_dense</span><span class="p">(</span><span class="n">initial_state</span><span class="p">,</span> <span class="n">final_time</span><span class="p">,</span> <span class="mi">2000</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+<span class="linenos"> 94</span>
+<span class="linenos"> 95</span>    <span class="c1"># Degree-zero circular-orbit half-period check.</span>
+<span class="linenos"> 96</span>    <span class="n">ode0</span> <span class="o">=</span> <span class="n">PinesModel</span><span class="p">(</span><span class="n">MakePines</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="linenos"> 97</span>    <span class="n">integrator0</span> <span class="o">=</span> <span class="n">ode0</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="mf">30.0</span><span class="p">)</span>
+<span class="linenos"> 98</span>    <span class="n">integrator0</span><span class="o">.</span><span class="n">setAbsTol</span><span class="p">(</span><span class="mf">1.0e-8</span><span class="p">)</span>
+<span class="linenos"> 99</span>    <span class="n">half_period_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">integrator0</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">initial_state</span><span class="p">,</span> <span class="n">period</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">))</span>
+<span class="linenos">100</span>    <span class="n">half_period_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">half_period_state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">initial_state</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+<span class="linenos">101</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Half-period position error [km]: </span><span class="si">{</span><span class="n">half_period_error</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="linenos">102</span>
+<span class="linenos">103</span>    <span class="c1"># Difference between the two trajectories at matching output times.</span>
+<span class="linenos">104</span>    <span class="n">time_hours</span> <span class="o">=</span> <span class="n">trajectories</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">/</span> <span class="mf">3600.0</span>
+<span class="linenos">105</span>    <span class="n">position_difference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">trajectories</span><span class="p">[</span><span class="mi">8</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">trajectories</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,)</span>
+<span class="linenos">106</span>
+<span class="linenos">107</span>    <span class="c1"># Plot orbits in 3D with Earth for scale, plus the trajectory separation.</span>
+<span class="linenos">108</span>    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">constrained_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">109</span>    <span class="n">orbit_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s2">"3d"</span><span class="p">)</span>
+<span class="linenos">110</span>    <span class="n">difference_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="linenos">111</span>
+<span class="linenos">112</span>    <span class="n">earth_x</span><span class="p">,</span> <span class="n">earth_y</span><span class="p">,</span> <span class="n">earth_z</span> <span class="o">=</span> <span class="n">make_earth_surface</span><span class="p">()</span>
+<span class="linenos">113</span>    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span>
+<span class="linenos">114</span>        <span class="n">earth_x</span><span class="p">,</span>
+<span class="linenos">115</span>        <span class="n">earth_y</span><span class="p">,</span>
+<span class="linenos">116</span>        <span class="n">earth_z</span><span class="p">,</span>
+<span class="linenos">117</span>        <span class="n">color</span><span class="o">=</span><span class="s2">"steelblue"</span><span class="p">,</span>
+<span class="linenos">118</span>        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+<span class="linenos">119</span>        <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="linenos">120</span>        <span class="n">shade</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">121</span>
+<span class="linenos">122</span>    <span class="n">colors</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">"tab:blue"</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span> <span class="s2">"tab:orange"</span><span class="p">}</span>
+<span class="linenos">123</span>    <span class="k">for</span> <span class="n">degree</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">]:</span>
+<span class="linenos">124</span>        <span class="n">trajectory</span> <span class="o">=</span> <span class="n">trajectories</span><span class="p">[</span><span class="n">degree</span><span class="p">]</span>
+<span class="linenos">125</span>        <span class="n">orbit_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+<span class="linenos">126</span>            <span class="n">trajectory</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="linenos">127</span>            <span class="n">trajectory</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="linenos">128</span>            <span class="n">trajectory</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+<span class="linenos">129</span>            <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">degree</span><span class="p">],</span>
+<span class="linenos">130</span>            <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.6</span><span class="p">,</span>
+<span class="linenos">131</span>            <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Degree </span><span class="si">{</span><span class="n">degree</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="linenos">132</span>
+<span class="linenos">133</span>    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+<span class="linenos">134</span>        <span class="p">[</span><span class="n">initial_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+<span class="linenos">135</span>        <span class="p">[</span><span class="n">initial_state</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+<span class="linenos">136</span>        <span class="p">[</span><span class="n">initial_state</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span>
+<span class="linenos">137</span>        <span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span>
+<span class="linenos">138</span>        <span class="n">s</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span>
+<span class="linenos">139</span>        <span class="n">label</span><span class="o">=</span><span class="s2">"Start"</span><span class="p">)</span>
+<span class="linenos">140</span>
+<span class="linenos">141</span>    <span class="n">limit</span> <span class="o">=</span> <span class="mf">1.12</span> <span class="o">*</span> <span class="n">initial_radius</span>
+<span class="linenos">142</span>    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+<span class="linenos">143</span>        <span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">limit</span><span class="p">,</span> <span class="n">limit</span><span class="p">),</span>
+<span class="linenos">144</span>        <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">limit</span><span class="p">,</span> <span class="n">limit</span><span class="p">),</span>
+<span class="linenos">145</span>        <span class="n">zlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">limit</span><span class="p">,</span> <span class="n">limit</span><span class="p">),</span>
+<span class="linenos">146</span>        <span class="n">xlabel</span><span class="o">=</span><span class="s2">"X [km]"</span><span class="p">,</span>
+<span class="linenos">147</span>        <span class="n">ylabel</span><span class="o">=</span><span class="s2">"Y [km]"</span><span class="p">,</span>
+<span class="linenos">148</span>        <span class="n">zlabel</span><span class="o">=</span><span class="s2">"Z [km]"</span><span class="p">,</span>
+<span class="linenos">149</span>        <span class="n">title</span><span class="o">=</span><span class="s2">"Orbit Propagation"</span><span class="p">)</span>
+<span class="linenos">150</span>    
+<span class="linenos">151</span>    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">set_box_aspect</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="linenos">152</span>    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">view_init</span><span class="p">(</span><span class="n">elev</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">azim</span><span class="o">=</span><span class="mi">35</span><span class="p">)</span>
+<span class="linenos">153</span>    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"upper left"</span><span class="p">)</span>
+<span class="linenos">154</span>    <span class="n">orbit_ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="linenos">155</span>
+<span class="linenos">156</span>    <span class="n">difference_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+<span class="linenos">157</span>        <span class="n">time_hours</span><span class="p">,</span>
+<span class="linenos">158</span>        <span class="n">position_difference</span><span class="p">,</span>
+<span class="linenos">159</span>        <span class="n">color</span><span class="o">=</span><span class="s2">"tab:purple"</span><span class="p">,</span>
+<span class="linenos">160</span>        <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos">161</span>    
+<span class="linenos">162</span>    <span class="n">difference_ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+<span class="linenos">163</span>        <span class="p">[</span><span class="n">time_hours</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span>
+<span class="linenos">164</span>        <span class="p">[</span><span class="n">position_difference</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span>
+<span class="linenos">165</span>        <span class="n">color</span><span class="o">=</span><span class="s2">"tab:purple"</span><span class="p">,</span>
+<span class="linenos">166</span>        <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+<span class="linenos">167</span>        <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="linenos">168</span>
+<span class="linenos">169</span>    <span class="n">difference_ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+<span class="linenos">170</span>        <span class="n">xlabel</span><span class="o">=</span><span class="s2">"Time [hours]"</span><span class="p">,</span>
+<span class="linenos">171</span>        <span class="n">ylabel</span><span class="o">=</span><span class="s2">"Position Difference [km]"</span><span class="p">,</span>
+<span class="linenos">172</span>        <span class="n">title</span><span class="o">=</span><span class="s2">"Degree-8 vs. Point-Mass Trajectory"</span><span class="p">)</span>
+<span class="linenos">173</span>    
+<span class="linenos">174</span>    <span class="n">difference_ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="linenos">175</span>
+<span class="linenos">176</span>    <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">"Pines Gravity Model: Effect of EGM96 Harmonics"</span><span class="p">)</span>
+<span class="linenos">177</span>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
+</div>
 </div>
 </section>
 <section id="implementation-notes">

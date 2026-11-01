@@ -48,35 +48,11 @@ The constants used in this example are
    R_E &= 6378.1363 \;\mathrm{km}.
    \end{aligned}
 
-The gravity coefficients are read from the EGM96 coefficient file:
-
-.. code-block:: python
-
-   COEFF_FILE = str(
-       Path(__file__).resolve().parents[1]
-       / "native"
-       / "data"
-       / "egm96.nor"
-   )
+The gravity coefficients are read from the EGM96 coefficient file.
 
 The gravity model is constructed using :code:`astro.PinesGravity`, which
 accepts the coefficient file, maximum degree, gravitational parameter,
 reference radius, and coefficient normalization convention.
-
-.. code-block:: python
-
-   @lru_cache(maxsize=None)
-   def MakePines(degree):
-       """
-       Build each gravity model once; coefficient parsing can take time.
-       """
-       return astro.PinesGravity(
-           COEFF_FILE,
-           degree,
-           MU,
-           RE,
-           "fully_normalized"
-       )
 
 The :code:`lru_cache` decorator ensures that each requested gravity model is
 constructed only once. This avoids repeatedly parsing the coefficient file
@@ -119,25 +95,6 @@ The Pines gravity kernel is evaluated at spherical harmonic degrees
 while increasing the maximum degree includes additional spherical harmonic
 terms.
 
-.. code-block:: python
-
-   position = np.array([4510.0, -3120.0, 5230.0])
-   radius = np.linalg.norm(position)
-   two_body = -MU * position / radius**3
-
-   print("Degree   |a| [km/s^2]       |a - a_2body| [km/s^2]")
-
-   for degree in [0, 2, 8, 20]:
-       gravity = MakePines(degree)
-       acceleration = np.asarray(gravity.acceleration(position))
-       difference = np.linalg.norm(acceleration - two_body)
-
-       print(
-           f"{degree:6d}   "
-           f"{np.linalg.norm(acceleration):.12e}   "
-           f"{difference:.12e}"
-       )
-
 The acceleration magnitude and difference from the analytical point-mass
 solution provide a basic comparison of the gravity models. The difference
 measures the perturbing contribution relative to central gravity at the
@@ -170,24 +127,6 @@ For a position vector :math:`\mathbf{r}`, the acceleration Jacobian is
 This derivative describes how the gravitational acceleration changes with
 position and is useful for sensitivity analysis, variational equations, and
 gradient-based optimization.
-
-The degree-8 gravity model is used to demonstrate Jacobian evaluation:
-
-.. code-block:: python
-
-   gravity8 = MakePines(8)
-
-   acceleration, jacobian = gravity8.compute_jacobian(position)
-
-   print(
-       "\nDegree-8 acceleration [km/s^2]:",
-       np.asarray(acceleration)
-   )
-
-   print(
-       "Acceleration Jacobian [1/s^2]:\n",
-       np.asarray(jacobian)
-   )
 
 The :code:`compute_jacobian` method returns both the acceleration and its
 Jacobian with respect to the input position.
@@ -225,29 +164,7 @@ The equations of motion are
 The acceleration function includes central gravity and the selected
 spherical harmonic perturbations.
 
-The dynamics are implemented using :code:`oc.ODEBase`:
-
-.. code-block:: python
-
-   class PinesModel(oc.ODEBase):
-       """
-       Orbital state dynamics using Pines gravity.
-
-       The Pines model evaluates gravity at a body-fixed position. This simple
-       example holds that frame fixed and does not model Earth rotation.
-       """
-
-       def __init__(self, gravity):
-           xvars = 6
-           args = oc.ODEArguments(xvars, 0)
-
-           position = args.head3()
-           velocity = args.segment3(3)
-
-           acceleration = gravity(position)
-           ode = vf.stack([velocity, acceleration])
-
-           super().__init__(ode, xvars)
+The dynamics are implemented using :code:`oc.ODEBase`.
 
 The gravity model is passed directly into the dynamics constructor. This
 preserves the ASSET VectorFunction representation of the acceleration and
@@ -287,28 +204,6 @@ The initial position and velocity are
    \;\mathrm{km/s}.
    \end{aligned}
 
-The initial state is constructed in Python as follows:
-
-.. code-block:: python
-
-   initial_radius = 7000.0
-   initial_speed = np.sqrt(MU / initial_radius)
-   inclination = np.deg2rad(51.6)
-
-   initial_state = np.zeros(7)
-
-   initial_state[0:3] = [
-       initial_radius,
-       0.0,
-       0.0
-   ]
-
-   initial_state[3:6] = [
-       0.0,
-       initial_speed * np.cos(inclination),
-       initial_speed * np.sin(inclination)
-   ]
-
 The initial state contains seven entries because the integrator's trajectory
 output includes time as an additional variable. The ODE itself contains six
 state variables.
@@ -319,12 +214,7 @@ The orbital period of the corresponding point-mass circular orbit is
 
    T = 2\pi\sqrt{\frac{r_0^3}{\mu}}.
 
-The propagation duration is selected as ten orbital periods:
-
-.. code-block:: python
-
-   period = 2.0 * np.pi * np.sqrt(initial_radius**3 / MU)
-   final_time = 10.0 * period
+The propagation duration is selected as ten orbital periods.
 
 Orbit Propagation
 -----------------
@@ -336,24 +226,6 @@ Two gravity models are propagated using the same initial conditions:
 
 Both models use an ASSET integrator with a nominal integration step of
 30 seconds and an absolute tolerance of :math:`10^{-8}`.
-
-.. code-block:: python
-
-   trajectories = {}
-
-   for degree in [0, 8]:
-       ode = PinesModel(MakePines(degree))
-
-       integrator = ode.integrator(30.0)
-       integrator.setAbsTol(1.0e-8)
-
-       trajectories[degree] = np.asarray(
-           integrator.integrate_dense(
-               initial_state,
-               final_time,
-               2000
-           )
-       ).T
 
 The resulting trajectories contain position, velocity, and time histories.
 The two trajectories can therefore be compared at matching output times.
@@ -384,31 +256,6 @@ The position error is calculated as
    \mathbf{r}(0)
    \right\|.
 
-The implementation is
-
-.. code-block:: python
-
-   ode0 = PinesModel(MakePines(0))
-
-   integrator0 = ode0.integrator(30.0)
-   integrator0.setAbsTol(1.0e-8)
-
-   half_period_state = np.asarray(
-       integrator0.integrate(
-           initial_state,
-           period / 2.0
-       )
-   )
-
-   half_period_error = np.linalg.norm(
-       half_period_state[0:3] + initial_state[0:3]
-   )
-
-   print(
-       f"\nHalf-period position error [km]: "
-       f"{half_period_error:.3e}"
-   )
-
 This provides a basic numerical check of the degree-zero gravity propagation
 against the expected circular-orbit geometry.
 
@@ -430,17 +277,6 @@ calculated at each output time:
 
 where :math:`\mathbf{r}_{8}` is the degree-8 position and
 :math:`\mathbf{r}_{0}` is the point-mass position.
-
-The position difference is computed using
-
-.. code-block:: python
-
-   time_hours = trajectories[0][6] / 3600.0
-
-   position_difference = np.linalg.norm(
-       trajectories[8][0:3] - trajectories[0][0:3],
-       axis=0
-   )
 
 The comparison illustrates the accumulated trajectory separation caused by
 the spherical harmonic perturbations included in the degree-8 model.
@@ -475,293 +311,20 @@ The surface is constructed from longitude and latitude coordinates:
 
 where :math:`\phi` is latitude and :math:`\lambda` is longitude.
 
-.. code-block:: python
-
-   def make_earth_surface():
-       longitude = np.linspace(0.0, 2.0 * np.pi, 40)
-       latitude = np.linspace(-np.pi / 2.0, np.pi / 2.0, 20)
-
-       longitude, latitude = np.meshgrid(longitude, latitude)
-
-       x = RE * np.cos(latitude) * np.cos(longitude)
-       y = RE * np.cos(latitude) * np.sin(longitude)
-       z = RE * np.sin(latitude)
-
-       return x, y, z
-
 The resulting surface is plotted with partial transparency so that both
 orbital trajectories remain visible.
 
 Full Code
 ---------
 
-The complete example is shown below.
+The complete Python implementation is included directly from the ASSET
+repository. This ensures that the code displayed here remains synchronized
+with the executable example.
 
-.. code-block:: python
-
-   # -*- coding: utf-8 -*-
-   """
-   Example use of ASSET's Pines gravity kernel.
-   """
-
-   from functools import lru_cache
-   from pathlib import Path
-
-   import numpy as np
-   import asset_asrl as ast
-   import matplotlib.pyplot as plt
-
-   vf = ast.VectorFunctions
-   oc = ast.OptimalControl
-   astro = ast.Astro
-
-   MU = 3.9860043543609598e5
-   RE = 6378.1363
-
-   COEFF_FILE = str(
-       Path(__file__).resolve().parents[1]
-       / "native"
-       / "data"
-       / "egm96.nor"
-   )
-
-   @lru_cache(maxsize=None)
-   def MakePines(degree):
-       """
-       Build each gravity model once; coefficient parsing can take time.
-       """
-       return astro.PinesGravity(
-           COEFF_FILE,
-           degree,
-           MU,
-           RE,
-           "fully_normalized"
-       )
-
-   class PinesModel(oc.ODEBase):
-       """
-       Orbital state dynamics using Pines gravity.
-
-       The Pines model evaluates gravity at a body-fixed position. This simple
-       example holds that frame fixed and does not model Earth rotation.
-       """
-
-       def __init__(self, gravity):
-           xvars = 6
-           args = oc.ODEArguments(xvars, 0)
-
-           position = args.head3()
-           velocity = args.segment3(3)
-
-           acceleration = gravity(position)
-           ode = vf.stack([velocity, acceleration])
-
-           super().__init__(ode, xvars)
-
-   def make_earth_surface():
-       longitude = np.linspace(0.0, 2.0 * np.pi, 40)
-       latitude = np.linspace(-np.pi / 2.0, np.pi / 2.0, 20)
-       longitude, latitude = np.meshgrid(longitude, latitude)
-
-       x = RE * np.cos(latitude) * np.cos(longitude)
-       y = RE * np.cos(latitude) * np.sin(longitude)
-       z = RE * np.sin(latitude)
-
-       return x, y, z
-
-   if __name__ == "__main__":
-
-       position = np.array([4510.0, -3120.0, 5230.0])
-       radius = np.linalg.norm(position)
-       two_body = -MU * position / radius**3
-
-       print("Degree   |a| [km/s^2]       |a - a_2body| [km/s^2]")
-
-       for degree in [0, 2, 8, 20]:
-           gravity = MakePines(degree)
-           acceleration = np.asarray(gravity.acceleration(position))
-           difference = np.linalg.norm(acceleration - two_body)
-
-           print(
-               f"{degree:6d}   "
-               f"{np.linalg.norm(acceleration):.12e}   "
-               f"{difference:.12e}"
-           )
-
-       # Show that the Pines VectorFunction can also provide derivatives.
-       gravity8 = MakePines(8)
-       acceleration, jacobian = gravity8.compute_jacobian(position)
-
-       print(
-           "\nDegree-8 acceleration [km/s^2]:",
-           np.asarray(acceleration)
-       )
-
-       print(
-           "Acceleration Jacobian [1/s^2]:\n",
-           np.asarray(jacobian)
-       )
-
-       # Circular orbit initial state, inclined by 51.6 degrees.
-       initial_radius = 7000.0
-       initial_speed = np.sqrt(MU / initial_radius)
-       inclination = np.deg2rad(51.6)
-
-       initial_state = np.zeros(7)
-       initial_state[0:3] = [initial_radius, 0.0, 0.0]
-
-       initial_state[3:6] = [
-           0.0,
-           initial_speed * np.cos(inclination),
-           initial_speed * np.sin(inclination)
-       ]
-
-       period = 2.0 * np.pi * np.sqrt(initial_radius**3 / MU)
-       final_time = 10.0 * period
-
-       # Integrate point-mass and degree-8 gravity models.
-       trajectories = {}
-
-       for degree in [0, 8]:
-           ode = PinesModel(MakePines(degree))
-           integrator = ode.integrator(30.0)
-           integrator.setAbsTol(1.0e-8)
-
-           trajectories[degree] = np.asarray(
-               integrator.integrate_dense(
-                   initial_state,
-                   final_time,
-                   2000
-               )
-           ).T
-
-       # Degree-zero circular-orbit half-period check.
-       ode0 = PinesModel(MakePines(0))
-       integrator0 = ode0.integrator(30.0)
-       integrator0.setAbsTol(1.0e-8)
-
-       half_period_state = np.asarray(
-           integrator0.integrate(
-               initial_state,
-               period / 2.0
-           )
-       )
-
-       half_period_error = np.linalg.norm(
-           half_period_state[0:3] + initial_state[0:3]
-       )
-
-       print(
-           f"\nHalf-period position error [km]: "
-           f"{half_period_error:.3e}"
-       )
-
-       # Difference between the two trajectories at matching output times.
-       time_hours = trajectories[0][6] / 3600.0
-
-       position_difference = np.linalg.norm(
-           trajectories[8][0:3] - trajectories[0][0:3],
-           axis=0
-       )
-
-       # Plot orbits in 3D with Earth for scale, plus trajectory separation.
-       fig = plt.figure(figsize=(13, 6), constrained_layout=True)
-
-       orbit_ax = fig.add_subplot(1, 2, 1, projection="3d")
-       difference_ax = fig.add_subplot(1, 2, 2)
-
-       earth_x, earth_y, earth_z = make_earth_surface()
-
-       orbit_ax.plot_surface(
-           earth_x,
-           earth_y,
-           earth_z,
-           color="steelblue",
-           alpha=0.25,
-           linewidth=0,
-           shade=True
-       )
-
-       colors = {
-           0: "tab:blue",
-           8: "tab:orange"
-       }
-
-       for degree in [0, 8]:
-           trajectory = trajectories[degree]
-
-           orbit_ax.plot(
-               trajectory[0],
-               trajectory[1],
-               trajectory[2],
-               color=colors[degree],
-               linewidth=1.6,
-               label=f"Degree {degree}"
-           )
-
-       orbit_ax.scatter(
-           [initial_state[0]],
-           [initial_state[1]],
-           [initial_state[2]],
-           color="black",
-           s=24,
-           label="Start"
-       )
-
-       limit = 1.12 * initial_radius
-
-       orbit_ax.set(
-           xlim=(-limit, limit),
-           ylim=(-limit, limit),
-           zlim=(-limit, limit),
-           xlabel="X [km]",
-           ylabel="Y [km]",
-           zlabel="Z [km]",
-           title="Orbit Propagation"
-       )
-
-       orbit_ax.set_box_aspect((1, 1, 1))
-       orbit_ax.view_init(elev=25, azim=35)
-       orbit_ax.legend(loc="upper left")
-       orbit_ax.grid(True, alpha=0.3)
-
-       difference_ax.plot(
-           time_hours,
-           position_difference,
-           color="tab:purple",
-           linewidth=2
-       )
-
-       difference_ax.scatter(
-           [time_hours[-1]],
-           [position_difference[-1]],
-           color="tab:purple",
-           s=30,
-           zorder=3
-       )
-
-       difference_ax.set(
-           xlabel="Time [hours]",
-           ylabel="Position Difference [km]",
-           title="Degree-8 vs. Point-Mass Trajectory"
-       )
-
-       difference_ax.grid(True, alpha=0.3)
-
-       fig.suptitle(
-           "Pines Gravity Model: Effect of EGM96 Harmonics"
-       )
-
-       fig.savefig(
-           Path(__file__).resolve().parents[1]
-           / "docs"
-           / "_static"
-           / "PinesGravity.svg",
-           format="svg",
-           bbox_inches="tight"
-       )
-
-       plt.show()
+.. literalinclude:: ../../examples/PinesGravity.py
+   :language: python
+   :linenos:
+   :caption: PinesGravity.py
 
 Implementation Notes
 --------------------
