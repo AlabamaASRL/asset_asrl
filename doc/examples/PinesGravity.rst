@@ -317,9 +317,7 @@ orbital trajectories remain visible.
 Full Code
 ---------
 
-The complete Python implementation is included directly from the ASSET
-repository. This ensures that the code displayed here remains synchronized
-with the executable example.
+The complete Python implementation is included below.
 
 .. literalinclude:: ../../examples/PinesGravity.py
    :language: python
