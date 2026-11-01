@@ -9,6 +9,7 @@
 #include "PinesGravityModel.h"
 #include "VectorFunctions/ASSET_VectorFunctions.h"
 #include "pch.h"
+#include "GravityCoefficientReader.h"
 
 
 namespace ASSET {
