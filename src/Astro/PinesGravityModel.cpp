@@ -38,12 +38,6 @@ PinesGravityModel::PinesGravityModel(
       reference_radius_(reference_radius),
       coefficient_file_(coefficient_file) {
 
-    // Validate the requested spherical-harmonic degree.
-    if (degree_ < 0 || degree_ > 360) {
-        throw std::invalid_argument(
-            "PinesGravity degree must be in [0, 360]");
-    }
-
     // Validate the fallback gravitational parameter and reference radius.
     // These values are used when the coefficient file has no metadata.
     if (!std::isfinite(mu_) || mu_ <= 0.0 ||
