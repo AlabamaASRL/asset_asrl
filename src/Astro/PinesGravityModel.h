@@ -180,30 +180,34 @@ class PinesGravityModel {
     Scalar sum3 = Scalar(0.0);
     Scalar sum4 = Scalar(0.0);
 
+    Scalar* const ap = a;
+
     for (int n = 0; n <= degree_; ++n) {
       const int k = n + 1;
 
+      // Row bases: index(n, m) == row_base + m, so rows are addressed
+      // directly instead of recomputing triangular indices.
+      const std::size_t row_k = index(k, 0);
+      const std::size_t row_km1 = index(k - 1, 0);
+      Scalar* const ak = ap + row_k;
+      const Scalar* const akm1 = ap + row_km1;
+      const Scalar* const akm2 = (k >= 2) ? ap + index(k - 2, 0) : ap;
+      const double* const gk = g_.data() + row_k;
+      const double* const hk = h_.data() + row_k;
+
       // Construct the normalized Legendre recurrence row required for
       // degree n's acceleration terms.
-      const std::size_t kk = index(k, k);
-      const std::size_t prev_diag = index(k - 1, k - 1);
+      const Scalar prev_diag = akm1[k - 1];
 
       // Diagonal term.
-      a[kk] = Scalar(diagonal_[k]) * a[prev_diag];
+      ak[k] = Scalar(diagonal_[k]) * prev_diag;
 
       // Adjacent-order term.
-      a[index(k, k - 1)] =
-          zhat * Scalar(superdiagonal_[k - 1]) * a[prev_diag];
+      ak[k - 1] = zhat * Scalar(superdiagonal_[k - 1]) * prev_diag;
 
       // Remaining orders depend on the preceding two degree rows.
       for (int m = 0; m <= k - 2; ++m) {
-        const std::size_t current = index(k, m);
-        const std::size_t previous = index(k - 1, m);
-        const std::size_t previous2 = index(k - 2, m);
-
-        a[current] =
-            Scalar(g_[current]) * zhat * a[previous] -
-            Scalar(h_[current]) * a[previous2];
+        ak[m] = Scalar(gk[m]) * zhat * akm1[m] - Scalar(hk[m]) * akm2[m];
       }
 
       Scalar term1 = Scalar(0.0);
@@ -211,38 +215,33 @@ class PinesGravityModel {
       Scalar term3 = Scalar(0.0);
       Scalar term4 = Scalar(0.0);
 
-      const std::size_t row_start = index(n, 0);
+      const std::size_t row_n = index(n, 0);
 
-      // Cache coefficient row bases. The coefficient arrays share the
-      // same triangular indexing convention.
-      const double* const c_row = c_.data() + row_start;
-      const double* const s_row = s_.data() + row_start;
-      const double* const alpha_row = alpha_.data() + row_start;
-      const double* const beta_row = beta_.data() + row_start;
+      // Row pointers for degree n. Coefficient arrays share the triangular
+      // indexing convention, so element m of row n is at row_n + m.
+      const double* const cn = c_.data() + row_n;
+      const double* const sn = s_.data() + row_n;
+      const double* const alphan = alpha_.data() + row_n;
+      const double* const betan = beta_.data() + row_n;
+      const Scalar* const an = ap + row_n;
+      const Scalar* const rep = re;
+      const Scalar* const imp = im;
 
       for (int m = 0; m <= n; ++m) {
-        const std::size_t j =
-            row_start + static_cast<std::size_t>(m);
-
-        const Scalar cm = Scalar(c_[j]);
-        const Scalar sm = Scalar(s_[j]);
+        // cn/sn already include the sqrt(2) factor (see constructor).
+        const Scalar cm = Scalar(cn[m]);
+        const Scalar sm = Scalar(sn[m]);
 
         // Harmonic coefficient contribution for order m.
-        const Scalar d =
-            Scalar(sqrt_two) * (cm * re[m] + sm * im[m]);
+        const Scalar d = cm * rep[m] + sm * imp[m];
 
         if (m > 0) {
           // Order-dependent contributions for the first two sums.
-          const Scalar e =
-              Scalar(sqrt_two) *
-              (cm * re[m - 1] + sm * im[m - 1]);
+          const Scalar e = cm * rep[m - 1] + sm * imp[m - 1];
 
-          const Scalar f =
-              Scalar(sqrt_two) *
-              (sm * re[m - 1] - cm * im[m - 1]);
+          const Scalar f = sm * rep[m - 1] - cm * imp[m - 1];
 
-          const Scalar weighted =
-              a[j] * Scalar(m);
+          const Scalar weighted = an[m] * Scalar(m);
 
           term1 += weighted * e;
           term2 += weighted * f;
@@ -250,15 +249,11 @@ class PinesGravityModel {
 
         if (m < n) {
           // Contribution coupling the current order to order m + 1.
-          term3 +=
-              Scalar(alpha_[j]) *
-              a[index(n, m + 1)] * d;
+          term3 += Scalar(alphan[m]) * an[m + 1] * d;
         }
 
-        // Contribution coupling to the next degree row.
-        term4 +=
-            Scalar(beta_[j]) *
-            a[index(n + 1, m + 1)] * d;
+        // Contribution coupling to the next degree row (row k).
+        term4 += Scalar(betan[m]) * ak[m + 1] * d;
       }
 
       // Apply radial scaling to the accumulated degree contributions.
