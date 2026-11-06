@@ -1,0 +1,1114 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Multi-Spacecraft Optimization" href="MultiTarg.html"><link rel="prev" title="Hyper-Sensitive Optimal Control Problem" href="HyperSensitive.html">
+        <link rel="prefetch" href="../_static/ASSETLOGO.svg" as="image">
+
+    <!-- Generated with Sphinx 9.1.1 and Furo 2025.12.19 -->
+        <title>Minimum-Time Hypersonic Glide Intercept - ASSET 0.5.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: red;
+  --color-brand-content: #CC3333;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">ASSET 0.5.2 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="../_static/ASSETLOGO.svg" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">ASSET 0.5.2 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/tutorials.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/Install.html">Installing ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/VectorFunctionGuide.html">Vector Function Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/ODEGuide.html">ODE Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/IntegratorGuide.html">Integrator Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/PhaseGuide.html">Optimal Control Phase Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlProblem.html">Optimal Control Problem Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/PSIOPT.html">PSIOPT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/AutoMeshGuide.html">Adaptive Mesh Refinement Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/NewInterface.html">Interface Enhancements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/OptimalControlUtilites.html">Optimal Control Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="examples.html">Examples</a><input aria-label="Toggle navigation of Examples" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="CartPole.html">Cart-Pole Swing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Delta3.html">Delta 3 Multi-phase GTO Transfer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HyperSensitive.html">Hyper-Sensitive Optimal Control Problem</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Minimum-Time Hypersonic Glide Intercept</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MultiTarg.html">Multi-Spacecraft Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OrbitContinuation.html">Orbit Family Continuation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ParallelParking.html">Parallel Parking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PinesGravity.html">Pines Gravity Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ReentryExample.html">Space Shuttle Reentry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelo.html">Zermelo’s Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zermelolink.html">Multi-Phase Zermelo’s Problem</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../python/python.html">Python Library Documentation</a><input aria-label="Toggle navigation of Python Library Documentation" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../python/asset.html">ASSET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/optimalcontrol.html">Optimal Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/vectorfunctions.html">Vector Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python/Astro.html">ASSET Astro Library</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Installation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Python: Installing ASSET</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contrib.html">Guidelines for Contributing</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/examples/HypersonicIntercept.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="minimum-time-hypersonic-glide-intercept">
+<h1>Minimum-Time Hypersonic Glide Intercept<a class="headerlink" href="#minimum-time-hypersonic-glide-intercept" title="Link to this heading">¶</a></h1>
+<p>In this example, we compute the minimum-time interception trajectory for a powered interceptor engaging an unpowered hypersonic glide vehicle (HGV) in a vertical plane. The interceptor launches from sea level and attempts to intercept the HGV while satisfying a prescribed terminal flight-path angle.</p>
+<p>The interceptor is modeled as a powered point-mass vehicle with aerodynamic lift and drag. The HGV is modeled as an unpowered point-mass vehicle with a prescribed time-varying angle of attack. Both vehicles are propagated simultaneously using a common time variable.</p>
+<p>The combined state and control vectors are defined as</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\vec{X} =
+[x_I,h_I,v_I,\gamma_I,m_I,x_T,h_T,v_T,\gamma_T]^T\\\quad \quad\\\vec{U} = [\alpha_I,\delta]\end{aligned}\end{align} \]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(x\)</span> is downrange position, <span class="math notranslate nohighlight">\(h\)</span> is altitude, <span class="math notranslate nohighlight">\(v\)</span> is velocity magnitude, <span class="math notranslate nohighlight">\(\gamma\)</span> is flight-path angle, <span class="math notranslate nohighlight">\(m_I\)</span> is interceptor mass, <span class="math notranslate nohighlight">\(\alpha_I\)</span> is interceptor angle of attack, and <span class="math notranslate nohighlight">\(\delta\)</span> is throttle.</p>
+<p>The subscripts <span class="math notranslate nohighlight">\(I\)</span> and <span class="math notranslate nohighlight">\(T\)</span> denote the interceptor and target, respectively. The resulting system consists of nine state equations and two interceptor control inputs.</p>
+<p>The equations of motion for either vehicle are based on the point-mass equations</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\dot{x} = v\cos(\gamma)\\\dot{h} = v\sin(\gamma)\\\dot{v} =
+\frac{T\cos(\alpha)-D}{m}
+-g\sin(\gamma)\\\dot{\gamma} =
+\frac{L+T\sin(\alpha)}{mv}
+-\frac{g\cos(\gamma)}{v}\end{aligned}\end{align} \]</div>
+</div>
+<p>For the interceptor, the mass flow rate is determined by the propulsion system specific impulse.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\dot{m}_I = -\frac{T}{I_{sp}g_0}\]</div>
+</div>
+<p>The HGV is unpowered, so its thrust and mass flow rate are zero. Its angle of attack is prescribed as a time-varying maneuver.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\alpha_T(t) =
+\alpha_{T,0}+A_T\sin(\omega_T t)\]</div>
+</div>
+<p>The aerodynamic forces are calculated using dynamic pressure and the vehicle aerodynamic coefficients.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}q = \frac{1}{2}\rho v^2\\\quad \quad\\L = qSC_L\\\quad \quad\\D = qSC_D\end{aligned}\end{align} \]</div>
+</div>
+<p>The atmospheric density is modeled using an exponential atmosphere.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\rho(h) = \rho_0\exp\left(-\frac{h}{H}\right)\]</div>
+</div>
+<p>The interceptor thrust is controlled through the throttle command.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[T_I = \delta T_{\max}\]</div>
+</div>
+<p>The throttle is bounded between zero and one, while interceptor angle of attack is constrained by the prescribed control limits.</p>
+<p>The interception problem is formulated as a minimum-time optimal-control problem. The objective is to minimize the final time required for the interceptor to reach the HGV.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[J = t_f\]</div>
+</div>
+<p>The initial interceptor and HGV conditions are specified independently. The interceptor begins at sea level with an initial ascending flight-path angle, while the HGV begins at a prescribed downrange distance and altitude with hypersonic velocity.</p>
+<p>Interception is enforced by requiring the interceptor and HGV to occupy the same position at the final time.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}x_I(t_f) = x_T(t_f)\\\quad \quad\\h_I(t_f) = h_T(t_f)\end{aligned}\end{align} \]</div>
+</div>
+<p>The interceptor terminal flight-path angle is also prescribed. To examine the effect of terminal geometry on the optimized engagement, the problem is solved for three different terminal flight-path angles.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\gamma_I(t_f) \in
+\{-30^\circ,-40^\circ,-50^\circ\}\]</div>
+</div>
+<p>The resulting trajectories provide a comparison of minimum-time engagement solutions under different terminal flight-path-angle requirements.</p>
+<p>The combined interceptor-target dynamics are implemented as an ASSET ODE. The ODE uses nine state variables and two control variables, with time as the independent variable. An ASSET phase is then constructed with the initial conditions, terminal interception constraints, control bounds, and minimum-time objective.</p>
+<p>The initial trajectory is generated using an initial guess for the interceptor and target trajectories. The ASSET optimizer then determines the control history and final time that satisfy the interception constraints.</p>
+<p>The optimized trajectories are plotted and animated to compare the three terminal-angle cases. The figure shows the resulting engagement trajectories, while the animation displays all cases on a common time axis. Each case remains at its terminal position after completing its interception, allowing the remaining cases to continue.</p>
+<p>The trajectory comparison and synchronized animation are shown below.</p>
+<a class="reference internal image-reference" href="examples/HGV_Interceptor.png"><img alt="examples/HGV_Interceptor.png" src="examples/HGV_Interceptor.png" style="width: 100%;" />
+</a>
+<a class="reference internal image-reference" href="examples/HGV_Interceptor.gif"><img alt="examples/HGV_Interceptor.gif" src="examples/HGV_Interceptor.gif" style="width: 100%;" />
+</a>
+<section id="full-code">
+<h2>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h2>
+<p>The complete Python implementation is included below.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">HypersonicIntercept.py</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="linenos">  2</span><span class="sd">"""</span>
+<span class="linenos">  3</span><span class="sd">Minimum-Time Hypersonic Glide Vehicle Intercept</span>
+<span class="linenos">  4</span>
+<span class="linenos">  5</span><span class="sd">Models a powered interceptor engaging an unpowered hypersonic glide vehicle</span>
+<span class="linenos">  6</span><span class="sd">(HGV) in a vertical plane.</span>
+<span class="linenos">  7</span><span class="sd">"""</span>
+<span class="linenos">  8</span>
+<span class="linenos">  9</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="linenos"> 10</span><span class="kn">import</span><span class="w"> </span><span class="nn">asset_asrl</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ast</span>
+<span class="linenos"> 11</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="linenos"> 12</span><span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.animation</span><span class="w"> </span><span class="kn">import</span> <span class="n">FuncAnimation</span><span class="p">,</span> <span class="n">PillowWriter</span>
+<span class="linenos"> 13</span>
+<span class="linenos"> 14</span><span class="c1">#%% ASSET Imports</span>
+<span class="linenos"> 15</span>
+<span class="linenos"> 16</span><span class="n">vf</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">VectorFunctions</span>
+<span class="linenos"> 17</span><span class="n">oc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">OptimalControl</span>
+<span class="linenos"> 18</span><span class="n">ODEArgs</span> <span class="o">=</span> <span class="n">oc</span><span class="o">.</span><span class="n">ODEArguments</span>
+<span class="linenos"> 19</span><span class="n">Args</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">Arguments</span>
+<span class="linenos"> 20</span>
+<span class="linenos"> 21</span><span class="c1">#%% University of Alabama Plot Styling</span>
+<span class="linenos"> 22</span>
+<span class="linenos"> 23</span><span class="n">ALABAMA_CRIMSON</span> <span class="o">=</span> <span class="s2">"#9E1B32"</span>
+<span class="linenos"> 24</span><span class="n">LIGHT_CRIMSON</span> <span class="o">=</span> <span class="s2">"#C64B62"</span>
+<span class="linenos"> 25</span><span class="n">PALE_CRIMSON</span> <span class="o">=</span> <span class="s2">"#E18A9A"</span>
+<span class="linenos"> 26</span><span class="n">LIGHT_GRAY</span> <span class="o">=</span> <span class="s2">"#E6E6E6"</span>
+<span class="linenos"> 27</span><span class="n">MUTED_GRAY</span> <span class="o">=</span> <span class="s2">"#A8A8A8"</span>
+<span class="linenos"> 28</span><span class="n">BACKGROUND</span> <span class="o">=</span> <span class="s2">"#111111"</span>
+<span class="linenos"> 29</span><span class="n">PANEL_BACKGROUND</span> <span class="o">=</span> <span class="s2">"#1B1B1B"</span>
+<span class="linenos"> 30</span><span class="n">GRID_COLOR</span> <span class="o">=</span> <span class="s2">"#555555"</span>
+<span class="linenos"> 31</span><span class="n">TEXT_COLOR</span> <span class="o">=</span> <span class="s2">"#F2F2F2"</span>
+<span class="linenos"> 32</span>
+<span class="linenos"> 33</span><span class="n">CASE_COLORS</span> <span class="o">=</span> <span class="p">[</span><span class="n">ALABAMA_CRIMSON</span><span class="p">,</span> <span class="n">LIGHT_CRIMSON</span><span class="p">,</span> <span class="n">PALE_CRIMSON</span><span class="p">]</span>
+<span class="linenos"> 34</span><span class="n">HGV_COLOR</span> <span class="o">=</span> <span class="n">LIGHT_GRAY</span>
+<span class="linenos"> 35</span><span class="n">GROUND_COLOR</span> <span class="o">=</span> <span class="n">MUTED_GRAY</span>
+<span class="linenos"> 36</span>
+<span class="linenos"> 37</span><span class="n">FIGURE_DPI</span> <span class="o">=</span> <span class="mi">300</span>
+<span class="linenos"> 38</span><span class="n">FIGURE_SIZE</span> <span class="o">=</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="linenos"> 39</span>
+<span class="linenos"> 40</span><span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<span class="linenos"> 41</span>    <span class="s2">"figure.facecolor"</span><span class="p">:</span> <span class="n">BACKGROUND</span><span class="p">,</span>
+<span class="linenos"> 42</span>    <span class="s2">"axes.facecolor"</span><span class="p">:</span> <span class="n">PANEL_BACKGROUND</span><span class="p">,</span>
+<span class="linenos"> 43</span>    <span class="s2">"axes.edgecolor"</span><span class="p">:</span> <span class="n">MUTED_GRAY</span><span class="p">,</span>
+<span class="linenos"> 44</span>    <span class="s2">"axes.labelcolor"</span><span class="p">:</span> <span class="n">TEXT_COLOR</span><span class="p">,</span>
+<span class="linenos"> 45</span>    <span class="s2">"axes.titlecolor"</span><span class="p">:</span> <span class="n">TEXT_COLOR</span><span class="p">,</span>
+<span class="linenos"> 46</span>    <span class="s2">"xtick.color"</span><span class="p">:</span> <span class="n">TEXT_COLOR</span><span class="p">,</span>
+<span class="linenos"> 47</span>    <span class="s2">"ytick.color"</span><span class="p">:</span> <span class="n">TEXT_COLOR</span><span class="p">,</span>
+<span class="linenos"> 48</span>    <span class="s2">"text.color"</span><span class="p">:</span> <span class="n">TEXT_COLOR</span><span class="p">,</span>
+<span class="linenos"> 49</span>    <span class="s2">"legend.facecolor"</span><span class="p">:</span> <span class="n">PANEL_BACKGROUND</span><span class="p">,</span>
+<span class="linenos"> 50</span>    <span class="s2">"legend.edgecolor"</span><span class="p">:</span> <span class="n">MUTED_GRAY</span><span class="p">,</span>
+<span class="linenos"> 51</span>    <span class="s2">"grid.color"</span><span class="p">:</span> <span class="n">GRID_COLOR</span><span class="p">,</span>
+<span class="linenos"> 52</span>    <span class="s2">"font.family"</span><span class="p">:</span> <span class="s2">"DejaVu Sans"</span><span class="p">,</span>
+<span class="linenos"> 53</span>    <span class="s2">"font.size"</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
+<span class="linenos"> 54</span>    <span class="s2">"savefig.facecolor"</span><span class="p">:</span> <span class="n">BACKGROUND</span><span class="p">,</span>
+<span class="linenos"> 55</span>    <span class="s2">"savefig.dpi"</span><span class="p">:</span> <span class="n">FIGURE_DPI</span>
+<span class="linenos"> 56</span><span class="p">})</span>
+<span class="linenos"> 57</span>
+<span class="linenos"> 58</span>
+<span class="linenos"> 59</span><span class="k">def</span><span class="w"> </span><span class="nf">style_axis</span><span class="p">(</span><span class="n">ax</span><span class="p">):</span>
+<span class="linenos"> 60</span>    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="linenos"> 61</span>    <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">colors</span><span class="o">=</span><span class="n">TEXT_COLOR</span><span class="p">)</span>
+<span class="linenos"> 62</span>    <span class="k">for</span> <span class="n">spine</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+<span class="linenos"> 63</span>        <span class="n">spine</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">MUTED_GRAY</span><span class="p">)</span>
+<span class="linenos"> 64</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_axisbelow</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 65</span>
+<span class="linenos"> 66</span>
+<span class="linenos"> 67</span><span class="k">def</span><span class="w"> </span><span class="nf">style_legend</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="linenos"> 68</span>    <span class="n">legend</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="linenos"> 69</span>    <span class="k">if</span> <span class="n">legend</span><span class="p">:</span>
+<span class="linenos"> 70</span>        <span class="n">legend</span><span class="o">.</span><span class="n">get_frame</span><span class="p">()</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mf">0.95</span><span class="p">)</span>
+<span class="linenos"> 71</span>        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">legend</span><span class="o">.</span><span class="n">get_texts</span><span class="p">():</span>
+<span class="linenos"> 72</span>            <span class="n">item</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">TEXT_COLOR</span><span class="p">)</span>
+<span class="linenos"> 73</span>    <span class="k">return</span> <span class="n">legend</span>
+<span class="linenos"> 74</span>
+<span class="linenos"> 75</span><span class="c1">#%% Constants</span>
+<span class="linenos"> 76</span><span class="n">G0</span> <span class="o">=</span> <span class="mf">9.80665</span>
+<span class="linenos"> 77</span><span class="n">RHO0</span> <span class="o">=</span> <span class="mf">1.225</span>
+<span class="linenos"> 78</span><span class="n">ATMOSPHERE_SCALE_HEIGHT</span> <span class="o">=</span> <span class="mf">7200.0</span>
+<span class="linenos"> 79</span>
+<span class="linenos"> 80</span>
+<span class="linenos"> 81</span><span class="k">def</span><span class="w"> </span><span class="nf">atmospheric_density</span><span class="p">(</span><span class="n">altitude</span><span class="p">):</span>
+<span class="linenos"> 82</span><span class="w">    </span><span class="sd">"""Return exponential-atmosphere density in kg/m^3."""</span>
+<span class="linenos"> 83</span>    <span class="k">return</span> <span class="n">RHO0</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">altitude</span> <span class="o">/</span> <span class="n">ATMOSPHERE_SCALE_HEIGHT</span><span class="p">)</span>
+<span class="linenos"> 84</span>
+<span class="linenos"> 85</span>
+<span class="linenos"> 86</span><span class="k">def</span><span class="w"> </span><span class="nf">atmospheric_density_numpy</span><span class="p">(</span><span class="n">altitude</span><span class="p">):</span>
+<span class="linenos"> 87</span><span class="w">    </span><span class="sd">"""Return exponential-atmosphere density using NumPy."""</span>
+<span class="linenos"> 88</span>    <span class="k">return</span> <span class="n">RHO0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">altitude</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">ATMOSPHERE_SCALE_HEIGHT</span><span class="p">)</span>
+<span class="linenos"> 89</span>
+<span class="linenos"> 90</span><span class="c1">#%% Interceptor Configuration</span>
+<span class="linenos"> 91</span><span class="n">T_MAX</span> <span class="o">=</span> <span class="mf">80.0e3</span>
+<span class="linenos"> 92</span><span class="n">ISP</span> <span class="o">=</span> <span class="mf">250.0</span>
+<span class="linenos"> 93</span>
+<span class="linenos"> 94</span><span class="n">S_INTERCEPTOR</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="linenos"> 95</span><span class="n">CL_ALPHA_INTERCEPTOR</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="linenos"> 96</span><span class="n">CD0_INTERCEPTOR</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="linenos"> 97</span><span class="n">K_INTERCEPTOR</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="linenos"> 98</span>
+<span class="linenos"> 99</span><span class="n">X0_I</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="linenos">100</span><span class="n">H0_I</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="linenos">101</span><span class="n">V0_I</span> <span class="o">=</span> <span class="mf">1200.0</span>
+<span class="linenos">102</span><span class="n">GAMMA0_I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mf">80.0</span><span class="p">)</span>
+<span class="linenos">103</span><span class="n">M0_I</span> <span class="o">=</span> <span class="mf">1200.0</span>
+<span class="linenos">104</span>
+<span class="linenos">105</span><span class="n">V_MIN_I</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="linenos">106</span><span class="n">V_MAX_I</span> <span class="o">=</span> <span class="mf">6500.0</span>
+<span class="linenos">107</span><span class="n">M_MIN_I</span> <span class="o">=</span> <span class="mf">300.0</span>
+<span class="linenos">108</span><span class="n">ALPHA_MAX_I</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="linenos">109</span>
+<span class="linenos">110</span><span class="c1">#%% HGV Configuration</span>
+<span class="linenos">111</span>
+<span class="linenos">112</span><span class="n">M_T</span> <span class="o">=</span> <span class="mf">1000.0</span>
+<span class="linenos">113</span><span class="n">S_T</span> <span class="o">=</span> <span class="mf">5.0</span>
+<span class="linenos">114</span><span class="n">CL_ALPHA_T</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="linenos">115</span><span class="n">CD0_T</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="linenos">116</span><span class="n">K_T</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="linenos">117</span>
+<span class="linenos">118</span><span class="n">ALPHA_T0</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="linenos">119</span><span class="n">AMP_T</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="linenos">120</span><span class="n">OMEGA_T</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="linenos">121</span>
+<span class="linenos">122</span><span class="n">X0_T</span> <span class="o">=</span> <span class="mf">20000.0</span>
+<span class="linenos">123</span><span class="n">H0_T</span> <span class="o">=</span> <span class="mf">35000.0</span>
+<span class="linenos">124</span><span class="n">V0_T</span> <span class="o">=</span> <span class="mf">4500.0</span>
+<span class="linenos">125</span><span class="n">GAMMA0_T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="o">-</span><span class="mf">12.0</span><span class="p">)</span>
+<span class="linenos">126</span>
+<span class="linenos">127</span><span class="c1">#%% Initial Guess Configuration</span>
+<span class="linenos">128</span>
+<span class="linenos">129</span><span class="n">T_GUESS</span> <span class="o">=</span> <span class="mf">35.0</span>
+<span class="linenos">130</span><span class="n">N_GUESS</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="linenos">131</span><span class="n">N_SEGMENTS</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="linenos">132</span>
+<span class="linenos">133</span><span class="n">INTERCEPTOR_CLIMB_BUMP</span> <span class="o">=</span> <span class="mf">8000.0</span>
+<span class="linenos">134</span><span class="n">INITIAL_GUESS_THROTTLE</span> <span class="o">=</span> <span class="mf">0.25</span>
+<span class="linenos">135</span>
+<span class="linenos">136</span><span class="c1">#%% HGV Reference Trajectory</span>
+<span class="linenos">137</span>
+<span class="linenos">138</span><span class="k">def</span><span class="w"> </span><span class="nf">hgv_rhs</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+<span class="linenos">139</span>    <span class="n">xT</span><span class="p">,</span> <span class="n">hT</span><span class="p">,</span> <span class="n">vT</span><span class="p">,</span> <span class="n">gammaT</span> <span class="o">=</span> <span class="n">state</span>
+<span class="linenos">140</span>
+<span class="linenos">141</span>    <span class="n">alphaT</span> <span class="o">=</span> <span class="n">ALPHA_T0</span> <span class="o">+</span> <span class="n">AMP_T</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">OMEGA_T</span> <span class="o">*</span> <span class="n">time</span><span class="p">)</span>
+<span class="linenos">142</span>
+<span class="linenos">143</span>    <span class="n">rhoT</span> <span class="o">=</span> <span class="n">atmospheric_density_numpy</span><span class="p">(</span><span class="n">hT</span><span class="p">)</span>
+<span class="linenos">144</span>    <span class="n">qT</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">rhoT</span> <span class="o">*</span> <span class="n">vT</span><span class="o">**</span><span class="mi">2</span>
+<span class="linenos">145</span>
+<span class="linenos">146</span>    <span class="n">CLT</span> <span class="o">=</span> <span class="n">CL_ALPHA_T</span> <span class="o">*</span> <span class="n">alphaT</span>
+<span class="linenos">147</span>    <span class="n">CDT</span> <span class="o">=</span> <span class="n">CD0_T</span> <span class="o">+</span> <span class="n">K_T</span> <span class="o">*</span> <span class="n">CLT</span><span class="o">**</span><span class="mi">2</span>
+<span class="linenos">148</span>
+<span class="linenos">149</span>    <span class="n">DT</span> <span class="o">=</span> <span class="n">qT</span> <span class="o">*</span> <span class="n">S_T</span> <span class="o">*</span> <span class="n">CDT</span>
+<span class="linenos">150</span>    <span class="n">LT</span> <span class="o">=</span> <span class="n">qT</span> <span class="o">*</span> <span class="n">S_T</span> <span class="o">*</span> <span class="n">CLT</span>
+<span class="linenos">151</span>
+<span class="linenos">152</span>    <span class="n">xTdot</span> <span class="o">=</span> <span class="n">vT</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">gammaT</span><span class="p">)</span>
+<span class="linenos">153</span>    <span class="n">hTdot</span> <span class="o">=</span> <span class="n">vT</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">gammaT</span><span class="p">)</span>
+<span class="linenos">154</span>    <span class="n">vTdot</span> <span class="o">=</span> <span class="o">-</span><span class="n">DT</span> <span class="o">/</span> <span class="n">M_T</span> <span class="o">-</span> <span class="n">G0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">gammaT</span><span class="p">)</span>
+<span class="linenos">155</span>    <span class="n">gammaTdot</span> <span class="o">=</span> <span class="n">LT</span> <span class="o">/</span> <span class="p">(</span><span class="n">M_T</span> <span class="o">*</span> <span class="n">vT</span><span class="p">)</span> <span class="o">-</span> <span class="n">G0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">gammaT</span><span class="p">)</span> <span class="o">/</span> <span class="n">vT</span>
+<span class="linenos">156</span>
+<span class="linenos">157</span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xTdot</span><span class="p">,</span> <span class="n">hTdot</span><span class="p">,</span> <span class="n">vTdot</span><span class="p">,</span> <span class="n">gammaTdot</span><span class="p">])</span>
+<span class="linenos">158</span>
+<span class="linenos">159</span><span class="k">def</span><span class="w"> </span><span class="nf">propagate_hgv_reference</span><span class="p">(</span><span class="n">final_time</span><span class="p">,</span> <span class="n">num_points</span><span class="o">=</span><span class="n">N_GUESS</span><span class="p">):</span>
+<span class="linenos">160</span>    <span class="n">time_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">final_time</span><span class="p">,</span> <span class="n">num_points</span><span class="p">)</span>
+<span class="linenos">161</span>    <span class="n">states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_points</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="linenos">162</span>    <span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">X0_T</span><span class="p">,</span> <span class="n">H0_T</span><span class="p">,</span> <span class="n">V0_T</span><span class="p">,</span> <span class="n">GAMMA0_T</span><span class="p">]</span>
+<span class="linenos">163</span>
+<span class="linenos">164</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+<span class="linenos">165</span>        <span class="n">t</span> <span class="o">=</span> <span class="n">time_grid</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="linenos">166</span>        <span class="n">dt</span> <span class="o">=</span> <span class="n">time_grid</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">time_grid</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="linenos">167</span>        <span class="n">y</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="linenos">168</span>
+<span class="linenos">169</span>        <span class="n">k1</span> <span class="o">=</span> <span class="n">hgv_rhs</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="linenos">170</span>        <span class="n">k2</span> <span class="o">=</span> <span class="n">hgv_rhs</span><span class="p">(</span><span class="n">t</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">k1</span><span class="p">)</span>
+<span class="linenos">171</span>        <span class="n">k3</span> <span class="o">=</span> <span class="n">hgv_rhs</span><span class="p">(</span><span class="n">t</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">k2</span><span class="p">)</span>
+<span class="linenos">172</span>        <span class="n">k4</span> <span class="o">=</span> <span class="n">hgv_rhs</span><span class="p">(</span><span class="n">t</span> <span class="o">+</span> <span class="n">dt</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">k3</span><span class="p">)</span>
+<span class="linenos">173</span>
+<span class="linenos">174</span>        <span class="n">states</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="p">(</span><span class="n">dt</span> <span class="o">/</span> <span class="mf">6.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">k1</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">k2</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">k3</span> <span class="o">+</span> <span class="n">k4</span><span class="p">)</span>
+<span class="linenos">175</span>        <span class="n">states</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="linenos">176</span>        <span class="n">states</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="linenos">177</span>
+<span class="linenos">178</span>    <span class="k">return</span> <span class="n">time_grid</span><span class="p">,</span> <span class="n">states</span>
+<span class="linenos">179</span>
+<span class="linenos">180</span><span class="c1">#%% ODE Setup</span>
+<span class="linenos">181</span>
+<span class="linenos">182</span><span class="k">class</span><span class="w"> </span><span class="nc">InterceptorTargetODE</span><span class="p">(</span><span class="n">oc</span><span class="o">.</span><span class="n">ODEBase</span><span class="p">):</span>
+<span class="linenos">183</span><span class="w">    </span><span class="sd">"""</span>
+<span class="linenos">184</span><span class="sd">    Nine-state coupled interceptor and HGV point-mass dynamics.</span>
+<span class="linenos">185</span>
+<span class="linenos">186</span><span class="sd">    State ordering:</span>
+<span class="linenos">187</span><span class="sd">        0: Interceptor horizontal position</span>
+<span class="linenos">188</span><span class="sd">        1: Interceptor altitude</span>
+<span class="linenos">189</span><span class="sd">        2: Interceptor velocity</span>
+<span class="linenos">190</span><span class="sd">        3: Interceptor flight-path angle</span>
+<span class="linenos">191</span><span class="sd">        4: Interceptor mass</span>
+<span class="linenos">192</span><span class="sd">        5: HGV horizontal position</span>
+<span class="linenos">193</span><span class="sd">        6: HGV altitude</span>
+<span class="linenos">194</span><span class="sd">        7: HGV velocity</span>
+<span class="linenos">195</span><span class="sd">        8: HGV flight-path angle</span>
+<span class="linenos">196</span>
+<span class="linenos">197</span><span class="sd">    Control ordering:</span>
+<span class="linenos">198</span><span class="sd">        0: Interceptor angle of attack</span>
+<span class="linenos">199</span><span class="sd">        1: Interceptor throttle</span>
+<span class="linenos">200</span><span class="sd">    """</span>
+<span class="linenos">201</span>
+<span class="linenos">202</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Tmax</span><span class="p">,</span> <span class="n">Isp</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">CLa</span><span class="p">,</span> <span class="n">CD0</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+<span class="linenos">203</span>        <span class="n">nx</span><span class="p">,</span> <span class="n">nu</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">2</span>
+<span class="linenos">204</span>        <span class="n">args</span> <span class="o">=</span> <span class="n">ODEArgs</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
+<span class="linenos">205</span>
+<span class="linenos">206</span>        <span class="n">xI</span><span class="p">,</span> <span class="n">hI</span><span class="p">,</span> <span class="n">vI</span><span class="p">,</span> <span class="n">gammaI</span><span class="p">,</span> <span class="n">mI</span><span class="p">,</span> <span class="n">xT</span><span class="p">,</span> <span class="n">hT</span><span class="p">,</span> <span class="n">vT</span><span class="p">,</span> <span class="n">gammaT</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">XVec</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="linenos">207</span>        <span class="n">alphaI</span><span class="p">,</span> <span class="n">throttle</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">UVar</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">args</span><span class="o">.</span><span class="n">UVar</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">208</span>
+<span class="linenos">209</span>        <span class="c1"># Interceptor aerodynamics.</span>
+<span class="linenos">210</span>        <span class="n">rhoI</span> <span class="o">=</span> <span class="n">atmospheric_density</span><span class="p">(</span><span class="n">hI</span><span class="p">)</span>
+<span class="linenos">211</span>        <span class="n">qI</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">rhoI</span> <span class="o">*</span> <span class="n">vI</span><span class="o">**</span><span class="mi">2</span>
+<span class="linenos">212</span>
+<span class="linenos">213</span>        <span class="n">CLI</span> <span class="o">=</span> <span class="n">CLa</span> <span class="o">*</span> <span class="n">alphaI</span>
+<span class="linenos">214</span>        <span class="n">CDI</span> <span class="o">=</span> <span class="n">CD0</span> <span class="o">+</span> <span class="n">k</span> <span class="o">*</span> <span class="n">CLI</span><span class="o">**</span><span class="mi">2</span>
+<span class="linenos">215</span>
+<span class="linenos">216</span>        <span class="n">DI</span> <span class="o">=</span> <span class="n">qI</span> <span class="o">*</span> <span class="n">S</span> <span class="o">*</span> <span class="n">CDI</span>
+<span class="linenos">217</span>        <span class="n">LI</span> <span class="o">=</span> <span class="n">qI</span> <span class="o">*</span> <span class="n">S</span> <span class="o">*</span> <span class="n">CLI</span>
+<span class="linenos">218</span>
+<span class="linenos">219</span>        <span class="n">TI</span> <span class="o">=</span> <span class="n">Tmax</span> <span class="o">*</span> <span class="n">throttle</span>
+<span class="linenos">220</span>
+<span class="linenos">221</span>        <span class="c1"># Interceptor equations of motion.</span>
+<span class="linenos">222</span>        <span class="n">xIdot</span> <span class="o">=</span> <span class="n">vI</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">gammaI</span><span class="p">)</span>
+<span class="linenos">223</span>        <span class="n">hIdot</span> <span class="o">=</span> <span class="n">vI</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">gammaI</span><span class="p">)</span>
+<span class="linenos">224</span>        <span class="n">vIdot</span> <span class="o">=</span> <span class="p">(</span><span class="n">TI</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alphaI</span><span class="p">)</span> <span class="o">-</span> <span class="n">DI</span><span class="p">)</span> <span class="o">/</span> <span class="n">mI</span> <span class="o">-</span> <span class="n">G0</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">gammaI</span><span class="p">)</span>
+<span class="linenos">225</span>        <span class="n">gammaIdot</span> <span class="o">=</span> <span class="p">(</span><span class="n">TI</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">alphaI</span><span class="p">)</span> <span class="o">+</span> <span class="n">LI</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">mI</span> <span class="o">*</span> <span class="n">vI</span><span class="p">)</span> <span class="o">-</span> <span class="n">G0</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">gammaI</span><span class="p">)</span> <span class="o">/</span> <span class="n">vI</span>
+<span class="linenos">226</span>        <span class="n">mIdot</span> <span class="o">=</span> <span class="o">-</span><span class="n">TI</span> <span class="o">/</span> <span class="p">(</span><span class="n">Isp</span> <span class="o">*</span> <span class="n">G0</span><span class="p">)</span>
+<span class="linenos">227</span>
+<span class="linenos">228</span>        <span class="c1"># Prescribed HGV angle of attack.</span>
+<span class="linenos">229</span>        <span class="n">time</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">TVar</span><span class="p">()</span>
+<span class="linenos">230</span>        <span class="n">alphaT</span> <span class="o">=</span> <span class="n">ALPHA_T0</span> <span class="o">+</span> <span class="n">AMP_T</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">OMEGA_T</span> <span class="o">*</span> <span class="n">time</span><span class="p">)</span>
+<span class="linenos">231</span>
+<span class="linenos">232</span>        <span class="c1"># HGV aerodynamics.</span>
+<span class="linenos">233</span>        <span class="n">rhoT</span> <span class="o">=</span> <span class="n">atmospheric_density</span><span class="p">(</span><span class="n">hT</span><span class="p">)</span>
+<span class="linenos">234</span>        <span class="n">qT</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">rhoT</span> <span class="o">*</span> <span class="n">vT</span><span class="o">**</span><span class="mi">2</span>
+<span class="linenos">235</span>
+<span class="linenos">236</span>        <span class="n">CLT</span> <span class="o">=</span> <span class="n">CL_ALPHA_T</span> <span class="o">*</span> <span class="n">alphaT</span>
+<span class="linenos">237</span>        <span class="n">CDT</span> <span class="o">=</span> <span class="n">CD0_T</span> <span class="o">+</span> <span class="n">K_T</span> <span class="o">*</span> <span class="n">CLT</span><span class="o">**</span><span class="mi">2</span>
+<span class="linenos">238</span>
+<span class="linenos">239</span>        <span class="n">DT</span> <span class="o">=</span> <span class="n">qT</span> <span class="o">*</span> <span class="n">S_T</span> <span class="o">*</span> <span class="n">CDT</span>
+<span class="linenos">240</span>        <span class="n">LT</span> <span class="o">=</span> <span class="n">qT</span> <span class="o">*</span> <span class="n">S_T</span> <span class="o">*</span> <span class="n">CLT</span>
+<span class="linenos">241</span>
+<span class="linenos">242</span>        <span class="c1"># HGV equations of motion.</span>
+<span class="linenos">243</span>        <span class="n">xTdot</span> <span class="o">=</span> <span class="n">vT</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">gammaT</span><span class="p">)</span>
+<span class="linenos">244</span>        <span class="n">hTdot</span> <span class="o">=</span> <span class="n">vT</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">gammaT</span><span class="p">)</span>
+<span class="linenos">245</span>        <span class="n">vTdot</span> <span class="o">=</span> <span class="o">-</span><span class="n">DT</span> <span class="o">/</span> <span class="n">M_T</span> <span class="o">-</span> <span class="n">G0</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">gammaT</span><span class="p">)</span>
+<span class="linenos">246</span>        <span class="n">gammaTdot</span> <span class="o">=</span> <span class="n">LT</span> <span class="o">/</span> <span class="p">(</span><span class="n">M_T</span> <span class="o">*</span> <span class="n">vT</span><span class="p">)</span> <span class="o">-</span> <span class="n">G0</span> <span class="o">*</span> <span class="n">vf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">gammaT</span><span class="p">)</span> <span class="o">/</span> <span class="n">vT</span>
+<span class="linenos">247</span>
+<span class="linenos">248</span>        <span class="n">ode</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">xIdot</span><span class="p">,</span> <span class="n">hIdot</span><span class="p">,</span> <span class="n">vIdot</span><span class="p">,</span> <span class="n">gammaIdot</span><span class="p">,</span> <span class="n">mIdot</span><span class="p">,</span> <span class="n">xTdot</span><span class="p">,</span> <span class="n">hTdot</span><span class="p">,</span> <span class="n">vTdot</span><span class="p">,</span> <span class="n">gammaTdot</span><span class="p">])</span>
+<span class="linenos">249</span>
+<span class="linenos">250</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span> <span class="n">nx</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
+<span class="linenos">251</span>
+<span class="linenos">252</span><span class="c1">#%% Initial Guess</span>
+<span class="linenos">253</span>
+<span class="linenos">254</span><span class="k">def</span><span class="w"> </span><span class="nf">build_initial_guess</span><span class="p">(</span><span class="n">final_fpa_deg</span><span class="p">,</span> <span class="n">t_guess</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="linenos">255</span>    <span class="n">time_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">N_GUESS</span><span class="p">)</span>
+<span class="linenos">256</span>    <span class="n">gamma_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">final_fpa_deg</span><span class="p">)</span>
+<span class="linenos">257</span>
+<span class="linenos">258</span>    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">259</span>        <span class="n">seed_time</span> <span class="o">=</span> <span class="n">seed</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+<span class="linenos">260</span>        <span class="n">seed_tf</span> <span class="o">=</span> <span class="n">seed_time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">261</span>        <span class="n">initial_states</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">262</span>
+<span class="linenos">263</span>        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">time_grid</span><span class="p">:</span>
+<span class="linenos">264</span>            <span class="n">t</span> <span class="o">=</span> <span class="n">seed_tf</span> <span class="o">*</span> <span class="n">s</span>
+<span class="linenos">265</span>            <span class="n">state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+<span class="linenos">266</span>
+<span class="linenos">267</span>            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">]:</span>
+<span class="linenos">268</span>                <span class="n">state</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">seed_time</span><span class="p">,</span> <span class="n">seed</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="linenos">269</span>
+<span class="linenos">270</span>            <span class="n">state</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span>
+<span class="linenos">271</span>            <span class="n">initial_states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+<span class="linenos">272</span>
+<span class="linenos">273</span>        <span class="k">return</span> <span class="n">initial_states</span>
+<span class="linenos">274</span>
+<span class="linenos">275</span>    <span class="n">target_time</span><span class="p">,</span> <span class="n">target_states</span> <span class="o">=</span> <span class="n">propagate_hgv_reference</span><span class="p">(</span><span class="n">t_guess</span><span class="p">)</span>
+<span class="linenos">276</span>
+<span class="linenos">277</span>    <span class="n">xT_final</span> <span class="o">=</span> <span class="n">target_states</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="linenos">278</span>    <span class="n">hT_final</span> <span class="o">=</span> <span class="n">target_states</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="linenos">279</span>    <span class="n">vT_final</span> <span class="o">=</span> <span class="n">target_states</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="linenos">280</span>
+<span class="linenos">281</span>    <span class="n">mass_flow_max</span> <span class="o">=</span> <span class="n">T_MAX</span> <span class="o">/</span> <span class="p">(</span><span class="n">ISP</span> <span class="o">*</span> <span class="n">G0</span><span class="p">)</span>
+<span class="linenos">282</span>    <span class="n">guessed_mass_final</span> <span class="o">=</span> <span class="n">M0_I</span> <span class="o">-</span> <span class="n">INITIAL_GUESS_THROTTLE</span> <span class="o">*</span> <span class="n">mass_flow_max</span> <span class="o">*</span> <span class="n">t_guess</span>
+<span class="linenos">283</span>    <span class="n">guessed_mass_final</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">guessed_mass_final</span><span class="p">,</span> <span class="n">M_MIN_I</span> <span class="o">+</span> <span class="mf">50.0</span><span class="p">)</span>
+<span class="linenos">284</span>
+<span class="linenos">285</span>    <span class="n">initial_states</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">286</span>
+<span class="linenos">287</span>    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">time_grid</span><span class="p">:</span>
+<span class="linenos">288</span>        <span class="n">state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+<span class="linenos">289</span>
+<span class="linenos">290</span>        <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">X0_I</span> <span class="o">+</span> <span class="p">(</span><span class="n">xT_final</span> <span class="o">-</span> <span class="n">X0_I</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span>
+<span class="linenos">291</span>        <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">H0_I</span> <span class="o">+</span> <span class="p">(</span><span class="n">hT_final</span> <span class="o">-</span> <span class="n">H0_I</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span> <span class="o">+</span> <span class="n">INTERCEPTOR_CLIMB_BUMP</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">s</span><span class="p">)</span>
+<span class="linenos">292</span>        <span class="n">state</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">V0_I</span> <span class="o">+</span> <span class="p">(</span><span class="n">vT_final</span> <span class="o">-</span> <span class="n">V0_I</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span>
+<span class="linenos">293</span>        <span class="n">state</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">GAMMA0_I</span> <span class="o">+</span> <span class="p">(</span><span class="n">gamma_f</span> <span class="o">-</span> <span class="n">GAMMA0_I</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span>
+<span class="linenos">294</span>        <span class="n">state</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">M0_I</span> <span class="o">+</span> <span class="p">(</span><span class="n">guessed_mass_final</span> <span class="o">-</span> <span class="n">M0_I</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span>
+<span class="linenos">295</span>
+<span class="linenos">296</span>        <span class="n">target_t</span> <span class="o">=</span> <span class="n">t_guess</span> <span class="o">*</span> <span class="n">s</span>
+<span class="linenos">297</span>
+<span class="linenos">298</span>        <span class="n">state</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">target_t</span><span class="p">,</span> <span class="n">target_time</span><span class="p">,</span> <span class="n">target_states</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="linenos">299</span>        <span class="n">state</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">target_t</span><span class="p">,</span> <span class="n">target_time</span><span class="p">,</span> <span class="n">target_states</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="linenos">300</span>        <span class="n">state</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">target_t</span><span class="p">,</span> <span class="n">target_time</span><span class="p">,</span> <span class="n">target_states</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="linenos">301</span>        <span class="n">state</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">target_t</span><span class="p">,</span> <span class="n">target_time</span><span class="p">,</span> <span class="n">target_states</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="linenos">302</span>
+<span class="linenos">303</span>        <span class="n">state</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_t</span>
+<span class="linenos">304</span>        <span class="n">state</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="linenos">305</span>        <span class="n">state</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="n">INITIAL_GUESS_THROTTLE</span>
+<span class="linenos">306</span>
+<span class="linenos">307</span>        <span class="n">initial_states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+<span class="linenos">308</span>
+<span class="linenos">309</span>    <span class="k">return</span> <span class="n">initial_states</span>
+<span class="linenos">310</span>
+<span class="linenos">311</span><span class="c1">#%% Solve with ASSET</span>
+<span class="linenos">312</span>
+<span class="linenos">313</span><span class="k">def</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span><span class="n">final_fpa_deg</span><span class="p">,</span> <span class="n">t_guess</span><span class="o">=</span><span class="n">T_GUESS</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="linenos">314</span><span class="w">    </span><span class="sd">"""Solve the minimum-time interceptor-HGV engagement problem."""</span>
+<span class="linenos">315</span>
+<span class="linenos">316</span>    <span class="n">ode</span> <span class="o">=</span> <span class="n">InterceptorTargetODE</span><span class="p">(</span><span class="n">T_MAX</span><span class="p">,</span> <span class="n">ISP</span><span class="p">,</span> <span class="n">S_INTERCEPTOR</span><span class="p">,</span> <span class="n">CL_ALPHA_INTERCEPTOR</span><span class="p">,</span> <span class="n">CD0_INTERCEPTOR</span><span class="p">,</span> <span class="n">K_INTERCEPTOR</span><span class="p">)</span>
+<span class="linenos">317</span>    <span class="n">gamma_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">final_fpa_deg</span><span class="p">)</span>
+<span class="linenos">318</span>    <span class="n">initial_states</span> <span class="o">=</span> <span class="n">build_initial_guess</span><span class="p">(</span><span class="n">final_fpa_deg</span><span class="p">,</span> <span class="n">t_guess</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+<span class="linenos">319</span>
+<span class="linenos">320</span>    <span class="n">phase</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">phase</span><span class="p">(</span><span class="s2">"LGL3"</span><span class="p">,</span> <span class="n">initial_states</span><span class="p">,</span> <span class="n">N_SEGMENTS</span><span class="p">)</span>
+<span class="linenos">321</span>    <span class="n">phase</span><span class="o">.</span><span class="n">setAutoScaling</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">322</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">PrintLevel</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">323</span>
+<span class="linenos">324</span>    <span class="c1"># Initial conditions.</span>
+<span class="linenos">325</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"First"</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="p">[</span><span class="n">X0_I</span><span class="p">,</span> <span class="n">H0_I</span><span class="p">,</span> <span class="n">V0_I</span><span class="p">,</span> <span class="n">GAMMA0_I</span><span class="p">,</span> <span class="n">M0_I</span><span class="p">,</span> <span class="n">X0_T</span><span class="p">,</span> <span class="n">H0_T</span><span class="p">,</span> <span class="n">V0_T</span><span class="p">,</span> <span class="n">GAMMA0_T</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+<span class="linenos">326</span>
+<span class="linenos">327</span>    <span class="c1"># Terminal interceptor flight-path angle.</span>
+<span class="linenos">328</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addBoundaryValue</span><span class="p">(</span><span class="s2">"Last"</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="n">gamma_f</span><span class="p">])</span>
+<span class="linenos">329</span>
+<span class="linenos">330</span>    <span class="c1"># Terminal position matching.</span>
+<span class="linenos">331</span>    <span class="n">intercept_args</span> <span class="o">=</span> <span class="n">Args</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="linenos">332</span>    <span class="n">intercept_function</span> <span class="o">=</span> <span class="n">vf</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">intercept_args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">intercept_args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">intercept_args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">intercept_args</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+<span class="linenos">333</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addEqualCon</span><span class="p">(</span><span class="s2">"Last"</span><span class="p">,</span> <span class="n">intercept_function</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+<span class="linenos">334</span>
+<span class="linenos">335</span>    <span class="c1"># Interceptor path constraints.</span>
+<span class="linenos">336</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLowerVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="linenos">337</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">V_MIN_I</span><span class="p">,</span> <span class="n">V_MAX_I</span><span class="p">)</span>
+<span class="linenos">338</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+<span class="linenos">339</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLowerVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">M_MIN_I</span><span class="p">)</span>
+<span class="linenos">340</span>
+<span class="linenos">341</span>    <span class="c1"># HGV altitude constraint.</span>
+<span class="linenos">342</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLowerVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="linenos">343</span>
+<span class="linenos">344</span>    <span class="c1"># Interceptor control constraints.</span>
+<span class="linenos">345</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="n">ALPHA_MAX_I</span><span class="p">,</span> <span class="n">ALPHA_MAX_I</span><span class="p">)</span>
+<span class="linenos">346</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addLUVarBound</span><span class="p">(</span><span class="s2">"Path"</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="linenos">347</span>
+<span class="linenos">348</span>    <span class="n">phase</span><span class="o">.</span><span class="n">addDeltaTimeObjective</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="linenos">349</span>    <span class="n">phase</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+<span class="linenos">350</span>
+<span class="linenos">351</span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">phase</span><span class="o">.</span><span class="n">returnTraj</span><span class="p">())</span><span class="o">.</span><span class="n">T</span>
+<span class="linenos">352</span>
+<span class="linenos">353</span><span class="c1">#%% Plot Results</span>
+<span class="linenos">354</span>
+<span class="linenos">355</span><span class="k">def</span><span class="w"> </span><span class="nf">plot_results</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+<span class="linenos">356</span><span class="w">    </span><span class="sd">"""Generate a four-panel Alabama-themed engagement summary."""</span>
+<span class="linenos">357</span>
+<span class="linenos">358</span>    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">FIGURE_SIZE</span><span class="p">,</span> <span class="n">constrained_layout</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos">359</span>    <span class="n">fig</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">BACKGROUND</span><span class="p">)</span>
+<span class="linenos">360</span>
+<span class="linenos">361</span>    <span class="n">ax_geo</span><span class="p">,</span> <span class="n">ax_vel</span><span class="p">,</span> <span class="n">ax_gamma</span><span class="p">,</span> <span class="n">ax_controls</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="linenos">362</span>
+<span class="linenos">363</span>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">gamma_deg</span><span class="p">,</span> <span class="n">traj</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+<span class="linenos">364</span>        <span class="n">color</span> <span class="o">=</span> <span class="n">CASE_COLORS</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">CASE_COLORS</span><span class="p">)]</span>
+<span class="linenos">365</span>        <span class="n">time</span> <span class="o">=</span> <span class="n">traj</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+<span class="linenos">366</span>        <span class="n">tf</span> <span class="o">=</span> <span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">367</span>        <span class="n">label</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">"$\gamma_f=</span><span class="si">{</span><span class="n">gamma_deg</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">^\circ$ ($t_f=</span><span class="si">{</span><span class="n">tf</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">$ s)"</span>
+<span class="linenos">368</span>
+<span class="linenos">369</span>        <span class="n">ax_geo</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">traj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">traj</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">gamma_deg</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">° interceptor"</span><span class="p">)</span>
+<span class="linenos">370</span>        <span class="n">ax_geo</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">traj</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">traj</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">HGV_COLOR</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">gamma_deg</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">° HGV"</span><span class="p">)</span>
+<span class="linenos">371</span>        <span class="n">ax_geo</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">traj</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">traj</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"X"</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="n">LIGHT_GRAY</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="linenos">372</span>
+<span class="linenos">373</span>        <span class="n">ax_vel</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">traj</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">gamma_deg</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">° interceptor"</span><span class="p">)</span>
+<span class="linenos">374</span>        <span class="n">ax_vel</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">traj</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">HGV_COLOR</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">gamma_deg</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">° HGV"</span><span class="p">)</span>
+<span class="linenos">375</span>
+<span class="linenos">376</span>        <span class="n">ax_gamma</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">traj</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+<span class="linenos">377</span>        <span class="n">ax_controls</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">traj</span><span class="p">[</span><span class="mi">10</span><span class="p">]),</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">gamma_deg</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">° AOA"</span><span class="p">)</span>
+<span class="linenos">378</span>
+<span class="linenos">379</span>    <span class="n">ax_geo</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X0_I</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">H0_I</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">ALABAMA_CRIMSON</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="n">LIGHT_GRAY</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"o"</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Interceptor launch"</span><span class="p">)</span>
+<span class="linenos">380</span>    <span class="n">ax_geo</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X0_T</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">H0_T</span> <span class="o">/</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">LIGHT_GRAY</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="n">ALABAMA_CRIMSON</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"*"</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">130</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"HGV start"</span><span class="p">)</span>
+<span class="linenos">381</span>
+<span class="linenos">382</span>    <span class="n">ax_geo</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$x$ (km)"</span><span class="p">)</span>
+<span class="linenos">383</span>    <span class="n">ax_geo</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$h$ (km)"</span><span class="p">)</span>
+<span class="linenos">384</span>    <span class="n">ax_geo</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Engagement Geometry"</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="linenos">385</span>    <span class="n">style_legend</span><span class="p">(</span><span class="n">ax_geo</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">"best"</span><span class="p">)</span>
+<span class="linenos">386</span>
+<span class="linenos">387</span>    <span class="n">ax_vel</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$t$ (s)"</span><span class="p">)</span>
+<span class="linenos">388</span>    <span class="n">ax_vel</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$v$ (m/s)"</span><span class="p">)</span>
+<span class="linenos">389</span>    <span class="n">ax_vel</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Vehicle Velocity"</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="linenos">390</span>    <span class="n">style_legend</span><span class="p">(</span><span class="n">ax_vel</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">"best"</span><span class="p">)</span>
+<span class="linenos">391</span>
+<span class="linenos">392</span>    <span class="n">ax_gamma</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$t$ (s)"</span><span class="p">)</span>
+<span class="linenos">393</span>    <span class="n">ax_gamma</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$\gamma_I$ (deg)"</span><span class="p">)</span>
+<span class="linenos">394</span>    <span class="n">ax_gamma</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Interceptor Flight-Path Angle"</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="linenos">395</span>    <span class="n">style_legend</span><span class="p">(</span><span class="n">ax_gamma</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">"best"</span><span class="p">)</span>
+<span class="linenos">396</span>
+<span class="linenos">397</span>    <span class="n">ax_controls</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$t$ (s)"</span><span class="p">)</span>
+<span class="linenos">398</span>    <span class="n">ax_controls</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$\alpha_I$ (deg)"</span><span class="p">)</span>
+<span class="linenos">399</span>    <span class="n">ax_controls</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Interceptor Angle of Attack and Throttle"</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="linenos">400</span>
+<span class="linenos">401</span>    <span class="n">throttle_axis</span> <span class="o">=</span> <span class="n">ax_controls</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+<span class="linenos">402</span>    <span class="n">throttle_axis</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s2">"none"</span><span class="p">)</span>
+<span class="linenos">403</span>
+<span class="linenos">404</span>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">gamma_deg</span><span class="p">,</span> <span class="n">traj</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+<span class="linenos">405</span>        <span class="n">color</span> <span class="o">=</span> <span class="n">CASE_COLORS</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">CASE_COLORS</span><span class="p">)]</span>
+<span class="linenos">406</span>        <span class="n">throttle_axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">traj</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="n">traj</span><span class="p">[</span><span class="mi">11</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.7</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">gamma_deg</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">° throttle"</span><span class="p">)</span>
+<span class="linenos">407</span>
+<span class="linenos">408</span>    <span class="n">throttle_axis</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Throttle"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">TEXT_COLOR</span><span class="p">)</span>
+<span class="linenos">409</span>    <span class="n">throttle_axis</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">)</span>
+<span class="linenos">410</span>    <span class="n">throttle_axis</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">TEXT_COLOR</span><span class="p">)</span>
+<span class="linenos">411</span>
+<span class="linenos">412</span>    <span class="k">for</span> <span class="n">spine</span> <span class="ow">in</span> <span class="n">throttle_axis</span><span class="o">.</span><span class="n">spines</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+<span class="linenos">413</span>        <span class="n">spine</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">MUTED_GRAY</span><span class="p">)</span>
+<span class="linenos">414</span>
+<span class="linenos">415</span>    <span class="n">style_legend</span><span class="p">(</span><span class="n">ax_controls</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">"upper left"</span><span class="p">)</span>
+<span class="linenos">416</span>    <span class="n">style_axis</span><span class="p">(</span><span class="n">ax_geo</span><span class="p">)</span>
+<span class="linenos">417</span>    <span class="n">style_axis</span><span class="p">(</span><span class="n">ax_vel</span><span class="p">)</span>
+<span class="linenos">418</span>    <span class="n">style_axis</span><span class="p">(</span><span class="n">ax_gamma</span><span class="p">)</span>
+<span class="linenos">419</span>    <span class="n">style_axis</span><span class="p">(</span><span class="n">ax_controls</span><span class="p">)</span>
+<span class="linenos">420</span>
+<span class="linenos">421</span>    <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">"Minimum-Time Hypersonic Interceptor Engagement"</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">"bold"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">TEXT_COLOR</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.985</span><span class="p">)</span>
+<span class="linenos">422</span>    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="n">rect</span><span class="o">=</span><span class="p">(</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.94</span><span class="p">),</span> <span class="n">h_pad</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">w_pad</span><span class="o">=</span><span class="mf">1.8</span><span class="p">)</span>
+<span class="linenos">423</span>    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">"HGV_Interceptor.png"</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">FIGURE_DPI</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="n">BACKGROUND</span><span class="p">)</span>
+<span class="linenos">424</span>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="linenos">425</span>
+<span class="linenos">426</span><span class="k">def</span><span class="w"> </span><span class="nf">make_animation</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">nframes</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
+<span class="linenos">427</span>    <span class="n">cases</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+<span class="linenos">428</span>
+<span class="linenos">429</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">cases</span><span class="p">:</span>
+<span class="linenos">430</span>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"No engagement trajectories were provided."</span><span class="p">)</span>
+<span class="linenos">431</span>
+<span class="linenos">432</span>    <span class="n">final_times</span> <span class="o">=</span> <span class="p">[</span><span class="n">traj</span><span class="p">[</span><span class="mi">9</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">traj</span> <span class="ow">in</span> <span class="n">cases</span><span class="p">]</span>
+<span class="linenos">433</span>    <span class="n">max_time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">final_times</span><span class="p">)</span>
+<span class="linenos">434</span>
+<span class="linenos">435</span>    <span class="n">time_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_time</span><span class="p">,</span> <span class="n">nframes</span><span class="p">)</span>
+<span class="linenos">436</span>
+<span class="linenos">437</span>    <span class="n">animation_data</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">438</span>    <span class="n">all_x</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">439</span>    <span class="n">all_h</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">440</span>
+<span class="linenos">441</span>    <span class="k">for</span> <span class="n">gamma_deg</span><span class="p">,</span> <span class="n">traj</span> <span class="ow">in</span> <span class="n">cases</span><span class="p">:</span>
+<span class="linenos">442</span>        <span class="n">trajectory_time</span> <span class="o">=</span> <span class="n">traj</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+<span class="linenos">443</span>        <span class="n">tf</span> <span class="o">=</span> <span class="n">trajectory_time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">444</span>        <span class="n">valid_time</span> <span class="o">=</span> <span class="n">time_grid</span> <span class="o">&lt;=</span> <span class="n">tf</span>
+<span class="linenos">445</span>
+<span class="linenos">446</span>        <span class="n">xI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">time_grid</span><span class="p">[</span><span class="n">valid_time</span><span class="p">],</span> <span class="n">trajectory_time</span><span class="p">,</span> <span class="n">traj</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mf">1e3</span>
+<span class="linenos">447</span>        <span class="n">hI</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">time_grid</span><span class="p">[</span><span class="n">valid_time</span><span class="p">],</span> <span class="n">trajectory_time</span><span class="p">,</span> <span class="n">traj</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mf">1e3</span>
+<span class="linenos">448</span>        <span class="n">xT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">time_grid</span><span class="p">[</span><span class="n">valid_time</span><span class="p">],</span> <span class="n">trajectory_time</span><span class="p">,</span> <span class="n">traj</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span> <span class="o">/</span> <span class="mf">1e3</span>
+<span class="linenos">449</span>        <span class="n">hT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">time_grid</span><span class="p">[</span><span class="n">valid_time</span><span class="p">],</span> <span class="n">trajectory_time</span><span class="p">,</span> <span class="n">traj</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span> <span class="o">/</span> <span class="mf">1e3</span>
+<span class="linenos">450</span>
+<span class="linenos">451</span>        <span class="n">throttle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">time_grid</span><span class="p">[</span><span class="n">valid_time</span><span class="p">],</span> <span class="n">trajectory_time</span><span class="p">,</span> <span class="n">traj</span><span class="p">[</span><span class="mi">11</span><span class="p">])</span>
+<span class="linenos">452</span>
+<span class="linenos">453</span>        <span class="n">all_x</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">xI</span><span class="p">,</span> <span class="n">xT</span><span class="p">])</span>
+<span class="linenos">454</span>        <span class="n">all_h</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">hI</span><span class="p">,</span> <span class="n">hT</span><span class="p">])</span>
+<span class="linenos">455</span>
+<span class="linenos">456</span>        <span class="n">animation_data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+<span class="linenos">457</span>            <span class="s2">"gamma"</span><span class="p">:</span> <span class="n">gamma_deg</span><span class="p">,</span>
+<span class="linenos">458</span>            <span class="s2">"tf"</span><span class="p">:</span> <span class="n">tf</span><span class="p">,</span>
+<span class="linenos">459</span>            <span class="s2">"valid_time"</span><span class="p">:</span> <span class="n">valid_time</span><span class="p">,</span>
+<span class="linenos">460</span>            <span class="s2">"time"</span><span class="p">:</span> <span class="n">time_grid</span><span class="p">[</span><span class="n">valid_time</span><span class="p">],</span>
+<span class="linenos">461</span>            <span class="s2">"xI"</span><span class="p">:</span> <span class="n">xI</span><span class="p">,</span>
+<span class="linenos">462</span>            <span class="s2">"hI"</span><span class="p">:</span> <span class="n">hI</span><span class="p">,</span>
+<span class="linenos">463</span>            <span class="s2">"xT"</span><span class="p">:</span> <span class="n">xT</span><span class="p">,</span>
+<span class="linenos">464</span>            <span class="s2">"hT"</span><span class="p">:</span> <span class="n">hT</span><span class="p">,</span>
+<span class="linenos">465</span>            <span class="s2">"throttle"</span><span class="p">:</span> <span class="n">throttle</span><span class="p">,</span>
+<span class="linenos">466</span>            <span class="s2">"color"</span><span class="p">:</span> <span class="n">CASE_COLORS</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">animation_data</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">CASE_COLORS</span><span class="p">)]})</span>
+<span class="linenos">467</span>
+<span class="linenos">468</span>    <span class="n">xmin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_x</span><span class="p">)</span>
+<span class="linenos">469</span>    <span class="n">xmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_x</span><span class="p">)</span>
+<span class="linenos">470</span>    <span class="n">hmin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">all_h</span><span class="p">)</span>
+<span class="linenos">471</span>    <span class="n">hmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">all_h</span><span class="p">)</span>
+<span class="linenos">472</span>
+<span class="linenos">473</span>    <span class="n">xpadding</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.04</span> <span class="o">*</span> <span class="p">(</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span><span class="p">))</span>
+<span class="linenos">474</span>    <span class="n">hpadding</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="p">(</span><span class="n">hmax</span> <span class="o">-</span> <span class="n">hmin</span><span class="p">))</span>
+<span class="linenos">475</span>
+<span class="linenos">476</span>    <span class="n">common_xlim</span> <span class="o">=</span> <span class="p">(</span><span class="n">xmin</span> <span class="o">-</span> <span class="n">xpadding</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">+</span> <span class="n">xpadding</span><span class="p">)</span>
+<span class="linenos">477</span>    <span class="n">common_ylim</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">hmin</span> <span class="o">-</span> <span class="n">hpadding</span><span class="p">),</span> <span class="n">hmax</span> <span class="o">+</span> <span class="n">hpadding</span><span class="p">)</span>
+<span class="linenos">478</span>
+<span class="linenos">479</span>    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="linenos">480</span>
+<span class="linenos">481</span>    <span class="n">fig</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">BACKGROUND</span><span class="p">)</span>
+<span class="linenos">482</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">PANEL_BACKGROUND</span><span class="p">)</span>
+<span class="linenos">483</span>
+<span class="linenos">484</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">common_xlim</span><span class="p">)</span>
+<span class="linenos">485</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">common_ylim</span><span class="p">)</span>
+<span class="linenos">486</span>
+<span class="linenos">487</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$x$ (km)"</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+<span class="linenos">488</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$h$ (km)"</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+<span class="linenos">489</span>
+<span class="linenos">490</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+<span class="linenos">491</span>        <span class="s2">"Hypersonic Interceptor Engagements"</span><span class="p">,</span>
+<span class="linenos">492</span>        <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+<span class="linenos">493</span>        <span class="n">fontweight</span><span class="o">=</span><span class="s2">"bold"</span><span class="p">,</span>
+<span class="linenos">494</span>        <span class="n">color</span><span class="o">=</span><span class="n">TEXT_COLOR</span><span class="p">,</span>
+<span class="linenos">495</span>        <span class="n">pad</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="linenos">496</span>
+<span class="linenos">497</span>    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">GRID_COLOR</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="linenos">498</span>    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">GROUND_COLOR</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Sea level"</span><span class="p">)</span>
+<span class="linenos">499</span>
+<span class="linenos">500</span>    <span class="k">for</span> <span class="n">spine</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+<span class="linenos">501</span>        <span class="n">spine</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">MUTED_GRAY</span><span class="p">)</span>
+<span class="linenos">502</span>
+<span class="linenos">503</span>    <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">colors</span><span class="o">=</span><span class="n">TEXT_COLOR</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+<span class="linenos">504</span>
+<span class="linenos">505</span>    <span class="n">animated_artists</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">506</span>
+<span class="linenos">507</span>    <span class="k">for</span> <span class="n">case</span> <span class="ow">in</span> <span class="n">animation_data</span><span class="p">:</span>
+<span class="linenos">508</span>
+<span class="linenos">509</span>        <span class="n">gamma_deg</span> <span class="o">=</span> <span class="n">case</span><span class="p">[</span><span class="s2">"gamma"</span><span class="p">]</span>
+<span class="linenos">510</span>        <span class="n">color</span> <span class="o">=</span> <span class="n">case</span><span class="p">[</span><span class="s2">"color"</span><span class="p">]</span>
+<span class="linenos">511</span>
+<span class="linenos">512</span>        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+<span class="linenos">513</span>            <span class="k">case</span><span class="p">[</span><span class="s2">"xI"</span><span class="p">],</span>
+<span class="linenos">514</span>            <span class="k">case</span><span class="p">[</span><span class="s2">"hI"</span><span class="p">],</span>
+<span class="linenos">515</span>            <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+<span class="linenos">516</span>            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.18</span><span class="p">,</span>
+<span class="linenos">517</span>            <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="linenos">518</span>
+<span class="linenos">519</span>        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+<span class="linenos">520</span>            <span class="k">case</span><span class="p">[</span><span class="s2">"xT"</span><span class="p">],</span>
+<span class="linenos">521</span>            <span class="k">case</span><span class="p">[</span><span class="s2">"hT"</span><span class="p">],</span>
+<span class="linenos">522</span>            <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+<span class="linenos">523</span>            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.18</span><span class="p">,</span>
+<span class="linenos">524</span>            <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+<span class="linenos">525</span>            <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">)</span>
+<span class="linenos">526</span>
+<span class="linenos">527</span>        <span class="n">trailI</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+<span class="linenos">528</span>            <span class="p">[],</span>
+<span class="linenos">529</span>            <span class="p">[],</span>
+<span class="linenos">530</span>            <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+<span class="linenos">531</span>            <span class="n">lw</span><span class="o">=</span><span class="mf">2.8</span><span class="p">,</span>
+<span class="linenos">532</span>            <span class="n">label</span><span class="o">=</span><span class="sa">rf</span><span class="s2">"Interceptor $\gamma_f=</span><span class="si">{</span><span class="n">gamma_deg</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">^\circ$"</span><span class="p">,</span>
+<span class="linenos">533</span>            <span class="n">animated</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">534</span>
+<span class="linenos">535</span>        <span class="n">trailT</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+<span class="linenos">536</span>            <span class="p">[],</span>
+<span class="linenos">537</span>            <span class="p">[],</span>
+<span class="linenos">538</span>            <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+<span class="linenos">539</span>            <span class="n">lw</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+<span class="linenos">540</span>            <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span>
+<span class="linenos">541</span>            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+<span class="linenos">542</span>            <span class="n">label</span><span class="o">=</span><span class="sa">rf</span><span class="s2">"HGV $\gamma_f=</span><span class="si">{</span><span class="n">gamma_deg</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">^\circ$"</span><span class="p">,</span>
+<span class="linenos">543</span>            <span class="n">animated</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">544</span>
+<span class="linenos">545</span>        <span class="n">pointI</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+<span class="linenos">546</span>            <span class="p">[],</span>
+<span class="linenos">547</span>            <span class="p">[],</span>
+<span class="linenos">548</span>            <span class="n">marker</span><span class="o">=</span><span class="s2">"o"</span><span class="p">,</span>
+<span class="linenos">549</span>            <span class="n">markersize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<span class="linenos">550</span>            <span class="n">markerfacecolor</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+<span class="linenos">551</span>            <span class="n">markeredgecolor</span><span class="o">=</span><span class="n">LIGHT_GRAY</span><span class="p">,</span>
+<span class="linenos">552</span>            <span class="n">linestyle</span><span class="o">=</span><span class="s2">"None"</span><span class="p">,</span>
+<span class="linenos">553</span>            <span class="n">animated</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">554</span>
+<span class="linenos">555</span>        <span class="n">pointT</span><span class="p">,</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+<span class="linenos">556</span>            <span class="p">[],</span>
+<span class="linenos">557</span>            <span class="p">[],</span>
+<span class="linenos">558</span>            <span class="n">marker</span><span class="o">=</span><span class="s2">"^"</span><span class="p">,</span>
+<span class="linenos">559</span>            <span class="n">markersize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+<span class="linenos">560</span>            <span class="n">markerfacecolor</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+<span class="linenos">561</span>            <span class="n">markeredgecolor</span><span class="o">=</span><span class="n">LIGHT_GRAY</span><span class="p">,</span>
+<span class="linenos">562</span>            <span class="n">linestyle</span><span class="o">=</span><span class="s2">"None"</span><span class="p">,</span>
+<span class="linenos">563</span>            <span class="n">animated</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">564</span>
+<span class="linenos">565</span>        <span class="k">case</span><span class="p">[</span><span class="s2">"artists"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">trailI</span><span class="p">,</span> <span class="n">trailT</span><span class="p">,</span> <span class="n">pointI</span><span class="p">,</span> <span class="n">pointT</span><span class="p">)</span>
+<span class="linenos">566</span>
+<span class="linenos">567</span>        <span class="n">animated_artists</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">case</span><span class="p">[</span><span class="s2">"artists"</span><span class="p">])</span>
+<span class="linenos">568</span>
+<span class="linenos">569</span>    <span class="n">timer</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+<span class="linenos">570</span>        <span class="mf">0.025</span><span class="p">,</span>
+<span class="linenos">571</span>        <span class="mf">0.96</span><span class="p">,</span>
+<span class="linenos">572</span>        <span class="s2">""</span><span class="p">,</span>
+<span class="linenos">573</span>        <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
+<span class="linenos">574</span>        <span class="n">color</span><span class="o">=</span><span class="n">TEXT_COLOR</span><span class="p">,</span>
+<span class="linenos">575</span>        <span class="n">fontsize</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+<span class="linenos">576</span>        <span class="n">verticalalignment</span><span class="o">=</span><span class="s2">"top"</span><span class="p">,</span>
+<span class="linenos">577</span>        <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+<span class="linenos">578</span>            <span class="n">boxstyle</span><span class="o">=</span><span class="s2">"round,pad=0.45"</span><span class="p">,</span>
+<span class="linenos">579</span>            <span class="n">facecolor</span><span class="o">=</span><span class="n">BACKGROUND</span><span class="p">,</span>
+<span class="linenos">580</span>            <span class="n">edgecolor</span><span class="o">=</span><span class="n">ALABAMA_CRIMSON</span><span class="p">,</span>
+<span class="linenos">581</span>            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.95</span><span class="p">),</span>
+<span class="linenos">582</span>        <span class="n">animated</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">583</span>
+<span class="linenos">584</span>    <span class="n">animated_artists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timer</span><span class="p">)</span>
+<span class="linenos">585</span>
+<span class="linenos">586</span>    <span class="n">legend</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"best"</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos">587</span>    <span class="n">legend</span><span class="o">.</span><span class="n">get_frame</span><span class="p">()</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">PANEL_BACKGROUND</span><span class="p">)</span>
+<span class="linenos">588</span>    <span class="n">legend</span><span class="o">.</span><span class="n">get_frame</span><span class="p">()</span><span class="o">.</span><span class="n">set_edgecolor</span><span class="p">(</span><span class="n">MUTED_GRAY</span><span class="p">)</span>
+<span class="linenos">589</span>
+<span class="linenos">590</span>    <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">legend</span><span class="o">.</span><span class="n">get_texts</span><span class="p">():</span>
+<span class="linenos">591</span>        <span class="n">text</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">TEXT_COLOR</span><span class="p">)</span>
+<span class="linenos">592</span>
+<span class="linenos">593</span>    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="n">rect</span><span class="o">=</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.96</span><span class="p">))</span>
+<span class="linenos">594</span>
+<span class="linenos">595</span>    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+<span class="linenos">596</span>        <span class="n">current_time</span> <span class="o">=</span> <span class="n">time_grid</span><span class="p">[</span><span class="n">frame</span><span class="p">]</span>
+<span class="linenos">597</span>
+<span class="linenos">598</span>        <span class="k">for</span> <span class="n">case</span> <span class="ow">in</span> <span class="n">animation_data</span><span class="p">:</span>
+<span class="linenos">599</span>            <span class="n">trailI</span><span class="p">,</span> <span class="n">trailT</span><span class="p">,</span> <span class="n">pointI</span><span class="p">,</span> <span class="n">pointT</span> <span class="o">=</span> <span class="n">case</span><span class="p">[</span><span class="s2">"artists"</span><span class="p">]</span>
+<span class="linenos">600</span>            <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">case</span><span class="p">[</span><span class="s2">"time"</span><span class="p">],</span> <span class="n">current_time</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">"right"</span><span class="p">)</span>
+<span class="linenos">601</span>
+<span class="linenos">602</span>            <span class="k">if</span> <span class="n">current_time</span> <span class="o">&gt;=</span> <span class="n">case</span><span class="p">[</span><span class="s2">"tf"</span><span class="p">]:</span>
+<span class="linenos">603</span>                <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">case</span><span class="p">[</span><span class="s2">"time"</span><span class="p">])</span>
+<span class="linenos">604</span>
+<span class="linenos">605</span>            <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">606</span>                <span class="n">trailI</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span>
+<span class="linenos">607</span>                    <span class="k">case</span><span class="p">[</span><span class="s2">"xI"</span><span class="p">][:</span><span class="n">n</span><span class="p">],</span>
+<span class="linenos">608</span>                    <span class="k">case</span><span class="p">[</span><span class="s2">"hI"</span><span class="p">][:</span><span class="n">n</span><span class="p">])</span>
+<span class="linenos">609</span>
+<span class="linenos">610</span>                <span class="n">trailT</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span>
+<span class="linenos">611</span>                    <span class="k">case</span><span class="p">[</span><span class="s2">"xT"</span><span class="p">][:</span><span class="n">n</span><span class="p">],</span>
+<span class="linenos">612</span>                    <span class="k">case</span><span class="p">[</span><span class="s2">"hT"</span><span class="p">][:</span><span class="n">n</span><span class="p">])</span>
+<span class="linenos">613</span>
+<span class="linenos">614</span>                <span class="n">pointI</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span>
+<span class="linenos">615</span>                    <span class="p">[</span><span class="n">case</span><span class="p">[</span><span class="s2">"xI"</span><span class="p">][</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]],</span>
+<span class="linenos">616</span>                    <span class="p">[</span><span class="n">case</span><span class="p">[</span><span class="s2">"hI"</span><span class="p">][</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="linenos">617</span>
+<span class="linenos">618</span>                <span class="n">pointT</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span>
+<span class="linenos">619</span>                    <span class="p">[</span><span class="n">case</span><span class="p">[</span><span class="s2">"xT"</span><span class="p">][</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]],</span>
+<span class="linenos">620</span>                    <span class="p">[</span><span class="n">case</span><span class="p">[</span><span class="s2">"hT"</span><span class="p">][</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="linenos">621</span>
+<span class="linenos">622</span>            <span class="k">else</span><span class="p">:</span>
+<span class="linenos">623</span>
+<span class="linenos">624</span>                <span class="n">trailI</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],</span> <span class="p">[])</span>
+<span class="linenos">625</span>                <span class="n">trailT</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],</span> <span class="p">[])</span>
+<span class="linenos">626</span>                <span class="n">pointI</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],</span> <span class="p">[])</span>
+<span class="linenos">627</span>                <span class="n">pointT</span><span class="o">.</span><span class="n">set_data</span><span class="p">([],</span> <span class="p">[])</span>
+<span class="linenos">628</span>
+<span class="linenos">629</span>        <span class="n">completed</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">current_time</span> <span class="o">&gt;=</span> <span class="n">case</span><span class="p">[</span><span class="s2">"tf"</span><span class="p">]</span> <span class="k">for</span> <span class="n">case</span> <span class="ow">in</span> <span class="n">animation_data</span><span class="p">)</span>
+<span class="linenos">630</span>
+<span class="linenos">631</span>        <span class="n">timer</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span>
+<span class="linenos">632</span>            <span class="sa">f</span><span class="s2">"Elapsed Time: </span><span class="si">{</span><span class="n">current_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> s</span><span class="se">\n</span><span class="s2">"</span>
+<span class="linenos">633</span>            <span class="sa">f</span><span class="s2">"Completed Intercepts: </span><span class="si">{</span><span class="n">completed</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">animation_data</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="linenos">634</span>
+<span class="linenos">635</span>        <span class="k">return</span> <span class="n">animated_artists</span>
+<span class="linenos">636</span>
+<span class="linenos">637</span>    <span class="n">animation</span> <span class="o">=</span> <span class="n">FuncAnimation</span><span class="p">(</span>
+<span class="linenos">638</span>        <span class="n">fig</span><span class="p">,</span>
+<span class="linenos">639</span>        <span class="n">update</span><span class="p">,</span>
+<span class="linenos">640</span>        <span class="n">frames</span><span class="o">=</span><span class="n">nframes</span><span class="p">,</span>
+<span class="linenos">641</span>        <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span> <span class="o">/</span> <span class="n">fps</span><span class="p">,</span>
+<span class="linenos">642</span>        <span class="n">blit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos">643</span>        <span class="n">cache_frame_data</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos">644</span>
+<span class="linenos">645</span>    <span class="n">filename</span> <span class="o">=</span> <span class="s2">"HGV_Interceptor.gif"</span>
+<span class="linenos">646</span>
+<span class="linenos">647</span>    <span class="n">animation</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+<span class="linenos">648</span>        <span class="n">filename</span><span class="p">,</span>
+<span class="linenos">649</span>        <span class="n">writer</span><span class="o">=</span><span class="n">PillowWriter</span><span class="p">(</span><span class="n">fps</span><span class="o">=</span><span class="n">fps</span><span class="p">),</span>
+<span class="linenos">650</span>        <span class="n">dpi</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
+<span class="linenos">651</span>        <span class="n">savefig_kwargs</span><span class="o">=</span><span class="p">{</span>
+<span class="linenos">652</span>            <span class="s2">"facecolor"</span><span class="p">:</span> <span class="n">BACKGROUND</span><span class="p">,</span>
+<span class="linenos">653</span>            <span class="s2">"edgecolor"</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
+<span class="linenos">654</span>            <span class="s2">"pad_inches"</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">})</span>
+<span class="linenos">655</span>
+<span class="linenos">656</span>    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+<span class="linenos">657</span>
+<span class="linenos">658</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<span class="linenos">659</span>    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="linenos">660</span>    <span class="n">seed</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos">661</span>
+<span class="linenos">662</span>    <span class="k">for</span> <span class="n">gamma_deg</span> <span class="ow">in</span> <span class="p">[</span><span class="o">-</span><span class="mi">30</span><span class="p">,</span> <span class="o">-</span><span class="mi">40</span><span class="p">,</span> <span class="o">-</span><span class="mi">50</span><span class="p">]:</span>
+<span class="linenos">663</span>        <span class="n">traj</span> <span class="o">=</span> <span class="n">solve</span><span class="p">(</span><span class="n">gamma_deg</span><span class="p">,</span> <span class="n">t_guess</span><span class="o">=</span><span class="n">T_GUESS</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+<span class="linenos">664</span>        <span class="n">results</span><span class="p">[</span><span class="n">gamma_deg</span><span class="p">]</span> <span class="o">=</span> <span class="n">traj</span>
+<span class="linenos">665</span>        <span class="n">seed</span> <span class="o">=</span> <span class="n">traj</span>
+<span class="linenos">666</span>        <span class="n">tf</span> <span class="o">=</span> <span class="n">traj</span><span class="p">[</span><span class="mi">9</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">667</span>        <span class="n">miss_x</span> <span class="o">=</span> <span class="n">traj</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">traj</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">668</span>        <span class="n">miss_h</span> <span class="o">=</span> <span class="n">traj</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">traj</span><span class="p">[</span><span class="mi">6</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">669</span>        <span class="n">achieved_gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">traj</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">670</span>        
+<span class="linenos">671</span>    <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">Making plots ...'</span><span class="p">)</span>
+<span class="linenos">672</span>    <span class="n">make_animation</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="linenos">673</span>    <span class="n">plot_results</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="MultiTarg.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Multi-Spacecraft Optimization</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="HyperSensitive.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Hyper-Sensitive Optimal Control Problem</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022-2023, UA ASRL
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Minimum-Time Hypersonic Glide Intercept</a><ul>
+<li><a class="reference internal" href="#full-code">Full Code</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8e576371"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    </body>
+</html>
