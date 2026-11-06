@@ -1,3 +1,5 @@
+set -e
+
 # Update
 sudo apt update
 # sudo apt upgrade
@@ -16,10 +18,11 @@ fi
 
 # Install MKL
 cd /tmp
-wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+wget -q https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+gpg --dearmor GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+sudo install -D -m 0644 GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB.gpg /etc/apt/keyrings/intel-oneapi.gpg
+rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB.gpg
+echo "deb [signed-by=/etc/apt/keyrings/intel-oneapi.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
 sudo apt update
 sudo apt install intel-oneapi-compiler-dpcpp-cpp intel-oneapi-mkl-devel intel-oneapi-mkl intel-oneapi-openmp
 
