@@ -188,6 +188,11 @@ PinesGravityModel::PinesGravityModel(
         "Pines coefficient file does not reach the requested degree");
   }
 
+  // Fold the sqrt(2) harmonic factor into the coefficients once, so the
+  // evaluation loop does not multiply by it for every term.
+  for (double& value : c_) value *= sqrt_two;
+  for (double& value : s_) value *= sqrt_two;
+
   // Precompute recurrence coefficients used during gravity evaluation.
   //
   // The acceleration recurrence requires Legendre-function values
