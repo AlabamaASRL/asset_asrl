@@ -7,10 +7,6 @@ In this example, we compute the minimum-time interception trajectory for a power
     :width: 100%
     :align: center
 
-.. image:: _static/HGV_Interceptor.svg
-    :width: 100%
-    :align: center
-
 The interceptor is modeled as a powered point-mass vehicle with aerodynamic lift and drag. The HGV is modeled as an unpowered point-mass vehicle with a prescribed time-varying angle of attack. Both vehicles are propagated simultaneously using a common time variable.
 
 The combined state and control vectors are defined as
@@ -118,7 +114,9 @@ The initial trajectory is generated using an initial guess for the interceptor a
 
 The optimized trajectories are plotted and animated to compare the three terminal-angle cases. The figure shows the resulting engagement trajectories, while the animation displays all cases on a common time axis. Each case remains at its terminal position after completing its interception, allowing the remaining cases to continue.
 
-The trajectory comparison and synchronized animation are shown at the beginning of this documentation page.
+.. image:: _static/HGV_Interceptor.svg
+    :width: 100%
+    :align: center
 
 Full Code
 ---------
