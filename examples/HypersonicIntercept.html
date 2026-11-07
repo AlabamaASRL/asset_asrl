@@ -281,10 +281,22 @@
         <article role="main" id="furo-main-content">
           <section id="minimum-time-hypersonic-glide-intercept">
 <h1>Minimum-Time Hypersonic Glide Intercept<a class="headerlink" href="#minimum-time-hypersonic-glide-intercept" title="Link to this heading">¶</a></h1>
+<section id="missile-defense-motivation">
+<h2>Missile Defense Motivation<a class="headerlink" href="#missile-defense-motivation" title="Link to this heading">¶</a></h2>
+<p>Hypersonic glide vehicles (HGVs) present a significant challenge for modern missile defense systems because of their extremely high velocities, maneuverability, and ability to operate along nontraditional flight paths. Unlike conventional ballistic missiles, which generally follow more predictable trajectories after boost, HGVs can maneuver throughout portions of their flight. This makes predicting their future position and determining an effective interception trajectory considerably more difficult.</p>
+<p>A successful missile defense engagement requires more than simply detecting and tracking an incoming threat. The interceptor must be able to reach the target while accounting for its own aerodynamic limitations, available propulsion, and changing flight conditions. Because both vehicles are moving simultaneously, even relatively small differences in velocity, position, or maneuvering behavior can significantly affect the interception geometry.</p>
+<p>Optimal control provides a useful framework for studying these engagement problems. By modeling the interceptor and target together, it is possible to determine control histories that satisfy interception constraints while optimizing a performance objective. In this example, the objective is to minimize the time required for an interceptor to engage a maneuvering hypersonic glide vehicle.</p>
+<p>This example demonstrates how numerical optimal-control methods can be applied to a simplified missile defense engagement. It focuses on the coupled vehicle dynamics, aerodynamic forces, propulsion constraints, and terminal interception geometry rather than modeling a complete operational missile defense system.</p>
+</section>
+<section id="problem-description">
+<h2>Problem Description<a class="headerlink" href="#problem-description" title="Link to this heading">¶</a></h2>
 <p>In this example, we compute the minimum-time interception trajectory for a powered interceptor engaging an unpowered hypersonic glide vehicle (HGV) in a vertical plane. The interceptor launches from sea level and attempts to intercept the HGV while satisfying a prescribed terminal flight-path angle.</p>
 <a class="reference internal image-reference" href="../_images/HGV_Interceptor.gif"><img alt="../_images/HGV_Interceptor.gif" class="align-center" src="../_images/HGV_Interceptor.gif" style="width: 100%;" />
 </a>
 <p>The interceptor is modeled as a powered point-mass vehicle with aerodynamic lift and drag. The HGV is modeled as an unpowered point-mass vehicle with a prescribed time-varying angle of attack. Both vehicles are propagated simultaneously using a common time variable.</p>
+</section>
+<section id="state-and-control-variables">
+<h2>State and Control Variables<a class="headerlink" href="#state-and-control-variables" title="Link to this heading">¶</a></h2>
 <p>The combined state and control vectors are defined as</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
@@ -293,6 +305,9 @@
 </div>
 <p>where <span class="math notranslate nohighlight">\(x\)</span> is downrange position, <span class="math notranslate nohighlight">\(h\)</span> is altitude, <span class="math notranslate nohighlight">\(v\)</span> is velocity magnitude, <span class="math notranslate nohighlight">\(\gamma\)</span> is flight-path angle, <span class="math notranslate nohighlight">\(m_I\)</span> is interceptor mass, <span class="math notranslate nohighlight">\(\alpha_I\)</span> is interceptor angle of attack, and <span class="math notranslate nohighlight">\(\delta\)</span> is throttle.</p>
 <p>The subscripts <span class="math notranslate nohighlight">\(I\)</span> and <span class="math notranslate nohighlight">\(T\)</span> denote the interceptor and target, respectively. The resulting system consists of nine state equations and two interceptor control inputs.</p>
+</section>
+<section id="equations-of-motion">
+<h2>Equations of Motion<a class="headerlink" href="#equations-of-motion" title="Link to this heading">¶</a></h2>
 <p>The equations of motion for either vehicle are based on the point-mass equations</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
@@ -313,6 +328,9 @@
 \[\alpha_T(t) =
 \alpha_{T,0}+A_T\sin(\omega_T t)\]</div>
 </div>
+</section>
+<section id="aerodynamic-and-propulsion-models">
+<h2>Aerodynamic and Propulsion Models<a class="headerlink" href="#aerodynamic-and-propulsion-models" title="Link to this heading">¶</a></h2>
 <p>The aerodynamic forces are calculated using dynamic pressure and the vehicle aerodynamic coefficients.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
@@ -329,6 +347,9 @@
 \[T_I = \delta T_{\max}\]</div>
 </div>
 <p>The throttle is bounded between zero and one, while interceptor angle of attack is constrained by the prescribed control limits.</p>
+</section>
+<section id="optimal-control-formulation">
+<h2>Optimal-Control Formulation<a class="headerlink" href="#optimal-control-formulation" title="Link to this heading">¶</a></h2>
 <p>The interception problem is formulated as a minimum-time optimal-control problem. The objective is to minimize the final time required for the interceptor to reach the HGV.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
@@ -347,11 +368,19 @@
 \{-30^\circ,-40^\circ,-50^\circ\}\]</div>
 </div>
 <p>The resulting trajectories provide a comparison of minimum-time engagement solutions under different terminal flight-path-angle requirements.</p>
+</section>
+<section id="asset-implementation">
+<h2>ASSET Implementation<a class="headerlink" href="#asset-implementation" title="Link to this heading">¶</a></h2>
 <p>The combined interceptor-target dynamics are implemented as an ASSET ODE. The ODE uses nine state variables and two control variables, with time as the independent variable. An ASSET phase is then constructed with the initial conditions, terminal interception constraints, control bounds, and minimum-time objective.</p>
 <p>The initial trajectory is generated using an initial guess for the interceptor and target trajectories. The ASSET optimizer then determines the control history and final time that satisfy the interception constraints.</p>
-<p>The optimized trajectories are plotted and animated to compare the three terminal-angle cases. The figure shows the resulting engagement trajectories, while the animation displays all cases on a common time axis. Each case remains at its terminal position after completing its interception, allowing the remaining cases to continue.</p>
+<p>The optimized trajectories are plotted and animated to compare the three terminal-angle cases. The animation displays all cases on a common time axis. Each case remains at its terminal position after completing its interception, allowing the remaining cases to continue.</p>
+</section>
+<section id="optimized-trajectory-results">
+<h2>Optimized Trajectory Results<a class="headerlink" href="#optimized-trajectory-results" title="Link to this heading">¶</a></h2>
+<p>The trajectory comparison illustrates how changing the prescribed terminal flight-path angle affects the resulting engagement geometry and minimum-time solution.</p>
 <a class="reference internal image-reference" href="../_images/HGV_Interceptor.svg"><img alt="../_images/HGV_Interceptor.svg" class="align-center" src="../_images/HGV_Interceptor.svg" style="width: 100%;" />
 </a>
+</section>
 <section id="full-code">
 <h2>Full Code<a class="headerlink" href="#full-code" title="Link to this heading">¶</a></h2>
 <p>The complete Python implementation is included below.</p>
@@ -1092,6 +1121,14 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Minimum-Time Hypersonic Glide Intercept</a><ul>
+<li><a class="reference internal" href="#missile-defense-motivation">Missile Defense Motivation</a></li>
+<li><a class="reference internal" href="#problem-description">Problem Description</a></li>
+<li><a class="reference internal" href="#state-and-control-variables">State and Control Variables</a></li>
+<li><a class="reference internal" href="#equations-of-motion">Equations of Motion</a></li>
+<li><a class="reference internal" href="#aerodynamic-and-propulsion-models">Aerodynamic and Propulsion Models</a></li>
+<li><a class="reference internal" href="#optimal-control-formulation">Optimal-Control Formulation</a></li>
+<li><a class="reference internal" href="#asset-implementation">ASSET Implementation</a></li>
+<li><a class="reference internal" href="#optimized-trajectory-results">Optimized Trajectory Results</a></li>
 <li><a class="reference internal" href="#full-code">Full Code</a></li>
 </ul>
 </li>
