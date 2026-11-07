@@ -2,16 +2,15 @@
 Minimum-Time Hypersonic Glide Intercept
 ========================================
 
-Missile Defense Motivation
+Motivation
 ==========================
 
-Hypersonic glide vehicles (HGVs) present a significant challenge for modern missile defense systems because of their extremely high velocities, maneuverability, and ability to operate along nontraditional flight paths. Unlike conventional ballistic missiles, which generally follow more predictable trajectories after boost, HGVs can maneuver throughout portions of their flight. This makes predicting their future position and determining an effective interception trajectory considerably more difficult.
+Hypersonic glide vehicles (HGVs) present a significant challenge for modern missile defense systems because of their extremely high velocities, maneuverability, and ability to operate along nontraditional flight paths. Unlike conventional ballistic missiles, which generally follow more predictable trajectories after boost, HGVs can maneuver throughout portions of their flight. This makes predicting their future position and determining an effective interception trajectory considerably more difficult. 
 
-A successful missile defense engagement requires more than simply detecting and tracking an incoming threat. The interceptor must be able to reach the target while accounting for its own aerodynamic limitations, available propulsion, and changing flight conditions. Because both vehicles are moving simultaneously, even relatively small differences in velocity, position, or maneuvering behavior can significantly affect the interception geometry.
+The interceptor must be able to reach the target while accounting for its own aerodynamic limitations, available propulsion, and changing flight conditions. Because both vehicles are moving simultaneously, even relatively small differences in velocity, position, or maneuvering behavior can significantly affect the interception geometry.
 
 Optimal control provides a useful framework for studying these engagement problems. By modeling the interceptor and target together, it is possible to determine control histories that satisfy interception constraints while optimizing a performance objective. In this example, the objective is to minimize the time required for an interceptor to engage a maneuvering hypersonic glide vehicle.
 
-This example demonstrates how numerical optimal-control methods can be applied to a simplified missile defense engagement. It focuses on the coupled vehicle dynamics, aerodynamic forces, propulsion constraints, and terminal interception geometry rather than modeling a complete operational missile defense system.
 
 Problem Description
 ===================
