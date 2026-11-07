@@ -3,11 +3,11 @@ Minimum-Time Hypersonic Glide Intercept
 ========================================
 In this example, we compute the minimum-time interception trajectory for a powered interceptor engaging an unpowered hypersonic glide vehicle (HGV) in a vertical plane. The interceptor launches from sea level and attempts to intercept the HGV while satisfying a prescribed terminal flight-path angle.
 
-.. image:: HGV_Interceptor.gif
+.. image:: _static/HGV_Interceptor.gif
     :width: 100%
     :align: center
 
-.. image:: HGV_Interceptor.svg
+.. image:: _static/HGV_Interceptor.svg
     :width: 100%
     :align: center
 
