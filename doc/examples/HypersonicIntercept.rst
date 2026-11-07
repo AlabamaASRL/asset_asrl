@@ -1,9 +1,15 @@
-
 ========================================
 Minimum-Time Hypersonic Glide Intercept
 ========================================
-
 In this example, we compute the minimum-time interception trajectory for a powered interceptor engaging an unpowered hypersonic glide vehicle (HGV) in a vertical plane. The interceptor launches from sea level and attempts to intercept the HGV while satisfying a prescribed terminal flight-path angle.
+
+.. image:: _static/HGV_Interceptor.gif
+    :width: 100%
+    :align: center
+
+.. image:: _static/HGV_Interceptor.svg
+    :width: 100%
+    :align: center
 
 The interceptor is modeled as a powered point-mass vehicle with aerodynamic lift and drag. The HGV is modeled as an unpowered point-mass vehicle with a prescribed time-varying angle of attack. Both vehicles are propagated simultaneously using a common time variable.
 
@@ -112,13 +118,7 @@ The initial trajectory is generated using an initial guess for the interceptor a
 
 The optimized trajectories are plotted and animated to compare the three terminal-angle cases. The figure shows the resulting engagement trajectories, while the animation displays all cases on a common time axis. Each case remains at its terminal position after completing its interception, allowing the remaining cases to continue.
 
-The trajectory comparison and synchronized animation are shown below.
-
-.. image:: HGV_Interceptor.png
-    :width: 100%
-
-.. image:: HGV_Interceptor.gif
-    :width: 100%
+The trajectory comparison and synchronized animation are shown at the beginning of this documentation page.
 
 Full Code
 ---------
