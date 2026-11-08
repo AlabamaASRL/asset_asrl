@@ -11,6 +11,9 @@
 //   SpicePxformApply  : [ET, x, y, z] -> R_{from->to}(ET) * [x, y, z]
 //                       Jacobian: [Rdot*r | R]  (3x4)
 //
+//   SpiceForceFrame   : [ET, x, y, z] (inertial) -> inertial
+//                       any ForceField3 evaluated in a body frame (see SpiceForceFrame.h)
+//
 // Rdot is taken from the lower-left block of the 6x6 state
 // transformation returned by sxform_c:  X = [[R, 0], [Rdot, R]].
 //
@@ -21,6 +24,7 @@
 
 #include "VectorFunctions/ASSET_VectorFunctions.h"
 
+#include <cmath>
 #include <mutex>
 #include <stdexcept>
 #include <string>
@@ -83,6 +87,16 @@ inline void configure_spice_errors() {
 }
 
 }  // namespace spice_detail
+
+// Lets a native node be applied to expression lists, e.g. node([t, x, y, z]),
+// so it can be composed into ODE and VectorFunction graphs.
+template<class FType>
+void DefineSpiceListEval(py::class_<FType>& obj) {
+  using Gen = GenericFunction<-1, -1>;
+  obj.def("__call__", [](const FType& fun, const std::vector<Gen>& funcs) {
+    return Gen(fun.eval(DynamicStack(funcs)));
+  });
+}
 
 // Second-order adjoint terms for Analytic VectorFunctions whose only
 // second derivatives come from finite differences of the exact Jacobian.
@@ -185,6 +199,7 @@ struct SpicePxform : VectorFunction<SpicePxform, 1, 9, Analytic, Analytic> {
                    .def(py::init<const std::string&, const std::string&>())
                    .def("inverse", &SpicePxform::inverse);
     Base::DenseBaseBuild(obj);
+    DefineSpiceListEval(obj);
   }
 };
 
@@ -258,6 +273,7 @@ struct SpicePxformApply
                    .def(py::init<const std::string&, const std::string&>())
                    .def("inverse", &SpicePxformApply::inverse);
     Base::DenseBaseBuild(obj);
+    DefineSpiceListEval(obj);
   }
 };
 
