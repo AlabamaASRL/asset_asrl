@@ -123,9 +123,9 @@ add_library(astro STATIC
   Astro/PinesGravity.cpp
   Astro/PinesGravityModel.cpp
   Astro/PinesGravityModel.h
-  Astro/SpiceForceFrame.h
+  Astro/ForceField3.h
   Astro/SpicePxform.h
-  Astro/ForceField3)
+  Astro/SpiceForceFrame.h)
 
 target_precompile_headers(astro REUSE_FROM pch)
 target_include_directories(astro PRIVATE ${INCLUDE_DIRS})
