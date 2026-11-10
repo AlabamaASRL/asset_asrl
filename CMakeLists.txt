@@ -287,9 +287,24 @@ endif()
 
 find_package(Python ${PYVERSION_EXACT} REQUIRED COMPONENTS Interpreter Development)
 
+# CSPICE provides the pxform_c/furnsh_c symbols used by Astro/SpicePxform.h.
+# Search CSPICE_ROOT, then the libcspice shipped inside the spiceypy wheel.
+execute_process(
+  COMMAND ${Python_EXECUTABLE} -c "import os, spiceypy; print(os.path.join(os.path.dirname(spiceypy.__file__), 'utils'))"
+  OUTPUT_VARIABLE SPICEYPY_UTILS_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  ERROR_QUIET)
+find_library(CSPICE_LIBRARY
+  NAMES cspice libcspice.so
+  HINTS ${CSPICE_ROOT}/lib $ENV{CSPICE_ROOT}/lib ${SPICEYPY_UTILS_DIR})
+if(NOT CSPICE_LIBRARY)
+  message(FATAL_ERROR "CSPICE not found. Install spiceypy or set -DCSPICE_ROOT=<dir containing libcspice.so>")
+endif()
+message(STATUS "CSPICE_LIBRARY = ${CSPICE_LIBRARY}")
+
 # Set dependency variables
 set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${MKL_INCLUDE_DIRS} ${AccelerateSparse_INCLUDE_DIRS})
-set(LINK_LIBS ${MKL_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS} ${AccelerateSparse_LIBRARIES})
+set(LINK_LIBS ${MKL_LIBRARIES} ${CSPICE_LIBRARY} Threads::Threads ${CMAKE_DL_LIBS} ${AccelerateSparse_LIBRARIES})
 
 # Handle OpenMP for Apple
 if (APPLE)
