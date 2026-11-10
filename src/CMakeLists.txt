@@ -123,9 +123,12 @@ add_library(astro STATIC
   Astro/PinesGravity.cpp
   Astro/PinesGravityModel.cpp
   Astro/PinesGravityModel.h
+  Astro/GravityCoefficientReader.cpp
+  Astro/GravityCoefficientReader.h
   Astro/ForceField3.h
   Astro/SpicePxform.h
-  Astro/SpiceForceFrame.h)
+  Astro/SpiceForceFrame.h
+  )
 
 target_precompile_headers(astro REUSE_FROM pch)
 target_include_directories(astro PRIVATE ${INCLUDE_DIRS})
@@ -154,14 +157,19 @@ target_link_libraries(asset PUBLIC optimalcontrol)
 target_link_libraries(asset PUBLIC vectorfunctions)
 target_link_libraries(asset PUBLIC astro)
 target_link_libraries(asset PUBLIC asset_extensions)
+if(CSPICE_LIBRARY)
+  target_link_libraries(asset PUBLIC ${CSPICE_LIBRARY})
+endif()
 
 target_include_directories(asset PRIVATE ${INCLUDE_DIRS})
 target_link_libraries(asset PRIVATE ${LINK_LIBS})
 #set_target_properties(asset PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
 if(UNIX)
-    target_link_options(asset PRIVATE ${LINKER_FLAGS})
+    set_target_properties(asset PROPERTIES LINK_FLAGS ${LINKER_FLAGS})
 endif()
+
+
 
 add_custom_target(pyassetsrc ALL DEPENDS ${CMAKE_SOURCE_DIR}/asset_asrl)
 
