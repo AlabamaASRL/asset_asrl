@@ -1,0 +1,11 @@
+[build-system]
+requires = ['setuptools>=77', 'wheel']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'asset_asrl'
+dynamic = ['version']
+description = 'High-speed, extensible, object-oriented trajectory design and optimization'
+license = 'Apache-2.0'
+authors = [{ name = "Alabama ASRL" }]
+requires-python = ">=3.8"
