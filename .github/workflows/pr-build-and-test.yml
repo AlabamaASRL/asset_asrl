@@ -141,11 +141,9 @@ jobs:
   test:
     name: test (${{ matrix.os }})
     needs: [changes, build]
-    # Run when the build succeeded, or was skipped because no C++/CMake files changed
-    if: >-
-      always() &&
-      needs.changes.result == 'success' &&
-      (needs.build.result == 'success' || needs.build.result == 'skipped')
+    # Always run tests when change detection succeeded. Use the PR wheel if it was
+    # built; otherwise (build skipped or failed) fall back to the most recent wheel.
+    if: always() && needs.changes.result == 'success'
     strategy:
       fail-fast: false
       matrix:
@@ -169,8 +167,8 @@ jobs:
           name: asset-asrl-wheel-${{ matrix.os }}
           path: dist
 
-      - name: Download most recent wheel build (no native changes)
-        if: needs.build.result == 'skipped'
+      - name: Download most recent wheel build (build skipped or failed)
+        if: needs.build.result != 'success'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
