@@ -1,0 +1,128 @@
+name: PR build and test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-build-${{ github.event.pull_request.number }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+      WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/0cb67a0d-67f6-410b-868b-f4a0a17ff0cf/intel-oneapi-toolkit-2026.1.1.32_offline.exe
+      WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel
+
+    steps:
+      - name: Checkout PR (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Linux dependencies (clang-13, Intel MKL)
+        if: runner.os == 'Linux'
+        env:
+          COMPILER: clang-13
+        run: bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
+
+      - name: Install macOS dependencies (libomp)
+        if: runner.os == 'macOS'
+        run: |
+          brew install libomp
+          echo "LIBOMP_PREFIX=$(brew --prefix libomp)" >> "$GITHUB_ENV"
+
+      - name: Install LLVM and clang-cl (Windows)
+        if: runner.os == 'Windows'
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "20"
+
+      - name: Set up MSVC environment (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86_64
+
+      - name: Install Intel MKL (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: scripts/windowsoneapi_install.bat "$WINDOWS_BASEKIT_URL" "$WINDOWS_CPP_COMPONENTS"
+
+      - name: Install Python build dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install -r requirements.txt
+
+      - name: Select clang-cl compiler (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          echo "CC=clang-cl.exe" >> "$GITHUB_ENV"
+          echo "CXX=clang-cl.exe" >> "$GITHUB_ENV"
+
+      - name: Build wheel from PR source
+        shell: bash
+        run: python -m pip wheel . --no-deps --verbose -w dist
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-asrl-wheel-${{ matrix.os }}
+          path: dist/*.whl
+          if-no-files-found: error
+          retention-days: 7
+
+  test:
+    name: test (${{ matrix.os }})
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout PR (for test sources)
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Download wheel built from this PR
+        uses: actions/download-artifact@v4
+        with:
+          name: asset-asrl-wheel-${{ matrix.os }}
+          path: dist
+
+      - name: Install built wheel and test requirements
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install dist/*.whl
+          if [ -f asset_asrl/requirements.txt ]; then python -m pip install -r asset_asrl/requirements.txt; fi
+
+      - name: Run tests against the PR build
+        shell: bash
+        run: python asset_asrl/tests/run_tests.py
