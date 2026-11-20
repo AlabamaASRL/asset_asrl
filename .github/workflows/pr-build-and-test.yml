@@ -6,14 +6,46 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
+  actions: read
 
 concurrency:
   group: pr-build-${{ github.event.pull_request.number }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: detect C++/CMake changes
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    outputs:
+      native: ${{ steps.filter.outputs.native }}
+      workflow: ${{ steps.filter.outputs.workflow }}
+
+    steps:
+      - name: Check for C++, CMake, or workflow changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            native:
+              - '**/*.cpp'
+              - '**/*.cc'
+              - '**/*.cxx'
+              - '**/*.c'
+              - '**/*.h'
+              - '**/*.hpp'
+              - '**/*.hxx'
+              - '**/*.inl'
+              - '**/CMakeLists.txt'
+              - '**/*.cmake'
+            workflow:
+              - '.github/workflows/pr-build-and-test.yml'
+
   build:
     name: build (${{ matrix.os }})
+    needs: changes
+    if: needs.changes.outputs.native == 'true' || needs.changes.outputs.workflow == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -61,10 +93,25 @@ jobs:
         with:
           arch: x86_64
 
-      - name: Install Intel MKL (Windows)
+      - name: Restore Intel MKL cache (Windows)
         if: runner.os == 'Windows'
+        id: mkl-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:\Program Files (x86)\Intel\oneAPI\mkl
+            C:\Program Files (x86)\Intel\oneAPI\tbb
+          key: intel-mkl-win-${{ env.WINDOWS_BASEKIT_URL }}-${{ env.WINDOWS_CPP_COMPONENTS }}
+
+      - name: Install Intel MKL (Windows)
+        if: runner.os == 'Windows' && steps.mkl-cache.outputs.cache-hit != 'true'
         shell: bash
         run: scripts/windowsoneapi_install.bat "$WINDOWS_BASEKIT_URL" "$WINDOWS_CPP_COMPONENTS"
+
+      - name: Set oneAPI root (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "ONEAPI_ROOT=C:/Program Files (x86)/Intel/oneAPI" >> "$GITHUB_ENV"
 
       - name: Install Python build dependencies
         shell: bash
@@ -93,7 +140,12 @@ jobs:
 
   test:
     name: test (${{ matrix.os }})
-    needs: build
+    needs: [changes, build]
+    # Run when the build succeeded, or was skipped because no C++/CMake files changed
+    if: >-
+      always() &&
+      needs.changes.result == 'success' &&
+      (needs.build.result == 'success' || needs.build.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
@@ -111,10 +163,35 @@ jobs:
           python-version: "3.10"
 
       - name: Download wheel built from this PR
+        if: needs.build.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: asset-asrl-wheel-${{ matrix.os }}
           path: dist
+
+      - name: Download most recent wheel build (no native changes)
+        if: needs.build.result == 'skipped'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ARTIFACT: asset-asrl-wheel-${{ matrix.os }}
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          run_id=""
+          for branch in "$HEAD_REF" "$BASE_REF"; do
+            run_id=$(gh api "repos/$REPO/actions/artifacts?name=$ARTIFACT&per_page=50" \
+              --jq "[.artifacts[] | select(.expired | not) | select(.workflow_run.head_branch == \"$branch\")][0].workflow_run.id // empty")
+            [ -n "$run_id" ] && break
+          done
+          if [ -z "$run_id" ]; then
+            echo "::error::No previous wheel artifact '$ARTIFACT' found for $HEAD_REF or $BASE_REF. Make a C++/CMake change or run a build first."
+            exit 1
+          fi
+          echo "Using wheel from run $run_id"
+          gh run download "$run_id" -R "$REPO" -n "$ARTIFACT" -D dist
 
       - name: Install built wheel and test requirements
         shell: bash
