@@ -130,11 +130,10 @@ jobs:
     env:
       # Update this link when building a new ASSET version
       WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/0cb67a0d-67f6-410b-868b-f4a0a17ff0cf/intel-oneapi-toolkit-2026.1.1.32_offline.exe
-      WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel
+      WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel,intel.oneapi.win.cpp-essentials
+      WINDOWS_CACHE_KEY: mkl-devel-cpp-essentials
+      VS_VER: vs2022
       ONEAPI_ROOT: "C:/Program Files (x86)/Intel/oneAPI"
-      MKLROOT: "C:/Program Files (x86)/Intel/oneAPI/mkl/latest"
-      CC: clang-cl.exe
-      CXX: clang-cl.exe
 
     steps:
       - uses: actions/checkout@v4
