@@ -119,22 +119,32 @@ jobs:
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install -r requirements.txt
 
-      - name: Select clang-cl compiler (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          echo "CC=clang-cl.exe" >> "$GITHUB_ENV"
-          echo "CXX=clang-cl.exe" >> "$GITHUB_ENV"
-
-      - name: Build wheel from PR source
+      - name: Build wheel from PR source (Linux/macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: python -m pip wheel . --no-deps --verbose -w dist
+
+      - name: Create build directory and run CMake (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: >
+          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_ASSET_WHEEL=True
+          -DCMAKE_C_COMPILER:FILEPATH="C:/Program Files/LLVM/bin/clang-cl.exe"
+          -DCMAKE_CXX_COMPILER:FILEPATH="C:/Program Files/LLVM/bin/clang-cl.exe"
+          -DCMAKE_LINKER:FILEPATH="C:/Program Files/LLVM/bin/lld-link.exe"
+
+      - name: Build Project (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: cmake --build build --target asset pypiwheel --config Release -- -j3
 
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
           name: asset-asrl-wheel-${{ matrix.os }}
-          path: dist/*.whl
+          path: |
+            dist/*.whl
+            build/pypiwheel/asset_asrl/dist/*.whl
           if-no-files-found: error
           retention-days: 7
 
