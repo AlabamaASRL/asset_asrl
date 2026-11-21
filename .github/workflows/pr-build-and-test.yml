@@ -57,6 +57,7 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: "11.0"
       WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/0cb67a0d-67f6-410b-868b-f4a0a17ff0cf/intel-oneapi-toolkit-2026.1.1.32_offline.exe
       WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel,intel.oneapi.win.cpp-essentials
+      WINDOWS_CACHE_KEY: mkl-devel-cpp-essentials
       VS_VER: vs2022
 
     steps:
@@ -104,7 +105,7 @@ jobs:
             C:\Program Files (x86)\Intel\oneAPI\mkl
             C:\Program Files (x86)\Intel\oneAPI\tbb
             C:\Program Files (x86)\Intel\oneAPI\compiler
-          key: intel-mkl-win-${{ env.WINDOWS_BASEKIT_URL }}-${{ env.WINDOWS_CPP_COMPONENTS }}
+          key: intel-mkl-win-${{ env.WINDOWS_BASEKIT_URL }}-${{ env.WINDOWS_CACHE_KEY }}
 
       - name: Install Intel MKL (Windows)
         if: runner.os == 'Windows' && steps.mkl-cache.outputs.cache-hit != 'true'
