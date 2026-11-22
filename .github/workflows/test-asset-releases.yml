@@ -76,8 +76,11 @@ jobs:
           PYTHONUNBUFFERED: "1"
         run: |
           TESTS="$GITHUB_WORKSPACE/${{ matrix.tests }}"
+          # Python 3.8+ ignores PATH when resolving extension DLL dependencies on Windows,
+          # so the Intel OpenMP directory must be registered with os.add_dll_directory.
+          DLL_SETUP='import os, sys; d = os.path.join(sys.prefix, "Library", "bin"); hasattr(os, "add_dll_directory") and os.path.isdir(d) and os.add_dll_directory(d)'
           if [ "${{ matrix.runner }}" = "unittest" ]; then
-            python -c "import faulthandler, sys, unittest; faulthandler.dump_traceback_later(1200, exit=True); import asset_asrl; unittest.main(module=None, argv=['run_tests.py', 'discover', '-s', sys.argv[1], '-t', sys.argv[1], '-p', 'test_*.py', '-v'])" "$TESTS"
+            python -c "import faulthandler, sys, unittest; faulthandler.dump_traceback_later(1200, exit=True); $DLL_SETUP; import asset_asrl; unittest.main(module=None, argv=['run_tests.py', 'discover', '-s', sys.argv[1], '-t', sys.argv[1], '-p', 'test_*.py', '-v'])" "$TESTS"
           else
-            python -c "import faulthandler, os, runpy, sys; faulthandler.dump_traceback_later(1200, exit=True); import asset_asrl; os.chdir(sys.argv[1]); runpy.run_path('run_tests.py', run_name='__main__')" "$TESTS"
+            python -c "import faulthandler, os, runpy, sys; faulthandler.dump_traceback_later(1200, exit=True); $DLL_SETUP; import asset_asrl; os.chdir(sys.argv[1]); runpy.run_path('run_tests.py', run_name='__main__')" "$TESTS"
           fi
