@@ -55,7 +55,18 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          python -m pip install asset-asrl==${{ matrix.version }}
+          python -m pip install asset-asrl==${{ matrix.version }} scipy
+
+      # The released Windows wheel links libiomp5md.dll, which intel-openmp installs under <prefix>/Library/bin.
+      # v0.5.1 doesn't register that directory itself, so put it on PATH for the test step.
+      - name: Expose Intel OpenMP runtime (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          python -m pip install intel-openmp
+          dll_dir="$(cygpath -u "$(python -c 'import os, sys; print(os.path.join(sys.prefix, "Library", "bin"))')")"
+          ls "$dll_dir/libiomp5md.dll"
+          echo "$dll_dir" >> "$GITHUB_PATH"
 
       - name: Run released tests
         shell: bash
