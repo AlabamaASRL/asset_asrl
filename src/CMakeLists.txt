@@ -145,12 +145,13 @@ pybind11_add_module(asset main.cpp)
 
 target_compile_options(asset PUBLIC  ${COMPILE_FLAGS})
 target_link_libraries(asset PUBLIC psiopt)
-target_link_libraries(asset PUBLIC utils)
 
 target_link_libraries(asset PUBLIC optimalcontrol)
 target_link_libraries(asset PUBLIC vectorfunctions)
 target_link_libraries(asset PUBLIC astro)
 target_link_libraries(asset PUBLIC asset_extensions)
+# Must come after the libraries that reference MemoryManager; GNU ld resolves static archives in link order.
+target_link_libraries(asset PUBLIC utils)
 
 target_include_directories(asset PRIVATE ${INCLUDE_DIRS})
 target_link_libraries(asset PRIVATE ${LINK_LIBS})
