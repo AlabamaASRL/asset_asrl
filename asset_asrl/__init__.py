@@ -16,6 +16,12 @@ if sys.platform == "win32":
     if dll_dir.is_dir():
         #print(f"Found {dll_dir} ... adding to DLL search path")
         os.add_dll_directory(str(dll_dir))
+        
+elif sys.platform.startswith("linux"):
+    import ctypes
+    iomp = Path(sys.prefix) / "lib" / "libiomp5.so"
+    if iomp.is_file():
+        ctypes.CDLL(str(iomp), mode=ctypes.RTLD_GLOBAL)
 
 # Import the compiled ASSET backend after its native dependencies are available.
 import asset as _asset
