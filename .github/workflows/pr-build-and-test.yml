@@ -179,6 +179,17 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Install Intel MKL runtime (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          wget -qO- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+          sudo apt update
+          sudo apt install -y intel-oneapi-mkl intel-oneapi-openmp
+          libdirs=$(find /opt/intel/oneapi \( -name 'libmkl_*.so*' -o -name 'libiomp5*.so*' \) -exec dirname {} \; | sort -u | paste -sd: -)
+          echo "LD_LIBRARY_PATH=${libdirs}:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+
       # The macOS wheel links Homebrew's libomp at runtime, so the test VM needs it too
       - name: Install macOS dependencies (libomp)
         if: runner.os == 'macOS'
