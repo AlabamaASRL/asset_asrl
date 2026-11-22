@@ -1,0 +1,48 @@
+name: Previous release tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  released-tests:
+    name: v${{ matrix.version }} tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ["0.5.1", "0.5.2"]
+        os: [ubuntu-22.04, macos-latest, windows-latest]
+        exclude:
+          # No macOS wheel for 0.5.1 on PyPI
+          - version: "0.5.1"
+            os: macos-latest
+
+    steps:
+      - name: Checkout v${{ matrix.version }} tests
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ matrix.version }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install released asset-asrl
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install asset-asrl==${{ matrix.version }}
+
+      - name: Run released tests
+        shell: bash
+        working-directory: ${{ github.workspace }}/asset_asrl/tests
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python -c "import faulthandler, runpy, sys; faulthandler.dump_traceback_later(1200, exit=True); import asset_asrl; runpy.run_path('run_tests.py', run_name='__main__')"
