@@ -309,9 +309,9 @@ if(DEFINED Python_INCLUDE_DIRS)
 elseif(DEFINED PYTHON_INCLUDE_DIRS)
     list(APPEND INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS})
 endif()
-if (NOT APPLE)
-    # Don't directly link with python library on mac and instead rely on -undefined dynamic_lookup 
-    # to bind to the python symbols at runtime from the interpreter
+if (WIN32)
+    # Only Windows needs the Python import library at link time. Linux and macOS resolve
+    # Python symbols from the running interpreter, so the wheel must not hard-link libpython.
     if(DEFINED Python_LIBRARIES)
         list(APPEND LINK_LIBS ${Python_LIBRARIES})
     elseif(DEFINED PYTHON_LIBRARIES)
