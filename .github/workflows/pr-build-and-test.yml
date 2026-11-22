@@ -209,7 +209,11 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          mapfile -t wheels < <(find dist -name '*.whl')
+          # mapfile is bash 4+ only; macOS /bin/bash is 3.2
+          wheels=()
+          while IFS= read -r whl; do
+            wheels+=("$whl")
+          done < <(find dist -name '*.whl')
           if [ "${#wheels[@]}" -eq 0 ]; then
             echo "::error::No .whl found under dist/"
             find dist
