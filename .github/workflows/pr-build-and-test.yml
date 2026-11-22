@@ -123,10 +123,12 @@ jobs:
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install -r requirements.txt
 
-      - name: Build wheel from PR source (Linux/macOS)
+      - name: Configure and build wheel (Linux/macOS)
         if: runner.os != 'Windows'
         shell: bash
-        run: python -m pip wheel . --no-deps --verbose -w dist
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_ASSET_WHEEL=True
+          cmake --build build --target asset pypiwheel --config Release -- -j3
 
       - name: Create build directory and run CMake (Windows)
         if: runner.os == 'Windows'
@@ -208,7 +210,7 @@ jobs:
           echo "Using wheel from run $run_id"
           gh run download "$run_id" -R "$REPO" -n "$ARTIFACT" -D dist
 
-      - name: Install built wheel and test requirements
+      - name: Install built wheel
         shell: bash
         run: |
           python -m pip install --upgrade pip
@@ -223,7 +225,6 @@ jobs:
             exit 1
           fi
           python -m pip install "${wheels[@]}"
-          if [ -f asset_asrl/requirements.txt ]; then python -m pip install -r asset_asrl/requirements.txt; fi
 
       - name: Run tests against the PR build
         shell: bash
