@@ -43,7 +43,7 @@ jobs:
               - '.github/workflows/pr-build-and-test.yml'
 
   build:
-    name: build (${{ matrix.os }})
+    name: build and test (${{ matrix.os }})
     needs: changes
     if: needs.changes.outputs.native == 'true' || needs.changes.outputs.workflow == 'true'
     strategy:
@@ -51,7 +51,7 @@ jobs:
       matrix:
         os: [ubuntu-22.04, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 120
+    timeout-minutes: 150
 
     env:
       MACOSX_DEPLOYMENT_TARGET: "11.0"
@@ -144,6 +144,29 @@ jobs:
         shell: bash
         run: cmake --build build --target asset pypiwheel --config Release -- -j3
 
+      # Test in the same environment the wheel was built in, so the runtime MKL matches the build
+      - name: Install built wheel and run tests
+        shell: bash
+        timeout-minutes: 25
+        env:
+          PYTHONUNBUFFERED: "1"
+        # Run from outside the checkout so the source asset_asrl/ package doesn't shadow the installed wheel
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          wheels=()
+          while IFS= read -r whl; do
+            wheels+=("$whl")
+          done < <(find "$GITHUB_WORKSPACE/dist" "$GITHUB_WORKSPACE/build/pypiwheel" -name '*.whl' 2>/dev/null)
+          if [ "${#wheels[@]}" -eq 0 ]; then
+            echo "::error::No .whl found after build"
+            exit 1
+          fi
+          python -m pip install --force-reinstall "${wheels[@]}"
+          # Import asset_asrl first so it registers the Windows DLL directory for the ASSET extension
+          # Dump all thread stacks to stderr and exit after 20 min so a hang shows where it is stuck
+          python -c "import faulthandler, runpy, sys; faulthandler.dump_traceback_later(1200, exit=True); import asset_asrl; tests = sys.argv[1]; sys.argv = ['run_tests.py', tests]; runpy.run_path(tests + '/run_tests.py', run_name='__main__')" "$GITHUB_WORKSPACE/asset_asrl/tests"
+
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
@@ -153,100 +176,3 @@ jobs:
             build/pypiwheel/asset_asrl/dist/*.whl
           if-no-files-found: error
           retention-days: 7
-
-  test:
-    name: test (${{ matrix.os }})
-    needs: [changes, build]
-    # Always run tests when change detection succeeded. Use the PR wheel if it was
-    # built; otherwise (build skipped or failed) fall back to the most recent wheel.
-    if: always() && needs.changes.result == 'success'
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-22.04, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
-
-    env:
-      PYTHONUNBUFFERED: "1"
-
-    steps:
-      - name: Checkout PR (for test sources)
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install Intel MKL runtime (Linux)
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          wget -qO- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
-          echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
-          sudo apt update
-          sudo apt install -y intel-oneapi-mkl intel-oneapi-openmp
-          libdirs=$(find /opt/intel/oneapi \( -name 'libmkl_*.so*' -o -name 'libiomp5*.so*' \) -exec dirname {} \; | sort -u | paste -sd: -)
-          echo "LD_LIBRARY_PATH=${libdirs}:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
-
-      # The macOS wheel links Homebrew's libomp at runtime, so the test VM needs it too
-      - name: Install macOS dependencies (libomp)
-        if: runner.os == 'macOS'
-        run: brew install libomp
-
-      - name: Download wheel built from this PR
-        if: needs.build.result == 'success'
-        uses: actions/download-artifact@v4
-        with:
-          name: asset-asrl-wheel-${{ matrix.os }}
-          path: dist
-
-      - name: Download most recent wheel build (build skipped or failed)
-        if: needs.build.result != 'success'
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-          ARTIFACT: asset-asrl-wheel-${{ matrix.os }}
-          HEAD_REF: ${{ github.head_ref }}
-          BASE_REF: ${{ github.base_ref }}
-        run: |
-          set -euo pipefail
-          run_id=""
-          for branch in "$HEAD_REF" "$BASE_REF"; do
-            run_id=$(gh api "repos/$REPO/actions/artifacts?name=$ARTIFACT&per_page=50" \
-              --jq "[.artifacts[] | select(.expired | not) | select(.workflow_run.head_branch == \"$branch\")][0].workflow_run.id // empty")
-            [ -n "$run_id" ] && break
-          done
-          if [ -z "$run_id" ]; then
-            echo "::error::No previous wheel artifact '$ARTIFACT' found for $HEAD_REF or $BASE_REF. Make a C++/CMake change or run a build first."
-            exit 1
-          fi
-          echo "Using wheel from run $run_id"
-          gh run download "$run_id" -R "$REPO" -n "$ARTIFACT" -D dist
-
-      - name: Install built wheel
-        shell: bash
-        run: |
-          python -m pip install --upgrade pip
-          # mapfile is bash 4+ only; macOS /bin/bash is 3.2
-          wheels=()
-          while IFS= read -r whl; do
-            wheels+=("$whl")
-          done < <(find dist -name '*.whl')
-          if [ "${#wheels[@]}" -eq 0 ]; then
-            echo "::error::No .whl found under dist/"
-            find dist
-            exit 1
-          fi
-          python -m pip install "${wheels[@]}"
-
-      - name: Run tests against the PR build
-        shell: bash
-        timeout-minutes: 25
-        # Dump all thread stacks to stderr and exit after 20 min so a hang shows where it is stuck
-        # Run from outside the checkout so the source asset_asrl/ package doesn't shadow the installed wheel
-        working-directory: ${{ runner.temp }}
-        run: |
-          python -c "import faulthandler, runpy, sys; faulthandler.dump_traceback_later(1200, exit=True); tests = sys.argv[1]; sys.argv = ['run_tests.py', tests]; runpy.run_path(tests + '/run_tests.py', run_name='__main__')" "$GITHUB_WORKSPACE/asset_asrl/tests"
