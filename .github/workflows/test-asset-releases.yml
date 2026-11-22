@@ -3,9 +3,14 @@ name: Previous release tests
 on:
   workflow_dispatch:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
+
+concurrency:
+  group: previous-release-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   released-tests:
@@ -17,13 +22,21 @@ jobs:
       matrix:
         version: ["0.5.1", "0.5.2"]
         os: [ubuntu-22.04, macos-latest, windows-latest]
+        include:
+          # v0.5.1 has no run_tests.py; tests are unittest modules under asset_asrl/test
+          - version: "0.5.1"
+            tests: "asset_asrl/test"
+            runner: unittest
+          - version: "0.5.2"
+            tests: "asset_asrl/tests"
+            runner: run_tests
         exclude:
           # No macOS wheel for 0.5.1 on PyPI
           - version: "0.5.1"
             os: macos-latest
 
     steps:
-      - name: Checkout v${{ matrix.version }} tests
+      - name: Checkout v${{ matrix.version }}
         uses: actions/checkout@v4
         with:
           ref: v${{ matrix.version }}
@@ -33,6 +46,11 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Install libomp (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install libomp
+
       - name: Install released asset-asrl
         shell: bash
         run: |
@@ -41,8 +59,14 @@ jobs:
 
       - name: Run released tests
         shell: bash
-        working-directory: ${{ github.workspace }}/asset_asrl/tests
+        # Run from outside the checkout so the source asset_asrl/ package doesn't shadow the installed wheel
+        working-directory: ${{ runner.temp }}
         env:
           PYTHONUNBUFFERED: "1"
         run: |
-          python -c "import faulthandler, runpy, sys; faulthandler.dump_traceback_later(1200, exit=True); import asset_asrl; runpy.run_path('run_tests.py', run_name='__main__')"
+          TESTS="$GITHUB_WORKSPACE/${{ matrix.tests }}"
+          if [ "${{ matrix.runner }}" = "unittest" ]; then
+            python -c "import faulthandler, sys, unittest; faulthandler.dump_traceback_later(1200, exit=True); import asset_asrl; unittest.main(module=None, argv=['run_tests.py', 'discover', '-s', sys.argv[1], '-t', sys.argv[1], '-p', 'test_*.py', '-v'])" "$TESTS"
+          else
+            python -c "import faulthandler, os, runpy, sys; faulthandler.dump_traceback_later(1200, exit=True); import asset_asrl; os.chdir(sys.argv[1]); runpy.run_path('run_tests.py', run_name='__main__')" "$TESTS"
+          fi
