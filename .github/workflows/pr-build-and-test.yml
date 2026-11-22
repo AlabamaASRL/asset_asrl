@@ -144,7 +144,8 @@ jobs:
         shell: bash
         run: cmake --build build --target asset pypiwheel --config Release -- -j3
 
-      # Test in the same environment the wheel was built in, so the runtime MKL matches the build
+      # The MKL environment from the dependency step isn't carried into later steps,
+      # so source setvars.sh here to load the same MKL runtime the wheel was linked against.
       - name: Install built wheel and run tests
         shell: bash
         timeout-minutes: 25
@@ -153,6 +154,9 @@ jobs:
         # Run from outside the checkout so the source asset_asrl/ package doesn't shadow the installed wheel
         working-directory: ${{ runner.temp }}
         run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            source /opt/intel/oneapi/setvars.sh --force > /dev/null
+          fi
           set -euo pipefail
           wheels=()
           while IFS= read -r whl; do
