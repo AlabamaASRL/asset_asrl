@@ -163,7 +163,10 @@ jobs:
       matrix:
         os: [ubuntu-22.04, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: 30
+
+    env:
+      PYTHONUNBUFFERED: "1"
 
     steps:
       - name: Checkout PR (for test sources)
@@ -224,4 +227,7 @@ jobs:
 
       - name: Run tests against the PR build
         shell: bash
-        run: python asset_asrl/tests/run_tests.py
+        timeout-minutes: 25
+        # Dump all thread stacks to stderr and exit after 20 min so a hang shows where it is stuck
+        run: |
+          python -c "import faulthandler, runpy, sys; faulthandler.dump_traceback_later(1200, exit=True); sys.argv = ['run_tests.py']; runpy.run_path('asset_asrl/tests/run_tests.py', run_name='__main__')"
