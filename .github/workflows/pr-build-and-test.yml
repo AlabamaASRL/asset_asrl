@@ -179,6 +179,11 @@ jobs:
         with:
           python-version: "3.10"
 
+      # The macOS wheel links Homebrew's libomp at runtime, so the test VM needs it too
+      - name: Install macOS dependencies (libomp)
+        if: runner.os == 'macOS'
+        run: brew install libomp
+
       - name: Download wheel built from this PR
         if: needs.build.result == 'success'
         uses: actions/download-artifact@v4
@@ -230,5 +235,7 @@ jobs:
         shell: bash
         timeout-minutes: 25
         # Dump all thread stacks to stderr and exit after 20 min so a hang shows where it is stuck
+        # Run from outside the checkout so the source asset_asrl/ package doesn't shadow the installed wheel
+        working-directory: ${{ runner.temp }}
         run: |
-          python -c "import faulthandler, runpy, sys; faulthandler.dump_traceback_later(1200, exit=True); sys.argv = ['run_tests.py']; runpy.run_path('asset_asrl/tests/run_tests.py', run_name='__main__')"
+          python -c "import faulthandler, runpy, sys; faulthandler.dump_traceback_later(1200, exit=True); tests = sys.argv[1]; sys.argv = ['run_tests.py', tests]; runpy.run_path(tests + '/run_tests.py', run_name='__main__')" "$GITHUB_WORKSPACE/asset_asrl/tests"
