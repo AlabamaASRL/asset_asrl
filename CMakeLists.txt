@@ -348,7 +348,7 @@ if(UNIX AND NOT APPLE)  # Linux (shared or static)
   if(ASSET_NO_UNDEFINED)
     list(APPEND LINKER_FLAGS "-Wl,--no-undefined")
   endif()
-  list(APPEND LINKER_FLAGS
+  list(APPEND LINK_LIBS
        -Wl,--start-group
        ${_mkl_libs}
        -Wl,--end-group)
