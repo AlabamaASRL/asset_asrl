@@ -94,6 +94,8 @@ def run_all_tests(start_dir=Path("tests"), pattern="test_*.py"):
 
     logger.info(f"Found {len(test_files)} test file(s).\n")
 
+    load_failures = []
+
     for test_file in test_files:
         logger.info(f"Loading: {test_file}")
 
@@ -117,13 +119,18 @@ def run_all_tests(start_dir=Path("tests"), pattern="test_*.py"):
 
         except Exception:
             logger.exception(f"Failed to load test file: {test_file}")
+            load_failures.append(test_file)
+
+    if load_failures:
+        logger.error(f"{len(load_failures)} test file(s) failed to load.")
+        sys.exit(1)
 
     test_count = suite.countTestCases()
     logger.info(f"\nDiscovered {test_count} test(s).\n")
 
     if test_count == 0:
-        logger.warning("No tests found. Exiting.")
-        sys.exit(0)
+        logger.error("No tests found.")
+        sys.exit(1)
 
     logger.info("Running tests...\n")
 
@@ -139,4 +146,5 @@ def run_all_tests(start_dir=Path("tests"), pattern="test_*.py"):
 
 
 if __name__ == "__main__":
-    run_all_tests(start_dir=Path("."), pattern="test_*.py")
+    start = sys.argv[1] if len(sys.argv) > 1 else "."
+    run_all_tests(start_dir=Path(start), pattern="test_*.py")
