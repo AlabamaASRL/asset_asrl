@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import asset_asrl as ast
 import asset_asrl.VectorFunctions as vf
 import asset_asrl.OptimalControl as oc
 from asset_asrl.VectorFunctions import Arguments as Args
@@ -247,14 +246,3 @@ if __name__ == "__main__":
    
 
     Plot(Traj1,Traj2)
-
-
-    
-    
-
-
- 
-
-
-
-

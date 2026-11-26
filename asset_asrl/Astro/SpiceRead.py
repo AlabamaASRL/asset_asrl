@@ -1,8 +1,6 @@
 import numpy as np
 import spiceypy as sp
-import asset_asrl.Astro.Constants as c
 import asset_asrl.Astro.Date as dt
-#sp.furnsh('BasicKernel.txt')
 
 def GetEphemTraj2(body,startJD,endJD,numstep,LU=1.0,TU=1.0,Frame='ECLIPJ2000',Center='SOLAR SYSTEM BARYCENTER'):
     times = [dt.JD_SPJ2000D(float(x)*(endJD-startJD)/float(numstep) + startJD) for x in range(numstep)]

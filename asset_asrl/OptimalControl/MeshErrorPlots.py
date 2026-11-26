@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns    # pip install seaborn if you dont have it
-import matplotlib.animation as animation
-
 
 def PhaseMeshErrorPlot(phase,show=True):
     fig,axs = plt.subplots(3,1)

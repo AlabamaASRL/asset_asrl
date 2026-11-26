@@ -1,7 +1,5 @@
 import asset as ast
 import numpy as np
-import asset_asrl as ast
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
@@ -207,8 +205,7 @@ def plot2DTrajListVF(tList, wFunc_num):
             uPlot[i, j] = u_ij
             vPlot[i, j] = v_ij
             
-    QV = axes[0].quiver(xPlot, yPlot, uPlot, vPlot, label = "Wind", color = "blue")
-    
+    axes[0].quiver(xPlot, yPlot, uPlot, vPlot, label = "Wind", color = "blue")
 
     # Overlay trajectories and control
     for i, t in enumerate(tList):
@@ -288,14 +285,9 @@ def compareSpeed():
 
 
 ################################################################################
-## Main
-def main():
+## Run
+if __name__ == "__main__":
     compareWind()
     compareSpeed()
 
-
-################################################################################
-## Run
-if __name__ == "__main__":
-    main()
 

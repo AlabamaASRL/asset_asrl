@@ -299,7 +299,7 @@ def Animate(Traj):
         return trace,xhat1,yhat1,zhat1,xhat2,yhat2,zhat2
 
 
-    ani = animation.FuncAnimation(fig, animate, frames=len(TT[0]),
+    animation.FuncAnimation(fig, animate, frames=len(TT[0]),
                                   interval=60, blit=True, init_func=init,repeat_delay=5000)
 
 
@@ -424,18 +424,5 @@ def Form2():
 
     
 if __name__ == "__main__":
-
     Form2()
     Form1()
-
-
-
-
-    
-
-
-
-
-
-
-

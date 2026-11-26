@@ -21,7 +21,6 @@ class FreeFlyingRobotODE(oc.ODEBase):
         Uvars = 4
         ############################################################
         args   = oc.ODEArguments(6,4)
-        xy     = args.XVec().head(2)
         xydot  = args.XVec().segment2(2)
         theta = args.XVar(4)
         omega = args.XVar(5)
@@ -89,7 +88,3 @@ if __name__ == "__main__":
     plt.plot(IGT[6],IGT[9]-IGT[10])
     plt.show()
     ##########################################################
-
-
-
-

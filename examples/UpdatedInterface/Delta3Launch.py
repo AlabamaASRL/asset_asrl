@@ -295,7 +295,7 @@ def Plot(Phase1,Phase2,Phase3,Phase4):
     
         ax3.stock_img() 
     
-        gl = ax3.gridlines(crs=latlon,
+        ax3.gridlines(crs=latlon,
                    xlocs=np.arange(-180., 181., 60.),
                    ylocs=np.arange(-90., 91., 30.),
                    draw_labels=False, color='k', linewidth=1.0,

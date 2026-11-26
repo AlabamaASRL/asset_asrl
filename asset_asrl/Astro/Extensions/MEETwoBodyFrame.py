@@ -86,9 +86,7 @@ class MEETwoBodyFrame():
         
         return vf.ColMatrix(RTNcoeffs,3,3)*U
     
-    def MEEtoCartesianFunc(self):
-        args = Args(6)
-        
+    def MEEtoCartesianFunc(self):        
         p,f,g,h,k,L = Args(6).tolist()
         
         sinL = vf.sin(L)

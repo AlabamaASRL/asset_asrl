@@ -98,7 +98,6 @@ def contin(ig, tf, cIdx, dx, lim, fixInit=[0, 1, 2]):
 ################################################################################
 # Use plotly to plot a list of trajectories
 def plotTrajList(tList, proj = False):
-    data = []
     if proj == False:
         fig, axes = plt.subplots(figsize = (8, 8))
         for t in tList:

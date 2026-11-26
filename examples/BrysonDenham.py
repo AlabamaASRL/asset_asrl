@@ -19,7 +19,6 @@ class Model(oc.ODEBase):
         Uvars = 1
         ############################################################
         args = oc.ODEArguments(Xvars, Uvars)
-        x = args.XVec()[0]
         v = args.XVec()[1]
         u = args.UVec()[0]
         ode = vf.stack([v, u])

@@ -110,7 +110,6 @@ def Animate(Traj):
     P1X  = T[0] + l*np.sin(T[1])
     P1Y  = -l*np.cos(T[1])
     
-    n = len(P0X)
     fig = plt.figure()
     
     ax0 = plt.subplot(321,xlim=(-.05, max(T[4])*1.05), ylim=(min(T[0])*1.2, max(T[0])*1.1))
@@ -144,7 +143,7 @@ def Animate(Traj):
         
         return pole,X,theta,U
 
-    ani = animation.FuncAnimation(fig, animate, frames=len(P0X),
+    animation.FuncAnimation(fig, animate, frames=len(P0X),
                                   interval=60, blit=True, init_func=init,
                                   repeat_delay=5000)
 

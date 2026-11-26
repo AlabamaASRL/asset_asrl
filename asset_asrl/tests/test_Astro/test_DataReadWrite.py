@@ -2,40 +2,13 @@
 
 from __future__ import annotations
 
-import importlib.util
 import pathlib
-import sys
 import tempfile
-import types
 import unittest
 
 import numpy as np
-
-
-# Resolve the production modules without importing asset_asrl's extension-backed root package.
-PACKAGE_ROOT = pathlib.Path(__file__).resolve().parents[2]
-ASTRO_ROOT = PACKAGE_ROOT / "Astro"
-
-
-def load_module(name: str, path: pathlib.Path):
-    spec = importlib.util.spec_from_file_location(name, path)
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-# DataReadWrite imports Constants through its package name.  Build the minimum
-# package structure so these tests remain independent of the compiled extension.
-asset_asrl = types.ModuleType("asset_asrl")
-astro = types.ModuleType("asset_asrl.Astro")
-asset_asrl.Astro = astro
-sys.modules.setdefault("asset_asrl", asset_asrl)
-sys.modules.setdefault("asset_asrl.Astro", astro)
-constants = load_module("asset_asrl.Astro.Constants", ASTRO_ROOT / "Constants.py")
-astro.Constants = constants
-data_io = load_module("asset_asrl.Astro.DataReadWrite", ASTRO_ROOT / "DataReadWrite.py")
+from asset_asrl.Astro import DataReadWrite as data_io
+from asset_asrl.Astro import Constants as constants
 
 
 class DataReadWriteTests(unittest.TestCase):
