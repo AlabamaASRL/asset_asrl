@@ -1,0 +1,182 @@
+name: PR build and test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+
+concurrency:
+  group: pr-build-${{ github.event.pull_request.number }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: detect C++/CMake changes
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    outputs:
+      native: ${{ steps.filter.outputs.native }}
+      workflow: ${{ steps.filter.outputs.workflow }}
+
+    steps:
+      - name: Check for C++, CMake, or workflow changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            native:
+              - '**/*.cpp'
+              - '**/*.cc'
+              - '**/*.cxx'
+              - '**/*.c'
+              - '**/*.h'
+              - '**/*.hpp'
+              - '**/*.hxx'
+              - '**/*.inl'
+              - '**/CMakeLists.txt'
+              - '**/*.cmake'
+            workflow:
+              - '.github/workflows/pr-build-and-test.yml'
+
+  build:
+    name: build and test (${{ matrix.os }})
+    needs: changes
+    if: needs.changes.outputs.native == 'true' || needs.changes.outputs.workflow == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 150
+
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+      WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/0cb67a0d-67f6-410b-868b-f4a0a17ff0cf/intel-oneapi-toolkit-2026.1.1.32_offline.exe
+      WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel,intel.oneapi.win.cpp-essentials
+      WINDOWS_CACHE_KEY: mkl-devel-cpp-essentials
+      VS_VER: vs2022
+
+    steps:
+      - name: Checkout PR (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Linux dependencies (clang-13, Intel MKL)
+        if: runner.os == 'Linux'
+        env:
+          COMPILER: clang-13
+        run: bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
+
+      - name: Install macOS dependencies (libomp)
+        if: runner.os == 'macOS'
+        run: |
+          brew install libomp
+          echo "LIBOMP_PREFIX=$(brew --prefix libomp)" >> "$GITHUB_ENV"
+
+      - name: Install LLVM and clang-cl (Windows)
+        if: runner.os == 'Windows'
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "20"
+
+      - name: Set up MSVC environment (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86_64
+          toolset: 14.4
+
+      - name: Restore Intel MKL cache (Windows)
+        if: runner.os == 'Windows'
+        id: mkl-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:\Program Files (x86)\Intel\oneAPI\mkl
+            C:\Program Files (x86)\Intel\oneAPI\tbb
+            C:\Program Files (x86)\Intel\oneAPI\compiler
+          key: intel-mkl-win-${{ env.WINDOWS_BASEKIT_URL }}-${{ env.WINDOWS_CACHE_KEY }}
+
+      - name: Install Intel MKL (Windows)
+        if: runner.os == 'Windows' && steps.mkl-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: scripts/windowsoneapi_install.bat "$WINDOWS_BASEKIT_URL" "$WINDOWS_CPP_COMPONENTS"
+
+      - name: Set oneAPI root (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "ONEAPI_ROOT=C:/Program Files (x86)/Intel/oneAPI" >> "$GITHUB_ENV"
+
+      - name: Install Python build dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install -r requirements.txt
+
+      - name: Configure and build wheel (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_ASSET_WHEEL=True
+          cmake --build build --target asset pypiwheel --config Release -- -j3
+
+      - name: Create build directory and run CMake (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: >
+          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_ASSET_WHEEL=True
+          -DCMAKE_C_COMPILER:FILEPATH="C:/Program Files/LLVM/bin/clang-cl.exe"
+          -DCMAKE_CXX_COMPILER:FILEPATH="C:/Program Files/LLVM/bin/clang-cl.exe"
+          -DCMAKE_LINKER:FILEPATH="C:/Program Files/LLVM/bin/lld-link.exe"
+
+      - name: Build Project (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: cmake --build build --target asset pypiwheel --config Release -- -j3
+
+      # The MKL environment from the dependency step isn't carried into later steps,
+      # so source setvars.sh here to load the same MKL runtime the wheel was linked against.
+      - name: Install built wheel and run tests
+        shell: bash
+        timeout-minutes: 25
+        env:
+          PYTHONUNBUFFERED: "1"
+        # Run from outside the checkout so the source asset_asrl/ package doesn't shadow the installed wheel
+        working-directory: ${{ runner.temp }}
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            source /opt/intel/oneapi/setvars.sh --force > /dev/null
+          fi
+          set -euo pipefail
+          wheels=()
+          while IFS= read -r whl; do
+            wheels+=("$whl")
+          done < <(find "$GITHUB_WORKSPACE/dist" "$GITHUB_WORKSPACE/build/pypiwheel" -name '*.whl' 2>/dev/null)
+          if [ "${#wheels[@]}" -eq 0 ]; then
+            echo "::error::No .whl found after build"
+            exit 1
+          fi
+          python -m pip install --force-reinstall "${wheels[@]}"
+          # Import asset_asrl first so it registers the Windows DLL directory for the ASSET extension
+          # Dump all thread stacks to stderr and exit after 20 min so a hang shows where it is stuck
+          python -c "import faulthandler, runpy, sys; faulthandler.dump_traceback_later(1200, exit=True); import asset_asrl; tests = sys.argv[1]; sys.argv = ['run_tests.py', tests]; runpy.run_path(tests + '/run_tests.py', run_name='__main__')" "$GITHUB_WORKSPACE/asset_asrl/tests"
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-asrl-wheel-${{ matrix.os }}
+          path: |
+            dist/*.whl
+            build/pypiwheel/asset_asrl/dist/*.whl
+          if-no-files-found: error
+          retention-days: 7

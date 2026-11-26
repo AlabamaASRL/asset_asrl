@@ -1,0 +1,195 @@
+name: wheels
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: linux py${{ matrix.python-version }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+
+      - name: Install Ubuntu dependencies
+        env:
+          COMPILER: clang-13
+        run: bash "$GITHUB_WORKSPACE/.github/install_ubuntu_dependencies.sh"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install -r requirements.txt patchelf auditwheel
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build -G "Unix Makefiles" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPIP_INSTALL=True \
+            -DBUILD_ASSET_WHEEL=True \
+            -DPython_EXECUTABLE="$(which python)" \
+            -DPython3_EXECUTABLE="$(which python)" \
+            -DPYTHON_EXECUTABLE="$(which python)"
+
+      - name: Build wheel
+        run: cmake --build build --target asset pypiwheel --config Release -- -j2
+
+      - name: Repair wheel
+        run: |
+          # No --plat: auditwheel selects the tag this build qualifies for
+          # (Ubuntu 22.04 has glibc 2.35, so manylinux_2_31 is not reachable).
+          mkdir -p wheelhouse
+          find build -name "*.whl" -print0 | xargs -0 -I{} auditwheel repair {} -w wheelhouse
+          ls -l wheelhouse
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux-py${{ matrix.python-version }}
+          path: wheelhouse/*.whl
+          if-no-files-found: error
+          retention-days: 7
+
+  macos:
+    name: macos py${{ matrix.python-version }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
+
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v5
+        id: setup-python
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+
+      - name: Install macOS dependencies
+        run: |
+          brew install libomp
+          echo "LIBOMP_PREFIX=$(brew --prefix libomp)" >> "$GITHUB_ENV"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install -r requirements.txt
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build -G "Unix Makefiles" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET}" \
+            -DPython_EXECUTABLE="${{ steps.setup-python.outputs.python-path }}" \
+            -DPython3_EXECUTABLE="${{ steps.setup-python.outputs.python-path }}" \
+            -DPYTHON_EXECUTABLE="${{ steps.setup-python.outputs.python-path }}" \
+            -DPIP_INSTALL=True \
+            -DBUILD_ASSET_WHEEL=True \
+            -DLIBOMP_PREFIX="${LIBOMP_PREFIX}"
+
+      - name: Build wheel
+        run: cmake --build build --target asset pypiwheel --config Release -- -j3
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-macos-py${{ matrix.python-version }}
+          path: build/pypiwheel/asset_asrl/dist/*.whl
+          if-no-files-found: error
+          retention-days: 7
+
+  windows:
+    name: windows py${{ matrix.python-version }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
+
+    env:
+      # Update this link when building a new ASSET version
+      WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/0cb67a0d-67f6-410b-868b-f4a0a17ff0cf/intel-oneapi-toolkit-2026.1.1.32_offline.exe
+      WINDOWS_CPP_COMPONENTS: intel.oneapi.win.mkl.devel,intel.oneapi.win.cpp-essentials
+      WINDOWS_CACHE_KEY: mkl-devel-cpp-essentials
+      VS_VER: vs2022
+      ONEAPI_ROOT: "C:/Program Files (x86)/Intel/oneAPI"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "20"
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86_64
+
+      - name: Install MKL
+        run: scripts/windowsoneapi_install.bat $WINDOWS_BASEKIT_URL $WINDOWS_CPP_COMPONENTS
+        shell: bash
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade wheel setuptools
+          python -m pip install -r requirements.txt
+
+      - name: Configure CMake
+        run: >
+          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DPIP_INSTALL=True -DBUILD_ASSET_WHEEL=True
+          -DCMAKE_C_COMPILER:FILEPATH="C:/Program Files/LLVM/bin/clang-cl.exe"
+          -DCMAKE_CXX_COMPILER:FILEPATH="C:/Program Files/LLVM/bin/clang-cl.exe"
+          -DCMAKE_LINKER:FILEPATH="C:/Program Files/LLVM/bin/lld-link.exe"
+
+      - name: Build wheel
+        run: cmake --build build --target asset pypiwheel --config Release -- -j3
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-windows-py${{ matrix.python-version }}
+          path: build/pypiwheel/asset_asrl/dist/*.whl
+          if-no-files-found: error
+          retention-days: 7
+
+  collect:
+    needs: [linux, macos, windows]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: wheels
+          merge-multiple: true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: all-wheels
+          path: wheels/
+          if-no-files-found: error
+          retention-days: 7

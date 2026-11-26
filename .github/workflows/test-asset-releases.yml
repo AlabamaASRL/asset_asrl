@@ -1,0 +1,86 @@
+name: Previous release tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: previous-release-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  released-tests:
+    name: v${{ matrix.version }} tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ["0.5.1", "0.5.2"]
+        os: [ubuntu-22.04, macos-latest, windows-latest]
+        include:
+          # v0.5.1 has no run_tests.py; tests are unittest modules under asset_asrl/test
+          - version: "0.5.1"
+            tests: "asset_asrl/test"
+            runner: unittest
+          - version: "0.5.2"
+            tests: "asset_asrl/tests"
+            runner: run_tests
+        exclude:
+          # No macOS wheel for 0.5.1 on PyPI
+          - version: "0.5.1"
+            os: macos-latest
+
+    steps:
+      - name: Checkout v${{ matrix.version }}
+        uses: actions/checkout@v4
+        with:
+          ref: v${{ matrix.version }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install libomp (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install libomp
+
+      - name: Install released asset-asrl
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install asset-asrl==${{ matrix.version }} scipy
+
+      # The released Windows wheel links libiomp5md.dll, which intel-openmp installs under <prefix>/Library/bin.
+      # v0.5.1 doesn't register that directory itself, so put it on PATH for the test step.
+      - name: Expose Intel OpenMP runtime (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          python -m pip install intel-openmp
+          dll_dir="$(cygpath -u "$(python -c 'import os, sys; print(os.path.join(sys.prefix, "Library", "bin"))')")"
+          ls "$dll_dir/libiomp5md.dll"
+          echo "$dll_dir" >> "$GITHUB_PATH"
+
+      - name: Run released tests
+        shell: bash
+        # Run from outside the checkout so the source asset_asrl/ package doesn't shadow the installed wheel
+        working-directory: ${{ runner.temp }}
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          TESTS="$GITHUB_WORKSPACE/${{ matrix.tests }}"
+          # Python 3.8+ ignores PATH when resolving extension DLL dependencies on Windows,
+          # so the Intel OpenMP directory must be registered with os.add_dll_directory.
+          DLL_SETUP='import os, sys; d = os.path.join(sys.prefix, "Library", "bin"); hasattr(os, "add_dll_directory") and os.path.isdir(d) and os.add_dll_directory(d)'
+          if [ "${{ matrix.runner }}" = "unittest" ]; then
+            python -c "import faulthandler, sys, unittest; faulthandler.dump_traceback_later(1200, exit=True); $DLL_SETUP; import asset_asrl; unittest.main(module=None, argv=['run_tests.py', 'discover', '-s', sys.argv[1], '-t', sys.argv[1], '-p', 'test_*.py', '-v'])" "$TESTS"
+          else
+            python -c "import faulthandler, os, runpy, sys; faulthandler.dump_traceback_later(1200, exit=True); $DLL_SETUP; import asset_asrl; os.chdir(sys.argv[1]); runpy.run_path('run_tests.py', run_name='__main__')" "$TESTS"
+          fi

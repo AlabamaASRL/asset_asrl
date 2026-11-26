@@ -56,7 +56,7 @@ class CMakeBuild(build_ext):
         build_args += ["--config", cfg]
 
         # Limit core count if we're on a github runner
-        if "GITHUB_WORKSPACE" in os.environ:
+        if platform.system() != "Windows" and "GITHUB_WORKSPACE" in os.environ:
             build_args += ["--", "-j1"]
         elif platform.system() != "Windows":
             # build_args += ["--", "-j{}".format(int(0.5 * multiprocessing.cpu_count()))]
