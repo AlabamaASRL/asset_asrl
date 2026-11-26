@@ -1,6 +1,10 @@
 #pragma once
 #include "OptimizationProblemBase.h"
+#ifdef USE_ACCELERATE_SPARSE
+#include "AccelerateUtils.h"
+#else
 #include "mkl.h"
+#endif
 
 namespace ASSET {
 
@@ -97,6 +101,10 @@ namespace ASSET {
         int nt,
         bool verbose) {
 
+#ifdef USE_ACCELERATE_SPARSE
+      accelerate_set_num_threads(1);
+#endif
+
 
       int NumJobs = args.size();
       int NumConv = 0;
@@ -110,7 +118,9 @@ namespace ASSET {
       Utils::Timer t;
 
       auto Job = [&](int threadid, int i) {
+#ifndef USE_ACCELERATE_SPARSE
         mkl_set_num_threads_local(1);
+#endif
 
         int gfidx = genfidxes[i];
         if constexpr (std::is_same_v<Args2, py::args>) {

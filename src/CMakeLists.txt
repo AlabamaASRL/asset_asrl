@@ -120,7 +120,9 @@ add_library(astro STATIC
   Astro/KeplerModel.cpp
   Astro/LambertSolvers.h
   Astro/LambertSolvers.cpp
-  )
+  Astro/PinesGravity.cpp
+  Astro/PinesGravityModel.cpp
+  Astro/PinesGravityModel.h)
 
 target_precompile_headers(astro REUSE_FROM pch)
 target_include_directories(astro PRIVATE ${INCLUDE_DIRS})
@@ -155,10 +157,8 @@ target_link_libraries(asset PRIVATE ${LINK_LIBS})
 #set_target_properties(asset PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
 if(UNIX)
-    set_target_properties(asset PROPERTIES LINK_FLAGS ${LINKER_FLAGS})
+    target_link_options(asset PRIVATE ${LINKER_FLAGS})
 endif()
-
-
 
 add_custom_target(pyassetsrc ALL DEPENDS ${CMAKE_SOURCE_DIR}/asset_asrl)
 
@@ -184,13 +184,3 @@ if(PYTHON_LOCAL_INSTALL_DIR)
                     COMMENT "Copied asset_asrl to ${PYTHON_LOCAL_INSTALL_DIR}")
 
 endif()
-
-
-    
-
-
-
-
-    
-
-

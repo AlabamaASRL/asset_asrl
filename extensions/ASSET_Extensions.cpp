@@ -113,15 +113,8 @@ namespace ASSET {
 }
 
 
-
-
-
-
-
-
 void ASSET::ExtensionsBuild(FunctionRegistry& reg, py::module& extmod)
 {
-
 
 
 	extmod.def("cpp_cr3bp", [](double mu) {

@@ -5,10 +5,13 @@ In most cases we suggest simply installing ASSET via pip, which is as simple as 
 
 .. code-block:: console
 
-	pip install asset-asrl
+    pip install asset-asrl
 
-We currently host Windows and Linux binaries for python 3.7-3.12 on PyPi.   
+We currently host the following binaries on PyPI:
 
+* Windows for Python versions 3.8-3.15
+* Linux for Python versions 3.9–3.15
+* MacOS for Python versions 3.10-3.15
 
 If you are interested in building ASSET from source, please see the following sections for a step-by-step guide on how to do so on:
 
@@ -16,296 +19,298 @@ If you are interested in building ASSET from source, please see the following se
 * Linux
 * Docker (Linux)
 
+We do not currently have a section for building on an Arm64 based Mac. If you would like to build from source, you can do it based off of the workflow file in the .github folder.
+
 Build from Source on Windows
 ----------------------------
 
 In order to build ASSET on Windows the following dependencies are required:
 
-* Visual Studio 2017 or greater `(Link to Visual Studio Community 2022) <https://visualstudio.microsoft.com/downloads/>`_ 
+* Visual Studio 2017 or greater (`Link to Visual Studio Community 2022 <https://visualstudio.microsoft.com/downloads/>`_)
+    * Currently building ASSET on Visual Studio Community 2026 is not supported. This will be addressed soon.
 * `LLVM Compiler Toolkit <https://github.com/llvm/llvm-project/releases/latest>`_
 * `Intel oneAPI MKL <https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=window&distributions=offline>`_
-* A Python installation with Numpy, however we recommend using Anaconda.
-	* `Anaconda <https://www.anaconda.com/products/distribution>`_
-* The Python packages SpiceyPy, Sphinx, and Furo
+* A Python installation with NumPy, however we recommend using Anaconda.
+  
+  * `Anaconda <https://www.anaconda.com/products/distribution>`_
 
+* The Python packages SpiceyPy, Sphinx, and Furo
 
 Step-By-Step Guide
 ^^^^^^^^^^^^^^^^^^
-#. We will begin by installing Visual Studio (VS). 
 
-	  ..  note:: 
-  
-	  Follow the VS installation prompts until you are prompted to select any additional packages to install with VS. 
-	  Here we will want to select **Desktop development with C++**; however, we are going to make one change to the defaults for the C++ install and **un-check** the option for "C++ Clang tools for Windows" (shown below).
+#. We will begin by installing Visual Studio (VS).
 
-	  .. image:: _static/vsstudiodesktopc++.png
+   .. note::
 
-	  Also ensure that the "**C++ CMake Tools for Windows**" is checked.
-	  After doing this continue and finish the installation.
+      Follow the VS installation prompts until you are prompted to select any additional packages to install with VS.
 
-		.. image:: _static/VSoptions.PNG
+      Here we will want to select **Desktop development with C++**; however, we are going to make one change to the defaults for the C++ install and **un-check** the option for "C++ Clang tools for Windows" (shown below).
+
+      .. image:: _static/vsstudiodesktopc++.png
+
+      Also ensure that the "**C++ CMake Tools for Windows**" is checked.
+
+      After doing this continue and finish the installation.
+
+      .. image:: _static/VSoptions.PNG
 
 #. Next we will install the LLVM Compiler Toolkit. An LLVM installation of at least LLVM-11 is required, and we recommend using the latest version if possible.
 
-	  ..  note:: 
-  
-	  Navigate to the LLVM github releases page, select your desired version, and download the LLVM win64 installer (LLVM-15.0.0-win64.exe for example).
-	  Proceed with the LLVM install, however ensure that the install option "**Do not add LLVM to the system PATH**" is checked.
-	  After finishing the LLVM installation we can proceed with installing Intel MKL.
+   .. note::
 
-		.. image:: _static/LLVMnopath.PNG
+      Navigate to the LLVM GitHub releases page, select your desired version, and download the LLVM win64 installer (LLVM-15.0.0-win64.exe for example).
+
+      Proceed with the LLVM install, however ensure that the install option "**Do not add LLVM to the system PATH**" is checked.
+
+      After finishing the LLVM installation we can proceed with installing Intel MKL.
+
+      .. image:: _static/LLVMnopath.PNG
 
 #. Download and install the Intel oneAPI MKL, using the offline installer.
 
-	  ..  note:: 
-  
-	  Install with the recommended settings and then proceed to installing Anaconda, if desired.
-	  If you are not using Anaconda you may skip the next step.
+   .. note::
+
+      Install with the recommended settings and then proceed to installing Anaconda, if desired.
+
+      If you are not using Anaconda you may skip the next step.
 
 #. Now download and install Anaconda.
 
-	  ..  note:: 
-	  
-	  Check that Anaconda is set to be placed on the PATH and set Anaconda to be your default Python.  Additionally install the following packages.
+   .. note::
 
-	  * SpiceyPy, Sphinx, and Furo
+      Check that Anaconda is set to be placed on the PATH and set Anaconda to be your default Python. Additionally install the following packages.
 
-	  Your version of Anaconda may be installed in "ProgramData" and may be named "Anaconda", "Anaconda3", or "anaconda3", depending on your installation settings.
+      * SpiceyPy, Sphinx, and Furo
 
-	  .. image:: _static/anacondainstall.PNG
+      Your version of Anaconda may be installed in "ProgramData" and may be named "Anaconda", "Anaconda3", or "anaconda3", depending on your installation settings.
 
-	  
-	  After installing anaconda, it may be necessary to upgrade numpy through pip, due to potential compatibibility issues with numpy's version of libiomp5md.dll and Intel MKL's version.
+      .. image:: _static/anacondainstall.PNG
 
-	  .. code-block:: console
+      After installing Anaconda, it may be necessary to upgrade NumPy through pip, due to potential compatibility issues with NumPy's version of libiomp5md.dll and Intel MKL's version.
 
-		pip install numpy --upgrade
+      .. code-block:: console
 
-	  .. warning::
+         pip install numpy --upgrade
 
-	    if you aren't using anaconda, you are still going to need numpy (comes with anaconda by default).
+   .. warning::
 
+      If you aren't using Anaconda, you are still going to need NumPy (comes with Anaconda by default).
 
 #. Next we will be adding the required system and PATH variables to build ASSET.
 
-	  ..  note:: 
-  
-	  First, add the Intel oneAPI to a new system variable named "ONEAPI_ROOT" and set the variable value to your oneAPI install directory, as shown below.
-	  If your install directory is different, be sure to point this to the correct folder. This may have already been set when you installed oneAPI.
+   .. note::
 
-		.. image:: _static/oneapiroot.PNG
+      First, add the Intel oneAPI to a new system variable named "ONEAPI_ROOT" and set the variable value to your oneAPI install directory, as shown below.
 
-	  .. warning::
+      If your install directory is different, be sure to point this to the correct folder. This may have already been set when you installed oneAPI.
 
-		If you are using an Alder Lake or Raptor Lake Intel CPU it may be beneficial to add the system variable "MKL_ENABLE_INSTRUCTIONS" with value "AVX" as well. 
+      .. image:: _static/oneapiroot.PNG
 
-#. We also need to add a few variables to our Path. 
+   .. warning::
 
-	  ..  note:: 
-  
-	  The following directories should be added to your system PATH and set as your default Python install.
-	  Once again, be sure to point this to the actual location of the relevant folders on your computer.
+      If you are using an Alder Lake or Raptor Lake Intel CPU it may be beneficial to add the system variable "MKL_ENABLE_INSTRUCTIONS" with value "AVX" as well.
 
-		.. image:: _static/anacondapath.PNG
+#. We also need to add a few variables to our Path.
 
-#. Now, clone the `ASSET repo <https://github.com/AlabamaASRL/asset_asrl>`_  to where you want it to live.
+   .. note::
 
-	  .. note::
+      The following directories should be added to your system PATH and set as your default Python install.
 
-	  If you are cloning from the command line, make sure to call :code:`git submodule update --init --recursive` inside of the repository after cloning to ensure that the dependencies are downloaded.
+      Once again, be sure to point this to the actual location of the relevant folders on your computer.
 
+      .. image:: _static/anacondapath.PNG
 
-#. We are almost there! Now, open VS and be sure to run it as administrator to avoid any conflicts when building the Python library. Additionally, ensure that your Python IDE is closed during this step. 
-	 
-	  .. note::
+#. Now, clone the `ASSET repo <https://github.com/AlabamaASRL/asset_asrl>`_ to where you want it to live.
 
-	  Open the ASSET folder with VS and wait for it to finish loading. After VS has finished loading the ASSET repo directory, navigate to the CMakeSettings.json file. Here it is recommended to change the integer number of threads to be the amount of RAM your computer has divided by 3 (rounded down).
+   .. note::
 
-	  .. image:: _static/cmakejson.PNG
+      If you are cloning from the command line, make sure to call :code:`git submodule update --init --recursive` inside of the repository after cloning to ensure that the dependencies are downloaded.
 
-	  .. image:: _static/threads.PNG
+#. We are almost there! Now, open VS and be sure to run it as administrator to avoid any conflicts when building the Python library. Additionally, ensure that your Python IDE is closed during this step.
 
-	  Now we are going to configure the ASSET CMake settings by going to the project dropdown menu and selecting "Configure ASSET" or "Configure Cache" (depending on the version of VS).
-	  Wait until the output message from CMake says that it is finished and proceed to the build step.
+   .. note::
 
-	  .. image:: _static/config.png
+      Open the ASSET folder with VS and wait for it to finish loading.
 
-	  The last step is to actually build ASSET! After the configuration step has completed navigate to the Build dropdown menu and choose "Build All" (or Ctrl + Shift + B). Keep your Python IDE closed until the build completes.
+      After VS has finished loading the ASSET repo directory, navigate to the CMakeSettings.json file. Here it is recommended to change the integer number of threads to be the amount of RAM your computer has divided by 3 (rounded down).
 
-	  .. image:: _static/build.png
+      .. image:: _static/cmakejson.PNG
+
+      .. image:: _static/threads.PNG
+
+      Now we are going to configure the ASSET CMake settings by going to the project dropdown menu and selecting "Configure ASSET" or "Configure Cache" (depending on the version of VS).
+
+      Wait until the output message from CMake says that it is finished and proceed to the build step.
+
+      .. image:: _static/config.png
+
+      The last step is to actually build ASSET! After the configuration step has completed navigate to the Build dropdown menu and choose "Build All" (or Ctrl + Shift + B). Keep your Python IDE closed until the build completes.
+
+      .. image:: _static/build.png
 
 #. With that you should have a successfully built ASSET Python library and are ready to get started with the rest of the tutorials.
 
-	  .. note::
+   .. note::
 
-	  To import ASSET simply use the following in your Python IDE
+      To import ASSET simply use the following in your Python IDE:
 
-	  .. code-block:: python
+      .. code-block:: python
 
-		import asset_asrl
-
-
+         import asset_asrl
 
 Build from Source on Linux
 --------------------------
+
 The dependencies for Linux installations are similar to that of Windows; however, we'll be using Visual Studio Code for our IDE:
 
 * `Visual Studio Code <https://code.visualstudio.com/download>`_
-	* `C/C++ Extension <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools>`_ 
-	* `CMake Tools Extension <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools>`_
-	* Ensure that you have a working version of `CMake installed <https://cmake.org/install/>`_
+
+  * `C/C++ Extension <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools>`_
+  * `CMake Tools Extension <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools>`_
+  * Ensure that you have a working version of `CMake installed <https://cmake.org/install/>`_
+
 * `LLVM Compiler Toolkit (recommended) <https://github.com/llvm/llvm-project/releases/latest>`_
-	* GCC 9 or greater can also be used
+
+  * GCC 9 or greater can also be used
+
 * `Intel oneAPI MKL <https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=linux&distributions=offline>`_
 * `Anaconda <https://www.anaconda.com/products/distribution#linux>`_
 * The Python packages SpiceyPy, Sphinx, and Furo
 
 Step-by-Step Guide
 ^^^^^^^^^^^^^^^^^^
+
 This guide was written assuming that the user has a working Ubuntu installation; however, ASSET will work with other Linux distributions. Simply use the appropriate commands to install the required packages.
+
 If it is desired to use an IDE other than Visual Studio Code, it is still required that a version of CMake of at least 3.16 is installed.
 
-#. We will begin by installing Visual Studio Code (VSCode). 
+#. We will begin by installing Visual Studio Code (VSCode).
 
-	  ..  note:: 
-  
-	  Install VSC as desired, along with the **C/C++** and **CMake Tools** Extensions.
+   .. note::
+
+      Install VSCode as desired, along with the **C/C++** and **CMake Tools** Extensions.
 
 #. Now, install LLVM clang using the package manager.
 
-	.. code-block:: console
+   .. code-block:: console
 
-		sudo apt install clang lldb lld
-	
-	* or if you desire to use gcc
-	
+      sudo apt install clang lldb lld
 
-	  .. code-block:: console
+   * Or if you desire to use GCC:
 
-		sudo apt update
-		sudo apt install build-essential
-		gcc --version
+     .. code-block:: console
+
+        sudo apt update
+        sudo apt install build-essential
+        gcc --version
 
 #. Download and install the Intel oneAPI MKL, using the offline installer. The complete Linux installation guide for Intel oneAPI can be found `here <https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top.html>`_.
 
-	  ..  note:: 
+   .. note::
 
-		We recommend that you use the oneAPI gui installer through the Intel website; however, if it necessary to install via the bash terminal, those directions can be found `here <https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-using-package-managers/apt.html#apt>`_.
+      We recommend that you use the oneAPI GUI installer through the Intel website; however, if it is necessary to install via the bash terminal, those directions can be found `here <https://www.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-using-package-managers/apt.html#apt>`_.
 
-		Install with the recommended settings and then proceed to installing Anaconda, if desired.
-		If you are not using Anaconda you may skip the next step.
+      Install with the recommended settings and then proceed to installing Anaconda, if desired.
+
+      If you are not using Anaconda you may skip the next step.
 
 #. Now, download and install Anaconda.
 
-      * Use pip to install SpiceyPy.
+   * Use pip to install SpiceyPy.
 
-	  .. warning::
+   .. warning::
 
-	  if you are using anaconda rather than a generic python installation, it may be necessary to upgrade numpy through pip, due to potential compatibibility issues with numpy's version of openmp and Intel MKL's version.
+      If you are using Anaconda rather than a generic Python installation, it may be necessary to upgrade NumPy through pip, due to potential compatibility issues with your version of OpenMP and Intel MKL's version.
 
-	  .. code-block:: console
+      .. code-block:: console
 
-		conda install nomkl
+         conda install nomkl
 
-	  Even if you already have anaconda or a python distribution installed you will need these packages.
+      Even if you already have Anaconda or a Python distribution installed you will need these packages:
 
-	  * SpiceyPy, Sphinx, and Furo
+      * SpiceyPy, Sphinx, and Furo
 
-	  .. warning::
+   .. warning::
 
-	    if you aren't using anaconda, you are still going to need numpy (comes with anaconda by default).
+      If you aren't using Anaconda, you are still going to need NumPy (comes with Anaconda by default).
 
 #. Next, we will set the required system variables to build ASSET.
 
-	  ..  note:: 
-  
-	  Use the source command to properly setup the oneAPI variables.
+   .. note::
 
-	  .. code-block:: console
+      Use the source command to properly set up the oneAPI variables.
 
-	   source /opt/intel/oneapi/setvars.sh
+      .. code-block:: console
 
-#. Now, clone the `ASSET repo <https://github.com/AlabamaASRL/asset_asrl>`_  to where you want it to live.
+         source /opt/intel/oneapi/setvars.sh
 
-	.. note::
+#. Now, clone the `ASSET repo <https://github.com/AlabamaASRL/asset_asrl>`_ to where you want it to live.
 
-		  If you are cloning from the command line, make sure to call :code:`git submodule update --init --recursive` inside of the repository after cloning to ensure that the dependencies are downloaded.
+   .. note::
 
+      If you are cloning from the command line, make sure to call :code:`git submodule update --init --recursive` inside of the repository after cloning to ensure that the dependencies are downloaded.
 
 #. After installing the dependencies, open VSCode to build ASSET.
-	
-	  .. note::
 
-	  Configure the VSCode CMake extension to use the Ninja generator. You may need to install Ninja.
+   .. note::
 
-	  .. code-block:: console
+      Configure the VSCode CMake extension to use the Ninja generator. You may need to install Ninja.
 
-		apt install ninja-build
+      .. code-block:: console
 
-	  Select the type of build (1) you wish to perform (Release is correct if you are going to be running code using ASSET), and kit to use (2) (gcc or clang).
+         apt install ninja-build
 
-	  .. image:: _static/vscodevariant.PNG
+      Select the type of build (1) you wish to perform (Release is correct if you are going to be running code using ASSET), and kit to use (2) (GCC or Clang).
 
-	  Now hit build to begin building ASSET
+      .. image:: _static/vscodevariant.PNG
 
-	  .. image:: _static/vscodebuild.png
+      Now hit build to begin building ASSET.
+
+      .. image:: _static/vscodebuild.png
 
 #. With that you should have a successfully built ASSET Python library and are ready to get started with the rest of the tutorials.
 
-	  .. note::
+   .. note::
 
-	  To import ASSET simply use the following in your Python IDE
+      To import ASSET simply use the following in your Python IDE:
 
-	  .. code-block:: python
+      .. code-block:: python
 
-		import asset_asrl
+         import asset_asrl
 
 Docker
 ------
 
-The `dockerfiles <https://github.com/AlabamaASRL/asset_asrl/tree/master/dockerfiles>`_ folder in the repo contains docker files and supporting scripts for building asset_asrl .whl files for pip installation on linux systems.
-Two images are provided based on Ubuntu 18.04 and 20.04. Build wheels on 18.04 for better compatibility with older linux distros or 20.04 for better performance.
+The `dockerfiles <https://github.com/AlabamaASRL/asset_asrl/tree/master/dockerfiles>`_ folder in the repo contains Docker files and supporting scripts for building asset_asrl .whl files for pip installation on Linux systems.
 
+Two images are provided based on Ubuntu 18.04 and 20.04. Build wheels on 18.04 for better compatibility with older Linux distros or 20.04 for better performance.
 
-To use, cd to the desired image's folder and build the image. You may optionally set the number of cores used building the image with the
-CMakeBuildJobs build argument.
+To use, cd to the desired image's folder and build the image. You may optionally set the number of cores used building the image with the CMakeBuildJobs build argument.
 
 .. code-block:: console
 
-	cd Ubuntu18.04
+    cd Ubuntu18.04
 
-	docker build -t assetbuild . --build-arg CMakeBuildJobs=12
-	
+    docker build -t assetbuild . --build-arg CMakeBuildJobs=12
+
 After building the image, start up a new container.
 
 .. code-block:: console
 
-	docker run -it assetbuild /bin/bash
+    docker run -it assetbuild /bin/bash
 
-Once inside the container, run the BuildWheel.sh script to build a .whl file for a particular python version (-p), repo branch (-b).
-You may also set the number of jobs used when compiling with the -j argument. 
+Once inside the container, run the BuildWheel.sh script to build a .whl file for a particular Python version (-p), repo branch (-b).
+
+You may also set the number of jobs used when compiling with the -j argument.
 
 .. code-block:: console
 
-	bash ~/BuildWheel.sh -b master -j 12 -p 3.10
+    bash ~/BuildWheel.sh -b master -j 12 -p 3.10
 
-After the build has completed, the packaged wheel file will be available in ~/asset_asrl/wheelhouse. You can then copy this file out of the container
-for installation on other systems.
-
-
-
+After the build has completed, the packaged wheel file will be available in ~/asset_asrl/wheelhouse. You can then copy this file out of the container for installation on other systems.
 
 Next Steps
 ----------
-If this is your first time using ASSET, it's now recommended that you begin reviewing the remaining tutorials, such as :ref:`Vector Function Tutorial`. After you feel comfortable with some of ASSET's coding paradigms, a select set
-of tutorials that highlight ASSET's features and capabilities are provided in :ref:`Examples`.
 
-
-
-
-
-		
-
-
-
-
+If this is your first time using ASSET, it's now recommended that you begin reviewing the remaining tutorials, such as :ref:`Vector Function Tutorial`. After you feel comfortable with some of ASSET's coding paradigms, a select set of tutorials that highlight ASSET's features and capabilities are provided in :ref:`Examples`.
